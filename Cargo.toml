@@ -1,0 +1,92 @@
+[package]
+name = "trussed"
+version = "0.1.0"
+authors = ["Nicolas Stalder <n@stalder.io>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+aes = { version = "0.3.2", default-features = false }
+block-modes = { version = "0.3.3", default-features = false }
+chacha20 = { version = "0.3.4" }
+chacha20poly1305 = { version = "0.3.3", default-features = false, features = ["heapless", "reduced-round"] }
+cortex-m-funnel = { version = "0.1.0-alpha.1" }
+cortex-m-semihosting = { version = "0.3.5", optional = true }
+# ctapcbor = { git = "https://github.com/nickray/ctapcbor", branch = "main" }
+# TODO: Currently, only depend on this for cose::P256PublicKey
+# --> would be good to remove dependency
+# OTOH, ctapcbor is in ctap_types too, and we use it a lot
+# --> so maybe split CBOR + COSE out of ctap-types?
+ctap-types = { path = "../ctap-types" }
+embedded-hal = { version = "0.2.3", features = ["unproven"] }
+generic-array = "0.12.3"  # "0.13.2"
+# generic-array = { version = "0.13.2", default-features = false }
+heapless = "0.5.5"
+hmac = "0.7.1"
+serde = { version = "1.0", default-features = false }
+serde_cbor = { version = "0.11.0", default-features = false }
+serde-indexed = "0.0.4"
+sha2 = { version = "0.8.0", default-features = false }
+ufmt = "0.1.0"
+
+cortex-m-rtfm = "0.5.1"
+# lpc55-hal = "0.0.3"
+lpc55-hal = { git = "https://github.com/nickray/lpc55-hal", branch = "main" }
+
+[dependencies.heapless-bytes]
+# version = "0.1.0"
+# path = "../../../heapless-bytes"
+git = "https://github.com/ycrypto/heapless-bytes"
+branch = "main"
+
+[dependencies.littlefs2]
+# path = "../../../littlefs2"
+git = "https://github.com/nickray/littlefs2"
+branch = "closures-instead-of-ub"
+# git = "https://github.com/nickray/littlefs2"
+# branch = "main"
+
+[dependencies.nisty]
+version = "0.1.0-alpha.2"
+features = ["asn1-der", "cose"]
+# path = "../../../nisty"
+# git = "https://github.com/ycrypto/nisty"
+# branch = "main"
+
+[dependencies.salty]
+git = "https://github.com/ycrypto/salty"
+branch = "main"
+features = ["cose"]
+
+[features]
+default = ["default-mechanisms"]
+verbose-tests = ["littlefs2/ll-assertions"]
+verbose-lfs = ["littlefs2/ll-assertions", "littlefs2/ll-trace"]
+debug-logs = []
+deep-semihosting-logs = ["semihosting"]
+semihosting = ["cortex-m-semihosting"]
+
+# mechanisms
+# default-mechanisms = ["aes256-cbc", "chacha8-poly1305", "ed25519", "hmac-sha256", "p256", "sha256", "trng"]
+default-mechanisms = [
+    "aes256-cbc",
+    "chacha8-poly1305",
+    "ed25519",
+    "hmac-sha256",
+    "p256",
+    "sha256",
+    "trng",
+]
+aes256-cbc = []
+chacha8-poly1305 = []
+ed25519 = []
+hmac-sha256 = []
+p256 = []
+sha256 = []
+trng = []
+
+[patch.crates-io]
+heapless = { git = "https://github.com/nickray/heapless", branch = "nickray-udebug" }
+ufmt = { git = "https://github.com/nickray/ufmt", branch = "nickray-derive-empty-enums" }
+ufmt-macros = { git = "https://github.com/nickray/ufmt", branch = "nickray-derive-empty-enums" }
