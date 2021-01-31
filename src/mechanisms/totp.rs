@@ -79,7 +79,7 @@ Sign<B> for super::Totp
 
         let secret: [u8; 20] = resources
             .load_key(KeyType::Secret, None, &key_id)?
-            .value.as_slice().try_into()
+            .value.as_ref().try_into()
             .map_err(|_| Error::InternalError)?;
 
         if request.message.len() != 8 {
@@ -90,7 +90,7 @@ Sign<B> for super::Totp
         let totp_value: u64 = hotp_raw(&secret, timestamp, DIGITS);
 
         // return signature (encode as LE)
-        Ok(reply::Sign { signature: totp_value.to_le_bytes().as_ref().try_into().unwrap() })
+        Ok(reply::Sign { signature: crate::ByteBuf::try_from_slice(totp_value.to_le_bytes().as_ref()).unwrap() })
     }
 }
 

@@ -28,7 +28,7 @@ impl<B: Board> Encrypt<B> for super::Tdes
 
         let symmetric_key: [u8; 24] = resources
             .load_key(KeyType::Secret, None, &key_id)?
-            .value.as_slice().try_into()
+            .value.as_ref().try_into()
             .map_err(|_| Error::InternalError)?;
 
 		let cipher = des::TdesEde3::new(GenericArray::from_slice(&symmetric_key));
@@ -53,7 +53,7 @@ impl<B: Board> Decrypt<B> for super::Tdes
 
         let symmetric_key: [u8; 24] = resources
             .load_key(KeyType::Secret, None, &key_id)?
-            .value.as_slice().try_into()
+            .value.as_ref().try_into()
             .map_err(|_| Error::InternalError)?;
 
 		let cipher = des::TdesEde3::new(GenericArray::from_slice(&symmetric_key));

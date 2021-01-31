@@ -192,7 +192,7 @@ macro_rules! setup {
             let board = $board::new(rng, store, pc_interface);
             let mut trussed: crate::Service<$board> = crate::service::Service::new(board);
 
-            let (test_trussed_requester, test_trussed_responder) = crate::pipe::TrussedInterchange::claim(0)
+            let (test_trussed_requester, test_trussed_responder) = crate::pipe::TrussedInterchange::claim()
                 .expect("could not setup TEST TrussedInterchange");
             let mut test_client_id = littlefs2::path::PathBuf::new();
             test_client_id.push(b"TEST\0".try_into().unwrap());
@@ -369,7 +369,7 @@ fn aead() {
                  ).map_err(drop).expect("no client error"))
             .map_err(drop).expect("no errors").plaintext;
 
-        assert_eq!(&message[..], plaintext.unwrap().as_slice());
+        assert_eq!(&message[..], plaintext.unwrap().as_ref());
 }
 
 #[test]

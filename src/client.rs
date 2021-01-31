@@ -202,7 +202,7 @@ pub trait Client {
     fn hash_sha256<'c>(&'c mut self, message: &[u8])
         -> ClientResult<'c, reply::Hash, Self>
     {
-        self.hash(Mechanism::Sha256, Message::from_slice(message).map_err(|_| ClientError::DataTooLarge)?)
+        self.hash(Mechanism::Sha256, Message::try_from_slice(message).map_err(|_| ClientError::DataTooLarge)?)
     }
 
     fn decrypt_chacha8poly1305<'c>(&'c mut self, key: &ObjectHandle, message: &[u8], associated_data: &[u8],
@@ -225,7 +225,7 @@ pub trait Client {
         -> ClientResult<'c, reply::Encrypt, Self>
     {
         self.encrypt(Mechanism::Chacha8Poly1305, key.clone(), message, associated_data,
-            nonce.and_then(|nonce| ShortData::from_slice(nonce).ok()))
+            nonce.and_then(|nonce| ShortData::try_from_slice(nonce).ok()))
     }
 
     fn decrypt_tdes<'c>(&'c mut self, key: &ObjectHandle, message: &[u8])
@@ -553,8 +553,8 @@ where S: Syscall {
                        message: &[u8], associated_data: &[u8], nonce: Option<ShortData>)
         -> ClientResult<'c, reply::Encrypt, Self>
     {
-        let message = Message::from_slice(message).map_err(|_| ClientError::DataTooLarge)?;
-        let associated_data = ShortData::from_slice(associated_data).map_err(|_| ClientError::DataTooLarge)?;
+        let message = Message::try_from_slice(message).map_err(|_| ClientError::DataTooLarge)?;
+        let associated_data = ShortData::try_from_slice(associated_data).map_err(|_| ClientError::DataTooLarge)?;
         let r = self.request(request::Encrypt { mechanism, key, message, associated_data, nonce })?;
         r.client.syscall.syscall();
         Ok(r)
@@ -572,10 +572,10 @@ where S: Syscall {
                        )
         -> ClientResult<'c, reply::Decrypt, Self>
     {
-        let message = Message::from_slice(message).map_err(|_| ClientError::DataTooLarge)?;
-        let associated_data = Message::from_slice(associated_data).map_err(|_| ClientError::DataTooLarge)?;
-        let nonce = ShortData::from_slice(nonce).map_err(|_| ClientError::DataTooLarge)?;
-        let tag = ShortData::from_slice(tag).map_err(|_| ClientError::DataTooLarge)?;
+        let message = Message::try_from_slice(message).map_err(|_| ClientError::DataTooLarge)?;
+        let associated_data = Message::try_from_slice(associated_data).map_err(|_| ClientError::DataTooLarge)?;
+        let nonce = ShortData::try_from_slice(nonce).map_err(|_| ClientError::DataTooLarge)?;
+        let tag = ShortData::try_from_slice(tag).map_err(|_| ClientError::DataTooLarge)?;
         let r = self.request(request::Decrypt { mechanism, key, message, associated_data, nonce, tag })?;
         r.client.syscall.syscall();
         Ok(r)
@@ -772,7 +772,7 @@ where S: Syscall {
         let r = self.request(request::Sign {
             key,
             mechanism,
-            message: ByteBuf::from_slice(data).map_err(|_| ClientError::DataTooLarge)?,
+            message: ByteBuf::try_from_slice(data).map_err(|_| ClientError::DataTooLarge)?,
             format,
         })?;
         r.client.syscall.syscall();
@@ -792,8 +792,8 @@ where S: Syscall {
         let r = self.request(request::Verify {
             mechanism,
             key,
-            message: Message::from_slice(&message).expect("all good"),
-            signature: Signature::from_slice(&signature).expect("all good"),
+            message: Message::try_from_slice(&message).expect("all good"),
+            signature: Signature::try_from_slice(&signature).expect("all good"),
             format,
         })?;
         r.client.syscall.syscall();
@@ -824,7 +824,7 @@ where S: Syscall {
         info_now!("{}B: raw key: {:X?}", raw_key.len(), raw_key);
         let r = self.request(request::UnsafeInjectKey {
             mechanism: Mechanism::Totp,
-            raw_key: ShortData::from_slice(raw_key).unwrap(),
+            raw_key: ShortData::try_from_slice(raw_key).unwrap(),
             attributes: StorageAttributes::new().set_persistence(persistence),
         })?;
         r.client.syscall.syscall();
@@ -836,7 +836,7 @@ where S: Syscall {
     {
         let r = self.request(request::UnsafeInjectKey {
             mechanism: Mechanism::Tdes,
-            raw_key: ShortData::from_slice(raw_key).unwrap(),
+            raw_key: ShortData::try_from_slice(raw_key).unwrap(),
             attributes: StorageAttributes::new().set_persistence(persistence),
         })?;
         r.client.syscall.syscall();
@@ -851,7 +851,7 @@ where S: Syscall {
                        associated_data: &[u8], attributes: StorageAttributes)
         -> ClientResult<'c, reply::UnwrapKey, Self>
     {
-        let associated_data = Message::from_slice(associated_data).map_err(|_| ClientError::DataTooLarge)?;
+        let associated_data = Message::try_from_slice(associated_data).map_err(|_| ClientError::DataTooLarge)?;
         let r = self.request(request::UnwrapKey { mechanism, wrapping_key, wrapped_key, associated_data, attributes })?;
         r.client.syscall.syscall();
         Ok(r)
@@ -865,7 +865,7 @@ where S: Syscall {
                        associated_data: &[u8])
         -> ClientResult<'c, reply::WrapKey, Self>
     {
-        let associated_data = Message::from_slice(associated_data).map_err(|_| ClientError::DataTooLarge)?;
+        let associated_data = Message::try_from_slice(associated_data).map_err(|_| ClientError::DataTooLarge)?;
         let r = self.request(request::WrapKey { mechanism, wrapping_key, key, associated_data })?;
         r.client.syscall.syscall();
         Ok(r)

@@ -23,7 +23,7 @@ Sign<B> for super::HmacSha256
         // let path = resources.prepare_path_for_key(KeyType::Secret, &key_id)?;
         // let (serialized_key, _) = resources.load_key_unchecked(&path)?;
         // let shared_secret = &serialized_key.value;
-        let l = shared_secret.as_slice().len();
+        let l = shared_secret.as_ref().len();
         if (l & 0xf) != 0 {
             info_now!("wrong key length, expected multiple of 16, got {}", l);
             Err(Error::WrongKeyKind)?;
@@ -41,7 +41,7 @@ Sign<B> for super::HmacSha256
         // incorrect use of the code value may permit timing attacks which defeat
         // the security provided by the `MacResult`
         let code_bytes: [u8; 32] = result.code().as_slice().try_into().unwrap();
-        let signature = Signature::from_slice(&code_bytes).unwrap();
+        let signature = Signature::try_from_slice(&code_bytes).unwrap();
 
         // return signature
         Ok(reply::Sign { signature })

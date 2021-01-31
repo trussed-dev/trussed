@@ -1,7 +1,7 @@
 use core::convert::{TryFrom, TryInto};
 
 pub use rand_core::{RngCore, SeedableRng};
-use heapless::ByteBuf;
+use heapless_bytes::Bytes as ByteBuf;
 use interchange::Responder;
 use littlefs2::path::{Path, PathBuf};
 use chacha20::ChaCha8Rng;
@@ -635,11 +635,11 @@ impl<B: Board> ServiceResources<B> {
                 let path = self.namespace_path(&path);
                 let mut data = Message::new();
                 data.resize_to_capacity();
-                let data: Message = match request.location {
+                let data: Message = crate::ByteBuf::from(match request.location {
                     StorageLocation::Internal => self.board.store().ifs().read(&path),
                     StorageLocation::External => self.board.store().efs().read(&path),
                     StorageLocation::Volatile => self.board.store().vfs().read(&path),
-                }.map_err(|_| Error::InternalError)?.into();
+                }.map_err(|_| Error::InternalError)?);
                 // data.resize_default(size).map_err(|_| Error::InternalError)?;
                 Ok(Reply::ReadFile(reply::ReadFile { data } ))
             }
@@ -829,7 +829,7 @@ impl<B: Board> ServiceResources<B> {
             KeyType::Public => b"pub\0".try_into().unwrap(),
             KeyType::Secret => b"sec\0".try_into().unwrap(),
         });
-        path.push(&PathBuf::from(key_id.hex().as_slice()));
+        path.push(&PathBuf::from(key_id.hex().as_ref()));
         // no dataspacing
         self.namespace_path(&path)
     }

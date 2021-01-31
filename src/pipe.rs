@@ -29,6 +29,42 @@ interchange::interchange! {
     TrussedInterchange: (Request, Result<Reply, Error>, 5, [None, None, None, None, None])
 }
 
+#[cfg(feature = "clients-6")]
+interchange::interchange! {
+    TrussedInterchange: (Request, Result<Reply, Error>, 6, [None, None, None, None, None, None])
+}
+
+#[cfg(feature = "clients-7")]
+interchange::interchange! {
+    TrussedInterchange: (Request, Result<Reply, Error>, 7, [None, None, None, None, None, None, None])
+}
+
+#[cfg(feature = "clients-8")]
+interchange::interchange! {
+    TrussedInterchange: (Request, Result<Reply, Error>, 8, [None, None, None, None, None, None, None, None])
+}
+
+#[cfg(feature = "clients-9")]
+interchange::interchange! {
+    TrussedInterchange: (Request, Result<Reply, Error>, 9, [None, None, None, None, None, None, None, None, None])
+}
+
+#[cfg(feature = "clients-10")]
+interchange::interchange! {
+    TrussedInterchange: (Request, Result<Reply, Error>, 10, [None, None, None, None, None, None, None, None, None, None])
+}
+
+#[cfg(feature = "clients-11")]
+interchange::interchange! {
+    TrussedInterchange: (Request, Result<Reply, Error>, 11, [None, None, None, None, None, None, None, None, None, None, None])
+}
+
+#[cfg(feature = "clients-12")]
+interchange::interchange! {
+    TrussedInterchange: (Request, Result<Reply, Error>, 12, [None, None, None, None, None, None, None, None, None, None, None, None])
+}
+
+
 // pub use interchange::TrussedInterchange;
 
 // TODO: The request pipe should block if there is an unhandled

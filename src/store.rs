@@ -327,7 +327,7 @@ impl<'a> TryFrom<(KeyKind, &'a [u8])> for SerializedKey {
     fn try_from(from: (KeyKind, &'a [u8])) -> Result<Self, Error> {
         Ok(SerializedKey {
             kind: from.0,
-            value: ByteBuf::from_slice(from.1).map_err(|_| Error::InternalError)?,
+            value: ByteBuf::try_from_slice(from.1).map_err(|_| Error::InternalError)?,
         })
     }
 }

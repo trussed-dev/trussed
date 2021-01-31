@@ -9,7 +9,7 @@ pub use heapless::{
     Vec,
 };
 
-pub use heapless::ByteBuf;
+pub use heapless_bytes::Bytes as ByteBuf;
 
 pub use littlefs2::{
     fs::{DirEntry, Filesystem},
@@ -515,7 +515,7 @@ impl UniqueId {
         // (0..hex.len())
         // use hex::FromHex;
         // let maybe_bytes = <[u8; 16]>::from_hex(hex).map_err(|e| ());
-        // maybe_bytes.map(|bytes| Self(ByteBuf::from_slice(&bytes).unwrap()))
+        // maybe_bytes.map(|bytes| Self(ByteBuf::try_from_slice(&bytes).unwrap()))
         if (hex.len() & 1) == 1 {
             // panic!("hex len & 1 =  {}", hex.len() & 1);
             return Err(());

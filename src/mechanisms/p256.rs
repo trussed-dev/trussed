@@ -13,7 +13,7 @@ fn load_public_key<B: Board>(resources: &mut ServiceResources<B>, key_id: &Uniqu
         .load_key(KeyType::Public, Some(KeyKind::P256), &key_id)?
         .value;
 
-    let public_bytes = match public_bytes.as_slice().len() {
+    let public_bytes = match public_bytes.as_ref().len() {
         64 => {
             let mut public_bytes_ = [0u8; 64];
             public_bytes_.copy_from_slice(&public_bytes.as_ref());
@@ -96,7 +96,7 @@ DeserializeKey<B> for super::P256
         let public_key = match request.format {
             KeySerialization::Cose => {
                 // TODO: this should all be done upstream
-                let cose_public_key: ctap_types::cose::P256PublicKey = crate::cbor_deserialize(
+                let cose_public_key: cosey::P256PublicKey = crate::cbor_deserialize(
                     &request.serialized_key).map_err(|_| Error::CborError)?;
                 let mut serialized_key = [0u8; 64];
                 if cose_public_key.x.len() != 32 || cose_public_key.y.len() != 32 {
@@ -114,7 +114,7 @@ DeserializeKey<B> for super::P256
 
             KeySerialization::EcdhEsHkdf256 => {
                 // TODO: this should all be done upstream
-                let cose_public_key: ctap_types::cose::EcdhEsHkdf256PublicKey = crate::cbor_deserialize(
+                let cose_public_key: cosey::EcdhEsHkdf256PublicKey = crate::cbor_deserialize(
                     &request.serialized_key).map_err(|_| Error::CborError)?;
                 let mut serialized_key = [0u8; 64];
                 if cose_public_key.x.len() != 32 || cose_public_key.y.len() != 32 {
@@ -200,16 +200,16 @@ SerializeKey<B> for super::P256
         let mut serialized_key = Message::new();
         match request.format {
             KeySerialization::EcdhEsHkdf256 => {
-                let cose_pk = ctap_types::cose::EcdhEsHkdf256PublicKey {
-                    x: ByteBuf::from_slice(&public_key.x_coordinate()).unwrap(),
-                    y: ByteBuf::from_slice(&public_key.y_coordinate()).unwrap(),
+                let cose_pk = cosey::EcdhEsHkdf256PublicKey {
+                    x: ByteBuf::try_from_slice(&public_key.x_coordinate()).unwrap(),
+                    y: ByteBuf::try_from_slice(&public_key.y_coordinate()).unwrap(),
                 };
                 crate::cbor_serialize_bytes(&cose_pk, &mut serialized_key).map_err(|_| Error::CborError)?;
             }
             KeySerialization::Cose => {
-                let cose_pk = ctap_types::cose::P256PublicKey {
-                    x: ByteBuf::from_slice(&public_key.x_coordinate()).unwrap(),
-                    y: ByteBuf::from_slice(&public_key.y_coordinate()).unwrap(),
+                let cose_pk = cosey::P256PublicKey {
+                    x: ByteBuf::try_from_slice(&public_key.x_coordinate()).unwrap(),
+                    y: ByteBuf::try_from_slice(&public_key.y_coordinate()).unwrap(),
                 };
                 crate::cbor_serialize_bytes(&cose_pk, &mut serialized_key).map_err(|_| Error::CborError)?;
             }
@@ -249,7 +249,7 @@ fn load_keypair<B: Board>(resources: &mut ServiceResources<B>, key_id: &UniqueId
     // info_now!("loading keypair");
     let seed: [u8; 32] = resources
         .load_key(KeyType::Secret, Some(KeyKind::P256), &key_id)?
-        .value.as_slice()
+        .value.as_ref()
         .try_into()
         .map_err(|_| Error::InternalError)?;
 
@@ -269,7 +269,7 @@ Sign<B> for super::P256
 
         let seed: [u8; 32] = resources
             .load_key(KeyType::Secret, Some(KeyKind::P256), &key_id)?
-            .value.as_slice()
+            .value.as_ref()
             .try_into()
             .map_err(|_| Error::InternalError)?;
 
@@ -277,10 +277,10 @@ Sign<B> for super::P256
 
         let our_signature = match request.format {
             SignatureSerialization::Asn1Der => {
-                Signature::from_slice(&native_signature.to_asn1_der()).unwrap()
+                Signature::try_from_slice(&native_signature.to_asn1_der()).unwrap()
             }
             SignatureSerialization::Raw => {
-                Signature::from_slice(&native_signature.to_bytes()).unwrap()
+                Signature::try_from_slice(&native_signature.to_bytes()).unwrap()
             }
         };
         // #[cfg(all(test, feature = "verbose-tests"))]
@@ -316,7 +316,7 @@ Sign<B> for super::P256Prehashed
             info_now!("wrong length");
             return Err(Error::WrongMessageLength);
         }
-        let message: [u8; 32] = request.message.as_slice().try_into().unwrap();
+        let message: [u8; 32] = request.message.as_ref().try_into().unwrap();
         info_now!("cast to 32B array");
 
         let native_signature = keypair.sign_prehashed(&message);
@@ -324,10 +324,10 @@ Sign<B> for super::P256Prehashed
 
         let our_signature = match request.format {
             SignatureSerialization::Asn1Der => {
-                Signature::from_slice(&native_signature.to_asn1_der()).unwrap()
+                Signature::try_from_slice(&native_signature.to_asn1_der()).unwrap()
             }
             SignatureSerialization::Raw => {
-                Signature::from_slice(&native_signature.to_bytes()).unwrap()
+                Signature::try_from_slice(&native_signature.to_bytes()).unwrap()
             }
         };
         // #[cfg(all(test, feature = "verbose-tests"))]

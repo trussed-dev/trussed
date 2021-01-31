@@ -12,7 +12,7 @@ fn load_public_key<B: Board>(resources: &mut ServiceResources<B>, key_id: &Uniqu
 
     let public_bytes: [u8; 32] = resources
         .load_key(KeyType::Public, Some(KeyKind::Ed25519), &key_id)?
-        .value.as_slice()
+        .value.as_ref()
         .try_into()
         .map_err(|_| Error::InternalError)?;
 
@@ -26,7 +26,7 @@ fn load_keypair<B: Board>(resources: &mut ServiceResources<B>, key_id: &UniqueId
 
     let seed: [u8; 32] = resources
         .load_key(KeyType::Secret, Some(KeyKind::Ed25519), &key_id)?
-        .value.as_slice()
+        .value.as_ref()
         .try_into()
         .map_err(|_| Error::InternalError)?;
 
@@ -128,10 +128,10 @@ SerializeKey<B> for super::Ed25519
         let mut serialized_key = Message::new();
         match request.format {
             KeySerialization::Cose => {
-                let cose_pk = ctap_types::cose::Ed25519PublicKey {
-                    // x: ByteBuf::from_slice(public_key.x_coordinate()).unwrap(),
-                    // x: ByteBuf::from_slice(&buf).unwrap(),
-                    x: ByteBuf::from_slice(public_key.as_bytes()).unwrap(),
+                let cose_pk =cosey::Ed25519PublicKey {
+                    // x: ByteBuf::try_from_slice(public_key.x_coordinate()).unwrap(),
+                    // x: ByteBuf::try_from_slice(&buf).unwrap(),
+                    x: ByteBuf::try_from_slice(public_key.as_bytes()).unwrap(),
                 };
                 crate::cbor_serialize_bytes(&cose_pk, &mut serialized_key).map_err(|_| Error::CborError)?;
             }
@@ -184,7 +184,7 @@ Sign<B> for super::Ed25519
         let keypair = load_keypair(resources, &key_id)?;
 
         let native_signature = keypair.sign(&request.message);
-        let our_signature = Signature::from_slice(&native_signature.to_bytes()).unwrap();
+        let our_signature = Signature::try_from_slice(&native_signature.to_bytes()).unwrap();
 
         // hprintln!("Ed25519 signature:").ok();
         // hprintln!("msg: {:?}", &request.message).ok();
