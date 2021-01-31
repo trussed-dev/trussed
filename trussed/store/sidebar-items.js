@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["create_directories",""],["delete",""],["read","Reads contents from path in location of store."],["store","Creates parent directory if necessary, then writes."],["write","Writes contents to path in location of store."]],"struct":[["Fs",""],["SerializedKey",""]],"trait":[["Store",""]],"type":[["KeyMaterial",""]]});

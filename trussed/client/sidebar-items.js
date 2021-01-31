@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["ClientError",""]],"struct":[["ClientImplementation",""],["FutureResult",""]],"trait":[["Client","Trussed Client interface that Trussed apps can rely on."]],"type":[["ClientResult",""]]});
