@@ -900,6 +900,21 @@
 <span id="897">897</span>
 <span id="898">898</span>
 <span id="899">899</span>
+<span id="900">900</span>
+<span id="901">901</span>
+<span id="902">902</span>
+<span id="903">903</span>
+<span id="904">904</span>
+<span id="905">905</span>
+<span id="906">906</span>
+<span id="907">907</span>
+<span id="908">908</span>
+<span id="909">909</span>
+<span id="910">910</span>
+<span id="911">911</span>
+<span id="912">912</span>
+<span id="913">913</span>
+<span id="914">914</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="ident">core</span>::<span class="ident">marker</span>::<span class="ident">PhantomData</span>;
 
@@ -1285,6 +1300,7 @@
 <span class="comment">// https://github.com/dflemstr/direct-executor/blob/master/src/lib.rs#L62-L66</span>
 
 <span class="attribute">#[<span class="ident">macro_export</span>]</span>
+<span class="attribute">#[<span class="ident">deprecated</span>]</span>
 <span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">block</span> {
     (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">future_result</span>:<span class="ident">expr</span>) <span class="op">=</span><span class="op">&gt;</span> {{
         <span class="comment">// evaluate the expression</span>
@@ -1306,6 +1322,20 @@
         <span class="kw">loop</span> {
             <span class="kw">match</span> <span class="ident">future_result</span>.<span class="ident">poll</span>() {
                 <span class="ident">core</span>::<span class="ident">task</span>::<span class="ident">Poll</span>::<span class="ident">Ready</span>(<span class="ident">result</span>) <span class="op">=</span><span class="op">&gt;</span> { <span class="kw">break</span> <span class="ident">result</span>.<span class="ident">expect</span>(<span class="string">&quot;no errors&quot;</span>); },
+                <span class="ident">core</span>::<span class="ident">task</span>::<span class="ident">Poll</span>::<span class="ident">Pending</span> <span class="op">=</span><span class="op">&gt;</span> {},
+            }
+        }
+    }}
+}
+
+<span class="attribute">#[<span class="ident">macro_export</span>]</span>
+<span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">try_syscall</span> {
+    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">pre_future_result</span>:<span class="ident">expr</span>) <span class="op">=</span><span class="op">&gt;</span> {{
+        <span class="comment">// evaluate the expression</span>
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">future_result</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">pre_future_result</span>.<span class="ident">expect</span>(<span class="string">&quot;no client error&quot;</span>);
+        <span class="kw">loop</span> {
+            <span class="kw">match</span> <span class="ident">future_result</span>.<span class="ident">poll</span>() {
+                <span class="ident">core</span>::<span class="ident">task</span>::<span class="ident">Poll</span>::<span class="ident">Ready</span>(<span class="ident">result</span>) <span class="op">=</span><span class="op">&gt;</span> { <span class="kw">break</span> <span class="ident">result</span>; },
                 <span class="ident">core</span>::<span class="ident">task</span>::<span class="ident">Poll</span>::<span class="ident">Pending</span> <span class="op">=</span><span class="op">&gt;</span> {},
             }
         }

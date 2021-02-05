@@ -1050,6 +1050,34 @@
 <span id="1047">1047</span>
 <span id="1048">1048</span>
 <span id="1049">1049</span>
+<span id="1050">1050</span>
+<span id="1051">1051</span>
+<span id="1052">1052</span>
+<span id="1053">1053</span>
+<span id="1054">1054</span>
+<span id="1055">1055</span>
+<span id="1056">1056</span>
+<span id="1057">1057</span>
+<span id="1058">1058</span>
+<span id="1059">1059</span>
+<span id="1060">1060</span>
+<span id="1061">1061</span>
+<span id="1062">1062</span>
+<span id="1063">1063</span>
+<span id="1064">1064</span>
+<span id="1065">1065</span>
+<span id="1066">1066</span>
+<span id="1067">1067</span>
+<span id="1068">1068</span>
+<span id="1069">1069</span>
+<span id="1070">1070</span>
+<span id="1071">1071</span>
+<span id="1072">1072</span>
+<span id="1073">1073</span>
+<span id="1074">1074</span>
+<span id="1075">1075</span>
+<span id="1076">1076</span>
+<span id="1077">1077</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="ident">core</span>::<span class="ident">convert</span>::{<span class="ident">TryFrom</span>, <span class="ident">TryInto</span>};
 
@@ -2045,6 +2073,34 @@
         <span class="kw">let</span> <span class="ident">resources</span> <span class="op">=</span> <span class="ident">ServiceResources</span>::<span class="ident">new</span>(<span class="ident">platform</span>);
         <span class="self">Self</span> { <span class="ident">eps</span>: <span class="ident">Vec</span>::<span class="ident">new</span>(), <span class="ident">resources</span> }
     }
+
+    <span class="doccomment">/// Add a new client, claiming one of the statically configured</span>
+    <span class="doccomment">/// interchange pairs.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_new_client</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="kw">crate</span>::<span class="ident">platform</span>::<span class="ident">Syscall</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">client_id</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">syscall</span>: <span class="ident">S</span>)
+        <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw">crate</span>::<span class="ident">client</span>::<span class="ident">ClientImplementation</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>, ()<span class="op">&gt;</span>
+    {
+        <span class="kw">use</span> <span class="ident">interchange</span>::<span class="ident">Interchange</span>;
+        <span class="kw">let</span> (<span class="ident">requester</span>, <span class="ident">responder</span>) <span class="op">=</span> <span class="ident">TrussedInterchange</span>::<span class="ident">claim</span>().<span class="ident">ok_or</span>(())<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">client_id</span> <span class="op">=</span> <span class="ident">ClientId</span>::<span class="ident">from</span>(<span class="ident">client_id</span>.<span class="ident">as_bytes</span>());
+        <span class="self">self</span>.<span class="ident">add_endpoint</span>(<span class="ident">responder</span>, <span class="ident">client_id</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">_service_endpoint</span><span class="op">|</span> ())<span class="question-mark">?</span>;
+
+        <span class="prelude-val">Ok</span>(<span class="kw">crate</span>::<span class="ident">client</span>::<span class="ident">ClientImplementation</span>::<span class="ident">new</span>(<span class="ident">requester</span>, <span class="ident">syscall</span>))
+    }
+
+    <span class="doccomment">/// Specialization of `try_new_client`, using `self`&#39;s implementation of `Syscall`</span>
+    <span class="doccomment">/// (directly call self for processing). This method is only useful for single-threaded</span>
+    <span class="doccomment">/// single-app runners.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_as_new_client</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">client_id</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>)
+        <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw">crate</span>::<span class="ident">client</span>::<span class="ident">ClientImplementation</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Service</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span><span class="op">&gt;</span>, ()<span class="op">&gt;</span>
+    {
+        <span class="kw">use</span> <span class="ident">interchange</span>::<span class="ident">Interchange</span>;
+        <span class="kw">let</span> (<span class="ident">requester</span>, <span class="ident">responder</span>) <span class="op">=</span> <span class="ident">TrussedInterchange</span>::<span class="ident">claim</span>().<span class="ident">ok_or</span>(())<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">client_id</span> <span class="op">=</span> <span class="ident">ClientId</span>::<span class="ident">from</span>(<span class="ident">client_id</span>.<span class="ident">as_bytes</span>());
+        <span class="self">self</span>.<span class="ident">add_endpoint</span>(<span class="ident">responder</span>, <span class="ident">client_id</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">_service_endpoint</span><span class="op">|</span> ())<span class="question-mark">?</span>;
+
+        <span class="prelude-val">Ok</span>(<span class="kw">crate</span>::<span class="ident">client</span>::<span class="ident">ClientImplementation</span>::<span class="ident">new</span>(<span class="ident">requester</span>, <span class="self">self</span>))
+    }
+
 
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">add_endpoint</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">interchange</span>: <span class="ident">Responder</span><span class="op">&lt;</span><span class="ident">TrussedInterchange</span><span class="op">&gt;</span>, <span class="ident">client_id</span>: <span class="ident">ClientId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">ServiceEndpoint</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">eps</span>.<span class="ident">push</span>(<span class="ident">ServiceEndpoint</span> { <span class="ident">interchange</span>, <span class="ident">client_id</span> })
