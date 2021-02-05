@@ -1,6 +1,6 @@
 //! TODO: split this out into a separate `trussed-platform` traits crate.
 
-pub use rand_core::RngCore;
+pub use rand_core::{CryptoRng, RngCore};
 pub use crate::store::Store;
 pub use crate::types::{ui, reboot};
 pub use crate::types::consent;
@@ -28,7 +28,7 @@ pub trait UserInterface {
 // replacing generic parameters with associated types
 // and a macro.
 pub unsafe trait Platform {
-    type R: RngCore;
+    type R: CryptoRng + RngCore;
     type S: Store;
     type UI: UserInterface;
 

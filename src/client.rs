@@ -382,7 +382,6 @@ pub trait Client {
 // https://github.com/dflemstr/direct-executor/blob/master/src/lib.rs#L62-L66
 
 #[macro_export]
-#[deprecated]
 macro_rules! block {
     ($future_result:expr) => {{
         // evaluate the expression
