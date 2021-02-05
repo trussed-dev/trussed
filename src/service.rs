@@ -993,6 +993,34 @@ impl<P: Platform> Service<P> {
         Self { eps: Vec::new(), resources }
     }
 
+    /// Add a new client, claiming one of the statically configured
+    /// interchange pairs.
+    pub fn try_new_client<S: crate::platform::Syscall>(&mut self, client_id: &str, syscall: S)
+        -> Result<crate::client::ClientImplementation<S>, ()>
+    {
+        use interchange::Interchange;
+        let (requester, responder) = TrussedInterchange::claim().ok_or(())?;
+        let client_id = ClientId::from(client_id.as_bytes());
+        self.add_endpoint(responder, client_id).map_err(|_service_endpoint| ())?;
+
+        Ok(crate::client::ClientImplementation::new(requester, syscall))
+    }
+
+    /// Specialization of `try_new_client`, using `self`'s implementation of `Syscall`
+    /// (directly call self for processing). This method is only useful for single-threaded
+    /// single-app runners.
+    pub fn try_as_new_client(&mut self, client_id: &str)
+        -> Result<crate::client::ClientImplementation<&mut Service<P>>, ()>
+    {
+        use interchange::Interchange;
+        let (requester, responder) = TrussedInterchange::claim().ok_or(())?;
+        let client_id = ClientId::from(client_id.as_bytes());
+        self.add_endpoint(responder, client_id).map_err(|_service_endpoint| ())?;
+
+        Ok(crate::client::ClientImplementation::new(requester, self))
+    }
+
+
     pub fn add_endpoint(&mut self, interchange: Responder<TrussedInterchange>, client_id: ClientId) -> Result<(), ServiceEndpoint> {
         self.eps.push(ServiceEndpoint { interchange, client_id })
     }
