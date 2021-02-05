@@ -45,6 +45,9 @@ macro_rules! platform { (
     UI: $UserInterface:ty,
 ) => {
 
+    /// Platform struct implemented `trussed::Platform`, generated
+    /// by a Trussed-supplied macro at call site, using the platform-specific
+    /// implementations of its components.
     pub struct $PlatformName {
         rng: $Rng,
         store: $Store,
