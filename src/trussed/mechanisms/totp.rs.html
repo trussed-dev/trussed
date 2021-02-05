@@ -132,7 +132,7 @@
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">api</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">error</span>::<span class="ident">Error</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">service</span>::<span class="kw-2">*</span>;
-<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">platform</span>::<span class="ident">Board</span>;
+<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">platform</span>::<span class="ident">Platform</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">types</span>::<span class="kw-2">*</span>;
 
 <span class="comment">// code copied from https://github.com/avacariu/rust-oath</span>
@@ -173,10 +173,10 @@
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;totp&quot;</span>)]</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">B</span>: <span class="ident">Board</span><span class="op">&gt;</span>
-<span class="ident">UnsafeInjectKey</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="kw">super</span>::<span class="ident">Totp</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">Platform</span><span class="op">&gt;</span>
+<span class="ident">UnsafeInjectKey</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="kw">super</span>::<span class="ident">Totp</span>
 {
-    <span class="kw">fn</span> <span class="ident">unsafe_inject_key</span>(<span class="ident">resources</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ServiceResources</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>, <span class="ident">request</span>: <span class="ident">request</span>::<span class="ident">UnsafeInjectKey</span>)
+    <span class="kw">fn</span> <span class="ident">unsafe_inject_key</span>(<span class="ident">resources</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ServiceResources</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>, <span class="ident">request</span>: <span class="ident">request</span>::<span class="ident">UnsafeInjectKey</span>)
         <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">reply</span>::<span class="ident">UnsafeInjectKey</span>, <span class="ident">Error</span><span class="op">&gt;</span>
     {
         <span class="comment">// in usual format, secret is a 32B Base32 encoding of 20B actual secret bytes</span>
@@ -198,10 +198,10 @@
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;totp&quot;</span>)]</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">B</span>: <span class="ident">Board</span><span class="op">&gt;</span>
-<span class="ident">Sign</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="kw">super</span>::<span class="ident">Totp</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">Platform</span><span class="op">&gt;</span>
+<span class="ident">Sign</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="kw">super</span>::<span class="ident">Totp</span>
 {
-    <span class="kw">fn</span> <span class="ident">sign</span>(<span class="ident">resources</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ServiceResources</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>, <span class="ident">request</span>: <span class="ident">request</span>::<span class="ident">Sign</span>)
+    <span class="kw">fn</span> <span class="ident">sign</span>(<span class="ident">resources</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ServiceResources</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>, <span class="ident">request</span>: <span class="ident">request</span>::<span class="ident">Sign</span>)
         <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">reply</span>::<span class="ident">Sign</span>, <span class="ident">Error</span><span class="op">&gt;</span>
     {
         <span class="kw">let</span> <span class="ident">key_id</span> <span class="op">=</span> <span class="ident">request</span>.<span class="ident">key</span>.<span class="ident">object_id</span>;
@@ -224,10 +224,10 @@
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;totp&quot;</span>)]</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">B</span>: <span class="ident">Board</span><span class="op">&gt;</span>
-<span class="ident">Exists</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="kw">super</span>::<span class="ident">Totp</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">Platform</span><span class="op">&gt;</span>
+<span class="ident">Exists</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="kw">super</span>::<span class="ident">Totp</span>
 {
-    <span class="kw">fn</span> <span class="ident">exists</span>(<span class="ident">resources</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ServiceResources</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>, <span class="ident">request</span>: <span class="ident">request</span>::<span class="ident">Exists</span>)
+    <span class="kw">fn</span> <span class="ident">exists</span>(<span class="ident">resources</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ServiceResources</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>, <span class="ident">request</span>: <span class="ident">request</span>::<span class="ident">Exists</span>)
         <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">reply</span>::<span class="ident">Exists</span>, <span class="ident">Error</span><span class="op">&gt;</span>
     {
         <span class="kw">let</span> <span class="ident">key_id</span> <span class="op">=</span> <span class="ident">request</span>.<span class="ident">key</span>.<span class="ident">object_id</span>;

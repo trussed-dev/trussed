@@ -86,7 +86,7 @@
 <span id="83">83</span>
 <span id="84">84</span>
 </pre><div class="example-wrap"><pre class="rust ">
-<span class="doccomment">//! TODO: split this out into a separate `trussed-board` traits crate.</span>
+<span class="doccomment">//! TODO: split this out into a separate `trussed-platform` traits crate.</span>
 
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">rand_core</span>::<span class="ident">RngCore</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">store</span>::<span class="ident">Store</span>;
@@ -115,7 +115,7 @@
 <span class="comment">// This is the same trick as in &quot;store.rs&quot;,</span>
 <span class="comment">// replacing generic parameters with associated types</span>
 <span class="comment">// and a macro.</span>
-<span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">trait</span> <span class="ident">Board</span> {
+<span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">trait</span> <span class="ident">Platform</span> {
     <span class="kw">type</span> <span class="ident">R</span>: <span class="ident">RngCore</span>;
     <span class="kw">type</span> <span class="ident">S</span>: <span class="ident">Store</span>;
     <span class="kw">type</span> <span class="ident">UI</span>: <span class="ident">UserInterface</span>;
@@ -126,26 +126,26 @@
 }
 
 <span class="attribute">#[<span class="ident">macro_export</span>]</span>
-<span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">board</span> { (
-    <span class="macro-nonterminal">$</span><span class="macro-nonterminal">BoardName</span>:<span class="ident">ident</span>,
+<span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">platform</span> { (
+    <span class="macro-nonterminal">$</span><span class="macro-nonterminal">PlatformName</span>:<span class="ident">ident</span>,
     <span class="ident">R</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">Rng</span>:<span class="ident">ty</span>,
     <span class="ident">S</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">Store</span>:<span class="ident">ty</span>,
     <span class="ident">UI</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">UserInterface</span>:<span class="ident">ty</span>,
 ) <span class="op">=</span><span class="op">&gt;</span> {
 
-    <span class="kw">pub</span> <span class="kw">struct</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">BoardName</span> {
+    <span class="kw">pub</span> <span class="kw">struct</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">PlatformName</span> {
         <span class="ident">rng</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">Rng</span>,
         <span class="ident">store</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">Store</span>,
         <span class="ident">user_interface</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">UserInterface</span>,
     }
 
-    <span class="kw">impl</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">BoardName</span> {
+    <span class="kw">impl</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">PlatformName</span> {
         <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">rng</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">Rng</span>, <span class="ident">store</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">Store</span>, <span class="ident">user_interface</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">UserInterface</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
             <span class="self">Self</span> { <span class="ident">rng</span>, <span class="ident">store</span>, <span class="ident">user_interface</span> }
         }
     }
 
-    <span class="kw">unsafe</span> <span class="kw">impl</span> <span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">platform</span>::<span class="ident">Board</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">BoardName</span> {
+    <span class="kw">unsafe</span> <span class="kw">impl</span> <span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">platform</span>::<span class="ident">Platform</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">PlatformName</span> {
         <span class="kw">type</span> <span class="ident">R</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">Rng</span>;
         <span class="kw">type</span> <span class="ident">S</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">Store</span>;
         <span class="kw">type</span> <span class="ident">UI</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">UserInterface</span>;

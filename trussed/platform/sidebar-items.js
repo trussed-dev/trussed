@@ -1,1 +1,1 @@
-initSidebarItems({"trait":[["Board",""],["RngCore","The core of a random number generator."],["Syscall","Trussed client will call this method when making a Trussed request. This is intended to trigger a secure context on the platform."],["UserInterface",""]]});
+initSidebarItems({"trait":[["Platform",""],["RngCore","The core of a random number generator."],["Syscall","Trussed client will call this method when making a Trussed request. This is intended to trigger a secure context on the platform."],["UserInterface",""]]});
