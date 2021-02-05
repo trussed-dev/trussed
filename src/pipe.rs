@@ -4,6 +4,24 @@ use crate::api::{Request, Reply};
 use crate::error::Error;
 use crate::types::ClientId;
 
+#[cfg(not(any(
+    feature = "clients-1",
+    feature = "clients-2",
+    feature = "clients-3",
+    feature = "clients-4",
+    feature = "clients-5",
+    feature = "clients-6",
+    feature = "clients-7",
+    feature = "clients-8",
+    feature = "clients-9",
+    feature = "clients-10",
+    feature = "clients-11",
+    feature = "clients-12",
+)))]
+interchange::interchange! {
+    TrussedInterchange: (Request, Result<Reply, Error>, 0, [])
+}
+
 #[cfg(feature = "clients-1")]
 interchange::interchange! {
     TrussedInterchange: (Request, Result<Reply, Error>)

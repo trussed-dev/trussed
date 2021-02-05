@@ -11,24 +11,6 @@
 extern crate delog;
 generate_macros!();
 
-// It's OK tocompile without - only the final "runner" needs to select
-//
-// #[cfg(not(any(
-//     feature = "clients-1",
-//     feature = "clients-2",
-//     feature = "clients-3",
-//     feature = "clients-4",
-//     feature = "clients-5",
-//     feature = "clients-6",
-//     feature = "clients-7",
-//     feature = "clients-8",
-//     feature = "clients-9",
-//     feature = "clients-10",
-//     feature = "clients-11",
-//     feature = "clients-12",
-// )))]
-// compile_error!("Please select how many Trussed™ clients will be needed, using one of the `clients-*` features.");
-
 pub use interchange::Interchange;
 
 pub mod api;
