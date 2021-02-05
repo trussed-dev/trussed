@@ -157,9 +157,9 @@ macro_rules! create_memory {
 macro_rules! setup {
     ($client:ident) => {
         let memory = create_memory!();
-        setup!($client, Store, Board, memory, [0u8; 32], true);
+        setup!($client, Store, Platform, memory, [0u8; 32], true);
     };
-    ($client:ident, $store:ident, $board: ident, $memory:expr, $seed:expr, $reformat: expr) => {
+    ($client:ident, $store:ident, $platform: ident, $memory:expr, $seed:expr, $reformat: expr) => {
 
 
             store!($store,
@@ -167,7 +167,7 @@ macro_rules! setup {
                 External: ExternalStorage,
                 Volatile: VolatileStorage
             );
-            board!($board,
+            platform!($platform,
                 R: MockRng,
                 S: $store,
                 UI: UserInterface,
@@ -189,8 +189,8 @@ macro_rules! setup {
             let rng = MockRng::new();
             let pc_interface: UserInterface = Default::default();
 
-            let board = $board::new(rng, store, pc_interface);
-            let mut trussed: crate::Service<$board> = crate::service::Service::new(board);
+            let platform = $platform::new(rng, store, pc_interface);
+            let mut trussed: crate::Service<$platform> = crate::service::Service::new(platform);
 
             let (test_trussed_requester, test_trussed_responder) = crate::pipe::TrussedInterchange::claim()
                 .expect("could not setup TEST TrussedInterchange");
@@ -201,7 +201,7 @@ macro_rules! setup {
 
             trussed.set_seed_if_uninitialized(&$seed);
             let mut $client = {
-                pub type TestClient<'a> = crate::ClientImplementation<&'a mut crate::Service<$board>>;
+                pub type TestClient<'a> = crate::ClientImplementation<&'a mut crate::Service<$platform>>;
                 TestClient::new(
                     test_trussed_requester,
                     &mut trussed
@@ -408,9 +408,9 @@ fn rng() {
     let mem1 = create_memory!();
     let mem2 = create_memory!();
     let mem3 = create_memory!();
-    setup!(client_twin1, StoreTwin1, BoardTwin1, mem1, [0x01u8; 32], true);
-    setup!(client_twin2, StoreTwin2, BoardTwin2, mem2, [0x01u8; 32], true);
-    setup!(client_3, StoreTwin3, BoardTwin3, mem3, [0x02u8; 32], true);
+    setup!(client_twin1, StoreTwin1, PlatformTwin1, mem1, [0x01u8; 32], true);
+    setup!(client_twin2, StoreTwin2, PlatformTwin2, mem2, [0x01u8; 32], true);
+    setup!(client_3, StoreTwin3, PlatformTwin3, mem3, [0x02u8; 32], true);
     let bytes_twin1 = gen_bytes!(client_twin1, 1024*100);
     let bytes_twin2 = gen_bytes!(client_twin2, 1024*100);
     let bytes_3 = gen_bytes!(client_3, 1024*100);
@@ -432,12 +432,12 @@ fn rng() {
     let mem_copy = create_memory!(mem);
 
     // Trussed saves the RNG state so it cannot produce the same RNG on different boots.
-    setup!(client_twin3, StoreTwin4, BoardTwin4, mem, [0x01u8; 32], true);
+    setup!(client_twin3, StoreTwin4, PlatformTwin4, mem, [0x01u8; 32], true);
 
     let first_128 = gen_bytes!(client_twin3, 128);
 
     // This time don't reformat the memory -- should pick up on last rng state.
-    setup!(client_twin4, StoreTwin5, BoardTwin5, mem_copy, [0x01u8; 32], false);
+    setup!(client_twin4, StoreTwin5, PlatformTwin5, mem_copy, [0x01u8; 32], false);
 
     let second_128 = gen_bytes!(client_twin4, 128);
 

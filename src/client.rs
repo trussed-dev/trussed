@@ -378,6 +378,9 @@ pub trait Client {
 
 }
 
+// would be interesting to use proper futures, and something like
+// https://github.com/dflemstr/direct-executor/blob/master/src/lib.rs#L62-L66
+
 #[macro_export]
 macro_rules! block {
     ($future_result:expr) => {{

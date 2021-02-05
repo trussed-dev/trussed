@@ -7,10 +7,10 @@ use crate::service::*;
 use crate::types::*;
 
 #[cfg(feature = "hmac-sha256")]
-impl<B: Board>
-Sign<B> for super::HmacSha256
+impl<P: Platform>
+Sign<P> for super::HmacSha256
 {
-    fn sign(resources: &mut ServiceResources<B>, request: request::Sign)
+    fn sign(resources: &mut ServiceResources<P>, request: request::Sign)
         -> Result<reply::Sign, Error>
     {
         use sha2::Sha256;
@@ -50,10 +50,10 @@ Sign<B> for super::HmacSha256
 }
 
 #[cfg(feature = "hmac-sha256")]
-impl<B: Board>
-GenerateKey<B> for super::HmacSha256
+impl<P: Platform>
+GenerateKey<P> for super::HmacSha256
 {
-    fn generate_key(resources: &mut ServiceResources<B>, request: request::GenerateKey)
+    fn generate_key(resources: &mut ServiceResources<P>, request: request::GenerateKey)
         -> Result<reply::GenerateKey, Error>
     {
         let mut seed = [0u8; 16];
@@ -77,4 +77,4 @@ GenerateKey<B> for super::HmacSha256
 
 
 #[cfg(not(feature = "hmac-sha256"))]
-impl<B: Board> Sign<B> for super::HmacSha256 {}
+impl<P: Platform> Sign<P> for super::HmacSha256 {}

@@ -22,8 +22,8 @@ pub use crate::pipe::ServiceEndpoint;
 
 macro_rules! rpc_trait { ($($Name:ident, $name:ident,)*) => { $(
 
-    pub trait $Name<B: Board> {
-        fn $name(_resources: &mut ServiceResources<B>, _request: request::$Name)
+    pub trait $Name<P: Platform> {
+        fn $name(_resources: &mut ServiceResources<P>, _request: request::$Name)
         -> Result<reply::$Name, Error> { Err(Error::MechanismNotAvailable) }
     }
 )* } }
@@ -63,10 +63,10 @@ struct ReadDirState {
     last: usize,
 }
 
-pub struct ServiceResources<B>
-where B: Board
+pub struct ServiceResources<P>
+where P: Platform
 {
-    pub(crate) board: B,
+    pub(crate) platform: P,
     // Option?
     currently_serving: ClientId,
     // TODO: how/when to clear
@@ -75,11 +75,11 @@ where B: Board
     rng_state: Option<ChaCha8Rng>,
 }
 
-impl<B: Board> ServiceResources<B> {
+impl<P: Platform> ServiceResources<P> {
 
-    pub fn new(board: B) -> Self {
+    pub fn new(platform: P) -> Self {
         Self {
-            board,
+            platform,
             currently_serving: PathBuf::new(),
             read_dir_files_state: None,
             read_dir_state: None,
@@ -88,24 +88,24 @@ impl<B: Board> ServiceResources<B> {
     }
 }
 
-pub struct Service<B> where B: Board {
+pub struct Service<P> where P: Platform {
     eps: Vec<ServiceEndpoint, MAX_SERVICE_CLIENTS>,
-    resources: ServiceResources<B>,
+    resources: ServiceResources<P>,
 }
 
 // need to be able to send crypto service to an interrupt handler
-unsafe impl<B: Board> Send for Service<B> {}
+unsafe impl<P: Platform> Send for Service<P> {}
 
-impl<B: Board> ServiceResources<B> {
+impl<P: Platform> ServiceResources<P> {
 
     pub fn reply_to(&mut self, request: Request) -> Result<Reply, Error> {
         // TODO: what we want to do here is map an enum to a generic type
         // Is there a nicer way to do this?
         // info_now!("trussed request: {:?}", &request).ok();
         // info_now!("IFS/EFS/VFS available BEFORE: {}/{}/{}",
-        //       self.board.store().ifs().available_blocks().unwrap(),
-        //       self.board.store().efs().available_blocks().unwrap(),
-        //       self.board.store().vfs().available_blocks().unwrap(),
+        //       self.platform.store().ifs().available_blocks().unwrap(),
+        //       self.platform.store().efs().available_blocks().unwrap(),
+        //       self.platform.store().vfs().available_blocks().unwrap(),
         // ).ok();
         debug_now!("trussed request: {:?}", &request);
         match request {
@@ -183,7 +183,7 @@ impl<B: Board> ServiceResources<B> {
                 let success = key_types.iter().any(|key_type| {
                     let path = self.key_path(*key_type, &request.key.object_id);
                     locations.iter().any(|location| {
-                        store::delete(self.board.store(), *location, &path)
+                        store::delete(self.platform.store(), *location, &path)
                     })
                 });
 
@@ -290,7 +290,7 @@ impl<B: Board> ServiceResources<B> {
                 }
 
                 assert!(request.location == StorageLocation::Internal);
-                let path = recursively_locate(self.board.store().ifs(), base_path, &request.filename).unwrap();
+                let path = recursively_locate(self.platform.store().ifs(), base_path, &request.filename).unwrap();
                 let path = match path.as_ref() {
                     Some(path) => Some(self.denamedataspace_path(path)),
                     None => None,
@@ -304,10 +304,10 @@ impl<B: Board> ServiceResources<B> {
             Request::DebugDumpStore(_request) => {
 
                 info_now!(":: PERSISTENT");
-                recursively_list(self.board.store().ifs(), PathBuf::from(b"/"));
+                recursively_list(self.platform.store().ifs(), PathBuf::from(b"/"));
 
                 info_now!(":: VOLATILE");
-                recursively_list(self.board.store().vfs(), PathBuf::from(b"/"));
+                recursively_list(self.platform.store().vfs(), PathBuf::from(b"/"));
 
                 fn recursively_list<S: 'static + crate::types::LfsStorage>(fs: &'static crate::store::Fs<S>, path: PathBuf) {
                     // let fs = store.vfs();
@@ -341,7 +341,7 @@ impl<B: Board> ServiceResources<B> {
 
                 let path = self.dataspace_path(&request.dir);
                 let path = self.namespace_path(&path);
-                let fs = self.board.store().ifs();
+                let fs = self.platform.store().ifs();
 
                 let mut found_not_before = request.not_before_filename.is_none();
                 let outcome = fs.read_dir_and_then(&path, |dir| {
@@ -401,7 +401,7 @@ impl<B: Board> ServiceResources<B> {
                 // let path = self.namespace_path(&request.dir);
                 let path = self.dataspace_path(&request.dir);
                 let path = self.namespace_path(&path);
-                let fs = self.board.store().ifs();
+                let fs = self.platform.store().ifs();
 
                 // let (i, entry) = fs.read_dir_and_then(&path, |dir| {
                 let outcome = fs.read_dir_and_then(&path, |dir| {
@@ -445,7 +445,7 @@ impl<B: Board> ServiceResources<B> {
                 let path = self.dataspace_path(&request.dir);
                 let path = self.namespace_path(&path);
 
-                let fs = self.board.store().ifs();
+                let fs = self.platform.store().ifs();
 
                 let result = fs.read_dir_and_then(&path, |dir| {
                     for entry in dir {
@@ -498,7 +498,7 @@ impl<B: Board> ServiceResources<B> {
                     result.unwrap()
                 };
 
-                let data = store::read(self.board.store(), request.location, entry.path())?;
+                let data = store::read(self.platform.store(), request.location, entry.path())?;
 
                 self.read_dir_files_state = Some(ReadDirFilesState {
                     request,
@@ -521,7 +521,7 @@ impl<B: Board> ServiceResources<B> {
                 // let path = self.namespace_path(&request.dir);
                 let path = self.dataspace_path(&request.dir);
                 let path = self.namespace_path(&path);
-                let fs = self.board.store().ifs();
+                let fs = self.platform.store().ifs();
 
                 let mut found_last = false;
                 let entry = fs.read_dir_and_then(&path, |dir| {
@@ -579,7 +579,7 @@ impl<B: Board> ServiceResources<B> {
                 let data = match entry {
                     Err(littlefs2::io::Error::NoSuchEntry) => None,
                     Ok(entry) => {
-                        let data = store::read(self.board.store(), request.location, entry.path())?;
+                        let data = store::read(self.platform.store(), request.location, entry.path())?;
 
                         self.read_dir_files_state = Some(ReadDirFilesState {
                             request,
@@ -605,9 +605,9 @@ impl<B: Board> ServiceResources<B> {
                 let mut data = Message::new();
                 data.resize_to_capacity();
                 match request.location {
-                    StorageLocation::Internal => self.board.store().ifs().remove_dir(&path),
-                    StorageLocation::External => self.board.store().efs().remove_dir(&path),
-                    StorageLocation::Volatile => self.board.store().vfs().remove_dir(&path),
+                    StorageLocation::Internal => self.platform.store().ifs().remove_dir(&path),
+                    StorageLocation::External => self.platform.store().efs().remove_dir(&path),
+                    StorageLocation::Volatile => self.platform.store().vfs().remove_dir(&path),
                 }.map_err(|_| Error::InternalError)?;
                 // data.resize_default(size).map_err(|_| Error::InternalError)?;
                 Ok(Reply::RemoveDir(reply::RemoveDir {} ))
@@ -621,9 +621,9 @@ impl<B: Board> ServiceResources<B> {
                 let mut data = Message::new();
                 data.resize_to_capacity();
                 match request.location {
-                    StorageLocation::Internal => self.board.store().ifs().remove(&path),
-                    StorageLocation::External => self.board.store().efs().remove(&path),
-                    StorageLocation::Volatile => self.board.store().vfs().remove(&path),
+                    StorageLocation::Internal => self.platform.store().ifs().remove(&path),
+                    StorageLocation::External => self.platform.store().efs().remove(&path),
+                    StorageLocation::Volatile => self.platform.store().vfs().remove(&path),
                 }.map_err(|_| Error::InternalError)?;
                 // data.resize_default(size).map_err(|_| Error::InternalError)?;
                 Ok(Reply::RemoveFile(reply::RemoveFile {} ))
@@ -636,9 +636,9 @@ impl<B: Board> ServiceResources<B> {
                 let mut data = Message::new();
                 data.resize_to_capacity();
                 let data: Message = crate::ByteBuf::from(match request.location {
-                    StorageLocation::Internal => self.board.store().ifs().read(&path),
-                    StorageLocation::External => self.board.store().efs().read(&path),
-                    StorageLocation::Volatile => self.board.store().vfs().read(&path),
+                    StorageLocation::Internal => self.platform.store().ifs().read(&path),
+                    StorageLocation::External => self.platform.store().efs().read(&path),
+                    StorageLocation::Volatile => self.platform.store().vfs().read(&path),
                 }.map_err(|_| Error::InternalError)?);
                 // data.resize_default(size).map_err(|_| Error::InternalError)?;
                 Ok(Reply::ReadFile(reply::ReadFile { data } ))
@@ -683,7 +683,7 @@ impl<B: Board> ServiceResources<B> {
                 let path = self.dataspace_path(&request.path);
                 let path = self.namespace_path(&path);
                 info!("WriteFile of size {}", request.data.len());
-                store::store(self.board.store(), request.location, &path, &request.data)?;
+                store::store(self.platform.store(), request.location, &path, &request.data)?;
                 Ok(Reply::WriteFile(reply::WriteFile {}))
             }
 
@@ -719,17 +719,17 @@ impl<B: Board> ServiceResources<B> {
             Request::RequestUserConsent(request) => {
                 assert_eq!(request.level, consent::Level::Normal);
 
-                let starttime = self.board.user_interface().uptime();
+                let starttime = self.platform.user_interface().uptime();
                 let timeout = core::time::Duration::from_millis(request.timeout_milliseconds as u64);
 
-                self.board.user_interface().set_status(ui::Status::WaitingForUserPresence);
+                self.platform.user_interface().set_status(ui::Status::WaitingForUserPresence);
                 loop {
-                    let nowtime = self.board.user_interface().uptime();
+                    let nowtime = self.platform.user_interface().uptime();
                     if (nowtime - starttime) > timeout {
                         let result = Err(consent::Error::TimedOut);
                         return Ok(Reply::RequestUserConsent(reply::RequestUserConsent { result } ));
                     }
-                    let up = self.board.user_interface().check_user_presence();
+                    let up = self.platform.user_interface().check_user_presence();
                     match request.level {
                         // If Normal level consent is request, then both Strong and Normal
                         // indications will result in success.
@@ -750,14 +750,14 @@ impl<B: Board> ServiceResources<B> {
                         }
                     }
                 }
-                self.board.user_interface().set_status(ui::Status::Idle);
+                self.platform.user_interface().set_status(ui::Status::Idle);
 
                 let result = Ok(());
                 Ok(Reply::RequestUserConsent(reply::RequestUserConsent { result } ))
             }
 
             Request::Reboot(request) => {
-                self.board.user_interface().reboot(request.to);
+                self.platform.user_interface().reboot(request.to);
             }
 
             _ => {
@@ -842,7 +842,7 @@ impl<B: Board> ServiceResources<B> {
         let serialized_bytes = crate::cbor_serialize(&serialized_key, &mut buf).map_err(|_| Error::CborError)?;
         let key_id = self.generate_unique_id()?;
         let path = self.key_path(key_type, &key_id);
-        store::store(self.board.store(), location, &path, &serialized_bytes)?;
+        store::store(self.platform.store(), location, &path, &serialized_bytes)?;
 
         Ok(key_id)
     }
@@ -855,7 +855,7 @@ impl<B: Board> ServiceResources<B> {
 
         let path = self.key_path(key_type, key_id);
 
-        store::store(self.board.store(), location, &path, &serialized_bytes)?;
+        store::store(self.platform.store(), location, &path, &serialized_bytes)?;
 
         Ok(())
     }
@@ -863,15 +863,15 @@ impl<B: Board> ServiceResources<B> {
     pub fn key_id_location(&self, key_type: KeyType, key_id: &UniqueId) -> Option<StorageLocation> {
         let path = self.key_path(key_type, key_id);
 
-        if path.exists(&self.board.store().vfs()) {
+        if path.exists(&self.platform.store().vfs()) {
             return Some(StorageLocation::Volatile);
         }
 
-        if path.exists(&self.board.store().ifs()) {
+        if path.exists(&self.platform.store().ifs()) {
             return Some(StorageLocation::Internal);
         }
 
-        if path.exists(&self.board.store().efs()) {
+        if path.exists(&self.platform.store().efs()) {
             return Some(StorageLocation::External);
         }
 
@@ -894,7 +894,7 @@ impl<B: Board> ServiceResources<B> {
             None => return Err(Error::NoSuchKey),
         };
 
-        let bytes: ByteBuf<consts::U128> = store::read(self.board.store(), location, &path)?;
+        let bytes: ByteBuf<consts::U128> = store::read(self.platform.store(), location, &path)?;
 
         let serialized_key: SerializedKey = crate::cbor_deserialize(&bytes).map_err(|_| Error::CborError)?;
 
@@ -925,14 +925,14 @@ impl<B: Board> ServiceResources<B> {
             let path = PathBuf::from(b"rng-state.bin");
 
             // If it hasn't been saved to flash yet, generate it from HW RNG.
-            let stored_seed = if ! path.exists(&self.board.store().ifs()) {
+            let stored_seed = if ! path.exists(&self.platform.store().ifs()) {
                 let mut stored_seed = [0u8; 32];
-                self.board.rng().try_fill_bytes(&mut stored_seed)
+                self.platform.rng().try_fill_bytes(&mut stored_seed)
                     .map_err(|_| Error::EntropyMalfunction)?;
                 stored_seed
             } else {
                 // Use the last saved state.
-                let stored_seed_bytebuf: ByteBuf<consts::U32> = store::read(self.board.store(), StorageLocation::Internal, &path)?;
+                let stored_seed_bytebuf: ByteBuf<consts::U32> = store::read(self.platform.store(), StorageLocation::Internal, &path)?;
                 let mut stored_seed = [0u8; 32];
                 stored_seed.clone_from_slice(&stored_seed_bytebuf);
                 stored_seed
@@ -955,7 +955,7 @@ impl<B: Board> ServiceResources<B> {
 
             // 1. First, draw fresh entropy from the HW TRNG.
             let mut entropy = [0u8; 32];
-            self.board.rng().try_fill_bytes(&mut entropy)
+            self.platform.rng().try_fill_bytes(&mut entropy)
                 .map_err(|_| Error::EntropyMalfunction)?;
 
             // 2. Mix into our previously stored seed.
@@ -973,7 +973,7 @@ impl<B: Board> ServiceResources<B> {
             hash.input(&our_seed);
             let seed_to_store = hash.result();
 
-            store::store(self.board.store(), StorageLocation::Internal, &path, seed_to_store.as_ref()).unwrap();
+            store::store(self.platform.store(), StorageLocation::Internal, &path, seed_to_store.as_ref()).unwrap();
         }
 
 
@@ -986,10 +986,10 @@ impl<B: Board> ServiceResources<B> {
 
 }
 
-impl<B: Board> Service<B> {
+impl<P: Platform> Service<P> {
 
-    pub fn new(board: B) -> Self {
-        let resources = ServiceResources::new(board);
+    pub fn new(platform: P) -> Self {
+        let resources = ServiceResources::new(platform);
         Self { eps: Vec::new(), resources }
     }
 
@@ -1000,8 +1000,8 @@ impl<B: Board> Service<B> {
     pub fn set_seed_if_uninitialized(&mut self, seed: &[u8; 32]) {
 
         let path = PathBuf::from(b"rng-state.bin");
-        if ! path.exists(&self.resources.board.store().ifs()) {
-            store::store(self.resources.board.store(), StorageLocation::Internal, &path, &seed[..]).unwrap();
+        if ! path.exists(&self.resources.platform.store().ifs()) {
+            store::store(self.resources.platform.store(), StorageLocation::Internal, &path, &seed[..]).unwrap();
         }
 
     }
@@ -1013,7 +1013,7 @@ impl<B: Board> Service<B> {
     // - return "when" next to be called
     // - potentially read out button status and return "async"
     pub fn update_ui(&mut self) /* -> u32 */ {
-        self.resources.board.user_interface().refresh();
+        self.resources.platform.user_interface().refresh();
     }
 
     // process one request per client which has any
@@ -1033,15 +1033,15 @@ impl<B: Board> Service<B> {
             }
         }
         debug_now!("I/E/V : {}/{}/{} >",
-              self.resources.board.store().ifs().available_blocks().unwrap(),
-              self.resources.board.store().efs().available_blocks().unwrap(),
-              self.resources.board.store().vfs().available_blocks().unwrap(),
+              self.resources.platform.store().ifs().available_blocks().unwrap(),
+              self.resources.platform.store().efs().available_blocks().unwrap(),
+              self.resources.platform.store().vfs().available_blocks().unwrap(),
         );
     }
 }
 
-impl<B> crate::client::Syscall for &mut Service<B>
-where B: Board
+impl<P> crate::client::Syscall for &mut Service<P>
+where P: Platform
 {
     fn syscall(&mut self) {
         self.process();

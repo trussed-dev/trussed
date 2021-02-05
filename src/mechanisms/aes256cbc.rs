@@ -7,10 +7,10 @@ use crate::service::*;
 use crate::types::*;
 
 #[cfg(feature = "aes256-cbc")]
-impl<B: Board> Encrypt<B> for super::Aes256Cbc
+impl<P: Platform> Encrypt<P> for super::Aes256Cbc
 {
     /// Encrypts the input *with zero IV*
-    fn encrypt(resources: &mut ServiceResources<B>, request: request::Encrypt)
+    fn encrypt(resources: &mut ServiceResources<P>, request: request::Encrypt)
         -> Result<reply::Encrypt, Error>
     {
 		use block_modes::{BlockMode, Cbc};
@@ -53,9 +53,9 @@ impl<B: Board> Encrypt<B> for super::Aes256Cbc
 }
 
 #[cfg(feature = "aes256-cbc")]
-impl<B: Board> WrapKey<B> for super::Aes256Cbc
+impl<P: Platform> WrapKey<P> for super::Aes256Cbc
 {
-    fn wrap_key(resources: &mut ServiceResources<B>, request: request::WrapKey)
+    fn wrap_key(resources: &mut ServiceResources<P>, request: request::WrapKey)
         -> Result<reply::WrapKey, Error>
     {
         // TODO: need to check both secret and private keys
@@ -84,9 +84,9 @@ impl<B: Board> WrapKey<B> for super::Aes256Cbc
 }
 
 #[cfg(feature = "aes256-cbc")]
-impl<B: Board> Decrypt<B> for super::Aes256Cbc
+impl<P: Platform> Decrypt<P> for super::Aes256Cbc
 {
-    fn decrypt(resources: &mut ServiceResources<B>, request: request::Decrypt)
+    fn decrypt(resources: &mut ServiceResources<P>, request: request::Decrypt)
         -> Result<reply::Decrypt, Error>
     {
 		use block_modes::{BlockMode, Cbc};
@@ -128,7 +128,7 @@ impl<B: Board> Decrypt<B> for super::Aes256Cbc
 }
 
 #[cfg(not(feature = "aes256-cbc"))]
-impl<B: Board> Decrypt<B> for super::Aes256Cbc {}
+impl<P: Platform> Decrypt<P> for super::Aes256Cbc {}
 
 #[cfg(not(feature = "aes256-cbc"))]
-impl<B: Board> Encrypt<B> for super::Aes256Cbc {}
+impl<P: Platform> Encrypt<P> for super::Aes256Cbc {}

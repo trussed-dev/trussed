@@ -22,14 +22,14 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::*;
 
-pub use crate::platform::Board;
+pub use crate::platform::Platform;
 pub use crate::client::FutureResult;
 
 pub mod ui {
     use super::*;
 
     // TODO: Consider whether a simple "language" to specify "patterns"
-    // makes sense, vs. "semantic" indications with board-specific implementation
+    // makes sense, vs. "semantic" indications with platform-specific implementation
     #[derive(Copy, Clone, Eq, PartialEq, Debug, Serialize, Deserialize)]
     pub enum Status {
         Idle,
@@ -289,7 +289,7 @@ pub struct ObjectHandle{
 
 // impl<S: crate::store::Store> core::ops::Drop for AutoDrop {
 //     fn drop(&mut self) {
-//         // crate::store::delete_volatile(self.board.store(), &self.handle);
+//         // crate::store::delete_volatile(self.platform.store(), &self.handle);
 //     }
 // }
 

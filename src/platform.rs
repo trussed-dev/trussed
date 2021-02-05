@@ -1,4 +1,4 @@
-//! TODO: split this out into a separate `trussed-board` traits crate.
+//! TODO: split this out into a separate `trussed-platform` traits crate.
 
 pub use rand_core::RngCore;
 pub use crate::store::Store;
@@ -27,7 +27,7 @@ pub trait UserInterface {
 // This is the same trick as in "store.rs",
 // replacing generic parameters with associated types
 // and a macro.
-pub unsafe trait Board {
+pub unsafe trait Platform {
     type R: RngCore;
     type S: Store;
     type UI: UserInterface;
@@ -38,26 +38,26 @@ pub unsafe trait Board {
 }
 
 #[macro_export]
-macro_rules! board { (
-    $BoardName:ident,
+macro_rules! platform { (
+    $PlatformName:ident,
     R: $Rng:ty,
     S: $Store:ty,
     UI: $UserInterface:ty,
 ) => {
 
-    pub struct $BoardName {
+    pub struct $PlatformName {
         rng: $Rng,
         store: $Store,
         user_interface: $UserInterface,
     }
 
-    impl $BoardName {
+    impl $PlatformName {
         pub fn new(rng: $Rng, store: $Store, user_interface: $UserInterface) -> Self {
             Self { rng, store, user_interface }
         }
     }
 
-    unsafe impl $crate::platform::Board for $BoardName {
+    unsafe impl $crate::platform::Platform for $PlatformName {
         type R = $Rng;
         type S = $Store;
         type UI = $UserInterface;

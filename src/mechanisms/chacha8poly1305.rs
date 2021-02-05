@@ -12,10 +12,10 @@ use crate::types::*;
 // Maybe start a discussion on the `aead` crate's GitHub about usability concerns...
 
 #[cfg(feature = "chacha8-poly1305")]
-impl<B: Board>
-GenerateKey<B> for super::Chacha8Poly1305 {
+impl<P: Platform>
+GenerateKey<P> for super::Chacha8Poly1305 {
 
-    fn generate_key(resources: &mut ServiceResources<B>, request: request::GenerateKey)
+    fn generate_key(resources: &mut ServiceResources<P>, request: request::GenerateKey)
         -> Result<reply::GenerateKey, Error>
     {
         // 32 bytes entropy
@@ -53,10 +53,10 @@ fn increment_nonce(nonce: &mut [u8]) -> Result<(), Error> {
 }
 
 #[cfg(feature = "chacha8-poly1305")]
-impl<B: Board>
-Decrypt<B> for super::Chacha8Poly1305
+impl<P: Platform>
+Decrypt<P> for super::Chacha8Poly1305
 {
-    fn decrypt(resources: &mut ServiceResources<B>, request: request::Decrypt)
+    fn decrypt(resources: &mut ServiceResources<P>, request: request::Decrypt)
         -> Result<reply::Decrypt, Error>
     {
         use chacha20poly1305::ChaCha8Poly1305;
@@ -96,10 +96,10 @@ Decrypt<B> for super::Chacha8Poly1305
 }
 
 #[cfg(feature = "chacha8-poly1305")]
-impl<B: Board>
-Encrypt<B> for super::Chacha8Poly1305
+impl<P: Platform>
+Encrypt<P> for super::Chacha8Poly1305
 {
-    fn encrypt(resources: &mut ServiceResources<B>, request: request::Encrypt)
+    fn encrypt(resources: &mut ServiceResources<P>, request: request::Encrypt)
         -> Result<reply::Encrypt, Error>
     {
         use chacha20poly1305::ChaCha8Poly1305;
@@ -162,10 +162,10 @@ Encrypt<B> for super::Chacha8Poly1305
 }
 
 #[cfg(feature = "chacha8-poly1305")]
-impl<B: Board>
-WrapKey<B> for super::Chacha8Poly1305
+impl<P: Platform>
+WrapKey<P> for super::Chacha8Poly1305
 {
-    fn wrap_key(resources: &mut ServiceResources<B>, request: request::WrapKey)
+    fn wrap_key(resources: &mut ServiceResources<P>, request: request::WrapKey)
         -> Result<reply::WrapKey, Error>
     {
         debug!("trussed: Chacha8Poly1305::WrapKey");
@@ -194,10 +194,10 @@ WrapKey<B> for super::Chacha8Poly1305
 }
 
 #[cfg(feature = "chacha8-poly1305")]
-impl<B: Board>
-UnwrapKey<B> for super::Chacha8Poly1305
+impl<P: Platform>
+UnwrapKey<P> for super::Chacha8Poly1305
 {
-    fn unwrap_key(resources: &mut ServiceResources<B>, request: request::UnwrapKey)
+    fn unwrap_key(resources: &mut ServiceResources<P>, request: request::UnwrapKey)
         -> Result<reply::UnwrapKey, Error>
     {
         let reply::Encrypt { ciphertext, nonce, tag } = crate::cbor_deserialize(
@@ -270,10 +270,10 @@ UnwrapKey<B> for super::Chacha8Poly1305
 
 
 // #[cfg(feature = "chacha8-poly1305")]
-// impl<B: Board>
-// Decrypt<B> for super::Chacha8Poly1305
+// impl<P: Platform>
+// Decrypt<P> for super::Chacha8Poly1305
 // {
-//     fn decrypt(resources: &mut ServiceResources<B>, request: request::Decrypt)
+//     fn decrypt(resources: &mut ServiceResources<P>, request: request::Decrypt)
 //         -> Result<reply::Decrypt, Error>
 //     {
 // 		use block_modes::{BlockMode, Cbc};
@@ -316,10 +316,10 @@ UnwrapKey<B> for super::Chacha8Poly1305
 //     Ok([42u8; 12])
 // }
 
-// impl<B: Board>
-// Encrypt<B> for super::Chacha8Poly1305
+// impl<P: Platform>
+// Encrypt<P> for super::Chacha8Poly1305
 // {
-//     fn encrypt(resources: &mut ServiceResources<B>, request: request::Encrypt)
+//     fn encrypt(resources: &mut ServiceResources<P>, request: request::Encrypt)
 //         -> Result<reply::Encrypt, Error>
 //     {
 //         use chacha20poly1305::ChaCha8Poly1305;
@@ -391,11 +391,11 @@ UnwrapKey<B> for super::Chacha8Poly1305
 
 
 #[cfg(not(feature = "chacha8-poly1305"))]
-impl<B: Board>
-Decrypt<B> for super::Chacha8Poly1305 {}
+impl<P: Platform>
+Decrypt<P> for super::Chacha8Poly1305 {}
 #[cfg(not(feature = "chacha8-poly1305"))]
-impl<B: Board>
-Encrypt<B> for super::Chacha8Poly1305 {}
+impl<P: Platform>
+Encrypt<P> for super::Chacha8Poly1305 {}
 #[cfg(not(feature = "chacha8-poly1305"))]
-impl<B: Board>
-GenerateKey<B> for super::Chacha8Poly1305 {}
+impl<P: Platform>
+GenerateKey<P> for super::Chacha8Poly1305 {}

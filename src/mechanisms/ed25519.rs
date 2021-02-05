@@ -7,7 +7,7 @@ use crate::error::Error;
 use crate::service::*;
 use crate::types::*;
 
-fn load_public_key<B: Board>(resources: &mut ServiceResources<B>, key_id: &UniqueId)
+fn load_public_key<P: Platform>(resources: &mut ServiceResources<P>, key_id: &UniqueId)
     -> Result<salty::PublicKey, Error> {
 
     let public_bytes: [u8; 32] = resources
@@ -21,7 +21,7 @@ fn load_public_key<B: Board>(resources: &mut ServiceResources<B>, key_id: &Uniqu
     Ok(public_key)
 }
 
-fn load_keypair<B: Board>(resources: &mut ServiceResources<B>, key_id: &UniqueId)
+fn load_keypair<P: Platform>(resources: &mut ServiceResources<P>, key_id: &UniqueId)
     -> Result<salty::Keypair, Error> {
 
     let seed: [u8; 32] = resources
@@ -36,10 +36,10 @@ fn load_keypair<B: Board>(resources: &mut ServiceResources<B>, key_id: &UniqueId
 }
 
 #[cfg(feature = "ed25519")]
-impl<B: Board>
-DeriveKey<B> for super::Ed25519
+impl<P: Platform>
+DeriveKey<P> for super::Ed25519
 {
-    fn derive_key(resources: &mut ServiceResources<B>, request: request::DeriveKey)
+    fn derive_key(resources: &mut ServiceResources<P>, request: request::DeriveKey)
         -> Result<reply::DeriveKey, Error>
     {
         let base_id = &request.base_key.object_id;
@@ -57,10 +57,10 @@ DeriveKey<B> for super::Ed25519
 }
 
 #[cfg(feature = "ed25519")]
-impl<B: Board>
-DeserializeKey<B> for super::Ed25519
+impl<P: Platform>
+DeserializeKey<P> for super::Ed25519
 {
-    fn deserialize_key(resources: &mut ServiceResources<B>, request: request::DeserializeKey)
+    fn deserialize_key(resources: &mut ServiceResources<P>, request: request::DeserializeKey)
         -> Result<reply::DeserializeKey, Error>
     {
           // - mechanism: Mechanism
@@ -91,10 +91,10 @@ DeserializeKey<B> for super::Ed25519
 }
 
 #[cfg(feature = "ed25519")]
-impl<B: Board>
-GenerateKey<B> for super::Ed25519
+impl<P: Platform>
+GenerateKey<P> for super::Ed25519
 {
-    fn generate_key(resources: &mut ServiceResources<B>, request: request::GenerateKey)
+    fn generate_key(resources: &mut ServiceResources<P>, request: request::GenerateKey)
         -> Result<reply::GenerateKey, Error>
     {
         let mut seed = [0u8; 32];
@@ -116,10 +116,10 @@ GenerateKey<B> for super::Ed25519
 }
 
 #[cfg(feature = "ed25519")]
-impl<B: Board>
-SerializeKey<B> for super::Ed25519
+impl<P: Platform>
+SerializeKey<P> for super::Ed25519
 {
-    fn serialize_key(resources: &mut ServiceResources<B>, request: request::SerializeKey)
+    fn serialize_key(resources: &mut ServiceResources<P>, request: request::SerializeKey)
         -> Result<reply::SerializeKey, Error>
     {
         let key_id = request.key.object_id;
@@ -149,10 +149,10 @@ SerializeKey<B> for super::Ed25519
 }
 
 #[cfg(feature = "ed25519")]
-impl<B: Board>
-Exists<B> for super::Ed25519
+impl<P: Platform>
+Exists<P> for super::Ed25519
 {
-    fn exists(resources: &mut ServiceResources<B>, request: request::Exists)
+    fn exists(resources: &mut ServiceResources<P>, request: request::Exists)
         -> Result<reply::Exists, Error>
     {
         let key_id = request.key.object_id;
@@ -163,10 +163,10 @@ Exists<B> for super::Ed25519
 }
 
 #[cfg(feature = "ed25519")]
-impl<B: Board>
-Sign<B> for super::Ed25519
+impl<P: Platform>
+Sign<P> for super::Ed25519
 {
-    fn sign(resources: &mut ServiceResources<B>, request: request::Sign)
+    fn sign(resources: &mut ServiceResources<P>, request: request::Sign)
         -> Result<reply::Sign, Error>
     {
         // Not so nice, expands to
@@ -197,10 +197,10 @@ Sign<B> for super::Ed25519
 }
 
 #[cfg(feature = "ed25519")]
-impl<B: Board>
-Verify<B> for super::Ed25519
+impl<P: Platform>
+Verify<P> for super::Ed25519
 {
-    fn verify(resources: &mut ServiceResources<B>, request: request::Verify)
+    fn verify(resources: &mut ServiceResources<P>, request: request::Verify)
         -> Result<reply::Verify, Error>
     {
         if let SignatureSerialization::Raw = request.format {
@@ -226,14 +226,14 @@ Verify<B> for super::Ed25519
 }
 
 #[cfg(not(feature = "ed25519"))]
-impl<B: Board>
-DeriveKey<B> for super::Ed25519 {}
+impl<P: Platform>
+DeriveKey<P> for super::Ed25519 {}
 #[cfg(not(feature = "ed25519"))]
-impl<B: Board>
-GenerateKey<B> for super::Ed25519 {}
+impl<P: Platform>
+GenerateKey<P> for super::Ed25519 {}
 #[cfg(not(feature = "ed25519"))]
-impl<B: Board>
-Sign<B> for super::Ed25519 {}
+impl<P: Platform>
+Sign<P> for super::Ed25519 {}
 #[cfg(not(feature = "ed25519"))]
-impl<B: Board>
-Verify<B> for super::Ed25519 {}
+impl<P: Platform>
+Verify<P> for super::Ed25519 {}

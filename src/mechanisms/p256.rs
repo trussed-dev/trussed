@@ -6,7 +6,7 @@ use crate::error::Error;
 use crate::service::*;
 use crate::types::*;
 
-fn load_public_key<B: Board>(resources: &mut ServiceResources<B>, key_id: &UniqueId)
+fn load_public_key<P: Platform>(resources: &mut ServiceResources<P>, key_id: &UniqueId)
     -> Result<nisty::PublicKey, Error> {
 
     let public_bytes = resources
@@ -31,10 +31,10 @@ fn load_public_key<B: Board>(resources: &mut ServiceResources<B>, key_id: &Uniqu
 
 
 #[cfg(feature = "p256")]
-impl<B: Board>
-Agree<B> for super::P256
+impl<P: Platform>
+Agree<P> for super::P256
 {
-    fn agree(resources: &mut ServiceResources<B>, request: request::Agree)
+    fn agree(resources: &mut ServiceResources<P>, request: request::Agree)
         -> Result<reply::Agree, Error>
     {
         let private_id = request.private_key.object_id;
@@ -45,8 +45,8 @@ Agree<B> for super::P256
 
         // THIS IS THE CORE
         info_now!("free/total RAMFS blocks: {:?}/{:?}",
-            resources.board.store().vfs().available_blocks().unwrap(),
-            resources.board.store().vfs().total_blocks(),
+            resources.platform.store().vfs().available_blocks().unwrap(),
+            resources.platform.store().vfs().total_blocks(),
         );
         let shared_secret = keypair.secret.agree(&public_key).map_err(|_| Error::InternalError)?.to_bytes();
 
@@ -61,10 +61,10 @@ Agree<B> for super::P256
 }
 
 #[cfg(feature = "p256")]
-impl<B: Board>
-DeriveKey<B> for super::P256
+impl<P: Platform>
+DeriveKey<P> for super::P256
 {
-    fn derive_key(resources: &mut ServiceResources<B>, request: request::DeriveKey)
+    fn derive_key(resources: &mut ServiceResources<P>, request: request::DeriveKey)
         -> Result<reply::DeriveKey, Error>
     {
         let base_id = request.base_key.object_id;
@@ -83,10 +83,10 @@ DeriveKey<B> for super::P256
 }
 
 #[cfg(feature = "p256")]
-impl<B: Board>
-DeserializeKey<B> for super::P256
+impl<P: Platform>
+DeserializeKey<P> for super::P256
 {
-    fn deserialize_key(resources: &mut ServiceResources<B>, request: request::DeserializeKey)
+    fn deserialize_key(resources: &mut ServiceResources<P>, request: request::DeserializeKey)
         -> Result<reply::DeserializeKey, Error>
     {
           // - mechanism: Mechanism
@@ -159,10 +159,10 @@ DeserializeKey<B> for super::P256
 }
 
 #[cfg(feature = "p256")]
-impl<B: Board>
-GenerateKey<B> for super::P256
+impl<P: Platform>
+GenerateKey<P> for super::P256
 {
-    fn generate_key(resources: &mut ServiceResources<B>, request: request::GenerateKey)
+    fn generate_key(resources: &mut ServiceResources<P>, request: request::GenerateKey)
         -> Result<reply::GenerateKey, Error>
     {
         // generate keypair
@@ -186,10 +186,10 @@ GenerateKey<B> for super::P256
 }
 
 #[cfg(feature = "p256")]
-impl<B: Board>
-SerializeKey<B> for super::P256
+impl<P: Platform>
+SerializeKey<P> for super::P256
 {
-    fn serialize_key(resources: &mut ServiceResources<B>, request: request::SerializeKey)
+    fn serialize_key(resources: &mut ServiceResources<P>, request: request::SerializeKey)
         -> Result<reply::SerializeKey, Error>
     {
 
@@ -231,10 +231,10 @@ SerializeKey<B> for super::P256
 }
 
 #[cfg(feature = "p256")]
-impl<B: Board>
-Exists<B> for super::P256
+impl<P: Platform>
+Exists<P> for super::P256
 {
-    fn exists(resources: &mut ServiceResources<B>, request: request::Exists)
+    fn exists(resources: &mut ServiceResources<P>, request: request::Exists)
         -> Result<reply::Exists, Error>
     {
         let key_id = request.key.object_id;
@@ -243,7 +243,7 @@ Exists<B> for super::P256
     }
 }
 
-fn load_keypair<B: Board>(resources: &mut ServiceResources<B>, key_id: &UniqueId)
+fn load_keypair<P: Platform>(resources: &mut ServiceResources<P>, key_id: &UniqueId)
     -> Result<nisty::Keypair, Error> {
 
     // info_now!("loading keypair");
@@ -259,10 +259,10 @@ fn load_keypair<B: Board>(resources: &mut ServiceResources<B>, key_id: &UniqueId
 }
 
 #[cfg(feature = "p256")]
-impl<B: Board>
-Sign<B> for super::P256
+impl<P: Platform>
+Sign<P> for super::P256
 {
-    fn sign(resources: &mut ServiceResources<B>, request: request::Sign)
+    fn sign(resources: &mut ServiceResources<P>, request: request::Sign)
         -> Result<reply::Sign, Error>
     {
         let key_id = request.key.object_id;
@@ -297,10 +297,10 @@ Sign<B> for super::P256
 }
 
 #[cfg(feature = "p256")]
-impl<B: Board>
-Sign<B> for super::P256Prehashed
+impl<P: Platform>
+Sign<P> for super::P256Prehashed
 {
-    fn sign(resources: &mut ServiceResources<B>, request: request::Sign)
+    fn sign(resources: &mut ServiceResources<P>, request: request::Sign)
         -> Result<reply::Sign, Error>
     {
         let key_id = request.key.object_id;
@@ -344,10 +344,10 @@ Sign<B> for super::P256Prehashed
 }
 
 #[cfg(feature = "p256")]
-impl<B: Board>
-Verify<B> for super::P256
+impl<P: Platform>
+Verify<P> for super::P256
 {
-    fn verify(resources: &mut ServiceResources<B>, request: request::Verify)
+    fn verify(resources: &mut ServiceResources<P>, request: request::Verify)
         -> Result<reply::Verify, Error>
     {
         let key_id = request.key.object_id;
@@ -373,17 +373,17 @@ Verify<B> for super::P256
 }
 
 #[cfg(not(feature = "p256"))]
-impl<B: Board>
-Agree<B> for super::P256 {}
+impl<P: Platform>
+Agree<P> for super::P256 {}
 #[cfg(not(feature = "p256"))]
-impl<B: Board>
-DeriveKey<B> for super::P256 {}
+impl<P: Platform>
+DeriveKey<P> for super::P256 {}
 #[cfg(not(feature = "p256"))]
-impl<B: Board>
-GenerateKey<B> for super::P256 {}
+impl<P: Platform>
+GenerateKey<P> for super::P256 {}
 #[cfg(not(feature = "p256"))]
-impl<B: Board>
-Sign<B> for super::P256 {}
+impl<P: Platform>
+Sign<P> for super::P256 {}
 #[cfg(not(feature = "p256"))]
-impl<B: Board>
-Verify<B> for super::P256 {}
+impl<P: Platform>
+Verify<P> for super::P256 {}

@@ -3,7 +3,7 @@ use core::convert::TryInto;
 use crate::api::*;
 use crate::error::Error;
 use crate::service::*;
-use crate::platform::Board;
+use crate::platform::Platform;
 use crate::types::*;
 
 // code copied from https://github.com/avacariu/rust-oath
@@ -44,10 +44,10 @@ fn dynamic_truncation(hs: &[u8]) -> u64 {
 }
 
 #[cfg(feature = "totp")]
-impl<B: Board>
-UnsafeInjectKey<B> for super::Totp
+impl<P: Platform>
+UnsafeInjectKey<P> for super::Totp
 {
-    fn unsafe_inject_key(resources: &mut ServiceResources<B>, request: request::UnsafeInjectKey)
+    fn unsafe_inject_key(resources: &mut ServiceResources<P>, request: request::UnsafeInjectKey)
         -> Result<reply::UnsafeInjectKey, Error>
     {
         // in usual format, secret is a 32B Base32 encoding of 20B actual secret bytes
@@ -69,10 +69,10 @@ UnsafeInjectKey<B> for super::Totp
 }
 
 #[cfg(feature = "totp")]
-impl<B: Board>
-Sign<B> for super::Totp
+impl<P: Platform>
+Sign<P> for super::Totp
 {
-    fn sign(resources: &mut ServiceResources<B>, request: request::Sign)
+    fn sign(resources: &mut ServiceResources<P>, request: request::Sign)
         -> Result<reply::Sign, Error>
     {
         let key_id = request.key.object_id;
@@ -95,10 +95,10 @@ Sign<B> for super::Totp
 }
 
 #[cfg(feature = "totp")]
-impl<B: Board>
-Exists<B> for super::Totp
+impl<P: Platform>
+Exists<P> for super::Totp
 {
-    fn exists(resources: &mut ServiceResources<B>, request: request::Exists)
+    fn exists(resources: &mut ServiceResources<P>, request: request::Exists)
         -> Result<reply::Exists, Error>
     {
         let key_id = request.key.object_id;
