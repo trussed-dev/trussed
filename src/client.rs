@@ -382,6 +382,7 @@ pub trait Client {
 // https://github.com/dflemstr/direct-executor/blob/master/src/lib.rs#L62-L66
 
 #[macro_export]
+#[deprecated]
 macro_rules! block {
     ($future_result:expr) => {{
         // evaluate the expression
@@ -403,6 +404,20 @@ macro_rules! syscall {
         loop {
             match future_result.poll() {
                 core::task::Poll::Ready(result) => { break result.expect("no errors"); },
+                core::task::Poll::Pending => {},
+            }
+        }
+    }}
+}
+
+#[macro_export]
+macro_rules! try_syscall {
+    ($pre_future_result:expr) => {{
+        // evaluate the expression
+        let mut future_result = $pre_future_result.expect("no client error");
+        loop {
+            match future_result.poll() {
+                core::task::Poll::Ready(result) => { break result; },
                 core::task::Poll::Pending => {},
             }
         }
