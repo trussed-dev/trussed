@@ -173,6 +173,48 @@ macro_rules! store { (
     }
 
     impl $store {
+        #[allow(dead_code)]
+        pub fn attach() -> Self {
+            Self::init(false)
+        }
+
+        #[allow(dead_code)]
+        pub fn format() -> Self {
+            Self::init(true)
+        }
+
+        #[allow(dead_code)]
+        pub fn init(format: bool) -> Self {
+            static mut INTERNAL_STORAGE: InternalStorage = <$Ifs>::new();
+            static mut INTERNAL_FS_ALLOC: Option<Allocation<InternalStorage>> = None;
+            unsafe { INTERNAL_FS_ALLOC = Some(Filesystem::allocate()); }
+
+            static mut EXTERNAL_STORAGE: ExternalStorage = <$Efs>::new();
+            static mut EXTERNAL_FS_ALLOC: Option<Allocation<ExternalStorage>> = None;
+            unsafe { EXTERNAL_FS_ALLOC = Some(Filesystem::allocate()); }
+
+            static mut VOLATILE_STORAGE: VolatileStorage = <$Vfs>::new();
+            static mut VOLATILE_FS_ALLOC: Option<Allocation<VolatileStorage>> = None;
+            unsafe { VOLATILE_FS_ALLOC = Some(Filesystem::allocate()); }
+
+            let store = Self::claim().unwrap();
+
+            store.mount(
+                unsafe { INTERNAL_FS_ALLOC.as_mut().unwrap() },
+                unsafe { &mut INTERNAL_STORAGE },
+                unsafe { EXTERNAL_FS_ALLOC.as_mut().unwrap() },
+                unsafe { &mut EXTERNAL_STORAGE },
+                unsafe { VOLATILE_FS_ALLOC.as_mut().unwrap() },
+                unsafe { &mut VOLATILE_STORAGE },
+                // format all the filesystems
+                format,
+            ).unwrap();
+
+            println!("formatted store");
+
+            store
+        }
+
         pub fn claim() -> Option<$store> {
             use core::sync::atomic::{AtomicBool, Ordering};
             // use $crate::store::NotSendOrSync;

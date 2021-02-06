@@ -21,7 +21,7 @@ pub fn get<R>(
 pub fn init_platform() -> Platform {
     use rand_core::SeedableRng as _;
     let rng = chacha20::ChaCha8Rng::from_rng(rand_core::OsRng).unwrap();
-    let store = store::init_store();
+    let store = store::Store::format();
     let ui = ui::UserInterface::new();
 
     let platform = Platform::new(rng, store, ui);
@@ -58,35 +58,4 @@ pub mod store {
         External: ExternalStorage,
         Volatile: VolatileStorage
     );
-
-    pub fn init_store() -> Store {
-        static mut INTERNAL_STORAGE: InternalStorage = InternalStorage::new();
-        static mut INTERNAL_FS_ALLOC: Option<Allocation<InternalStorage>> = None;
-        unsafe { INTERNAL_FS_ALLOC = Some(Filesystem::allocate()); }
-
-        static mut EXTERNAL_STORAGE: ExternalStorage = ExternalStorage::new();
-        static mut EXTERNAL_FS_ALLOC: Option<Allocation<ExternalStorage>> = None;
-        unsafe { EXTERNAL_FS_ALLOC = Some(Filesystem::allocate()); }
-
-        static mut VOLATILE_STORAGE: VolatileStorage = VolatileStorage::new();
-        static mut VOLATILE_FS_ALLOC: Option<Allocation<VolatileStorage>> = None;
-        unsafe { VOLATILE_FS_ALLOC = Some(Filesystem::allocate()); }
-
-        let store = Store::claim().unwrap();
-
-        store.mount(
-            unsafe { INTERNAL_FS_ALLOC.as_mut().unwrap() },
-            unsafe { &mut INTERNAL_STORAGE },
-            unsafe { EXTERNAL_FS_ALLOC.as_mut().unwrap() },
-            unsafe { &mut EXTERNAL_STORAGE },
-            unsafe { VOLATILE_FS_ALLOC.as_mut().unwrap() },
-            unsafe { &mut VOLATILE_STORAGE },
-            // format all the filesystems
-            true,
-        ).unwrap();
-
-        println!("formatted store");
-
-        store
-    }
 }

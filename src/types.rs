@@ -218,7 +218,7 @@ pub enum KeyKind {
     Symmetric24 = 8,
     Symmetric20 = 9,
     // ThirtytwoByteBuf,
-    X25519 = 10
+    X255 = 10
 }
 
 impl core::convert::TryFrom<u8> for KeyKind {
@@ -234,7 +234,7 @@ impl core::convert::TryFrom<u8> for KeyKind {
             7 => KeyKind::Symmetric32Nonce12,
             8 => KeyKind::Symmetric24,
             9 => KeyKind::Symmetric20,
-            10 => KeyKind::X25519,
+            10 => KeyKind::X255,
             _ => { return Err(crate::error::Error::CborError); }
         })
     }
@@ -451,7 +451,7 @@ pub enum Mechanism {
     Tdes,
     Totp,
     Trng,
-    X25519,
+    X255,
 }
 
 pub type LongData = ByteBuf<MAX_LONG_DATA_LENGTH>;

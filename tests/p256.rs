@@ -16,5 +16,10 @@ fn p256_agree() {
 
         let secret1 = syscall!(client.agree_p256(&sk1, &pk2, Volatile)).shared_secret;
         let secret2 = syscall!(client.agree_p256(&sk2, &pk1, Volatile)).shared_secret;
+
+        // Trussed™ won't give out secrets, but lets us use them
+        let derivative1 = syscall!(client.sign_hmacsha256(&secret1, &[])).signature;
+        let derivative2 = syscall!(client.sign_hmacsha256(&secret2, &[])).signature;
+        assert_eq!(derivative1, derivative2);
     })
 }

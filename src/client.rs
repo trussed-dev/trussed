@@ -275,20 +275,20 @@ pub trait Client {
     fn generate_x255_secret_key<'c>(&'c mut self, persistence: StorageLocation)
         -> ClientResult<'c, reply::GenerateKey, Self>
     {
-        self.generate_key(Mechanism::X25519, StorageAttributes::new().set_persistence(persistence))
+        self.generate_key(Mechanism::X255, StorageAttributes::new().set_persistence(persistence))
     }
 
     fn derive_x255_public_key<'c>(&'c mut self, secret_key: &ObjectHandle, persistence: StorageLocation)
         -> ClientResult<'c, reply::DeriveKey, Self>
     {
-        self.derive_key(Mechanism::X25519, secret_key.clone(), StorageAttributes::new().set_persistence(persistence))
+        self.derive_key(Mechanism::X255, secret_key.clone(), StorageAttributes::new().set_persistence(persistence))
     }
 
     fn agree_x255<'c>(&'c mut self, private_key: &ObjectHandle, public_key: &ObjectHandle, persistence: StorageLocation)
         -> ClientResult<'c, reply::Agree, Self>
     {
         self.agree(
-            Mechanism::X25519,
+            Mechanism::X255,
             private_key.clone(),
             public_key.clone(),
             StorageAttributes::new().set_persistence(persistence),
