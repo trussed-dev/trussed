@@ -119,6 +119,7 @@ impl<P: Platform> ServiceResources<P> {
                 match request.mechanism {
 
                     Mechanism::P256 => mechanisms::P256::agree(self, request),
+                    Mechanism::X25519 => mechanisms::X25519::agree(self, request),
                     _ => Err(Error::MechanismNotAvailable),
 
                 }.map(|reply| Reply::Agree(reply))
@@ -141,6 +142,7 @@ impl<P: Platform> ServiceResources<P> {
                     Mechanism::Ed25519 => mechanisms::Ed25519::derive_key(self, request),
                     Mechanism::P256 => mechanisms::P256::derive_key(self, request),
                     Mechanism::Sha256 => mechanisms::Sha256::derive_key(self, request),
+                    Mechanism::X25519 => mechanisms::X25519::derive_key(self, request),
                     _ => Err(Error::MechanismNotAvailable),
 
                 }.map(|reply| Reply::DeriveKey(reply))
@@ -151,6 +153,7 @@ impl<P: Platform> ServiceResources<P> {
 
                     Mechanism::Ed25519 => mechanisms::Ed25519::deserialize_key(self, request),
                     Mechanism::P256 => mechanisms::P256::deserialize_key(self, request),
+                    Mechanism::X25519 => mechanisms::X25519::deserialize_key(self, request),
                     _ => Err(Error::MechanismNotAvailable),
 
                 }.map(|reply| Reply::DeserializeKey(reply))
@@ -196,6 +199,7 @@ impl<P: Platform> ServiceResources<P> {
                     Mechanism::Ed25519 => mechanisms::Ed25519::exists(self, request),
                     Mechanism::P256 => mechanisms::P256::exists(self, request),
                     Mechanism::Totp => mechanisms::Totp::exists(self, request),
+                    Mechanism::X25519 => mechanisms::X25519::exists(self, request),
                     _ => Err(Error::MechanismNotAvailable),
 
                 }.map(|reply| Reply::Exists(reply))
@@ -207,6 +211,7 @@ impl<P: Platform> ServiceResources<P> {
                     Mechanism::Ed25519 => mechanisms::Ed25519::generate_key(self, request),
                     Mechanism::HmacSha256 => mechanisms::HmacSha256::generate_key(self, request),
                     Mechanism::P256 => mechanisms::P256::generate_key(self, request),
+                    Mechanism::X25519 => mechanisms::X25519::generate_key(self, request),
                     _ => Err(Error::MechanismNotAvailable),
                 }.map(|reply| Reply::GenerateKey(reply))
             },
@@ -661,6 +666,7 @@ impl<P: Platform> ServiceResources<P> {
 
                     Mechanism::Ed25519 => mechanisms::Ed25519::serialize_key(self, request),
                     Mechanism::P256 => mechanisms::P256::serialize_key(self, request),
+                    Mechanism::X25519 => mechanisms::X25519::serialize_key(self, request),
                     _ => Err(Error::MechanismNotAvailable),
 
                 }.map(|reply| Reply::SerializeKey(reply))

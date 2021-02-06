@@ -16,7 +16,7 @@ fn load_public_key<P: Platform>(resources: &mut ServiceResources<P>, key_id: &Un
         .try_into()
         .map_err(|_| Error::InternalError)?;
 
-    let public_key = salty::PublicKey::try_from(&public_bytes).map_err(|_| Error::InternalError)?;
+    let public_key = salty::signature::PublicKey::try_from(&public_bytes).map_err(|_| Error::InternalError)?;
 
     Ok(public_key)
 }
@@ -30,7 +30,7 @@ fn load_keypair<P: Platform>(resources: &mut ServiceResources<P>, key_id: &Uniqu
         .try_into()
         .map_err(|_| Error::InternalError)?;
 
-    let keypair = salty::Keypair::from(&seed);
+    let keypair = salty::signature::Keypair::from(&seed);
     // hprintln!("seed: {:?}", &seed).ok();
     Ok(keypair)
 }
@@ -76,7 +76,7 @@ DeserializeKey<P> for super::Ed25519
         }
 
         let serialized_key: [u8; 32] = request.serialized_key[..32].try_into().unwrap();
-        let public_key = salty::PublicKey::try_from(&serialized_key)
+        let public_key = salty::signature::PublicKey::try_from(&serialized_key)
             .map_err(|_| Error::InvalidSerializedKey)?;
 
         let public_id = resources.store_key(
@@ -100,7 +100,7 @@ GenerateKey<P> for super::Ed25519
         let mut seed = [0u8; 32];
         resources.fill_random_bytes(&mut seed).map_err(|_| Error::EntropyMalfunction)?;
 
-        // let keypair = salty::Keypair::from(&seed);
+        // let keypair = salty::signature::Keypair::from(&seed);
         // #[cfg(all(test, feature = "verbose-tests"))]
         // println!("ed25519 keypair with public key = {:?}", &keypair.public);
 
@@ -217,7 +217,7 @@ Verify<P> for super::Ed25519
 
         let mut signature_array = [0u8; salty::constants::SIGNATURE_SERIALIZED_LENGTH];
         signature_array.copy_from_slice(request.signature.as_ref());
-        let salty_signature = salty::Signature::from(&signature_array);
+        let salty_signature = salty::signature::Signature::from(&signature_array);
 
         Ok(reply::Verify { valid:
             public_key.verify(&request.message, &salty_signature).is_ok()

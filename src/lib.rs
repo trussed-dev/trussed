@@ -1,4 +1,4 @@
-#![cfg_attr(not(test), no_std)]
+// #![cfg_attr(not(test), no_std)]
 // #![no_std]
 
 // prevent a spurious error message: https://github.com/rust-lang/rust/issues/54010

@@ -192,6 +192,7 @@ macro_rules! setup {
             let platform = $platform::new(rng, store, pc_interface);
             let mut trussed: crate::Service<$platform> = crate::service::Service::new(platform);
 
+            unsafe { crate::pipe::TrussedInterchange::reset_claims(); }
             let (test_trussed_requester, test_trussed_responder) = crate::pipe::TrussedInterchange::claim()
                 .expect("could not setup TEST TrussedInterchange");
             let mut test_client_id = littlefs2::path::PathBuf::new();

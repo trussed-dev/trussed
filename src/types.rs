@@ -209,6 +209,8 @@ pub enum KeyKind {
     Ed25519 = 1,
     Entropy32 = 2, // output of TRNG
     P256 = 3,
+    // a shared secret may not be suitable for use as a symmetric key,
+    // and should pass through a key derivation function first.
     SharedSecret32 = 4,  // or 256 (in bits)?
     SymmetricKey16 = 5,
     SymmetricKey32 = 6, // or directly: SharedSecret32 —DeriveKey(HmacSha256)-> SymmetricKey32 —Encrypt(Aes256)-> ...
@@ -216,6 +218,7 @@ pub enum KeyKind {
     Symmetric24 = 8,
     Symmetric20 = 9,
     // ThirtytwoByteBuf,
+    X25519 = 10
 }
 
 impl core::convert::TryFrom<u8> for KeyKind {
@@ -226,8 +229,12 @@ impl core::convert::TryFrom<u8> for KeyKind {
             2 => KeyKind::Entropy32,
             3 => KeyKind::P256,
             4 => KeyKind::SharedSecret32,
-            5 => KeyKind::SymmetricKey32,
-            6 => KeyKind::Symmetric32Nonce12,
+            5 => KeyKind::SymmetricKey16,
+            6 => KeyKind::SymmetricKey32,
+            7 => KeyKind::Symmetric32Nonce12,
+            8 => KeyKind::Symmetric24,
+            9 => KeyKind::Symmetric20,
+            10 => KeyKind::X25519,
             _ => { return Err(crate::error::Error::CborError); }
         })
     }
