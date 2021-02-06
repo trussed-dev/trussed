@@ -409,6 +409,48 @@
 <span id="406">406</span>
 <span id="407">407</span>
 <span id="408">408</span>
+<span id="409">409</span>
+<span id="410">410</span>
+<span id="411">411</span>
+<span id="412">412</span>
+<span id="413">413</span>
+<span id="414">414</span>
+<span id="415">415</span>
+<span id="416">416</span>
+<span id="417">417</span>
+<span id="418">418</span>
+<span id="419">419</span>
+<span id="420">420</span>
+<span id="421">421</span>
+<span id="422">422</span>
+<span id="423">423</span>
+<span id="424">424</span>
+<span id="425">425</span>
+<span id="426">426</span>
+<span id="427">427</span>
+<span id="428">428</span>
+<span id="429">429</span>
+<span id="430">430</span>
+<span id="431">431</span>
+<span id="432">432</span>
+<span id="433">433</span>
+<span id="434">434</span>
+<span id="435">435</span>
+<span id="436">436</span>
+<span id="437">437</span>
+<span id="438">438</span>
+<span id="439">439</span>
+<span id="440">440</span>
+<span id="441">441</span>
+<span id="442">442</span>
+<span id="443">443</span>
+<span id="444">444</span>
+<span id="445">445</span>
+<span id="446">446</span>
+<span id="447">447</span>
+<span id="448">448</span>
+<span id="449">449</span>
+<span id="450">450</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! `store` presents a combined interface to three littlefs2 filesystems:</span>
 <span class="doccomment">//! internal flash, external flash, volatile/RAM.</span>
@@ -585,6 +627,48 @@
     }
 
     <span class="kw">impl</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">store</span> {
+        <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">dead_code</span>)]</span>
+        <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">attach</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+            <span class="self">Self</span>::<span class="ident">init</span>(<span class="bool-val">false</span>)
+        }
+
+        <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">dead_code</span>)]</span>
+        <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">format</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+            <span class="self">Self</span>::<span class="ident">init</span>(<span class="bool-val">true</span>)
+        }
+
+        <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">dead_code</span>)]</span>
+        <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">init</span>(<span class="ident">format</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+            <span class="kw">static</span> <span class="kw-2">mut</span> <span class="ident">INTERNAL_STORAGE</span>: <span class="ident">InternalStorage</span> <span class="op">=</span> <span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">Ifs</span><span class="op">&gt;</span>::<span class="ident">new</span>();
+            <span class="kw">static</span> <span class="kw-2">mut</span> <span class="ident">INTERNAL_FS_ALLOC</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Allocation</span><span class="op">&lt;</span><span class="ident">InternalStorage</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="prelude-val">None</span>;
+            <span class="kw">unsafe</span> { <span class="ident">INTERNAL_FS_ALLOC</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">Filesystem</span>::<span class="ident">allocate</span>()); }
+
+            <span class="kw">static</span> <span class="kw-2">mut</span> <span class="ident">EXTERNAL_STORAGE</span>: <span class="ident">ExternalStorage</span> <span class="op">=</span> <span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">Efs</span><span class="op">&gt;</span>::<span class="ident">new</span>();
+            <span class="kw">static</span> <span class="kw-2">mut</span> <span class="ident">EXTERNAL_FS_ALLOC</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Allocation</span><span class="op">&lt;</span><span class="ident">ExternalStorage</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="prelude-val">None</span>;
+            <span class="kw">unsafe</span> { <span class="ident">EXTERNAL_FS_ALLOC</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">Filesystem</span>::<span class="ident">allocate</span>()); }
+
+            <span class="kw">static</span> <span class="kw-2">mut</span> <span class="ident">VOLATILE_STORAGE</span>: <span class="ident">VolatileStorage</span> <span class="op">=</span> <span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">Vfs</span><span class="op">&gt;</span>::<span class="ident">new</span>();
+            <span class="kw">static</span> <span class="kw-2">mut</span> <span class="ident">VOLATILE_FS_ALLOC</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Allocation</span><span class="op">&lt;</span><span class="ident">VolatileStorage</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="prelude-val">None</span>;
+            <span class="kw">unsafe</span> { <span class="ident">VOLATILE_FS_ALLOC</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">Filesystem</span>::<span class="ident">allocate</span>()); }
+
+            <span class="kw">let</span> <span class="ident">store</span> <span class="op">=</span> <span class="self">Self</span>::<span class="ident">claim</span>().<span class="ident">unwrap</span>();
+
+            <span class="ident">store</span>.<span class="ident">mount</span>(
+                <span class="kw">unsafe</span> { <span class="ident">INTERNAL_FS_ALLOC</span>.<span class="ident">as_mut</span>().<span class="ident">unwrap</span>() },
+                <span class="kw">unsafe</span> { <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">INTERNAL_STORAGE</span> },
+                <span class="kw">unsafe</span> { <span class="ident">EXTERNAL_FS_ALLOC</span>.<span class="ident">as_mut</span>().<span class="ident">unwrap</span>() },
+                <span class="kw">unsafe</span> { <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">EXTERNAL_STORAGE</span> },
+                <span class="kw">unsafe</span> { <span class="ident">VOLATILE_FS_ALLOC</span>.<span class="ident">as_mut</span>().<span class="ident">unwrap</span>() },
+                <span class="kw">unsafe</span> { <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">VOLATILE_STORAGE</span> },
+                <span class="comment">// format all the filesystems</span>
+                <span class="ident">format</span>,
+            ).<span class="ident">unwrap</span>();
+
+            <span class="macro">println</span><span class="macro">!</span>(<span class="string">&quot;formatted store&quot;</span>);
+
+            <span class="ident">store</span>
+        }
+
         <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">claim</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">store</span><span class="op">&gt;</span> {
             <span class="kw">use</span> <span class="ident">core</span>::<span class="ident">sync</span>::<span class="ident">atomic</span>::{<span class="ident">AtomicBool</span>, <span class="ident">Ordering</span>};
             <span class="comment">// use $crate::store::NotSendOrSync;</span>

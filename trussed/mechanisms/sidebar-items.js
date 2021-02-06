@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["Aes256Cbc",""],["Chacha8Poly1305",""],["Ed25519",""],["HmacSha256",""],["P256",""],["P256Prehashed",""],["Sha256",""],["Tdes",""],["Totp",""],["Trng",""]],"trait":[["MechanismTrait",""]]});
+initSidebarItems({"struct":[["Aes256Cbc",""],["Chacha8Poly1305",""],["Ed255",""],["HmacSha256",""],["P256",""],["P256Prehashed",""],["Sha256",""],["Tdes",""],["Totp",""],["Trng",""],["X255",""]],"trait":[["MechanismTrait",""]]});

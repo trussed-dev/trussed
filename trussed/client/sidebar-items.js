@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["ClientError",""]],"struct":[["ClientImplementation",""],["FutureResult",""]],"trait":[["Client","Trussed Client interface that Trussed apps can rely on."]],"type":[["ClientResult",""]]});
+initSidebarItems({"enum":[["ClientError",""]],"struct":[["ClientImplementation",""],["FutureResult",""]],"trait":[["Aes256Cbc",""],["Chacha8Poly1305",""],["Client","Trussed Client interface that Trussed apps can rely on."],["Ed255",""],["HmacSha256",""],["P256",""],["Sha256",""],["Tdes",""],["Totp",""],["X255",""]],"type":[["ClientResult",""]]});

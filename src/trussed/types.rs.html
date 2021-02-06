@@ -551,6 +551,13 @@
 <span id="548">548</span>
 <span id="549">549</span>
 <span id="550">550</span>
+<span id="551">551</span>
+<span id="552">552</span>
+<span id="553">553</span>
+<span id="554">554</span>
+<span id="555">555</span>
+<span id="556">556</span>
+<span id="557">557</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="ident">core</span>::<span class="ident">convert</span>::<span class="ident">TryFrom</span>;
 <span class="kw">use</span> <span class="ident">core</span>::<span class="ident">marker</span>::<span class="ident">PhantomData</span>;
@@ -760,9 +767,11 @@
 <span class="attribute">#[<span class="ident">repr</span>(<span class="ident">u8</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">KeyKind</span> {
     <span class="comment">// Aes256,</span>
-    <span class="ident">Ed25519</span> <span class="op">=</span> <span class="number">1</span>,
+    <span class="ident">Ed255</span> <span class="op">=</span> <span class="number">1</span>,
     <span class="ident">Entropy32</span> <span class="op">=</span> <span class="number">2</span>, <span class="comment">// output of TRNG</span>
     <span class="ident">P256</span> <span class="op">=</span> <span class="number">3</span>,
+    <span class="comment">// a shared secret may not be suitable for use as a symmetric key,</span>
+    <span class="comment">// and should pass through a key derivation function first.</span>
     <span class="ident">SharedSecret32</span> <span class="op">=</span> <span class="number">4</span>,  <span class="comment">// or 256 (in bits)?</span>
     <span class="ident">SymmetricKey16</span> <span class="op">=</span> <span class="number">5</span>,
     <span class="ident">SymmetricKey32</span> <span class="op">=</span> <span class="number">6</span>, <span class="comment">// or directly: SharedSecret32 —DeriveKey(HmacSha256)-&gt; SymmetricKey32 —Encrypt(Aes256)-&gt; ...</span>
@@ -770,18 +779,23 @@
     <span class="ident">Symmetric24</span> <span class="op">=</span> <span class="number">8</span>,
     <span class="ident">Symmetric20</span> <span class="op">=</span> <span class="number">9</span>,
     <span class="comment">// ThirtytwoByteBuf,</span>
+    <span class="ident">X255</span> <span class="op">=</span> <span class="number">10</span>
 }
 
 <span class="kw">impl</span> <span class="ident">core</span>::<span class="ident">convert</span>::<span class="ident">TryFrom</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">KeyKind</span> {
     <span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">error</span>::<span class="ident">Error</span>;
     <span class="kw">fn</span> <span class="ident">try_from</span>(<span class="ident">num</span>: <span class="ident">u8</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="self">Self</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="kw">match</span> <span class="ident">num</span> {
-            <span class="number">1</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">KeyKind</span>::<span class="ident">Ed25519</span>,
+            <span class="number">1</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">KeyKind</span>::<span class="ident">Ed255</span>,
             <span class="number">2</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">KeyKind</span>::<span class="ident">Entropy32</span>,
             <span class="number">3</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">KeyKind</span>::<span class="ident">P256</span>,
             <span class="number">4</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">KeyKind</span>::<span class="ident">SharedSecret32</span>,
-            <span class="number">5</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">KeyKind</span>::<span class="ident">SymmetricKey32</span>,
-            <span class="number">6</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">KeyKind</span>::<span class="ident">Symmetric32Nonce12</span>,
+            <span class="number">5</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">KeyKind</span>::<span class="ident">SymmetricKey16</span>,
+            <span class="number">6</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">KeyKind</span>::<span class="ident">SymmetricKey32</span>,
+            <span class="number">7</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">KeyKind</span>::<span class="ident">Symmetric32Nonce12</span>,
+            <span class="number">8</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">KeyKind</span>::<span class="ident">Symmetric24</span>,
+            <span class="number">9</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">KeyKind</span>::<span class="ident">Symmetric20</span>,
+            <span class="number">10</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">KeyKind</span>::<span class="ident">X255</span>,
             <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> { <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="kw">crate</span>::<span class="ident">error</span>::<span class="ident">Error</span>::<span class="ident">CborError</span>); }
         })
     }
@@ -988,7 +1002,7 @@
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Mechanism</span> {
     <span class="ident">Aes256Cbc</span>,
     <span class="ident">Chacha8Poly1305</span>,
-    <span class="ident">Ed25519</span>,
+    <span class="ident">Ed255</span>,
     <span class="ident">HmacSha256</span>,
     <span class="comment">// P256XSha256,</span>
     <span class="ident">P256</span>,
@@ -998,7 +1012,7 @@
     <span class="ident">Tdes</span>,
     <span class="ident">Totp</span>,
     <span class="ident">Trng</span>,
-    <span class="ident">X25519</span>,
+    <span class="ident">X255</span>,
 }
 
 <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">LongData</span> <span class="op">=</span> <span class="ident">ByteBuf</span><span class="op">&lt;</span><span class="ident">MAX_LONG_DATA_LENGTH</span><span class="op">&gt;</span>;
