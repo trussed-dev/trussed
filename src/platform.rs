@@ -1,4 +1,10 @@
-//! TODO: split this out into a separate `trussed-platform` traits crate.
+//! Trait for platforms to implement that use Trussed.
+//!
+//! Trussed requires access to a cryptographically secure random number generator,
+//! facilities for persistent and volatile storage, and some user interface to ensure
+//! operations do not happen without user consent. Implementing this trait enables this.
+//!
+//! TODO: Currently, `Platform::R` lacks the `CryptoRng` bound.
 
 // pub use rand_core::{CryptoRng, RngCore};
 pub use rand_core::RngCore;

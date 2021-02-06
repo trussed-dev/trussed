@@ -61,7 +61,7 @@ GenerateKey<P> for super::HmacSha256
 
         // let keypair = salty::Keypair::from(&seed);
         // #[cfg(all(test, feature = "verbose-tests"))]
-        // println!("ed25519 keypair with public key = {:?}", &keypair.public);
+        // println!("ed255 keypair with public key = {:?}", &keypair.public);
 
         // store keys
         let key_id = resources.store_key(

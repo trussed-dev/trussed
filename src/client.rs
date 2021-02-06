@@ -1,3 +1,80 @@
+//! # Client interface for applications.
+//!
+//! The API methods (such as `GenerateKey`, `Sign`, `Verify`,...) are implemented by a variety
+//! of mechanisms (such as `Ed255`, `X255`, `Chacha8Poly1305`, `HmacSha256`,...).
+//!
+//! The `ClientImplementation` structure in this module offers only one general `request` method:
+//! ```ignore
+//! pub fn request<'c, T: From<Reply>>(&'c mut self, req: impl Into<Request>)
+//!   -> ClientResult<'c, T, Self>
+//! ```
+//!
+//! For convenience, the `Client` trait expands the API methods, keeping the mechanism general,
+//! e.g.:
+//! ```ignore
+//! // use trussed::Client as _;
+//! fn sign<'c>(&'c mut self,
+//!   mechanism: Mechanism,
+//!   key: ObjectHandle,
+//!   data: &[u8],
+//!   format: SignatureSerialization
+//! ) -> ClientResult<'c, reply::Sign, Self>;
+//! ```
+//!
+//! For further convenience, each mechanism has a corresponding trait of the same name, e.g.,
+//! `Ed255`, which also specializes the mechanism, e.g.
+//! ```ignore
+//! // use trussed::client::Ed255 as _;
+//! fn sign_ed255<'c>(&'c mut self, key: &ObjectHandle, message: &[u8])
+//!   -> ClientResult<'c, reply::Sign, Self>
+//! ```
+//!
+//! Pick your poison :)
+//!
+//! # Details
+//!
+//! The lower-level workings of `ClientResult` are currently a hand-rolled / semi-horrible
+//! pseudo-`Future` implementation; this will likely be replaced by a proper `core::future::Future`
+//! with something like the [direct-executor](https://github.com/dflemstr/direct-executor).
+//!
+//! The lifetimes indicate that the `ClientResult` takes ownership of the unique reference
+//! to the client itself for the length of its own lifetime. That is, once the call to Trussed
+//! completes (success or failure), there is no use for the `ClientResult` anymore, so due to
+//! lexical lifetimes, the `ClientImplementation` can be used again.
+//!
+//! What does always happen is that each client has an Interchange with the service, in which
+//! it places the `api::Request` (a Rust enum), and then uses the `Syscall` implementation, to
+//! trigger processing by the Trussed service.
+//!
+//! In practice, in embedded Syscall is implemented by pending a hardware interrupt for the
+//! service, which runs at a higher interrupt priority. For PC testing, the service itself
+//! has a Syscall implementation ("call thyself"). In both cases, the caller is blocked until
+//! processing completes.
+//!
+//! All the same, to unpack the "result" it is suggested to use the `syscall!` macro, which
+//! returns the `Reply` corresponding to the `Request`. Example:
+//! ```ignore
+//! let secret_key = syscall!(client.generate_x255_secret_key(Internal)).key;
+//! ```
+//!
+//! This `syscall!` can fail (by panicking) in two ways:
+//! - logic error: clients are only allowed to make one syscall to the Trussed service at once,
+//!   then they must wait for a response. By the above, this case cannot happen in practice.
+//! - processing error: some methods are naturally fallible; for example, a public key that is
+//!   to be imported via `Deserialize` may be invalid for the mechanism (such things are always checked).
+//!
+//! In this second case (probably in all cases when programming defensively, e.g. one possible
+//! `trussed::error::Error` is `HostMemory`, which means out of RAM), the `try_syscall!` macro
+//! should be used instead, which does not unwrap the inner Result type.
+//!
+//! In terms of the `Result<FutureResult<'c, T, C>, ClientError>` return type of the `Client::request`
+//! method, the outer `Result` corresponds to the logic error (see `trussed::client::ClientError`)
+//! for possible causes.
+//!
+//! The processing error corresponds to the `Result<From<Reply, trussed::error::Error>>` which is
+//! the `Ready` variant of the `core::task::Poll` struct returns by the `FutureResult`'s `poll` method.
+//! Possible causes are listed in `trussed::error::Error`.
+//!
 use core::marker::PhantomData;
 
 use interchange::Requester;
@@ -20,6 +97,242 @@ pub enum ClientError {
 
 pub type ClientResult<'c, T, C> = core::result::Result<FutureResult<'c, T, C>, ClientError>;
 
+#[cfg(feature = "p256")]
+impl<S: Syscall> P256 for ClientImplementation<S> {}
+
+pub trait P256: Client {
+    fn generate_p256_private_key<'c>(&'c mut self, persistence: StorageLocation)
+        -> ClientResult<'c, reply::GenerateKey, Self>
+    {
+        self.generate_key(Mechanism::P256, StorageAttributes::new().set_persistence(persistence))
+    }
+
+    fn derive_p256_public_key<'c>(&'c mut self, private_key: &ObjectHandle, persistence: StorageLocation)
+        -> ClientResult<'c, reply::DeriveKey, Self>
+    {
+        self.derive_key(Mechanism::P256, private_key.clone(), StorageAttributes::new().set_persistence(persistence))
+    }
+
+    // generally, don't offer multiple versions of a mechanism, if possible.
+    // try using the simplest when given the choice.
+    // hashing is something users can do themselves hopefully :)
+    //
+    // on the other hand: if users need sha256, then if the service runs in secure trustzone
+    // domain, we'll maybe need two copies of the sha2 code
+    fn sign_p256<'c>(&'c mut self, key: &ObjectHandle, message: &[u8], format: SignatureSerialization)
+        -> ClientResult<'c, reply::Sign, Self>
+    {
+        self.sign(Mechanism::P256, key.clone(), message, format)
+    }
+
+    fn verify_p256<'c>(&'c mut self, key: &ObjectHandle, message: &[u8], signature: &[u8])
+        -> ClientResult<'c, reply::Verify, Self>
+    {
+        self.verify(Mechanism::P256, key.clone(), message, signature, SignatureSerialization::Raw)
+    }
+
+    fn agree_p256<'c>(&'c mut self, private_key: &ObjectHandle, public_key: &ObjectHandle, persistence: StorageLocation)
+        -> ClientResult<'c, reply::Agree, Self>
+    {
+        self.agree(
+            Mechanism::P256,
+            private_key.clone(),
+            public_key.clone(),
+            StorageAttributes::new().set_persistence(persistence),
+        )
+    }
+
+}
+
+#[cfg(feature = "ed255")]
+impl<S: Syscall> Ed255 for ClientImplementation<S> {}
+
+pub trait Ed255: Client {
+    fn generate_ed255_private_key<'c>(&'c mut self, persistence: StorageLocation)
+        -> ClientResult<'c, reply::GenerateKey, Self>
+    {
+        self.generate_key(Mechanism::Ed255, StorageAttributes::new().set_persistence(persistence))
+    }
+
+    fn derive_ed255_public_key<'c>(&'c mut self, private_key: &ObjectHandle, persistence: StorageLocation)
+        -> ClientResult<'c, reply::DeriveKey, Self>
+    {
+        self.derive_key(Mechanism::Ed255, private_key.clone(), StorageAttributes::new().set_persistence(persistence))
+    }
+
+    fn sign_ed255<'c>(&'c mut self, key: &ObjectHandle, message: &[u8])
+        -> ClientResult<'c, reply::Sign, Self>
+    {
+        self.sign(Mechanism::Ed255, key.clone(), message, SignatureSerialization::Raw)
+    }
+
+    fn verify_ed255<'c>(&'c mut self, key: &ObjectHandle, message: &[u8], signature: &[u8])
+        -> ClientResult<'c, reply::Verify, Self>
+    {
+        self.verify(Mechanism::Ed255, key.clone(), message, signature, SignatureSerialization::Raw)
+    }
+}
+
+#[cfg(feature = "x255")]
+impl<S: Syscall> X255 for ClientImplementation<S> {}
+
+pub trait X255: Client {
+    fn generate_x255_secret_key<'c>(&'c mut self, persistence: StorageLocation)
+        -> ClientResult<'c, reply::GenerateKey, Self>
+    {
+        self.generate_key(Mechanism::X255, StorageAttributes::new().set_persistence(persistence))
+    }
+
+    fn derive_x255_public_key<'c>(&'c mut self, secret_key: &ObjectHandle, persistence: StorageLocation)
+        -> ClientResult<'c, reply::DeriveKey, Self>
+    {
+        self.derive_key(Mechanism::X255, secret_key.clone(), StorageAttributes::new().set_persistence(persistence))
+    }
+
+    fn agree_x255<'c>(&'c mut self, private_key: &ObjectHandle, public_key: &ObjectHandle, persistence: StorageLocation)
+        -> ClientResult<'c, reply::Agree, Self>
+    {
+        self.agree(
+            Mechanism::X255,
+            private_key.clone(),
+            public_key.clone(),
+            StorageAttributes::new().set_persistence(persistence),
+        )
+    }
+}
+
+#[cfg(feature = "hmac-sha256")]
+impl<S: Syscall> HmacSha256 for ClientImplementation<S> {}
+
+pub trait HmacSha256: Client {
+    fn generate_hmacsha256_key<'c>(&'c mut self, persistence: StorageLocation)
+        -> ClientResult<'c, reply::GenerateKey, Self>
+    {
+        self.generate_key(Mechanism::HmacSha256, StorageAttributes::new().set_persistence(persistence))
+    }
+
+    fn sign_hmacsha256<'c>(&'c mut self, key: &ObjectHandle, message: &[u8])
+        -> ClientResult<'c, reply::Sign, Self>
+    {
+        self.sign(Mechanism::HmacSha256, key.clone(), message, SignatureSerialization::Raw)
+    }
+
+}
+
+#[cfg(feature = "sha256")]
+impl<S: Syscall> Sha256 for ClientImplementation<S> {}
+
+pub trait Sha256: Client {
+    fn hash_sha256<'c>(&'c mut self, message: &[u8])
+        -> ClientResult<'c, reply::Hash, Self>
+    {
+        self.hash(Mechanism::Sha256, Message::try_from_slice(message).map_err(|_| ClientError::DataTooLarge)?)
+    }
+}
+
+#[cfg(feature = "chacha8-poly1305")]
+impl<S: Syscall> Chacha8Poly1305 for ClientImplementation<S> {}
+
+pub trait Chacha8Poly1305: Client {
+    fn decrypt_chacha8poly1305<'c>(&'c mut self, key: &ObjectHandle, message: &[u8], associated_data: &[u8],
+                                       nonce: &[u8], tag: &[u8])
+        -> ClientResult<'c, reply::Decrypt, Self>
+    {
+        self.decrypt(Mechanism::Chacha8Poly1305, key.clone(), message, associated_data, nonce, tag)
+    }
+
+    fn encrypt_chacha8poly1305<'c>(&'c mut self, key: &ObjectHandle, message: &[u8], associated_data: &[u8],
+                                       nonce: Option<&[u8; 12]>)
+        -> ClientResult<'c, reply::Encrypt, Self>
+    {
+        self.encrypt(Mechanism::Chacha8Poly1305, key.clone(), message, associated_data,
+            nonce.and_then(|nonce| ShortData::try_from_slice(nonce).ok()))
+    }
+
+    fn generate_chacha8poly1305_key<'c>(&'c mut self, persistence: StorageLocation)
+        -> ClientResult<'c, reply::GenerateKey, Self>
+    {
+        self.generate_key(Mechanism::Chacha8Poly1305, StorageAttributes::new().set_persistence(persistence))
+    }
+
+    fn unwrap_key_chacha8poly1305<'c>(&'c mut self, wrapping_key: &ObjectHandle, wrapped_key: &Message,
+                       associated_data: &[u8], location: StorageLocation)
+        -> ClientResult<'c, reply::UnwrapKey, Self>
+    {
+        self.unwrap_key(Mechanism::Chacha8Poly1305, wrapping_key.clone(), wrapped_key.clone(), associated_data,
+                         StorageAttributes::new().set_persistence(location))
+    }
+
+    fn wrap_key_chacha8poly1305<'c>(&'c mut self, wrapping_key: &ObjectHandle, key: &ObjectHandle,
+                       associated_data: &[u8])
+        -> ClientResult<'c, reply::WrapKey, Self>
+    {
+        self.wrap_key(Mechanism::Chacha8Poly1305, wrapping_key.clone(), key.clone(), associated_data)
+    }
+}
+
+#[cfg(feature = "aes256-cbc")]
+impl<S: Syscall> Aes256Cbc for ClientImplementation<S> {}
+
+pub trait Aes256Cbc: Client {
+    fn decrypt_aes256cbc<'c>(&'c mut self, key: &ObjectHandle, message: &[u8])
+        -> ClientResult<'c, reply::Decrypt, Self>
+    {
+        self.decrypt(
+            Mechanism::Aes256Cbc, key.clone(), message, &[], &[], &[],
+        )
+    }
+
+    fn wrap_key_aes256cbc<'c>(&'c mut self, wrapping_key: &ObjectHandle, key: &ObjectHandle)
+        -> ClientResult<'c, reply::WrapKey, Self>
+    {
+        self.wrap_key(Mechanism::Aes256Cbc, wrapping_key.clone(), key.clone(), &[])
+    }
+}
+
+#[cfg(feature = "tdes")]
+impl<S: Syscall> Tdes for ClientImplementation<S> {}
+
+pub trait Tdes: Client {
+    fn decrypt_tdes<'c>(&'c mut self, key: &ObjectHandle, message: &[u8])
+        -> ClientResult<'c, reply::Decrypt, Self>
+    {
+        self.decrypt(Mechanism::Tdes, key.clone(), message, &[], &[], &[])
+    }
+
+    fn encrypt_tdes<'c>(&'c mut self, key: &ObjectHandle, message: &[u8])
+        -> ClientResult<'c, reply::Encrypt, Self>
+    {
+        self.encrypt(Mechanism::Tdes, key.clone(), message, &[], None)
+    }
+
+    fn unsafe_inject_tdes_key<'c>(&'c mut self, raw_key: &[u8; 24], persistence: StorageLocation)
+        -> ClientResult<'c, reply::UnsafeInjectKey, Self>
+    {
+        self.unsafe_inject_key(Mechanism::Tdes, raw_key, persistence)
+    }
+}
+
+#[cfg(feature = "totp")]
+impl<S: Syscall> Totp for ClientImplementation<S> {}
+
+pub trait Totp: Client {
+    fn sign_totp<'c>(&'c mut self, key: &ObjectHandle, timestamp: u64)
+        -> ClientResult<'c, reply::Sign, Self>
+    {
+        self.sign(Mechanism::Totp, key.clone(),
+            &timestamp.to_le_bytes().as_ref(),
+            SignatureSerialization::Raw,
+        )
+    }
+
+    fn unsafe_inject_totp_key<'c>(&'c mut self, raw_key: &[u8; 20], persistence: StorageLocation)
+        -> ClientResult<'c, reply::UnsafeInjectKey, Self>
+    {
+        self.unsafe_inject_key(Mechanism::Totp, raw_key, persistence)
+    }
+}
+
 /// Trussed Client interface that Trussed apps can rely on.
 pub trait Client {
     fn poll(&mut self) -> core::task::Poll<core::result::Result<Reply, Error>>;
@@ -34,17 +347,6 @@ pub trait Client {
         attributes: StorageAttributes,
         )
         -> ClientResult<'c, reply::Agree, Self>;
-
-    fn agree_p256<'c>(&'c mut self, private_key: &ObjectHandle, public_key: &ObjectHandle, persistence: StorageLocation)
-        -> ClientResult<'c, reply::Agree, Self>
-    {
-        self.agree(
-            Mechanism::P256,
-            private_key.clone(),
-            public_key.clone(),
-            StorageAttributes::new().set_persistence(persistence),
-        )
-    }
 
     fn derive_key<'c>(&'c mut self, mechanism: Mechanism, base_key: ObjectHandle, attributes: StorageAttributes)
         -> ClientResult<'c, reply::DeriveKey, Self>;
@@ -77,19 +379,11 @@ pub trait Client {
         -> ClientResult<'c, reply::DeserializeKey, Self>;
 
 
-    fn delete<'c>(
-        &'c mut self,
-        // mechanism: Mechanism,
-        key: ObjectHandle,
-    )
+    fn delete<'c>(&'c mut self, key: ObjectHandle)
         -> ClientResult<'c, reply::Delete, Self>;
 
-
-    fn debug_dump_store<'c>(
-        &'c mut self,
-    )
+    fn debug_dump_store<'c>(&'c mut self)
         -> ClientResult<'c, reply::DebugDumpStore, Self>;
-
 
     fn exists<'c>(
         &'c mut self,
@@ -98,10 +392,8 @@ pub trait Client {
     )
         -> ClientResult<'c, reply::Exists, Self>;
 
-
     fn generate_key<'c>(&'c mut self, mechanism: Mechanism, attributes: StorageAttributes)
         -> ClientResult<'c, reply::GenerateKey, Self>;
-
 
     fn read_dir_first<'c>(
         &'c mut self,
@@ -111,12 +403,8 @@ pub trait Client {
     )
         -> ClientResult<'c, reply::ReadDirFirst, Self>;
 
-
-    fn read_dir_next<'c>(
-        &'c mut self,
-    )
+    fn read_dir_next<'c>(&'c mut self)
         -> ClientResult<'c, reply::ReadDirNext, Self>;
-
 
     fn read_dir_files_first<'c>(
         &'c mut self,
@@ -126,31 +414,20 @@ pub trait Client {
     )
         -> ClientResult<'c, reply::ReadDirFilesFirst, Self>;
 
-
-    fn read_dir_files_next<'c>(
-        &'c mut self,
-    )
+    fn read_dir_files_next<'c>(&'c mut self)
         -> ClientResult<'c, reply::ReadDirFilesNext, Self>;
-
 
     fn remove_dir<'c>(&'c mut self, location: StorageLocation, path: PathBuf)
         -> ClientResult<'c, reply::RemoveFile, Self>;
 
-
     fn remove_file<'c>(&'c mut self, location: StorageLocation, path: PathBuf)
         -> ClientResult<'c, reply::RemoveFile, Self>;
-
 
     fn read_file<'c>(&'c mut self, location: StorageLocation, path: PathBuf)
         -> ClientResult<'c, reply::ReadFile, Self>;
 
-
-    fn locate_file<'c>(&'c mut self, location: StorageLocation,
-                           dir: Option<PathBuf>,
-                           filename: PathBuf,
-                           )
+    fn locate_file<'c>(&'c mut self, location: StorageLocation, dir: Option<PathBuf>, filename: PathBuf)
         -> ClientResult<'c, reply::LocateFile, Self>;
-
 
     fn write_file<'c>(
         &'c mut self,
@@ -168,7 +445,6 @@ pub trait Client {
     fn serialize_key<'c>(&'c mut self, mechanism: Mechanism, key: ObjectHandle, format: KeySerialization)
         -> ClientResult<'c, reply::SerializeKey, Self>;
 
-
     fn sign<'c>(
         &'c mut self,
         mechanism: Mechanism,
@@ -177,7 +453,6 @@ pub trait Client {
         format: SignatureSerialization,
     )
         -> ClientResult<'c, reply::Sign, Self>;
-
 
     fn verify<'c>(
         &'c mut self,
@@ -189,213 +464,25 @@ pub trait Client {
     )
         -> ClientResult<'c, reply::Verify, Self>;
 
-
-
     fn random_bytes<'c>(&'c mut self, count: usize)
         -> ClientResult<'c, reply::RandomByteBuf, Self>;
-
 
     fn hash<'c>(&'c mut self, mechanism: Mechanism, message: Message)
         -> ClientResult<'c, reply::Hash, Self>;
 
-
-    fn hash_sha256<'c>(&'c mut self, message: &[u8])
-        -> ClientResult<'c, reply::Hash, Self>
-    {
-        self.hash(Mechanism::Sha256, Message::try_from_slice(message).map_err(|_| ClientError::DataTooLarge)?)
-    }
-
-    fn decrypt_chacha8poly1305<'c>(&'c mut self, key: &ObjectHandle, message: &[u8], associated_data: &[u8],
-                                       nonce: &[u8], tag: &[u8])
-        -> ClientResult<'c, reply::Decrypt, Self>
-    {
-        self.decrypt(Mechanism::Chacha8Poly1305, key.clone(), message, associated_data, nonce, tag)
-    }
-
-    fn decrypt_aes256cbc<'c>(&'c mut self, key: &ObjectHandle, message: &[u8])
-        -> ClientResult<'c, reply::Decrypt, Self>
-    {
-        self.decrypt(
-            Mechanism::Aes256Cbc, key.clone(), message, &[], &[], &[],
-        )
-    }
-
-    fn encrypt_chacha8poly1305<'c>(&'c mut self, key: &ObjectHandle, message: &[u8], associated_data: &[u8],
-                                       nonce: Option<&[u8; 12]>)
-        -> ClientResult<'c, reply::Encrypt, Self>
-    {
-        self.encrypt(Mechanism::Chacha8Poly1305, key.clone(), message, associated_data,
-            nonce.and_then(|nonce| ShortData::try_from_slice(nonce).ok()))
-    }
-
-    fn decrypt_tdes<'c>(&'c mut self, key: &ObjectHandle, message: &[u8])
-        -> ClientResult<'c, reply::Decrypt, Self>
-    {
-        self.decrypt(Mechanism::Tdes, key.clone(), message, &[], &[], &[])
-    }
-
-    fn encrypt_tdes<'c>(&'c mut self, key: &ObjectHandle, message: &[u8])
-        -> ClientResult<'c, reply::Encrypt, Self>
-    {
-        self.encrypt(Mechanism::Tdes, key.clone(), message, &[], None)
-    }
-
-
-    fn unsafe_inject_totp_key<'c>(&'c mut self, raw_key: &[u8; 20], persistence: StorageLocation)
-        -> ClientResult<'c, reply::UnsafeInjectKey, Self>;
-
-
-    fn unsafe_inject_tdes_key<'c>(&'c mut self, raw_key: &[u8; 24], persistence: StorageLocation)
-        -> ClientResult<'c, reply::UnsafeInjectKey, Self>;
-
-    fn generate_chacha8poly1305_key<'c>(&'c mut self, persistence: StorageLocation)
-        -> ClientResult<'c, reply::GenerateKey, Self>
-    {
-        self.generate_key(Mechanism::Chacha8Poly1305, StorageAttributes::new().set_persistence(persistence))
-    }
-
-    fn generate_ed25519_private_key<'c>(&'c mut self, persistence: StorageLocation)
-        -> ClientResult<'c, reply::GenerateKey, Self>
-    {
-        self.generate_key(Mechanism::Ed25519, StorageAttributes::new().set_persistence(persistence))
-    }
-
-    fn generate_hmacsha256_key<'c>(&'c mut self, persistence: StorageLocation)
-        -> ClientResult<'c, reply::GenerateKey, Self>
-    {
-        self.generate_key(Mechanism::HmacSha256, StorageAttributes::new().set_persistence(persistence))
-    }
-
-    fn derive_ed25519_public_key<'c>(&'c mut self, private_key: &ObjectHandle, persistence: StorageLocation)
-        -> ClientResult<'c, reply::DeriveKey, Self>
-    {
-        self.derive_key(Mechanism::Ed25519, private_key.clone(), StorageAttributes::new().set_persistence(persistence))
-    }
-
-    fn generate_x255_secret_key<'c>(&'c mut self, persistence: StorageLocation)
-        -> ClientResult<'c, reply::GenerateKey, Self>
-    {
-        self.generate_key(Mechanism::X255, StorageAttributes::new().set_persistence(persistence))
-    }
-
-    fn derive_x255_public_key<'c>(&'c mut self, secret_key: &ObjectHandle, persistence: StorageLocation)
-        -> ClientResult<'c, reply::DeriveKey, Self>
-    {
-        self.derive_key(Mechanism::X255, secret_key.clone(), StorageAttributes::new().set_persistence(persistence))
-    }
-
-    fn agree_x255<'c>(&'c mut self, private_key: &ObjectHandle, public_key: &ObjectHandle, persistence: StorageLocation)
-        -> ClientResult<'c, reply::Agree, Self>
-    {
-        self.agree(
-            Mechanism::X255,
-            private_key.clone(),
-            public_key.clone(),
-            StorageAttributes::new().set_persistence(persistence),
-        )
-    }
-
-
-    fn generate_p256_private_key<'c>(&'c mut self, persistence: StorageLocation)
-        -> ClientResult<'c, reply::GenerateKey, Self>
-    {
-        self.generate_key(Mechanism::P256, StorageAttributes::new().set_persistence(persistence))
-    }
-
-    fn derive_p256_public_key<'c>(&'c mut self, private_key: &ObjectHandle, persistence: StorageLocation)
-        -> ClientResult<'c, reply::DeriveKey, Self>
-    {
-        self.derive_key(Mechanism::P256, private_key.clone(), StorageAttributes::new().set_persistence(persistence))
-    }
-
-    fn sign_ed25519<'c>(&'c mut self, key: &ObjectHandle, message: &[u8])
-        -> ClientResult<'c, reply::Sign, Self>
-    {
-        self.sign(Mechanism::Ed25519, key.clone(), message, SignatureSerialization::Raw)
-    }
-
-    fn sign_hmacsha256<'c>(&'c mut self, key: &ObjectHandle, message: &[u8])
-        -> ClientResult<'c, reply::Sign, Self>
-    {
-        self.sign(Mechanism::HmacSha256, key.clone(), message, SignatureSerialization::Raw)
-    }
-
-    // generally, don't offer multiple versions of a mechanism, if possible.
-    // try using the simplest when given the choice.
-    // hashing is something users can do themselves hopefully :)
-    //
-    // on the other hand: if users need sha256, then if the service runs in secure trustzone
-    // domain, we'll maybe need two copies of the sha2 code
-    fn sign_p256<'c>(&'c mut self, key: &ObjectHandle, message: &[u8], format: SignatureSerialization)
-        -> ClientResult<'c, reply::Sign, Self>
-    {
-        self.sign(Mechanism::P256, key.clone(), message, format)
-    }
-
-    fn sign_totp<'c>(&'c mut self, key: &ObjectHandle, timestamp: u64)
-        -> ClientResult<'c, reply::Sign, Self>
-    {
-        self.sign(Mechanism::Totp, key.clone(),
-            &timestamp.to_le_bytes().as_ref(),
-            SignatureSerialization::Raw,
-        )
-    }
-
-
-
-          // - mechanism: Mechanism
-          // - wrapping_key: ObjectHandle
-          // - wrapped_key: Message
-          // - associated_data: Message
     fn unwrap_key<'c>(&'c mut self, mechanism: Mechanism, wrapping_key: ObjectHandle, wrapped_key: Message,
                        associated_data: &[u8], attributes: StorageAttributes)
         -> ClientResult<'c, reply::UnwrapKey, Self>;
 
-    fn unwrap_key_chacha8poly1305<'c>(&'c mut self, wrapping_key: &ObjectHandle, wrapped_key: &Message,
-                       associated_data: &[u8], location: StorageLocation)
-        -> ClientResult<'c, reply::UnwrapKey, Self>
-    {
-        self.unwrap_key(Mechanism::Chacha8Poly1305, wrapping_key.clone(), wrapped_key.clone(), associated_data,
-                         StorageAttributes::new().set_persistence(location))
-    }
-
-    fn verify_ed25519<'c>(&'c mut self, key: &ObjectHandle, message: &[u8], signature: &[u8])
-        -> ClientResult<'c, reply::Verify, Self>
-    {
-        self.verify(Mechanism::Ed25519, key.clone(), message, signature, SignatureSerialization::Raw)
-    }
-
-    fn verify_p256<'c>(&'c mut self, key: &ObjectHandle, message: &[u8], signature: &[u8])
-        -> ClientResult<'c, reply::Verify, Self>
-    {
-        self.verify(Mechanism::P256, key.clone(), message, signature, SignatureSerialization::Raw)
-    }
-
-
-          // - mechanism: Mechanism
-          // - wrapping_key: ObjectHandle
-          // - key: ObjectHandle
-          // - associated_data: Message
     fn wrap_key<'c>(&'c mut self, mechanism: Mechanism, wrapping_key: ObjectHandle, key: ObjectHandle,
                        associated_data: &[u8])
         -> ClientResult<'c, reply::WrapKey, Self>;
 
-    fn wrap_key_chacha8poly1305<'c>(&'c mut self, wrapping_key: &ObjectHandle, key: &ObjectHandle,
-                       associated_data: &[u8])
-        -> ClientResult<'c, reply::WrapKey, Self>
-    {
-        self.wrap_key(Mechanism::Chacha8Poly1305, wrapping_key.clone(), key.clone(), associated_data)
-    }
-
-    fn wrap_key_aes256cbc<'c>(&'c mut self, wrapping_key: &ObjectHandle, key: &ObjectHandle)
-        -> ClientResult<'c, reply::WrapKey, Self>
-    {
-        self.wrap_key(Mechanism::Aes256Cbc, wrapping_key.clone(), key.clone(), &[])
-    }
+    fn unsafe_inject_key<'c>(&'c mut self, mechanism: Mechanism, raw_key: &[u8], persistence: StorageLocation)
+        -> ClientResult<'c, reply::UnsafeInjectKey, Self>;
 
     fn confirm_user_present<'c>(&'c mut self, timeout_milliseconds: u32)
         -> ClientResult<'c, reply::RequestUserConsent, Self>;
-
 
     fn reboot<'c>(&'c mut self, to: reboot::To)
         -> ClientResult<'c, reply::Reboot, Self>;
@@ -475,7 +562,7 @@ where
 
 }
 
-pub struct ClientImplementation<S: Syscall> {
+pub struct ClientImplementation<S> {
     // raw: RawClient<Client<S>>,
     syscall: S,
 
@@ -521,8 +608,6 @@ where S: Syscall
         self.interchange.request(request).map_err(drop).unwrap();
         Ok(FutureResult::new(self))
     }
-
-
 }
 
 impl<S> Client for ClientImplementation<S>
@@ -859,31 +944,6 @@ where S: Syscall {
     }
 
 
-    fn unsafe_inject_totp_key<'c>(&'c mut self, raw_key: &[u8; 20], persistence: StorageLocation)
-        -> ClientResult<'c, reply::UnsafeInjectKey, Self>
-    {
-        info_now!("{}B: raw key: {:X?}", raw_key.len(), raw_key);
-        let r = self.request(request::UnsafeInjectKey {
-            mechanism: Mechanism::Totp,
-            raw_key: ShortData::try_from_slice(raw_key).unwrap(),
-            attributes: StorageAttributes::new().set_persistence(persistence),
-        })?;
-        r.client.syscall.syscall();
-        Ok(r)
-    }
-
-    fn unsafe_inject_tdes_key<'c>(&'c mut self, raw_key: &[u8; 24], persistence: StorageLocation)
-        -> ClientResult<'c, reply::UnsafeInjectKey, Self>
-    {
-        let r = self.request(request::UnsafeInjectKey {
-            mechanism: Mechanism::Tdes,
-            raw_key: ShortData::try_from_slice(raw_key).unwrap(),
-            attributes: StorageAttributes::new().set_persistence(persistence),
-        })?;
-        r.client.syscall.syscall();
-        Ok(r)
-    }
-
           // - mechanism: Mechanism
           // - wrapping_key: ObjectHandle
           // - wrapped_key: Message
@@ -912,6 +972,17 @@ where S: Syscall {
         Ok(r)
     }
 
+    fn unsafe_inject_key<'c>(&'c mut self, mechanism: Mechanism, raw_key: &[u8], persistence: StorageLocation)
+        -> ClientResult<'c, reply::UnsafeInjectKey, Self>
+    {
+        let r = self.request(request::UnsafeInjectKey {
+            mechanism,
+            raw_key: ShortData::try_from_slice(raw_key).unwrap(),
+            attributes: StorageAttributes::new().set_persistence(persistence),
+        })?;
+        r.client.syscall.syscall();
+        Ok(r)
+    }
 
     fn confirm_user_present<'c>(&'c mut self, timeout_milliseconds: u32)
         -> ClientResult<'c, reply::RequestUserConsent, Self>

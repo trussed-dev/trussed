@@ -11,7 +11,7 @@ fn load_public_key<P: Platform>(resources: &mut ServiceResources<P>, key_id: &Un
     -> Result<salty::PublicKey, Error> {
 
     let public_bytes: [u8; 32] = resources
-        .load_key(KeyType::Public, Some(KeyKind::Ed25519), &key_id)?
+        .load_key(KeyType::Public, Some(KeyKind::Ed255), &key_id)?
         .value.as_ref()
         .try_into()
         .map_err(|_| Error::InternalError)?;
@@ -25,7 +25,7 @@ fn load_keypair<P: Platform>(resources: &mut ServiceResources<P>, key_id: &Uniqu
     -> Result<salty::Keypair, Error> {
 
     let seed: [u8; 32] = resources
-        .load_key(KeyType::Secret, Some(KeyKind::Ed25519), &key_id)?
+        .load_key(KeyType::Secret, Some(KeyKind::Ed255), &key_id)?
         .value.as_ref()
         .try_into()
         .map_err(|_| Error::InternalError)?;
@@ -35,9 +35,9 @@ fn load_keypair<P: Platform>(resources: &mut ServiceResources<P>, key_id: &Uniqu
     Ok(keypair)
 }
 
-#[cfg(feature = "ed25519")]
+#[cfg(feature = "ed255")]
 impl<P: Platform>
-DeriveKey<P> for super::Ed25519
+DeriveKey<P> for super::Ed255
 {
     fn derive_key(resources: &mut ServiceResources<P>, request: request::DeriveKey)
         -> Result<reply::DeriveKey, Error>
@@ -47,7 +47,7 @@ DeriveKey<P> for super::Ed25519
 
         let public_id = resources.store_key(
             request.attributes.persistence,
-            KeyType::Public, KeyKind::Ed25519,
+            KeyType::Public, KeyKind::Ed255,
             keypair.public.as_bytes())?;
 
         Ok(reply::DeriveKey {
@@ -56,9 +56,9 @@ DeriveKey<P> for super::Ed25519
     }
 }
 
-#[cfg(feature = "ed25519")]
+#[cfg(feature = "ed255")]
 impl<P: Platform>
-DeserializeKey<P> for super::Ed25519
+DeserializeKey<P> for super::Ed255
 {
     fn deserialize_key(resources: &mut ServiceResources<P>, request: request::DeserializeKey)
         -> Result<reply::DeserializeKey, Error>
@@ -81,7 +81,7 @@ DeserializeKey<P> for super::Ed25519
 
         let public_id = resources.store_key(
             request.attributes.persistence,
-            KeyType::Public, KeyKind::Ed25519,
+            KeyType::Public, KeyKind::Ed255,
             public_key.as_bytes())?;
 
         Ok(reply::DeserializeKey {
@@ -90,9 +90,9 @@ DeserializeKey<P> for super::Ed25519
     }
 }
 
-#[cfg(feature = "ed25519")]
+#[cfg(feature = "ed255")]
 impl<P: Platform>
-GenerateKey<P> for super::Ed25519
+GenerateKey<P> for super::Ed255
 {
     fn generate_key(resources: &mut ServiceResources<P>, request: request::GenerateKey)
         -> Result<reply::GenerateKey, Error>
@@ -102,12 +102,12 @@ GenerateKey<P> for super::Ed25519
 
         // let keypair = salty::signature::Keypair::from(&seed);
         // #[cfg(all(test, feature = "verbose-tests"))]
-        // println!("ed25519 keypair with public key = {:?}", &keypair.public);
+        // println!("ed255 keypair with public key = {:?}", &keypair.public);
 
         // store keys
         let key_id = resources.store_key(
             request.attributes.persistence,
-            KeyType::Secret, KeyKind::Ed25519,
+            KeyType::Secret, KeyKind::Ed255,
             &seed)?;
 
         // return handle
@@ -115,9 +115,9 @@ GenerateKey<P> for super::Ed25519
     }
 }
 
-#[cfg(feature = "ed25519")]
+#[cfg(feature = "ed255")]
 impl<P: Platform>
-SerializeKey<P> for super::Ed25519
+SerializeKey<P> for super::Ed255
 {
     fn serialize_key(resources: &mut ServiceResources<P>, request: request::SerializeKey)
         -> Result<reply::SerializeKey, Error>
@@ -128,7 +128,7 @@ SerializeKey<P> for super::Ed25519
         let mut serialized_key = Message::new();
         match request.format {
             KeySerialization::Cose => {
-                let cose_pk =cosey::Ed25519PublicKey {
+                let cose_pk = cosey::Ed25519PublicKey {
                     // x: ByteBuf::try_from_slice(public_key.x_coordinate()).unwrap(),
                     // x: ByteBuf::try_from_slice(&buf).unwrap(),
                     x: ByteBuf::try_from_slice(public_key.as_bytes()).unwrap(),
@@ -148,32 +148,32 @@ SerializeKey<P> for super::Ed25519
     }
 }
 
-#[cfg(feature = "ed25519")]
+#[cfg(feature = "ed255")]
 impl<P: Platform>
-Exists<P> for super::Ed25519
+Exists<P> for super::Ed255
 {
     fn exists(resources: &mut ServiceResources<P>, request: request::Exists)
         -> Result<reply::Exists, Error>
     {
         let key_id = request.key.object_id;
 
-        let exists = resources.exists_key(KeyType::Secret, Some(KeyKind::Ed25519), &key_id);
+        let exists = resources.exists_key(KeyType::Secret, Some(KeyKind::Ed255), &key_id);
         Ok(reply::Exists { exists })
     }
 }
 
-#[cfg(feature = "ed25519")]
+#[cfg(feature = "ed255")]
 impl<P: Platform>
-Sign<P> for super::Ed25519
+Sign<P> for super::Ed255
 {
     fn sign(resources: &mut ServiceResources<P>, request: request::Sign)
         -> Result<reply::Sign, Error>
     {
         // Not so nice, expands to
-        // `trussed::/home/nicolas/projects/solo-bee/components/trussed/src/mechanisms/ed25519.rs:151
-        // Ed25519::Sign`, i.e. VEERY long
-        // debug!("trussed::{}:{} Ed25519::Sign", file!(), line!()).ok();
-        // debug!("trussed: Ed25519::Sign").ok();
+        // `trussed::/home/nicolas/projects/solo-bee/components/trussed/src/mechanisms/ed255.rs:151
+        // Ed255::Sign`, i.e. VEERY long
+        // debug!("trussed::{}:{} Ed255::Sign", file!(), line!()).ok();
+        // debug!("trussed: Ed255::Sign").ok();
         // if let SignatureSerialization::Raw = request.format {
         // } else {
         //     return Err(Error::InvalidSerializationFormat);
@@ -186,7 +186,7 @@ Sign<P> for super::Ed25519
         let native_signature = keypair.sign(&request.message);
         let our_signature = Signature::try_from_slice(&native_signature.to_bytes()).unwrap();
 
-        // hprintln!("Ed25519 signature:").ok();
+        // hprintln!("Ed255 signature:").ok();
         // hprintln!("msg: {:?}", &request.message).ok();
         // hprintln!("pk:  {:?}", &keypair.public.as_bytes()).ok();
         // hprintln!("sig: {:?}", &our_signature).ok();
@@ -196,9 +196,9 @@ Sign<P> for super::Ed25519
     }
 }
 
-#[cfg(feature = "ed25519")]
+#[cfg(feature = "ed255")]
 impl<P: Platform>
-Verify<P> for super::Ed25519
+Verify<P> for super::Ed255
 {
     fn verify(resources: &mut ServiceResources<P>, request: request::Verify)
         -> Result<reply::Verify, Error>
@@ -225,15 +225,15 @@ Verify<P> for super::Ed25519
     }
 }
 
-#[cfg(not(feature = "ed25519"))]
+#[cfg(not(feature = "ed255"))]
 impl<P: Platform>
-DeriveKey<P> for super::Ed25519 {}
-#[cfg(not(feature = "ed25519"))]
+DeriveKey<P> for super::Ed255 {}
+#[cfg(not(feature = "ed255"))]
 impl<P: Platform>
-GenerateKey<P> for super::Ed25519 {}
-#[cfg(not(feature = "ed25519"))]
+GenerateKey<P> for super::Ed255 {}
+#[cfg(not(feature = "ed255"))]
 impl<P: Platform>
-Sign<P> for super::Ed25519 {}
-#[cfg(not(feature = "ed25519"))]
+Sign<P> for super::Ed255 {}
+#[cfg(not(feature = "ed255"))]
 impl<P: Platform>
-Verify<P> for super::Ed25519 {}
+Verify<P> for super::Ed255 {}

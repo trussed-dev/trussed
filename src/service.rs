@@ -139,7 +139,7 @@ impl<P: Platform> ServiceResources<P> {
             Request::DeriveKey(request) => {
                 match request.mechanism {
 
-                    Mechanism::Ed25519 => mechanisms::Ed25519::derive_key(self, request),
+                    Mechanism::Ed255 => mechanisms::Ed255::derive_key(self, request),
                     Mechanism::P256 => mechanisms::P256::derive_key(self, request),
                     Mechanism::Sha256 => mechanisms::Sha256::derive_key(self, request),
                     Mechanism::X255 => mechanisms::X255::derive_key(self, request),
@@ -151,7 +151,7 @@ impl<P: Platform> ServiceResources<P> {
             Request::DeserializeKey(request) => {
                 match request.mechanism {
 
-                    Mechanism::Ed25519 => mechanisms::Ed25519::deserialize_key(self, request),
+                    Mechanism::Ed255 => mechanisms::Ed255::deserialize_key(self, request),
                     Mechanism::P256 => mechanisms::P256::deserialize_key(self, request),
                     Mechanism::X255 => mechanisms::X255::deserialize_key(self, request),
                     _ => Err(Error::MechanismNotAvailable),
@@ -196,7 +196,7 @@ impl<P: Platform> ServiceResources<P> {
             Request::Exists(request) => {
                 match request.mechanism {
 
-                    Mechanism::Ed25519 => mechanisms::Ed25519::exists(self, request),
+                    Mechanism::Ed255 => mechanisms::Ed255::exists(self, request),
                     Mechanism::P256 => mechanisms::P256::exists(self, request),
                     Mechanism::Totp => mechanisms::Totp::exists(self, request),
                     Mechanism::X255 => mechanisms::X255::exists(self, request),
@@ -208,7 +208,7 @@ impl<P: Platform> ServiceResources<P> {
             Request::GenerateKey(request) => {
                 match request.mechanism {
                     Mechanism::Chacha8Poly1305 => mechanisms::Chacha8Poly1305::generate_key(self, request),
-                    Mechanism::Ed25519 => mechanisms::Ed25519::generate_key(self, request),
+                    Mechanism::Ed255 => mechanisms::Ed255::generate_key(self, request),
                     Mechanism::HmacSha256 => mechanisms::HmacSha256::generate_key(self, request),
                     Mechanism::P256 => mechanisms::P256::generate_key(self, request),
                     Mechanism::X255 => mechanisms::X255::generate_key(self, request),
@@ -664,7 +664,7 @@ impl<P: Platform> ServiceResources<P> {
             Request::SerializeKey(request) => {
                 match request.mechanism {
 
-                    Mechanism::Ed25519 => mechanisms::Ed25519::serialize_key(self, request),
+                    Mechanism::Ed255 => mechanisms::Ed255::serialize_key(self, request),
                     Mechanism::P256 => mechanisms::P256::serialize_key(self, request),
                     Mechanism::X255 => mechanisms::X255::serialize_key(self, request),
                     _ => Err(Error::MechanismNotAvailable),
@@ -675,7 +675,7 @@ impl<P: Platform> ServiceResources<P> {
             Request::Sign(request) => {
                 match request.mechanism {
 
-                    Mechanism::Ed25519 => mechanisms::Ed25519::sign(self, request),
+                    Mechanism::Ed255 => mechanisms::Ed255::sign(self, request),
                     Mechanism::HmacSha256 => mechanisms::HmacSha256::sign(self, request),
                     Mechanism::P256 => mechanisms::P256::sign(self, request),
                     Mechanism::P256Prehashed => mechanisms::P256Prehashed::sign(self, request),
@@ -705,7 +705,7 @@ impl<P: Platform> ServiceResources<P> {
             Request::Verify(request) => {
                 match request.mechanism {
 
-                    Mechanism::Ed25519 => mechanisms::Ed25519::verify(self, request),
+                    Mechanism::Ed255 => mechanisms::Ed255::verify(self, request),
                     Mechanism::P256 => mechanisms::P256::verify(self, request),
                     _ => Err(Error::MechanismNotAvailable),
 

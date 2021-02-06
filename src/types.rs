@@ -206,7 +206,7 @@ impl KeyAttributes {
 #[repr(u8)]
 pub enum KeyKind {
     // Aes256,
-    Ed25519 = 1,
+    Ed255 = 1,
     Entropy32 = 2, // output of TRNG
     P256 = 3,
     // a shared secret may not be suitable for use as a symmetric key,
@@ -225,7 +225,7 @@ impl core::convert::TryFrom<u8> for KeyKind {
     type Error = crate::error::Error;
     fn try_from(num: u8) -> Result<Self, Self::Error> {
         Ok(match num {
-            1 => KeyKind::Ed25519,
+            1 => KeyKind::Ed255,
             2 => KeyKind::Entropy32,
             3 => KeyKind::P256,
             4 => KeyKind::SharedSecret32,
@@ -441,7 +441,7 @@ impl StorageAttributes {
 pub enum Mechanism {
     Aes256Cbc,
     Chacha8Poly1305,
-    Ed25519,
+    Ed255,
     HmacSha256,
     // P256XSha256,
     P256,

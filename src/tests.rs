@@ -11,8 +11,6 @@ use littlefs2::const_ram_storage;
 use interchange::Interchange;
 use entropy::shannon_entropy;
 
-
-
 pub struct MockRng(ChaCha20);
 
 impl MockRng {
@@ -154,6 +152,9 @@ macro_rules! create_memory {
 
     }
 }
+
+// TODO: what's going on here? Duplicates code in `tests/client/mod.rs`.
+// Might make sense as a trussed::fixture submodule activated via feature flag.
 macro_rules! setup {
     ($client:ident) => {
         let memory = create_memory!();
@@ -222,39 +223,40 @@ fn dummy() {
 
 #[test]
 #[serial]
-fn sign_ed25519() {
+fn sign_ed255() {
     // let mut client = setup!();
     setup!(client);
 
-    let future = client.generate_ed25519_private_key(StorageLocation::Internal).expect("no client error");
-    println!("submitted gen ed25519");
+    use crate::client::{Ed255, P256};
+    let future = client.generate_ed255_private_key(StorageLocation::Internal).expect("no client error");
+    println!("submitted gen ed255");
     let reply = block!(future);
     let private_key = reply.expect("no errors, never").key;
     println!("got a private key {:?}", &private_key);
 
-    let public_key = block!(client.derive_ed25519_public_key(&private_key, StorageLocation::Volatile).expect("no client error"))
+    let public_key = block!(client.derive_ed255_public_key(&private_key, StorageLocation::Volatile).expect("no client error"))
         .expect("no issues").key;
     println!("got a public key {:?}", &public_key);
 
     assert!(block!(
-            client.derive_ed25519_public_key(&private_key, StorageLocation::Volatile).expect("no client error wot")
+            client.derive_ed255_public_key(&private_key, StorageLocation::Volatile).expect("no client error wot")
     ).is_ok());
     assert!(block!(
             client.derive_p256_public_key(&private_key, StorageLocation::Volatile).expect("no client error wot")
     ).is_err());
 
     let message = [1u8, 2u8, 3u8];
-    let future = client.sign_ed25519(&private_key, &message).expect("no client error post err");
+    let future = client.sign_ed255(&private_key, &message).expect("no client error post err");
     let reply: Result<api::reply::Sign, _> = block!(future);
     let signature = reply.expect("good signature").signature;
     println!("got a signature: {:?}", &signature);
 
-    let future = client.verify_ed25519(&public_key, &message, &signature).expect("no client error");
+    let future = client.verify_ed255(&public_key, &message, &signature).expect("no client error");
     let reply = block!(future);
     let valid = reply.expect("good signature").valid;
     assert!(valid);
 
-    let future = client.verify_ed25519(&public_key, &message, &[1u8,2,3]).expect("no client error");
+    let future = client.verify_ed255(&public_key, &message, &[1u8,2,3]).expect("no client error");
     let reply = block!(future);
     assert_eq!(Err(Error::WrongSignatureLength), reply);
 }
@@ -262,6 +264,7 @@ fn sign_ed25519() {
 #[test]
 #[serial]
 fn sign_p256() {
+    use crate::client::P256 as _;
     // let mut client = setup!();
     setup!(client);
         let private_key = block!(client.generate_p256_private_key(StorageLocation::External).expect("no client error"))
@@ -294,6 +297,7 @@ fn sign_p256() {
 #[serial]
 fn agree_p256() {
     // let mut client = setup!();
+    use crate::client::P256;
     setup!(client);
         let plat_private_key = block!(client.generate_p256_private_key(StorageLocation::Volatile).expect("no client error"))
             .expect("no errors").key;
@@ -341,36 +345,36 @@ fn agree_p256() {
 #[test]
 #[serial]
 fn aead() {
-    // let mut client = setup!();
+    use crate::client::Chacha8Poly1305;
     setup!(client);
-        let secret_key =
-            block!(
-                client
-                .generate_chacha8poly1305_key(StorageLocation::Volatile)
-                .expect("no client error")
-            )
-            .expect("no errors")
-            .key;
+    let secret_key =
+        block!(
+            client
+            .generate_chacha8poly1305_key(StorageLocation::Volatile)
+            .expect("no client error")
+        )
+        .expect("no errors")
+        .key;
 
-        println!("got a key {:?}", &secret_key);
+    println!("got a key {:?}", &secret_key);
 
-        let message = b"test message";
-        let associated_data = b"solokeys.com";
-        let api::reply::Encrypt { ciphertext, nonce, tag } =
-            block!(client.encrypt_chacha8poly1305(&secret_key, message, associated_data, None).expect("no client error"))
-            .expect("no errors");
+    let message = b"test message";
+    let associated_data = b"solokeys.com";
+    let api::reply::Encrypt { ciphertext, nonce, tag } =
+        block!(client.encrypt_chacha8poly1305(&secret_key, message, associated_data, None).expect("no client error"))
+        .expect("no errors");
 
-        let plaintext =
-            block!(client.decrypt_chacha8poly1305(
-                    &secret_key,
-                    &ciphertext,
-                    associated_data,
-                    &nonce,
-                    &tag,
-                 ).map_err(drop).expect("no client error"))
-            .map_err(drop).expect("no errors").plaintext;
+    let plaintext =
+        block!(client.decrypt_chacha8poly1305(
+                &secret_key,
+                &ciphertext,
+                associated_data,
+                &nonce,
+                &tag,
+             ).map_err(drop).expect("no client error"))
+        .map_err(drop).expect("no errors").plaintext;
 
-        assert_eq!(&message[..], plaintext.unwrap().as_ref());
+    assert_eq!(&message[..], plaintext.unwrap().as_ref());
 }
 
 #[test]

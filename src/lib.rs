@@ -27,6 +27,8 @@ pub mod types;
 pub use api::Reply;
 pub use error::Error;
 pub use client::{Client, ClientImplementation};
+/// The trait that platforms need to implement to use Trussed.
+pub use platform::Platform;
 pub use service::Service;
 
 pub use cbor_smol::{cbor_serialize, cbor_serialize_bytes, cbor_serialize_bytebuf, cbor_deserialize};
