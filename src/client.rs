@@ -113,6 +113,18 @@ pub trait P256: Client {
         self.derive_key(Mechanism::P256, private_key.clone(), StorageAttributes::new().set_persistence(persistence))
     }
 
+    fn deserialize_p256_key<'c>(&'c mut self, serialized_key: &[u8], format: KeySerialization, attributes: StorageAttributes)
+        -> ClientResult<'c, reply::DeserializeKey, Self>
+    {
+        self.deserialize_key(Mechanism::P256, serialized_key, format, attributes)
+    }
+
+    fn serialize_p256_key<'c>(&'c mut self, key: &ObjectHandle, format: KeySerialization)
+        -> ClientResult<'c, reply::SerializeKey, Self>
+    {
+        self.serialize_key(Mechanism::P256, key.clone(), format)
+    }
+
     // generally, don't offer multiple versions of a mechanism, if possible.
     // try using the simplest when given the choice.
     // hashing is something users can do themselves hopefully :)
@@ -158,6 +170,18 @@ pub trait Ed255: Client {
         -> ClientResult<'c, reply::DeriveKey, Self>
     {
         self.derive_key(Mechanism::Ed255, private_key.clone(), StorageAttributes::new().set_persistence(persistence))
+    }
+
+    fn deserialize_ed255_key<'c>(&'c mut self, serialized_key: &[u8], format: KeySerialization, attributes: StorageAttributes)
+        -> ClientResult<'c, reply::DeserializeKey, Self>
+    {
+        self.deserialize_key(Mechanism::Ed255, serialized_key, format, attributes)
+    }
+
+    fn serialize_ed255_key<'c>(&'c mut self, key: &ObjectHandle, format: KeySerialization)
+        -> ClientResult<'c, reply::SerializeKey, Self>
+    {
+        self.serialize_key(Mechanism::Ed255, key.clone(), format)
     }
 
     fn sign_ed255<'c>(&'c mut self, key: &ObjectHandle, message: &[u8])
@@ -374,7 +398,7 @@ pub trait Client {
           // - serialized_key: Message
           // - format: KeySerialization
           // - attributes: StorageAttributes
-    fn deserialize_key<'c>(&'c mut self, mechanism: Mechanism, serialized_key: Message,
+    fn deserialize_key<'c>(&'c mut self, mechanism: Mechanism, serialized_key: &[u8],
                                format: KeySerialization, attributes: StorageAttributes)
         -> ClientResult<'c, reply::DeserializeKey, Self>;
 
@@ -711,10 +735,11 @@ where S: Syscall {
           // - serialized_key: Message
           // - format: KeySerialization
           // - attributes: StorageAttributes
-    fn deserialize_key<'c>(&'c mut self, mechanism: Mechanism, serialized_key: Message,
+    fn deserialize_key<'c>(&'c mut self, mechanism: Mechanism, serialized_key: &[u8],
                                format: KeySerialization, attributes: StorageAttributes)
         -> ClientResult<'c, reply::DeserializeKey, Self>
     {
+        let serialized_key = Message::try_from_slice(serialized_key).map_err(|_| ClientError::DataTooLarge)?;
         let r = self.request(request::DeserializeKey {
             mechanism, serialized_key, format, attributes
         } )?;
