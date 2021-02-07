@@ -174,38 +174,57 @@ macro_rules! store { (
 
     impl $store {
         #[allow(dead_code)]
-        pub fn attach() -> Self {
-            Self::init(false)
+        pub fn attach(internal_fs: $Ifs, external_fs: $Efs, volatile_fs: $Vfs) -> Self {
+            Self::init(internal_fs, external_fs, volatile_fs, false)
         }
 
         #[allow(dead_code)]
-        pub fn format() -> Self {
-            Self::init(true)
+        pub fn format(internal_fs: $Ifs, external_fs: $Efs, volatile_fs: $Vfs) -> Self {
+            Self::init(internal_fs, external_fs, volatile_fs, true)
         }
 
         #[allow(dead_code)]
-        pub fn init(format: bool) -> Self {
-            static mut INTERNAL_STORAGE: InternalStorage = <$Ifs>::new();
-            static mut INTERNAL_FS_ALLOC: Option<Allocation<InternalStorage>> = None;
+        pub fn init(
+            internal_fs: $Ifs,
+            external_fs: $Efs,
+            volatile_fs: $Vfs,
+            format: bool,
+        )
+            -> Self
+        {
+            // static mut INTERNAL_STORAGE: $Ifs = i_ctor();//<$Ifs>::new();
+
+            static mut INTERNAL_STORAGE: Option<$Ifs> = None;
+            unsafe { INTERNAL_STORAGE = Some(internal_fs); }
+            static mut INTERNAL_FS_ALLOC: Option<Allocation<$Ifs>> = None;
             unsafe { INTERNAL_FS_ALLOC = Some(Filesystem::allocate()); }
 
-            static mut EXTERNAL_STORAGE: ExternalStorage = <$Efs>::new();
-            static mut EXTERNAL_FS_ALLOC: Option<Allocation<ExternalStorage>> = None;
+            // static mut EXTERNAL_STORAGE: $Efs = <$Efs>::new();
+            static mut EXTERNAL_STORAGE: Option<$Efs> = None;
+            unsafe { EXTERNAL_STORAGE = Some(external_fs); }
+            static mut EXTERNAL_FS_ALLOC: Option<Allocation<$Efs>> = None;
             unsafe { EXTERNAL_FS_ALLOC = Some(Filesystem::allocate()); }
 
-            static mut VOLATILE_STORAGE: VolatileStorage = <$Vfs>::new();
-            static mut VOLATILE_FS_ALLOC: Option<Allocation<VolatileStorage>> = None;
+            // static mut VOLATILE_STORAGE: $Vfs = <$Vfs>::new();
+            static mut VOLATILE_STORAGE: Option<$Vfs> = None;
+            unsafe { VOLATILE_STORAGE = Some(volatile_fs); }
+            static mut VOLATILE_FS_ALLOC: Option<Allocation<$Vfs>> = None;
             unsafe { VOLATILE_FS_ALLOC = Some(Filesystem::allocate()); }
 
             let store = Self::claim().unwrap();
 
             store.mount(
                 unsafe { INTERNAL_FS_ALLOC.as_mut().unwrap() },
-                unsafe { &mut INTERNAL_STORAGE },
+                // unsafe { &mut INTERNAL_STORAGE },
+                unsafe { INTERNAL_STORAGE.as_mut().unwrap() },
+
                 unsafe { EXTERNAL_FS_ALLOC.as_mut().unwrap() },
-                unsafe { &mut EXTERNAL_STORAGE },
+                // unsafe { &mut EXTERNAL_STORAGE },
+                unsafe { EXTERNAL_STORAGE.as_mut().unwrap() },
+
                 unsafe { VOLATILE_FS_ALLOC.as_mut().unwrap() },
-                unsafe { &mut VOLATILE_STORAGE },
+                // unsafe { &mut VOLATILE_STORAGE },
+                unsafe { VOLATILE_STORAGE.as_mut().unwrap() },
                 // format all the filesystems
                 format,
             ).unwrap();

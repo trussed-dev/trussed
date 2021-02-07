@@ -21,7 +21,11 @@ pub fn get<R>(
 pub fn init_platform() -> Platform {
     use rand_core::SeedableRng as _;
     let rng = chacha20::ChaCha8Rng::from_rng(rand_core::OsRng).unwrap();
-    let store = store::Store::format();
+    let store = store::Store::format(
+        store::InternalStorage::new(),
+        store::ExternalStorage::new(),
+        store::VolatileStorage::new(),
+        );
     let ui = ui::UserInterface::new();
 
     let platform = Platform::new(rng, store, ui);
