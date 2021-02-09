@@ -67,17 +67,14 @@
 //! - Alternative: subdirectory <==> RP hash, everything else in flat files
 //! - In any case need to "list dirs excluding . and .." or similar
 
-use core::convert::TryFrom;
-
 #[allow(unused_imports)]
 #[cfg(feature = "semihosting")]
 use cortex_m_semihosting::hprintln;
 use littlefs2::path::Path;
-use serde_indexed::{DeserializeIndexed, SerializeIndexed};
-
-use crate::config::*;
 use crate::error::Error;
 use crate::types::*;
+
+pub mod keystore;
 
 // pub type FileContents = ByteBuf<MAX_FILE_SIZE>;
 
@@ -444,25 +441,6 @@ pub fn create_directories<'s, S: LfsStorage>(
         }
     }
     Ok(())
-}
-
-pub type KeyMaterial = ByteBuf<MAX_SERIALIZED_KEY_LENGTH>;
-
-#[derive(Clone,Debug,Eq,PartialEq,SerializeIndexed,DeserializeIndexed)]
-pub struct SerializedKey {
-   // r#type: KeyType,
-   pub kind: KeyKind,
-   pub value: ByteBuf<MAX_SERIALIZED_KEY_LENGTH>,
-}
-
-impl<'a> TryFrom<(KeyKind, &'a [u8])> for SerializedKey {
-    type Error = Error;
-    fn try_from(from: (KeyKind, &'a [u8])) -> Result<Self, Error> {
-        Ok(SerializedKey {
-            kind: from.0,
-            value: ByteBuf::try_from_slice(from.1).map_err(|_| Error::InternalError)?,
-        })
-    }
 }
 
 /// Reads contents from path in location of store.

@@ -4,7 +4,6 @@ use crate::api::*;
 // use crate::config::*;
 use crate::error::Error;
 use crate::service::*;
-use crate::store::*;
 use crate::types::*;
 
 // TODO: The non-detached versions seem better.
@@ -12,10 +11,9 @@ use crate::types::*;
 // Maybe start a discussion on the `aead` crate's GitHub about usability concerns...
 
 #[cfg(feature = "chacha8-poly1305")]
-impl<P: Platform>
-GenerateKey<P> for super::Chacha8Poly1305 {
+impl GenerateKey for super::Chacha8Poly1305 {
 
-    fn generate_key(resources: &mut ServiceResources<P>, request: request::GenerateKey)
+    fn generate_key(keystore: &mut impl Keystore, request: request::GenerateKey)
         -> Result<reply::GenerateKey, Error>
     {
         // 32 bytes entropy
@@ -23,11 +21,10 @@ GenerateKey<P> for super::Chacha8Poly1305 {
         let mut serialized = [0u8; 44];
 
         let entropy = &mut serialized[..32];
-        resources.fill_random_bytes(entropy)
-            .map_err(|_| Error::EntropyMalfunction)?;
+        keystore.drbg().fill_bytes(entropy);
 
         // store keys
-        let key_id = resources.store_key(
+        let key_id = keystore.store_key(
             request.attributes.persistence,
             KeyType::Secret,
             KeyKind::Symmetric32Nonce12,
@@ -53,16 +50,15 @@ fn increment_nonce(nonce: &mut [u8]) -> Result<(), Error> {
 }
 
 #[cfg(feature = "chacha8-poly1305")]
-impl<P: Platform>
-Decrypt<P> for super::Chacha8Poly1305
+impl Decrypt for super::Chacha8Poly1305
 {
-    fn decrypt(resources: &mut ServiceResources<P>, request: request::Decrypt)
+    fn decrypt(keystore: &mut impl Keystore, request: request::Decrypt)
         -> Result<reply::Decrypt, Error>
     {
         use chacha20poly1305::ChaCha8Poly1305;
         use chacha20poly1305::aead::{Aead, NewAead};
 
-        let serialized_value = resources
+        let serialized_value = keystore
             .load_key(KeyType::Secret, Some(KeyKind::Symmetric32Nonce12), &request.key.object_id)?
             .value;
         let serialized = serialized_value.as_ref();
@@ -96,10 +92,9 @@ Decrypt<P> for super::Chacha8Poly1305
 }
 
 #[cfg(feature = "chacha8-poly1305")]
-impl<P: Platform>
-Encrypt<P> for super::Chacha8Poly1305
+impl Encrypt for super::Chacha8Poly1305
 {
-    fn encrypt(resources: &mut ServiceResources<P>, request: request::Encrypt)
+    fn encrypt(keystore: &mut impl Keystore, request: request::Encrypt)
         -> Result<reply::Encrypt, Error>
     {
         use chacha20poly1305::ChaCha8Poly1305;
@@ -110,7 +105,7 @@ Encrypt<P> for super::Chacha8Poly1305
         let key_type = KeyType::Secret;
         let key_kind = KeyKind::Symmetric32Nonce12;
         let key_id = &request.key.object_id;
-        let mut serialized_value = resources
+        let mut serialized_value = keystore
             .load_key(key_type, Some(key_kind), key_id)?
             .value;
         let serialized = serialized_value.as_mut();
@@ -118,10 +113,10 @@ Encrypt<P> for super::Chacha8Poly1305
         assert!(serialized.len() == 44);
 
         // no panic by above early return
-        let location = resources.key_id_location(key_type, key_id).unwrap();
+        let location = keystore.location(key_type, key_id).unwrap();
 
         // let key_id = request.key.object_id;
-        // let path = resources.prepare_path_for_key(KeyType::Secret, &key_id)?;
+        // let path = keystore.prepare_path_for_key(KeyType::Secret, &key_id)?;
         // let mut serialized = [0u8; 44];
         // debug!("loading encryption key: {:?}", &path);
 
@@ -132,7 +127,7 @@ Encrypt<P> for super::Chacha8Poly1305
         }
         // increment_nonce(&mut serialized[32..])?;
 
-        resources.overwrite_key(location, key_type, key_kind, key_id, &serialized)?;
+        keystore.overwrite_key(location, key_type, key_kind, key_id, &serialized)?;
 
         let (symmetric_key, generated_nonce) = serialized.split_at_mut(32);
 
@@ -162,16 +157,15 @@ Encrypt<P> for super::Chacha8Poly1305
 }
 
 #[cfg(feature = "chacha8-poly1305")]
-impl<P: Platform>
-WrapKey<P> for super::Chacha8Poly1305
+impl WrapKey for super::Chacha8Poly1305
 {
-    fn wrap_key(resources: &mut ServiceResources<P>, request: request::WrapKey)
+    fn wrap_key(keystore: &mut impl Keystore, request: request::WrapKey)
         -> Result<reply::WrapKey, Error>
     {
         debug!("trussed: Chacha8Poly1305::WrapKey");
 
         // TODO: need to check both secret and private keys
-        let serialized_key = resources
+        let serialized_key = keystore
             .load_key(KeyType::Secret, None, &request.key.object_id)?;
 
         let mut message = Message::new();
@@ -184,7 +178,7 @@ WrapKey<P> for super::Chacha8Poly1305
             associated_data: ShortData::new(),
             nonce: None,
         };
-        let encryption_reply = <super::Chacha8Poly1305>::encrypt(resources, encryption_request)?;
+        let encryption_reply = <super::Chacha8Poly1305>::encrypt(keystore, encryption_request)?;
 
         let mut wrapped_key = Message::new();
         crate::cbor_serialize_bytes(&encryption_reply, &mut wrapped_key).map_err(|_| Error::CborError)?;
@@ -194,10 +188,9 @@ WrapKey<P> for super::Chacha8Poly1305
 }
 
 #[cfg(feature = "chacha8-poly1305")]
-impl<P: Platform>
-UnwrapKey<P> for super::Chacha8Poly1305
+impl UnwrapKey for super::Chacha8Poly1305
 {
-    fn unwrap_key(resources: &mut ServiceResources<P>, request: request::UnwrapKey)
+    fn unwrap_key(keystore: &mut impl Keystore, request: request::UnwrapKey)
         -> Result<reply::UnwrapKey, Error>
     {
         let reply::Encrypt { ciphertext, nonce, tag } = crate::cbor_deserialize(
@@ -213,18 +206,18 @@ UnwrapKey<P> for super::Chacha8Poly1305
         };
 
         let serialized_key = if let Some(serialized_key) =
-            <super::Chacha8Poly1305>::decrypt(resources, decryption_request)?.plaintext {
+            <super::Chacha8Poly1305>::decrypt(keystore, decryption_request)?.plaintext {
             serialized_key
         } else {
             return Ok(reply::UnwrapKey { key: None } );
         };
 
         // TODO: probably change this to returning Option<key> too
-        let SerializedKey { kind, value } = crate::cbor_deserialize(&serialized_key).map_err(|_| Error::CborError)?;
+        let SerializedKey { kind, value, .. } = crate::cbor_deserialize(&serialized_key).map_err(|_| Error::CborError)?;
         let kind = KeyKind::try_from(kind).map_err(|_| Error::InternalError)?;
 
         // TODO: need to check both secret and private keys
-        let key_id = resources.store_key(
+        let key_id = keystore.store_key(
             request.attributes.persistence,
             // using for signing keys... we need to know
             KeyType::Secret,
@@ -273,7 +266,7 @@ UnwrapKey<P> for super::Chacha8Poly1305
 // impl<P: Platform>
 // Decrypt<P> for super::Chacha8Poly1305
 // {
-//     fn decrypt(resources: &mut ServiceResources<P>, request: request::Decrypt)
+//     fn decrypt(keystore: &mut impl Keystore, request: request::Decrypt)
 //         -> Result<reply::Decrypt, Error>
 //     {
 // 		use block_modes::{BlockMode, Cbc};
@@ -286,8 +279,8 @@ UnwrapKey<P> for super::Chacha8Poly1305
 
 //         let key_id = request.key.object_id;
 //         let mut symmetric_key = [0u8; 32];
-//         let path = resources.prepare_path_for_key(KeyType::Secret, &key_id)?;
-//         resources.load_serialized_key(&path, KeyKind::SymmetricKey32, &mut symmetric_key)?;
+//         let path = keystore.prepare_path_for_key(KeyType::Secret, &key_id)?;
+//         keystore.load_serialized_key(&path, KeyKind::SymmetricKey32, &mut symmetric_key)?;
 
 //         let zero_iv = [0u8; 32];
 // 		let cipher = Aes256Cbc::new_var(&symmetric_key, &zero_iv).unwrap();
@@ -319,16 +312,16 @@ UnwrapKey<P> for super::Chacha8Poly1305
 // impl<P: Platform>
 // Encrypt<P> for super::Chacha8Poly1305
 // {
-//     fn encrypt(resources: &mut ServiceResources<P>, request: request::Encrypt)
+//     fn encrypt(keystore: &mut impl Keystore, request: request::Encrypt)
 //         -> Result<reply::Encrypt, Error>
 //     {
 //         use chacha20poly1305::ChaCha8Poly1305;
 
 //         let key_id = request.key.object_id;
-//         let path = resources.prepare_path_for_key(KeyType::Secret, &key_id)?;
+//         let path = keystore.prepare_path_for_key(KeyType::Secret, &key_id)?;
 
 //         let mut symmetric_key = [0u8; 32];
-//         resources.load_serialized_key(&path, KeyKind::SymmetricKey32, &mut symmetric_key)?;
+//         keystore.load_serialized_key(&path, KeyKind::SymmetricKey32, &mut symmetric_key)?;
 
 //         // keep in state?
 //         let aead = ChaCha8Poly1305::new(GenericArray::clone_from_slice(&symmetric_key)?);

@@ -12,21 +12,20 @@ use block_cipher_trait::BlockCipher;
 use crate::api::*;
 use crate::error::Error;
 use crate::service::*;
-use crate::platform::Platform;
 use crate::types::*;
 
 #[cfg(feature = "tdes")]
-impl<P: Platform> Encrypt<P> for super::Tdes
+impl Encrypt for super::Tdes
 {
     /// Encrypts a single block. Let's hope we don't have to support ECB!!
-    fn encrypt(resources: &mut ServiceResources<P>, request: request::Encrypt)
+    fn encrypt(keystore: &mut impl Keystore, request: request::Encrypt)
         -> Result<reply::Encrypt, Error>
     {
         if request.message.len() != 8 { return Err(Error::WrongMessageLength); }
 
         let key_id = request.key.object_id;
 
-        let symmetric_key: [u8; 24] = resources
+        let symmetric_key: [u8; 24] = keystore
             .load_key(KeyType::Secret, None, &key_id)?
             .value.as_ref().try_into()
             .map_err(|_| Error::InternalError)?;
@@ -41,17 +40,17 @@ impl<P: Platform> Encrypt<P> for super::Tdes
 }
 
 #[cfg(feature = "tdes")]
-impl<P: Platform> Decrypt<P> for super::Tdes
+impl Decrypt for super::Tdes
 {
     /// Decrypts a single block. Let's hope we don't have to support ECB!!
-    fn decrypt(resources: &mut ServiceResources<P>, request: request::Decrypt)
+    fn decrypt(keystore: &mut impl Keystore, request: request::Decrypt)
         -> Result<reply::Decrypt, Error>
     {
         if request.message.len() != 8 { return Err(Error::WrongMessageLength); }
 
         let key_id = request.key.object_id;
 
-        let symmetric_key: [u8; 24] = resources
+        let symmetric_key: [u8; 24] = keystore
             .load_key(KeyType::Secret, None, &key_id)?
             .value.as_ref().try_into()
             .map_err(|_| Error::InternalError)?;
@@ -66,10 +65,9 @@ impl<P: Platform> Decrypt<P> for super::Tdes
 }
 
 #[cfg(feature = "tdes")]
-impl<P: Platform>
-UnsafeInjectKey<P> for super::Tdes
+impl UnsafeInjectKey for super::Tdes
 {
-    fn unsafe_inject_key(resources: &mut ServiceResources<P>, request: request::UnsafeInjectKey)
+    fn unsafe_inject_key(keystore: &mut impl Keystore, request: request::UnsafeInjectKey)
         -> Result<reply::UnsafeInjectKey, Error>
     {
         if request.raw_key.len() != 24 {
@@ -77,7 +75,7 @@ UnsafeInjectKey<P> for super::Tdes
         }
 
         // store it
-        let key_id = resources.store_key(
+        let key_id = keystore.store_key(
             request.attributes.persistence,
             KeyType::Secret,
             KeyKind::Symmetric24,

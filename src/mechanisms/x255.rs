@@ -9,10 +9,10 @@ use crate::types::*;
 
 use salty::agreement;
 
-fn load_public_key<P: Platform>(resources: &mut ServiceResources<P>, key_id: &UniqueId)
+fn load_public_key(keystore: &mut impl Keystore, key_id: &UniqueId)
     -> Result<agreement::PublicKey, Error> {
 
-    let public_bytes: [u8; 32] = resources
+    let public_bytes: [u8; 32] = keystore
         .load_key(KeyType::Public, Some(KeyKind::X255), &key_id)?
         .value.as_ref()
         .try_into()
@@ -23,10 +23,10 @@ fn load_public_key<P: Platform>(resources: &mut ServiceResources<P>, key_id: &Un
     Ok(public_key)
 }
 
-fn load_secret_key<P: Platform>(resources: &mut ServiceResources<P>, key_id: &UniqueId)
+fn load_secret_key(keystore: &mut impl Keystore, key_id: &UniqueId)
     -> Result<agreement::SecretKey, Error> {
 
-    let seed: [u8; 32] = resources
+    let seed: [u8; 32] = keystore
         .load_key(KeyType::Secret, Some(KeyKind::X255), &key_id)?
         .value.as_ref()
         .try_into()
@@ -37,25 +37,24 @@ fn load_secret_key<P: Platform>(resources: &mut ServiceResources<P>, key_id: &Un
 }
 
 #[cfg(feature = "x255")]
-impl<P: Platform>
-Agree<P> for super::X255
+impl Agree for super::X255
 {
-    fn agree(resources: &mut ServiceResources<P>, request: request::Agree)
+    fn agree(keystore: &mut impl Keystore, request: request::Agree)
         -> Result<reply::Agree, Error>
     {
         let secret_key = load_secret_key(
-            resources,
+            keystore,
             &request.private_key.object_id,
         )?;
 
         let public_key = load_public_key(
-            resources,
+            keystore,
             &request.public_key.object_id,
         )?;
 
         let shared_secret = secret_key.agree(&public_key).to_bytes();
 
-        let key_id = resources.store_key(
+        let key_id = keystore.store_key(
             request.attributes.persistence,
             KeyType::Secret, KeyKind::SharedSecret32,
             &shared_secret)?;
@@ -66,19 +65,17 @@ Agree<P> for super::X255
 }
 
 #[cfg(feature = "x255")]
-impl<P: Platform>
-GenerateKey<P> for super::X255
+impl GenerateKey for super::X255
 {
-    fn generate_key(resources: &mut ServiceResources<P>, request: request::GenerateKey)
+    fn generate_key(keystore: &mut impl Keystore, request: request::GenerateKey)
         -> Result<reply::GenerateKey, Error>
     {
         // generate keypair
         let mut seed = [0u8; 32];
-        resources.fill_random_bytes(&mut seed)
-            .map_err(|_| Error::EntropyMalfunction)?;
+        keystore.drbg().fill_bytes(&mut seed);
 
         // store keys
-        let key_id = resources.store_key(
+        let key_id = keystore.store_key(
             request.attributes.persistence,
             KeyType::Secret, KeyKind::X255,
             &seed)?;
@@ -89,32 +86,30 @@ GenerateKey<P> for super::X255
 }
 
 #[cfg(feature = "x255")]
-impl<P: Platform>
-Exists<P> for super::X255
+impl Exists for super::X255
 {
-    fn exists(resources: &mut ServiceResources<P>, request: request::Exists)
+    fn exists(keystore: &mut impl Keystore, request: request::Exists)
         -> Result<reply::Exists, Error>
     {
         let key_id = request.key.object_id;
-        let exists = resources.exists_key(KeyType::Secret, Some(KeyKind::X255), &key_id);
+        let exists = keystore.exists_key(KeyType::Secret, Some(KeyKind::X255), &key_id);
         Ok(reply::Exists { exists })
     }
 }
 
 #[cfg(feature = "x255")]
-impl<P: Platform>
-DeriveKey<P> for super::X255
+impl DeriveKey for super::X255
 {
-    fn derive_key(resources: &mut ServiceResources<P>, request: request::DeriveKey)
+    fn derive_key(keystore: &mut impl Keystore, request: request::DeriveKey)
         -> Result<reply::DeriveKey, Error>
     {
         let base_id = request.base_key.object_id;
 
-        let secret_key = load_secret_key(resources, &base_id)?;
+        let secret_key = load_secret_key(keystore, &base_id)?;
         let public_key = agreement::PublicKey::from(&secret_key);
 
         let public_key_bytes = public_key.to_bytes();
-        let public_id = resources.store_key(
+        let public_id = keystore.store_key(
             request.attributes.persistence,
             KeyType::Public, KeyKind::X255,
             &public_key_bytes)?;
@@ -126,14 +121,13 @@ DeriveKey<P> for super::X255
 }
 
 #[cfg(feature = "x255")]
-impl<P: Platform>
-SerializeKey<P> for super::X255
+impl SerializeKey for super::X255
 {
-    fn serialize_key(resources: &mut ServiceResources<P>, request: request::SerializeKey)
+    fn serialize_key(keystore: &mut impl Keystore, request: request::SerializeKey)
         -> Result<reply::SerializeKey, Error>
     {
         let key_id = request.key.object_id;
-        let public_key = load_public_key(resources, &key_id)?;
+        let public_key = load_public_key(keystore, &key_id)?;
 
         let mut serialized_key = Message::new();
         match request.format {
@@ -149,10 +143,9 @@ SerializeKey<P> for super::X255
 }
 
 #[cfg(feature = "x255")]
-impl<P: Platform>
-DeserializeKey<P> for super::X255
+impl DeserializeKey for super::X255
 {
-    fn deserialize_key(resources: &mut ServiceResources<P>, request: request::DeserializeKey)
+    fn deserialize_key(keystore: &mut impl Keystore, request: request::DeserializeKey)
         -> Result<reply::DeserializeKey, Error>
     {
           // - mechanism: Mechanism
@@ -171,7 +164,7 @@ DeserializeKey<P> for super::X255
         let public_key = salty::agreement::PublicKey::try_from(serialized_key)
             .map_err(|_| Error::InvalidSerializedKey)?;
 
-        let public_id = resources.store_key(
+        let public_id = keystore.store_key(
             request.attributes.persistence,
             KeyType::Public, KeyKind::X255,
             &public_key.to_bytes())?;
@@ -184,20 +177,14 @@ DeserializeKey<P> for super::X255
 
 
 #[cfg(not(feature = "x255"))]
-impl<P: Platform>
-Agree<P> for super::X255 {}
+impl Agree for super::X255 {}
 #[cfg(not(feature = "x255"))]
-impl<P: Platform>
-GenerateKey<P> for super::X255 {}
+impl GenerateKey for super::X255 {}
 #[cfg(not(feature = "x255"))]
-impl<P: Platform>
-Exists<P> for super::X255 {}
+impl Exists for super::X255 {}
 #[cfg(not(feature = "x255"))]
-impl<P: Platform>
-Derive<P> for super::X255 {}
+impl Derive for super::X255 {}
 #[cfg(not(feature = "x255"))]
-impl<P: Platform>
-SerializeKey<P> for super::X255 {}
+impl SerializeKey for super::X255 {}
 #[cfg(not(feature = "x255"))]
-impl<P: Platform>
-DeserializeKey<P> for super::X255 {}
+impl DeserializeKey for super::X255 {}

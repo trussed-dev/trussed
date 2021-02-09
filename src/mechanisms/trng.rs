@@ -5,19 +5,17 @@ use crate::service::*;
 use crate::types::*;
 
 #[cfg(feature = "trng")]
-impl<P: Platform>
-GenerateKey<P> for super::Trng
+impl GenerateKey for super::Trng
 {
-    fn generate_key(resources: &mut ServiceResources<P>, request: request::GenerateKey)
+    fn generate_key(keystore: &mut impl Keystore, request: request::GenerateKey)
         -> Result<reply::GenerateKey, Error>
     {
         // generate entropy
         let mut entropy = [0u8; 32];
-        resources.platform.rng().try_fill_bytes(&mut entropy)
-            .map_err(|_| Error::EntropyMalfunction)?;
+        keystore.drbg().fill_bytes(&mut entropy);
 
         // store keys
-        let key_id = resources.store_key(
+        let key_id = keystore.store_key(
             request.attributes.persistence,
             KeyType::Secret,
             KeyKind::Entropy32,

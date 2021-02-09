@@ -7,10 +7,10 @@ use crate::service::*;
 use crate::types::*;
 
 #[cfg(feature = "aes256-cbc")]
-impl<P: Platform> Encrypt<P> for super::Aes256Cbc
+impl Encrypt for super::Aes256Cbc
 {
     /// Encrypts the input *with zero IV*
-    fn encrypt(resources: &mut ServiceResources<P>, request: request::Encrypt)
+    fn encrypt(keystore: &mut impl Keystore, request: request::Encrypt)
         -> Result<reply::Encrypt, Error>
     {
 		use block_modes::{BlockMode, Cbc};
@@ -23,10 +23,10 @@ impl<P: Platform> Encrypt<P> for super::Aes256Cbc
 
         let key_id = request.key.object_id;
         // let mut symmetric_key = [0u8; 32];
-        // let path = resources.key_path(KeyType::Secret, &key_id);
-        // resources.load_key(&path, KeyKind::SymmetricKey32, &mut symmetric_key)?;
+        // let path = keystore.key_path(KeyType::Secret, &key_id);
+        // keystore.load_key(&path, KeyKind::SymmetricKey32, &mut symmetric_key)?;
 
-        let symmetric_key: [u8; 32] = resources
+        let symmetric_key: [u8; 32] = keystore
             .load_key(KeyType::Secret, None, &key_id)?
             .value.as_ref().try_into()
             .map_err(|_| Error::InternalError)?;
@@ -53,18 +53,18 @@ impl<P: Platform> Encrypt<P> for super::Aes256Cbc
 }
 
 #[cfg(feature = "aes256-cbc")]
-impl<P: Platform> WrapKey<P> for super::Aes256Cbc
+impl WrapKey for super::Aes256Cbc
 {
-    fn wrap_key(resources: &mut ServiceResources<P>, request: request::WrapKey)
+    fn wrap_key(keystore: &mut impl Keystore, request: request::WrapKey)
         -> Result<reply::WrapKey, Error>
     {
         // TODO: need to check both secret and private keys
-        // let path = resources.key_path(KeyType::Secret, &request.key.object_id)?;
-        // let (serialized_key, _location) = resources.load_key_unchecked(&path)?;
+        // let path = keystore.key_path(KeyType::Secret, &request.key.object_id)?;
+        // let (serialized_key, _location) = keystore.load_key_unchecked(&path)?;
 
         // let message: Message = serialized_key.value.try_to_byte_buf().map_err(|_| Error::InternalError)?;
 
-        let message: Message = crate::ByteBuf::try_from_slice(resources
+        let message: Message = crate::ByteBuf::try_from_slice(keystore
             .load_key(KeyType::Secret, None, &request.key.object_id)?
             .value.as_ref()).map_err(|_| Error::InternalError)?;
 
@@ -75,7 +75,7 @@ impl<P: Platform> WrapKey<P> for super::Aes256Cbc
             associated_data: ShortData::new(),
             nonce: None,
         };
-        let encryption_reply = <super::Aes256Cbc>::encrypt(resources, encryption_request)?;
+        let encryption_reply = <super::Aes256Cbc>::encrypt(keystore, encryption_request)?;
 
         let wrapped_key = encryption_reply.ciphertext;
 
@@ -84,9 +84,9 @@ impl<P: Platform> WrapKey<P> for super::Aes256Cbc
 }
 
 #[cfg(feature = "aes256-cbc")]
-impl<P: Platform> Decrypt<P> for super::Aes256Cbc
+impl Decrypt for super::Aes256Cbc
 {
-    fn decrypt(resources: &mut ServiceResources<P>, request: request::Decrypt)
+    fn decrypt(keystore: &mut impl Keystore, request: request::Decrypt)
         -> Result<reply::Decrypt, Error>
     {
 		use block_modes::{BlockMode, Cbc};
@@ -98,7 +98,7 @@ impl<P: Platform> Decrypt<P> for super::Aes256Cbc
         type Aes256Cbc = Cbc<Aes256, ZeroPadding>;
 
         let key_id = request.key.object_id;
-        let symmetric_key: [u8; 32] = resources
+        let symmetric_key: [u8; 32] = keystore
             .load_key(KeyType::Secret, None, &key_id)?
             .value.as_ref()
             .try_into()
@@ -128,7 +128,7 @@ impl<P: Platform> Decrypt<P> for super::Aes256Cbc
 }
 
 #[cfg(not(feature = "aes256-cbc"))]
-impl<P: Platform> Decrypt<P> for super::Aes256Cbc {}
+impl Decrypt for super::Aes256Cbc {}
 
 #[cfg(not(feature = "aes256-cbc"))]
-impl<P: Platform> Encrypt<P> for super::Aes256Cbc {}
+impl Encrypt for super::Aes256Cbc {}

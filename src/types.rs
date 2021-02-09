@@ -21,6 +21,7 @@ pub use littlefs2::{
 use serde::{Deserialize, Serialize};
 
 use crate::config::*;
+use crate::key::KeyType;
 
 pub use crate::platform::Platform;
 pub use crate::client::FutureResult;
@@ -198,53 +199,6 @@ impl KeyAttributes {
     pub fn new() -> Self {
         Default::default()
     }
-}
-
-// TODO: How to store/check?
-// TODO: Fix variant indices to keep storage stable!!
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-#[repr(u8)]
-pub enum KeyKind {
-    // Aes256,
-    Ed255 = 1,
-    Entropy32 = 2, // output of TRNG
-    P256 = 3,
-    // a shared secret may not be suitable for use as a symmetric key,
-    // and should pass through a key derivation function first.
-    SharedSecret32 = 4,  // or 256 (in bits)?
-    SymmetricKey16 = 5,
-    SymmetricKey32 = 6, // or directly: SharedSecret32 —DeriveKey(HmacSha256)-> SymmetricKey32 —Encrypt(Aes256)-> ...
-    Symmetric32Nonce12 = 7,
-    Symmetric24 = 8,
-    Symmetric20 = 9,
-    // ThirtytwoByteBuf,
-    X255 = 10
-}
-
-impl core::convert::TryFrom<u8> for KeyKind {
-    type Error = crate::error::Error;
-    fn try_from(num: u8) -> Result<Self, Self::Error> {
-        Ok(match num {
-            1 => KeyKind::Ed255,
-            2 => KeyKind::Entropy32,
-            3 => KeyKind::P256,
-            4 => KeyKind::SharedSecret32,
-            5 => KeyKind::SymmetricKey16,
-            6 => KeyKind::SymmetricKey32,
-            7 => KeyKind::Symmetric32Nonce12,
-            8 => KeyKind::Symmetric24,
-            9 => KeyKind::Symmetric20,
-            10 => KeyKind::X255,
-            _ => { return Err(crate::error::Error::CborError); }
-        })
-    }
-}
-
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub enum KeyType {
-    // Private,
-    Public,
-    Secret,
 }
 
 /// PhantomData to make it unconstructable

@@ -6,10 +6,25 @@ use crate::error::Error;
 use crate::service::*;
 use crate::types::*;
 
-fn load_public_key<P: Platform>(resources: &mut ServiceResources<P>, key_id: &UniqueId)
+fn load_keypair(keystore: &mut impl Keystore, key_id: &UniqueId)
+    -> Result<nisty::Keypair, Error> {
+
+    // info_now!("loading keypair");
+    let seed: [u8; 32] = keystore
+        .load_key(KeyType::Secret, Some(KeyKind::P256), &key_id)?
+        .value.as_ref()
+        .try_into()
+        .map_err(|_| Error::InternalError)?;
+
+    let keypair = nisty::Keypair::generate_patiently(&seed);
+    // info_now!("seed: {:?}", &seed);
+    Ok(keypair)
+}
+
+fn load_public_key(keystore: &mut impl Keystore, key_id: &UniqueId)
     -> Result<nisty::PublicKey, Error> {
 
-    let public_bytes = resources
+    let public_bytes = keystore
         .load_key(KeyType::Public, Some(KeyKind::P256), &key_id)?
         .value;
 
@@ -31,26 +46,25 @@ fn load_public_key<P: Platform>(resources: &mut ServiceResources<P>, key_id: &Un
 
 
 #[cfg(feature = "p256")]
-impl<P: Platform>
-Agree<P> for super::P256
+impl Agree for super::P256
 {
-    fn agree(resources: &mut ServiceResources<P>, request: request::Agree)
+    fn agree(keystore: &mut impl Keystore, request: request::Agree)
         -> Result<reply::Agree, Error>
     {
         let private_id = request.private_key.object_id;
         let public_id = request.public_key.object_id;
 
-        let keypair = load_keypair(resources, &private_id)?;
-        let public_key = load_public_key(resources, &public_id)?;
+        let keypair = load_keypair(keystore, &private_id)?;
+        let public_key = load_public_key(keystore, &public_id)?;
 
         // THIS IS THE CORE
         info_now!("free/total RAMFS blocks: {:?}/{:?}",
-            resources.platform.store().vfs().available_blocks().unwrap(),
-            resources.platform.store().vfs().total_blocks(),
+            keystore.platform.store().vfs().available_blocks().unwrap(),
+            keystore.platform.store().vfs().total_blocks(),
         );
         let shared_secret = keypair.secret.agree(&public_key).map_err(|_| Error::InternalError)?.to_bytes();
 
-        let key_id = resources.store_key(
+        let key_id = keystore.store_key(
             request.attributes.persistence,
             KeyType::Secret, KeyKind::SharedSecret32,
             &shared_secret)?;
@@ -61,17 +75,16 @@ Agree<P> for super::P256
 }
 
 #[cfg(feature = "p256")]
-impl<P: Platform>
-DeriveKey<P> for super::P256
+impl DeriveKey for super::P256
 {
-    fn derive_key(resources: &mut ServiceResources<P>, request: request::DeriveKey)
+    fn derive_key(keystore: &mut impl Keystore, request: request::DeriveKey)
         -> Result<reply::DeriveKey, Error>
     {
         let base_id = request.base_key.object_id;
 
-        let keypair = load_keypair(resources, &base_id)?;
+        let keypair = load_keypair(keystore, &base_id)?;
 
-        let public_id = resources.store_key(
+        let public_id = keystore.store_key(
             request.attributes.persistence,
             KeyType::Public, KeyKind::P256,
             &keypair.public.to_bytes())?;
@@ -83,10 +96,9 @@ DeriveKey<P> for super::P256
 }
 
 #[cfg(feature = "p256")]
-impl<P: Platform>
-DeserializeKey<P> for super::P256
+impl DeserializeKey for super::P256
 {
-    fn deserialize_key(resources: &mut ServiceResources<P>, request: request::DeserializeKey)
+    fn deserialize_key(keystore: &mut impl Keystore, request: request::DeserializeKey)
         -> Result<reply::DeserializeKey, Error>
     {
           // - mechanism: Mechanism
@@ -146,7 +158,7 @@ DeserializeKey<P> for super::P256
             _ => { return Err(Error::InternalError); }
         };
 
-        let public_id = resources.store_key(
+        let public_id = keystore.store_key(
             request.attributes.persistence,
             KeyType::Public, KeyKind::P256,
             public_key.as_bytes())?;
@@ -159,23 +171,21 @@ DeserializeKey<P> for super::P256
 }
 
 #[cfg(feature = "p256")]
-impl<P: Platform>
-GenerateKey<P> for super::P256
+impl GenerateKey for super::P256
 {
-    fn generate_key(resources: &mut ServiceResources<P>, request: request::GenerateKey)
+    fn generate_key(keystore: &mut impl Keystore, request: request::GenerateKey)
         -> Result<reply::GenerateKey, Error>
     {
         // generate keypair
         let mut seed = [0u8; 32];
-        resources.fill_random_bytes(&mut seed)
-            .map_err(|_| Error::EntropyMalfunction)?;
+        keystore.drbg().fill_bytes(&mut seed);
 
         // let keypair = nisty::Keypair::generate_patiently(&seed);
         // #[cfg(all(test, feature = "verbose-tests"))]
         // println!("p256 keypair with public key = {:?}", &keypair.public);
 
         // store keys
-        let key_id = resources.store_key(
+        let key_id = keystore.store_key(
             request.attributes.persistence,
             KeyType::Secret, KeyKind::P256,
             &seed)?;
@@ -186,16 +196,15 @@ GenerateKey<P> for super::P256
 }
 
 #[cfg(feature = "p256")]
-impl<P: Platform>
-SerializeKey<P> for super::P256
+impl SerializeKey for super::P256
 {
-    fn serialize_key(resources: &mut ServiceResources<P>, request: request::SerializeKey)
+    fn serialize_key(keystore: &mut impl Keystore, request: request::SerializeKey)
         -> Result<reply::SerializeKey, Error>
     {
 
         let key_id = request.key.object_id;
 
-        let public_key = load_public_key(resources, &key_id)?;
+        let public_key = load_public_key(keystore, &key_id)?;
 
         let mut serialized_key = Message::new();
         match request.format {
@@ -231,43 +240,26 @@ SerializeKey<P> for super::P256
 }
 
 #[cfg(feature = "p256")]
-impl<P: Platform>
-Exists<P> for super::P256
+impl Exists for super::P256
 {
-    fn exists(resources: &mut ServiceResources<P>, request: request::Exists)
+    fn exists(keystore: &mut impl Keystore, request: request::Exists)
         -> Result<reply::Exists, Error>
     {
         let key_id = request.key.object_id;
-        let exists = resources.exists_key(KeyType::Secret, Some(KeyKind::P256), &key_id);
+        let exists = keystore.exists_key(KeyType::Secret, Some(KeyKind::P256), &key_id);
         Ok(reply::Exists { exists })
     }
 }
 
-fn load_keypair<P: Platform>(resources: &mut ServiceResources<P>, key_id: &UniqueId)
-    -> Result<nisty::Keypair, Error> {
-
-    // info_now!("loading keypair");
-    let seed: [u8; 32] = resources
-        .load_key(KeyType::Secret, Some(KeyKind::P256), &key_id)?
-        .value.as_ref()
-        .try_into()
-        .map_err(|_| Error::InternalError)?;
-
-    let keypair = nisty::Keypair::generate_patiently(&seed);
-    // info_now!("seed: {:?}", &seed);
-    Ok(keypair)
-}
-
 #[cfg(feature = "p256")]
-impl<P: Platform>
-Sign<P> for super::P256
+impl Sign for super::P256
 {
-    fn sign(resources: &mut ServiceResources<P>, request: request::Sign)
+    fn sign(keystore: &mut impl Keystore, request: request::Sign)
         -> Result<reply::Sign, Error>
     {
         let key_id = request.key.object_id;
 
-        let seed: [u8; 32] = resources
+        let seed: [u8; 32] = keystore
             .load_key(KeyType::Secret, Some(KeyKind::P256), &key_id)?
             .value.as_ref()
             .try_into()
@@ -297,15 +289,14 @@ Sign<P> for super::P256
 }
 
 #[cfg(feature = "p256")]
-impl<P: Platform>
-Sign<P> for super::P256Prehashed
+impl Sign for super::P256Prehashed
 {
-    fn sign(resources: &mut ServiceResources<P>, request: request::Sign)
+    fn sign(keystore: &mut impl Keystore, request: request::Sign)
         -> Result<reply::Sign, Error>
     {
         let key_id = request.key.object_id;
 
-        let keypair = load_keypair(resources, &key_id).map_err(|e| {
+        let keypair = load_keypair(keystore, &key_id).map_err(|e| {
             info_now!("load keypair error {:?}", e);
             e
         })?;
@@ -344,15 +335,14 @@ Sign<P> for super::P256Prehashed
 }
 
 #[cfg(feature = "p256")]
-impl<P: Platform>
-Verify<P> for super::P256
+impl Verify for super::P256
 {
-    fn verify(resources: &mut ServiceResources<P>, request: request::Verify)
+    fn verify(keystore: &mut impl Keystore, request: request::Verify)
         -> Result<reply::Verify, Error>
     {
         let key_id = request.key.object_id;
 
-        let public_key = load_public_key(resources, &key_id)?;
+        let public_key = load_public_key(keystore, &key_id)?;
 
         if request.signature.len() != nisty::SIGNATURE_LENGTH {
             return Err(Error::WrongSignatureLength);
@@ -373,17 +363,12 @@ Verify<P> for super::P256
 }
 
 #[cfg(not(feature = "p256"))]
-impl<P: Platform>
-Agree<P> for super::P256 {}
+impl Agree for super::P256 {}
 #[cfg(not(feature = "p256"))]
-impl<P: Platform>
-DeriveKey<P> for super::P256 {}
+impl DeriveKey for super::P256 {}
 #[cfg(not(feature = "p256"))]
-impl<P: Platform>
-GenerateKey<P> for super::P256 {}
+impl GenerateKey for super::P256 {}
 #[cfg(not(feature = "p256"))]
-impl<P: Platform>
-Sign<P> for super::P256 {}
+impl Sign for super::P256 {}
 #[cfg(not(feature = "p256"))]
-impl<P: Platform>
-Verify<P> for super::P256 {}
+impl Verify for super::P256 {}

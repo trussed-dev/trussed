@@ -3,6 +3,8 @@
 // use crate::api::Reply;
 // use crate::client::RawClient;
 
+pub type Result<T> = core::result::Result<T, Error>;
+
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 #[repr(u32)]
 pub enum Error {

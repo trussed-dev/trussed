@@ -3,7 +3,6 @@ use core::convert::TryInto;
 use crate::api::*;
 use crate::error::Error;
 use crate::service::*;
-use crate::platform::Platform;
 use crate::types::*;
 
 // code copied from https://github.com/avacariu/rust-oath
@@ -44,10 +43,9 @@ fn dynamic_truncation(hs: &[u8]) -> u64 {
 }
 
 #[cfg(feature = "totp")]
-impl<P: Platform>
-UnsafeInjectKey<P> for super::Totp
+impl UnsafeInjectKey for super::Totp
 {
-    fn unsafe_inject_key(resources: &mut ServiceResources<P>, request: request::UnsafeInjectKey)
+    fn unsafe_inject_key(keystore: &mut impl Keystore, request: request::UnsafeInjectKey)
         -> Result<reply::UnsafeInjectKey, Error>
     {
         // in usual format, secret is a 32B Base32 encoding of 20B actual secret bytes
@@ -57,7 +55,7 @@ UnsafeInjectKey<P> for super::Totp
         }
 
         // store it
-        let key_id = resources.store_key(
+        let key_id = keystore.store_key(
             request.attributes.persistence,
             KeyType::Secret,
             KeyKind::Symmetric20,
@@ -69,15 +67,14 @@ UnsafeInjectKey<P> for super::Totp
 }
 
 #[cfg(feature = "totp")]
-impl<P: Platform>
-Sign<P> for super::Totp
+impl Sign for super::Totp
 {
-    fn sign(resources: &mut ServiceResources<P>, request: request::Sign)
+    fn sign(keystore: &mut impl Keystore, request: request::Sign)
         -> Result<reply::Sign, Error>
     {
         let key_id = request.key.object_id;
 
-        let secret: [u8; 20] = resources
+        let secret: [u8; 20] = keystore
             .load_key(KeyType::Secret, None, &key_id)?
             .value.as_ref().try_into()
             .map_err(|_| Error::InternalError)?;
@@ -95,15 +92,14 @@ Sign<P> for super::Totp
 }
 
 #[cfg(feature = "totp")]
-impl<P: Platform>
-Exists<P> for super::Totp
+impl Exists for super::Totp
 {
-    fn exists(resources: &mut ServiceResources<P>, request: request::Exists)
+    fn exists(keystore: &mut impl Keystore, request: request::Exists)
         -> Result<reply::Exists, Error>
     {
         let key_id = request.key.object_id;
 
-        let exists = resources.exists_key(KeyType::Secret, Some(KeyKind::Symmetric20), &key_id);
+        let exists = keystore.exists_key(KeyType::Secret, Some(KeyKind::Symmetric20), &key_id);
         Ok(reply::Exists { exists })
     }
 }
