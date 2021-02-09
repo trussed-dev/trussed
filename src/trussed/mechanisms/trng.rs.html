@@ -28,8 +28,6 @@
 <span id="25">25</span>
 <span id="26">26</span>
 <span id="27">27</span>
-<span id="28">28</span>
-<span id="29">29</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">api</span>::<span class="kw-2">*</span>;
 <span class="comment">// use crate::config::*;</span>
@@ -38,19 +36,17 @@
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">types</span>::<span class="kw-2">*</span>;
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;trng&quot;</span>)]</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">Platform</span><span class="op">&gt;</span>
-<span class="ident">GenerateKey</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="kw">super</span>::<span class="ident">Trng</span>
+<span class="kw">impl</span> <span class="ident">GenerateKey</span> <span class="kw">for</span> <span class="kw">super</span>::<span class="ident">Trng</span>
 {
-    <span class="kw">fn</span> <span class="ident">generate_key</span>(<span class="ident">resources</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ServiceResources</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>, <span class="ident">request</span>: <span class="ident">request</span>::<span class="ident">GenerateKey</span>)
+    <span class="kw">fn</span> <span class="ident">generate_key</span>(<span class="ident">keystore</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">impl</span> <span class="ident">Keystore</span>, <span class="ident">request</span>: <span class="ident">request</span>::<span class="ident">GenerateKey</span>)
         <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">reply</span>::<span class="ident">GenerateKey</span>, <span class="ident">Error</span><span class="op">&gt;</span>
     {
         <span class="comment">// generate entropy</span>
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">entropy</span> <span class="op">=</span> [<span class="number">0u8</span>; <span class="number">32</span>];
-        <span class="ident">resources</span>.<span class="ident">platform</span>.<span class="ident">rng</span>().<span class="ident">try_fill_bytes</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">entropy</span>)
-            .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error</span>::<span class="ident">EntropyMalfunction</span>)<span class="question-mark">?</span>;
+        <span class="ident">keystore</span>.<span class="ident">drbg</span>().<span class="ident">fill_bytes</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">entropy</span>);
 
         <span class="comment">// store keys</span>
-        <span class="kw">let</span> <span class="ident">key_id</span> <span class="op">=</span> <span class="ident">resources</span>.<span class="ident">store_key</span>(
+        <span class="kw">let</span> <span class="ident">key_id</span> <span class="op">=</span> <span class="ident">keystore</span>.<span class="ident">store_key</span>(
             <span class="ident">request</span>.<span class="ident">attributes</span>.<span class="ident">persistence</span>,
             <span class="ident">KeyType</span>::<span class="ident">Secret</span>,
             <span class="ident">KeyKind</span>::<span class="ident">Entropy32</span>,

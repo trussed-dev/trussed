@@ -512,52 +512,6 @@
 <span id="509">509</span>
 <span id="510">510</span>
 <span id="511">511</span>
-<span id="512">512</span>
-<span id="513">513</span>
-<span id="514">514</span>
-<span id="515">515</span>
-<span id="516">516</span>
-<span id="517">517</span>
-<span id="518">518</span>
-<span id="519">519</span>
-<span id="520">520</span>
-<span id="521">521</span>
-<span id="522">522</span>
-<span id="523">523</span>
-<span id="524">524</span>
-<span id="525">525</span>
-<span id="526">526</span>
-<span id="527">527</span>
-<span id="528">528</span>
-<span id="529">529</span>
-<span id="530">530</span>
-<span id="531">531</span>
-<span id="532">532</span>
-<span id="533">533</span>
-<span id="534">534</span>
-<span id="535">535</span>
-<span id="536">536</span>
-<span id="537">537</span>
-<span id="538">538</span>
-<span id="539">539</span>
-<span id="540">540</span>
-<span id="541">541</span>
-<span id="542">542</span>
-<span id="543">543</span>
-<span id="544">544</span>
-<span id="545">545</span>
-<span id="546">546</span>
-<span id="547">547</span>
-<span id="548">548</span>
-<span id="549">549</span>
-<span id="550">550</span>
-<span id="551">551</span>
-<span id="552">552</span>
-<span id="553">553</span>
-<span id="554">554</span>
-<span id="555">555</span>
-<span id="556">556</span>
-<span id="557">557</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="ident">core</span>::<span class="ident">convert</span>::<span class="ident">TryFrom</span>;
 <span class="kw">use</span> <span class="ident">core</span>::<span class="ident">marker</span>::<span class="ident">PhantomData</span>;
@@ -582,6 +536,7 @@
 <span class="kw">use</span> <span class="ident">serde</span>::{<span class="ident">Deserialize</span>, <span class="ident">Serialize</span>};
 
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">config</span>::<span class="kw-2">*</span>;
+<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">key</span>::<span class="ident">KeyType</span>;
 
 <span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">platform</span>::<span class="ident">Platform</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">client</span>::<span class="ident">FutureResult</span>;
@@ -759,53 +714,6 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="ident">Default</span>::<span class="ident">default</span>()
     }
-}
-
-<span class="comment">// TODO: How to store/check?</span>
-<span class="comment">// TODO: Fix variant indices to keep storage stable!!</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">Eq</span>, <span class="ident">PartialEq</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
-<span class="attribute">#[<span class="ident">repr</span>(<span class="ident">u8</span>)]</span>
-<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">KeyKind</span> {
-    <span class="comment">// Aes256,</span>
-    <span class="ident">Ed255</span> <span class="op">=</span> <span class="number">1</span>,
-    <span class="ident">Entropy32</span> <span class="op">=</span> <span class="number">2</span>, <span class="comment">// output of TRNG</span>
-    <span class="ident">P256</span> <span class="op">=</span> <span class="number">3</span>,
-    <span class="comment">// a shared secret may not be suitable for use as a symmetric key,</span>
-    <span class="comment">// and should pass through a key derivation function first.</span>
-    <span class="ident">SharedSecret32</span> <span class="op">=</span> <span class="number">4</span>,  <span class="comment">// or 256 (in bits)?</span>
-    <span class="ident">SymmetricKey16</span> <span class="op">=</span> <span class="number">5</span>,
-    <span class="ident">SymmetricKey32</span> <span class="op">=</span> <span class="number">6</span>, <span class="comment">// or directly: SharedSecret32 —DeriveKey(HmacSha256)-&gt; SymmetricKey32 —Encrypt(Aes256)-&gt; ...</span>
-    <span class="ident">Symmetric32Nonce12</span> <span class="op">=</span> <span class="number">7</span>,
-    <span class="ident">Symmetric24</span> <span class="op">=</span> <span class="number">8</span>,
-    <span class="ident">Symmetric20</span> <span class="op">=</span> <span class="number">9</span>,
-    <span class="comment">// ThirtytwoByteBuf,</span>
-    <span class="ident">X255</span> <span class="op">=</span> <span class="number">10</span>
-}
-
-<span class="kw">impl</span> <span class="ident">core</span>::<span class="ident">convert</span>::<span class="ident">TryFrom</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">KeyKind</span> {
-    <span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">error</span>::<span class="ident">Error</span>;
-    <span class="kw">fn</span> <span class="ident">try_from</span>(<span class="ident">num</span>: <span class="ident">u8</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="self">Self</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="prelude-val">Ok</span>(<span class="kw">match</span> <span class="ident">num</span> {
-            <span class="number">1</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">KeyKind</span>::<span class="ident">Ed255</span>,
-            <span class="number">2</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">KeyKind</span>::<span class="ident">Entropy32</span>,
-            <span class="number">3</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">KeyKind</span>::<span class="ident">P256</span>,
-            <span class="number">4</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">KeyKind</span>::<span class="ident">SharedSecret32</span>,
-            <span class="number">5</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">KeyKind</span>::<span class="ident">SymmetricKey16</span>,
-            <span class="number">6</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">KeyKind</span>::<span class="ident">SymmetricKey32</span>,
-            <span class="number">7</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">KeyKind</span>::<span class="ident">Symmetric32Nonce12</span>,
-            <span class="number">8</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">KeyKind</span>::<span class="ident">Symmetric24</span>,
-            <span class="number">9</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">KeyKind</span>::<span class="ident">Symmetric20</span>,
-            <span class="number">10</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">KeyKind</span>::<span class="ident">X255</span>,
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> { <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="kw">crate</span>::<span class="ident">error</span>::<span class="ident">Error</span>::<span class="ident">CborError</span>); }
-        })
-    }
-}
-
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">Eq</span>, <span class="ident">PartialEq</span>)]</span>
-<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">KeyType</span> {
-    <span class="comment">// Private,</span>
-    <span class="ident">Public</span>,
-    <span class="ident">Secret</span>,
 }
 
 <span class="doccomment">/// PhantomData to make it unconstructable</span>

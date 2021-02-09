@@ -520,28 +520,6 @@
 <span id="517">517</span>
 <span id="518">518</span>
 <span id="519">519</span>
-<span id="520">520</span>
-<span id="521">521</span>
-<span id="522">522</span>
-<span id="523">523</span>
-<span id="524">524</span>
-<span id="525">525</span>
-<span id="526">526</span>
-<span id="527">527</span>
-<span id="528">528</span>
-<span id="529">529</span>
-<span id="530">530</span>
-<span id="531">531</span>
-<span id="532">532</span>
-<span id="533">533</span>
-<span id="534">534</span>
-<span id="535">535</span>
-<span id="536">536</span>
-<span id="537">537</span>
-<span id="538">538</span>
-<span id="539">539</span>
-<span id="540">540</span>
-<span id="541">541</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! `store` presents a combined interface to three littlefs2 filesystems:</span>
 <span class="doccomment">//! internal flash, external flash, volatile/RAM.</span>
@@ -612,17 +590,14 @@
 <span class="doccomment">//! - Alternative: subdirectory &lt;==&gt; RP hash, everything else in flat files</span>
 <span class="doccomment">//! - In any case need to &quot;list dirs excluding . and ..&quot; or similar</span>
 
-<span class="kw">use</span> <span class="ident">core</span>::<span class="ident">convert</span>::<span class="ident">TryFrom</span>;
-
 <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused_imports</span>)]</span>
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;semihosting&quot;</span>)]</span>
 <span class="kw">use</span> <span class="ident">cortex_m_semihosting</span>::<span class="ident">hprintln</span>;
 <span class="kw">use</span> <span class="ident">littlefs2</span>::<span class="ident">path</span>::<span class="ident">Path</span>;
-<span class="kw">use</span> <span class="ident">serde_indexed</span>::{<span class="ident">DeserializeIndexed</span>, <span class="ident">SerializeIndexed</span>};
-
-<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">config</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">error</span>::<span class="ident">Error</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">types</span>::<span class="kw-2">*</span>;
+
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">keystore</span>;
 
 <span class="comment">// pub type FileContents = ByteBuf&lt;MAX_FILE_SIZE&gt;;</span>
 
@@ -989,25 +964,6 @@
         }
     }
     <span class="prelude-val">Ok</span>(())
-}
-
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">KeyMaterial</span> <span class="op">=</span> <span class="ident">ByteBuf</span><span class="op">&lt;</span><span class="ident">MAX_SERIALIZED_KEY_LENGTH</span><span class="op">&gt;</span>;
-
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>,<span class="ident">Debug</span>,<span class="ident">Eq</span>,<span class="ident">PartialEq</span>,<span class="ident">SerializeIndexed</span>,<span class="ident">DeserializeIndexed</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SerializedKey</span> {
-   <span class="comment">// r#type: KeyType,</span>
-   <span class="kw">pub</span> <span class="ident">kind</span>: <span class="ident">KeyKind</span>,
-   <span class="kw">pub</span> <span class="ident">value</span>: <span class="ident">ByteBuf</span><span class="op">&lt;</span><span class="ident">MAX_SERIALIZED_KEY_LENGTH</span><span class="op">&gt;</span>,
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">TryFrom</span><span class="op">&lt;</span>(<span class="ident">KeyKind</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>])<span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">SerializedKey</span> {
-    <span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">Error</span>;
-    <span class="kw">fn</span> <span class="ident">try_from</span>(<span class="ident">from</span>: (<span class="ident">KeyKind</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>])) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="prelude-val">Ok</span>(<span class="ident">SerializedKey</span> {
-            <span class="ident">kind</span>: <span class="ident">from</span>.<span class="number">0</span>,
-            <span class="ident">value</span>: <span class="ident">ByteBuf</span>::<span class="ident">try_from_slice</span>(<span class="ident">from</span>.<span class="number">1</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error</span>::<span class="ident">InternalError</span>)<span class="question-mark">?</span>,
-        })
-    }
 }
 
 <span class="doccomment">/// Reads contents from path in location of store.</span>

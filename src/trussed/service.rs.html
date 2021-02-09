@@ -1021,71 +1021,8 @@
 <span id="1018">1018</span>
 <span id="1019">1019</span>
 <span id="1020">1020</span>
-<span id="1021">1021</span>
-<span id="1022">1022</span>
-<span id="1023">1023</span>
-<span id="1024">1024</span>
-<span id="1025">1025</span>
-<span id="1026">1026</span>
-<span id="1027">1027</span>
-<span id="1028">1028</span>
-<span id="1029">1029</span>
-<span id="1030">1030</span>
-<span id="1031">1031</span>
-<span id="1032">1032</span>
-<span id="1033">1033</span>
-<span id="1034">1034</span>
-<span id="1035">1035</span>
-<span id="1036">1036</span>
-<span id="1037">1037</span>
-<span id="1038">1038</span>
-<span id="1039">1039</span>
-<span id="1040">1040</span>
-<span id="1041">1041</span>
-<span id="1042">1042</span>
-<span id="1043">1043</span>
-<span id="1044">1044</span>
-<span id="1045">1045</span>
-<span id="1046">1046</span>
-<span id="1047">1047</span>
-<span id="1048">1048</span>
-<span id="1049">1049</span>
-<span id="1050">1050</span>
-<span id="1051">1051</span>
-<span id="1052">1052</span>
-<span id="1053">1053</span>
-<span id="1054">1054</span>
-<span id="1055">1055</span>
-<span id="1056">1056</span>
-<span id="1057">1057</span>
-<span id="1058">1058</span>
-<span id="1059">1059</span>
-<span id="1060">1060</span>
-<span id="1061">1061</span>
-<span id="1062">1062</span>
-<span id="1063">1063</span>
-<span id="1064">1064</span>
-<span id="1065">1065</span>
-<span id="1066">1066</span>
-<span id="1067">1067</span>
-<span id="1068">1068</span>
-<span id="1069">1069</span>
-<span id="1070">1070</span>
-<span id="1071">1071</span>
-<span id="1072">1072</span>
-<span id="1073">1073</span>
-<span id="1074">1074</span>
-<span id="1075">1075</span>
-<span id="1076">1076</span>
-<span id="1077">1077</span>
-<span id="1078">1078</span>
-<span id="1079">1079</span>
-<span id="1080">1080</span>
-<span id="1081">1081</span>
-<span id="1082">1082</span>
-<span id="1083">1083</span>
 </pre><div class="example-wrap"><pre class="rust ">
-<span class="kw">use</span> <span class="ident">core</span>::<span class="ident">convert</span>::{<span class="ident">TryFrom</span>, <span class="ident">TryInto</span>};
+<span class="kw">use</span> <span class="ident">core</span>::<span class="ident">convert</span>::<span class="ident">TryInto</span>;
 
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">rand_core</span>::{<span class="ident">RngCore</span>, <span class="ident">SeedableRng</span>};
 <span class="kw">use</span> <span class="ident">heapless_bytes</span>::<span class="ident">Bytes</span> <span class="kw">as</span> <span class="ident">ByteBuf</span>;
@@ -1098,9 +1035,11 @@
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">platform</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">config</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">error</span>::<span class="ident">Error</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">key</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">mechanisms</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">pipe</span>::<span class="ident">TrussedInterchange</span>;
-<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">store</span>::{<span class="self">self</span>, <span class="kw-2">*</span>};
+<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">store</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">store</span>::<span class="ident">keystore</span>::{<span class="ident">ClientKeystore</span>, <span class="ident">Keystore</span>};
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">types</span>::<span class="kw-2">*</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">pipe</span>::<span class="ident">ServiceEndpoint</span>;
 
@@ -1109,8 +1048,8 @@
 
 <span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">rpc_trait</span> { ($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">Name</span>:<span class="ident">ident</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>:<span class="ident">ident</span>,)<span class="kw-2">*</span>) <span class="op">=</span><span class="op">&gt;</span> { $(
 
-    <span class="kw">pub</span> <span class="kw">trait</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">Name</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">Platform</span><span class="op">&gt;</span> {
-        <span class="kw">fn</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>(<span class="ident">_resources</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ServiceResources</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>, <span class="ident">_request</span>: <span class="ident">request</span>::<span class="macro-nonterminal">$</span><span class="macro-nonterminal">Name</span>)
+    <span class="kw">pub</span> <span class="kw">trait</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">Name</span> {
+        <span class="kw">fn</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>(<span class="ident">_keystore</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">impl</span> <span class="ident">Keystore</span>, <span class="ident">_request</span>: <span class="ident">request</span>::<span class="macro-nonterminal">$</span><span class="macro-nonterminal">Name</span>)
         <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">reply</span>::<span class="macro-nonterminal">$</span><span class="macro-nonterminal">Name</span>, <span class="ident">Error</span><span class="op">&gt;</span> { <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">MechanismNotAvailable</span>) }
     }
 )<span class="op">*</span> } }
@@ -1185,7 +1124,7 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">Platform</span><span class="op">&gt;</span> <span class="ident">ServiceResources</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> {
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">reply_to</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">request</span>: <span class="ident">Request</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Reply</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">reply_to</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">client_id</span>: <span class="ident">PathBuf</span>, <span class="ident">request</span>: <span class="ident">Request</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Reply</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="comment">// TODO: what we want to do here is map an enum to a generic type</span>
         <span class="comment">// Is there a nicer way to do this?</span>
         <span class="comment">// info_now!(&quot;trussed request: {:?}&quot;, &amp;request).ok();</span>
@@ -1194,7 +1133,14 @@
         <span class="comment">//       self.platform.store().efs().available_blocks().unwrap(),</span>
         <span class="comment">//       self.platform.store().vfs().available_blocks().unwrap(),</span>
         <span class="comment">// ).ok();</span>
-        <span class="macro">debug_now</span><span class="macro">!</span>(<span class="string">&quot;trussed request: {:?}&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">request</span>);
+        <span class="comment">// debug_now!(&quot;trussed request: {:?}&quot;, &amp;request);</span>
+        <span class="kw">let</span> <span class="ident">full_store</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">platform</span>.<span class="ident">store</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">keystore</span>: <span class="ident">ClientKeystore</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">P</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">ClientKeystore</span>::<span class="ident">new</span>(
+            <span class="ident">client_id</span>,
+            <span class="self">self</span>.<span class="ident">drbg</span>().<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error</span>::<span class="ident">EntropyMalfunction</span>)<span class="question-mark">?</span>,
+            <span class="ident">full_store</span>,
+        );
+        <span class="kw">let</span> <span class="ident">keystore</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">keystore</span>;
         <span class="kw">match</span> <span class="ident">request</span> {
             <span class="ident">Request</span>::<span class="ident">DummyRequest</span> <span class="op">=</span><span class="op">&gt;</span> {
                 <span class="comment">// #[cfg(test)]</span>
@@ -1205,8 +1151,8 @@
             <span class="ident">Request</span>::<span class="ident">Agree</span>(<span class="ident">request</span>) <span class="op">=</span><span class="op">&gt;</span> {
                 <span class="kw">match</span> <span class="ident">request</span>.<span class="ident">mechanism</span> {
 
-                    <span class="ident">Mechanism</span>::<span class="ident">P256</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">P256</span>::<span class="ident">agree</span>(<span class="self">self</span>, <span class="ident">request</span>),
-                    <span class="ident">Mechanism</span>::<span class="ident">X255</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">X255</span>::<span class="ident">agree</span>(<span class="self">self</span>, <span class="ident">request</span>),
+                    <span class="ident">Mechanism</span>::<span class="ident">P256</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">P256</span>::<span class="ident">agree</span>(<span class="ident">keystore</span>, <span class="ident">request</span>),
+                    <span class="ident">Mechanism</span>::<span class="ident">X255</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">X255</span>::<span class="ident">agree</span>(<span class="ident">keystore</span>, <span class="ident">request</span>),
                     <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">MechanismNotAvailable</span>),
 
                 }.<span class="ident">map</span>(<span class="op">|</span><span class="ident">reply</span><span class="op">|</span> <span class="ident">Reply</span>::<span class="ident">Agree</span>(<span class="ident">reply</span>))
@@ -1215,9 +1161,9 @@
             <span class="ident">Request</span>::<span class="ident">Decrypt</span>(<span class="ident">request</span>) <span class="op">=</span><span class="op">&gt;</span> {
                 <span class="kw">match</span> <span class="ident">request</span>.<span class="ident">mechanism</span> {
 
-                    <span class="ident">Mechanism</span>::<span class="ident">Aes256Cbc</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">Aes256Cbc</span>::<span class="ident">decrypt</span>(<span class="self">self</span>, <span class="ident">request</span>),
-                    <span class="ident">Mechanism</span>::<span class="ident">Chacha8Poly1305</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">Chacha8Poly1305</span>::<span class="ident">decrypt</span>(<span class="self">self</span>, <span class="ident">request</span>),
-                    <span class="ident">Mechanism</span>::<span class="ident">Tdes</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">Tdes</span>::<span class="ident">decrypt</span>(<span class="self">self</span>, <span class="ident">request</span>),
+                    <span class="ident">Mechanism</span>::<span class="ident">Aes256Cbc</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">Aes256Cbc</span>::<span class="ident">decrypt</span>(<span class="ident">keystore</span>, <span class="ident">request</span>),
+                    <span class="ident">Mechanism</span>::<span class="ident">Chacha8Poly1305</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">Chacha8Poly1305</span>::<span class="ident">decrypt</span>(<span class="ident">keystore</span>, <span class="ident">request</span>),
+                    <span class="ident">Mechanism</span>::<span class="ident">Tdes</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">Tdes</span>::<span class="ident">decrypt</span>(<span class="ident">keystore</span>, <span class="ident">request</span>),
                     <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">MechanismNotAvailable</span>),
 
                 }.<span class="ident">map</span>(<span class="op">|</span><span class="ident">reply</span><span class="op">|</span> <span class="ident">Reply</span>::<span class="ident">Decrypt</span>(<span class="ident">reply</span>))
@@ -1226,10 +1172,10 @@
             <span class="ident">Request</span>::<span class="ident">DeriveKey</span>(<span class="ident">request</span>) <span class="op">=</span><span class="op">&gt;</span> {
                 <span class="kw">match</span> <span class="ident">request</span>.<span class="ident">mechanism</span> {
 
-                    <span class="ident">Mechanism</span>::<span class="ident">Ed255</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">Ed255</span>::<span class="ident">derive_key</span>(<span class="self">self</span>, <span class="ident">request</span>),
-                    <span class="ident">Mechanism</span>::<span class="ident">P256</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">P256</span>::<span class="ident">derive_key</span>(<span class="self">self</span>, <span class="ident">request</span>),
-                    <span class="ident">Mechanism</span>::<span class="ident">Sha256</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">Sha256</span>::<span class="ident">derive_key</span>(<span class="self">self</span>, <span class="ident">request</span>),
-                    <span class="ident">Mechanism</span>::<span class="ident">X255</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">X255</span>::<span class="ident">derive_key</span>(<span class="self">self</span>, <span class="ident">request</span>),
+                    <span class="ident">Mechanism</span>::<span class="ident">Ed255</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">Ed255</span>::<span class="ident">derive_key</span>(<span class="ident">keystore</span>, <span class="ident">request</span>),
+                    <span class="ident">Mechanism</span>::<span class="ident">P256</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">P256</span>::<span class="ident">derive_key</span>(<span class="ident">keystore</span>, <span class="ident">request</span>),
+                    <span class="ident">Mechanism</span>::<span class="ident">Sha256</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">Sha256</span>::<span class="ident">derive_key</span>(<span class="ident">keystore</span>, <span class="ident">request</span>),
+                    <span class="ident">Mechanism</span>::<span class="ident">X255</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">X255</span>::<span class="ident">derive_key</span>(<span class="ident">keystore</span>, <span class="ident">request</span>),
                     <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">MechanismNotAvailable</span>),
 
                 }.<span class="ident">map</span>(<span class="op">|</span><span class="ident">reply</span><span class="op">|</span> <span class="ident">Reply</span>::<span class="ident">DeriveKey</span>(<span class="ident">reply</span>))
@@ -1238,9 +1184,9 @@
             <span class="ident">Request</span>::<span class="ident">DeserializeKey</span>(<span class="ident">request</span>) <span class="op">=</span><span class="op">&gt;</span> {
                 <span class="kw">match</span> <span class="ident">request</span>.<span class="ident">mechanism</span> {
 
-                    <span class="ident">Mechanism</span>::<span class="ident">Ed255</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">Ed255</span>::<span class="ident">deserialize_key</span>(<span class="self">self</span>, <span class="ident">request</span>),
-                    <span class="ident">Mechanism</span>::<span class="ident">P256</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">P256</span>::<span class="ident">deserialize_key</span>(<span class="self">self</span>, <span class="ident">request</span>),
-                    <span class="ident">Mechanism</span>::<span class="ident">X255</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">X255</span>::<span class="ident">deserialize_key</span>(<span class="self">self</span>, <span class="ident">request</span>),
+                    <span class="ident">Mechanism</span>::<span class="ident">Ed255</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">Ed255</span>::<span class="ident">deserialize_key</span>(<span class="ident">keystore</span>, <span class="ident">request</span>),
+                    <span class="ident">Mechanism</span>::<span class="ident">P256</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">P256</span>::<span class="ident">deserialize_key</span>(<span class="ident">keystore</span>, <span class="ident">request</span>),
+                    <span class="ident">Mechanism</span>::<span class="ident">X255</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">X255</span>::<span class="ident">deserialize_key</span>(<span class="ident">keystore</span>, <span class="ident">request</span>),
                     <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">MechanismNotAvailable</span>),
 
                 }.<span class="ident">map</span>(<span class="op">|</span><span class="ident">reply</span><span class="op">|</span> <span class="ident">Reply</span>::<span class="ident">DeserializeKey</span>(<span class="ident">reply</span>))
@@ -1249,9 +1195,9 @@
             <span class="ident">Request</span>::<span class="ident">Encrypt</span>(<span class="ident">request</span>) <span class="op">=</span><span class="op">&gt;</span> {
                 <span class="kw">match</span> <span class="ident">request</span>.<span class="ident">mechanism</span> {
 
-                    <span class="ident">Mechanism</span>::<span class="ident">Aes256Cbc</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">Aes256Cbc</span>::<span class="ident">encrypt</span>(<span class="self">self</span>, <span class="ident">request</span>),
-                    <span class="ident">Mechanism</span>::<span class="ident">Chacha8Poly1305</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">Chacha8Poly1305</span>::<span class="ident">encrypt</span>(<span class="self">self</span>, <span class="ident">request</span>),
-                    <span class="ident">Mechanism</span>::<span class="ident">Tdes</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">Tdes</span>::<span class="ident">encrypt</span>(<span class="self">self</span>, <span class="ident">request</span>),
+                    <span class="ident">Mechanism</span>::<span class="ident">Aes256Cbc</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">Aes256Cbc</span>::<span class="ident">encrypt</span>(<span class="ident">keystore</span>, <span class="ident">request</span>),
+                    <span class="ident">Mechanism</span>::<span class="ident">Chacha8Poly1305</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">Chacha8Poly1305</span>::<span class="ident">encrypt</span>(<span class="ident">keystore</span>, <span class="ident">request</span>),
+                    <span class="ident">Mechanism</span>::<span class="ident">Tdes</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">Tdes</span>::<span class="ident">encrypt</span>(<span class="ident">keystore</span>, <span class="ident">request</span>),
                     <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">MechanismNotAvailable</span>),
 
                 }.<span class="ident">map</span>(<span class="op">|</span><span class="ident">reply</span><span class="op">|</span> <span class="ident">Reply</span>::<span class="ident">Encrypt</span>(<span class="ident">reply</span>))
@@ -1283,10 +1229,10 @@
             <span class="ident">Request</span>::<span class="ident">Exists</span>(<span class="ident">request</span>) <span class="op">=</span><span class="op">&gt;</span> {
                 <span class="kw">match</span> <span class="ident">request</span>.<span class="ident">mechanism</span> {
 
-                    <span class="ident">Mechanism</span>::<span class="ident">Ed255</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">Ed255</span>::<span class="ident">exists</span>(<span class="self">self</span>, <span class="ident">request</span>),
-                    <span class="ident">Mechanism</span>::<span class="ident">P256</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">P256</span>::<span class="ident">exists</span>(<span class="self">self</span>, <span class="ident">request</span>),
-                    <span class="ident">Mechanism</span>::<span class="ident">Totp</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">Totp</span>::<span class="ident">exists</span>(<span class="self">self</span>, <span class="ident">request</span>),
-                    <span class="ident">Mechanism</span>::<span class="ident">X255</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">X255</span>::<span class="ident">exists</span>(<span class="self">self</span>, <span class="ident">request</span>),
+                    <span class="ident">Mechanism</span>::<span class="ident">Ed255</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">Ed255</span>::<span class="ident">exists</span>(<span class="ident">keystore</span>, <span class="ident">request</span>),
+                    <span class="ident">Mechanism</span>::<span class="ident">P256</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">P256</span>::<span class="ident">exists</span>(<span class="ident">keystore</span>, <span class="ident">request</span>),
+                    <span class="ident">Mechanism</span>::<span class="ident">Totp</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">Totp</span>::<span class="ident">exists</span>(<span class="ident">keystore</span>, <span class="ident">request</span>),
+                    <span class="ident">Mechanism</span>::<span class="ident">X255</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">X255</span>::<span class="ident">exists</span>(<span class="ident">keystore</span>, <span class="ident">request</span>),
                     <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">MechanismNotAvailable</span>),
 
                 }.<span class="ident">map</span>(<span class="op">|</span><span class="ident">reply</span><span class="op">|</span> <span class="ident">Reply</span>::<span class="ident">Exists</span>(<span class="ident">reply</span>))
@@ -1294,19 +1240,19 @@
 
             <span class="ident">Request</span>::<span class="ident">GenerateKey</span>(<span class="ident">request</span>) <span class="op">=</span><span class="op">&gt;</span> {
                 <span class="kw">match</span> <span class="ident">request</span>.<span class="ident">mechanism</span> {
-                    <span class="ident">Mechanism</span>::<span class="ident">Chacha8Poly1305</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">Chacha8Poly1305</span>::<span class="ident">generate_key</span>(<span class="self">self</span>, <span class="ident">request</span>),
-                    <span class="ident">Mechanism</span>::<span class="ident">Ed255</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">Ed255</span>::<span class="ident">generate_key</span>(<span class="self">self</span>, <span class="ident">request</span>),
-                    <span class="ident">Mechanism</span>::<span class="ident">HmacSha256</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">HmacSha256</span>::<span class="ident">generate_key</span>(<span class="self">self</span>, <span class="ident">request</span>),
-                    <span class="ident">Mechanism</span>::<span class="ident">P256</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">P256</span>::<span class="ident">generate_key</span>(<span class="self">self</span>, <span class="ident">request</span>),
-                    <span class="ident">Mechanism</span>::<span class="ident">X255</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">X255</span>::<span class="ident">generate_key</span>(<span class="self">self</span>, <span class="ident">request</span>),
+                    <span class="ident">Mechanism</span>::<span class="ident">Chacha8Poly1305</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">Chacha8Poly1305</span>::<span class="ident">generate_key</span>(<span class="ident">keystore</span>, <span class="ident">request</span>),
+                    <span class="ident">Mechanism</span>::<span class="ident">Ed255</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">Ed255</span>::<span class="ident">generate_key</span>(<span class="ident">keystore</span>, <span class="ident">request</span>),
+                    <span class="ident">Mechanism</span>::<span class="ident">HmacSha256</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">HmacSha256</span>::<span class="ident">generate_key</span>(<span class="ident">keystore</span>, <span class="ident">request</span>),
+                    <span class="ident">Mechanism</span>::<span class="ident">P256</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">P256</span>::<span class="ident">generate_key</span>(<span class="ident">keystore</span>, <span class="ident">request</span>),
+                    <span class="ident">Mechanism</span>::<span class="ident">X255</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">X255</span>::<span class="ident">generate_key</span>(<span class="ident">keystore</span>, <span class="ident">request</span>),
                     <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">MechanismNotAvailable</span>),
                 }.<span class="ident">map</span>(<span class="op">|</span><span class="ident">reply</span><span class="op">|</span> <span class="ident">Reply</span>::<span class="ident">GenerateKey</span>(<span class="ident">reply</span>))
             },
 
             <span class="ident">Request</span>::<span class="ident">UnsafeInjectKey</span>(<span class="ident">request</span>) <span class="op">=</span><span class="op">&gt;</span> {
                 <span class="kw">match</span> <span class="ident">request</span>.<span class="ident">mechanism</span> {
-                    <span class="ident">Mechanism</span>::<span class="ident">Tdes</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">Tdes</span>::<span class="ident">unsafe_inject_key</span>(<span class="self">self</span>, <span class="ident">request</span>),
-                    <span class="ident">Mechanism</span>::<span class="ident">Totp</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">Totp</span>::<span class="ident">unsafe_inject_key</span>(<span class="self">self</span>, <span class="ident">request</span>),
+                    <span class="ident">Mechanism</span>::<span class="ident">Tdes</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">Tdes</span>::<span class="ident">unsafe_inject_key</span>(<span class="ident">keystore</span>, <span class="ident">request</span>),
+                    <span class="ident">Mechanism</span>::<span class="ident">Totp</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">Totp</span>::<span class="ident">unsafe_inject_key</span>(<span class="ident">keystore</span>, <span class="ident">request</span>),
                     <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">MechanismNotAvailable</span>),
                 }.<span class="ident">map</span>(<span class="op">|</span><span class="ident">reply</span><span class="op">|</span> <span class="ident">Reply</span>::<span class="ident">UnsafeInjectKey</span>(<span class="ident">reply</span>))
             },
@@ -1314,7 +1260,7 @@
             <span class="ident">Request</span>::<span class="ident">Hash</span>(<span class="ident">request</span>) <span class="op">=</span><span class="op">&gt;</span> {
                 <span class="kw">match</span> <span class="ident">request</span>.<span class="ident">mechanism</span> {
 
-                    <span class="ident">Mechanism</span>::<span class="ident">Sha256</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">Sha256</span>::<span class="ident">hash</span>(<span class="self">self</span>, <span class="ident">request</span>),
+                    <span class="ident">Mechanism</span>::<span class="ident">Sha256</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">Sha256</span>::<span class="ident">hash</span>(<span class="ident">keystore</span>, <span class="ident">request</span>),
                     <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">MechanismNotAvailable</span>),
 
                 }.<span class="ident">map</span>(<span class="op">|</span><span class="ident">reply</span><span class="op">|</span> <span class="ident">Reply</span>::<span class="ident">Hash</span>(<span class="ident">reply</span>))
@@ -1751,9 +1697,9 @@
             <span class="ident">Request</span>::<span class="ident">SerializeKey</span>(<span class="ident">request</span>) <span class="op">=</span><span class="op">&gt;</span> {
                 <span class="kw">match</span> <span class="ident">request</span>.<span class="ident">mechanism</span> {
 
-                    <span class="ident">Mechanism</span>::<span class="ident">Ed255</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">Ed255</span>::<span class="ident">serialize_key</span>(<span class="self">self</span>, <span class="ident">request</span>),
-                    <span class="ident">Mechanism</span>::<span class="ident">P256</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">P256</span>::<span class="ident">serialize_key</span>(<span class="self">self</span>, <span class="ident">request</span>),
-                    <span class="ident">Mechanism</span>::<span class="ident">X255</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">X255</span>::<span class="ident">serialize_key</span>(<span class="self">self</span>, <span class="ident">request</span>),
+                    <span class="ident">Mechanism</span>::<span class="ident">Ed255</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">Ed255</span>::<span class="ident">serialize_key</span>(<span class="ident">keystore</span>, <span class="ident">request</span>),
+                    <span class="ident">Mechanism</span>::<span class="ident">P256</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">P256</span>::<span class="ident">serialize_key</span>(<span class="ident">keystore</span>, <span class="ident">request</span>),
+                    <span class="ident">Mechanism</span>::<span class="ident">X255</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">X255</span>::<span class="ident">serialize_key</span>(<span class="ident">keystore</span>, <span class="ident">request</span>),
                     <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">MechanismNotAvailable</span>),
 
                 }.<span class="ident">map</span>(<span class="op">|</span><span class="ident">reply</span><span class="op">|</span> <span class="ident">Reply</span>::<span class="ident">SerializeKey</span>(<span class="ident">reply</span>))
@@ -1762,11 +1708,11 @@
             <span class="ident">Request</span>::<span class="ident">Sign</span>(<span class="ident">request</span>) <span class="op">=</span><span class="op">&gt;</span> {
                 <span class="kw">match</span> <span class="ident">request</span>.<span class="ident">mechanism</span> {
 
-                    <span class="ident">Mechanism</span>::<span class="ident">Ed255</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">Ed255</span>::<span class="ident">sign</span>(<span class="self">self</span>, <span class="ident">request</span>),
-                    <span class="ident">Mechanism</span>::<span class="ident">HmacSha256</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">HmacSha256</span>::<span class="ident">sign</span>(<span class="self">self</span>, <span class="ident">request</span>),
-                    <span class="ident">Mechanism</span>::<span class="ident">P256</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">P256</span>::<span class="ident">sign</span>(<span class="self">self</span>, <span class="ident">request</span>),
-                    <span class="ident">Mechanism</span>::<span class="ident">P256Prehashed</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">P256Prehashed</span>::<span class="ident">sign</span>(<span class="self">self</span>, <span class="ident">request</span>),
-                    <span class="ident">Mechanism</span>::<span class="ident">Totp</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">Totp</span>::<span class="ident">sign</span>(<span class="self">self</span>, <span class="ident">request</span>),
+                    <span class="ident">Mechanism</span>::<span class="ident">Ed255</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">Ed255</span>::<span class="ident">sign</span>(<span class="ident">keystore</span>, <span class="ident">request</span>),
+                    <span class="ident">Mechanism</span>::<span class="ident">HmacSha256</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">HmacSha256</span>::<span class="ident">sign</span>(<span class="ident">keystore</span>, <span class="ident">request</span>),
+                    <span class="ident">Mechanism</span>::<span class="ident">P256</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">P256</span>::<span class="ident">sign</span>(<span class="ident">keystore</span>, <span class="ident">request</span>),
+                    <span class="ident">Mechanism</span>::<span class="ident">P256Prehashed</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">P256Prehashed</span>::<span class="ident">sign</span>(<span class="ident">keystore</span>, <span class="ident">request</span>),
+                    <span class="ident">Mechanism</span>::<span class="ident">Totp</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">Totp</span>::<span class="ident">sign</span>(<span class="ident">keystore</span>, <span class="ident">request</span>),
                     <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">MechanismNotAvailable</span>),
 
                 }.<span class="ident">map</span>(<span class="op">|</span><span class="ident">reply</span><span class="op">|</span> <span class="ident">Reply</span>::<span class="ident">Sign</span>(<span class="ident">reply</span>))
@@ -1783,7 +1729,7 @@
             <span class="ident">Request</span>::<span class="ident">UnwrapKey</span>(<span class="ident">request</span>) <span class="op">=</span><span class="op">&gt;</span> {
                 <span class="kw">match</span> <span class="ident">request</span>.<span class="ident">mechanism</span> {
 
-                    <span class="ident">Mechanism</span>::<span class="ident">Chacha8Poly1305</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">Chacha8Poly1305</span>::<span class="ident">unwrap_key</span>(<span class="self">self</span>, <span class="ident">request</span>),
+                    <span class="ident">Mechanism</span>::<span class="ident">Chacha8Poly1305</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">Chacha8Poly1305</span>::<span class="ident">unwrap_key</span>(<span class="ident">keystore</span>, <span class="ident">request</span>),
                     <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">MechanismNotAvailable</span>),
 
                 }.<span class="ident">map</span>(<span class="op">|</span><span class="ident">reply</span><span class="op">|</span> <span class="ident">Reply</span>::<span class="ident">UnwrapKey</span>(<span class="ident">reply</span>))
@@ -1792,8 +1738,8 @@
             <span class="ident">Request</span>::<span class="ident">Verify</span>(<span class="ident">request</span>) <span class="op">=</span><span class="op">&gt;</span> {
                 <span class="kw">match</span> <span class="ident">request</span>.<span class="ident">mechanism</span> {
 
-                    <span class="ident">Mechanism</span>::<span class="ident">Ed255</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">Ed255</span>::<span class="ident">verify</span>(<span class="self">self</span>, <span class="ident">request</span>),
-                    <span class="ident">Mechanism</span>::<span class="ident">P256</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">P256</span>::<span class="ident">verify</span>(<span class="self">self</span>, <span class="ident">request</span>),
+                    <span class="ident">Mechanism</span>::<span class="ident">Ed255</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">Ed255</span>::<span class="ident">verify</span>(<span class="ident">keystore</span>, <span class="ident">request</span>),
+                    <span class="ident">Mechanism</span>::<span class="ident">P256</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">P256</span>::<span class="ident">verify</span>(<span class="ident">keystore</span>, <span class="ident">request</span>),
                     <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">MechanismNotAvailable</span>),
 
                 }.<span class="ident">map</span>(<span class="op">|</span><span class="ident">reply</span><span class="op">|</span> <span class="ident">Reply</span>::<span class="ident">Verify</span>(<span class="ident">reply</span>))
@@ -1802,8 +1748,8 @@
             <span class="ident">Request</span>::<span class="ident">WrapKey</span>(<span class="ident">request</span>) <span class="op">=</span><span class="op">&gt;</span> {
                 <span class="kw">match</span> <span class="ident">request</span>.<span class="ident">mechanism</span> {
 
-                    <span class="ident">Mechanism</span>::<span class="ident">Aes256Cbc</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">Aes256Cbc</span>::<span class="ident">wrap_key</span>(<span class="self">self</span>, <span class="ident">request</span>),
-                    <span class="ident">Mechanism</span>::<span class="ident">Chacha8Poly1305</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">Chacha8Poly1305</span>::<span class="ident">wrap_key</span>(<span class="self">self</span>, <span class="ident">request</span>),
+                    <span class="ident">Mechanism</span>::<span class="ident">Aes256Cbc</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">Aes256Cbc</span>::<span class="ident">wrap_key</span>(<span class="ident">keystore</span>, <span class="ident">request</span>),
+                    <span class="ident">Mechanism</span>::<span class="ident">Chacha8Poly1305</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mechanisms</span>::<span class="ident">Chacha8Poly1305</span>::<span class="ident">wrap_key</span>(<span class="ident">keystore</span>, <span class="ident">request</span>),
                     <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">MechanismNotAvailable</span>),
 
                 }.<span class="ident">map</span>(<span class="op">|</span><span class="ident">reply</span><span class="op">|</span> <span class="ident">Reply</span>::<span class="ident">WrapKey</span>(<span class="ident">reply</span>))
@@ -1927,79 +1873,6 @@
         <span class="self">self</span>.<span class="ident">namespace_path</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>)
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">store_key</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">location</span>: <span class="ident">StorageLocation</span>, <span class="ident">key_type</span>: <span class="ident">KeyType</span>, <span class="ident">key_kind</span>: <span class="ident">KeyKind</span>, <span class="ident">key_material</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">UniqueId</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="macro">info_now</span><span class="macro">!</span>(<span class="string">&quot;STORING {:?} -&gt; {:?}&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">key_kind</span>, <span class="ident">location</span>);
-        <span class="kw">let</span> <span class="ident">serialized_key</span> <span class="op">=</span> <span class="ident">SerializedKey</span>::<span class="ident">try_from</span>((<span class="ident">key_kind</span>, <span class="ident">key_material</span>))<span class="question-mark">?</span>;
-
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> [<span class="number">0u8</span>; <span class="number">128</span>];
-        <span class="kw">let</span> <span class="ident">serialized_bytes</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">cbor_serialize</span>(<span class="kw-2">&amp;</span><span class="ident">serialized_key</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buf</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error</span>::<span class="ident">CborError</span>)<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">key_id</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">generate_unique_id</span>()<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">key_path</span>(<span class="ident">key_type</span>, <span class="kw-2">&amp;</span><span class="ident">key_id</span>);
-        <span class="ident">store</span>::<span class="ident">store</span>(<span class="self">self</span>.<span class="ident">platform</span>.<span class="ident">store</span>(), <span class="ident">location</span>, <span class="kw-2">&amp;</span><span class="ident">path</span>, <span class="kw-2">&amp;</span><span class="ident">serialized_bytes</span>)<span class="question-mark">?</span>;
-
-        <span class="prelude-val">Ok</span>(<span class="ident">key_id</span>)
-    }
-
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">overwrite_key</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">location</span>: <span class="ident">StorageLocation</span>, <span class="ident">key_type</span>: <span class="ident">KeyType</span>, <span class="ident">key_kind</span>: <span class="ident">KeyKind</span>, <span class="ident">key_id</span>: <span class="kw-2">&amp;</span><span class="ident">UniqueId</span>, <span class="ident">key_material</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">serialized_key</span> <span class="op">=</span> <span class="ident">SerializedKey</span>::<span class="ident">try_from</span>((<span class="ident">key_kind</span>, <span class="ident">key_material</span>))<span class="question-mark">?</span>;
-
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> [<span class="number">0u8</span>; <span class="number">128</span>];
-        <span class="kw">let</span> <span class="ident">serialized_bytes</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">cbor_serialize</span>(<span class="kw-2">&amp;</span><span class="ident">serialized_key</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buf</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error</span>::<span class="ident">CborError</span>)<span class="question-mark">?</span>;
-
-        <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">key_path</span>(<span class="ident">key_type</span>, <span class="ident">key_id</span>);
-
-        <span class="ident">store</span>::<span class="ident">store</span>(<span class="self">self</span>.<span class="ident">platform</span>.<span class="ident">store</span>(), <span class="ident">location</span>, <span class="kw-2">&amp;</span><span class="ident">path</span>, <span class="kw-2">&amp;</span><span class="ident">serialized_bytes</span>)<span class="question-mark">?</span>;
-
-        <span class="prelude-val">Ok</span>(())
-    }
-
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">key_id_location</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key_type</span>: <span class="ident">KeyType</span>, <span class="ident">key_id</span>: <span class="kw-2">&amp;</span><span class="ident">UniqueId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">StorageLocation</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">key_path</span>(<span class="ident">key_type</span>, <span class="ident">key_id</span>);
-
-        <span class="kw">if</span> <span class="ident">path</span>.<span class="ident">exists</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">platform</span>.<span class="ident">store</span>().<span class="ident">vfs</span>()) {
-            <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">StorageLocation</span>::<span class="ident">Volatile</span>);
-        }
-
-        <span class="kw">if</span> <span class="ident">path</span>.<span class="ident">exists</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">platform</span>.<span class="ident">store</span>().<span class="ident">ifs</span>()) {
-            <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">StorageLocation</span>::<span class="ident">Internal</span>);
-        }
-
-        <span class="kw">if</span> <span class="ident">path</span>.<span class="ident">exists</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">platform</span>.<span class="ident">store</span>().<span class="ident">efs</span>()) {
-            <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">StorageLocation</span>::<span class="ident">External</span>);
-        }
-
-        <span class="prelude-val">None</span>
-    }
-
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">exists_key</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key_type</span>: <span class="ident">KeyType</span>, <span class="ident">key_kind</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">KeyKind</span><span class="op">&gt;</span>, <span class="ident">key_id</span>: <span class="kw-2">&amp;</span><span class="ident">UniqueId</span>)
-        <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span>  {
-        <span class="self">self</span>.<span class="ident">load_key</span>(<span class="ident">key_type</span>, <span class="ident">key_kind</span>, <span class="ident">key_id</span>).<span class="ident">is_ok</span>()
-    }
-
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">load_key</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key_type</span>: <span class="ident">KeyType</span>, <span class="ident">key_kind</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">KeyKind</span><span class="op">&gt;</span>, <span class="ident">key_id</span>: <span class="kw-2">&amp;</span><span class="ident">UniqueId</span>)
-        <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">SerializedKey</span>, <span class="ident">Error</span><span class="op">&gt;</span>  {
-
-        <span class="comment">// info_now!(&quot;LOADING {:?}&quot;, &amp;key_kind).ok();</span>
-        <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">key_path</span>(<span class="ident">key_type</span>, <span class="ident">key_id</span>);
-
-        <span class="kw">let</span> <span class="ident">location</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">key_id_location</span>(<span class="ident">key_type</span>, <span class="ident">key_id</span>) {
-            <span class="prelude-val">Some</span>(<span class="ident">location</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">location</span>,
-            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">NoSuchKey</span>),
-        };
-
-        <span class="kw">let</span> <span class="ident">bytes</span>: <span class="ident">ByteBuf</span><span class="op">&lt;</span><span class="ident">consts</span>::<span class="ident">U128</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">store</span>::<span class="ident">read</span>(<span class="self">self</span>.<span class="ident">platform</span>.<span class="ident">store</span>(), <span class="ident">location</span>, <span class="kw-2">&amp;</span><span class="ident">path</span>)<span class="question-mark">?</span>;
-
-        <span class="kw">let</span> <span class="ident">serialized_key</span>: <span class="ident">SerializedKey</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">cbor_deserialize</span>(<span class="kw-2">&amp;</span><span class="ident">bytes</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error</span>::<span class="ident">CborError</span>)<span class="question-mark">?</span>;
-
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">kind</span>) <span class="op">=</span> <span class="ident">key_kind</span> {
-            <span class="kw">if</span> <span class="ident">serialized_key</span>.<span class="ident">kind</span> <span class="op">!</span><span class="op">=</span> <span class="ident">kind</span> {
-                <span class="macro">info_now</span><span class="macro">!</span>(<span class="string">&quot;wrong key kind, expected {:?} got {:?}&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">kind</span>, <span class="kw-2">&amp;</span><span class="ident">serialized_key</span>.<span class="ident">kind</span>);
-                <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">WrongKeyKind</span>)<span class="question-mark">?</span>;
-            }
-        }
-        <span class="prelude-val">Ok</span>(<span class="ident">serialized_key</span>)
-    }
-
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">generate_unique_id</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">UniqueId</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">unique_id</span> <span class="op">=</span> [<span class="number">0u8</span>; <span class="number">16</span>];
 
@@ -2010,7 +1883,7 @@
         <span class="prelude-val">Ok</span>(<span class="ident">UniqueId</span>(<span class="ident">unique_id</span>))
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">fill_random_bytes</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">bytes</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">drbg</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ChaCha8Rng</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
 
         <span class="comment">// Check if our RNG is loaded.</span>
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">rng_state</span>.<span class="ident">is_none</span>() {
@@ -2069,12 +1942,13 @@
             <span class="ident">store</span>::<span class="ident">store</span>(<span class="self">self</span>.<span class="ident">platform</span>.<span class="ident">store</span>(), <span class="ident">StorageLocation</span>::<span class="ident">Internal</span>, <span class="kw-2">&amp;</span><span class="ident">path</span>, <span class="ident">seed_to_store</span>.<span class="ident">as_ref</span>()).<span class="ident">unwrap</span>();
         }
 
-
+        <span class="comment">// no panic - just ensured existence</span>
         <span class="kw">let</span> <span class="ident">chacha</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">rng_state</span>.<span class="ident">as_mut</span>().<span class="ident">unwrap</span>();
+        <span class="prelude-val">Ok</span>(<span class="ident">chacha</span>)
+    }
 
-        <span class="ident">chacha</span>.<span class="ident">fill_bytes</span>(<span class="ident">bytes</span>);
-        <span class="prelude-val">Ok</span>(())
-
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">fill_random_bytes</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">bytes</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="prelude-val">Ok</span>(<span class="self">self</span>.<span class="ident">drbg</span>()<span class="question-mark">?</span>.<span class="ident">fill_bytes</span>(<span class="ident">bytes</span>))
     }
 
 }
@@ -2148,7 +2022,7 @@
                 <span class="comment">// #[cfg(test)] println!(&quot;service got request: {:?}&quot;, &amp;request);</span>
 
                 <span class="ident">resources</span>.<span class="ident">currently_serving</span> <span class="op">=</span> <span class="ident">ep</span>.<span class="ident">client_id</span>.<span class="ident">clone</span>();
-                <span class="kw">let</span> <span class="ident">reply_result</span> <span class="op">=</span> <span class="ident">resources</span>.<span class="ident">reply_to</span>(<span class="ident">request</span>);
+                <span class="kw">let</span> <span class="ident">reply_result</span> <span class="op">=</span> <span class="ident">resources</span>.<span class="ident">reply_to</span>(<span class="ident">ep</span>.<span class="ident">client_id</span>.<span class="ident">clone</span>(), <span class="ident">request</span>);
                 <span class="ident">ep</span>.<span class="ident">interchange</span>.<span class="ident">respond</span>(<span class="ident">reply_result</span>).<span class="ident">ok</span>();
 
             }
