@@ -59,7 +59,9 @@ pub trait Filestore {
     fn remove_file(&mut self, path: &PathBuf, location: &Location) -> Result<()>;
     fn remove_dir(&mut self, path: &PathBuf, location: &Location) -> Result<()>;
 
-    /// Iterate over entries of a directory.
+    /// Iterate over entries of a directory (both file and directory entries).
+    ///
+    /// This function is modeled after `std::fs::read_dir`, within the limitations of our setup.
     ///
     /// The `not_before` parameter is an optimization for users to locate a specifically named
     /// file in one call - if the filename exists (e.g., `my-data.txt`), then return it directly.
@@ -75,6 +77,9 @@ pub trait Filestore {
     /// following call.
     fn read_dir_next(&mut self, state: ReadDirState)
         -> Result<Option<(DirEntry, ReadDirState)>>;
+
+    // fn read_dir_files_first(&mut self, dir: &PathBuf, location: Location, not_before: Option<&PathBuf>)
+    //     -> Result<Option<(DirEntry, ReadDirState)>>;
 }
 
 impl<S: Store> Filestore for ClientFilestore<S> {
@@ -115,43 +120,86 @@ impl<S: Store> Filestore for ClientFilestore<S> {
 
         let dir = self.actual_path(clients_dir);
 
-        // this is only a Result instead of an Option because `read_dir_and_then` works this way
-        let look_what_i_found = fs.read_dir_and_then(&dir, |it| {
+        //// this is only a Result instead of an Option because `read_dir_and_then` works this way
+        //let look_what_i_found = fs.read_dir_and_then(&dir, |it| {
 
-            // iterate over entries in the directory
-            // skip `.` and `..`
-            for (i, entry) in it.enumerate().skip(2) {
-                // why is entry a Result?
-                let entry = entry.unwrap();
-                match not_before {
-                    None => return Ok((i, entry)),
-                    Some(not_before) => {
-                        if entry.file_name() == not_before.as_ref() {
-                            return Ok((i, entry));
-                        }
+        //    // iterate over entries in the directory
+        //    // skip `.` and `..`
+        //    for (i, entry) in it.enumerate().skip(2) {
+        //        // why is entry a Result?
+        //        let entry = entry.unwrap();
+        //        match not_before {
+        //            None => return Ok((i, entry)),
+        //            Some(not_before) => {
+        //                if entry.file_name() == not_before.as_ref() {
+        //                    return Ok((i, entry));
+        //                }
+        //            }
+        //        }
+        //    }
+
+        //    //
+        //    Err(littlefs2::io::Error::Io)
+        //});
+
+        //Ok(match look_what_i_found {
+        //    Ok((i, mut entry)) => {
+        //        let read_dir_state = ReadDirState {
+        //            real_dir: dir,
+        //            last: i
+        //        };
+
+        //        let entry_client_path = self.client_path(entry.path());
+        //        *unsafe { entry.path_buf_mut() } = entry_client_path;
+        //        Some((entry, read_dir_state))
+        //    }
+
+        //    _ => None,
+
+        //})
+
+        Ok(fs.read_dir_and_then(&dir, |it| {
+
+            // this is an iterator with Item = (usize, Result<DirEntry>)
+            it.enumerate()
+
+                // skip over `.` and `..`
+                .skip(2)
+
+                // todo: try ?-ing out of this (the API matches std::fs, where read/write errors
+                // can occur during operation)
+                .map(|(i, entry)| (i, entry.unwrap()))
+
+                // if there is a "not_before" entry, filter out entries before it
+                .filter(|(_, entry)| {
+                    match not_before {
+                        Some(not_before) => entry.file_name() == not_before.as_ref(),
+                        _ => true,
                     }
-                }
-            }
+                })
 
-            //
-            Err(littlefs2::io::Error::Io)
-        });
+                // take first entry that fits the bill
+                .next()
 
-        Ok(match look_what_i_found {
-            Ok((i, mut entry)) => {
-                let read_dir_state = ReadDirState {
-                    real_dir: dir,
-                    last: i
-                };
+                // if there is an entry, construct the state that needs storing out of it,
+                // remove the prefix from the entry's path to not leak implementation details to
+                // the client, and return both the entry and the state
+                .map(|(i, mut entry)| {
+                    let read_dir_state = ReadDirState { real_dir: dir.clone(), last: i };
+                    let entry_client_path = self.client_path(entry.path());
+                    // This is a hidden function which allows us to modify `entry.path`.
+                    // In regular use, `DirEntry` is not supposed to be constructable by the user
+                    // (only by querying the filesystem), which is why the function is both
+                    // hidden and tagged "unsafe" to discourage use. Our use case here is precisely
+                    // the reason for its existence :)
+                    *unsafe { entry.path_buf_mut() } = entry_client_path;
+                    (entry, read_dir_state)
 
-                let entry_client_path = self.client_path(entry.path());
-                *unsafe { entry.path_buf_mut() } = entry_client_path;
-                Some((entry, read_dir_state))
-            }
-
-            _ => None,
-
-        })
+                // the `ok_or` dummy error followed by the `ok` in the next line is because
+                // `read_dir_and_then` wants to see Results (although we naturally have an Option
+                // at this point)
+                }).ok_or(littlefs2::io::Error::Io)
+        }).ok())
     }
 
     fn read_dir_next(&mut self, state: ReadDirState) -> Result<Option<(DirEntry, ReadDirState)>> {
