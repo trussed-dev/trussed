@@ -15,7 +15,10 @@ pub use crate::key::*;
 use crate::mechanisms;
 use crate::pipe::TrussedInterchange;
 use crate::store;
-pub use crate::store::keystore::{ClientKeystore, Keystore};
+pub use crate::store::{
+    filestore::{ClientFilestore, Filestore},
+    keystore::{ClientKeystore, Keystore},
+};
 use crate::types::*;
 pub use crate::pipe::ServiceEndpoint;
 
@@ -59,11 +62,11 @@ struct ReadDirFilesState {
     last: PathBuf,
 }
 
-#[derive(Clone)]
-struct ReadDirState {
-    request: request::ReadDirFirst,
-    last: usize,
-}
+// #[derive(Clone)]
+// pub struct ReadDirState {
+//     request: request::ReadDirFirst,
+//     last: usize,
+// }
 
 pub struct ServiceResources<P>
 where P: Platform
@@ -73,7 +76,7 @@ where P: Platform
     currently_serving: ClientId,
     // TODO: how/when to clear
     read_dir_files_state: Option<ReadDirFilesState>,
-    read_dir_state: Option<ReadDirState>,
+    read_dir_state: Option<crate::store::filestore::ReadDirState>,
     rng_state: Option<ChaCha8Rng>,
 }
 
@@ -103,24 +106,26 @@ impl<P: Platform> ServiceResources<P> {
     pub fn reply_to(&mut self, client_id: PathBuf, request: Request) -> Result<Reply, Error> {
         // TODO: what we want to do here is map an enum to a generic type
         // Is there a nicer way to do this?
-        // info_now!("trussed request: {:?}", &request).ok();
-        // info_now!("IFS/EFS/VFS available BEFORE: {}/{}/{}",
-        //       self.platform.store().ifs().available_blocks().unwrap(),
-        //       self.platform.store().efs().available_blocks().unwrap(),
-        //       self.platform.store().vfs().available_blocks().unwrap(),
-        // ).ok();
-        // debug_now!("trussed request: {:?}", &request);
+
         let full_store = self.platform.store();
+
+        // prepare keystore, bound to client_id, for cryptographic calls
         let mut keystore: ClientKeystore<'_, P> = ClientKeystore::new(
-            client_id,
+            client_id.clone(),
             self.drbg().map_err(|_| Error::EntropyMalfunction)?,
             full_store,
         );
         let keystore = &mut keystore;
+
+        // prepare filestore, bound to client_id, for storage calls
+        let mut filestore: ClientFilestore<P::S> = ClientFilestore::new(
+            client_id.clone(),
+            full_store,
+        );
+        let filestore = &mut filestore;
+
         match request {
             Request::DummyRequest => {
-                // #[cfg(test)]
-                // println!("got a dummy request!");
                 Ok(Reply::DummyReply)
             },
 
@@ -315,6 +320,8 @@ impl<P: Platform> ServiceResources<P> {
 
             }
 
+            // This is now preferably done using littlefs-fuse (when device is not yet locked),
+            // and should be removed from firmware completely
             Request::DebugDumpStore(_request) => {
 
                 info_now!(":: PERSISTENT");
@@ -351,105 +358,41 @@ impl<P: Platform> ServiceResources<P> {
             }
 
             Request::ReadDirFirst(request) => {
-                assert!(request.location == StorageLocation::Internal);
-
-                let path = self.dataspace_path(&request.dir);
-                let path = self.namespace_path(&path);
-                let fs = self.platform.store().ifs();
-
-                let mut found_not_before = request.not_before_filename.is_none();
-                let outcome = fs.read_dir_and_then(&path, |dir| {
-                    for (i, entry) in dir.enumerate() {
-                        if i < 2 {
-                            continue;
-                        }
-
-                        let entry = entry.unwrap();
-                        if found_not_before {
-                            return Ok((i, entry));
-                        } else {
-                            found_not_before =
-                                entry.file_name() ==
-                                    request
-                                        .not_before_filename.as_ref()
-                                        .unwrap().as_ref()
-                            ;
-                            continue;
-                        }
-                    }
-
-                    Err(littlefs2::io::Error::Io)
-                });
-
-                // we want an option, really
-                // but let's abuse a result instead
-                let maybe_entry = match outcome {
-                    Ok((i, mut entry)) => {
-                        self.read_dir_state = Some(ReadDirState {
-                            request,
-                            last: i,
-                        });
-                        *unsafe { entry.path_buf_mut() } = self.denamedataspace_path(&entry.path());
+                let maybe_entry = match filestore.read_dir_first(&request.dir, request.location, request.not_before_filename.as_ref())? {
+                    Some((entry, read_dir_state)) => {
+                        self.read_dir_state = Some(read_dir_state);
                         Some(entry)
                     }
-
-                    Err(_) => {
-                        self.read_dir_files_state = None;
+                    None => {
+                        self.read_dir_state = None;
                         None
+
                     }
                 };
-                Ok(Reply::ReadDirFirst(reply::ReadDirFirst {
-                    entry: maybe_entry,
-                } ))
-
+                Ok(Reply::ReadDirFirst(reply::ReadDirFirst { entry: maybe_entry } ))
             }
 
             Request::ReadDirNext(_request) => {
-                let ReadDirState { request, last } = match &self.read_dir_state {
-                    Some(state) => state.clone(),
-                    None => panic!("call ReadDirFirst before ReadDirNext"),
-                };
+                // ensure next call has nothing to work with, unless we store state again
+                let read_dir_state = self.read_dir_state.take();
 
-                assert!(request.location == StorageLocation::Internal);
-
-                // let path = self.namespace_path(&request.dir);
-                let path = self.dataspace_path(&request.dir);
-                let path = self.namespace_path(&path);
-                let fs = self.platform.store().ifs();
-
-                // let (i, entry) = fs.read_dir_and_then(&path, |dir| {
-                let outcome = fs.read_dir_and_then(&path, |dir| {
-                    for (i, entry) in dir.enumerate() {
-                        if i <= last {
-                            continue;
+                let maybe_entry = match read_dir_state {
+                    None => None,
+                    Some(state) => {
+                        match filestore.read_dir_next(state)? {
+                            Some((entry, read_dir_state)) => {
+                                self.read_dir_state = Some(read_dir_state);
+                                Some(entry)
+                            }
+                            None => {
+                                self.read_dir_state = None;
+                                None
+                            }
                         }
-
-                        let entry = entry.unwrap();
-                        return Ok((i, entry));
-                    }
-
-                    Err(littlefs2::io::Error::Io)
-                });
-
-                let maybe_entry = match outcome {
-                    Ok((i, mut entry)) => {
-                        self.read_dir_state = Some(ReadDirState {
-                            request,
-                            last: i,
-                        });
-                        *unsafe { entry.path_buf_mut() } = self.denamedataspace_path(&entry.path());
-                        Some(entry)
-                    }
-
-                    Err(_) => {
-                        self.read_dir_state = None;
-                        None
                     }
                 };
-                Ok(Reply::ReadDirNext(reply::ReadDirNext {
-                    entry: maybe_entry,
-                } ))
 
+                Ok(Reply::ReadDirNext(reply::ReadDirNext { entry: maybe_entry } ))
             }
 
             Request::ReadDirFilesFirst(request) => {
@@ -612,58 +555,26 @@ impl<P: Platform> ServiceResources<P> {
             }
 
             Request::RemoveDir(request) => {
-                // let path = self.blob_path(&request.path, Some(&request.id.object_id))?;
-                // let path = self.namespace_path(&request.path);
-                let path = self.dataspace_path(&request.path);
-                let path = self.namespace_path(&path);
-                let mut data = Message::new();
-                data.resize_to_capacity();
-                match request.location {
-                    StorageLocation::Internal => self.platform.store().ifs().remove_dir(&path),
-                    StorageLocation::External => self.platform.store().efs().remove_dir(&path),
-                    StorageLocation::Volatile => self.platform.store().vfs().remove_dir(&path),
-                }.map_err(|_| Error::InternalError)?;
-                // data.resize_default(size).map_err(|_| Error::InternalError)?;
+                filestore.remove_dir(&request.path, &request.location)?;
                 Ok(Reply::RemoveDir(reply::RemoveDir {} ))
             }
 
             Request::RemoveFile(request) => {
-                // let path = self.blob_path(&request.path, Some(&request.id.object_id))?;
-                // let path = self.namespace_path(&request.path);
-                let path = self.dataspace_path(&request.path);
-                let path = self.namespace_path(&path);
-                let mut data = Message::new();
-                data.resize_to_capacity();
-                match request.location {
-                    StorageLocation::Internal => self.platform.store().ifs().remove(&path),
-                    StorageLocation::External => self.platform.store().efs().remove(&path),
-                    StorageLocation::Volatile => self.platform.store().vfs().remove(&path),
-                }.map_err(|_| Error::InternalError)?;
-                // data.resize_default(size).map_err(|_| Error::InternalError)?;
+                filestore.remove_file(&request.path, &request.location)?;
                 Ok(Reply::RemoveFile(reply::RemoveFile {} ))
             }
 
             Request::ReadFile(request) => {
-                // let path = self.blob_path(&request.path, Some(&request.id.object_id))?;
-                let path = self.dataspace_path(&request.path);
-                let path = self.namespace_path(&path);
-                let mut data = Message::new();
-                data.resize_to_capacity();
-                let data: Message = crate::ByteBuf::from(match request.location {
-                    StorageLocation::Internal => self.platform.store().ifs().read(&path),
-                    StorageLocation::External => self.platform.store().efs().read(&path),
-                    StorageLocation::Volatile => self.platform.store().vfs().read(&path),
-                }.map_err(|_| Error::InternalError)?);
-                // data.resize_default(size).map_err(|_| Error::InternalError)?;
-                Ok(Reply::ReadFile(reply::ReadFile { data } ))
+                Ok(Reply::ReadFile(reply::ReadFile {
+                    data: filestore.read(&request.path, &request.location)?
+                }))
             }
 
             Request::RandomByteBuf(request) => {
                 if request.count < 1024 {
                     let mut bytes = Message::new();
                     bytes.resize_default(request.count).unwrap();
-                    self.fill_random_bytes(&mut bytes)?;
-
+                    self.drbg()?.fill_bytes(&mut bytes);
                     Ok(Reply::RandomByteBuf(reply::RandomByteBuf { bytes } ))
                 } else {
                     Err(Error::MechanismNotAvailable)
@@ -695,11 +606,8 @@ impl<P: Platform> ServiceResources<P> {
             },
 
             Request::WriteFile(request) => {
-                let path = self.dataspace_path(&request.path);
-                let path = self.namespace_path(&path);
-                info!("WriteFile of size {}", request.data.len());
-                store::store(self.platform.store(), request.location, &path, &request.data)?;
-                Ok(Reply::WriteFile(reply::WriteFile {}))
+                filestore.write(&request.path, &request.location, &request.data)?;
+                Ok(Reply::WriteFile(reply::WriteFile {} ))
             }
 
             Request::UnwrapKey(request) => {

@@ -74,6 +74,7 @@ use littlefs2::path::Path;
 use crate::error::Error;
 use crate::types::*;
 
+pub mod filestore;
 pub mod keystore;
 
 // pub type FileContents = ByteBuf<MAX_FILE_SIZE>;
@@ -477,7 +478,15 @@ pub fn delete(store: impl Store, location: StorageLocation, path: &Path) -> bool
         StorageLocation::External => store.efs().remove(path),
         StorageLocation::Volatile => store.vfs().remove(path),
     };
+    outcome.is_ok()
+}
 
+pub fn remove_dir(store: impl Store, location: StorageLocation, path: &Path) -> bool {
+    let outcome = match location {
+        StorageLocation::Internal => store.ifs().remove_dir(path),
+        StorageLocation::External => store.efs().remove_dir(path),
+        StorageLocation::Volatile => store.vfs().remove_dir(path),
+    };
     outcome.is_ok()
 }
 
