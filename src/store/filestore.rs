@@ -168,17 +168,19 @@ impl<S: Store> Filestore for ClientFilestore<S> {
 
                 // todo: try ?-ing out of this (the API matches std::fs, where read/write errors
                 // can occur during operation)
+                //
+                // Option<usize, Result<DirEntry>> -> ??
                 .map(|(i, entry)| (i, entry.unwrap()))
 
-                // if there is a "not_before" entry, filter out entries before it
+                // if there is a "not_before" entry, skip all entries before it.
+                // since we're taking "next" at the following step, we can just filter
                 .filter(|(_, entry)| {
-                    match not_before {
-                        Some(not_before) => entry.file_name() == not_before.as_ref(),
-                        _ => true,
-                    }
+                    if let Some(not_before) = not_before {
+                        entry.file_name() == not_before.as_ref()
+                    } else { true }
                 })
 
-                // take first entry that fits the bill
+                // take first entry that meets requirements
                 .next()
 
                 // if there is an entry, construct the state that needs storing out of it,
