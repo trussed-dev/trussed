@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["ClientFilestore",""],["ReadDirState",""]],"trait":[["Filestore",""]],"type":[["ClientId",""]]});
+initSidebarItems({"struct":[["ClientFilestore",""],["ReadDirFilesState",""],["ReadDirState",""]],"trait":[["Filestore",""]],"type":[["ClientId",""]]});
