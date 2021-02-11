@@ -23,59 +23,58 @@ interchange::interchange! {
 
 #[cfg(feature = "clients-2")]
 interchange::interchange! {
-    TrussedInterchange: (Request, Result<Reply, Error>, 2, [None, None])
+    TrussedInterchange: (Request, Result<Reply, Error>, 2)
 }
 
 #[cfg(feature = "clients-3")]
 interchange::interchange! {
-    TrussedInterchange: (Request, Result<Reply, Error>, 3, [None, None, None])
+    TrussedInterchange: (Request, Result<Reply, Error>, 3)
 }
 
 #[cfg(feature = "clients-4")]
 interchange::interchange! {
-    TrussedInterchange: (Request, Result<Reply, Error>, 4, [None, None, None, None])
+    TrussedInterchange: (Request, Result<Reply, Error>, 4)
 }
 
 #[cfg(feature = "clients-5")]
 interchange::interchange! {
-    TrussedInterchange: (Request, Result<Reply, Error>, 5, [None, None, None, None, None])
+    TrussedInterchange: (Request, Result<Reply, Error>, 5)
 }
 
 #[cfg(feature = "clients-6")]
 interchange::interchange! {
-    TrussedInterchange: (Request, Result<Reply, Error>, 6, [None, None, None, None, None, None])
+    TrussedInterchange: (Request, Result<Reply, Error>, 6)
 }
 
 #[cfg(feature = "clients-7")]
 interchange::interchange! {
-    TrussedInterchange: (Request, Result<Reply, Error>, 7, [None, None, None, None, None, None, None])
+    TrussedInterchange: (Request, Result<Reply, Error>, 7)
 }
 
 #[cfg(feature = "clients-8")]
 interchange::interchange! {
-    TrussedInterchange: (Request, Result<Reply, Error>, 8, [None, None, None, None, None, None, None, None])
+    TrussedInterchange: (Request, Result<Reply, Error>, 8)
 }
 
 #[cfg(feature = "clients-9")]
 interchange::interchange! {
-    TrussedInterchange: (Request, Result<Reply, Error>, 9, [None, None, None, None, None, None, None, None, None])
+    TrussedInterchange: (Request, Result<Reply, Error>, 9)
 }
 
 #[cfg(feature = "clients-10")]
 interchange::interchange! {
-    TrussedInterchange: (Request, Result<Reply, Error>, 10, [None, None, None, None, None, None, None, None, None, None])
+    TrussedInterchange: (Request, Result<Reply, Error>, 10)
 }
 
 #[cfg(feature = "clients-11")]
 interchange::interchange! {
-    TrussedInterchange: (Request, Result<Reply, Error>, 11, [None, None, None, None, None, None, None, None, None, None, None])
+    TrussedInterchange: (Request, Result<Reply, Error>, 11)
 }
 
 #[cfg(feature = "clients-12")]
 interchange::interchange! {
-    TrussedInterchange: (Request, Result<Reply, Error>, 12, [None, None, None, None, None, None, None, None, None, None, None, None])
+    TrussedInterchange: (Request, Result<Reply, Error>, 12)
 }
-
 
 // pub use interchange::TrussedInterchange;
 
