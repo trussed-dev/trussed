@@ -481,6 +481,14 @@ pub fn delete(store: impl Store, location: StorageLocation, path: &Path) -> bool
     outcome.is_ok()
 }
 
+pub fn exists(store: impl Store, location: StorageLocation, path: &Path) -> bool {
+    match location {
+        StorageLocation::Internal => path.exists(store.ifs()),
+        StorageLocation::External => path.exists(store.efs()),
+        StorageLocation::Volatile => path.exists(store.vfs()),
+    }
+}
+
 pub fn remove_dir(store: impl Store, location: StorageLocation, path: &Path) -> bool {
     let outcome = match location {
         StorageLocation::Internal => store.ifs().remove_dir(path),

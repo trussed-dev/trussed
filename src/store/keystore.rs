@@ -15,7 +15,7 @@ use crate::{
     },
     Platform,
     store::{self, Store as _},
-    types::StorageLocation,
+    types::StorageLocation as Location,
 };
 
 
@@ -58,12 +58,13 @@ pub trait Keystore {
     // fn store(&self, key: Key, location: Location) -> Result<KeyId>;
     // fn load(&self, key: KeyId) -> Result<Key>;
     // fn exists(&self, key: KeyId) -> bool;
-    fn store_key(&mut self, location: StorageLocation, secret: Secrecy, kind: KeyKind, material: &[u8]) -> Result<KeyId>;
+    fn store_key(&mut self, location: Location, secret: Secrecy, kind: KeyKind, material: &[u8]) -> Result<KeyId>;
     fn exists_key(&self, secrecy: Secrecy, kind: Option<KeyKind>, id: &KeyId) -> bool;
+    fn delete_key(&self, id: &KeyId) -> bool;
     fn load_key(&self, secret: Secrecy, kind: Option<KeyKind>, id: &KeyId) -> Result<SerializedKey>;
-    fn overwrite_key(&self, location: StorageLocation, secrecy: Secrecy, kind: KeyKind, id: &KeyId, material: &[u8]) -> Result<()>;
+    fn overwrite_key(&self, location: Location, secrecy: Secrecy, kind: KeyKind, id: &KeyId, material: &[u8]) -> Result<()>;
     fn drbg(&mut self) -> &mut ChaCha8Rng;
-    fn location(&self, secret: Secrecy, id: &KeyId) -> Option<StorageLocation>;
+    fn location(&self, secret: Secrecy, id: &KeyId) -> Option<Location>;
 }
 
 impl<P: Platform> ClientKeystore<'_, P> {
@@ -97,7 +98,7 @@ impl<P: Platform> Keystore for ClientKeystore<'_, P> {
         self.drbg
     }
 
-    fn store_key(&mut self, location: StorageLocation, secret: Secrecy, kind: KeyKind, material: &[u8]) -> Result<KeyId> {
+    fn store_key(&mut self, location: Location, secret: Secrecy, kind: KeyKind, material: &[u8]) -> Result<KeyId> {
         // info_now!("storing {:?} -> {:?}", &key_kind, location);
         let serialized_key = SerializedKey::try_from((kind, material))?;
 
@@ -112,6 +113,27 @@ impl<P: Platform> Keystore for ClientKeystore<'_, P> {
 
     fn exists_key(&self, secrecy: Secrecy, kind: Option<KeyKind>, id: &KeyId) -> bool {
         self.load_key(secrecy, kind, id).is_ok()
+    }
+
+    // TODO: is this an Oracle?
+    fn delete_key(&self, id: &KeyId) -> bool {
+        let secrecies = [
+            Secrecy::Secret,
+            Secrecy::Public,
+        ];
+
+        let locations = [
+            Location::Internal,
+            Location::External,
+            Location::Volatile,
+        ];
+
+        secrecies.iter().any(|secrecy| {
+            let path = self.key_path(*secrecy, &id);
+            locations.iter().any(|location| {
+                store::delete(self.store, *location, &path)
+            })
+        })
     }
 
     fn load_key(&self, secret: Secrecy, kind: Option<KeyKind>, id: &KeyId) -> Result<SerializedKey> {
@@ -133,7 +155,7 @@ impl<P: Platform> Keystore for ClientKeystore<'_, P> {
         Ok(serialized_key)
     }
 
-    fn overwrite_key(&self, location: StorageLocation, secrecy: Secrecy, kind: KeyKind, id: &KeyId, material: &[u8]) -> Result<()> {
+    fn overwrite_key(&self, location: Location, secrecy: Secrecy, kind: KeyKind, id: &KeyId, material: &[u8]) -> Result<()> {
         let serialized_key = SerializedKey::try_from((kind, material))?;
 
         let mut buf = [0u8; 128];
@@ -147,19 +169,19 @@ impl<P: Platform> Keystore for ClientKeystore<'_, P> {
     }
 
 
-    fn location(&self, secret: Secrecy, id: &KeyId) -> Option<StorageLocation> {
+    fn location(&self, secret: Secrecy, id: &KeyId) -> Option<Location> {
         let path = self.key_path(secret, id);
 
         if path.exists(&self.store.vfs()) {
-            return Some(StorageLocation::Volatile);
+            return Some(Location::Volatile);
         }
 
         if path.exists(&self.store.ifs()) {
-            return Some(StorageLocation::Internal);
+            return Some(Location::Internal);
         }
 
         if path.exists(&self.store.efs()) {
-            return Some(StorageLocation::External);
+            return Some(Location::External);
         }
 
         None
