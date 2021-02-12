@@ -11,6 +11,10 @@ use littlefs2::const_ram_storage;
 use interchange::Interchange;
 use entropy::shannon_entropy;
 
+use crate::client::{
+    CryptoClient as _,
+};
+
 pub struct MockRng(ChaCha20);
 
 impl MockRng {
@@ -234,29 +238,29 @@ fn sign_ed255() {
     let private_key = reply.expect("no errors, never").key;
     println!("got a private key {:?}", &private_key);
 
-    let public_key = block!(client.derive_ed255_public_key(&private_key, StorageLocation::Volatile).expect("no client error"))
+    let public_key = block!(client.derive_ed255_public_key(private_key, StorageLocation::Volatile).expect("no client error"))
         .expect("no issues").key;
     println!("got a public key {:?}", &public_key);
 
     assert!(block!(
-            client.derive_ed255_public_key(&private_key, StorageLocation::Volatile).expect("no client error wot")
+            client.derive_ed255_public_key(private_key, StorageLocation::Volatile).expect("no client error wot")
     ).is_ok());
     assert!(block!(
-            client.derive_p256_public_key(&private_key, StorageLocation::Volatile).expect("no client error wot")
+            client.derive_p256_public_key(private_key, StorageLocation::Volatile).expect("no client error wot")
     ).is_err());
 
     let message = [1u8, 2u8, 3u8];
-    let future = client.sign_ed255(&private_key, &message).expect("no client error post err");
+    let future = client.sign_ed255(private_key, &message).expect("no client error post err");
     let reply: Result<api::reply::Sign, _> = block!(future);
     let signature = reply.expect("good signature").signature;
     println!("got a signature: {:?}", &signature);
 
-    let future = client.verify_ed255(&public_key, &message, &signature).expect("no client error");
+    let future = client.verify_ed255(public_key, &message, &signature).expect("no client error");
     let reply = block!(future);
     let valid = reply.expect("good signature").valid;
     assert!(valid);
 
-    let future = client.verify_ed255(&public_key, &message, &[1u8,2,3]).expect("no client error");
+    let future = client.verify_ed255(public_key, &message, &[1u8,2,3]).expect("no client error");
     let reply = block!(future);
     assert_eq!(Err(Error::WrongSignatureLength), reply);
 }
@@ -270,19 +274,19 @@ fn sign_p256() {
         let private_key = block!(client.generate_p256_private_key(StorageLocation::External).expect("no client error"))
             .expect("no errors").key;
         println!("got a public key {:?}", &private_key);
-        let public_key = block!(client.derive_p256_public_key(&private_key, StorageLocation::Volatile).expect("no client error"))
+        let public_key = block!(client.derive_p256_public_key(private_key, StorageLocation::Volatile).expect("no client error"))
             .expect("no errors").key;
         println!("got a public key {:?}", &public_key);
 
         let message = [1u8, 2u8, 3u8];
-        let signature = block!(client.sign_p256(&private_key, &message, SignatureSerialization::Raw)
+        let signature = block!(client.sign_p256(private_key, &message, SignatureSerialization::Raw)
             .expect("no client error"))
             .expect("good signature")
             .signature;
 
         // use core::convert::AsMut;
         // let sig = signature.0.as_mut()[0] = 0;
-        let future = client.verify_p256(&public_key, &message, &signature);
+        let future = client.verify_p256(public_key, &message, &signature);
         let future = future.expect("no client error");
         let result = block!(future);
         if result.is_err() {
@@ -302,14 +306,14 @@ fn agree_p256() {
         let plat_private_key = block!(client.generate_p256_private_key(StorageLocation::Volatile).expect("no client error"))
             .expect("no errors").key;
         println!("got a public key {:?}", &plat_private_key);
-        let plat_public_key = block!(client.derive_p256_public_key(&plat_private_key, StorageLocation::Volatile).expect("no client error"))
+        let plat_public_key = block!(client.derive_p256_public_key(plat_private_key, StorageLocation::Volatile).expect("no client error"))
             .expect("no errors").key;
         println!("got a public key {:?}", &plat_public_key);
 
         let auth_private_key = block!(client.generate_p256_private_key(StorageLocation::Volatile).expect("no client error"))
             .expect("no errors").key;
         println!("got a public key {:?}", &auth_private_key);
-        let auth_public_key = block!(client.derive_p256_public_key(&auth_private_key, StorageLocation::Volatile).expect("no client error"))
+        let auth_public_key = block!(client.derive_p256_public_key(auth_private_key, StorageLocation::Volatile).expect("no client error"))
             .expect("no errors").key;
         println!("got a public key {:?}", &auth_public_key);
 
@@ -361,12 +365,12 @@ fn aead() {
     let message = b"test message";
     let associated_data = b"solokeys.com";
     let api::reply::Encrypt { ciphertext, nonce, tag } =
-        block!(client.encrypt_chacha8poly1305(&secret_key, message, associated_data, None).expect("no client error"))
+        block!(client.encrypt_chacha8poly1305(secret_key, message, associated_data, None).expect("no client error"))
         .expect("no errors");
 
     let plaintext =
         block!(client.decrypt_chacha8poly1305(
-                &secret_key,
+                secret_key,
                 &ciphertext,
                 associated_data,
                 &nonce,

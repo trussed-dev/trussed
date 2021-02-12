@@ -11,9 +11,6 @@ mod chacha8poly1305;
 pub struct Ed255 {}
 mod ed255;
 
-pub struct X255 {}
-mod x255;
-
 pub struct HmacSha256 {}
 mod hmacsha256;
 
@@ -24,14 +21,17 @@ mod p256;
 pub struct Sha256 {}
 mod sha256;
 
-pub struct Totp {}
-mod totp;
-
 pub struct Tdes {}
 mod tdes;
 
+pub struct Totp {}
+mod totp;
+
 pub struct Trng {}
 mod trng;
+
+pub struct X255 {}
+mod x255;
 
 // pub enum MechanismEnum {
 //     NotImplemented,
