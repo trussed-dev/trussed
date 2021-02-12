@@ -6,7 +6,7 @@ use crate::{
     error::{Error, Result},
     // service::ReadDirState,
     store::{self, Store},
-    types::{Message, StorageLocation as Location, UserAttribute},
+    types::{Message, Location as Location, UserAttribute},
 };
 
 #[derive(Clone)]

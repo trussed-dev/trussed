@@ -232,21 +232,21 @@ fn sign_ed255() {
     setup!(client);
 
     use crate::client::{Ed255, P256};
-    let future = client.generate_ed255_private_key(StorageLocation::Internal).expect("no client error");
+    let future = client.generate_ed255_private_key(Location::Internal).expect("no client error");
     println!("submitted gen ed255");
     let reply = block!(future);
     let private_key = reply.expect("no errors, never").key;
     println!("got a private key {:?}", &private_key);
 
-    let public_key = block!(client.derive_ed255_public_key(private_key, StorageLocation::Volatile).expect("no client error"))
+    let public_key = block!(client.derive_ed255_public_key(private_key, Location::Volatile).expect("no client error"))
         .expect("no issues").key;
     println!("got a public key {:?}", &public_key);
 
     assert!(block!(
-            client.derive_ed255_public_key(private_key, StorageLocation::Volatile).expect("no client error wot")
+            client.derive_ed255_public_key(private_key, Location::Volatile).expect("no client error wot")
     ).is_ok());
     assert!(block!(
-            client.derive_p256_public_key(private_key, StorageLocation::Volatile).expect("no client error wot")
+            client.derive_p256_public_key(private_key, Location::Volatile).expect("no client error wot")
     ).is_err());
 
     let message = [1u8, 2u8, 3u8];
@@ -271,10 +271,10 @@ fn sign_p256() {
     use crate::client::P256 as _;
     // let mut client = setup!();
     setup!(client);
-        let private_key = block!(client.generate_p256_private_key(StorageLocation::External).expect("no client error"))
+        let private_key = block!(client.generate_p256_private_key(Location::External).expect("no client error"))
             .expect("no errors").key;
         println!("got a public key {:?}", &private_key);
-        let public_key = block!(client.derive_p256_public_key(private_key, StorageLocation::Volatile).expect("no client error"))
+        let public_key = block!(client.derive_p256_public_key(private_key, Location::Volatile).expect("no client error"))
             .expect("no errors").key;
         println!("got a public key {:?}", &public_key);
 
@@ -303,29 +303,29 @@ fn agree_p256() {
     // let mut client = setup!();
     use crate::client::P256;
     setup!(client);
-        let plat_private_key = block!(client.generate_p256_private_key(StorageLocation::Volatile).expect("no client error"))
+        let plat_private_key = block!(client.generate_p256_private_key(Location::Volatile).expect("no client error"))
             .expect("no errors").key;
         println!("got a public key {:?}", &plat_private_key);
-        let plat_public_key = block!(client.derive_p256_public_key(plat_private_key, StorageLocation::Volatile).expect("no client error"))
+        let plat_public_key = block!(client.derive_p256_public_key(plat_private_key, Location::Volatile).expect("no client error"))
             .expect("no errors").key;
         println!("got a public key {:?}", &plat_public_key);
 
-        let auth_private_key = block!(client.generate_p256_private_key(StorageLocation::Volatile).expect("no client error"))
+        let auth_private_key = block!(client.generate_p256_private_key(Location::Volatile).expect("no client error"))
             .expect("no errors").key;
         println!("got a public key {:?}", &auth_private_key);
-        let auth_public_key = block!(client.derive_p256_public_key(auth_private_key, StorageLocation::Volatile).expect("no client error"))
+        let auth_public_key = block!(client.derive_p256_public_key(auth_private_key, Location::Volatile).expect("no client error"))
             .expect("no errors").key;
         println!("got a public key {:?}", &auth_public_key);
 
         let shared_secret = block!(
             client.agree(Mechanism::P256, auth_private_key.clone(), plat_public_key.clone(),
-                         StorageAttributes::new().set_persistence(StorageLocation::Volatile))
+                         StorageAttributes::new().set_persistence(Location::Volatile))
                 .expect("no client error"))
             .expect("no errors").shared_secret;
 
         let alt_shared_secret = block!(
             client.agree(Mechanism::P256, plat_private_key.clone(), auth_public_key.clone(),
-                         StorageAttributes::new().set_persistence(StorageLocation::Volatile))
+                         StorageAttributes::new().set_persistence(Location::Volatile))
                 .expect("no client error"))
             .expect("no errors").shared_secret;
 
@@ -334,7 +334,7 @@ fn agree_p256() {
 
         let symmetric_key = block!(
             client.derive_key(Mechanism::Sha256, shared_secret.clone(),
-                              StorageAttributes::new().set_persistence(StorageLocation::Volatile))
+                              StorageAttributes::new().set_persistence(Location::Volatile))
                 .expect("no client error"))
             .expect("no errors").key;
 
@@ -354,7 +354,7 @@ fn aead() {
     let secret_key =
         block!(
             client
-            .generate_chacha8poly1305_key(StorageLocation::Volatile)
+            .generate_chacha8poly1305_key(Location::Volatile)
             .expect("no client error")
         )
         .expect("no errors")

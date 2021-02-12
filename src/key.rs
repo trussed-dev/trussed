@@ -38,7 +38,7 @@ impl Default for KeyFlags {
 
 #[derive(Clone,Debug,Eq,PartialEq,SerializeIndexed,DeserializeIndexed)]
 pub struct SerializedKey {
-   // r#type: KeyType,
+   // r#type: Secrecy,
    pub kind: KeyKind,
    pub flags: KeyFlags,
    pub value: ByteBuf<MAX_SERIALIZED_KEY_LENGTH>,
@@ -85,7 +85,7 @@ impl core::convert::TryFrom<u8> for KeyKind {
 }
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub enum KeyType {
+pub enum Secrecy {
     // Private,
     Public,
     Secret,

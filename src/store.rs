@@ -74,6 +74,7 @@ use littlefs2::path::Path;
 use crate::error::Error;
 use crate::types::*;
 
+pub mod counterstore;
 pub mod filestore;
 pub mod keystore;
 
@@ -445,87 +446,87 @@ pub fn create_directories<'s, S: LfsStorage>(
 }
 
 /// Reads contents from path in location of store.
-pub fn read<N: heapless::ArrayLength<u8>>(store: impl Store, location: StorageLocation, path: &Path) -> Result<ByteBuf<N>, Error> {
+pub fn read<N: heapless::ArrayLength<u8>>(store: impl Store, location: Location, path: &Path) -> Result<ByteBuf<N>, Error> {
     match location {
-        StorageLocation::Internal => store.ifs().read(path),
-        StorageLocation::External => store.efs().read(path),
-        StorageLocation::Volatile => store.vfs().read(path),
+        Location::Internal => store.ifs().read(path),
+        Location::External => store.efs().read(path),
+        Location::Volatile => store.vfs().read(path),
     }.map(ByteBuf::from).map_err(|_| Error::FilesystemReadFailure)
 }
 
 /// Writes contents to path in location of store.
-pub fn write(store: impl Store, location: StorageLocation, path: &Path, contents: &[u8]) -> Result<(), Error> {
+pub fn write(store: impl Store, location: Location, path: &Path, contents: &[u8]) -> Result<(), Error> {
     match location {
-        StorageLocation::Internal => store.ifs().write(path, contents),
-        StorageLocation::External => store.efs().write(path, contents),
-        StorageLocation::Volatile => store.vfs().write(path, contents),
+        Location::Internal => store.ifs().write(path, contents),
+        Location::External => store.efs().write(path, contents),
+        Location::Volatile => store.vfs().write(path, contents),
     }.map_err(|_| Error::FilesystemWriteFailure)
 }
 
 /// Creates parent directory if necessary, then writes.
-pub fn store(store: impl Store, location: StorageLocation, path: &Path, contents: &[u8]) -> Result<(), Error> {
+pub fn store(store: impl Store, location: Location, path: &Path, contents: &[u8]) -> Result<(), Error> {
     match location {
-        StorageLocation::Internal => create_directories(store.ifs(), path)?,
-        StorageLocation::External => create_directories(store.efs(), path)?,
-        StorageLocation::Volatile => create_directories(store.vfs(), path)?,
+        Location::Internal => create_directories(store.ifs(), path)?,
+        Location::External => create_directories(store.efs(), path)?,
+        Location::Volatile => create_directories(store.vfs(), path)?,
     }
     write(store, location, path, contents)
 }
 
-pub fn delete(store: impl Store, location: StorageLocation, path: &Path) -> bool {
+pub fn delete(store: impl Store, location: Location, path: &Path) -> bool {
     let outcome = match location {
-        StorageLocation::Internal => store.ifs().remove(path),
-        StorageLocation::External => store.efs().remove(path),
-        StorageLocation::Volatile => store.vfs().remove(path),
+        Location::Internal => store.ifs().remove(path),
+        Location::External => store.efs().remove(path),
+        Location::Volatile => store.vfs().remove(path),
     };
     outcome.is_ok()
 }
 
-pub fn exists(store: impl Store, location: StorageLocation, path: &Path) -> bool {
+pub fn exists(store: impl Store, location: Location, path: &Path) -> bool {
     match location {
-        StorageLocation::Internal => path.exists(store.ifs()),
-        StorageLocation::External => path.exists(store.efs()),
-        StorageLocation::Volatile => path.exists(store.vfs()),
+        Location::Internal => path.exists(store.ifs()),
+        Location::External => path.exists(store.efs()),
+        Location::Volatile => path.exists(store.vfs()),
     }
 }
 
-pub fn remove_dir(store: impl Store, location: StorageLocation, path: &Path) -> bool {
+pub fn remove_dir(store: impl Store, location: Location, path: &Path) -> bool {
     let outcome = match location {
-        StorageLocation::Internal => store.ifs().remove_dir(path),
-        StorageLocation::External => store.efs().remove_dir(path),
-        StorageLocation::Volatile => store.vfs().remove_dir(path),
+        Location::Internal => store.ifs().remove_dir(path),
+        Location::External => store.efs().remove_dir(path),
+        Location::Volatile => store.vfs().remove_dir(path),
     };
     outcome.is_ok()
 }
 
 // pub fn delete_volatile(store: impl Store, handle: &ObjectHandle) -> bool {
-//     let key_types = [
-//         KeyType::Secret,
-//         KeyType::Public,
+//     let secrecies = [
+//         Secrecy::Secret,
+//         Secrecy::Public,
 //     ];
 
-//     let success = key_types.iter().any(|key_type| {
-//         let path = self.key_path(*key_type, handle);
-//         store::delete(store, StorageLocation::Volatile, &path)
+//     let success = secrecies.iter().any(|secrecy| {
+//         let path = self.key_path(*secrecy, handle);
+//         store::delete(store, Location::Volatile, &path)
 //     });
 
 //     success
 // }
 
 // pub fn delete_anywhere(store: impl Store, handle: &ObjectHandle) -> bool {
-//     let key_types = [
-//         KeyType::Secret,
-//         KeyType::Public,
+//     let secrecies = [
+//         Secrecy::Secret,
+//         Secrecy::Public,
 //     ];
 
 //     let locations = [
-//         StorageLocation::Internal,
-//         StorageLocation::External,
-//         StorageLocation::Volatile,
+//         Location::Internal,
+//         Location::External,
+//         Location::Volatile,
 //     ];
 
-//     let success = key_types.iter().any(|key_type| {
-//         let path = self.key_path(*key_type, handle);
+//     let success = secrecies.iter().any(|secrecy| {
+//         let path = self.key_path(*secrecy, handle);
 //         locations.iter().any(|location| {
 //             store::delete(store, *location, &path)
 //         })

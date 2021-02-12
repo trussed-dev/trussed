@@ -3,7 +3,7 @@ use trussed::syscall;
 
 mod client;
 
-use trussed::types::StorageLocation::*;
+use trussed::types::Location::*;
 
 
 #[test]

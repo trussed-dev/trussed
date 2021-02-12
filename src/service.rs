@@ -14,6 +14,7 @@ use crate::mechanisms;
 use crate::pipe::TrussedInterchange;
 pub use crate::store::{
     filestore::{ClientFilestore, Filestore, ReadDirState, ReadDirFilesState},
+    counterstore::{ClientCounterstore, Counterstore as _},
     keystore::{ClientKeystore, Keystore},
 };
 use crate::types::*;
@@ -97,9 +98,16 @@ impl<P: Platform> ServiceResources<P> {
         );
         let keystore = &mut keystore;
 
+        // prepare counterstore, bound to client_id, for counter calls
+        let mut counterstore: ClientCounterstore<P::S> = ClientCounterstore::new(
+            client_id.clone(),
+            full_store,
+        );
+        let counterstore = &mut counterstore;
+
         // prepare filestore, bound to client_id, for storage calls
         let mut filestore: ClientFilestore<P::S> = ClientFilestore::new(
-            client_id,
+            client_id.clone(),
             full_store,
         );
         let filestore = &mut filestore;
@@ -454,6 +462,16 @@ impl<P: Platform> ServiceResources<P> {
                 self.platform.user_interface().reboot(request.to);
             }
 
+            Request::CreateCounter(request) => {
+                counterstore.create(request.location)
+                    .map(|id| Reply::CreateCounter(reply::CreateCounter { id } ))
+            }
+
+            Request::IncrementCounter(request) => {
+                counterstore.increment(request.id)
+                    .map(|counter| Reply::IncrementCounter(reply::IncrementCounter { counter } ))
+            }
+
             _ => {
                 // #[cfg(test)]
                 // println!("todo: {:?} request!", &request);
@@ -477,14 +495,14 @@ impl<P: Platform> ServiceResources<P> {
             let path = PathBuf::from(b"rng-state.bin");
 
             // If it hasn't been saved to flash yet, generate it from HW RNG.
-            let stored_seed = if ! filestore.exists(&path, StorageLocation::Internal) {
+            let stored_seed = if ! filestore.exists(&path, Location::Internal) {
                 let mut stored_seed = [0u8; 32];
                 self.platform.rng().try_fill_bytes(&mut stored_seed)
                     .map_err(|_| Error::EntropyMalfunction)?;
                 stored_seed
             } else {
                 // Use the last saved state.
-                let stored_seed_bytebuf: ByteBuf<consts::U32> = filestore.read(&path, StorageLocation::Internal)?;
+                let stored_seed_bytebuf: ByteBuf<consts::U32> = filestore.read(&path, Location::Internal)?;
                 let mut stored_seed = [0u8; 32];
                 stored_seed.clone_from_slice(&stored_seed_bytebuf);
                 stored_seed
@@ -525,7 +543,7 @@ impl<P: Platform> ServiceResources<P> {
             hash.input(&our_seed);
             let seed_to_store = hash.result();
 
-            filestore.write(&path, StorageLocation::Internal, seed_to_store.as_ref()).unwrap();
+            filestore.write(&path, Location::Internal, seed_to_store.as_ref()).unwrap();
         }
 
         // no panic - just ensured existence
@@ -593,8 +611,8 @@ impl<P: Platform> Service<P> {
         let filestore = &mut filestore;
 
         let path = PathBuf::from(b"rng-state.bin");
-        if ! filestore.exists(&path, StorageLocation::Internal) {
-            filestore.write(&path, StorageLocation::Internal, seed.as_ref()).unwrap();
+        if ! filestore.exists(&path, Location::Internal) {
+            filestore.write(&path, Location::Internal, seed.as_ref()).unwrap();
         }
 
     }

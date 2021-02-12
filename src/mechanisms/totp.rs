@@ -57,7 +57,7 @@ impl UnsafeInjectKey for super::Totp
         // store it
         let key_id = keystore.store_key(
             request.attributes.persistence,
-            KeyType::Secret,
+            Secrecy::Secret,
             KeyKind::Symmetric20,
             &request.raw_key,
         )?;
@@ -75,7 +75,7 @@ impl Sign for super::Totp
         let key_id = request.key.object_id;
 
         let secret: [u8; 20] = keystore
-            .load_key(KeyType::Secret, None, &key_id)?
+            .load_key(Secrecy::Secret, None, &key_id)?
             .value.as_ref().try_into()
             .map_err(|_| Error::InternalError)?;
 
@@ -99,7 +99,7 @@ impl Exists for super::Totp
     {
         let key_id = request.key.object_id;
 
-        let exists = keystore.exists_key(KeyType::Secret, Some(KeyKind::Symmetric20), &key_id);
+        let exists = keystore.exists_key(Secrecy::Secret, Some(KeyKind::Symmetric20), &key_id);
         Ok(reply::Exists { exists })
     }
 }

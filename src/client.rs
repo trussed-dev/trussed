@@ -97,7 +97,7 @@ pub enum ClientError {
 
 pub type ClientResult<'c, T, C> = core::result::Result<FutureResult<'c, T, C>, ClientError>;
 
-pub trait Client: CryptoClient + FilesystemClient + ManagementClient + UiClient {}
+pub trait Client: CryptoClient + CounterClient + FilesystemClient + ManagementClient + UiClient {}
 
 impl<S: Syscall> Client for ClientImplementation<S> {}
 
@@ -221,6 +221,7 @@ where S: Syscall {
 }
 
 impl<S: Syscall> CryptoClient for ClientImplementation<S> {}
+impl<S: Syscall> CounterClient for ClientImplementation<S> {}
 impl<S: Syscall> FilesystemClient for ClientImplementation<S> {}
 impl<S: Syscall> ManagementClient for ClientImplementation<S> {}
 impl<S: Syscall> UiClient for ClientImplementation<S> {}
@@ -399,7 +400,7 @@ pub trait CryptoClient: PollClient {
         Ok(r)
     }
 
-    fn unsafe_inject_key(&mut self, mechanism: Mechanism, raw_key: &[u8], persistence: StorageLocation)
+    fn unsafe_inject_key(&mut self, mechanism: Mechanism, raw_key: &[u8], persistence: Location)
         -> ClientResult<'_, reply::UnsafeInjectKey, Self>
     {
         let r = self.request(request::UnsafeInjectKey {
@@ -439,6 +440,26 @@ pub trait CryptoClient: PollClient {
 
 }
 
+pub trait CounterClient: PollClient {
+
+    fn create_counter(&mut self, location: Location)
+        -> ClientResult<'_, reply::CreateCounter, Self>
+    {
+        let r = self.request(request::CreateCounter { location })?;
+        r.client.syscall();
+        Ok(r)
+    }
+
+    fn increment_counter(&mut self, id: Id)
+        -> ClientResult<'_, reply::IncrementCounter, Self>
+    {
+        let r = self.request(request::IncrementCounter { id })?;
+        r.client.syscall();
+        Ok(r)
+    }
+
+}
+
 pub trait FilesystemClient: PollClient {
 
     fn debug_dump_store(&mut self)
@@ -451,7 +472,7 @@ pub trait FilesystemClient: PollClient {
 
     fn read_dir_first(
         &mut self,
-        location: StorageLocation,
+        location: Location,
         dir: PathBuf,
         not_before_filename: Option<PathBuf>,
     )
@@ -474,7 +495,7 @@ pub trait FilesystemClient: PollClient {
 
     fn read_dir_files_first(
         &mut self,
-        location: StorageLocation,
+        location: Location,
         dir: PathBuf,
         user_attribute: Option<UserAttribute>,
     )
@@ -493,7 +514,7 @@ pub trait FilesystemClient: PollClient {
         Ok(r)
     }
 
-    fn remove_dir(&mut self, location: StorageLocation, path: PathBuf)
+    fn remove_dir(&mut self, location: Location, path: PathBuf)
         -> ClientResult<'_, reply::RemoveFile, Self>
     {
         let r = self.request(request::RemoveDir { location, path } )?;
@@ -501,7 +522,7 @@ pub trait FilesystemClient: PollClient {
         Ok(r)
     }
 
-    fn remove_file(&mut self, location: StorageLocation, path: PathBuf)
+    fn remove_file(&mut self, location: Location, path: PathBuf)
         -> ClientResult<'_, reply::RemoveFile, Self>
     {
         let r = self.request(request::RemoveFile { location, path } )?;
@@ -509,7 +530,7 @@ pub trait FilesystemClient: PollClient {
         Ok(r)
     }
 
-    fn read_file(&mut self, location: StorageLocation, path: PathBuf)
+    fn read_file(&mut self, location: Location, path: PathBuf)
         -> ClientResult<'_, reply::ReadFile, Self>
     {
         let r = self.request(request::ReadFile { location, path } )?;
@@ -517,7 +538,7 @@ pub trait FilesystemClient: PollClient {
         Ok(r)
     }
 
-    fn locate_file(&mut self, location: StorageLocation, dir: Option<PathBuf>, filename: PathBuf)
+    fn locate_file(&mut self, location: Location, dir: Option<PathBuf>, filename: PathBuf)
         -> ClientResult<'_, reply::LocateFile, Self>
     {
         let r = self.request(request::LocateFile { location, dir, filename } )?;
@@ -527,7 +548,7 @@ pub trait FilesystemClient: PollClient {
 
     fn write_file(
         &mut self,
-        location: StorageLocation,
+        location: Location,
         path: PathBuf,
         data: Message,
         user_attribute: Option<UserAttribute>,
@@ -612,14 +633,14 @@ pub trait Chacha8Poly1305: CryptoClient {
             nonce.and_then(|nonce| ShortData::try_from_slice(nonce).ok()))
     }
 
-    fn generate_chacha8poly1305_key(&mut self, persistence: StorageLocation)
+    fn generate_chacha8poly1305_key(&mut self, persistence: Location)
         -> ClientResult<'_, reply::GenerateKey, Self>
     {
         self.generate_key(Mechanism::Chacha8Poly1305, StorageAttributes::new().set_persistence(persistence))
     }
 
     fn unwrap_key_chacha8poly1305<'c>(&'c mut self, wrapping_key: ObjectHandle, wrapped_key: &[u8],
-                       associated_data: &[u8], location: StorageLocation)
+                       associated_data: &[u8], location: Location)
         -> ClientResult<'c, reply::UnwrapKey, Self>
     {
         self.unwrap_key(Mechanism::Chacha8Poly1305, wrapping_key,
@@ -640,7 +661,7 @@ pub trait Chacha8Poly1305: CryptoClient {
 impl<S: Syscall> HmacSha256 for ClientImplementation<S> {}
 
 pub trait HmacSha256: CryptoClient {
-    fn generate_hmacsha256_key(&mut self, persistence: StorageLocation)
+    fn generate_hmacsha256_key(&mut self, persistence: Location)
         -> ClientResult<'_, reply::GenerateKey, Self>
     {
         self.generate_key(Mechanism::HmacSha256, StorageAttributes::new().set_persistence(persistence))
@@ -658,13 +679,13 @@ pub trait HmacSha256: CryptoClient {
 impl<S: Syscall> Ed255 for ClientImplementation<S> {}
 
 pub trait Ed255: CryptoClient {
-    fn generate_ed255_private_key(&mut self, persistence: StorageLocation)
+    fn generate_ed255_private_key(&mut self, persistence: Location)
         -> ClientResult<'_, reply::GenerateKey, Self>
     {
         self.generate_key(Mechanism::Ed255, StorageAttributes::new().set_persistence(persistence))
     }
 
-    fn derive_ed255_public_key(&mut self, private_key: ObjectHandle, persistence: StorageLocation)
+    fn derive_ed255_public_key(&mut self, private_key: ObjectHandle, persistence: Location)
         -> ClientResult<'_, reply::DeriveKey, Self>
     {
         self.derive_key(Mechanism::Ed255, private_key, StorageAttributes::new().set_persistence(persistence))
@@ -699,13 +720,13 @@ pub trait Ed255: CryptoClient {
 impl<S: Syscall> P256 for ClientImplementation<S> {}
 
 pub trait P256: CryptoClient {
-    fn generate_p256_private_key(&mut self, persistence: StorageLocation)
+    fn generate_p256_private_key(&mut self, persistence: Location)
         -> ClientResult<'_, reply::GenerateKey, Self>
     {
         self.generate_key(Mechanism::P256, StorageAttributes::new().set_persistence(persistence))
     }
 
-    fn derive_p256_public_key(&mut self, private_key: ObjectHandle, persistence: StorageLocation)
+    fn derive_p256_public_key(&mut self, private_key: ObjectHandle, persistence: Location)
         -> ClientResult<'_, reply::DeriveKey, Self>
     {
         self.derive_key(Mechanism::P256, private_key, StorageAttributes::new().set_persistence(persistence))
@@ -741,7 +762,7 @@ pub trait P256: CryptoClient {
         self.verify(Mechanism::P256, key, message, signature, SignatureSerialization::Raw)
     }
 
-    fn agree_p256(&mut self, private_key: ObjectHandle, public_key: ObjectHandle, persistence: StorageLocation)
+    fn agree_p256(&mut self, private_key: ObjectHandle, public_key: ObjectHandle, persistence: Location)
         -> ClientResult<'_, reply::Agree, Self>
     {
         self.agree(
@@ -780,7 +801,7 @@ pub trait Tdes: CryptoClient {
         self.encrypt(Mechanism::Tdes, key, message, &[], None)
     }
 
-    fn unsafe_inject_tdes_key<'c>(&'c mut self, raw_key: &[u8; 24], persistence: StorageLocation)
+    fn unsafe_inject_tdes_key<'c>(&'c mut self, raw_key: &[u8; 24], persistence: Location)
         -> ClientResult<'c, reply::UnsafeInjectKey, Self>
     {
         self.unsafe_inject_key(Mechanism::Tdes, raw_key, persistence)
@@ -800,7 +821,7 @@ pub trait Totp: CryptoClient {
         )
     }
 
-    fn unsafe_inject_totp_key<'c>(&'c mut self, raw_key: &[u8; 20], persistence: StorageLocation)
+    fn unsafe_inject_totp_key<'c>(&'c mut self, raw_key: &[u8; 20], persistence: Location)
         -> ClientResult<'c, reply::UnsafeInjectKey, Self>
     {
         self.unsafe_inject_key(Mechanism::Totp, raw_key, persistence)
@@ -811,19 +832,19 @@ pub trait Totp: CryptoClient {
 impl<S: Syscall> X255 for ClientImplementation<S> {}
 
 pub trait X255: CryptoClient {
-    fn generate_x255_secret_key(&mut self, persistence: StorageLocation)
+    fn generate_x255_secret_key(&mut self, persistence: Location)
         -> ClientResult<'_, reply::GenerateKey, Self>
     {
         self.generate_key(Mechanism::X255, StorageAttributes::new().set_persistence(persistence))
     }
 
-    fn derive_x255_public_key(&mut self, secret_key: ObjectHandle, persistence: StorageLocation)
+    fn derive_x255_public_key(&mut self, secret_key: ObjectHandle, persistence: Location)
         -> ClientResult<'_, reply::DeriveKey, Self>
     {
         self.derive_key(Mechanism::X255, secret_key, StorageAttributes::new().set_persistence(persistence))
     }
 
-    fn agree_x255(&mut self, private_key: ObjectHandle, public_key: ObjectHandle, persistence: StorageLocation)
+    fn agree_x255(&mut self, private_key: ObjectHandle, public_key: ObjectHandle, persistence: Location)
         -> ClientResult<'_, reply::Agree, Self>
     {
         self.agree(

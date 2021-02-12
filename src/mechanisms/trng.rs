@@ -17,7 +17,7 @@ impl GenerateKey for super::Trng
         // store keys
         let key_id = keystore.store_key(
             request.attributes.persistence,
-            KeyType::Secret,
+            Secrecy::Secret,
             KeyKind::Entropy32,
             &entropy)?;
 

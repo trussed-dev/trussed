@@ -10,12 +10,12 @@ use crate::{
     error::{Error, Result},
     key::{
         KeyKind,
-        KeyType as Secrecy,
+        Secrecy,
         SerializedKey,
     },
     Platform,
     store::{self, Store as _},
-    types::StorageLocation as Location,
+    types::Location as Location,
 };
 
 
@@ -58,13 +58,13 @@ pub trait Keystore {
     // fn store(&self, key: Key, location: Location) -> Result<KeyId>;
     // fn load(&self, key: KeyId) -> Result<Key>;
     // fn exists(&self, key: KeyId) -> bool;
-    fn store_key(&mut self, location: Location, secret: Secrecy, kind: KeyKind, material: &[u8]) -> Result<KeyId>;
+    fn store_key(&mut self, location: Location, secrecy: Secrecy, kind: KeyKind, material: &[u8]) -> Result<KeyId>;
     fn exists_key(&self, secrecy: Secrecy, kind: Option<KeyKind>, id: &KeyId) -> bool;
     fn delete_key(&self, id: &KeyId) -> bool;
-    fn load_key(&self, secret: Secrecy, kind: Option<KeyKind>, id: &KeyId) -> Result<SerializedKey>;
+    fn load_key(&self, secrecy: Secrecy, kind: Option<KeyKind>, id: &KeyId) -> Result<SerializedKey>;
     fn overwrite_key(&self, location: Location, secrecy: Secrecy, kind: KeyKind, id: &KeyId, material: &[u8]) -> Result<()>;
     fn drbg(&mut self) -> &mut ChaCha8Rng;
-    fn location(&self, secret: Secrecy, id: &KeyId) -> Option<Location>;
+    fn location(&self, secrecy: Secrecy, id: &KeyId) -> Option<Location>;
 }
 
 impl<P: Platform> ClientKeystore<'_, P> {
@@ -76,13 +76,13 @@ impl<P: Platform> ClientKeystore<'_, P> {
         crate::types::UniqueId(id)
     }
 
-    pub fn key_path(&self, secret: Secrecy, id: &KeyId) -> PathBuf {
+    pub fn key_path(&self, secrecy: Secrecy, id: &KeyId) -> PathBuf {
         let mut path = PathBuf::new();
         path.push(&self.client_id);
         // TODO: huh?!?!
         // If I change these prefixes to shorter,
         // DebugDumpStore skips the directory contents
-        path.push(match secret {
+        path.push(match secrecy {
             Secrecy::Secret => b"sec\0".try_into().unwrap(),
             Secrecy::Public => b"pub\0".try_into().unwrap(),
         });
@@ -98,14 +98,14 @@ impl<P: Platform> Keystore for ClientKeystore<'_, P> {
         self.drbg
     }
 
-    fn store_key(&mut self, location: Location, secret: Secrecy, kind: KeyKind, material: &[u8]) -> Result<KeyId> {
+    fn store_key(&mut self, location: Location, secrecy: Secrecy, kind: KeyKind, material: &[u8]) -> Result<KeyId> {
         // info_now!("storing {:?} -> {:?}", &key_kind, location);
         let serialized_key = SerializedKey::try_from((kind, material))?;
 
         let mut buf = [0u8; 128];
         let serialized_bytes = crate::cbor_serialize(&serialized_key, &mut buf).map_err(|_| Error::CborError)?;
         let id = self.generate_key_id();
-        let path = self.key_path(secret, &id);
+        let path = self.key_path(secrecy, &id);
         store::store(self.store, location, &path, &serialized_bytes)?;
 
         Ok(id)
@@ -136,11 +136,11 @@ impl<P: Platform> Keystore for ClientKeystore<'_, P> {
         })
     }
 
-    fn load_key(&self, secret: Secrecy, kind: Option<KeyKind>, id: &KeyId) -> Result<SerializedKey> {
+    fn load_key(&self, secrecy: Secrecy, kind: Option<KeyKind>, id: &KeyId) -> Result<SerializedKey> {
         // info_now!("loading  {:?}", &key_kind);
-        let path = self.key_path(secret, id);
+        let path = self.key_path(secrecy, id);
 
-        let location = self.location(secret, id).ok_or(Error::NoSuchKey)?;
+        let location = self.location(secrecy, id).ok_or(Error::NoSuchKey)?;
 
         let bytes: ByteBuf<consts::U128> = store::read(self.store, location, &path)?;
 
@@ -169,8 +169,8 @@ impl<P: Platform> Keystore for ClientKeystore<'_, P> {
     }
 
 
-    fn location(&self, secret: Secrecy, id: &KeyId) -> Option<Location> {
-        let path = self.key_path(secret, id);
+    fn location(&self, secrecy: Secrecy, id: &KeyId) -> Option<Location> {
+        let path = self.key_path(secrecy, id);
 
         if path.exists(&self.store.vfs()) {
             return Some(Location::Volatile);

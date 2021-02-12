@@ -17,9 +17,9 @@ impl Sign for super::HmacSha256
         type HmacSha256 = Hmac<Sha256>;
 
         let key_id = request.key.object_id;
-        let shared_secret = keystore.load_key(KeyType::Secret, None, &key_id)?.value;
+        let shared_secret = keystore.load_key(Secrecy::Secret, None, &key_id)?.value;
 
-        // let path = keystore.prepare_path_for_key(KeyType::Secret, &key_id)?;
+        // let path = keystore.prepare_path_for_key(Secrecy::Secret, &key_id)?;
         // let (serialized_key, _) = keystore.load_key_unchecked(&path)?;
         // let shared_secret = &serialized_key.value;
         let l = shared_secret.as_ref().len();
@@ -64,7 +64,7 @@ impl GenerateKey for super::HmacSha256
         // store keys
         let key_id = keystore.store_key(
             request.attributes.persistence,
-            KeyType::Secret,
+            Secrecy::Secret,
             KeyKind::SymmetricKey16,
             &seed)?;
 

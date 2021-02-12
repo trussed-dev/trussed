@@ -21,10 +21,16 @@ pub use littlefs2::{
 use serde::{Deserialize, Serialize};
 
 use crate::config::*;
-use crate::key::KeyType;
+use crate::key::Secrecy;
 
 pub use crate::platform::Platform;
 pub use crate::client::FutureResult;
+
+#[derive(Copy, Clone, Debug, serde::Deserialize, PartialEq, PartialOrd, serde::Serialize)]
+#[serde(transparent)]
+pub struct Id(pub(crate) u128);
+
+impl Eq for Id {}
 
 pub mod ui {
     use super::*;
@@ -163,7 +169,7 @@ pub struct DataAttributes {
 // Lookup seems a bit painful, on the other hand a struct of options is wasteful.
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Serialize, Deserialize)]
 pub struct KeyAttributes {
-    // key_type: KeyType,
+    // secrecy: Secrecy,
     // object_id: ByteBuf,
     // derive: bool, // can other keys be derived
     // local: bool, // generated on token, or copied from such
@@ -310,7 +316,7 @@ pub enum ObjectType {
     // But what else??
     Counter,
     Data,
-    Key(KeyType),
+    Key(Secrecy),
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
@@ -342,7 +348,7 @@ pub struct PrivateKeyAttributes {
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Serialize, Deserialize)]
-pub enum StorageLocation {
+pub enum Location {
     Volatile,
     Internal,
     External,
@@ -358,7 +364,7 @@ pub struct StorageAttributes {
 
     // // cryptoki: token (vs session) object
     // persistent: bool,
-    pub persistence: StorageLocation,
+    pub persistence: Location,
 
     // cryptoki: user must be logged in
     // private: bool,
@@ -370,7 +376,7 @@ pub struct StorageAttributes {
 }
 
 impl StorageAttributes {
-    pub fn set_persistence(mut self, persistence: StorageLocation) -> Self {
+    pub fn set_persistence(mut self, persistence: Location) -> Self {
         self.persistence = persistence;
         self
     }
@@ -384,7 +390,7 @@ impl StorageAttributes {
             // label: String::new(),
             // persistent: false,
 
-            persistence: StorageLocation::Volatile,
+            persistence: Location::Volatile,
 
             // modifiable: true,
             // copyable: true,

@@ -76,6 +76,13 @@ generate_enums! {
     RequestUserConsent: 33
     Reboot: 34
 
+    //////////////
+    // Counters //
+    //////////////
+
+    CreateCounter: 40
+    IncrementCounter: 41
+
     ///////////
     // Other //
     ///////////
@@ -174,34 +181,34 @@ pub mod request {
           - message: Message
 
         LocateFile:
-          - location: StorageLocation
+          - location: Location
           - dir: Option<PathBuf>
           - filename: PathBuf
 
         ReadDirFilesFirst:
-          - location: StorageLocation
+          - location: Location
           - dir: PathBuf
           - user_attribute: Option<UserAttribute>
 
         ReadDirFilesNext:
 
         ReadDirFirst:
-          - location: StorageLocation
+          - location: Location
           - dir: PathBuf
           - not_before_filename: Option<PathBuf>
 
         ReadDirNext:
 
         ReadFile:
-          - location: StorageLocation
+          - location: Location
           - path: PathBuf
 
         RemoveFile:
-          - location: StorageLocation
+          - location: Location
           - path: PathBuf
 
         RemoveDir:
-          - location: StorageLocation
+          - location: Location
           - path: PathBuf
 
         // use GetAttribute(value) on counter instead
@@ -223,7 +230,7 @@ pub mod request {
           - format: SignatureSerialization
 
         WriteFile:
-          - location: StorageLocation
+          - location: Location
           - path: PathBuf
           - data: Message
           - user_attribute: Option<UserAttribute>
@@ -260,6 +267,12 @@ pub mod request {
 
         Reboot:
           - to: reboot::To
+
+        CreateCounter:
+          - location: Location
+
+        IncrementCounter:
+          - id: Id
     }
 }
 
@@ -374,6 +387,10 @@ pub mod reply {
 
         Reboot:
 
+        CreateCounter:
+          - id: Id
+        IncrementCounter:
+          - counter: u128
     }
 
 }

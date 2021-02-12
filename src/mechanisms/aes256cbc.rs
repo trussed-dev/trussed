@@ -23,11 +23,11 @@ impl Encrypt for super::Aes256Cbc
 
         let key_id = request.key.object_id;
         // let mut symmetric_key = [0u8; 32];
-        // let path = keystore.key_path(KeyType::Secret, &key_id);
+        // let path = keystore.key_path(Secrecy::Secret, &key_id);
         // keystore.load_key(&path, KeyKind::SymmetricKey32, &mut symmetric_key)?;
 
         let symmetric_key: [u8; 32] = keystore
-            .load_key(KeyType::Secret, None, &key_id)?
+            .load_key(Secrecy::Secret, None, &key_id)?
             .value.as_ref().try_into()
             .map_err(|_| Error::InternalError)?;
 
@@ -59,13 +59,13 @@ impl WrapKey for super::Aes256Cbc
         -> Result<reply::WrapKey, Error>
     {
         // TODO: need to check both secret and private keys
-        // let path = keystore.key_path(KeyType::Secret, &request.key.object_id)?;
+        // let path = keystore.key_path(Secrecy::Secret, &request.key.object_id)?;
         // let (serialized_key, _location) = keystore.load_key_unchecked(&path)?;
 
         // let message: Message = serialized_key.value.try_to_byte_buf().map_err(|_| Error::InternalError)?;
 
         let message: Message = crate::ByteBuf::try_from_slice(keystore
-            .load_key(KeyType::Secret, None, &request.key.object_id)?
+            .load_key(Secrecy::Secret, None, &request.key.object_id)?
             .value.as_ref()).map_err(|_| Error::InternalError)?;
 
         let encryption_request = request::Encrypt {
@@ -99,7 +99,7 @@ impl Decrypt for super::Aes256Cbc
 
         let key_id = request.key.object_id;
         let symmetric_key: [u8; 32] = keystore
-            .load_key(KeyType::Secret, None, &key_id)?
+            .load_key(Secrecy::Secret, None, &key_id)?
             .value.as_ref()
             .try_into()
             .map_err(|_| Error::InternalError)?;
