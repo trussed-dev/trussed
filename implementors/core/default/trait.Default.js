@@ -1,3 +1,3 @@
 (function() {var implementors = {};
-implementors["trussed"] = [{"text":"impl Default for KeyFlags","synthetic":false,"types":[]},{"text":"impl Default for DataAttributes","synthetic":false,"types":[]},{"text":"impl Default for KeyAttributes","synthetic":false,"types":[]},{"text":"impl Default for Letters","synthetic":false,"types":[]}];
+implementors["trussed"] = [{"text":"impl Default for KeyFlags","synthetic":false,"types":[]},{"text":"impl Default for DataAttributes","synthetic":false,"types":[]},{"text":"impl Default for KeyAttributes","synthetic":false,"types":[]},{"text":"impl Default for Letters","synthetic":false,"types":[]},{"text":"impl Default for StorageAttributes","synthetic":false,"types":[]}];
 if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

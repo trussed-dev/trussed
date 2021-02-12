@@ -512,6 +512,15 @@
 <span id="509">509</span>
 <span id="510">510</span>
 <span id="511">511</span>
+<span id="512">512</span>
+<span id="513">513</span>
+<span id="514">514</span>
+<span id="515">515</span>
+<span id="516">516</span>
+<span id="517">517</span>
+<span id="518">518</span>
+<span id="519">519</span>
+<span id="520">520</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="ident">core</span>::<span class="ident">convert</span>::<span class="ident">TryFrom</span>;
 <span class="kw">use</span> <span class="ident">core</span>::<span class="ident">marker</span>::<span class="ident">PhantomData</span>;
@@ -629,6 +638,7 @@
 
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Eq</span>, <span class="ident">PartialEq</span>, <span class="ident">Debug</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy</span>::<span class="ident">large_enum_variant</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Attributes</span> {
     <span class="ident">Certificate</span>,
     <span class="ident">Counter</span>,
@@ -716,10 +726,11 @@
     }
 }
 
-<span class="doccomment">/// PhantomData to make it unconstructable</span>
+<span class="doccomment">/// Non-exhaustive to make it unconstructable</span>
 <span class="doccomment">/// NB: Better to check in service that nothing snuck through!</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Default</span>, <span class="ident">Eq</span>, <span class="ident">PartialEq</span>, <span class="ident">Debug</span>, <span class="ident">Deserialize</span>, <span class="ident">Serialize</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Letters</span>(<span class="kw">pub</span> <span class="ident">ShortData</span>, ());
+<span class="attribute">#[<span class="ident">non_exhaustive</span>]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Letters</span>(<span class="kw">pub</span> <span class="ident">ShortData</span>);
 
 <span class="kw">impl</span> <span class="ident">TryFrom</span><span class="op">&lt;</span><span class="ident">ShortData</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Letters</span> {
     <span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">error</span>::<span class="ident">Error</span>;
@@ -728,7 +739,7 @@
         <span class="kw">if</span> <span class="op">!</span><span class="kw-2">&amp;</span><span class="ident">bytes</span>.<span class="ident">iter</span>().<span class="ident">all</span>(<span class="op">|</span><span class="ident">b</span><span class="op">|</span> <span class="kw-2">*</span><span class="ident">b</span> <span class="op">&gt;</span><span class="op">=</span> <span class="string">b&#39;a&#39;</span> <span class="op">&amp;&amp;</span> <span class="kw-2">*</span><span class="ident">b</span> <span class="op">&lt;</span><span class="op">=</span> <span class="string">b&#39;z&#39;</span>) {
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="self">Self</span>::<span class="ident">Error</span>::<span class="ident">NotJustLetters</span>);
         }
-        <span class="prelude-val">Ok</span>(<span class="ident">Letters</span>(<span class="ident">bytes</span>, ()))
+        <span class="prelude-val">Ok</span>(<span class="ident">Letters</span>(<span class="ident">bytes</span>))
     }
 }
 
@@ -805,7 +816,7 @@
             {
                 <span class="kw">use</span> <span class="ident">core</span>::<span class="ident">convert</span>::<span class="ident">TryInto</span>;
                 <span class="kw">if</span> <span class="ident">v</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="number">16</span> {
-                    <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">E</span>::<span class="ident">invalid_length</span>(<span class="ident">v</span>.<span class="ident">len</span>(), <span class="kw-2">&amp;</span><span class="self">self</span>))<span class="question-mark">?</span>;
+                    <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">E</span>::<span class="ident">invalid_length</span>(<span class="ident">v</span>.<span class="ident">len</span>(), <span class="kw-2">&amp;</span><span class="self">self</span>));
                 }
                 <span class="prelude-val">Ok</span>(<span class="ident">ObjectHandle</span> { <span class="ident">object_id</span>: <span class="ident">UniqueId</span>(<span class="ident">v</span>.<span class="ident">try_into</span>().<span class="ident">unwrap</span>()) } )
             }
@@ -906,6 +917,12 @@
     }
 }
 
+<span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">StorageAttributes</span> {
+    <span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="self">Self</span>::<span class="ident">new</span>()
+    }
+}
+
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Eq</span>, <span class="ident">PartialEq</span>, <span class="ident">Debug</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Mechanism</span> {
     <span class="ident">Aes256Cbc</span>,
@@ -986,6 +1003,7 @@
         <span class="ident">buffer</span>
     }
 
+    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy</span>::<span class="ident">result_unit_err</span>)]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_from_hex</span>(<span class="ident">hex</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">core</span>::<span class="ident">result</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, ()<span class="op">&gt;</span> {
         <span class="comment">// https://stackoverflow.com/a/52992629</span>
         <span class="comment">// (0..hex.len())</span>
