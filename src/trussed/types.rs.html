@@ -521,6 +521,12 @@
 <span id="518">518</span>
 <span id="519">519</span>
 <span id="520">520</span>
+<span id="521">521</span>
+<span id="522">522</span>
+<span id="523">523</span>
+<span id="524">524</span>
+<span id="525">525</span>
+<span id="526">526</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="ident">core</span>::<span class="ident">convert</span>::<span class="ident">TryFrom</span>;
 <span class="kw">use</span> <span class="ident">core</span>::<span class="ident">marker</span>::<span class="ident">PhantomData</span>;
@@ -545,10 +551,16 @@
 <span class="kw">use</span> <span class="ident">serde</span>::{<span class="ident">Deserialize</span>, <span class="ident">Serialize</span>};
 
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">config</span>::<span class="kw-2">*</span>;
-<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">key</span>::<span class="ident">KeyType</span>;
+<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">key</span>::<span class="ident">Secrecy</span>;
 
 <span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">platform</span>::<span class="ident">Platform</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">client</span>::<span class="ident">FutureResult</span>;
+
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">serde</span>::<span class="ident">Deserialize</span>, <span class="ident">PartialEq</span>, <span class="ident">PartialOrd</span>, <span class="ident">serde</span>::<span class="ident">Serialize</span>)]</span>
+<span class="attribute">#[<span class="ident">serde</span>(<span class="ident">transparent</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Id</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">u128</span>);
+
+<span class="kw">impl</span> <span class="ident">Eq</span> <span class="kw">for</span> <span class="ident">Id</span> {}
 
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">ui</span> {
     <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
@@ -687,7 +699,7 @@
 <span class="comment">// Lookup seems a bit painful, on the other hand a struct of options is wasteful.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Eq</span>, <span class="ident">PartialEq</span>, <span class="ident">Debug</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">KeyAttributes</span> {
-    <span class="comment">// key_type: KeyType,</span>
+    <span class="comment">// secrecy: Secrecy,</span>
     <span class="comment">// object_id: ByteBuf,</span>
     <span class="comment">// derive: bool, // can other keys be derived</span>
     <span class="comment">// local: bool, // generated on token, or copied from such</span>
@@ -834,7 +846,7 @@
     <span class="comment">// But what else??</span>
     <span class="ident">Counter</span>,
     <span class="ident">Data</span>,
-    <span class="ident">Key</span>(<span class="ident">KeyType</span>),
+    <span class="ident">Key</span>(<span class="ident">Secrecy</span>),
 }
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Eq</span>, <span class="ident">PartialEq</span>, <span class="ident">Debug</span>)]</span>
@@ -866,7 +878,7 @@
 }
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Eq</span>, <span class="ident">PartialEq</span>, <span class="ident">Debug</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
-<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">StorageLocation</span> {
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Location</span> {
     <span class="ident">Volatile</span>,
     <span class="ident">Internal</span>,
     <span class="ident">External</span>,
@@ -882,7 +894,7 @@
 
     <span class="comment">// // cryptoki: token (vs session) object</span>
     <span class="comment">// persistent: bool,</span>
-    <span class="kw">pub</span> <span class="ident">persistence</span>: <span class="ident">StorageLocation</span>,
+    <span class="kw">pub</span> <span class="ident">persistence</span>: <span class="ident">Location</span>,
 
     <span class="comment">// cryptoki: user must be logged in</span>
     <span class="comment">// private: bool,</span>
@@ -894,7 +906,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">StorageAttributes</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_persistence</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">persistence</span>: <span class="ident">StorageLocation</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_persistence</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">persistence</span>: <span class="ident">Location</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="self">self</span>.<span class="ident">persistence</span> <span class="op">=</span> <span class="ident">persistence</span>;
         <span class="self">self</span>
     }
@@ -908,7 +920,7 @@
             <span class="comment">// label: String::new(),</span>
             <span class="comment">// persistent: false,</span>
 
-            <span class="ident">persistence</span>: <span class="ident">StorageLocation</span>::<span class="ident">Volatile</span>,
+            <span class="ident">persistence</span>: <span class="ident">Location</span>::<span class="ident">Volatile</span>,
 
             <span class="comment">// modifiable: true,</span>
             <span class="comment">// copyable: true,</span>

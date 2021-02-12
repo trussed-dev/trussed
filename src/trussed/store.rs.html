@@ -537,6 +537,7 @@
 <span id="534">534</span>
 <span id="535">535</span>
 <span id="536">536</span>
+<span id="537">537</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! `store` presents a combined interface to three littlefs2 filesystems:</span>
 <span class="doccomment">//! internal flash, external flash, volatile/RAM.</span>
@@ -614,6 +615,7 @@
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">error</span>::<span class="ident">Error</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">types</span>::<span class="kw-2">*</span>;
 
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">counterstore</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">filestore</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">keystore</span>;
 
@@ -985,87 +987,87 @@
 }
 
 <span class="doccomment">/// Reads contents from path in location of store.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">read</span><span class="op">&lt;</span><span class="ident">N</span>: <span class="ident">heapless</span>::<span class="ident">ArrayLength</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">store</span>: <span class="kw">impl</span> <span class="ident">Store</span>, <span class="ident">location</span>: <span class="ident">StorageLocation</span>, <span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">ByteBuf</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">read</span><span class="op">&lt;</span><span class="ident">N</span>: <span class="ident">heapless</span>::<span class="ident">ArrayLength</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">store</span>: <span class="kw">impl</span> <span class="ident">Store</span>, <span class="ident">location</span>: <span class="ident">Location</span>, <span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">ByteBuf</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
     <span class="kw">match</span> <span class="ident">location</span> {
-        <span class="ident">StorageLocation</span>::<span class="ident">Internal</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">store</span>.<span class="ident">ifs</span>().<span class="ident">read</span>(<span class="ident">path</span>),
-        <span class="ident">StorageLocation</span>::<span class="ident">External</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">store</span>.<span class="ident">efs</span>().<span class="ident">read</span>(<span class="ident">path</span>),
-        <span class="ident">StorageLocation</span>::<span class="ident">Volatile</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">store</span>.<span class="ident">vfs</span>().<span class="ident">read</span>(<span class="ident">path</span>),
+        <span class="ident">Location</span>::<span class="ident">Internal</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">store</span>.<span class="ident">ifs</span>().<span class="ident">read</span>(<span class="ident">path</span>),
+        <span class="ident">Location</span>::<span class="ident">External</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">store</span>.<span class="ident">efs</span>().<span class="ident">read</span>(<span class="ident">path</span>),
+        <span class="ident">Location</span>::<span class="ident">Volatile</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">store</span>.<span class="ident">vfs</span>().<span class="ident">read</span>(<span class="ident">path</span>),
     }.<span class="ident">map</span>(<span class="ident">ByteBuf</span>::<span class="ident">from</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error</span>::<span class="ident">FilesystemReadFailure</span>)
 }
 
 <span class="doccomment">/// Writes contents to path in location of store.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write</span>(<span class="ident">store</span>: <span class="kw">impl</span> <span class="ident">Store</span>, <span class="ident">location</span>: <span class="ident">StorageLocation</span>, <span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>, <span class="ident">contents</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write</span>(<span class="ident">store</span>: <span class="kw">impl</span> <span class="ident">Store</span>, <span class="ident">location</span>: <span class="ident">Location</span>, <span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>, <span class="ident">contents</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
     <span class="kw">match</span> <span class="ident">location</span> {
-        <span class="ident">StorageLocation</span>::<span class="ident">Internal</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">store</span>.<span class="ident">ifs</span>().<span class="ident">write</span>(<span class="ident">path</span>, <span class="ident">contents</span>),
-        <span class="ident">StorageLocation</span>::<span class="ident">External</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">store</span>.<span class="ident">efs</span>().<span class="ident">write</span>(<span class="ident">path</span>, <span class="ident">contents</span>),
-        <span class="ident">StorageLocation</span>::<span class="ident">Volatile</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">store</span>.<span class="ident">vfs</span>().<span class="ident">write</span>(<span class="ident">path</span>, <span class="ident">contents</span>),
+        <span class="ident">Location</span>::<span class="ident">Internal</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">store</span>.<span class="ident">ifs</span>().<span class="ident">write</span>(<span class="ident">path</span>, <span class="ident">contents</span>),
+        <span class="ident">Location</span>::<span class="ident">External</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">store</span>.<span class="ident">efs</span>().<span class="ident">write</span>(<span class="ident">path</span>, <span class="ident">contents</span>),
+        <span class="ident">Location</span>::<span class="ident">Volatile</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">store</span>.<span class="ident">vfs</span>().<span class="ident">write</span>(<span class="ident">path</span>, <span class="ident">contents</span>),
     }.<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error</span>::<span class="ident">FilesystemWriteFailure</span>)
 }
 
 <span class="doccomment">/// Creates parent directory if necessary, then writes.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">store</span>(<span class="ident">store</span>: <span class="kw">impl</span> <span class="ident">Store</span>, <span class="ident">location</span>: <span class="ident">StorageLocation</span>, <span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>, <span class="ident">contents</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">store</span>(<span class="ident">store</span>: <span class="kw">impl</span> <span class="ident">Store</span>, <span class="ident">location</span>: <span class="ident">Location</span>, <span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>, <span class="ident">contents</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
     <span class="kw">match</span> <span class="ident">location</span> {
-        <span class="ident">StorageLocation</span>::<span class="ident">Internal</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">create_directories</span>(<span class="ident">store</span>.<span class="ident">ifs</span>(), <span class="ident">path</span>)<span class="question-mark">?</span>,
-        <span class="ident">StorageLocation</span>::<span class="ident">External</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">create_directories</span>(<span class="ident">store</span>.<span class="ident">efs</span>(), <span class="ident">path</span>)<span class="question-mark">?</span>,
-        <span class="ident">StorageLocation</span>::<span class="ident">Volatile</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">create_directories</span>(<span class="ident">store</span>.<span class="ident">vfs</span>(), <span class="ident">path</span>)<span class="question-mark">?</span>,
+        <span class="ident">Location</span>::<span class="ident">Internal</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">create_directories</span>(<span class="ident">store</span>.<span class="ident">ifs</span>(), <span class="ident">path</span>)<span class="question-mark">?</span>,
+        <span class="ident">Location</span>::<span class="ident">External</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">create_directories</span>(<span class="ident">store</span>.<span class="ident">efs</span>(), <span class="ident">path</span>)<span class="question-mark">?</span>,
+        <span class="ident">Location</span>::<span class="ident">Volatile</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">create_directories</span>(<span class="ident">store</span>.<span class="ident">vfs</span>(), <span class="ident">path</span>)<span class="question-mark">?</span>,
     }
     <span class="ident">write</span>(<span class="ident">store</span>, <span class="ident">location</span>, <span class="ident">path</span>, <span class="ident">contents</span>)
 }
 
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">delete</span>(<span class="ident">store</span>: <span class="kw">impl</span> <span class="ident">Store</span>, <span class="ident">location</span>: <span class="ident">StorageLocation</span>, <span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">delete</span>(<span class="ident">store</span>: <span class="kw">impl</span> <span class="ident">Store</span>, <span class="ident">location</span>: <span class="ident">Location</span>, <span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
     <span class="kw">let</span> <span class="ident">outcome</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">location</span> {
-        <span class="ident">StorageLocation</span>::<span class="ident">Internal</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">store</span>.<span class="ident">ifs</span>().<span class="ident">remove</span>(<span class="ident">path</span>),
-        <span class="ident">StorageLocation</span>::<span class="ident">External</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">store</span>.<span class="ident">efs</span>().<span class="ident">remove</span>(<span class="ident">path</span>),
-        <span class="ident">StorageLocation</span>::<span class="ident">Volatile</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">store</span>.<span class="ident">vfs</span>().<span class="ident">remove</span>(<span class="ident">path</span>),
+        <span class="ident">Location</span>::<span class="ident">Internal</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">store</span>.<span class="ident">ifs</span>().<span class="ident">remove</span>(<span class="ident">path</span>),
+        <span class="ident">Location</span>::<span class="ident">External</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">store</span>.<span class="ident">efs</span>().<span class="ident">remove</span>(<span class="ident">path</span>),
+        <span class="ident">Location</span>::<span class="ident">Volatile</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">store</span>.<span class="ident">vfs</span>().<span class="ident">remove</span>(<span class="ident">path</span>),
     };
     <span class="ident">outcome</span>.<span class="ident">is_ok</span>()
 }
 
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">exists</span>(<span class="ident">store</span>: <span class="kw">impl</span> <span class="ident">Store</span>, <span class="ident">location</span>: <span class="ident">StorageLocation</span>, <span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">exists</span>(<span class="ident">store</span>: <span class="kw">impl</span> <span class="ident">Store</span>, <span class="ident">location</span>: <span class="ident">Location</span>, <span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
     <span class="kw">match</span> <span class="ident">location</span> {
-        <span class="ident">StorageLocation</span>::<span class="ident">Internal</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">path</span>.<span class="ident">exists</span>(<span class="ident">store</span>.<span class="ident">ifs</span>()),
-        <span class="ident">StorageLocation</span>::<span class="ident">External</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">path</span>.<span class="ident">exists</span>(<span class="ident">store</span>.<span class="ident">efs</span>()),
-        <span class="ident">StorageLocation</span>::<span class="ident">Volatile</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">path</span>.<span class="ident">exists</span>(<span class="ident">store</span>.<span class="ident">vfs</span>()),
+        <span class="ident">Location</span>::<span class="ident">Internal</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">path</span>.<span class="ident">exists</span>(<span class="ident">store</span>.<span class="ident">ifs</span>()),
+        <span class="ident">Location</span>::<span class="ident">External</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">path</span>.<span class="ident">exists</span>(<span class="ident">store</span>.<span class="ident">efs</span>()),
+        <span class="ident">Location</span>::<span class="ident">Volatile</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">path</span>.<span class="ident">exists</span>(<span class="ident">store</span>.<span class="ident">vfs</span>()),
     }
 }
 
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">remove_dir</span>(<span class="ident">store</span>: <span class="kw">impl</span> <span class="ident">Store</span>, <span class="ident">location</span>: <span class="ident">StorageLocation</span>, <span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">remove_dir</span>(<span class="ident">store</span>: <span class="kw">impl</span> <span class="ident">Store</span>, <span class="ident">location</span>: <span class="ident">Location</span>, <span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
     <span class="kw">let</span> <span class="ident">outcome</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">location</span> {
-        <span class="ident">StorageLocation</span>::<span class="ident">Internal</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">store</span>.<span class="ident">ifs</span>().<span class="ident">remove_dir</span>(<span class="ident">path</span>),
-        <span class="ident">StorageLocation</span>::<span class="ident">External</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">store</span>.<span class="ident">efs</span>().<span class="ident">remove_dir</span>(<span class="ident">path</span>),
-        <span class="ident">StorageLocation</span>::<span class="ident">Volatile</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">store</span>.<span class="ident">vfs</span>().<span class="ident">remove_dir</span>(<span class="ident">path</span>),
+        <span class="ident">Location</span>::<span class="ident">Internal</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">store</span>.<span class="ident">ifs</span>().<span class="ident">remove_dir</span>(<span class="ident">path</span>),
+        <span class="ident">Location</span>::<span class="ident">External</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">store</span>.<span class="ident">efs</span>().<span class="ident">remove_dir</span>(<span class="ident">path</span>),
+        <span class="ident">Location</span>::<span class="ident">Volatile</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">store</span>.<span class="ident">vfs</span>().<span class="ident">remove_dir</span>(<span class="ident">path</span>),
     };
     <span class="ident">outcome</span>.<span class="ident">is_ok</span>()
 }
 
 <span class="comment">// pub fn delete_volatile(store: impl Store, handle: &amp;ObjectHandle) -&gt; bool {</span>
-<span class="comment">//     let key_types = [</span>
-<span class="comment">//         KeyType::Secret,</span>
-<span class="comment">//         KeyType::Public,</span>
+<span class="comment">//     let secrecies = [</span>
+<span class="comment">//         Secrecy::Secret,</span>
+<span class="comment">//         Secrecy::Public,</span>
 <span class="comment">//     ];</span>
 
-<span class="comment">//     let success = key_types.iter().any(|key_type| {</span>
-<span class="comment">//         let path = self.key_path(*key_type, handle);</span>
-<span class="comment">//         store::delete(store, StorageLocation::Volatile, &amp;path)</span>
+<span class="comment">//     let success = secrecies.iter().any(|secrecy| {</span>
+<span class="comment">//         let path = self.key_path(*secrecy, handle);</span>
+<span class="comment">//         store::delete(store, Location::Volatile, &amp;path)</span>
 <span class="comment">//     });</span>
 
 <span class="comment">//     success</span>
 <span class="comment">// }</span>
 
 <span class="comment">// pub fn delete_anywhere(store: impl Store, handle: &amp;ObjectHandle) -&gt; bool {</span>
-<span class="comment">//     let key_types = [</span>
-<span class="comment">//         KeyType::Secret,</span>
-<span class="comment">//         KeyType::Public,</span>
+<span class="comment">//     let secrecies = [</span>
+<span class="comment">//         Secrecy::Secret,</span>
+<span class="comment">//         Secrecy::Public,</span>
 <span class="comment">//     ];</span>
 
 <span class="comment">//     let locations = [</span>
-<span class="comment">//         StorageLocation::Internal,</span>
-<span class="comment">//         StorageLocation::External,</span>
-<span class="comment">//         StorageLocation::Volatile,</span>
+<span class="comment">//         Location::Internal,</span>
+<span class="comment">//         Location::External,</span>
+<span class="comment">//         Location::Volatile,</span>
 <span class="comment">//     ];</span>
 
-<span class="comment">//     let success = key_types.iter().any(|key_type| {</span>
-<span class="comment">//         let path = self.key_path(*key_type, handle);</span>
+<span class="comment">//     let success = secrecies.iter().any(|secrecy| {</span>
+<span class="comment">//         let path = self.key_path(*secrecy, handle);</span>
 <span class="comment">//         locations.iter().any(|location| {</span>
 <span class="comment">//             store::delete(store, *location, &amp;path)</span>
 <span class="comment">//         })</span>

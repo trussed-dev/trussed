@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["KeyKind",""],["KeyType",""]],"struct":[["ByteBuf",""],["KeyFlags",""],["SerializedKey",""]],"type":[["KeyMaterial",""]]});
+initSidebarItems({"enum":[["KeyKind",""],["Secrecy",""]],"struct":[["ByteBuf",""],["KeyFlags",""],["SerializedKey",""]],"type":[["KeyMaterial",""]]});
