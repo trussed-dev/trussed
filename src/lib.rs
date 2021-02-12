@@ -1,7 +1,7 @@
 #![cfg_attr(not(test), no_std)]
-//! # Trussed™
+//! # Trussed
 //!
-//! Trussed™ is a minimal, modular way to write cryptographic applications on microcontroller platforms.
+//! Trussed® is a minimal, modular way to write cryptographic applications on microcontroller platforms.
 //! Easy to write, easy to audit — compile-time security by default.
 //!
 //! Documentation is evolving, a good entry point is the module `trussed::client`.
