@@ -57,18 +57,16 @@ impl<S: Store> ClientFilestore<S> {
         let end_of_namespace = bytes[1..].iter().position(|&x| x == b'/')
             // oh oh oh
             .unwrap();
-        let buf = PathBuf::from(&bytes[end_of_namespace + 1 + offset..]);
-        // info_now!("buf out: {:?}", &buf).ok();
-        buf
+        PathBuf::from(&bytes[end_of_namespace + 1 + offset..])
     }
 }
 
 pub trait Filestore {
-    fn read<N: ArrayLength<u8>>(&mut self, path: &PathBuf, location: &Location) -> Result<ByteBuf<N>>;
-    fn write(&mut self, path: &PathBuf, location: &Location, data: &[u8]) -> Result<()>;
-    fn exists(&mut self, path: &PathBuf, location: &Location) -> bool;
-    fn remove_file(&mut self, path: &PathBuf, location: &Location) -> Result<()>;
-    fn remove_dir(&mut self, path: &PathBuf, location: &Location) -> Result<()>;
+    fn read<N: ArrayLength<u8>>(&mut self, path: &PathBuf, location: Location) -> Result<ByteBuf<N>>;
+    fn write(&mut self, path: &PathBuf, location: Location, data: &[u8]) -> Result<()>;
+    fn exists(&mut self, path: &PathBuf, location: Location) -> bool;
+    fn remove_file(&mut self, path: &PathBuf, location: Location) -> Result<()>;
+    fn remove_dir(&mut self, path: &PathBuf, location: Location) -> Result<()>;
     fn locate_file(&mut self, location: Location, underneath: Option<PathBuf>, filename: PathBuf) -> Result<Option<PathBuf>>;
 
     /// Iterate over entries of a directory (both file and directory entries).
@@ -106,35 +104,35 @@ pub trait Filestore {
 }
 
 impl<S: Store> Filestore for ClientFilestore<S> {
-    fn read<N: ArrayLength<u8>>(&mut self, path: &PathBuf, location: &Location) -> Result<ByteBuf<N>> {
+    fn read<N: ArrayLength<u8>>(&mut self, path: &PathBuf, location: Location) -> Result<ByteBuf<N>> {
         let path = self.actual_path(path);
 
-        store::read(self.store, *location, &path)
+        store::read(self.store, location, &path)
     }
 
-    fn write(&mut self, path: &PathBuf, location: &Location, data: &[u8]) -> Result<()> {
+    fn write(&mut self, path: &PathBuf, location: Location, data: &[u8]) -> Result<()> {
         let path = self.actual_path(path);
-        store::write(self.store, *location, &path, data)
+        store::write(self.store, location, &path, data)
     }
 
-    fn exists(&mut self, path: &PathBuf, location: &Location) -> bool {
+    fn exists(&mut self, path: &PathBuf, location: Location) -> bool {
         let path = self.actual_path(path);
-        store::exists(self.store, *location, &path)
+        store::exists(self.store, location, &path)
     }
 
-    fn remove_file(&mut self, path: &PathBuf, location: &Location) -> Result<()> {
+    fn remove_file(&mut self, path: &PathBuf, location: Location) -> Result<()> {
         let path = self.actual_path(path);
 
-        match store::delete(self.store, location.clone(), &path) {
+        match store::delete(self.store, location, &path) {
             true => Ok(()),
             false => Err(Error::InternalError),
         }
     }
 
-    fn remove_dir(&mut self, path: &PathBuf, location: &Location) -> Result<()> {
+    fn remove_dir(&mut self, path: &PathBuf, location: Location) -> Result<()> {
         let path = self.actual_path(path);
 
-        match store::delete(self.store, location.clone(), &path) {
+        match store::delete(self.store, location, &path) {
             true => Ok(()),
             false => Err(Error::InternalError),
         }
@@ -163,15 +161,11 @@ impl<S: Store> Filestore for ClientFilestore<S> {
                 .map(|(i, entry)| (i, entry.unwrap()))
 
                 // if there is a "not_before" entry, skip all entries before it.
-                // since we're taking "next" at the following step, we can just filter
-                .filter(|(_, entry)| {
+                .find(|(_, entry)| {
                     if let Some(not_before) = not_before {
                         entry.file_name() == not_before.as_ref()
                     } else { true }
                 })
-
-                // take first entry that meets requirements
-                .next()
 
                 // if there is an entry, construct the state that needs storing out of it,
                 // remove the prefix from the entry's path to not leak implementation details to
@@ -204,7 +198,7 @@ impl<S: Store> Filestore for ClientFilestore<S> {
         Ok(fs.read_dir_and_then(&real_dir, |it| {
 
             // skip over previous
-            it.enumerate().skip(last).next()
+            it.enumerate().nth(last)
                 // entry is still a Result :/ (see question in `read_dir_first`)
                 .map(|(i,entry)| (i, entry.unwrap()))
                 // convert Option into Result, again because `read_dir_and_then` expects this
@@ -249,7 +243,8 @@ impl<S: Store> Filestore for ClientFilestore<S> {
                 // skip over directories (including `.` and `..`)
                 .filter(|(_, entry)| entry.file_type().is_file())
 
-                .filter(|(_, entry)| {
+                // take first entry that meets requirements
+                .find(|(_, entry)| {
                     if let Some(user_attribute) = user_attribute.as_ref() {
                         let mut path = dir.clone();
                         path.push(entry.file_name());
@@ -262,9 +257,6 @@ impl<S: Store> Filestore for ClientFilestore<S> {
                         }
                     } else { true }
                 })
-
-                // take first entry that meets requirements
-                .next()
 
                 // if there is an entry, construct the state that needs storing out of it,
                 // and return the file's contents.
@@ -296,7 +288,8 @@ impl<S: Store> Filestore for ClientFilestore<S> {
             it.enumerate().skip(last)
                 // entry is still a Result :/ (see question in `read_dir_first`)
                 .map(|(i,entry)| (i, entry.unwrap()))
-                .filter(|(_, entry)| {
+                // take first entry that meets requirements
+                .find(|(_, entry)| {
                     if let Some(user_attribute) = user_attribute.as_ref() {
                         let mut path = real_dir.clone();
                         path.push(entry.file_name());
@@ -308,9 +301,6 @@ impl<S: Store> Filestore for ClientFilestore<S> {
                         }
                     } else { true }
                 })
-
-                // take first entry that meets requirements
-                .next()
 
                 .map(|(i, entry)| {
                     let read_dir_files_state = ReadDirFilesState { real_dir: real_dir.clone(), last: i, location, user_attribute };
@@ -329,7 +319,7 @@ impl<S: Store> Filestore for ClientFilestore<S> {
             return Err(Error::RequestNotAvailable);
         }
 
-        let clients_dir = underneath.unwrap_or(PathBuf::from(b"/"));
+        let clients_dir = underneath.unwrap_or_else(|| PathBuf::from(b"/"));
         let dir = self.actual_path(&clients_dir);
         let fs = self.store.ifs();
 

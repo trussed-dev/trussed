@@ -2,6 +2,7 @@ macro_rules! generate_enums {
     ($($which:ident: $index:literal)*) => {
 
     #[derive(Clone, Eq, PartialEq, Debug)]
+    #[allow(clippy::large_enum_variant)]
     pub enum Request {
         DummyRequest, // for testing
         $(
@@ -10,6 +11,7 @@ macro_rules! generate_enums {
     }
 
     #[derive(Clone, Eq, PartialEq, Debug)]
+    #[allow(clippy::large_enum_variant)]
     pub enum Reply {
         DummyReply, // for testing
         $(

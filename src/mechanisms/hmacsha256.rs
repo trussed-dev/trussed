@@ -25,7 +25,7 @@ impl Sign for super::HmacSha256
         let l = shared_secret.as_ref().len();
         if (l & 0xf) != 0 {
             info_now!("wrong key length, expected multiple of 16, got {}", l);
-            Err(Error::WrongKeyKind)?;
+            return Err(Error::WrongKeyKind);
         }
         // keystore.load_key(&path, KeyKind::SharedSecret32, &mut shared_secret)?;
         // keystore.load_key(&path, KeyKind::SymmetricKey16, &mut shared_secret)?;

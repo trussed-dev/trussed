@@ -35,7 +35,7 @@ impl Encrypt for super::Aes256Cbc
 		let cipher = Aes256Cbc::new_var(&symmetric_key, &zero_iv).unwrap();
 
 		// buffer must have enough space for message+padding
-		let mut buffer = request.message.clone();
+		let mut buffer = request.message;
 		// // copy message to the buffer
 		// let pos = plaintext.len();
 		// buffer[..pos].copy_from_slice(plaintext);
@@ -70,7 +70,7 @@ impl WrapKey for super::Aes256Cbc
 
         let encryption_request = request::Encrypt {
             mechanism: Mechanism::Aes256Cbc,
-            key: request.wrapping_key.clone(),
+            key: request.wrapping_key,
             message,
             associated_data: ShortData::new(),
             nonce: None,
@@ -108,7 +108,7 @@ impl Decrypt for super::Aes256Cbc
 		let cipher = Aes256Cbc::new_var(&symmetric_key, &zero_iv).unwrap();
 
 		// buffer must have enough space for message+padding
-		let mut buffer = request.message.clone();
+		let mut buffer = request.message;
 		// // copy message to the buffer
 		// let pos = plaintext.len();
 		// buffer[..pos].copy_from_slice(plaintext);

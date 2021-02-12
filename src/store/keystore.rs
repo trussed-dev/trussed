@@ -149,7 +149,7 @@ impl<P: Platform> Keystore for ClientKeystore<'_, P> {
         if let Some(kind) = kind {
             if serialized_key.kind != kind {
                 // info_now!("wrong key kind, expected {:?} got {:?}", &kind, &serialized_key.kind);
-                Err(Error::WrongKeyKind)?;
+                return Err(Error::WrongKeyKind);
             }
         }
         Ok(serialized_key)

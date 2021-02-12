@@ -450,7 +450,7 @@ pub fn read<N: heapless::ArrayLength<u8>>(store: impl Store, location: StorageLo
         StorageLocation::Internal => store.ifs().read(path),
         StorageLocation::External => store.efs().read(path),
         StorageLocation::Volatile => store.vfs().read(path),
-    }.map(|vec| ByteBuf::from(vec)).map_err(|_| Error::FilesystemReadFailure)
+    }.map(ByteBuf::from).map_err(|_| Error::FilesystemReadFailure)
 }
 
 /// Writes contents to path in location of store.

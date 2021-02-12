@@ -114,6 +114,7 @@ pub type ClientId = PathBuf;
 
 
 #[derive(Clone, Eq, PartialEq, Debug, Serialize, Deserialize)]
+#[allow(clippy::large_enum_variant)]
 pub enum Attributes {
     Certificate,
     Counter,
@@ -201,10 +202,11 @@ impl KeyAttributes {
     }
 }
 
-/// PhantomData to make it unconstructable
+/// Non-exhaustive to make it unconstructable
 /// NB: Better to check in service that nothing snuck through!
 #[derive(Clone, Default, Eq, PartialEq, Debug, Deserialize, Serialize)]
-pub struct Letters(pub ShortData, ());
+#[non_exhaustive]
+pub struct Letters(pub ShortData);
 
 impl TryFrom<ShortData> for Letters {
     type Error = crate::error::Error;
@@ -213,7 +215,7 @@ impl TryFrom<ShortData> for Letters {
         if !&bytes.iter().all(|b| *b >= b'a' && *b <= b'z') {
             return Err(Self::Error::NotJustLetters);
         }
-        Ok(Letters(bytes, ()))
+        Ok(Letters(bytes))
     }
 }
 
@@ -290,7 +292,7 @@ impl<'de> serde::Deserialize<'de> for ObjectHandle {
             {
                 use core::convert::TryInto;
                 if v.len() != 16 {
-                    return Err(E::invalid_length(v.len(), &self))?;
+                    return Err(E::invalid_length(v.len(), &self));
                 }
                 Ok(ObjectHandle { object_id: UniqueId(v.try_into().unwrap()) } )
             }
@@ -391,6 +393,12 @@ impl StorageAttributes {
     }
 }
 
+impl Default for StorageAttributes {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Serialize, Deserialize)]
 pub enum Mechanism {
     Aes256Cbc,
@@ -471,6 +479,7 @@ impl UniqueId {
         buffer
     }
 
+    #[allow(clippy::result_unit_err)]
     pub fn try_from_hex(hex: &[u8]) -> core::result::Result<Self, ()> {
         // https://stackoverflow.com/a/52992629
         // (0..hex.len())

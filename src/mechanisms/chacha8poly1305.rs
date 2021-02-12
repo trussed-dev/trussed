@@ -1,4 +1,4 @@
-use core::convert::{TryFrom, TryInto};
+use core::convert::TryInto;
 
 use crate::api::*;
 // use crate::config::*;
@@ -173,7 +173,7 @@ impl WrapKey for super::Chacha8Poly1305
 
         let encryption_request = request::Encrypt {
             mechanism: Mechanism::Chacha8Poly1305,
-            key: request.wrapping_key.clone(),
+            key: request.wrapping_key,
             message,
             associated_data: ShortData::new(),
             nonce: None,
@@ -198,7 +198,7 @@ impl UnwrapKey for super::Chacha8Poly1305
 
         let decryption_request = request::Decrypt {
             mechanism: Mechanism::Chacha8Poly1305,
-            key: request.wrapping_key.clone(),
+            key: request.wrapping_key,
             message: ciphertext,
             associated_data: request.associated_data,
             nonce,
@@ -214,7 +214,6 @@ impl UnwrapKey for super::Chacha8Poly1305
 
         // TODO: probably change this to returning Option<key> too
         let SerializedKey { kind, value, .. } = crate::cbor_deserialize(&serialized_key).map_err(|_| Error::CborError)?;
-        let kind = KeyKind::try_from(kind).map_err(|_| Error::InternalError)?;
 
         // TODO: need to check both secret and private keys
         let key_id = keystore.store_key(

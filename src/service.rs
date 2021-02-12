@@ -99,7 +99,7 @@ impl<P: Platform> ServiceResources<P> {
 
         // prepare filestore, bound to client_id, for storage calls
         let mut filestore: ClientFilestore<P::S> = ClientFilestore::new(
-            client_id.clone(),
+            client_id,
             full_store,
         );
         let filestore = &mut filestore;
@@ -116,7 +116,7 @@ impl<P: Platform> ServiceResources<P> {
                     Mechanism::X255 => mechanisms::X255::agree(keystore, request),
                     _ => Err(Error::MechanismNotAvailable),
 
-                }.map(|reply| Reply::Agree(reply))
+                }.map(Reply::Agree)
             },
 
             Request::Decrypt(request) => {
@@ -127,7 +127,7 @@ impl<P: Platform> ServiceResources<P> {
                     Mechanism::Tdes => mechanisms::Tdes::decrypt(keystore, request),
                     _ => Err(Error::MechanismNotAvailable),
 
-                }.map(|reply| Reply::Decrypt(reply))
+                }.map(Reply::Decrypt)
             },
 
             Request::DeriveKey(request) => {
@@ -139,7 +139,7 @@ impl<P: Platform> ServiceResources<P> {
                     Mechanism::X255 => mechanisms::X255::derive_key(keystore, request),
                     _ => Err(Error::MechanismNotAvailable),
 
-                }.map(|reply| Reply::DeriveKey(reply))
+                }.map(Reply::DeriveKey)
             },
 
             Request::DeserializeKey(request) => {
@@ -150,7 +150,7 @@ impl<P: Platform> ServiceResources<P> {
                     Mechanism::X255 => mechanisms::X255::deserialize_key(keystore, request),
                     _ => Err(Error::MechanismNotAvailable),
 
-                }.map(|reply| Reply::DeserializeKey(reply))
+                }.map(Reply::DeserializeKey)
             }
 
             Request::Encrypt(request) => {
@@ -161,7 +161,7 @@ impl<P: Platform> ServiceResources<P> {
                     Mechanism::Tdes => mechanisms::Tdes::encrypt(keystore, request),
                     _ => Err(Error::MechanismNotAvailable),
 
-                }.map(|reply| Reply::Encrypt(reply))
+                }.map(Reply::Encrypt)
             },
 
             Request::Delete(request) => {
@@ -178,7 +178,7 @@ impl<P: Platform> ServiceResources<P> {
                     Mechanism::X255 => mechanisms::X255::exists(keystore, request),
                     _ => Err(Error::MechanismNotAvailable),
 
-                }.map(|reply| Reply::Exists(reply))
+                }.map(Reply::Exists)
             },
 
             Request::GenerateKey(request) => {
@@ -189,7 +189,7 @@ impl<P: Platform> ServiceResources<P> {
                     Mechanism::P256 => mechanisms::P256::generate_key(keystore, request),
                     Mechanism::X255 => mechanisms::X255::generate_key(keystore, request),
                     _ => Err(Error::MechanismNotAvailable),
-                }.map(|reply| Reply::GenerateKey(reply))
+                }.map(Reply::GenerateKey)
             },
 
             Request::UnsafeInjectKey(request) => {
@@ -197,7 +197,7 @@ impl<P: Platform> ServiceResources<P> {
                     Mechanism::Tdes => mechanisms::Tdes::unsafe_inject_key(keystore, request),
                     Mechanism::Totp => mechanisms::Totp::unsafe_inject_key(keystore, request),
                     _ => Err(Error::MechanismNotAvailable),
-                }.map(|reply| Reply::UnsafeInjectKey(reply))
+                }.map(Reply::UnsafeInjectKey)
             },
 
             Request::Hash(request) => {
@@ -206,7 +206,7 @@ impl<P: Platform> ServiceResources<P> {
                     Mechanism::Sha256 => mechanisms::Sha256::hash(keystore, request),
                     _ => Err(Error::MechanismNotAvailable),
 
-                }.map(|reply| Reply::Hash(reply))
+                }.map(Reply::Hash)
             },
 
             Request::LocateFile(request) => {
@@ -326,18 +326,18 @@ impl<P: Platform> ServiceResources<P> {
             }
 
             Request::RemoveDir(request) => {
-                filestore.remove_dir(&request.path, &request.location)?;
+                filestore.remove_dir(&request.path, request.location)?;
                 Ok(Reply::RemoveDir(reply::RemoveDir {} ))
             }
 
             Request::RemoveFile(request) => {
-                filestore.remove_file(&request.path, &request.location)?;
+                filestore.remove_file(&request.path, request.location)?;
                 Ok(Reply::RemoveFile(reply::RemoveFile {} ))
             }
 
             Request::ReadFile(request) => {
                 Ok(Reply::ReadFile(reply::ReadFile {
-                    data: filestore.read(&request.path, &request.location)?
+                    data: filestore.read(&request.path, request.location)?
                 }))
             }
 
@@ -360,7 +360,7 @@ impl<P: Platform> ServiceResources<P> {
                     Mechanism::X255 => mechanisms::X255::serialize_key(keystore, request),
                     _ => Err(Error::MechanismNotAvailable),
 
-                }.map(|reply| Reply::SerializeKey(reply))
+                }.map(Reply::SerializeKey)
             }
 
             Request::Sign(request) => {
@@ -373,11 +373,11 @@ impl<P: Platform> ServiceResources<P> {
                     Mechanism::Totp => mechanisms::Totp::sign(keystore, request),
                     _ => Err(Error::MechanismNotAvailable),
 
-                }.map(|reply| Reply::Sign(reply))
+                }.map(Reply::Sign)
             },
 
             Request::WriteFile(request) => {
-                filestore.write(&request.path, &request.location, &request.data)?;
+                filestore.write(&request.path, request.location, &request.data)?;
                 Ok(Reply::WriteFile(reply::WriteFile {} ))
             }
 
@@ -387,7 +387,7 @@ impl<P: Platform> ServiceResources<P> {
                     Mechanism::Chacha8Poly1305 => mechanisms::Chacha8Poly1305::unwrap_key(keystore, request),
                     _ => Err(Error::MechanismNotAvailable),
 
-                }.map(|reply| Reply::UnwrapKey(reply))
+                }.map(Reply::UnwrapKey)
             }
 
             Request::Verify(request) => {
@@ -397,7 +397,7 @@ impl<P: Platform> ServiceResources<P> {
                     Mechanism::P256 => mechanisms::P256::verify(keystore, request),
                     _ => Err(Error::MechanismNotAvailable),
 
-                }.map(|reply| Reply::Verify(reply))
+                }.map(Reply::Verify)
             },
 
             Request::WrapKey(request) => {
@@ -407,7 +407,7 @@ impl<P: Platform> ServiceResources<P> {
                     Mechanism::Chacha8Poly1305 => mechanisms::Chacha8Poly1305::wrap_key(keystore, request),
                     _ => Err(Error::MechanismNotAvailable),
 
-                }.map(|reply| Reply::WrapKey(reply))
+                }.map(Reply::WrapKey)
             },
 
             Request::RequestUserConsent(request) => {
@@ -477,14 +477,14 @@ impl<P: Platform> ServiceResources<P> {
             let path = PathBuf::from(b"rng-state.bin");
 
             // If it hasn't been saved to flash yet, generate it from HW RNG.
-            let stored_seed = if ! filestore.exists(&path, &StorageLocation::Internal) {
+            let stored_seed = if ! filestore.exists(&path, StorageLocation::Internal) {
                 let mut stored_seed = [0u8; 32];
                 self.platform.rng().try_fill_bytes(&mut stored_seed)
                     .map_err(|_| Error::EntropyMalfunction)?;
                 stored_seed
             } else {
                 // Use the last saved state.
-                let stored_seed_bytebuf: ByteBuf<consts::U32> = filestore.read(&path, &StorageLocation::Internal)?;
+                let stored_seed_bytebuf: ByteBuf<consts::U32> = filestore.read(&path, StorageLocation::Internal)?;
                 let mut stored_seed = [0u8; 32];
                 stored_seed.clone_from_slice(&stored_seed_bytebuf);
                 stored_seed
@@ -525,7 +525,7 @@ impl<P: Platform> ServiceResources<P> {
             hash.input(&our_seed);
             let seed_to_store = hash.result();
 
-            filestore.write(&path, &StorageLocation::Internal, seed_to_store.as_ref()).unwrap();
+            filestore.write(&path, StorageLocation::Internal, seed_to_store.as_ref()).unwrap();
         }
 
         // no panic - just ensured existence
@@ -534,7 +534,8 @@ impl<P: Platform> ServiceResources<P> {
     }
 
     pub fn fill_random_bytes(&mut self, bytes: &mut[u8]) -> Result<(), Error> {
-        Ok(self.drbg()?.fill_bytes(bytes))
+        self.drbg()?.fill_bytes(bytes);
+        Ok(())
     }
 
 }
@@ -548,6 +549,7 @@ impl<P: Platform> Service<P> {
 
     /// Add a new client, claiming one of the statically configured
     /// interchange pairs.
+    #[allow(clippy::result_unit_err)]
     pub fn try_new_client<S: crate::platform::Syscall>(&mut self, client_id: &str, syscall: S)
         -> Result<crate::client::ClientImplementation<S>, ()>
     {
@@ -562,6 +564,7 @@ impl<P: Platform> Service<P> {
     /// Specialization of `try_new_client`, using `self`'s implementation of `Syscall`
     /// (directly call self for processing). This method is only useful for single-threaded
     /// single-app runners.
+    #[allow(clippy::result_unit_err)]
     pub fn try_as_new_client(&mut self, client_id: &str)
         -> Result<crate::client::ClientImplementation<&mut Service<P>>, ()>
     {
@@ -590,8 +593,8 @@ impl<P: Platform> Service<P> {
         let filestore = &mut filestore;
 
         let path = PathBuf::from(b"rng-state.bin");
-        if ! filestore.exists(&path, &StorageLocation::Internal) {
-            filestore.write(&path, &StorageLocation::Internal, seed.as_ref()).unwrap();
+        if ! filestore.exists(&path, StorageLocation::Internal) {
+            filestore.write(&path, StorageLocation::Internal, seed.as_ref()).unwrap();
         }
 
     }

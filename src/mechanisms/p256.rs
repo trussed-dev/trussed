@@ -118,10 +118,8 @@ impl DeserializeKey for super::P256
                 serialized_key[..32].copy_from_slice(&cose_public_key.x);
                 serialized_key[32..].copy_from_slice(&cose_public_key.y);
 
-                let public_key = nisty::PublicKey::try_from(&serialized_key)
-                    .map_err(|_| Error::InvalidSerializedKey)?;
-
-                public_key
+                nisty::PublicKey::try_from(&serialized_key)
+                    .map_err(|_| Error::InvalidSerializedKey)?
             }
 
             KeySerialization::EcdhEsHkdf256 => {
@@ -136,10 +134,8 @@ impl DeserializeKey for super::P256
                 serialized_key[..32].copy_from_slice(&cose_public_key.x);
                 serialized_key[32..].copy_from_slice(&cose_public_key.y);
 
-                let public_key = nisty::PublicKey::try_from(&serialized_key)
-                    .map_err(|_| Error::InvalidSerializedKey)?;
-
-                public_key
+                nisty::PublicKey::try_from(&serialized_key)
+                    .map_err(|_| Error::InvalidSerializedKey)?
             }
 
             KeySerialization::Raw => {
@@ -149,10 +145,9 @@ impl DeserializeKey for super::P256
 
                 let mut serialized_key = [0u8; 64];
                 serialized_key.copy_from_slice(&request.serialized_key[..64]);
-                let public_key = nisty::PublicKey::try_from(&serialized_key)
-                    .map_err(|_| Error::InvalidSerializedKey)?;
 
-                public_key
+                nisty::PublicKey::try_from(&serialized_key)
+                    .map_err(|_| Error::InvalidSerializedKey)?
             }
 
             _ => { return Err(Error::InternalError); }
