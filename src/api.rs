@@ -6,6 +6,7 @@
 //! [pkcs11-headers]: https://docs.oasis-open.org/pkcs11/pkcs11-base/v3.0/cs01/include/pkcs11-v3.0/
 
 use core::hint::unreachable_unchecked;
+use core::time::Duration;
 use crate::config;
 use crate::types::*;
 
@@ -75,6 +76,7 @@ generate_enums! {
 
     RequestUserConsent: 33
     Reboot: 34
+    Uptime: 35
 
     //////////////
     // Counters //
@@ -268,6 +270,8 @@ pub mod request {
         Reboot:
           - to: reboot::To
 
+        Uptime:
+
         CreateCounter:
           - location: Location
 
@@ -386,6 +390,9 @@ pub mod reply {
             - result: consent::Result
 
         Reboot:
+
+        Uptime:
+          - uptime: Duration
 
         CreateCounter:
           - id: Id

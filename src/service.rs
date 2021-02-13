@@ -462,6 +462,10 @@ impl<P: Platform> ServiceResources<P> {
                 self.platform.user_interface().reboot(request.to);
             }
 
+            Request::Uptime(_request) => {
+                Ok(Reply::Uptime(reply::Uptime { uptime: self.platform.user_interface().uptime() }))
+            }
+
             Request::CreateCounter(request) => {
                 counterstore.create(request.location)
                     .map(|id| Reply::CreateCounter(reply::CreateCounter { id } ))

@@ -576,6 +576,15 @@ pub trait ManagementClient: PollClient {
         Ok(r)
     }
 
+    fn uptime(&mut self)
+        -> ClientResult<'_, reply::Uptime, Self>
+    {
+        let r = self.request(request::Uptime {})?;
+        r.client.syscall();
+        Ok(r)
+    }
+
+
 }
 
 

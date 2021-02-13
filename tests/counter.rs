@@ -4,7 +4,10 @@ mod client;
 mod store;
 
 use trussed::{
-    client::CounterClient as _,
+    client::{
+        CounterClient as _,
+        // ManagementClient as _,
+    },
     error::Result,
     syscall,
     types::Location::*,
@@ -58,6 +61,8 @@ fn counter_client() {
         for j in 3..1_000 {
             assert_eq!(syscall!(client.increment_counter(jd)).counter, j);
         }
+
+        // assert_eq!(syscall!(client.uptime()).uptime.as_nanos(), 10);
 
     });
 }
