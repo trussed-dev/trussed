@@ -86,6 +86,8 @@ use crate::types::*;
 
 pub use crate::platform::Syscall;
 
+pub mod mechanisms;
+
 // to be fair, this is a programmer error,
 // and could also just panic
 #[derive(Copy, Clone, Debug)]
@@ -97,11 +99,12 @@ pub enum ClientError {
 
 pub type ClientResult<'c, T, C> = core::result::Result<FutureResult<'c, T, C>, ClientError>;
 
-pub trait Client: CryptoClient + CounterClient + FilesystemClient + ManagementClient + UiClient {}
+/// All-in-one trait bounding on the sub-traits.
+pub trait Client: CertificateClient + CryptoClient + CounterClient + FilesystemClient + ManagementClient + UiClient {}
 
 impl<S: Syscall> Client for ClientImplementation<S> {}
 
-/// Trussed Client interface that Trussed apps can rely on.
+/// Lowest level interface, use one of the higher level ones.
 pub trait PollClient {
     fn request<T: From<crate::api::Reply>>(&mut self, req: impl Into<Request>) -> ClientResult<'_, T, Self>;
     fn poll(&mut self) -> core::task::Poll<core::result::Result<Reply, Error>>;
@@ -135,6 +138,7 @@ where
     }
 }
 
+/// The client implementation client applications actually receive.
 pub struct ClientImplementation<S> {
     // raw: RawClient<Client<S>>,
     syscall: S,
@@ -220,11 +224,46 @@ where S: Syscall {
     }
 }
 
+impl<S: Syscall> CertificateClient for ClientImplementation<S> {}
 impl<S: Syscall> CryptoClient for ClientImplementation<S> {}
 impl<S: Syscall> CounterClient for ClientImplementation<S> {}
 impl<S: Syscall> FilesystemClient for ClientImplementation<S> {}
 impl<S: Syscall> ManagementClient for ClientImplementation<S> {}
 impl<S: Syscall> UiClient for ClientImplementation<S> {}
+
+/// Read/Write + Delete certificates
+pub trait CertificateClient: PollClient {
+
+    fn delete_certificate(&mut self, id: Id)
+        -> ClientResult<'_, reply::DeleteCertificate, Self>
+    {
+        let r = self.request(request::DeleteCertificate { id })?;
+        r.client.syscall();
+        Ok(r)
+    }
+
+    fn read_certificate(&mut self, id: Id)
+        -> ClientResult<'_, reply::ReadCertificate, Self>
+    {
+        let r = self.request(request::ReadCertificate { id })?;
+        r.client.syscall();
+        Ok(r)
+    }
+
+    /// Currently, this writes the cert (assumed but not verified to be DER)
+    /// as-is. It might make sense to add attributes (such as "deletable").
+    /// (On the other hand, the attn CA certs are not directly accessible to clients,
+    /// and generated attn certs can be regenerated).
+    fn write_certificate(&mut self, location: Location, der: &[u8])
+        -> ClientResult<'_, reply::WriteCertificate, Self>
+    {
+        let der = Message::try_from_slice(der).map_err(|_| ClientError::DataTooLarge)?;
+        let r = self.request(request::WriteCertificate { location, der })?;
+        r.client.syscall();
+        Ok(r)
+    }
+
+}
 
 /// Trussed Client interface that Trussed apps can rely on.
 pub trait CryptoClient: PollClient {
@@ -440,6 +479,7 @@ pub trait CryptoClient: PollClient {
 
 }
 
+/// Create counters, increment existing counters.
 pub trait CounterClient: PollClient {
 
     fn create_counter(&mut self, location: Location)
@@ -460,6 +500,7 @@ pub trait CounterClient: PollClient {
 
 }
 
+/// Read/Write/Delete files, iterate over directories.
 pub trait FilesystemClient: PollClient {
 
     fn debug_dump_store(&mut self)
@@ -566,6 +607,7 @@ pub trait FilesystemClient: PollClient {
 }
 
 
+/// All the other methods that are fit to expose.
 pub trait ManagementClient: PollClient {
 
     fn reboot(&mut self, to: reboot::To)
@@ -588,6 +630,7 @@ pub trait ManagementClient: PollClient {
 }
 
 
+/// User-interfacing functionality.
 pub trait UiClient: PollClient {
 
     fn confirm_user_present(&mut self, timeout_milliseconds: u32)
@@ -603,267 +646,6 @@ pub trait UiClient: PollClient {
 
 }
 
-
-#[cfg(feature = "aes256-cbc")]
-impl<S: Syscall> Aes256Cbc for ClientImplementation<S> {}
-
-pub trait Aes256Cbc: CryptoClient {
-    fn decrypt_aes256cbc<'c>(&'c mut self, key: ObjectHandle, message: &[u8])
-        -> ClientResult<'c, reply::Decrypt, Self>
-    {
-        self.decrypt(
-            Mechanism::Aes256Cbc, key, message, &[], &[], &[],
-        )
-    }
-
-    fn wrap_key_aes256cbc(&mut self, wrapping_key: ObjectHandle, key: ObjectHandle)
-        -> ClientResult<'_, reply::WrapKey, Self>
-    {
-        self.wrap_key(Mechanism::Aes256Cbc, wrapping_key, key, &[])
-    }
-}
-
-#[cfg(feature = "chacha8-poly1305")]
-impl<S: Syscall> Chacha8Poly1305 for ClientImplementation<S> {}
-
-pub trait Chacha8Poly1305: CryptoClient {
-    fn decrypt_chacha8poly1305<'c>(&'c mut self, key: ObjectHandle, message: &[u8], associated_data: &[u8],
-                                       nonce: &[u8], tag: &[u8])
-        -> ClientResult<'c, reply::Decrypt, Self>
-    {
-        self.decrypt(Mechanism::Chacha8Poly1305, key, message, associated_data, nonce, tag)
-    }
-
-    fn encrypt_chacha8poly1305<'c>(&'c mut self, key: ObjectHandle, message: &[u8], associated_data: &[u8],
-                                       nonce: Option<&[u8; 12]>)
-        -> ClientResult<'c, reply::Encrypt, Self>
-    {
-        self.encrypt(Mechanism::Chacha8Poly1305, key, message, associated_data,
-            nonce.and_then(|nonce| ShortData::try_from_slice(nonce).ok()))
-    }
-
-    fn generate_chacha8poly1305_key(&mut self, persistence: Location)
-        -> ClientResult<'_, reply::GenerateKey, Self>
-    {
-        self.generate_key(Mechanism::Chacha8Poly1305, StorageAttributes::new().set_persistence(persistence))
-    }
-
-    fn unwrap_key_chacha8poly1305<'c>(&'c mut self, wrapping_key: ObjectHandle, wrapped_key: &[u8],
-                       associated_data: &[u8], location: Location)
-        -> ClientResult<'c, reply::UnwrapKey, Self>
-    {
-        self.unwrap_key(Mechanism::Chacha8Poly1305, wrapping_key,
-                        Message::try_from_slice(wrapped_key).map_err(|_| ClientError::DataTooLarge)?,
-                        associated_data,
-                        StorageAttributes::new().set_persistence(location))
-    }
-
-    fn wrap_key_chacha8poly1305<'c>(&'c mut self, wrapping_key: ObjectHandle, key: ObjectHandle,
-                       associated_data: &[u8])
-        -> ClientResult<'c, reply::WrapKey, Self>
-    {
-        self.wrap_key(Mechanism::Chacha8Poly1305, wrapping_key, key, associated_data)
-    }
-}
-
-#[cfg(feature = "hmac-sha256")]
-impl<S: Syscall> HmacSha256 for ClientImplementation<S> {}
-
-pub trait HmacSha256: CryptoClient {
-    fn generate_hmacsha256_key(&mut self, persistence: Location)
-        -> ClientResult<'_, reply::GenerateKey, Self>
-    {
-        self.generate_key(Mechanism::HmacSha256, StorageAttributes::new().set_persistence(persistence))
-    }
-
-    fn sign_hmacsha256<'c>(&'c mut self, key: ObjectHandle, message: &[u8])
-        -> ClientResult<'c, reply::Sign, Self>
-    {
-        self.sign(Mechanism::HmacSha256, key, message, SignatureSerialization::Raw)
-    }
-
-}
-
-#[cfg(feature = "ed255")]
-impl<S: Syscall> Ed255 for ClientImplementation<S> {}
-
-pub trait Ed255: CryptoClient {
-    fn generate_ed255_private_key(&mut self, persistence: Location)
-        -> ClientResult<'_, reply::GenerateKey, Self>
-    {
-        self.generate_key(Mechanism::Ed255, StorageAttributes::new().set_persistence(persistence))
-    }
-
-    fn derive_ed255_public_key(&mut self, private_key: ObjectHandle, persistence: Location)
-        -> ClientResult<'_, reply::DeriveKey, Self>
-    {
-        self.derive_key(Mechanism::Ed255, private_key, StorageAttributes::new().set_persistence(persistence))
-    }
-
-    fn deserialize_ed255_key<'c>(&'c mut self, serialized_key: &[u8], format: KeySerialization, attributes: StorageAttributes)
-        -> ClientResult<'c, reply::DeserializeKey, Self>
-    {
-        self.deserialize_key(Mechanism::Ed255, serialized_key, format, attributes)
-    }
-
-    fn serialize_ed255_key(&mut self, key: ObjectHandle, format: KeySerialization)
-        -> ClientResult<'_, reply::SerializeKey, Self>
-    {
-        self.serialize_key(Mechanism::Ed255, key, format)
-    }
-
-    fn sign_ed255<'c>(&'c mut self, key: ObjectHandle, message: &[u8])
-        -> ClientResult<'c, reply::Sign, Self>
-    {
-        self.sign(Mechanism::Ed255, key, message, SignatureSerialization::Raw)
-    }
-
-    fn verify_ed255<'c>(&'c mut self, key: ObjectHandle, message: &[u8], signature: &[u8])
-        -> ClientResult<'c, reply::Verify, Self>
-    {
-        self.verify(Mechanism::Ed255, key, message, signature, SignatureSerialization::Raw)
-    }
-}
-
-#[cfg(feature = "p256")]
-impl<S: Syscall> P256 for ClientImplementation<S> {}
-
-pub trait P256: CryptoClient {
-    fn generate_p256_private_key(&mut self, persistence: Location)
-        -> ClientResult<'_, reply::GenerateKey, Self>
-    {
-        self.generate_key(Mechanism::P256, StorageAttributes::new().set_persistence(persistence))
-    }
-
-    fn derive_p256_public_key(&mut self, private_key: ObjectHandle, persistence: Location)
-        -> ClientResult<'_, reply::DeriveKey, Self>
-    {
-        self.derive_key(Mechanism::P256, private_key, StorageAttributes::new().set_persistence(persistence))
-    }
-
-    fn deserialize_p256_key<'c>(&'c mut self, serialized_key: &[u8], format: KeySerialization, attributes: StorageAttributes)
-        -> ClientResult<'c, reply::DeserializeKey, Self>
-    {
-        self.deserialize_key(Mechanism::P256, serialized_key, format, attributes)
-    }
-
-    fn serialize_p256_key(&mut self, key: ObjectHandle, format: KeySerialization)
-        -> ClientResult<'_, reply::SerializeKey, Self>
-    {
-        self.serialize_key(Mechanism::P256, key, format)
-    }
-
-    // generally, don't offer multiple versions of a mechanism, if possible.
-    // try using the simplest when given the choice.
-    // hashing is something users can do themselves hopefully :)
-    //
-    // on the other hand: if users need sha256, then if the service runs in secure trustzone
-    // domain, we'll maybe need two copies of the sha2 code
-    fn sign_p256<'c>(&'c mut self, key: ObjectHandle, message: &[u8], format: SignatureSerialization)
-        -> ClientResult<'c, reply::Sign, Self>
-    {
-        self.sign(Mechanism::P256, key, message, format)
-    }
-
-    fn verify_p256<'c>(&'c mut self, key: ObjectHandle, message: &[u8], signature: &[u8])
-        -> ClientResult<'c, reply::Verify, Self>
-    {
-        self.verify(Mechanism::P256, key, message, signature, SignatureSerialization::Raw)
-    }
-
-    fn agree_p256(&mut self, private_key: ObjectHandle, public_key: ObjectHandle, persistence: Location)
-        -> ClientResult<'_, reply::Agree, Self>
-    {
-        self.agree(
-            Mechanism::P256,
-            private_key,
-            public_key,
-            StorageAttributes::new().set_persistence(persistence),
-        )
-    }
-}
-
-#[cfg(feature = "sha256")]
-impl<S: Syscall> Sha256 for ClientImplementation<S> {}
-
-pub trait Sha256: CryptoClient {
-    fn hash_sha256<'c>(&'c mut self, message: &[u8])
-        -> ClientResult<'c, reply::Hash, Self>
-    {
-        self.hash(Mechanism::Sha256, Message::try_from_slice(message).map_err(|_| ClientError::DataTooLarge)?)
-    }
-}
-
-#[cfg(feature = "tdes")]
-impl<S: Syscall> Tdes for ClientImplementation<S> {}
-
-pub trait Tdes: CryptoClient {
-    fn decrypt_tdes<'c>(&'c mut self, key: ObjectHandle, message: &[u8])
-        -> ClientResult<'c, reply::Decrypt, Self>
-    {
-        self.decrypt(Mechanism::Tdes, key, message, &[], &[], &[])
-    }
-
-    fn encrypt_tdes<'c>(&'c mut self, key: ObjectHandle, message: &[u8])
-        -> ClientResult<'c, reply::Encrypt, Self>
-    {
-        self.encrypt(Mechanism::Tdes, key, message, &[], None)
-    }
-
-    fn unsafe_inject_tdes_key<'c>(&'c mut self, raw_key: &[u8; 24], persistence: Location)
-        -> ClientResult<'c, reply::UnsafeInjectKey, Self>
-    {
-        self.unsafe_inject_key(Mechanism::Tdes, raw_key, persistence)
-    }
-}
-
-#[cfg(feature = "totp")]
-impl<S: Syscall> Totp for ClientImplementation<S> {}
-
-pub trait Totp: CryptoClient {
-    fn sign_totp(&mut self, key: ObjectHandle, timestamp: u64)
-        -> ClientResult<'_, reply::Sign, Self>
-    {
-        self.sign(Mechanism::Totp, key,
-            &timestamp.to_le_bytes().as_ref(),
-            SignatureSerialization::Raw,
-        )
-    }
-
-    fn unsafe_inject_totp_key<'c>(&'c mut self, raw_key: &[u8; 20], persistence: Location)
-        -> ClientResult<'c, reply::UnsafeInjectKey, Self>
-    {
-        self.unsafe_inject_key(Mechanism::Totp, raw_key, persistence)
-    }
-}
-
-#[cfg(feature = "x255")]
-impl<S: Syscall> X255 for ClientImplementation<S> {}
-
-pub trait X255: CryptoClient {
-    fn generate_x255_secret_key(&mut self, persistence: Location)
-        -> ClientResult<'_, reply::GenerateKey, Self>
-    {
-        self.generate_key(Mechanism::X255, StorageAttributes::new().set_persistence(persistence))
-    }
-
-    fn derive_x255_public_key(&mut self, secret_key: ObjectHandle, persistence: Location)
-        -> ClientResult<'_, reply::DeriveKey, Self>
-    {
-        self.derive_key(Mechanism::X255, secret_key, StorageAttributes::new().set_persistence(persistence))
-    }
-
-    fn agree_x255(&mut self, private_key: ObjectHandle, public_key: ObjectHandle, persistence: Location)
-        -> ClientResult<'_, reply::Agree, Self>
-    {
-        self.agree(
-            Mechanism::X255,
-            private_key,
-            public_key,
-            StorageAttributes::new().set_persistence(persistence),
-        )
-    }
-}
 
 // would be interesting to use proper futures, and something like
 // https://github.com/dflemstr/direct-executor/blob/master/src/lib.rs#L62-L66

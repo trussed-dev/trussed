@@ -32,6 +32,7 @@ pub enum Error {
     InvalidSerializationFormat,
     MechanismNotAvailable,
     NonceOverflow,
+    NoSuchCertificate,
     NoSuchKey,
     NotJustLetters,
     RequestNotAvailable,

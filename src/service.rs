@@ -14,6 +14,7 @@ use crate::mechanisms;
 use crate::pipe::TrussedInterchange;
 pub use crate::store::{
     filestore::{ClientFilestore, Filestore, ReadDirState, ReadDirFilesState},
+    certstore::{ClientCertstore, Certstore as _},
     counterstore::{ClientCounterstore, Counterstore as _},
     keystore::{ClientKeystore, Keystore},
 };
@@ -97,6 +98,13 @@ impl<P: Platform> ServiceResources<P> {
             full_store,
         );
         let keystore = &mut keystore;
+
+        // prepare certstore, bound to client_id, for cert calls
+        let mut certstore: ClientCertstore<P::S> = ClientCertstore::new(
+            client_id.clone(),
+            full_store,
+        );
+        let certstore = &mut certstore;
 
         // prepare counterstore, bound to client_id, for counter calls
         let mut counterstore: ClientCounterstore<P::S> = ClientCounterstore::new(
@@ -474,6 +482,23 @@ impl<P: Platform> ServiceResources<P> {
             Request::IncrementCounter(request) => {
                 counterstore.increment(request.id)
                     .map(|counter| Reply::IncrementCounter(reply::IncrementCounter { counter } ))
+            }
+
+            Request::DeleteCertificate(request) => {
+                certstore.delete_certificate(request.id)
+                    .map(|_| Reply::DeleteCertificate(reply::DeleteCertificate {} ))
+
+            }
+
+            Request::ReadCertificate(request) => {
+                certstore.read_certificate(request.id)
+                    .map(|der| Reply::ReadCertificate(reply::ReadCertificate { der } ))
+
+            }
+
+            Request::WriteCertificate(request) => {
+                certstore.write_certificate(request.location, &request.der, counterstore)
+                    .map(|id| Reply::WriteCertificate(reply::WriteCertificate { id } ))
             }
 
             _ => {

@@ -53,16 +53,6 @@ impl<S: Store> ClientCounterstore<S> {
         store::store(self.store, location, &path, &value.to_le_bytes())
     }
 
-    pub fn increment_counter_zero(&mut self) -> Counter {
-        self.increment_location(Location::Internal, COUNTER_ZERO)
-            .unwrap_or_else(|_| {
-                self.write_counter(Location::Internal, 0, 0).map_err(|_| {
-                        panic!("writing to {} failed", &self.counter_path(0));
-                }).unwrap();
-                self.increment_location(Location::Internal, COUNTER_ZERO).unwrap()
-            })
-    }
-
     fn increment_location(&mut self, location: Location, id: Id) -> Result<Counter> {
         let prev_counter: u128 = self.read_counter(location, id.0)?.into();
         let counter = prev_counter + 1;
@@ -78,6 +68,7 @@ pub trait Counterstore {
         self.create_starting_at(location, 0u128)
     }
     fn increment(&mut self, id: Id) -> Result<u128>;
+    fn increment_counter_zero(&mut self) -> u128;
 }
 
 impl<S: Store> Counterstore for ClientCounterstore<S> {
@@ -98,6 +89,17 @@ impl<S: Store> Counterstore for ClientCounterstore<S> {
             self.increment_location(location, id).ok()
         }).next().ok_or(Error::NoSuchKey)
     }
+
+    fn increment_counter_zero(&mut self) -> Counter {
+        self.increment_location(Location::Internal, COUNTER_ZERO)
+            .unwrap_or_else(|_| {
+                self.write_counter(Location::Internal, 0, 0).map_err(|_| {
+                        panic!("writing to {} failed", &self.counter_path(0));
+                }).unwrap();
+                self.increment_location(Location::Internal, COUNTER_ZERO).unwrap()
+            })
+    }
+
 }
 
 // #[derive(Copy, Clone, Debug, PartialEq, PartialOrd)]

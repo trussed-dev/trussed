@@ -85,6 +85,14 @@ generate_enums! {
     CreateCounter: 40
     IncrementCounter: 41
 
+    //////////////////
+    // Certificates //
+    //////////////////
+
+    DeleteCertificate: 40
+    ReadCertificate: 41
+    WriteCertificate: 42
+
     ///////////
     // Other //
     ///////////
@@ -277,6 +285,17 @@ pub mod request {
 
         IncrementCounter:
           - id: Id
+
+        DeleteCertificate:
+          - id: Id
+
+        ReadCertificate:
+          - id: Id
+
+        WriteCertificate:
+          - location: Location
+          - der: Message
+
     }
 }
 
@@ -396,8 +415,17 @@ pub mod reply {
 
         CreateCounter:
           - id: Id
+
         IncrementCounter:
           - counter: u128
+
+        DeleteCertificate:
+
+        ReadCertificate:
+          - der: Message
+
+        WriteCertificate:
+          - id: Id
     }
 
 }

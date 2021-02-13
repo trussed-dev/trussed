@@ -1,4 +1,4 @@
-use trussed::client::{HmacSha256, X255};
+use trussed::client::mechanisms::{HmacSha256, X255};
 use trussed::syscall;
 
 mod client;

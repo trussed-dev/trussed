@@ -74,6 +74,7 @@ use littlefs2::path::Path;
 use crate::error::Error;
 use crate::types::*;
 
+pub mod certstore;
 pub mod counterstore;
 pub mod filestore;
 pub mod keystore;

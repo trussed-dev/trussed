@@ -231,7 +231,7 @@ fn sign_ed255() {
     // let mut client = setup!();
     setup!(client);
 
-    use crate::client::{Ed255, P256};
+    use crate::client::mechanisms::{Ed255, P256};
     let future = client.generate_ed255_private_key(Location::Internal).expect("no client error");
     println!("submitted gen ed255");
     let reply = block!(future);
@@ -268,7 +268,7 @@ fn sign_ed255() {
 #[test]
 #[serial]
 fn sign_p256() {
-    use crate::client::P256 as _;
+    use crate::client::mechanisms::P256 as _;
     // let mut client = setup!();
     setup!(client);
         let private_key = block!(client.generate_p256_private_key(Location::External).expect("no client error"))
@@ -301,7 +301,7 @@ fn sign_p256() {
 #[serial]
 fn agree_p256() {
     // let mut client = setup!();
-    use crate::client::P256;
+    use crate::client::mechanisms::P256;
     setup!(client);
         let plat_private_key = block!(client.generate_p256_private_key(Location::Volatile).expect("no client error"))
             .expect("no errors").key;
@@ -349,7 +349,7 @@ fn agree_p256() {
 #[test]
 #[serial]
 fn aead() {
-    use crate::client::Chacha8Poly1305;
+    use crate::client::mechanisms::Chacha8Poly1305;
     setup!(client);
     let secret_key =
         block!(
