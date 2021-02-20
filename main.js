@@ -5,4 +5,8 @@ if(!String.prototype.startsWith){String.prototype.startsWith=function(searchStri
              and <code>const</code>.","Search functions by type signature (e.g., <code>vec -&gt; usize</code> or \
              <code>* -&gt; vec</code>)","Search multiple things at once by splitting your query with comma (e.g., \
              <code>str,u8</code> or <code>String,struct:Vec,test</code>)","You can look for items with an exact name by putting double quotes around \
-             your request: <code>\"string\"</code>","Look for items inside another one by searching for a path: <code>vec::Vec</code>",].map(x=>"<p>"+x+"</p>").join("");var div_infos=document.createElement("div");addClass(div_infos,"infos");div_infos.innerHTML="<h2>Search Tricks</h2>"+infos;container.appendChild(book_info);container.appendChild(div_shortcuts);container.appendChild(div_infos);popup.appendChild(container);insertAfter(popup,getSearchElement());buildHelperPopup=function(){}}onHashChange(null);window.onhashchange=onHashChange}());window.onunload=function(){}
+             your request: <code>\"string\"</code>","Look for items inside another one by searching for a path: <code>vec::Vec</code>",].map(x=>"<p>"+x+"</p>").join("");var div_infos=document.createElement("div");addClass(div_infos,"infos");div_infos.innerHTML="<h2>Search Tricks</h2>"+infos;container.appendChild(book_info);container.appendChild(div_shortcuts);container.appendChild(div_infos);popup.appendChild(container);insertAfter(popup,getSearchElement());buildHelperPopup=function(){}}onHashChange(null);window.onhashchange=onHashChange}());window.onunload=function(){};
+var el = document.querySelector("img[alt=logo]").closest("a");
+if (el.href != "index.html") {
+    el.href = "../index.html";
+}

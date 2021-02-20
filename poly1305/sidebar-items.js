@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["BLOCK_SIZE","Size of the blocks Poly1305 acts upon"],["KEY_SIZE","Size of a Poly1305 key"]],"struct":[["Poly1305","The Poly1305 universal hash function."]],"type":[["Block","Poly1305 blocks (16-bytes)"],["Key","Poly1305 keys (32-bytes)"],["Tag","Poly1305 tags (16-bytes)"]]});

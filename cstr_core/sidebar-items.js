@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["CStr","Representation of a borrowed C string."],["FromBytesWithNulError","An error returned from `CStr::from_bytes_with_nul` to indicate that a nul byte was found too early in the slice provided or one wasn't found at all."]],"type":[["c_char","Re-export c_char"]]});

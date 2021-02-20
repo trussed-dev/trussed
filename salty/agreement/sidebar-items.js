@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["make_255_bit","Construct a `Scalar` from the low 255 bits of a 256-bit integer."],["x25519","Implementations:"]],"struct":[["PublicKey",""],["SecretKey","A X25519 secret key."],["SharedSecret","The result of a Diffie-Hellman key exchange."]]});
