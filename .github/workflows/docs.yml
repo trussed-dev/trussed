@@ -1,0 +1,37 @@
+name: Docs
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Install Rust toolchain
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        profile: minimal
+
+    - name: Install build dependencies
+      run: >
+        sudo apt-get update -y -qq &&
+        sudo apt-get install -y -qq llvm libc6-dev-i386 libclang-dev
+
+    - uses: fiam/arm-none-eabi-gcc@v1
+      with:
+        release: "9-2020-q2"
+
+    - name: Build Documentation
+      run: cargo doc && scripts/make-toplevel-index.sh
+
+    - name: Deploy Docs
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./target/doc
