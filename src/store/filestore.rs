@@ -112,7 +112,7 @@ impl<S: Store> Filestore for ClientFilestore<S> {
 
     fn write(&mut self, path: &PathBuf, location: Location, data: &[u8]) -> Result<()> {
         let path = self.actual_path(path);
-        store::write(self.store, location, &path, data)
+        store::store(self.store, location, &path, data)
     }
 
     fn exists(&mut self, path: &PathBuf, location: Location) -> bool {

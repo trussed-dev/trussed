@@ -10,7 +10,7 @@ Very much WIP. Actively developed. Unstable APIs.
 
 ## Resources
 
-- API docs: <https://trussed-dev.github.io/trussed/trussed/>
+- API docs: <https://trussed-dev.github.io/trussed>
 - Example: <https://github.com/trussed-dev/trussed-totp-pc-tutorial>
 - Discussions: <https://github.com/trussed-dev/trussed/discussions>
 - Matrix: <https://matrix.to/#/#trussed:matrix.org>
