@@ -516,7 +516,7 @@ impl<P: Platform> ServiceResources<P> {
 
             // dogfood our own construction
             let mut filestore: ClientFilestore<P::S> = ClientFilestore::new(
-                PathBuf::from(b"trussed\0"),
+                PathBuf::from(b"trussed"),
                 self.platform.store(),
             );
             let filestore = &mut filestore;

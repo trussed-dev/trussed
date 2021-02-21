@@ -57,10 +57,6 @@ impl Agree for super::P256
         let public_key = load_public_key(keystore, &public_id)?;
 
         // THIS IS THE CORE
-        info_now!("free/total RAMFS blocks: {:?}/{:?}",
-            keystore.platform.store().vfs().available_blocks().unwrap(),
-            keystore.platform.store().vfs().total_blocks(),
-        );
         let shared_secret = keypair.secret.agree(&public_key).map_err(|_| Error::InternalError)?.to_bytes();
 
         let key_id = keystore.store_key(
