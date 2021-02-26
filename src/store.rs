@@ -448,6 +448,7 @@ pub fn create_directories<'s, S: LfsStorage>(
 
 /// Reads contents from path in location of store.
 pub fn read<N: heapless::ArrayLength<u8>>(store: impl Store, location: Location, path: &Path) -> Result<ByteBuf<N>, Error> {
+    debug_now!("reading {}", &path);
     match location {
         Location::Internal => store.ifs().read(path),
         Location::External => store.efs().read(path),
@@ -457,6 +458,7 @@ pub fn read<N: heapless::ArrayLength<u8>>(store: impl Store, location: Location,
 
 /// Writes contents to path in location of store.
 pub fn write(store: impl Store, location: Location, path: &Path, contents: &[u8]) -> Result<(), Error> {
+    debug_now!("writing {}", &path);
     match location {
         Location::Internal => store.ifs().write(path, contents),
         Location::External => store.efs().write(path, contents),
@@ -466,6 +468,7 @@ pub fn write(store: impl Store, location: Location, path: &Path, contents: &[u8]
 
 /// Creates parent directory if necessary, then writes.
 pub fn store(store: impl Store, location: Location, path: &Path, contents: &[u8]) -> Result<(), Error> {
+    debug_now!("storing {}", &path);
     match location {
         Location::Internal => create_directories(store.ifs(), path)?,
         Location::External => create_directories(store.efs(), path)?,
@@ -475,6 +478,7 @@ pub fn store(store: impl Store, location: Location, path: &Path, contents: &[u8]
 }
 
 pub fn delete(store: impl Store, location: Location, path: &Path) -> bool {
+    debug_now!("deleting {}", &path);
     let outcome = match location {
         Location::Internal => store.ifs().remove(path),
         Location::External => store.efs().remove(path),
@@ -484,6 +488,7 @@ pub fn delete(store: impl Store, location: Location, path: &Path) -> bool {
 }
 
 pub fn exists(store: impl Store, location: Location, path: &Path) -> bool {
+    debug_now!("checking existence of {}", &path);
     match location {
         Location::Internal => path.exists(store.ifs()),
         Location::External => path.exists(store.efs()),
@@ -492,6 +497,7 @@ pub fn exists(store: impl Store, location: Location, path: &Path) -> bool {
 }
 
 pub fn remove_dir(store: impl Store, location: Location, path: &Path) -> bool {
+    debug_now!("remove_dir'ing {}", &path);
     let outcome = match location {
         Location::Internal => store.ifs().remove_dir(path),
         Location::External => store.efs().remove_dir(path),
