@@ -48,6 +48,8 @@ impl<S: Store> ClientFilestore<S> {
         path
     }
 
+    // TODO: this is waaay too fiddly, need an approach
+    // that totally excludes off-by-N type errors.
     pub fn client_path(&self, actual_path: &Path) -> PathBuf {
         let bytes = actual_path.as_ref().as_bytes();
         let absolute = bytes[0] == b'/';
@@ -57,7 +59,8 @@ impl<S: Store> ClientFilestore<S> {
         let end_of_namespace = bytes[1..].iter().position(|&x| x == b'/')
             // oh oh oh
             .unwrap();
-        PathBuf::from(&bytes[end_of_namespace + 1 + offset..])
+        let dat_offset = "/dat/".len();
+        PathBuf::from(&bytes[end_of_namespace + 1 + offset + dat_offset..])
     }
 }
 
@@ -173,6 +176,7 @@ impl<S: Store> Filestore for ClientFilestore<S> {
                 .map(|(i, mut entry)| {
                     let read_dir_state = ReadDirState { real_dir: dir.clone(), last: i };
                     let entry_client_path = self.client_path(entry.path());
+                    // trace_now!("converted path {} to client path {}", &entry.path(), &entry_client_path);
                     // This is a hidden function which allows us to modify `entry.path`.
                     // In regular use, `DirEntry` is not supposed to be constructable by the user
                     // (only by querying the filesystem), which is why the function is both
@@ -198,7 +202,7 @@ impl<S: Store> Filestore for ClientFilestore<S> {
         Ok(fs.read_dir_and_then(&real_dir, |it| {
 
             // skip over previous
-            it.enumerate().nth(last)
+            it.enumerate().nth(last + 1)
                 // entry is still a Result :/ (see question in `read_dir_first`)
                 .map(|(i,entry)| (i, entry.unwrap()))
                 // convert Option into Result, again because `read_dir_and_then` expects this
@@ -285,9 +289,13 @@ impl<S: Store> Filestore for ClientFilestore<S> {
         Ok(fs.read_dir_and_then(&real_dir, |it| {
 
             // skip over previous
-            it.enumerate().skip(last)
+            it.enumerate().skip(last + 1)
                 // entry is still a Result :/ (see question in `read_dir_first`)
                 .map(|(i,entry)| (i, entry.unwrap()))
+
+                // skip over directories (including `.` and `..`)
+                .filter(|(_, entry)| entry.file_type().is_file())
+
                 // take first entry that meets requirements
                 .find(|(_, entry)| {
                     if let Some(user_attribute) = user_attribute.as_ref() {
