@@ -2,6 +2,7 @@
 implementors["aead"] = [{"text":"impl PartialOrd&lt;Error&gt; for Error","synthetic":false,"types":[]}];
 implementors["byteorder"] = [{"text":"impl PartialOrd&lt;BigEndian&gt; for BigEndian","synthetic":false,"types":[]},{"text":"impl PartialOrd&lt;LittleEndian&gt; for LittleEndian","synthetic":false,"types":[]}];
 implementors["cstr_core"] = [{"text":"impl PartialOrd&lt;CStr&gt; for CStr","synthetic":false,"types":[]}];
+implementors["der"] = [{"text":"impl PartialOrd&lt;Length&gt; for Length","synthetic":false,"types":[]}];
 implementors["generic_array"] = [{"text":"impl&lt;T:&nbsp;PartialOrd, N&gt; PartialOrd&lt;GenericArray&lt;T, N&gt;&gt; for GenericArray&lt;T, N&gt; <span class=\"where fmt-newline\">where<br>&nbsp;&nbsp;&nbsp;&nbsp;N: ArrayLength&lt;T&gt;,&nbsp;</span>","synthetic":false,"types":[]}];
 implementors["half"] = [{"text":"impl PartialOrd&lt;bf16&gt; for bf16","synthetic":false,"types":[]},{"text":"impl PartialOrd&lt;f16&gt; for f16","synthetic":false,"types":[]}];
 implementors["heapless"] = [{"text":"impl&lt;P&gt; PartialOrd&lt;Box&lt;P, Init&gt;&gt; for Box&lt;P&gt; <span class=\"where fmt-newline\">where<br>&nbsp;&nbsp;&nbsp;&nbsp;P: Pool,<br>&nbsp;&nbsp;&nbsp;&nbsp;P::Data: PartialOrd,&nbsp;</span>","synthetic":false,"types":[]},{"text":"impl&lt;T&gt; PartialOrd&lt;Box&lt;T, Init&gt;&gt; for Box&lt;T&gt; <span class=\"where fmt-newline\">where<br>&nbsp;&nbsp;&nbsp;&nbsp;T: PartialOrd,&nbsp;</span>","synthetic":false,"types":[]}];

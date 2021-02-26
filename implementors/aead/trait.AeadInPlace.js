@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["chacha20poly1305"] = [{"text":"impl&lt;C&gt; AeadInPlace for ChaChaPoly1305&lt;C&gt; <span class=\"where fmt-newline\">where<br>&nbsp;&nbsp;&nbsp;&nbsp;C: NewStreamCipher&lt;KeySize = U32, NonceSize = U12&gt; + SyncStreamCipher + SyncStreamCipherSeek,&nbsp;</span>","synthetic":false,"types":[]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

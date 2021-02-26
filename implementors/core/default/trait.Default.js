@@ -1,10 +1,10 @@
 (function() {var implementors = {};
-implementors["asn1derpy"] = [{"text":"impl&lt;N:&nbsp;ArrayLength&lt;u8&gt;&gt; Default for Der&lt;N&gt;","synthetic":false,"types":[]}];
 implementors["block_buffer"] = [{"text":"impl&lt;BlockSize:&nbsp;Default + ArrayLength&lt;u8&gt;&gt; Default for BlockBuffer&lt;BlockSize&gt;","synthetic":false,"types":[]}];
 implementors["byteorder"] = [{"text":"impl Default for BigEndian","synthetic":false,"types":[]},{"text":"impl Default for LittleEndian","synthetic":false,"types":[]}];
 implementors["cosey"] = [{"text":"impl Default for TotpPublicKey","synthetic":false,"types":[]}];
 implementors["crypto_mac"] = [{"text":"impl Default for MacError","synthetic":false,"types":[]},{"text":"impl Default for InvalidKeyLength","synthetic":false,"types":[]}];
 implementors["cstr_core"] = [{"text":"impl&lt;'a&gt; Default for &amp;'a CStr","synthetic":false,"types":[]}];
+implementors["der"] = [{"text":"impl Default for Length","synthetic":false,"types":[]}];
 implementors["digest"] = [{"text":"impl Default for InvalidOutputSize","synthetic":false,"types":[]}];
 implementors["generic_array"] = [{"text":"impl&lt;T:&nbsp;Default, N&gt; Default for GenericArray&lt;T, N&gt; <span class=\"where fmt-newline\">where<br>&nbsp;&nbsp;&nbsp;&nbsp;N: ArrayLength&lt;T&gt;,&nbsp;</span>","synthetic":false,"types":[]}];
 implementors["half"] = [{"text":"impl Default for bf16","synthetic":false,"types":[]},{"text":"impl Default for f16","synthetic":false,"types":[]}];

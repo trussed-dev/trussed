@@ -1,3 +1,0 @@
-(function() {var implementors = {};
-implementors["chacha20poly1305"] = [{"text":"impl Aead for ChaCha8Poly1305","synthetic":false,"types":[]},{"text":"impl Aead for ChaCha12Poly1305","synthetic":false,"types":[]},{"text":"impl Aead for ChaCha20Poly1305","synthetic":false,"types":[]}];
-if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

@@ -2,6 +2,7 @@
 implementors["aead"] = [{"text":"impl Ord for Error","synthetic":false,"types":[]}];
 implementors["byteorder"] = [{"text":"impl Ord for BigEndian","synthetic":false,"types":[]},{"text":"impl Ord for LittleEndian","synthetic":false,"types":[]}];
 implementors["cstr_core"] = [{"text":"impl Ord for CStr","synthetic":false,"types":[]}];
+implementors["der"] = [{"text":"impl Ord for Length","synthetic":false,"types":[]}];
 implementors["generic_array"] = [{"text":"impl&lt;T:&nbsp;Ord, N&gt; Ord for GenericArray&lt;T, N&gt; <span class=\"where fmt-newline\">where<br>&nbsp;&nbsp;&nbsp;&nbsp;N: ArrayLength&lt;T&gt;,&nbsp;</span>","synthetic":false,"types":[]}];
 implementors["heapless"] = [{"text":"impl&lt;P&gt; Ord for Box&lt;P&gt; <span class=\"where fmt-newline\">where<br>&nbsp;&nbsp;&nbsp;&nbsp;P: Pool,<br>&nbsp;&nbsp;&nbsp;&nbsp;P::Data: Ord,&nbsp;</span>","synthetic":false,"types":[]},{"text":"impl&lt;T&gt; Ord for Box&lt;T&gt; <span class=\"where fmt-newline\">where<br>&nbsp;&nbsp;&nbsp;&nbsp;T: Ord,&nbsp;</span>","synthetic":false,"types":[]}];
 implementors["log"] = [{"text":"impl Ord for Level","synthetic":false,"types":[]},{"text":"impl Ord for LevelFilter","synthetic":false,"types":[]},{"text":"impl&lt;'a&gt; Ord for Metadata&lt;'a&gt;","synthetic":false,"types":[]},{"text":"impl&lt;'a&gt; Ord for MetadataBuilder&lt;'a&gt;","synthetic":false,"types":[]}];
