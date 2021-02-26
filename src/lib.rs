@@ -5,7 +5,6 @@
 //! Easy to write, easy to audit — compile-time security by default.
 //!
 //! Documentation is evolving, a good entry point is the module `trussed::client`.
-// #![no_std]
 
 // prevent a spurious error message: https://github.com/rust-lang/rust/issues/54010
 // UNFORTUNATELY: with #![cfg(test)], no longer compiles for no_std,

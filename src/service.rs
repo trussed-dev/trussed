@@ -625,7 +625,7 @@ impl<P: Platform> Service<P> {
 
 
     pub fn add_endpoint(&mut self, interchange: Responder<TrussedInterchange>, client_id: ClientId) -> Result<(), ServiceEndpoint> {
-        if client_id == PathBuf::from(b"trussed\0") {
+        if client_id == PathBuf::from(b"trussed") {
             panic!("trussed is a reserved client ID");
         }
         self.eps.push(ServiceEndpoint { interchange, client_id })
@@ -634,13 +634,13 @@ impl<P: Platform> Service<P> {
     pub fn set_seed_if_uninitialized(&mut self, seed: &[u8; 32]) {
 
         let mut filestore: ClientFilestore<P::S> = ClientFilestore::new(
-            PathBuf::from(b"trussed\0"),
+            PathBuf::from(b"trussed"),
             self.resources.platform.store(),
         );
         let filestore = &mut filestore;
 
         let path = PathBuf::from(b"rng-state.bin");
-        if ! filestore.exists(&path, Location::Internal) {
+        if !filestore.exists(&path, Location::Internal) {
             filestore.write(&path, Location::Internal, seed.as_ref()).unwrap();
         }
 
