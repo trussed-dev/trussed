@@ -569,8 +569,8 @@ impl<P: Platform> ServiceResources<P> {
             // 3. Store hash of seed for next boot.
             use sha2::digest::Digest;
             let mut hash = sha2::Sha256::new();
-            hash.input(&our_seed);
-            let seed_to_store = hash.result();
+            hash.update(&our_seed);
+            let seed_to_store = hash.finalize();
 
             filestore.write(&path, Location::Internal, seed_to_store.as_ref()).unwrap();
         }
