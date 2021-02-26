@@ -87,6 +87,7 @@ use crate::types::*;
 pub use crate::platform::Syscall;
 
 pub mod mechanisms;
+pub use mechanisms::*;
 
 // to be fair, this is a programmer error,
 // and could also just panic
