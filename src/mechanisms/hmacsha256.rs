@@ -13,7 +13,7 @@ impl Sign for super::HmacSha256
         -> Result<reply::Sign, Error>
     {
         use sha2::Sha256;
-        use hmac::{Hmac, Mac};
+        use hmac::{Hmac, Mac, NewMac};
         type HmacSha256 = Hmac<Sha256>;
 
         let key_id = request.key.object_id;
@@ -34,12 +34,12 @@ impl Sign for super::HmacSha256
         let mut mac = HmacSha256::new_varkey(&shared_secret.as_ref())
             .expect("HMAC can take key of any size");
 
-        mac.input(&request.message);
-        let result = mac.result();
+        mac.update(&request.message);
+        let result = mac.finalize();
         // To get underlying array use `code` method, but be carefull, since
         // incorrect use of the code value may permit timing attacks which defeat
         // the security provided by the `MacResult`
-        let code_bytes: [u8; 32] = result.code().as_slice().try_into().unwrap();
+        let code_bytes: [u8; 32] = result.into_bytes().as_slice().try_into().unwrap();
         let signature = Signature::try_from_slice(&code_bytes).unwrap();
 
         // return signature

@@ -16,17 +16,17 @@ fn hotp_raw(key: &[u8], counter: u64, digits: u32) -> u64 {
 }
 
 fn hmac_and_truncate(key: &[u8], message: &[u8], digits: u32) -> u64 {
-    use hmac::{Hmac, Mac};
+    use hmac::{Hmac, Mac, NewMac};
     // let mut hmac = Hmac::<D>::new(GenericArray::from_slice(key));
     let mut hmac = Hmac::<sha1::Sha1>::new_varkey(key).unwrap();
-    hmac.input(message);
-    let result = hmac.result();
+    hmac.update(message);
+    let result = hmac.finalize();
 
     // output of `.code()` is GenericArray<u8, OutputSize>, again 20B
     // crypto-mac docs warn: "Be very careful using this method,
     // since incorrect use of the code value may permit timing attacks
     // which defeat the security provided by the Mac trait."
-    let hs = result.code();
+    let hs = result.into_bytes();
 
     dynamic_truncation(&hs) % 10_u64.pow(digits)
 }

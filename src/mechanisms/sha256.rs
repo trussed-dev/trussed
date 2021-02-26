@@ -23,8 +23,8 @@ impl DeriveKey for super::Sha256
         // hash it
         use sha2::digest::Digest;
         let mut hash = sha2::Sha256::new();
-        hash.input(&shared_secret);
-        let symmetric_key: [u8; 32] = hash.result().into();
+        hash.update(&shared_secret);
+        let symmetric_key: [u8; 32] = hash.finalize().into();
 
         let key_id = keystore.store_key(
             request.attributes.persistence,
@@ -46,10 +46,10 @@ impl Hash for super::Sha256
     {
         use sha2::digest::Digest;
         let mut hash = sha2::Sha256::new();
-        hash.input(&request.message);
+        hash.update(&request.message);
 
         let mut hashed = ShortData::new();
-        hashed.extend_from_slice(&hash.result()).unwrap();
+        hashed.extend_from_slice(&hash.finalize()).unwrap();
 
         Ok(reply::Hash { hash: hashed } )
     }

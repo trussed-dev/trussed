@@ -16,6 +16,8 @@ impl GenerateKey for super::Chacha8Poly1305 {
     fn generate_key(keystore: &mut impl Keystore, request: request::GenerateKey)
         -> Result<reply::GenerateKey, Error>
     {
+        use rand_core::RngCore as _;
+
         // 32 bytes entropy
         // 12 bytes nonce
         let mut serialized = [0u8; 44];
@@ -56,7 +58,7 @@ impl Decrypt for super::Chacha8Poly1305
         -> Result<reply::Decrypt, Error>
     {
         use chacha20poly1305::ChaCha8Poly1305;
-        use chacha20poly1305::aead::{Aead, NewAead};
+        use chacha20poly1305::aead::{AeadInPlace, NewAead};
 
         let serialized_value = keystore
             .load_key(Secrecy::Secret, Some(KeyKind::Symmetric32Nonce12), &request.key.object_id)?
@@ -70,7 +72,7 @@ impl Decrypt for super::Chacha8Poly1305
 
         let symmetric_key = &serialized[..32];
 
-        let aead = ChaCha8Poly1305::new(GenericArray::clone_from_slice(&symmetric_key));
+        let aead = ChaCha8Poly1305::new(&GenericArray::clone_from_slice(&symmetric_key));
 
         let mut plaintext = request.message.clone();
         let nonce = GenericArray::from_slice(&request.nonce);
@@ -98,7 +100,7 @@ impl Encrypt for super::Chacha8Poly1305
         -> Result<reply::Encrypt, Error>
     {
         use chacha20poly1305::ChaCha8Poly1305;
-        use chacha20poly1305::aead::{Aead, NewAead};
+        use chacha20poly1305::aead::{AeadInPlace, NewAead};
 
 
         // load key and nonce
@@ -139,7 +141,7 @@ impl Encrypt for super::Chacha8Poly1305
 
 
         // keep in state?
-        let aead = ChaCha8Poly1305::new(GenericArray::clone_from_slice(symmetric_key));
+        let aead = ChaCha8Poly1305::new(&GenericArray::clone_from_slice(symmetric_key));
 
         let mut ciphertext = request.message.clone();
         let tag: [u8; 16] = aead.encrypt_in_place_detached(

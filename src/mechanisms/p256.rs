@@ -259,7 +259,7 @@ impl Sign for super::P256
 
         let our_signature = match request.format {
             SignatureSerialization::Asn1Der => {
-                Signature::try_from_slice(&native_signature.to_asn1_der()).unwrap()
+                Signature::try_from_slice(&native_signature.to_der()).unwrap()
             }
             SignatureSerialization::Raw => {
                 Signature::try_from_slice(&native_signature.to_bytes()).unwrap()
@@ -305,7 +305,7 @@ impl Sign for super::P256Prehashed
 
         let our_signature = match request.format {
             SignatureSerialization::Asn1Der => {
-                Signature::try_from_slice(&native_signature.to_asn1_der()).unwrap()
+                Signature::try_from_slice(&native_signature.to_der()).unwrap()
             }
             SignatureSerialization::Raw => {
                 Signature::try_from_slice(&native_signature.to_bytes()).unwrap()
