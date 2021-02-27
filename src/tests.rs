@@ -1,7 +1,5 @@
 #![cfg(test)]
 
-use std::convert::TryInto;
-
 use chacha20::ChaCha20;
 
 use crate::*;
@@ -202,8 +200,7 @@ macro_rules! setup {
             unsafe { crate::pipe::TrussedInterchange::reset_claims(); }
             let (test_trussed_requester, test_trussed_responder) = crate::pipe::TrussedInterchange::claim()
                 .expect("could not setup TEST TrussedInterchange");
-            let mut test_client_id = littlefs2::path::PathBuf::new();
-            test_client_id.push(b"TEST\0".try_into().unwrap());
+            let test_client_id = "TEST".into();
 
             assert!(trussed.add_endpoint(test_trussed_responder, test_client_id).is_ok());
 

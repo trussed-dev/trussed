@@ -1,5 +1,3 @@
-use core::convert::TryInto;
-
 mod client;
 mod store;
 
@@ -21,7 +19,7 @@ use trussed::{
 fn counter_implementation() {
     let result: Result<()> = store::get(|store| {
 
-        let client_id = b"test".try_into().unwrap();
+        let client_id = "test".into();
         let mut cstore = ClientCounterstore::new(client_id, *store);
 
         assert_eq!(cstore.increment_counter_zero(), 1);

@@ -1,4 +1,4 @@
-use core::convert::{TryFrom, TryInto};
+use core::convert::TryFrom;
 
 use chacha20::ChaCha8Rng;
 pub use heapless::consts;
@@ -82,9 +82,9 @@ impl<P: Platform> ClientKeystore<'_, P> {
         // TODO: huh?!?!
         // If I change these prefixes to shorter,
         // DebugDumpStore skips the directory contents
-        path.push(match secrecy {
-            Secrecy::Secret => b"sec\0".try_into().unwrap(),
-            Secrecy::Public => b"pub\0".try_into().unwrap(),
+        path.push(&match secrecy {
+            Secrecy::Secret => PathBuf::from("sec"),
+            Secrecy::Public => PathBuf::from("pub"),
         });
         path.push(&PathBuf::from(id.hex().as_ref()));
         path

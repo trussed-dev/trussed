@@ -1,7 +1,4 @@
-use core::{
-    convert::TryInto,
-    fmt::Write,
-};
+use core::fmt::Write;
 
 use littlefs2::path::PathBuf;
 
@@ -75,7 +72,7 @@ impl<S: Store> ClientCertstore<S> {
     fn cert_path(&self, id: Id) -> PathBuf {
         let mut path = PathBuf::new();
         path.push(&self.client_id);
-        path.push(b"x5c\0".try_into().unwrap());
+        path.push(&PathBuf::from("x5c"));
         let mut buf = ByteBuf::<consts::U32>::new();
         write!(&mut buf, "{}", id.0).ok();
         path.push(&PathBuf::from(buf.as_slice()));
