@@ -7,7 +7,7 @@
 //! TODO: Currently, `Platform::R` lacks the `CryptoRng` bound.
 
 // pub use rand_core::{CryptoRng, RngCore};
-pub use rand_core::RngCore;
+pub use rand_core::{CryptoRng, RngCore};
 pub use crate::store::Store;
 pub use crate::types::{ui, reboot};
 pub use crate::types::consent;
@@ -36,7 +36,7 @@ pub trait UserInterface {
 // and a macro.
 pub unsafe trait Platform {
     // temporarily remove CryptoRng bound until HALs come along
-    type R: /*CryptoRng +*/ RngCore;
+    type R: CryptoRng + RngCore;
     type S: Store;
     type UI: UserInterface;
 
