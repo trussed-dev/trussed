@@ -1,5 +1,3 @@
-use core::convert::TryInto;
-
 use crate::{
     ArrayLength,
     ByteBuf,
@@ -43,7 +41,7 @@ impl<S: Store> ClientFilestore<S> {
     pub fn actual_path(&self, client_path: &PathBuf) -> PathBuf {
         let mut path = PathBuf::new();
         path.push(&self.client_id);
-        path.push(b"dat\0".try_into().unwrap());
+        path.push(&PathBuf::from("dat"));
         path.push(client_path);
         path
     }
@@ -327,7 +325,7 @@ impl<S: Store> Filestore for ClientFilestore<S> {
             return Err(Error::RequestNotAvailable);
         }
 
-        let clients_dir = underneath.unwrap_or_else(|| PathBuf::from(b"/"));
+        let clients_dir = underneath.unwrap_or_else(|| PathBuf::from("/"));
         let dir = self.actual_path(&clients_dir);
         let fs = self.store.ifs();
 

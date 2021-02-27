@@ -236,10 +236,10 @@ impl<P: Platform> ServiceResources<P> {
             Request::DebugDumpStore(_request) => {
 
                 info_now!(":: PERSISTENT");
-                recursively_list(self.platform.store().ifs(), PathBuf::from(b"/"));
+                recursively_list(self.platform.store().ifs(), PathBuf::from("/"));
 
                 info_now!(":: VOLATILE");
-                recursively_list(self.platform.store().vfs(), PathBuf::from(b"/"));
+                recursively_list(self.platform.store().vfs(), PathBuf::from("/"));
 
                 fn recursively_list<S: 'static + crate::types::LfsStorage>(fs: &'static crate::store::Fs<S>, path: PathBuf) {
                     // let fs = store.vfs();
@@ -516,12 +516,12 @@ impl<P: Platform> ServiceResources<P> {
 
             // dogfood our own construction
             let mut filestore: ClientFilestore<P::S> = ClientFilestore::new(
-                PathBuf::from(b"trussed"),
+                PathBuf::from("trussed"),
                 self.platform.store(),
             );
             let filestore = &mut filestore;
 
-            let path = PathBuf::from(b"rng-state.bin");
+            let path = PathBuf::from("rng-state.bin");
 
             // If it hasn't been saved to flash yet, generate it from HW RNG.
             let stored_seed = if ! filestore.exists(&path, Location::Internal) {
@@ -625,7 +625,7 @@ impl<P: Platform> Service<P> {
 
 
     pub fn add_endpoint(&mut self, interchange: Responder<TrussedInterchange>, client_id: ClientId) -> Result<(), ServiceEndpoint> {
-        if client_id == PathBuf::from(b"trussed") {
+        if client_id == PathBuf::from("trussed") {
             panic!("trussed is a reserved client ID");
         }
         self.eps.push(ServiceEndpoint { interchange, client_id })
@@ -634,12 +634,12 @@ impl<P: Platform> Service<P> {
     pub fn set_seed_if_uninitialized(&mut self, seed: &[u8; 32]) {
 
         let mut filestore: ClientFilestore<P::S> = ClientFilestore::new(
-            PathBuf::from(b"trussed"),
+            PathBuf::from("trussed"),
             self.resources.platform.store(),
         );
         let filestore = &mut filestore;
 
-        let path = PathBuf::from(b"rng-state.bin");
+        let path = PathBuf::from("rng-state.bin");
         if !filestore.exists(&path, Location::Internal) {
             filestore.write(&path, Location::Internal, seed.as_ref()).unwrap();
         }

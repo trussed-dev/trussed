@@ -34,7 +34,7 @@ impl<S: Store> ClientCounterstore<S> {
     fn counter_path(&self, id: u128) -> PathBuf {
         let mut path = PathBuf::new();
         path.push(&self.client_id);
-        path.push(b"ctr\0".try_into().unwrap());
+        path.push(&PathBuf::from("ctr"));
         let mut buf = ByteBuf::<consts::U32>::new();
         write!(&mut buf, "{}", id).ok();
         path.push(&PathBuf::from(buf.as_slice()));
