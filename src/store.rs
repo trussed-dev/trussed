@@ -179,31 +179,31 @@ macro_rules! store { (
             external_fs: $Efs,
             volatile_fs: $Vfs,
         ) -> (
-            &'static mut Allocation<$Ifs>,
+            &'static mut littlefs2::fs::Allocation<$Ifs>,
             &'static mut $Ifs,
-            &'static mut Allocation<$Efs>,
+            &'static mut littlefs2::fs::Allocation<$Efs>,
             &'static mut $Efs,
-            &'static mut Allocation<$Vfs>,
+            &'static mut littlefs2::fs::Allocation<$Vfs>,
             &'static mut $Vfs,
         ) {
             // static mut INTERNAL_STORAGE: $Ifs = i_ctor();//<$Ifs>::new();
 
             static mut INTERNAL_STORAGE: Option<$Ifs> = None;
             unsafe { INTERNAL_STORAGE = Some(internal_fs); }
-            static mut INTERNAL_FS_ALLOC: Option<Allocation<$Ifs>> = None;
-            unsafe { INTERNAL_FS_ALLOC = Some(Filesystem::allocate()); }
+            static mut INTERNAL_FS_ALLOC: Option<littlefs2::fs::Allocation<$Ifs>> = None;
+            unsafe { INTERNAL_FS_ALLOC = Some(littlefs2::fs::Filesystem::allocate()); }
 
             // static mut EXTERNAL_STORAGE: $Efs = <$Efs>::new();
             static mut EXTERNAL_STORAGE: Option<$Efs> = None;
             unsafe { EXTERNAL_STORAGE = Some(external_fs); }
-            static mut EXTERNAL_FS_ALLOC: Option<Allocation<$Efs>> = None;
-            unsafe { EXTERNAL_FS_ALLOC = Some(Filesystem::allocate()); }
+            static mut EXTERNAL_FS_ALLOC: Option<littlefs2::fs::Allocation<$Efs>> = None;
+            unsafe { EXTERNAL_FS_ALLOC = Some(littlefs2::fs::Filesystem::allocate()); }
 
             // static mut VOLATILE_STORAGE: $Vfs = <$Vfs>::new();
             static mut VOLATILE_STORAGE: Option<$Vfs> = None;
             unsafe { VOLATILE_STORAGE = Some(volatile_fs); }
-            static mut VOLATILE_FS_ALLOC: Option<Allocation<$Vfs>> = None;
-            unsafe { VOLATILE_FS_ALLOC = Some(Filesystem::allocate()); }
+            static mut VOLATILE_FS_ALLOC: Option<littlefs2::fs::Allocation<$Vfs>> = None;
+            unsafe { VOLATILE_FS_ALLOC = Some(littlefs2::fs::Filesystem::allocate()); }
 
             (
                 unsafe { INTERNAL_FS_ALLOC.as_mut().unwrap() },
@@ -372,6 +372,10 @@ macro_rules! store { (
         pub fn attach_else_format(internal_fs: $Ifs, external_fs: $Efs, volatile_fs: $Vfs) -> Self {
             // This unfortunately repeates the code of `allocate`.
             // It seems Rust's borrowing rules go against this.
+            use littlefs2::fs::{
+                Allocation,
+                Filesystem,
+            };
 
             static mut INTERNAL_STORAGE: Option<$Ifs> = None;
             unsafe { INTERNAL_STORAGE = Some(internal_fs); }
