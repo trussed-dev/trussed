@@ -29,7 +29,7 @@ impl GenerateKey for super::Chacha8Poly1305 {
         let key_id = keystore.store_key(
             request.attributes.persistence,
             key::Secrecy::Secret,
-            key::Kind::Symmetric32Nonce12,
+            key::Kind::Symmetric32Nonce(12),
             &serialized,
         )?;
 
@@ -61,7 +61,7 @@ impl Decrypt for super::Chacha8Poly1305
         use chacha20poly1305::aead::{AeadInPlace, NewAead};
 
         let serialized_material = keystore
-            .load_key(key::Secrecy::Secret, Some(key::Kind::Symmetric32Nonce12), &request.key.object_id)?
+            .load_key(key::Secrecy::Secret, Some(key::Kind::Symmetric32Nonce(12)), &request.key.object_id)?
             .material;
         let serialized = serialized_material.as_ref();
 
@@ -105,7 +105,7 @@ impl Encrypt for super::Chacha8Poly1305
 
         // load key and nonce
         let secrecy = key::Secrecy::Secret;
-        let key_kind = key::Kind::Symmetric32Nonce12;
+        let key_kind = key::Kind::Symmetric32Nonce(12);
         let key_id = &request.key.object_id;
         let mut serialized_material = keystore
             .load_key(secrecy, Some(key_kind), key_id)?

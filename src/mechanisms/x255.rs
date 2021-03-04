@@ -56,7 +56,7 @@ impl Agree for super::X255
 
         let key_id = keystore.store_key(
             request.attributes.persistence,
-            key::Secrecy::Secret, key::Kind::SharedSecret32,
+            key::Secrecy::Secret, key::Kind::Shared(32),
             &shared_secret)?;
 
         // return handle
