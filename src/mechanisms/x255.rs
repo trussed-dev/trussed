@@ -13,8 +13,8 @@ fn load_public_key(keystore: &mut impl Keystore, key_id: &UniqueId)
     -> Result<agreement::PublicKey, Error> {
 
     let public_bytes: [u8; 32] = keystore
-        .load_key(Secrecy::Public, Some(KeyKind::X255), &key_id)?
-        .value.as_ref()
+        .load_key(key::Secrecy::Public, Some(key::Kind::X255), &key_id)?
+        .material.as_ref()
         .try_into()
         .map_err(|_| Error::InternalError)?;
 
@@ -27,8 +27,8 @@ fn load_secret_key(keystore: &mut impl Keystore, key_id: &UniqueId)
     -> Result<agreement::SecretKey, Error> {
 
     let seed: [u8; 32] = keystore
-        .load_key(Secrecy::Secret, Some(KeyKind::X255), &key_id)?
-        .value.as_ref()
+        .load_key(key::Secrecy::Secret, Some(key::Kind::X255), &key_id)?
+        .material.as_ref()
         .try_into()
         .map_err(|_| Error::InternalError)?;
 
@@ -56,7 +56,7 @@ impl Agree for super::X255
 
         let key_id = keystore.store_key(
             request.attributes.persistence,
-            Secrecy::Secret, KeyKind::SharedSecret32,
+            key::Secrecy::Secret, key::Kind::SharedSecret32,
             &shared_secret)?;
 
         // return handle
@@ -77,7 +77,7 @@ impl GenerateKey for super::X255
         // store keys
         let key_id = keystore.store_key(
             request.attributes.persistence,
-            Secrecy::Secret, KeyKind::X255,
+            key::Secrecy::Secret, key::Kind::X255,
             &seed)?;
 
         // return handle
@@ -92,7 +92,7 @@ impl Exists for super::X255
         -> Result<reply::Exists, Error>
     {
         let key_id = request.key.object_id;
-        let exists = keystore.exists_key(Secrecy::Secret, Some(KeyKind::X255), &key_id);
+        let exists = keystore.exists_key(key::Secrecy::Secret, Some(key::Kind::X255), &key_id);
         Ok(reply::Exists { exists })
     }
 }
@@ -111,7 +111,7 @@ impl DeriveKey for super::X255
         let public_key_bytes = public_key.to_bytes();
         let public_id = keystore.store_key(
             request.attributes.persistence,
-            Secrecy::Public, KeyKind::X255,
+            key::Secrecy::Public, key::Kind::X255,
             &public_key_bytes)?;
 
         Ok(reply::DeriveKey {
@@ -166,7 +166,7 @@ impl DeserializeKey for super::X255
 
         let public_id = keystore.store_key(
             request.attributes.persistence,
-            Secrecy::Public, KeyKind::X255,
+            key::Secrecy::Public, key::Kind::X255,
             &public_key.to_bytes())?;
 
         Ok(reply::DeserializeKey {

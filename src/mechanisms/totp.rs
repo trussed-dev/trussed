@@ -24,7 +24,7 @@ fn hmac_and_truncate(key: &[u8], message: &[u8], digits: u32) -> u64 {
 
     // output of `.code()` is GenericArray<u8, OutputSize>, again 20B
     // crypto-mac docs warn: "Be very careful using this method,
-    // since incorrect use of the code value may permit timing attacks
+    // since incorrect use of the code material may permit timing attacks
     // which defeat the security provided by the Mac trait."
     let hs = result.into_bytes();
 
@@ -57,8 +57,8 @@ impl UnsafeInjectKey for super::Totp
         // store it
         let key_id = keystore.store_key(
             request.attributes.persistence,
-            Secrecy::Secret,
-            KeyKind::Symmetric20,
+            key::Secrecy::Secret,
+            key::Kind::Symmetric20,
             &request.raw_key,
         )?;
 
@@ -75,8 +75,8 @@ impl Sign for super::Totp
         let key_id = request.key.object_id;
 
         let secret: [u8; 20] = keystore
-            .load_key(Secrecy::Secret, None, &key_id)?
-            .value.as_ref().try_into()
+            .load_key(key::Secrecy::Secret, None, &key_id)?
+            .material.as_ref().try_into()
             .map_err(|_| Error::InternalError)?;
 
         if request.message.len() != 8 {
@@ -84,10 +84,10 @@ impl Sign for super::Totp
         }
         let timestamp_as_le_bytes = request.message[..].try_into().unwrap();
         let timestamp = u64::from_le_bytes(timestamp_as_le_bytes);
-        let totp_value: u64 = hotp_raw(&secret, timestamp, DIGITS);
+        let totp_material: u64 = hotp_raw(&secret, timestamp, DIGITS);
 
         // return signature (encode as LE)
-        Ok(reply::Sign { signature: crate::ByteBuf::try_from_slice(totp_value.to_le_bytes().as_ref()).unwrap() })
+        Ok(reply::Sign { signature: crate::ByteBuf::try_from_slice(totp_material.to_le_bytes().as_ref()).unwrap() })
     }
 }
 
@@ -99,7 +99,7 @@ impl Exists for super::Totp
     {
         let key_id = request.key.object_id;
 
-        let exists = keystore.exists_key(Secrecy::Secret, Some(KeyKind::Symmetric20), &key_id);
+        let exists = keystore.exists_key(key::Secrecy::Secret, Some(key::Kind::Symmetric20), &key_id);
         Ok(reply::Exists { exists })
     }
 }
@@ -113,7 +113,7 @@ mod tests {
     fn test_hotp() {
         assert_eq!(hotp_raw(b"\xff", 23, 6), 330795);
 
-        // test values from RFC 4226
+        // test materials from RFC 4226
         assert_eq!(hotp_raw(b"12345678901234567890", 0, 6), 755224);
         assert_eq!(hotp_raw(b"12345678901234567890", 1, 6), 287082);
         assert_ne!(hotp_raw(b"12345678901234567890", 1, 6), 287081);

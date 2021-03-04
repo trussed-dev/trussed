@@ -17,8 +17,8 @@ impl GenerateKey for super::Trng
         // store keys
         let key_id = keystore.store_key(
             request.attributes.persistence,
-            Secrecy::Secret,
-            KeyKind::Entropy32,
+            key::Secrecy::Secret,
+            key::Kind::Entropy32,
             &entropy)?;
 
         Ok(reply::GenerateKey { key: ObjectHandle { object_id: key_id } })

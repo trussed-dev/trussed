@@ -26,8 +26,8 @@ impl Encrypt for super::Tdes
         let key_id = request.key.object_id;
 
         let symmetric_key: [u8; 24] = keystore
-            .load_key(Secrecy::Secret, None, &key_id)?
-            .value.as_ref().try_into()
+            .load_key(key::Secrecy::Secret, None, &key_id)?
+            .material.as_ref().try_into()
             .map_err(|_| Error::InternalError)?;
 
 		let cipher = des::TdesEde3::new(GenericArray::from_slice(&symmetric_key));
@@ -51,8 +51,8 @@ impl Decrypt for super::Tdes
         let key_id = request.key.object_id;
 
         let symmetric_key: [u8; 24] = keystore
-            .load_key(Secrecy::Secret, None, &key_id)?
-            .value.as_ref().try_into()
+            .load_key(key::Secrecy::Secret, None, &key_id)?
+            .material.as_ref().try_into()
             .map_err(|_| Error::InternalError)?;
 
 		let cipher = des::TdesEde3::new(GenericArray::from_slice(&symmetric_key));
@@ -77,8 +77,8 @@ impl UnsafeInjectKey for super::Tdes
         // store it
         let key_id = keystore.store_key(
             request.attributes.persistence,
-            Secrecy::Secret,
-            KeyKind::Symmetric24,
+            key::Secrecy::Secret,
+            key::Kind::Symmetric24,
             &request.raw_key,
         )?;
 

@@ -1,5 +1,3 @@
-use core::convert::TryFrom;
-
 use chacha20::ChaCha8Rng;
 pub use heapless::consts;
 use littlefs2::path::PathBuf;
@@ -8,11 +6,7 @@ use rand_core::RngCore as _;
 use crate::{
     ByteBuf,
     error::{Error, Result},
-    key::{
-        KeyKind,
-        Secrecy,
-        SerializedKey,
-    },
+    key,
     Platform,
     store::{self, Store as _},
     types::Location as Location,
@@ -47,7 +41,7 @@ pub const SERIALIZATION_VERSION: u8 = 0;
 
 // #[derive(Clone,Debug,Eq,PartialEq,SerializeIndexed,DeserializeIndexed)]
 // pub struct Key {
-//    // r#type: Secrecy,
+//    // r#type: key::Secrecy,
 //    pub kind: Kind,
 //    pub flags: Flags,
 //    pub raw: Data, //ByteBuf<MAX_SERIALIZED_KEY_LENGTH>,
@@ -58,13 +52,13 @@ pub trait Keystore {
     // fn store(&self, key: Key, location: Location) -> Result<KeyId>;
     // fn load(&self, key: KeyId) -> Result<Key>;
     // fn exists(&self, key: KeyId) -> bool;
-    fn store_key(&mut self, location: Location, secrecy: Secrecy, kind: KeyKind, material: &[u8]) -> Result<KeyId>;
-    fn exists_key(&self, secrecy: Secrecy, kind: Option<KeyKind>, id: &KeyId) -> bool;
+    fn store_key(&mut self, location: Location, secrecy: key::Secrecy, kind: key::Kind, material: &[u8]) -> Result<KeyId>;
+    fn exists_key(&self, secrecy: key::Secrecy, kind: Option<key::Kind>, id: &KeyId) -> bool;
     fn delete_key(&self, id: &KeyId) -> bool;
-    fn load_key(&self, secrecy: Secrecy, kind: Option<KeyKind>, id: &KeyId) -> Result<SerializedKey>;
-    fn overwrite_key(&self, location: Location, secrecy: Secrecy, kind: KeyKind, id: &KeyId, material: &[u8]) -> Result<()>;
+    fn load_key(&self, secrecy: key::Secrecy, kind: Option<key::Kind>, id: &KeyId) -> Result<key::Key>;
+    fn overwrite_key(&self, location: Location, secrecy: key::Secrecy, kind: key::Kind, id: &KeyId, material: &[u8]) -> Result<()>;
     fn drbg(&mut self) -> &mut ChaCha8Rng;
-    fn location(&self, secrecy: Secrecy, id: &KeyId) -> Option<Location>;
+    fn location(&self, secrecy: key::Secrecy, id: &KeyId) -> Option<Location>;
 }
 
 impl<P: Platform> ClientKeystore<'_, P> {
@@ -76,15 +70,15 @@ impl<P: Platform> ClientKeystore<'_, P> {
         crate::types::UniqueId(id)
     }
 
-    pub fn key_path(&self, secrecy: Secrecy, id: &KeyId) -> PathBuf {
+    pub fn key_path(&self, secrecy: key::Secrecy, id: &KeyId) -> PathBuf {
         let mut path = PathBuf::new();
         path.push(&self.client_id);
         // TODO: huh?!?!
         // If I change these prefixes to shorter,
         // DebugDumpStore skips the directory contents
         path.push(&match secrecy {
-            Secrecy::Secret => PathBuf::from("sec"),
-            Secrecy::Public => PathBuf::from("pub"),
+            key::Secrecy::Secret => PathBuf::from("sec"),
+            key::Secrecy::Public => PathBuf::from("pub"),
         });
         path.push(&PathBuf::from(id.hex().as_ref()));
         path
@@ -98,28 +92,37 @@ impl<P: Platform> Keystore for ClientKeystore<'_, P> {
         self.drbg
     }
 
-    fn store_key(&mut self, location: Location, secrecy: Secrecy, kind: KeyKind, material: &[u8]) -> Result<KeyId> {
+    fn store_key(&mut self, location: Location, secrecy: key::Secrecy, kind: key::Kind, material: &[u8]) -> Result<KeyId> {
         // info_now!("storing {:?} -> {:?}", &key_kind, location);
-        let serialized_key = SerializedKey::try_from((kind, material))?;
+        // let serialized_key = key::Key::try_from((kind, material))?;
 
-        let mut buf = [0u8; 128];
-        let serialized_bytes = crate::cbor_serialize(&serialized_key, &mut buf).map_err(|_| Error::CborError)?;
+        // let mut buf = [0u8; 128];
+        let mut flags = key::Flags::default();
+        if secrecy == key::Secrecy::Secret {
+            flags |= key::Flags::SENSITIVE;
+        }
+        let key = key::Key {
+            flags: Default::default(),
+            kind,
+            material: key::Material::try_from_slice(material).unwrap(),
+        };
+
         let id = self.generate_key_id();
         let path = self.key_path(secrecy, &id);
-        store::store(self.store, location, &path, &serialized_bytes)?;
+        store::store(self.store, location, &path, &key.serialize())?;
 
         Ok(id)
     }
 
-    fn exists_key(&self, secrecy: Secrecy, kind: Option<KeyKind>, id: &KeyId) -> bool {
+    fn exists_key(&self, secrecy: key::Secrecy, kind: Option<key::Kind>, id: &KeyId) -> bool {
         self.load_key(secrecy, kind, id).is_ok()
     }
 
     // TODO: is this an Oracle?
     fn delete_key(&self, id: &KeyId) -> bool {
         let secrecies = [
-            Secrecy::Secret,
-            Secrecy::Public,
+            key::Secrecy::Secret,
+            key::Secrecy::Public,
         ];
 
         let locations = [
@@ -136,7 +139,7 @@ impl<P: Platform> Keystore for ClientKeystore<'_, P> {
         })
     }
 
-    fn load_key(&self, secrecy: Secrecy, kind: Option<KeyKind>, id: &KeyId) -> Result<SerializedKey> {
+    fn load_key(&self, secrecy: key::Secrecy, kind: Option<key::Kind>, id: &KeyId) -> Result<key::Key> {
         // info_now!("loading  {:?}", &key_kind);
         let path = self.key_path(secrecy, id);
 
@@ -144,32 +147,46 @@ impl<P: Platform> Keystore for ClientKeystore<'_, P> {
 
         let bytes: ByteBuf<consts::U128> = store::read(self.store, location, &path)?;
 
-        let serialized_key: SerializedKey = crate::cbor_deserialize(&bytes).map_err(|_| Error::CborError)?;
+        let key = key::Key::try_deserialize(&bytes)?;
+        // let serialized_key: key::Key = crate::cbor_deserialize(&bytes).map_err(|_| Error::CborError)?;
 
         if let Some(kind) = kind {
-            if serialized_key.kind != kind {
-                // info_now!("wrong key kind, expected {:?} got {:?}", &kind, &serialized_key.kind);
+            if key.kind != kind {
                 return Err(Error::WrongKeyKind);
             }
         }
-        Ok(serialized_key)
+        Ok(key)
     }
 
-    fn overwrite_key(&self, location: Location, secrecy: Secrecy, kind: KeyKind, id: &KeyId, material: &[u8]) -> Result<()> {
-        let serialized_key = SerializedKey::try_from((kind, material))?;
-
-        let mut buf = [0u8; 128];
-        let serialized_bytes = crate::cbor_serialize(&serialized_key, &mut buf).map_err(|_| Error::CborError)?;
+    fn overwrite_key(&self, location: Location, secrecy: key::Secrecy, kind: key::Kind, id: &KeyId, material: &[u8]) -> Result<()> {
+        let mut flags = key::Flags::default();
+        if secrecy == key::Secrecy::Secret {
+            flags |= key::Flags::SENSITIVE;
+        }
+        let key = key::Key {
+            flags: Default::default(),
+            kind,
+            material: key::Material::try_from_slice(material).unwrap(),
+        };
 
         let path = self.key_path(secrecy, id);
+        store::store(self.store, location, &path, &key.serialize())?;
 
-        store::store(self.store, location, &path, &serialized_bytes)?;
+        // /// old
+        // let serialized_key = key::Key::try_from((kind, material))?;
+
+        // let mut buf = [0u8; 128];
+        // let serialized_bytes = crate::cbor_serialize(&serialized_key, &mut buf).map_err(|_| Error::CborError)?;
+
+        // let path = self.key_path(secrecy, id);
+
+        // store::store(self.store, location, &path, &serialized_bytes)?;
 
         Ok(())
     }
 
 
-    fn location(&self, secrecy: Secrecy, id: &KeyId) -> Option<Location> {
+    fn location(&self, secrecy: key::Secrecy, id: &KeyId) -> Option<Location> {
         let path = self.key_path(secrecy, id);
 
         if path.exists(&self.store.vfs()) {

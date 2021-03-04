@@ -28,8 +28,8 @@ impl GenerateKey for super::Chacha8Poly1305 {
         // store keys
         let key_id = keystore.store_key(
             request.attributes.persistence,
-            Secrecy::Secret,
-            KeyKind::Symmetric32Nonce12,
+            key::Secrecy::Secret,
+            key::Kind::Symmetric32Nonce12,
             &serialized,
         )?;
 
@@ -60,10 +60,10 @@ impl Decrypt for super::Chacha8Poly1305
         use chacha20poly1305::ChaCha8Poly1305;
         use chacha20poly1305::aead::{AeadInPlace, NewAead};
 
-        let serialized_value = keystore
-            .load_key(Secrecy::Secret, Some(KeyKind::Symmetric32Nonce12), &request.key.object_id)?
-            .value;
-        let serialized = serialized_value.as_ref();
+        let serialized_material = keystore
+            .load_key(key::Secrecy::Secret, Some(key::Kind::Symmetric32Nonce12), &request.key.object_id)?
+            .material;
+        let serialized = serialized_material.as_ref();
 
         // if serialized.len() != 44 {
         //     return Error::InternalError;
@@ -104,13 +104,13 @@ impl Encrypt for super::Chacha8Poly1305
 
 
         // load key and nonce
-        let secrecy = Secrecy::Secret;
-        let key_kind = KeyKind::Symmetric32Nonce12;
+        let secrecy = key::Secrecy::Secret;
+        let key_kind = key::Kind::Symmetric32Nonce12;
         let key_id = &request.key.object_id;
-        let mut serialized_value = keystore
+        let mut serialized_material = keystore
             .load_key(secrecy, Some(key_kind), key_id)?
-            .value;
-        let serialized = serialized_value.as_mut();
+            .material;
+        let serialized = serialized_material.as_mut();
 
         assert!(serialized.len() == 44);
 
@@ -118,7 +118,7 @@ impl Encrypt for super::Chacha8Poly1305
         let location = keystore.location(secrecy, key_id).unwrap();
 
         // let key_id = request.key.object_id;
-        // let path = keystore.prepare_path_for_key(Secrecy::Secret, &key_id)?;
+        // let path = keystore.prepare_path_for_key(key::Secrecy::Secret, &key_id)?;
         // let mut serialized = [0u8; 44];
         // debug!("loading encryption key: {:?}", &path);
 
@@ -168,10 +168,9 @@ impl WrapKey for super::Chacha8Poly1305
 
         // TODO: need to check both secret and private keys
         let serialized_key = keystore
-            .load_key(Secrecy::Secret, None, &request.key.object_id)?;
+            .load_key(key::Secrecy::Secret, None, &request.key.object_id)?;
 
-        let mut message = Message::new();
-        crate::cbor_serialize_bytes(&serialized_key, &mut message).map_err(|_| Error::CborError)?;
+        let message = serialized_key.serialize().try_convert_into().unwrap();
 
         let encryption_request = request::Encrypt {
             mechanism: Mechanism::Chacha8Poly1305,
@@ -215,15 +214,15 @@ impl UnwrapKey for super::Chacha8Poly1305
         };
 
         // TODO: probably change this to returning Option<key> too
-        let SerializedKey { kind, value, .. } = crate::cbor_deserialize(&serialized_key).map_err(|_| Error::CborError)?;
+        let key::Key{ flags: _, kind, material } = key::Key::try_deserialize(&serialized_key)?;
 
         // TODO: need to check both secret and private keys
         let key_id = keystore.store_key(
             request.attributes.persistence,
             // using for signing keys... we need to know
-            Secrecy::Secret,
+            key::Secrecy::Secret,
             kind,
-            &value,
+            &material,
         )?;
 
         Ok(reply::UnwrapKey { key: Some(ObjectHandle { object_id: key_id }) } )
@@ -280,8 +279,8 @@ impl UnwrapKey for super::Chacha8Poly1305
 
 //         let key_id = request.key.object_id;
 //         let mut symmetric_key = [0u8; 32];
-//         let path = keystore.prepare_path_for_key(Secrecy::Secret, &key_id)?;
-//         keystore.load_serialized_key(&path, KeyKind::SymmetricKey32, &mut symmetric_key)?;
+//         let path = keystore.prepare_path_for_key(key::Secrecy::Secret, &key_id)?;
+//         keystore.load_serialized_key(&path, key::Kind::SymmetricKey32, &mut symmetric_key)?;
 
 //         let zero_iv = [0u8; 32];
 // 		let cipher = Aes256Cbc::new_var(&symmetric_key, &zero_iv).unwrap();
@@ -319,10 +318,10 @@ impl UnwrapKey for super::Chacha8Poly1305
 //         use chacha20poly1305::ChaCha8Poly1305;
 
 //         let key_id = request.key.object_id;
-//         let path = keystore.prepare_path_for_key(Secrecy::Secret, &key_id)?;
+//         let path = keystore.prepare_path_for_key(key::Secrecy::Secret, &key_id)?;
 
 //         let mut symmetric_key = [0u8; 32];
-//         keystore.load_serialized_key(&path, KeyKind::SymmetricKey32, &mut symmetric_key)?;
+//         keystore.load_serialized_key(&path, key::Kind::SymmetricKey32, &mut symmetric_key)?;
 
 //         // keep in state?
 //         let aead = ChaCha8Poly1305::new(GenericArray::clone_from_slice(&symmetric_key)?);

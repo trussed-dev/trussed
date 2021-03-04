@@ -11,8 +11,8 @@ fn load_public_key(keystore: &mut impl Keystore, key_id: &UniqueId)
     -> Result<salty::PublicKey, Error> {
 
     let public_bytes: [u8; 32] = keystore
-        .load_key(Secrecy::Public, Some(KeyKind::Ed255), &key_id)?
-        .value.as_ref()
+        .load_key(key::Secrecy::Public, Some(key::Kind::Ed255), &key_id)?
+        .material.as_ref()
         .try_into()
         .map_err(|_| Error::InternalError)?;
 
@@ -25,8 +25,8 @@ fn load_keypair(keystore: &mut impl Keystore, key_id: &UniqueId)
     -> Result<salty::Keypair, Error> {
 
     let seed: [u8; 32] = keystore
-        .load_key(Secrecy::Secret, Some(KeyKind::Ed255), &key_id)?
-        .value.as_ref()
+        .load_key(key::Secrecy::Secret, Some(key::Kind::Ed255), &key_id)?
+        .material.as_ref()
         .try_into()
         .map_err(|_| Error::InternalError)?;
 
@@ -46,7 +46,7 @@ impl DeriveKey for super::Ed255
 
         let public_id = keystore.store_key(
             request.attributes.persistence,
-            Secrecy::Public, KeyKind::Ed255,
+            key::Secrecy::Public, key::Kind::Ed255,
             keypair.public.as_bytes())?;
 
         Ok(reply::DeriveKey {
@@ -79,7 +79,7 @@ impl DeserializeKey for super::Ed255
 
         let public_id = keystore.store_key(
             request.attributes.persistence,
-            Secrecy::Public, KeyKind::Ed255,
+            key::Secrecy::Public, key::Kind::Ed255,
             public_key.as_bytes())?;
 
         Ok(reply::DeserializeKey {
@@ -104,7 +104,7 @@ impl GenerateKey for super::Ed255
         // store keys
         let key_id = keystore.store_key(
             request.attributes.persistence,
-            Secrecy::Secret, KeyKind::Ed255,
+            key::Secrecy::Secret, key::Kind::Ed255,
             &seed)?;
 
         // return handle
@@ -152,7 +152,7 @@ impl Exists for super::Ed255
     {
         let key_id = request.key.object_id;
 
-        let exists = keystore.exists_key(Secrecy::Secret, Some(KeyKind::Ed255), &key_id);
+        let exists = keystore.exists_key(key::Secrecy::Secret, Some(key::Kind::Ed255), &key_id);
         Ok(reply::Exists { exists })
     }
 }
