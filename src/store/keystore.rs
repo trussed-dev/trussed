@@ -33,20 +33,6 @@ impl<'a, P: Platform> ClientKeystore<'a, P> {
 
 pub const SERIALIZATION_VERSION: u8 = 0;
 
-// pub enum Kind {
-//     Shared(u16),
-//     Symmetric(u16),
-//     SymmetricWithNonce(u16, u8),
-// }
-
-// #[derive(Clone,Debug,Eq,PartialEq,SerializeIndexed,DeserializeIndexed)]
-// pub struct Key {
-//    // r#type: key::Secrecy,
-//    pub kind: Kind,
-//    pub flags: Flags,
-//    pub raw: Data, //ByteBuf<MAX_SERIALIZED_KEY_LENGTH>,
-// }
-
 /// Trait intended for use by mechanism implementations.
 pub trait Keystore {
     // fn store(&self, key: Key, location: Location) -> Result<KeyId>;
@@ -94,9 +80,7 @@ impl<P: Platform> Keystore for ClientKeystore<'_, P> {
 
     fn store_key(&mut self, location: Location, secrecy: key::Secrecy, kind: key::Kind, material: &[u8]) -> Result<KeyId> {
         // info_now!("storing {:?} -> {:?}", &key_kind, location);
-        // let serialized_key = key::Key::try_from((kind, material))?;
 
-        // let mut buf = [0u8; 128];
         let mut flags = key::Flags::default();
         if secrecy == key::Secrecy::Secret {
             flags |= key::Flags::SENSITIVE;
@@ -148,7 +132,6 @@ impl<P: Platform> Keystore for ClientKeystore<'_, P> {
         let bytes: ByteBuf<consts::U128> = store::read(self.store, location, &path)?;
 
         let key = key::Key::try_deserialize(&bytes)?;
-        // let serialized_key: key::Key = crate::cbor_deserialize(&bytes).map_err(|_| Error::CborError)?;
 
         if let Some(kind) = kind {
             if key.kind != kind {
@@ -171,16 +154,6 @@ impl<P: Platform> Keystore for ClientKeystore<'_, P> {
 
         let path = self.key_path(secrecy, id);
         store::store(self.store, location, &path, &key.serialize())?;
-
-        // /// old
-        // let serialized_key = key::Key::try_from((kind, material))?;
-
-        // let mut buf = [0u8; 128];
-        // let serialized_bytes = crate::cbor_serialize(&serialized_key, &mut buf).map_err(|_| Error::CborError)?;
-
-        // let path = self.key_path(secrecy, id);
-
-        // store::store(self.store, location, &path, &serialized_bytes)?;
 
         Ok(())
     }

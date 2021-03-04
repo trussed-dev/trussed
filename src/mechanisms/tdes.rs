@@ -78,7 +78,7 @@ impl UnsafeInjectKey for super::Tdes
         let key_id = keystore.store_key(
             request.attributes.persistence,
             key::Secrecy::Secret,
-            key::Kind::Symmetric24,
+            key::Kind::Symmetric(24),
             &request.raw_key,
         )?;
 

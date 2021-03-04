@@ -65,7 +65,7 @@ impl GenerateKey for super::HmacSha256
         let key_id = keystore.store_key(
             request.attributes.persistence,
             key::Secrecy::Secret,
-            key::Kind::SymmetricKey16,
+            key::Kind::Symmetric(16),
             &seed)?;
 
         // return handle
