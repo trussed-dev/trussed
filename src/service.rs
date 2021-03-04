@@ -9,7 +9,7 @@ use crate::api::*;
 use crate::platform::*;
 use crate::config::*;
 use crate::error::Error;
-pub use crate::key::*;
+pub use crate::key;
 use crate::mechanisms;
 use crate::pipe::TrussedInterchange;
 pub use crate::store::{

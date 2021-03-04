@@ -10,8 +10,8 @@ fn load_keypair(keystore: &mut impl Keystore, key_id: &UniqueId)
 
     // info_now!("loading keypair");
     let seed: [u8; 32] = keystore
-        .load_key(Secrecy::Secret, Some(KeyKind::P256), &key_id)?
-        .value.as_ref()
+        .load_key(key::Secrecy::Secret, Some(key::Kind::P256), &key_id)?
+        .material.as_ref()
         .try_into()
         .map_err(|_| Error::InternalError)?;
 
@@ -24,8 +24,8 @@ fn load_public_key(keystore: &mut impl Keystore, key_id: &UniqueId)
     -> Result<nisty::PublicKey, Error> {
 
     let public_bytes = keystore
-        .load_key(Secrecy::Public, Some(KeyKind::P256), &key_id)?
-        .value;
+        .load_key(key::Secrecy::Public, Some(key::Kind::P256), &key_id)?
+        .material;
 
     let public_bytes = match public_bytes.as_ref().len() {
         64 => {
@@ -61,7 +61,7 @@ impl Agree for super::P256
 
         let key_id = keystore.store_key(
             request.attributes.persistence,
-            Secrecy::Secret, KeyKind::SharedSecret32,
+            key::Secrecy::Secret, key::Kind::SharedSecret32,
             &shared_secret)?;
 
         // return handle
@@ -81,7 +81,7 @@ impl DeriveKey for super::P256
 
         let public_id = keystore.store_key(
             request.attributes.persistence,
-            Secrecy::Public, KeyKind::P256,
+            key::Secrecy::Public, key::Kind::P256,
             &keypair.public.to_bytes())?;
 
         Ok(reply::DeriveKey {
@@ -150,7 +150,7 @@ impl DeserializeKey for super::P256
 
         let public_id = keystore.store_key(
             request.attributes.persistence,
-            Secrecy::Public, KeyKind::P256,
+            key::Secrecy::Public, key::Kind::P256,
             public_key.as_bytes())?;
 
 
@@ -177,7 +177,7 @@ impl GenerateKey for super::P256
         // store keys
         let key_id = keystore.store_key(
             request.attributes.persistence,
-            Secrecy::Secret, KeyKind::P256,
+            key::Secrecy::Secret, key::Kind::P256,
             &seed)?;
 
         // return handle
@@ -236,7 +236,7 @@ impl Exists for super::P256
         -> Result<reply::Exists, Error>
     {
         let key_id = request.key.object_id;
-        let exists = keystore.exists_key(Secrecy::Secret, Some(KeyKind::P256), &key_id);
+        let exists = keystore.exists_key(key::Secrecy::Secret, Some(key::Kind::P256), &key_id);
         Ok(reply::Exists { exists })
     }
 }
@@ -250,8 +250,8 @@ impl Sign for super::P256
         let key_id = request.key.object_id;
 
         let seed: [u8; 32] = keystore
-            .load_key(Secrecy::Secret, Some(KeyKind::P256), &key_id)?
-            .value.as_ref()
+            .load_key(key::Secrecy::Secret, Some(key::Kind::P256), &key_id)?
+            .material.as_ref()
             .try_into()
             .map_err(|_| Error::InternalError)?;
 

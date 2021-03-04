@@ -15,8 +15,8 @@ impl DeriveKey for super::Sha256
         let base_id = &request.base_key.object_id;
 
         let shared_secret: [u8; 32] = keystore
-            .load_key(Secrecy::Secret, Some(KeyKind::SharedSecret32), base_id)?
-            .value.as_ref()
+            .load_key(key::Secrecy::Secret, Some(key::Kind::SharedSecret32), base_id)?
+            .material.as_ref()
             .try_into()
             .map_err(|_| Error::InternalError)?;
 
@@ -28,7 +28,7 @@ impl DeriveKey for super::Sha256
 
         let key_id = keystore.store_key(
             request.attributes.persistence,
-            Secrecy::Secret, KeyKind::SymmetricKey32,
+            key::Secrecy::Secret, key::Kind::SymmetricKey32,
             &symmetric_key)?;
             // keystore.generate_unique_id()?;
 
