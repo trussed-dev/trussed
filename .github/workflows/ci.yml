@@ -9,6 +9,11 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target:
+          - x86_64-unknown-linux-gnu
+          - thumbv7em-none-eabi
 
     steps:
       - name: Checkout repository
@@ -18,6 +23,7 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
+          target: ${{ matrix.target }}
           profile: minimal
 
       - name: Install build dependencies
@@ -30,8 +36,9 @@ jobs:
           release: "9-2020-q2"
 
       - name: Build
-        run: cargo build --verbose
+        run: cargo build --verbose --target ${{ matrix.target }}
 
       - name: Run tests
         run: cargo test --verbose
+        if: matrix.target == 'x86_64-unknown-linux-gnu'
 

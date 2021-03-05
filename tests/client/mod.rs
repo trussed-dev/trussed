@@ -20,7 +20,9 @@ pub fn get<R>(
 
 pub fn init_platform() -> Platform {
     use rand_core::SeedableRng as _;
-    let rng = chacha20::ChaCha8Rng::from_rng(rand_core::OsRng).unwrap();
+    // causing a regression again
+    // let rng = chacha20::ChaCha8Rng::from_rng(rand_core::OsRng).unwrap();
+    let rng = chacha20::ChaCha8Rng::from_seed([42u8; 32]);
     let store = store::Store::format(
         store::InternalStorage::new(),
         store::ExternalStorage::new(),
