@@ -181,7 +181,7 @@ impl WrapKey for super::Chacha8Poly1305
         };
         let encryption_reply = <super::Chacha8Poly1305>::encrypt(keystore, encryption_request)?;
 
-        let wrapped_key = crate::cbor_serialize_bytes(&encryption_reply).map_err(|_| Error::CborError)?;
+        let wrapped_key = crate::postcard_serialize_bytes(&encryption_reply).map_err(|_| Error::CborError)?;
 
         Ok(reply::WrapKey { wrapped_key })
     }
@@ -193,7 +193,7 @@ impl UnwrapKey for super::Chacha8Poly1305
     fn unwrap_key(keystore: &mut impl Keystore, request: request::UnwrapKey)
         -> Result<reply::UnwrapKey, Error>
     {
-        let reply::Encrypt { ciphertext, nonce, tag } = crate::cbor_deserialize(
+        let reply::Encrypt { ciphertext, nonce, tag } = crate::postcard_deserialize(
             &request.wrapped_key).map_err(|_| Error::CborError)?;
 
         let decryption_request = request::Decrypt {

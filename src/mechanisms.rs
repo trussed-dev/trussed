@@ -18,7 +18,12 @@ pub struct HmacSha256 {}
 mod hmacsha256;
 
 pub struct HmacSha512 {}
+#[cfg(feature = "hmac-sha512")]
 mod hmacsha512;
+#[cfg(not(feature = "hmac-sha512"))]
+impl crate::service::GenerateKey for HmacSha512 {}
+#[cfg(not(feature = "hmac-sha512"))]
+impl crate::service::Sign for HmacSha512 {}
 
 pub struct P256 {}
 pub struct P256Prehashed {}
