@@ -226,7 +226,7 @@ pub trait Totp: CryptoClient {
         )
     }
 
-    fn unsafe_inject_totp_key<'c>(&'c mut self, raw_key: &[u8; 20], persistence: Location)
+    fn unsafe_inject_totp_key<'c>(&'c mut self, raw_key: &[u8], persistence: Location)
         -> ClientResult<'c, reply::UnsafeInjectKey, Self>
     {
         self.unsafe_inject_key(Mechanism::Totp, raw_key, persistence)
