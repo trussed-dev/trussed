@@ -75,4 +75,6 @@ impl GenerateKey for super::HmacSha512
 
 
 #[cfg(not(feature = "hmac-sha512"))]
+impl GenerateKey for super::HmacSha512 {}
+#[cfg(not(feature = "hmac-sha512"))]
 impl Sign for super::HmacSha512 {}

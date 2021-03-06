@@ -252,14 +252,17 @@ impl Sign for super::P256
     {
         let key_id = request.key.object_id;
 
+        // debug_now!("loading seed");
         let seed: [u8; 32] = keystore
             .load_key(key::Secrecy::Secret, Some(key::Kind::P256), &key_id)?
             .material.as_ref()
             .try_into()
             .map_err(|_| Error::InternalError)?;
 
+        // debug_now!("signing {} of length {} with {}", &hex_str!(&request.message[..10]), request.message.len(), hex_str!(&seed));
         let native_signature = nisty::SecretKey::sign_with(seed, &request.message);
 
+        // debug_now!("making signature");
         let our_signature = match request.format {
             SignatureSerialization::Asn1Der => {
                 Signature::try_from_slice(&native_signature.to_der()).unwrap()
