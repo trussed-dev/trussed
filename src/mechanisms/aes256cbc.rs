@@ -64,7 +64,7 @@ impl WrapKey for super::Aes256Cbc
 
         // let message: Message = serialized_key.material.try_to_byte_buf().map_err(|_| Error::InternalError)?;
 
-        let message: Message = crate::ByteBuf::try_from_slice(keystore
+        let message: Message = crate::Bytes::try_from_slice(keystore
             .load_key(key::Secrecy::Secret, None, &request.key.object_id)?
             .material.as_ref()).map_err(|_| Error::InternalError)?;
 

@@ -79,7 +79,7 @@ pub mod counterstore;
 pub mod filestore;
 pub mod keystore;
 
-// pub type FileContents = ByteBuf<MAX_FILE_SIZE>;
+// pub type FileContents = Bytes<MAX_FILE_SIZE>;
 
 // pub mod our {
 //     type Result = ();
@@ -451,13 +451,13 @@ pub fn create_directories<'s, S: LfsStorage>(
 }
 
 /// Reads contents from path in location of store.
-pub fn read<N: heapless::ArrayLength<u8>>(store: impl Store, location: Location, path: &Path) -> Result<ByteBuf<N>, Error> {
+pub fn read<N: heapless::ArrayLength<u8>>(store: impl Store, location: Location, path: &Path) -> Result<Bytes<N>, Error> {
     debug_now!("reading {}", &path);
     match location {
         Location::Internal => store.ifs().read(path),
         Location::External => store.efs().read(path),
         Location::Volatile => store.vfs().read(path),
-    }.map(ByteBuf::from).map_err(|_| Error::FilesystemReadFailure)
+    }.map(Bytes::from).map_err(|_| Error::FilesystemReadFailure)
 }
 
 /// Writes contents to path in location of store.

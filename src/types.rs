@@ -9,7 +9,7 @@ pub use heapless::{
     Vec,
 };
 
-pub use heapless_bytes::Bytes as ByteBuf;
+pub use crate::Bytes;
 
 pub use littlefs2::{
     fs::{DirEntry, Filesystem},
@@ -155,7 +155,7 @@ pub struct DataAttributes {
     // application that manages the object
     // pub application: String<MAX_APPLICATION_NAME_LENGTH>,
     // DER-encoding of *type* of data object
-    // pub object_id: ByteBuf<?>,
+    // pub object_id: Bytes<?>,
     pub kind: ShortData,
     pub value: LongData,
 }
@@ -170,7 +170,7 @@ pub struct DataAttributes {
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Serialize, Deserialize)]
 pub struct KeyAttributes {
     // secrecy: Secrecy,
-    // object_id: ByteBuf,
+    // object_id: Bytes,
     // derive: bool, // can other keys be derived
     // local: bool, // generated on token, or copied from such
     // key_gen_mechanism: Mechanism, // only for local, how was key generated
@@ -410,7 +410,9 @@ pub enum Mechanism {
     Aes256Cbc,
     Chacha8Poly1305,
     Ed255,
+    HmacSha1,
     HmacSha256,
+    HmacSha512,
     // P256XSha256,
     P256,
     P256Prehashed,
@@ -422,11 +424,11 @@ pub enum Mechanism {
     X255,
 }
 
-pub type LongData = ByteBuf<MAX_LONG_DATA_LENGTH>;
-pub type MediumData = ByteBuf<MAX_MEDIUM_DATA_LENGTH>;
-pub type ShortData = ByteBuf<MAX_SHORT_DATA_LENGTH>;
+pub type LongData = Bytes<MAX_LONG_DATA_LENGTH>;
+pub type MediumData = Bytes<MAX_MEDIUM_DATA_LENGTH>;
+pub type ShortData = Bytes<MAX_SHORT_DATA_LENGTH>;
 
-pub type Message = ByteBuf<MAX_MESSAGE_LENGTH>;
+pub type Message = Bytes<MAX_MESSAGE_LENGTH>;
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Serialize, Deserialize)]
 pub enum KeySerialization {
@@ -437,7 +439,7 @@ pub enum KeySerialization {
     Sec1,
 }
 
-pub type Signature = ByteBuf<MAX_SIGNATURE_LENGTH>;
+pub type Signature = Bytes<MAX_SIGNATURE_LENGTH>;
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Serialize, Deserialize)]
 pub enum SignatureSerialization {
@@ -468,9 +470,9 @@ impl From<SpecialId> for UniqueId {
 }
 
 impl UniqueId {
-    pub fn hex(&self) -> ByteBuf<consts::U32> {
+    pub fn hex(&self) -> Bytes<consts::U32> {
         const HEX_CHARS: &[u8] = b"0123456789abcdef";
-        let mut buffer = ByteBuf::new();
+        let mut buffer = Bytes::new();
 
         for i in 0 .. self.0.len() {
             if self.0[i] == 0 && i != (self.0.len()-1) {
@@ -491,7 +493,7 @@ impl UniqueId {
         // (0..hex.len())
         // use hex::FromHex;
         // let maybe_bytes = <[u8; 16]>::from_hex(hex).map_err(|e| ());
-        // maybe_bytes.map(|bytes| Self(ByteBuf::try_from_slice(&bytes).unwrap()))
+        // maybe_bytes.map(|bytes| Self(Bytes::try_from_slice(&bytes).unwrap()))
         if (hex.len() & 1) == 1 {
             // panic!("hex len & 1 =  {}", hex.len() & 1);
             return Err(());
@@ -522,5 +524,5 @@ impl core::fmt::Debug for UniqueId {
     }
 }
 
-pub type UserAttribute = ByteBuf<MAX_USER_ATTRIBUTE_LENGTH>;
+pub type UserAttribute = Bytes<MAX_USER_ATTRIBUTE_LENGTH>;
 

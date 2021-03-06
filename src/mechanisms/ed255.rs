@@ -121,24 +121,25 @@ impl SerializeKey for super::Ed255
         let key_id = request.key.object_id;
         let public_key = load_public_key(keystore, &key_id)?;
 
-        let mut serialized_key = Message::new();
-        match request.format {
+        let serialized_key = match request.format {
             KeySerialization::Cose => {
                 let cose_pk = cosey::Ed25519PublicKey {
-                    // x: ByteBuf::try_from_slice(public_key.x_coordinate()).unwrap(),
-                    // x: ByteBuf::try_from_slice(&buf).unwrap(),
-                    x: ByteBuf::try_from_slice(public_key.as_bytes()).unwrap(),
+                    // x: Bytes::try_from_slice(public_key.x_coordinate()).unwrap(),
+                    // x: Bytes::try_from_slice(&buf).unwrap(),
+                    x: Bytes::try_from_slice(public_key.as_bytes()).unwrap(),
                 };
-                crate::cbor_serialize_bytes(&cose_pk, &mut serialized_key).map_err(|_| Error::CborError)?;
+                crate::cbor_serialize_bytes(&cose_pk).map_err(|_| Error::CborError)?
             }
 
             KeySerialization::Raw => {
+                let mut serialized_key = Message::new();
                 serialized_key.extend_from_slice(public_key.as_bytes()).map_err(|_| Error::InternalError)?;
                 // serialized_key.extend_from_slice(&buf).map_err(|_| Error::InternalError)?;
+                serialized_key
             }
 
             _ => { return Err(Error::InternalError); }
-        }
+        };
 
         Ok(reply::SerializeKey { serialized_key })
     }

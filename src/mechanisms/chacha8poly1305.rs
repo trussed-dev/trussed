@@ -181,8 +181,7 @@ impl WrapKey for super::Chacha8Poly1305
         };
         let encryption_reply = <super::Chacha8Poly1305>::encrypt(keystore, encryption_request)?;
 
-        let mut wrapped_key = Message::new();
-        crate::cbor_serialize_bytes(&encryption_reply, &mut wrapped_key).map_err(|_| Error::CborError)?;
+        let wrapped_key = crate::cbor_serialize_bytes(&encryption_reply).map_err(|_| Error::CborError)?;
 
         Ok(reply::WrapKey { wrapped_key })
     }

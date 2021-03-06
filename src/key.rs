@@ -1,15 +1,15 @@
-pub use heapless_bytes::Bytes as ByteBuf;
 use serde::{Deserialize, Serialize};
 use serde_indexed::{DeserializeIndexed, SerializeIndexed};
 use zeroize::Zeroize;
 
+pub use crate::Bytes;
 use crate::{
     Error,
     config::{MAX_KEY_MATERIAL_LENGTH, MAX_SERIALIZED_KEY_LENGTH},
 };
 
-pub type Material = ByteBuf<MAX_KEY_MATERIAL_LENGTH>;
-pub type SerializedKeyBytes = ByteBuf<MAX_SERIALIZED_KEY_LENGTH>;
+pub type Material = Bytes<MAX_KEY_MATERIAL_LENGTH>;
+pub type SerializedKeyBytes = Bytes<MAX_SERIALIZED_KEY_LENGTH>;
 
 // We don't implement serde to make sure nobody inadvertently still uses it
 // Should we use references here only?

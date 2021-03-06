@@ -62,6 +62,24 @@ pub trait Chacha8Poly1305: CryptoClient {
     }
 }
 
+#[cfg(feature = "hmac-sha1")]
+impl<S: Syscall> HmacSha1 for ClientImplementation<S> {}
+
+pub trait HmacSha1: CryptoClient {
+    fn generate_hmacsha1_key(&mut self, persistence: Location)
+        -> ClientResult<'_, reply::GenerateKey, Self>
+    {
+        self.generate_key(Mechanism::HmacSha1, StorageAttributes::new().set_persistence(persistence))
+    }
+
+    fn sign_hmacsha1<'c>(&'c mut self, key: ObjectHandle, message: &[u8])
+        -> ClientResult<'c, reply::Sign, Self>
+    {
+        self.sign(Mechanism::HmacSha1, key, message, SignatureSerialization::Raw)
+    }
+
+}
+
 #[cfg(feature = "hmac-sha256")]
 impl<S: Syscall> HmacSha256 for ClientImplementation<S> {}
 
@@ -76,6 +94,24 @@ pub trait HmacSha256: CryptoClient {
         -> ClientResult<'c, reply::Sign, Self>
     {
         self.sign(Mechanism::HmacSha256, key, message, SignatureSerialization::Raw)
+    }
+
+}
+
+#[cfg(feature = "hmac-sha512")]
+impl<S: Syscall> HmacSha512 for ClientImplementation<S> {}
+
+pub trait HmacSha512: CryptoClient {
+    fn generate_hmacsha512_key(&mut self, persistence: Location)
+        -> ClientResult<'_, reply::GenerateKey, Self>
+    {
+        self.generate_key(Mechanism::HmacSha512, StorageAttributes::new().set_persistence(persistence))
+    }
+
+    fn sign_hmacsha512<'c>(&'c mut self, key: ObjectHandle, message: &[u8])
+        -> ClientResult<'c, reply::Sign, Self>
+    {
+        self.sign(Mechanism::HmacSha512, key, message, SignatureSerialization::Raw)
     }
 
 }
