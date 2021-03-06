@@ -381,9 +381,9 @@ pub trait CryptoClient: PollClient {
     }
 
     fn random_bytes(&mut self, count: usize)
-        -> ClientResult<'_, reply::RandomByteBuf, Self>
+        -> ClientResult<'_, reply::RandomBytes, Self>
     {
-        let r = self.request(request::RandomByteBuf { count } )?;
+        let r = self.request(request::RandomBytes { count } )?;
         r.client.syscall();
         Ok(r)
     }
@@ -412,7 +412,7 @@ pub trait CryptoClient: PollClient {
         let r = self.request(request::Sign {
             key,
             mechanism,
-            message: ByteBuf::try_from_slice(data).map_err(|_| ClientError::DataTooLarge)?,
+            message: Bytes::try_from_slice(data).map_err(|_| ClientError::DataTooLarge)?,
             format,
         })?;
         r.client.syscall();

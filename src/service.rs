@@ -1,11 +1,11 @@
 pub use rand_core::{RngCore, SeedableRng};
-use heapless_bytes::Bytes as ByteBuf;
 use interchange::Responder;
 use littlefs2::path::PathBuf;
 use chacha20::ChaCha8Rng;
 
 
 use crate::api::*;
+use crate::Bytes;
 use crate::platform::*;
 use crate::config::*;
 use crate::error::Error;
@@ -201,7 +201,9 @@ impl<P: Platform> ServiceResources<P> {
                 match request.mechanism {
                     Mechanism::Chacha8Poly1305 => mechanisms::Chacha8Poly1305::generate_key(keystore, request),
                     Mechanism::Ed255 => mechanisms::Ed255::generate_key(keystore, request),
+                    Mechanism::HmacSha1 => mechanisms::HmacSha1::generate_key(keystore, request),
                     Mechanism::HmacSha256 => mechanisms::HmacSha256::generate_key(keystore, request),
+                    Mechanism::HmacSha512 => mechanisms::HmacSha512::generate_key(keystore, request),
                     Mechanism::P256 => mechanisms::P256::generate_key(keystore, request),
                     Mechanism::X255 => mechanisms::X255::generate_key(keystore, request),
                     _ => Err(Error::MechanismNotAvailable),
@@ -357,12 +359,12 @@ impl<P: Platform> ServiceResources<P> {
                 }))
             }
 
-            Request::RandomByteBuf(request) => {
+            Request::RandomBytes(request) => {
                 if request.count < 1024 {
                     let mut bytes = Message::new();
                     bytes.resize_default(request.count).unwrap();
                     self.drbg()?.fill_bytes(&mut bytes);
-                    Ok(Reply::RandomByteBuf(reply::RandomByteBuf { bytes } ))
+                    Ok(Reply::RandomBytes(reply::RandomBytes { bytes } ))
                 } else {
                     Err(Error::MechanismNotAvailable)
                 }
@@ -383,7 +385,9 @@ impl<P: Platform> ServiceResources<P> {
                 match request.mechanism {
 
                     Mechanism::Ed255 => mechanisms::Ed255::sign(keystore, request),
+                    Mechanism::HmacSha1 => mechanisms::HmacSha1::sign(keystore, request),
                     Mechanism::HmacSha256 => mechanisms::HmacSha256::sign(keystore, request),
+                    Mechanism::HmacSha512 => mechanisms::HmacSha512::sign(keystore, request),
                     Mechanism::P256 => mechanisms::P256::sign(keystore, request),
                     Mechanism::P256Prehashed => mechanisms::P256Prehashed::sign(keystore, request),
                     Mechanism::Totp => mechanisms::Totp::sign(keystore, request),
@@ -531,7 +535,7 @@ impl<P: Platform> ServiceResources<P> {
                 stored_seed
             } else {
                 // Use the last saved state.
-                let stored_seed_bytebuf: ByteBuf<consts::U32> = filestore.read(&path, Location::Internal)?;
+                let stored_seed_bytebuf: Bytes<consts::U32> = filestore.read(&path, Location::Internal)?;
                 let mut stored_seed = [0u8; 32];
                 stored_seed.clone_from_slice(&stored_seed_bytebuf);
                 stored_seed

@@ -86,7 +86,7 @@ impl Sign for super::Totp
         let totp_material: u64 = hotp_raw(&secret, timestamp, DIGITS);
 
         // return signature (encode as LE)
-        Ok(reply::Sign { signature: crate::ByteBuf::try_from_slice(totp_material.to_le_bytes().as_ref()).unwrap() })
+        Ok(reply::Sign { signature: crate::Bytes::try_from_slice(totp_material.to_le_bytes().as_ref()).unwrap() })
     }
 }
 

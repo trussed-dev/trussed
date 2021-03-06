@@ -6,7 +6,7 @@ use core::{
 use littlefs2::path::PathBuf;
 
 use crate::{
-    ByteBuf,
+    Bytes,
     consts,
     error::{Error, Result},
     store::{self, Store},
@@ -35,7 +35,7 @@ impl<S: Store> ClientCounterstore<S> {
         let mut path = PathBuf::new();
         path.push(&self.client_id);
         path.push(&PathBuf::from("ctr"));
-        let mut buf = ByteBuf::<consts::U32>::new();
+        let mut buf = Bytes::<consts::U32>::new();
         write!(&mut buf, "{}", id).ok();
         path.push(&PathBuf::from(buf.as_slice()));
         path
@@ -43,7 +43,7 @@ impl<S: Store> ClientCounterstore<S> {
 
     fn read_counter(&mut self, location: Location, id: u128) -> Result<Counter> {
         let path = self.counter_path(id);
-        let mut bytes: crate::ByteBuf<crate::consts::U16> = store::read(self.store, location, &path)?;
+        let mut bytes: crate::Bytes<crate::consts::U16> = store::read(self.store, location, &path)?;
         bytes.resize_default(16).ok();
         Ok(u128::from_le_bytes(bytes.as_slice().try_into().unwrap()))
     }

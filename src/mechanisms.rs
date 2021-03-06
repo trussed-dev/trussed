@@ -11,8 +11,14 @@ mod chacha8poly1305;
 pub struct Ed255 {}
 mod ed255;
 
+pub struct HmacSha1 {}
+mod hmacsha1;
+
 pub struct HmacSha256 {}
 mod hmacsha256;
+
+pub struct HmacSha512 {}
+mod hmacsha512;
 
 pub struct P256 {}
 pub struct P256Prehashed {}

@@ -4,7 +4,7 @@ use littlefs2::path::PathBuf;
 use rand_core::RngCore as _;
 
 use crate::{
-    ByteBuf,
+    Bytes,
     error::{Error, Result},
     key,
     Platform,
@@ -129,7 +129,7 @@ impl<P: Platform> Keystore for ClientKeystore<'_, P> {
 
         let location = self.location(secrecy, id).ok_or(Error::NoSuchKey)?;
 
-        let bytes: ByteBuf<consts::U128> = store::read(self.store, location, &path)?;
+        let bytes: Bytes<consts::U128> = store::read(self.store, location, &path)?;
 
         let key = key::Key::try_deserialize(&bytes)?;
 

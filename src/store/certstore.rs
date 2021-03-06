@@ -3,7 +3,7 @@ use core::fmt::Write;
 use littlefs2::path::PathBuf;
 
 use crate::{
-    ByteBuf,
+    Bytes,
     consts,
     error::{Error, Result},
     store::{self, Store},
@@ -73,7 +73,7 @@ impl<S: Store> ClientCertstore<S> {
         let mut path = PathBuf::new();
         path.push(&self.client_id);
         path.push(&PathBuf::from("x5c"));
-        let mut buf = ByteBuf::<consts::U32>::new();
+        let mut buf = Bytes::<consts::U32>::new();
         write!(&mut buf, "{}", id.0).ok();
         path.push(&PathBuf::from(buf.as_slice()));
         path
