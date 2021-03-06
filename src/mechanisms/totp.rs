@@ -48,17 +48,17 @@ impl UnsafeInjectKey for super::Totp
     fn unsafe_inject_key(keystore: &mut impl Keystore, request: request::UnsafeInjectKey)
         -> Result<reply::UnsafeInjectKey, Error>
     {
-        // in usual format, secret is a 32B Base32 encoding of 20B actual secret bytes
-        if request.raw_key.len() != 20 {
-            // hprintln!("{}B: {:X?}", request.raw_key.len(), &request.raw_key).ok();
-            return Err(Error::WrongMessageLength);
-        }
+        // // in usual format, secret is a 32B Base32 encoding of 20B actual secret bytes
+        // if request.raw_key.len() != 20 {
+        //     // hprintln!("{}B: {:X?}", request.raw_key.len(), &request.raw_key).ok();
+        //     return Err(Error::WrongMessageLength);
+        // }
 
         // store it
         let key_id = keystore.store_key(
             request.attributes.persistence,
             key::Secrecy::Secret,
-            key::Kind::Symmetric(20),
+            key::Kind::Symmetric(request.raw_key.len()),
             &request.raw_key,
         )?;
 
@@ -74,10 +74,9 @@ impl Sign for super::Totp
     {
         let key_id = request.key.object_id;
 
-        let secret: [u8; 20] = keystore
+        let secret = keystore
             .load_key(key::Secrecy::Secret, None, &key_id)?
-            .material.as_ref().try_into()
-            .map_err(|_| Error::InternalError)?;
+            .material;
 
         if request.message.len() != 8 {
             return Err(Error::InternalError);
