@@ -27,7 +27,7 @@ pub use crate::pipe::ServiceEndpoint;
 macro_rules! rpc_trait { ($($Name:ident, $name:ident,)*) => { $(
 
     pub trait $Name {
-        fn $name(_keystore: &mut impl Keystore, _request: request::$Name)
+        fn $name(_keystore: &mut impl Keystore, _request: &request::$Name)
         -> Result<reply::$Name, Error> { Err(Error::MechanismNotAvailable) }
     }
 )* } }
@@ -85,7 +85,7 @@ unsafe impl<P: Platform> Send for Service<P> {}
 
 impl<P: Platform> ServiceResources<P> {
 
-    pub fn reply_to(&mut self, client_id: PathBuf, request: Request) -> Result<Reply, Error> {
+    pub fn reply_to(&mut self, client_id: PathBuf, request: &Request) -> Result<Reply, Error> {
         // TODO: what we want to do here is map an enum to a generic type
         // Is there a nicer way to do this?
 
@@ -228,7 +228,7 @@ impl<P: Platform> ServiceResources<P> {
             },
 
             Request::LocateFile(request) => {
-                let path = filestore.locate_file(request.location, request.dir, request.filename)?;
+                let path = filestore.locate_file(request.location, request.dir.clone(), request.filename.clone())?;
 
                 Ok(Reply::LocateFile(reply::LocateFile { path }) )
             }
@@ -309,7 +309,7 @@ impl<P: Platform> ServiceResources<P> {
             }
 
             Request::ReadDirFilesFirst(request) => {
-                let maybe_data = match filestore.read_dir_files_first(&request.dir, request.location, request.user_attribute)? {
+                let maybe_data = match filestore.read_dir_files_first(&request.dir, request.location, request.user_attribute.clone())? {
                     Some((data, state)) => {
                         self.read_dir_files_state = Some(state);
                         data
@@ -671,7 +671,7 @@ impl<P: Platform> Service<P> {
                 // #[cfg(test)] println!("service got request: {:?}", &request);
 
                 // resources.currently_serving = ep.client_id.clone();
-                let reply_result = resources.reply_to(ep.client_id.clone(), request);
+                let reply_result = resources.reply_to(ep.client_id.clone(), &request);
                 ep.interchange.respond(reply_result).ok();
 
             }

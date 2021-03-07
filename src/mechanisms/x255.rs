@@ -39,7 +39,8 @@ fn load_secret_key(keystore: &mut impl Keystore, key_id: &UniqueId)
 #[cfg(feature = "x255")]
 impl Agree for super::X255
 {
-    fn agree(keystore: &mut impl Keystore, request: request::Agree)
+    // #[inline(never)]
+    fn agree(keystore: &mut impl Keystore, request: &request::Agree)
         -> Result<reply::Agree, Error>
     {
         let secret_key = load_secret_key(
@@ -67,7 +68,8 @@ impl Agree for super::X255
 #[cfg(feature = "x255")]
 impl GenerateKey for super::X255
 {
-    fn generate_key(keystore: &mut impl Keystore, request: request::GenerateKey)
+    // #[inline(never)]
+    fn generate_key(keystore: &mut impl Keystore, request: &request::GenerateKey)
         -> Result<reply::GenerateKey, Error>
     {
         // generate keypair
@@ -88,7 +90,8 @@ impl GenerateKey for super::X255
 #[cfg(feature = "x255")]
 impl Exists for super::X255
 {
-    fn exists(keystore: &mut impl Keystore, request: request::Exists)
+    // #[inline(never)]
+    fn exists(keystore: &mut impl Keystore, request: &request::Exists)
         -> Result<reply::Exists, Error>
     {
         let key_id = request.key.object_id;
@@ -100,7 +103,8 @@ impl Exists for super::X255
 #[cfg(feature = "x255")]
 impl DeriveKey for super::X255
 {
-    fn derive_key(keystore: &mut impl Keystore, request: request::DeriveKey)
+    // #[inline(never)]
+    fn derive_key(keystore: &mut impl Keystore, request: &request::DeriveKey)
         -> Result<reply::DeriveKey, Error>
     {
         let base_id = request.base_key.object_id;
@@ -123,7 +127,8 @@ impl DeriveKey for super::X255
 #[cfg(feature = "x255")]
 impl SerializeKey for super::X255
 {
-    fn serialize_key(keystore: &mut impl Keystore, request: request::SerializeKey)
+    // #[inline(never)]
+    fn serialize_key(keystore: &mut impl Keystore, request: &request::SerializeKey)
         -> Result<reply::SerializeKey, Error>
     {
         let key_id = request.key.object_id;
@@ -145,7 +150,8 @@ impl SerializeKey for super::X255
 #[cfg(feature = "x255")]
 impl DeserializeKey for super::X255
 {
-    fn deserialize_key(keystore: &mut impl Keystore, request: request::DeserializeKey)
+    // #[inline(never)]
+    fn deserialize_key(keystore: &mut impl Keystore, request: &request::DeserializeKey)
         -> Result<reply::DeserializeKey, Error>
     {
           // - mechanism: Mechanism

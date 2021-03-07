@@ -7,6 +7,7 @@ use crate::error::Error;
 use crate::service::*;
 use crate::types::*;
 
+    #[inline(never)]
 fn load_public_key(keystore: &mut impl Keystore, key_id: &UniqueId)
     -> Result<salty::PublicKey, Error> {
 
@@ -21,6 +22,7 @@ fn load_public_key(keystore: &mut impl Keystore, key_id: &UniqueId)
     Ok(public_key)
 }
 
+    #[inline(never)]
 fn load_keypair(keystore: &mut impl Keystore, key_id: &UniqueId)
     -> Result<salty::Keypair, Error> {
 
@@ -38,7 +40,8 @@ fn load_keypair(keystore: &mut impl Keystore, key_id: &UniqueId)
 #[cfg(feature = "ed255")]
 impl DeriveKey for super::Ed255
 {
-    fn derive_key(keystore: &mut impl Keystore, request: request::DeriveKey)
+    #[inline(never)]
+    fn derive_key(keystore: &mut impl Keystore, request: &request::DeriveKey)
         -> Result<reply::DeriveKey, Error>
     {
         let base_id = &request.base_key.object_id;
@@ -58,7 +61,8 @@ impl DeriveKey for super::Ed255
 #[cfg(feature = "ed255")]
 impl DeserializeKey for super::Ed255
 {
-    fn deserialize_key(keystore: &mut impl Keystore, request: request::DeserializeKey)
+    #[inline(never)]
+    fn deserialize_key(keystore: &mut impl Keystore, request: &request::DeserializeKey)
         -> Result<reply::DeserializeKey, Error>
     {
           // - mechanism: Mechanism
@@ -91,7 +95,8 @@ impl DeserializeKey for super::Ed255
 #[cfg(feature = "ed255")]
 impl GenerateKey for super::Ed255
 {
-    fn generate_key(keystore: &mut impl Keystore, request: request::GenerateKey)
+    #[inline(never)]
+    fn generate_key(keystore: &mut impl Keystore, request: &request::GenerateKey)
         -> Result<reply::GenerateKey, Error>
     {
         let mut seed = [0u8; 32];
@@ -115,7 +120,8 @@ impl GenerateKey for super::Ed255
 #[cfg(feature = "ed255")]
 impl SerializeKey for super::Ed255
 {
-    fn serialize_key(keystore: &mut impl Keystore, request: request::SerializeKey)
+    #[inline(never)]
+    fn serialize_key(keystore: &mut impl Keystore, request: &request::SerializeKey)
         -> Result<reply::SerializeKey, Error>
     {
         let key_id = request.key.object_id;
@@ -148,7 +154,8 @@ impl SerializeKey for super::Ed255
 #[cfg(feature = "ed255")]
 impl Exists for super::Ed255
 {
-    fn exists(keystore: &mut impl Keystore, request: request::Exists)
+    #[inline(never)]
+    fn exists(keystore: &mut impl Keystore, request: &request::Exists)
         -> Result<reply::Exists, Error>
     {
         let key_id = request.key.object_id;
@@ -161,7 +168,8 @@ impl Exists for super::Ed255
 #[cfg(feature = "ed255")]
 impl Sign for super::Ed255
 {
-    fn sign(keystore: &mut impl Keystore, request: request::Sign)
+    #[inline(never)]
+    fn sign(keystore: &mut impl Keystore, request: &request::Sign)
         -> Result<reply::Sign, Error>
     {
         // Not so nice, expands to
@@ -194,7 +202,8 @@ impl Sign for super::Ed255
 #[cfg(feature = "ed255")]
 impl Verify for super::Ed255
 {
-    fn verify(keystore: &mut impl Keystore, request: request::Verify)
+    #[inline(never)]
+    fn verify(keystore: &mut impl Keystore, request: &request::Verify)
         -> Result<reply::Verify, Error>
     {
         if let SignatureSerialization::Raw = request.format {

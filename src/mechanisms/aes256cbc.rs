@@ -10,7 +10,7 @@ use crate::types::*;
 impl Encrypt for super::Aes256Cbc
 {
     /// Encrypts the input *with zero IV*
-    fn encrypt(keystore: &mut impl Keystore, request: request::Encrypt)
+    fn encrypt(keystore: &mut impl Keystore, request: &request::Encrypt)
         -> Result<reply::Encrypt, Error>
     {
 		use block_modes::{BlockMode, Cbc};
@@ -35,7 +35,7 @@ impl Encrypt for super::Aes256Cbc
 		let cipher = Aes256Cbc::new_var(&symmetric_key, &zero_iv).unwrap();
 
 		// buffer must have enough space for message+padding
-		let mut buffer = request.message;
+		let mut buffer = request.message.clone();
 		// // copy message to the buffer
 		// let pos = plaintext.len();
 		// buffer[..pos].copy_from_slice(plaintext);
@@ -55,7 +55,7 @@ impl Encrypt for super::Aes256Cbc
 #[cfg(feature = "aes256-cbc")]
 impl WrapKey for super::Aes256Cbc
 {
-    fn wrap_key(keystore: &mut impl Keystore, request: request::WrapKey)
+    fn wrap_key(keystore: &mut impl Keystore, request: &request::WrapKey)
         -> Result<reply::WrapKey, Error>
     {
         // TODO: need to check both secret and private keys
@@ -75,7 +75,7 @@ impl WrapKey for super::Aes256Cbc
             associated_data: ShortData::new(),
             nonce: None,
         };
-        let encryption_reply = <super::Aes256Cbc>::encrypt(keystore, encryption_request)?;
+        let encryption_reply = <super::Aes256Cbc>::encrypt(keystore, &encryption_request)?;
 
         let wrapped_key = encryption_reply.ciphertext;
 
@@ -86,7 +86,7 @@ impl WrapKey for super::Aes256Cbc
 #[cfg(feature = "aes256-cbc")]
 impl Decrypt for super::Aes256Cbc
 {
-    fn decrypt(keystore: &mut impl Keystore, request: request::Decrypt)
+    fn decrypt(keystore: &mut impl Keystore, request: &request::Decrypt)
         -> Result<reply::Decrypt, Error>
     {
 		use block_modes::{BlockMode, Cbc};
@@ -108,7 +108,7 @@ impl Decrypt for super::Aes256Cbc
 		let cipher = Aes256Cbc::new_var(&symmetric_key, &zero_iv).unwrap();
 
 		// buffer must have enough space for message+padding
-		let mut buffer = request.message;
+		let mut buffer = request.message.clone();
 		// // copy message to the buffer
 		// let pos = plaintext.len();
 		// buffer[..pos].copy_from_slice(plaintext);
