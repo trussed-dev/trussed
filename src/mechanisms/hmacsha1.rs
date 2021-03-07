@@ -7,7 +7,8 @@ use crate::types::*;
 #[cfg(feature = "hmac-sha1")]
 impl Sign for super::HmacSha1
 {
-    fn sign(keystore: &mut impl Keystore, request: request::Sign)
+    #[inline(never)]
+    fn sign(keystore: &mut impl Keystore, request: &request::Sign)
         -> Result<reply::Sign, Error>
     {
         use sha1::Sha1;
@@ -37,7 +38,8 @@ impl Sign for super::HmacSha1
 #[cfg(feature = "hmac-sha1")]
 impl GenerateKey for super::HmacSha1
 {
-    fn generate_key(keystore: &mut impl Keystore, request: request::GenerateKey)
+    #[inline(never)]
+    fn generate_key(keystore: &mut impl Keystore, request: &request::GenerateKey)
         -> Result<reply::GenerateKey, Error>
     {
         let mut seed = [0u8; 16];

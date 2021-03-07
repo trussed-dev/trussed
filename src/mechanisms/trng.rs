@@ -7,7 +7,7 @@ use crate::types::*;
 #[cfg(feature = "trng")]
 impl GenerateKey for super::Trng
 {
-    fn generate_key(keystore: &mut impl Keystore, request: request::GenerateKey)
+    fn generate_key(keystore: &mut impl Keystore, request: &request::GenerateKey)
         -> Result<reply::GenerateKey, Error>
     {
         // generate entropy

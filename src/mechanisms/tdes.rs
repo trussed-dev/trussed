@@ -18,7 +18,8 @@ use crate::types::*;
 impl Encrypt for super::Tdes
 {
     /// Encrypts a single block. Let's hope we don't have to support ECB!!
-    fn encrypt(keystore: &mut impl Keystore, request: request::Encrypt)
+    #[inline(never)]
+    fn encrypt(keystore: &mut impl Keystore, request: &request::Encrypt)
         -> Result<reply::Encrypt, Error>
     {
         if request.message.len() != 8 { return Err(Error::WrongMessageLength); }
@@ -32,7 +33,7 @@ impl Encrypt for super::Tdes
 
 		let cipher = des::TdesEde3::new(GenericArray::from_slice(&symmetric_key));
 
-		let mut message = request.message;
+		let mut message = request.message.clone();
         cipher.encrypt_block(GenericArray::from_mut_slice(&mut message));
 
         Ok(reply::Encrypt { ciphertext: message, nonce: Default::default(), tag: Default::default() })
@@ -43,7 +44,8 @@ impl Encrypt for super::Tdes
 impl Decrypt for super::Tdes
 {
     /// Decrypts a single block. Let's hope we don't have to support ECB!!
-    fn decrypt(keystore: &mut impl Keystore, request: request::Decrypt)
+    #[inline(never)]
+    fn decrypt(keystore: &mut impl Keystore, request: &request::Decrypt)
         -> Result<reply::Decrypt, Error>
     {
         if request.message.len() != 8 { return Err(Error::WrongMessageLength); }
@@ -57,7 +59,7 @@ impl Decrypt for super::Tdes
 
 		let cipher = des::TdesEde3::new(GenericArray::from_slice(&symmetric_key));
 
-        let mut message = request.message;
+        let mut message = request.message.clone();
         cipher.decrypt_block(GenericArray::from_mut_slice(&mut message));
 
         Ok(reply::Decrypt { plaintext: Some(message) })
@@ -67,7 +69,8 @@ impl Decrypt for super::Tdes
 #[cfg(feature = "tdes")]
 impl UnsafeInjectKey for super::Tdes
 {
-    fn unsafe_inject_key(keystore: &mut impl Keystore, request: request::UnsafeInjectKey)
+    #[inline(never)]
+    fn unsafe_inject_key(keystore: &mut impl Keystore, request: &request::UnsafeInjectKey)
         -> Result<reply::UnsafeInjectKey, Error>
     {
         if request.raw_key.len() != 24 {

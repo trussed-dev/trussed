@@ -13,7 +13,8 @@ use crate::types::*;
 #[cfg(feature = "chacha8-poly1305")]
 impl GenerateKey for super::Chacha8Poly1305 {
 
-    fn generate_key(keystore: &mut impl Keystore, request: request::GenerateKey)
+    #[inline(never)]
+    fn generate_key(keystore: &mut impl Keystore, request: &request::GenerateKey)
         -> Result<reply::GenerateKey, Error>
     {
         use rand_core::RngCore as _;
@@ -37,6 +38,7 @@ impl GenerateKey for super::Chacha8Poly1305 {
     }
 }
 
+    #[inline(never)]
 fn increment_nonce(nonce: &mut [u8]) -> Result<(), Error> {
     let mut carry: u16 = 1;
     for digit in nonce.iter_mut() {
@@ -54,7 +56,8 @@ fn increment_nonce(nonce: &mut [u8]) -> Result<(), Error> {
 #[cfg(feature = "chacha8-poly1305")]
 impl Decrypt for super::Chacha8Poly1305
 {
-    fn decrypt(keystore: &mut impl Keystore, request: request::Decrypt)
+    #[inline(never)]
+    fn decrypt(keystore: &mut impl Keystore, request: &request::Decrypt)
         -> Result<reply::Decrypt, Error>
     {
         use chacha20poly1305::ChaCha8Poly1305;
@@ -96,7 +99,8 @@ impl Decrypt for super::Chacha8Poly1305
 #[cfg(feature = "chacha8-poly1305")]
 impl Encrypt for super::Chacha8Poly1305
 {
-    fn encrypt(keystore: &mut impl Keystore, request: request::Encrypt)
+    #[inline(never)]
+    fn encrypt(keystore: &mut impl Keystore, request: &request::Encrypt)
         -> Result<reply::Encrypt, Error>
     {
         use chacha20poly1305::ChaCha8Poly1305;
@@ -161,7 +165,8 @@ impl Encrypt for super::Chacha8Poly1305
 #[cfg(feature = "chacha8-poly1305")]
 impl WrapKey for super::Chacha8Poly1305
 {
-    fn wrap_key(keystore: &mut impl Keystore, request: request::WrapKey)
+    #[inline(never)]
+    fn wrap_key(keystore: &mut impl Keystore, request: &request::WrapKey)
         -> Result<reply::WrapKey, Error>
     {
         debug!("trussed: Chacha8Poly1305::WrapKey");
@@ -179,7 +184,7 @@ impl WrapKey for super::Chacha8Poly1305
             associated_data: ShortData::new(),
             nonce: None,
         };
-        let encryption_reply = <super::Chacha8Poly1305>::encrypt(keystore, encryption_request)?;
+        let encryption_reply = <super::Chacha8Poly1305>::encrypt(keystore, &encryption_request)?;
 
         let wrapped_key = crate::postcard_serialize_bytes(&encryption_reply).map_err(|_| Error::CborError)?;
 
@@ -190,7 +195,8 @@ impl WrapKey for super::Chacha8Poly1305
 #[cfg(feature = "chacha8-poly1305")]
 impl UnwrapKey for super::Chacha8Poly1305
 {
-    fn unwrap_key(keystore: &mut impl Keystore, request: request::UnwrapKey)
+    #[inline(never)]
+    fn unwrap_key(keystore: &mut impl Keystore, request: &request::UnwrapKey)
         -> Result<reply::UnwrapKey, Error>
     {
         let reply::Encrypt { ciphertext, nonce, tag } = crate::postcard_deserialize(
@@ -200,13 +206,13 @@ impl UnwrapKey for super::Chacha8Poly1305
             mechanism: Mechanism::Chacha8Poly1305,
             key: request.wrapping_key,
             message: ciphertext,
-            associated_data: request.associated_data,
+            associated_data: request.associated_data.clone(),
             nonce,
             tag,
         };
 
         let serialized_key = if let Some(serialized_key) =
-            <super::Chacha8Poly1305>::decrypt(keystore, decryption_request)?.plaintext {
+            <super::Chacha8Poly1305>::decrypt(keystore, &decryption_request)?.plaintext {
             serialized_key
         } else {
             return Ok(reply::UnwrapKey { key: None } );

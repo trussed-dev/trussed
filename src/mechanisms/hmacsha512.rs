@@ -9,7 +9,8 @@ use crate::types::*;
 #[cfg(feature = "hmac-sha512")]
 impl Sign for super::HmacSha512
 {
-    fn sign(keystore: &mut impl Keystore, request: request::Sign)
+    #[inline(never)]
+    fn sign(keystore: &mut impl Keystore, request: &request::Sign)
         -> Result<reply::Sign, Error>
     {
         use sha2::Sha512;
@@ -29,10 +30,10 @@ impl Sign for super::HmacSha512
         }
         // keystore.load_key(&path, key::Kind::SharedSecret32, &mut shared_secret)?;
         // keystore.load_key(&path, key::Kind::SymmetricKey16, &mut shared_secret)?;
-
         // let mut mac = HmacSha512::new_varkey(&shared_secret)
         let mut mac = HmacSha512::new_varkey(&shared_secret.as_ref())
             .expect("HMAC can take key of any size");
+        loop{}
 
         mac.update(&request.message);
         let result = mac.finalize();
@@ -51,7 +52,8 @@ impl Sign for super::HmacSha512
 #[cfg(feature = "hmac-sha512")]
 impl GenerateKey for super::HmacSha512
 {
-    fn generate_key(keystore: &mut impl Keystore, request: request::GenerateKey)
+    #[inline(never)]
+    fn generate_key(keystore: &mut impl Keystore, request: &request::GenerateKey)
         -> Result<reply::GenerateKey, Error>
     {
         let mut seed = [0u8; 16];

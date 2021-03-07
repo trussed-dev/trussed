@@ -11,10 +11,12 @@ const DIGITS: u32 = 6;
 
 // https://tools.ietf.org/html/rfc4226#section-5.3
 
+    #[inline(never)]
 fn hotp_raw(key: &[u8], counter: u64, digits: u32) -> u64 {
     hmac_and_truncate(key, &counter.to_be_bytes(), digits)
 }
 
+    #[inline(never)]
 fn hmac_and_truncate(key: &[u8], message: &[u8], digits: u32) -> u64 {
     use hmac::{Hmac, Mac, NewMac};
     // let mut hmac = Hmac::<D>::new(GenericArray::from_slice(key));
@@ -45,7 +47,8 @@ fn dynamic_truncation(hs: &[u8]) -> u64 {
 #[cfg(feature = "totp")]
 impl UnsafeInjectKey for super::Totp
 {
-    fn unsafe_inject_key(keystore: &mut impl Keystore, request: request::UnsafeInjectKey)
+    #[inline(never)]
+    fn unsafe_inject_key(keystore: &mut impl Keystore, request: &request::UnsafeInjectKey)
         -> Result<reply::UnsafeInjectKey, Error>
     {
         // // in usual format, secret is a 32B Base32 encoding of 20B actual secret bytes
@@ -69,7 +72,8 @@ impl UnsafeInjectKey for super::Totp
 #[cfg(feature = "totp")]
 impl Sign for super::Totp
 {
-    fn sign(keystore: &mut impl Keystore, request: request::Sign)
+    #[inline(never)]
+    fn sign(keystore: &mut impl Keystore, request: &request::Sign)
         -> Result<reply::Sign, Error>
     {
         let key_id = request.key.object_id;
@@ -93,7 +97,8 @@ impl Sign for super::Totp
 #[cfg(feature = "totp")]
 impl Exists for super::Totp
 {
-    fn exists(keystore: &mut impl Keystore, request: request::Exists)
+    #[inline(never)]
+    fn exists(keystore: &mut impl Keystore, request: &request::Exists)
         -> Result<reply::Exists, Error>
     {
         let key_id = request.key.object_id;

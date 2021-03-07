@@ -9,7 +9,8 @@ use crate::types::*;
 #[cfg(feature = "hmac-sha256")]
 impl Sign for super::HmacSha256
 {
-    fn sign(keystore: &mut impl Keystore, request: request::Sign)
+    #[inline(never)]
+    fn sign(keystore: &mut impl Keystore, request: &request::Sign)
         -> Result<reply::Sign, Error>
     {
         use sha2::Sha256;
@@ -51,7 +52,8 @@ impl Sign for super::HmacSha256
 #[cfg(feature = "hmac-sha256")]
 impl GenerateKey for super::HmacSha256
 {
-    fn generate_key(keystore: &mut impl Keystore, request: request::GenerateKey)
+    #[inline(never)]
+    fn generate_key(keystore: &mut impl Keystore, request: &request::GenerateKey)
         -> Result<reply::GenerateKey, Error>
     {
         let mut seed = [0u8; 16];

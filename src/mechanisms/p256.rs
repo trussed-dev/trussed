@@ -5,6 +5,7 @@ use crate::error::Error;
 use crate::service::*;
 use crate::types::*;
 
+    #[inline(never)]
 fn load_keypair(keystore: &mut impl Keystore, key_id: &UniqueId)
     -> Result<nisty::Keypair, Error> {
 
@@ -20,6 +21,7 @@ fn load_keypair(keystore: &mut impl Keystore, key_id: &UniqueId)
     Ok(keypair)
 }
 
+    #[inline(never)]
 fn load_public_key(keystore: &mut impl Keystore, key_id: &UniqueId)
     -> Result<nisty::PublicKey, Error> {
 
@@ -47,7 +49,8 @@ fn load_public_key(keystore: &mut impl Keystore, key_id: &UniqueId)
 #[cfg(feature = "p256")]
 impl Agree for super::P256
 {
-    fn agree(keystore: &mut impl Keystore, request: request::Agree)
+    #[inline(never)]
+    fn agree(keystore: &mut impl Keystore, request: &request::Agree)
         -> Result<reply::Agree, Error>
     {
         let private_id = request.private_key.object_id;
@@ -72,7 +75,8 @@ impl Agree for super::P256
 #[cfg(feature = "p256")]
 impl DeriveKey for super::P256
 {
-    fn derive_key(keystore: &mut impl Keystore, request: request::DeriveKey)
+    #[inline(never)]
+    fn derive_key(keystore: &mut impl Keystore, request: &request::DeriveKey)
         -> Result<reply::DeriveKey, Error>
     {
         let base_id = request.base_key.object_id;
@@ -93,7 +97,8 @@ impl DeriveKey for super::P256
 #[cfg(feature = "p256")]
 impl DeserializeKey for super::P256
 {
-    fn deserialize_key(keystore: &mut impl Keystore, request: request::DeserializeKey)
+    #[inline(never)]
+    fn deserialize_key(keystore: &mut impl Keystore, request: &request::DeserializeKey)
         -> Result<reply::DeserializeKey, Error>
     {
           // - mechanism: Mechanism
@@ -163,7 +168,8 @@ impl DeserializeKey for super::P256
 #[cfg(feature = "p256")]
 impl GenerateKey for super::P256
 {
-    fn generate_key(keystore: &mut impl Keystore, request: request::GenerateKey)
+    #[inline(never)]
+    fn generate_key(keystore: &mut impl Keystore, request: &request::GenerateKey)
         -> Result<reply::GenerateKey, Error>
     {
         // generate keypair
@@ -188,7 +194,8 @@ impl GenerateKey for super::P256
 #[cfg(feature = "p256")]
 impl SerializeKey for super::P256
 {
-    fn serialize_key(keystore: &mut impl Keystore, request: request::SerializeKey)
+    #[inline(never)]
+    fn serialize_key(keystore: &mut impl Keystore, request: &request::SerializeKey)
         -> Result<reply::SerializeKey, Error>
     {
 
@@ -235,7 +242,8 @@ impl SerializeKey for super::P256
 #[cfg(feature = "p256")]
 impl Exists for super::P256
 {
-    fn exists(keystore: &mut impl Keystore, request: request::Exists)
+    #[inline(never)]
+    fn exists(keystore: &mut impl Keystore, request: &request::Exists)
         -> Result<reply::Exists, Error>
     {
         let key_id = request.key.object_id;
@@ -247,7 +255,8 @@ impl Exists for super::P256
 #[cfg(feature = "p256")]
 impl Sign for super::P256
 {
-    fn sign(keystore: &mut impl Keystore, request: request::Sign)
+    #[inline(never)]
+    fn sign(keystore: &mut impl Keystore, request: &request::Sign)
         -> Result<reply::Sign, Error>
     {
         let key_id = request.key.object_id;
@@ -273,7 +282,6 @@ impl Sign for super::P256
         };
         // #[cfg(all(test, feature = "verbose-tests"))]
         // println!("p256 sig = {:?}", &native_signature);
-        // info_now!("p256 sig = {:?}", &our_signature).ok();
 
         info_now!("P256 signature:");
         // info_now!("msg: {:?}", &request.message).ok();
@@ -287,7 +295,8 @@ impl Sign for super::P256
 #[cfg(feature = "p256")]
 impl Sign for super::P256Prehashed
 {
-    fn sign(keystore: &mut impl Keystore, request: request::Sign)
+    #[inline(never)]
+    fn sign(keystore: &mut impl Keystore, request: &request::Sign)
         -> Result<reply::Sign, Error>
     {
         let key_id = request.key.object_id;
@@ -333,7 +342,8 @@ impl Sign for super::P256Prehashed
 #[cfg(feature = "p256")]
 impl Verify for super::P256
 {
-    fn verify(keystore: &mut impl Keystore, request: request::Verify)
+    #[inline(never)]
+    fn verify(keystore: &mut impl Keystore, request: &request::Verify)
         -> Result<reply::Verify, Error>
     {
         let key_id = request.key.object_id;

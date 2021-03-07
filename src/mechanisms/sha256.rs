@@ -9,7 +9,8 @@ use crate::types::*;
 #[cfg(feature = "sha256")]
 impl DeriveKey for super::Sha256
 {
-    fn derive_key(keystore: &mut impl Keystore, request: request::DeriveKey)
+    #[inline(never)]
+    fn derive_key(keystore: &mut impl Keystore, request: &request::DeriveKey)
         -> Result<reply::DeriveKey, Error>
     {
         let base_id = &request.base_key.object_id;
@@ -41,7 +42,8 @@ impl DeriveKey for super::Sha256
 #[cfg(feature = "sha256")]
 impl Hash for super::Sha256
 {
-    fn hash(_keystore: &mut impl Keystore, request: request::Hash)
+    #[inline(never)]
+    fn hash(_keystore: &mut impl Keystore, request: &request::Hash)
         -> Result<reply::Hash, Error>
     {
         use sha2::digest::Digest;
