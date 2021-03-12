@@ -1,5 +1,14 @@
-// do we really need this
-pub trait MechanismTrait {}
+// NOTE: The mechanism implementations are currently littered with `#[inline(never)]`,
+// which is annoyingly explicit + manual (easy to forget).
+// The underlying concern is that the stack use of `ServiceResources::reply_to` would be
+// "too big" if they all get inlined.
+//
+// Removing these inlines (2021-03-12) changes the `text` code size of an entire solo-bee
+// firmware from 350416 to 351376 (larger), so it's at least not obvious that these inlines
+// happen.
+//
+// The question of breaking down `reply_to` into smaller, more globally understandable pieces,
+// should be revisited.
 
 // TODO: rename to aes256-cbc-zero-iv
 pub struct Aes256Cbc {}
