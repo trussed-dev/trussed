@@ -49,6 +49,7 @@ generate_enums! {
     Sign: 11
     WriteFile: 12
     UnsafeInjectKey: 31
+    UnsafeInjectSharedKey: 32
     UnwrapKey: 13
     Verify: 14
     WrapKey: 15
@@ -250,6 +251,10 @@ pub mod request {
           - raw_key: ShortData
           - attributes: StorageAttributes
 
+        UnsafeInjectSharedKey:
+          - location: Location
+          - raw_key: ShortData
+
         UnwrapKey:
           - mechanism: Mechanism
           - wrapping_key: ObjectHandle
@@ -396,6 +401,9 @@ pub mod reply {
             - valid: bool
 
         UnsafeInjectKey:
+            - key: ObjectHandle
+
+        UnsafeInjectSharedKey:
             - key: ObjectHandle
 
         UnwrapKey:

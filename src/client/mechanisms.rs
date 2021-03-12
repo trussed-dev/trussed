@@ -241,12 +241,6 @@ pub trait Tdes: CryptoClient {
     {
         self.encrypt(Mechanism::Tdes, key, message, &[], None)
     }
-
-    fn unsafe_inject_tdes_key<'c>(&'c mut self, raw_key: &[u8; 24], persistence: Location)
-        -> ClientResult<'c, reply::UnsafeInjectKey, Self>
-    {
-        self.unsafe_inject_key(Mechanism::Tdes, raw_key, persistence)
-    }
 }
 
 #[cfg(feature = "totp")]
@@ -260,12 +254,6 @@ pub trait Totp: CryptoClient {
             &timestamp.to_le_bytes().as_ref(),
             SignatureSerialization::Raw,
         )
-    }
-
-    fn unsafe_inject_totp_key<'c>(&'c mut self, raw_key: &[u8], persistence: Location)
-        -> ClientResult<'c, reply::UnsafeInjectKey, Self>
-    {
-        self.unsafe_inject_key(Mechanism::Totp, raw_key, persistence)
     }
 }
 
