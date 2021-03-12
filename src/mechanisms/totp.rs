@@ -3,7 +3,6 @@ use core::convert::TryInto;
 use crate::api::*;
 use crate::error::Error;
 use crate::service::*;
-use crate::types::*;
 
 // code copied from https://github.com/avacariu/rust-oath
 
@@ -42,31 +41,6 @@ fn dynamic_truncation(hs: &[u8]) -> u64 {
 
     // zero highest bit, avoids signed/unsigned "ambiguity"
     p & 0x7fff_ffff
-}
-
-#[cfg(feature = "totp")]
-impl UnsafeInjectKey for super::Totp
-{
-    #[inline(never)]
-    fn unsafe_inject_key(keystore: &mut impl Keystore, request: &request::UnsafeInjectKey)
-        -> Result<reply::UnsafeInjectKey, Error>
-    {
-        // // in usual format, secret is a 32B Base32 encoding of 20B actual secret bytes
-        // if request.raw_key.len() != 20 {
-        //     // hprintln!("{}B: {:X?}", request.raw_key.len(), &request.raw_key).ok();
-        //     return Err(Error::WrongMessageLength);
-        // }
-
-        // store it
-        let key_id = keystore.store_key(
-            request.attributes.persistence,
-            key::Secrecy::Secret,
-            key::Kind::Symmetric(request.raw_key.len()),
-            &request.raw_key,
-        )?;
-
-        Ok(reply::UnsafeInjectKey { key: ObjectHandle { object_id: key_id } })
-    }
 }
 
 #[cfg(feature = "totp")]

@@ -65,27 +65,3 @@ impl Decrypt for super::Tdes
         Ok(reply::Decrypt { plaintext: Some(message) })
     }
 }
-
-#[cfg(feature = "tdes")]
-impl UnsafeInjectKey for super::Tdes
-{
-    #[inline(never)]
-    fn unsafe_inject_key(keystore: &mut impl Keystore, request: &request::UnsafeInjectKey)
-        -> Result<reply::UnsafeInjectKey, Error>
-    {
-        if request.raw_key.len() != 24 {
-            return Err(Error::WrongMessageLength);
-        }
-
-        // store it
-        let key_id = keystore.store_key(
-            request.attributes.persistence,
-            key::Secrecy::Secret,
-            key::Kind::Symmetric(24),
-            &request.raw_key,
-        )?;
-
-        Ok(reply::UnsafeInjectKey { key: ObjectHandle { object_id: key_id } })
-    }
-}
-

@@ -212,10 +212,19 @@ impl<P: Platform> ServiceResources<P> {
 
             Request::UnsafeInjectKey(request) => {
                 match request.mechanism {
-                    Mechanism::Tdes => mechanisms::Tdes::unsafe_inject_key(keystore, request),
-                    Mechanism::Totp => mechanisms::Totp::unsafe_inject_key(keystore, request),
                     _ => Err(Error::MechanismNotAvailable),
                 }.map(Reply::UnsafeInjectKey)
+            },
+
+            Request::UnsafeInjectSharedKey(request) => {
+                let key = ObjectHandle { object_id: keystore.store_key(
+                    request.location,
+                    key::Secrecy::Secret,
+                    key::Kind::Shared(request.raw_key.len()),
+                    &request.raw_key,
+                )? };
+
+                Ok(Reply::UnsafeInjectSharedKey(reply::UnsafeInjectSharedKey { key } ))
             },
 
             Request::Hash(request) => {

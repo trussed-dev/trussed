@@ -440,6 +440,13 @@ pub trait CryptoClient: PollClient {
         Ok(r)
     }
 
+    #[deprecated]
+    /// This mechanism-specific key injection is deprecated in favor of the general
+    /// injection mechanism for symmetric keys of unknown quality, i.e., "shared" keys,
+    /// of trussed::key::Kind::Shared.
+    ///
+    /// The implementations have been removed, so replace your usage with the
+    /// methoed `unsafe_inject_shared_key`.
     fn unsafe_inject_key(&mut self, mechanism: Mechanism, raw_key: &[u8], persistence: Location)
         -> ClientResult<'_, reply::UnsafeInjectKey, Self>
     {
@@ -447,6 +454,17 @@ pub trait CryptoClient: PollClient {
             mechanism,
             raw_key: ShortData::try_from_slice(raw_key).unwrap(),
             attributes: StorageAttributes::new().set_persistence(persistence),
+        })?;
+        r.client.syscall();
+        Ok(r)
+    }
+
+    fn unsafe_inject_shared_key(&mut self, raw_key: &[u8], location: Location)
+        -> ClientResult<'_, reply::UnsafeInjectSharedKey, Self>
+    {
+        let r = self.request(request::UnsafeInjectSharedKey {
+            raw_key: ShortData::try_from_slice(raw_key).unwrap(),
+            location,
         })?;
         r.client.syscall();
         Ok(r)
