@@ -50,6 +50,14 @@
 <span id="47">47</span>
 <span id="48">48</span>
 <span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
+<span id="55">55</span>
+<span id="56">56</span>
+<span id="57">57</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="attribute">#![<span class="ident">cfg_attr</span>(<span class="ident">not</span>(<span class="ident">test</span>), <span class="ident">no_std</span>)]</span>
 <span class="doccomment">//! # Trussed</span>
@@ -90,8 +98,16 @@
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">platform</span>::<span class="ident">Platform</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">service</span>::<span class="ident">Service</span>;
 
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">cbor_smol</span>::{<span class="ident">cbor_serialize</span>, <span class="ident">cbor_serialize_bytes</span>, <span class="ident">cbor_serialize_bytebuf</span>, <span class="ident">cbor_deserialize</span>};
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">heapless_bytes</span>::{<span class="ident">ArrayLength</span>, <span class="ident">Bytes</span> <span class="kw">as</span> <span class="ident">ByteBuf</span>, <span class="ident">consts</span>};
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">cbor_smol</span>::{<span class="ident">cbor_serialize</span>, <span class="ident">cbor_serialize_bytes</span>, <span class="ident">cbor_deserialize</span>};
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">heapless_bytes</span>::{<span class="ident">ArrayLength</span>, <span class="ident">Bytes</span>, <span class="ident">consts</span>};
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">postcard</span>::{<span class="ident">from_bytes</span> <span class="kw">as</span> <span class="ident">postcard_deserialize</span>, <span class="ident">to_slice</span> <span class="kw">as</span> <span class="ident">postcard_serialize</span>};
+
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">postcard_serialize_bytes</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>, <span class="ident">N</span>: <span class="ident">ArrayLength</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">T</span>: <span class="ident">serde</span>::<span class="ident">Serialize</span><span class="op">&gt;</span>(
+    <span class="ident">object</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">T</span>,
+) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">postcard</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Bytes</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">let</span> <span class="ident">vec</span> <span class="op">=</span> <span class="ident">postcard</span>::<span class="ident">to_vec</span>(<span class="ident">object</span>)<span class="question-mark">?</span>;
+    <span class="prelude-val">Ok</span>(<span class="ident">Bytes</span>::<span class="ident">from</span>(<span class="ident">vec</span>))
+}
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">tests</span>;

@@ -53,9 +53,38 @@
 <span id="50">50</span>
 <span id="51">51</span>
 <span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
+<span id="55">55</span>
+<span id="56">56</span>
+<span id="57">57</span>
+<span id="58">58</span>
+<span id="59">59</span>
+<span id="60">60</span>
+<span id="61">61</span>
+<span id="62">62</span>
+<span id="63">63</span>
+<span id="64">64</span>
+<span id="65">65</span>
+<span id="66">66</span>
+<span id="67">67</span>
+<span id="68">68</span>
+<span id="69">69</span>
+<span id="70">70</span>
+<span id="71">71</span>
+<span id="72">72</span>
 </pre><div class="example-wrap"><pre class="rust ">
-<span class="comment">// do we really need this</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">MechanismTrait</span> {}
+<span class="comment">// NOTE: The mechanism implementations are currently littered with `#[inline(never)]`,</span>
+<span class="comment">// which is annoyingly explicit + manual (easy to forget).</span>
+<span class="comment">// The underlying concern is that the stack use of `ServiceResources::reply_to` would be</span>
+<span class="comment">// &quot;too big&quot; if they all get inlined.</span>
+<span class="comment">//</span>
+<span class="comment">// Removing these inlines (2021-03-12) changes the `text` code size of an entire solo-bee</span>
+<span class="comment">// firmware from 350416 to 351376 (larger), so it&#39;s at least not obvious that these inlines</span>
+<span class="comment">// happen.</span>
+<span class="comment">//</span>
+<span class="comment">// The question of breaking down `reply_to` into smaller, more globally understandable pieces,</span>
+<span class="comment">// should be revisited.</span>
 
 <span class="comment">// TODO: rename to aes256-cbc-zero-iv</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Aes256Cbc</span> {}
@@ -67,8 +96,19 @@
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Ed255</span> {}
 <span class="kw">mod</span> <span class="ident">ed255</span>;
 
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">HmacSha1</span> {}
+<span class="kw">mod</span> <span class="ident">hmacsha1</span>;
+
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">HmacSha256</span> {}
 <span class="kw">mod</span> <span class="ident">hmacsha256</span>;
+
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">HmacSha512</span> {}
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;hmac-sha512&quot;</span>)]</span>
+<span class="kw">mod</span> <span class="ident">hmacsha512</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;hmac-sha512&quot;</span>))]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">service</span>::<span class="ident">GenerateKey</span> <span class="kw">for</span> <span class="ident">HmacSha512</span> {}
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;hmac-sha512&quot;</span>))]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">service</span>::<span class="ident">Sign</span> <span class="kw">for</span> <span class="ident">HmacSha512</span> {}
 
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">P256</span> {}
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">P256Prehashed</span> {}
