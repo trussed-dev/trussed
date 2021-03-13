@@ -79,7 +79,8 @@ impl GenerateKey for super::X255
         // store keys
         let key_id = keystore.store_key(
             request.attributes.persistence,
-            key::Secrecy::Secret, key::Kind::X255,
+            key::Secrecy::Secret,
+            key::Info::from(key::Kind::X255).with_local_flag(),
             &seed)?;
 
         // return handle

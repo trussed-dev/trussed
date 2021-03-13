@@ -28,9 +28,22 @@ pub struct Key {
 }
 
 #[derive(Clone, Debug, /*DeserializeIndexed,*/ Eq, PartialEq, /*SerializeIndexed,*/ Zeroize)]
-pub struct Header {
+pub struct Info {
    pub flags: Flags,
    pub kind: Kind,
+}
+
+impl Info {
+    pub fn with_local_flag(mut self) -> Self {
+        self.flags |= Flags::LOCAL;
+        self
+    }
+}
+
+impl From<Kind> for Info {
+    fn from(kind: Kind) -> Self {
+        Self { flags: Default::default(), kind }
+    }
 }
 
 // TODO: How to store/check?
@@ -89,11 +102,11 @@ impl Key {
         if bytes.len() < 4 {
             return Err(Error::InvalidSerializedKey);
         }
-        let (header, material) = bytes.split_at(4);
-        let flags_bits = u16::from_be_bytes([header[0], header[1]]);
+        let (info, material) = bytes.split_at(4);
+        let flags_bits = u16::from_be_bytes([info[0], info[1]]);
         let flags = Flags::from_bits(flags_bits).ok_or(Error::InvalidSerializedKey)?;
 
-        let kind_bits = u16::from_be_bytes([header[2], header[3]]);
+        let kind_bits = u16::from_be_bytes([info[2], info[3]]);
         let kind = Kind::try_from(kind_bits, material.len()).map_err(|_| Error::InvalidSerializedKey)?;
 
         Ok(Key {

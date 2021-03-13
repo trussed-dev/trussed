@@ -38,10 +38,10 @@ pub trait Keystore {
     // fn store(&self, key: Key, location: Location) -> Result<KeyId>;
     // fn load(&self, key: KeyId) -> Result<Key>;
     // fn exists(&self, key: KeyId) -> bool;
-    fn store_key(&mut self, location: Location, secrecy: key::Secrecy, kind: key::Kind, material: &[u8]) -> Result<KeyId>;
+    fn store_key(&mut self, location: Location, secrecy: key::Secrecy, info: impl Into<key::Info>, material: &[u8]) -> Result<KeyId>;
     fn exists_key(&self, secrecy: key::Secrecy, kind: Option<key::Kind>, id: &KeyId) -> bool;
     /// Return Header of key, if it exists
-    fn key_header(&self, secrecy: key::Secrecy, id: &KeyId) -> Option<key::Header>;
+    fn key_info(&self, secrecy: key::Secrecy, id: &KeyId) -> Option<key::Info>;
     fn delete_key(&self, id: &KeyId) -> bool;
     fn load_key(&self, secrecy: key::Secrecy, kind: Option<key::Kind>, id: &KeyId) -> Result<key::Key>;
     fn overwrite_key(&self, location: Location, secrecy: key::Secrecy, kind: key::Kind, id: &KeyId, material: &[u8]) -> Result<()>;
@@ -80,16 +80,17 @@ impl<P: Platform> Keystore for ClientKeystore<P> {
         &mut self.drbg
     }
 
-    fn store_key(&mut self, location: Location, secrecy: key::Secrecy, kind: key::Kind, material: &[u8]) -> Result<KeyId> {
+    #[inline(never)]
+    fn store_key(&mut self, location: Location, secrecy: key::Secrecy, info: impl Into<key::Info>, material: &[u8]) -> Result<KeyId> {
         // info_now!("storing {:?} -> {:?}", &key_kind, location);
 
-        let mut flags = key::Flags::default();
+        let mut info: key::Info = info.into();
         if secrecy == key::Secrecy::Secret {
-            flags |= key::Flags::SENSITIVE;
+            info.flags |= key::Flags::SENSITIVE;
         }
         let key = key::Key {
-            flags: Default::default(),
-            kind,
+            flags: info.flags,
+            kind: info.kind,
             material: key::Material::try_from_slice(material).unwrap(),
         };
 
@@ -104,8 +105,8 @@ impl<P: Platform> Keystore for ClientKeystore<P> {
         self.load_key(secrecy, kind, id).is_ok()
     }
 
-    fn key_header(&self, secrecy: key::Secrecy, id: &KeyId) -> Option<key::Header> {
-        self.load_key(secrecy, None, id).map(|key| key::Header { flags: key.flags, kind: key.kind }).ok()
+    fn key_info(&self, secrecy: key::Secrecy, id: &KeyId) -> Option<key::Info> {
+        self.load_key(secrecy, None, id).map(|key| key::Info { flags: key.flags, kind: key.kind }).ok()
     }
 
     // TODO: is this an Oracle?
