@@ -183,7 +183,8 @@ impl GenerateKey for super::P256
         // store keys
         let key_id = keystore.store_key(
             request.attributes.persistence,
-            key::Secrecy::Secret, key::Kind::P256,
+            key::Secrecy::Secret,
+            key::Info::from(key::Kind::P256).with_local_flag(),
             &seed)?;
 
         // return handle

@@ -48,14 +48,14 @@ pub fn try_attest(
         P256,
     };
 
-    let key_algorithm = match keystore.key_header(key::Secrecy::Secret, &request.private_key.object_id) {
+    let key_algorithm = match keystore.key_info(key::Secrecy::Secret, &request.private_key.object_id) {
         None => return Err(Error::NoSuchKey),
-        Some(header) => {
-            if !header.flags.contains(key::Flags::LOCAL) {
+        Some(info) => {
+            if !info.flags.contains(key::Flags::LOCAL) {
                 return Err(Error::InvalidSerializedKey);
             }
 
-            match header.kind {
+            match info.kind {
                 key::Kind::P256 => KeyAlgorithm::P256,
                 key::Kind::Ed255 => KeyAlgorithm::Ed255,
                 _ => return Err(Error::NoSuchKey),

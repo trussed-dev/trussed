@@ -109,7 +109,8 @@ impl GenerateKey for super::Ed255
         // store keys
         let key_id = keystore.store_key(
             request.attributes.persistence,
-            key::Secrecy::Secret, key::Kind::Ed255,
+            key::Secrecy::Secret,
+            key::Info::from(key::Kind::Ed255).with_local_flag(),
             &seed)?;
 
         // return handle
