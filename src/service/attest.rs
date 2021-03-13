@@ -12,8 +12,9 @@ use crate::{
         reply::Attest as AttestReply,
     },
     error::Error,
+    key,
     mechanisms,
-    service::{DeriveKey, Exists, SerializeKey, Sign},
+    service::{DeriveKey, SerializeKey, Sign},
     store::certstore::Certstore,
     store::counterstore::Counterstore,
     store::keystore::Keystore,
@@ -42,11 +43,29 @@ pub fn try_attest(
     let mut serial = [0u8; 20];
     keystore.drbg().fill_bytes(&mut serial);
 
-    let spki = {
-        if mechanisms::Ed255::exists(
-            keystore,
-            &request::Exists { mechanism: Mechanism::Ed255, key: request.private_key },
-        )?.exists {
+    enum KeyAlgorithm {
+        Ed255,
+        P256,
+    };
+
+    let key_algorithm = match keystore.key_header(key::Secrecy::Secret, &request.private_key.object_id) {
+        None => return Err(Error::NoSuchKey),
+        Some(header) => {
+            if !header.flags.contains(key::Flags::LOCAL) {
+                return Err(Error::InvalidSerializedKey);
+            }
+
+            match header.kind {
+                key::Kind::P256 => KeyAlgorithm::P256,
+                key::Kind::Ed255 => KeyAlgorithm::Ed255,
+                _ => return Err(Error::NoSuchKey),
+            }
+        }
+    };
+
+
+    let spki = match key_algorithm {
+        KeyAlgorithm::Ed255 => {
             let public_key = mechanisms::Ed255::derive_key(
                 keystore,
                 &request::DeriveKey {
@@ -68,11 +87,9 @@ pub fn try_attest(
             SerializedSubjectPublicKey::Ed255(
                 serialized_key.as_ref().try_into().map_err(|_| Error::ImplementationError)?
             )
+        }
 
-        } else if mechanisms::P256::exists(
-            keystore,
-            &request::Exists { mechanism: Mechanism::P256, key: request.private_key },
-        )?.exists {
+        KeyAlgorithm::P256 => {
             let public_key = mechanisms::P256::derive_key(
                 keystore,
                 &request::DeriveKey {
@@ -94,8 +111,6 @@ pub fn try_attest(
             SerializedSubjectPublicKey::P256(
                 serialized_key.as_ref().try_into().map_err(|_| Error::ImplementationError)?
             )
-        } else {
-            return Err(Error::NoSuchKey);
         }
     };
 

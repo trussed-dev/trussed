@@ -27,6 +27,12 @@ pub struct Key {
    pub material: Material,
 }
 
+#[derive(Clone, Debug, /*DeserializeIndexed,*/ Eq, PartialEq, /*SerializeIndexed,*/ Zeroize)]
+pub struct Header {
+   pub flags: Flags,
+   pub kind: Kind,
+}
+
 // TODO: How to store/check?
 // TODO: Fix variant indices to keep storage stable!!
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Serialize, Deserialize, Zeroize)]

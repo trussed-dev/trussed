@@ -40,6 +40,8 @@ pub trait Keystore {
     // fn exists(&self, key: KeyId) -> bool;
     fn store_key(&mut self, location: Location, secrecy: key::Secrecy, kind: key::Kind, material: &[u8]) -> Result<KeyId>;
     fn exists_key(&self, secrecy: key::Secrecy, kind: Option<key::Kind>, id: &KeyId) -> bool;
+    /// Return Header of key, if it exists
+    fn key_header(&self, secrecy: key::Secrecy, id: &KeyId) -> Option<key::Header>;
     fn delete_key(&self, id: &KeyId) -> bool;
     fn load_key(&self, secrecy: key::Secrecy, kind: Option<key::Kind>, id: &KeyId) -> Result<key::Key>;
     fn overwrite_key(&self, location: Location, secrecy: key::Secrecy, kind: key::Kind, id: &KeyId, material: &[u8]) -> Result<()>;
@@ -100,6 +102,10 @@ impl<P: Platform> Keystore for ClientKeystore<P> {
 
     fn exists_key(&self, secrecy: key::Secrecy, kind: Option<key::Kind>, id: &KeyId) -> bool {
         self.load_key(secrecy, kind, id).is_ok()
+    }
+
+    fn key_header(&self, secrecy: key::Secrecy, id: &KeyId) -> Option<key::Header> {
+        self.load_key(secrecy, None, id).map(|key| key::Header { flags: key.flags, kind: key.kind }).ok()
     }
 
     // TODO: is this an Oracle?
