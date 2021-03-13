@@ -3,7 +3,6 @@ use interchange::Responder;
 use littlefs2::path::PathBuf;
 use chacha20::ChaCha8Rng;
 
-
 use crate::api::*;
 use crate::Bytes;
 use crate::platform::*;
@@ -20,6 +19,9 @@ pub use crate::store::{
 };
 use crate::types::*;
 pub use crate::pipe::ServiceEndpoint;
+
+
+pub mod attest;
 
 // #[macro_use]
 // mod macros;
