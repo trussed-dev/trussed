@@ -54,6 +54,8 @@ generate_enums! {
     Verify: 14
     WrapKey: 15
 
+    Attest: 0xFF
+
     /////////////
     // Storage //
     /////////////
@@ -109,6 +111,12 @@ pub mod request {
             - private_key: ObjectHandle
             - public_key: ObjectHandle
             - attributes: StorageAttributes
+
+        Attest:
+            // only Ed255 + P256
+            - signing_mechanism: Mechanism
+            // only Ed255 + P256
+            - private_key: ObjectHandle
 
         // examples:
         // - store public keys from external source
@@ -316,6 +324,9 @@ pub mod reply {
         //       P256Sha256 -> SymmetricKey32
         Agree:
             - shared_secret: ObjectHandle
+
+        Attest:
+            - certificate: Id
 
         CreateObject:
             - object: ObjectHandle
