@@ -434,6 +434,7 @@ pub type Message = Bytes<MAX_MESSAGE_LENGTH>;
 pub enum KeySerialization {
     // Asn1Der,
     Cose,
+    // Der,
     EcdhEsHkdf256,
     Raw,
     Sec1,

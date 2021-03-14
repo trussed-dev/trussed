@@ -21,8 +21,14 @@ use crate::{
     types::{KeySerialization, Location, Mechanism, Message, ObjectHandle, SignatureSerialization, StorageAttributes, UniqueId},
 };
 
+#[cfg(not(feature = "test-attestation-cert-ids"))]
 pub const ED255_ATTN_KEY: UniqueId = UniqueId([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1]);
+#[cfg(feature = "test-attestation-cert-ids")]
+pub const ED255_ATTN_KEY: UniqueId = UniqueId([0x12,0xd2,0xa7,0xe4,0x03,0x55,0x21,0x42,0x99,0xf1,0x57,0x34,0xc5,0xd7,0xd0,0xe7]);
+#[cfg(not(feature = "test-attestation-cert-ids"))]
 pub const P256_ATTN_KEY: UniqueId = UniqueId([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2]);
+#[cfg(feature = "test-attestation-cert-ids")]
+pub const P256_ATTN_KEY: UniqueId = UniqueId([0xc8,0xd6,0x77,0xa3,0x93,0x46,0xc9,0x8f,0xc8,0x5a,0xb0,0x5d,0x29,0xc5,0x75,0x32]);
 
 #[inline(never)]
 pub fn try_attest(
@@ -62,7 +68,6 @@ pub fn try_attest(
             }
         }
     };
-
 
     let spki = match key_algorithm {
         KeyAlgorithm::Ed255 => {
@@ -118,9 +123,11 @@ pub fn try_attest(
         version: Version::V3,
         serial: BigEndianInteger(serial.as_ref()),
         signature_algorithm,
-        issuer: Name::default().with_organization("Trussed"),
-        subject: Name::default(),
+        issuer: Name::default().with_country(b"CH").with_organization("Trussed").with_state("Zurich"),
+        // validity: Validity { start: Datetime(b"20210313120000Z"), end: None },
         validity: Validity { start: Datetime(b"20210313120000Z"), end: None },
+        // subject: Name::default(),
+        subject: Name::default(), //.with_country(b"CH").with_organization("Trussed").with_state("Zurich"),
         subject_public_key_info: spki,
     };
 
@@ -128,11 +135,10 @@ pub fn try_attest(
         .to_heapless_vec()
         .map_err(|_| Error::InternalError)?);
 
-
     // 2. sign the TBS Cert
     let signature = match signature_algorithm {
         SignatureAlgorithm::Ed255 => {
-            SerializedSignature::Ed255(mechanisms::Ed255::sign(
+            let signature = mechanisms::Ed255::sign(
                 attn_keystore,
                 &request::Sign {
                     mechanism: Mechanism::Ed255,
@@ -140,7 +146,8 @@ pub fn try_attest(
                     message: message.clone(),
                     format: SignatureSerialization::Raw,
                 },
-            )?.signature.as_ref().try_into().unwrap())
+            ).unwrap().signature;
+            SerializedSignature::Ed255(signature.as_ref().try_into().unwrap())
         }
         SignatureAlgorithm::P256 => {
             SerializedSignature::P256(heapless_bytes::Bytes::try_from_slice(&mechanisms::P256::sign(
@@ -151,83 +158,120 @@ pub fn try_attest(
                     message: message.clone(),
                     format: SignatureSerialization::Asn1Der,
                 },
-            )?.signature.as_ref()).unwrap())
+            ).unwrap().signature.as_ref()).unwrap())
         }
     };
 
+    let mut leading_zero_signature = [0u8; 80];
+    let l = signature.as_ref().len();
+    leading_zero_signature[1..][..l].copy_from_slice(signature.as_ref());
+
     // 3. construct the entire DER-serialized cert
     let certificate = Message::from(Certificate {
-        tbs_certificate: &message,
+        tbs_certificate: to_be_signed_certificate,
         signature_algorithm,
-        signature: signature,
+        signature: &leading_zero_signature[..l + 1],
     }
         .to_heapless_vec()
         .map_err(|_| Error::ImplementationError)?);
-
-    debug_now!("generated DER certificate:\n{}", hex_str!(&certificate));
 
     let id = certstore.write_certificate(Location::Internal, &certificate, counterstore)?;
 
     Ok(AttestReply { certificate: id })
 }
 
+#[derive(Clone, Copy, Encodable, Eq, PartialEq)]
+pub struct TbsCertificate<'l> {
+    // this is "EXPLICIT [0]", where 0 translates to 0x00 and EXPLICIT to constructed|context
+    #[tlv(constructed, context, number = "0x0")]
+    version: Version,
+    #[tlv(number = "0x2")] // INTEGER
+    serial: BigEndianInteger<'l>,
+    #[tlv(constructed, number = "0x10")] // SEQUENCE
+    signature_algorithm: SignatureAlgorithm,
+    /// TODO: This MUST be non-empty. Maybe just put O=Trussed
+    #[tlv(constructed, number = "0x10")] // SEQUENCE
+    issuer: Name<'l>,
+    #[tlv(constructed, number = "0x10")] // SEQUENCE
+    validity: Validity<'l>,
+    /// This one seems optional
+    #[tlv(constructed, number = "0x10")] // SEQUENCE
+    subject: Name<'l>,
+    #[tlv(constructed, number = "0x10")] // SEQUENCE
+    subject_public_key_info: SerializedSubjectPublicKey,
+
+    // optional
+    // extensions: Extensions
+}
+
 #[derive(Clone, Encodable, Eq, PartialEq)]
 #[tlv(constructed, number = "0x10")] // SEQUENCE
 pub struct Certificate<'l> {
     #[tlv(constructed, number = "0x10")] // SEQUENCE
-    tbs_certificate: &'l [u8],
+    tbs_certificate: TbsCertificate<'l>,
     #[tlv(constructed, number = "0x10")] // SEQUENCE
     signature_algorithm: SignatureAlgorithm,
-    #[tlv(number = "0x3")] // BIT-STRING
-    signature: SerializedSignature,
+    #[tlv(number = "0x3", slice)] // BIT-STRING
+    signature: &'l [u8],//SerializedSignature,
 }
 
-#[derive(Clone, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub enum SerializedSignature {
     Ed255([u8; 64]),
     // This is the DER version with leading '04'
     P256(heapless_bytes::Bytes<heapless::consts::U72>),
 }
 
-impl Encodable for SerializedSignature {
-    fn encoded_length(&self) -> BerResult<BerLength> {
-        // a leading '00' byte to say that we have no unused bits
-        Ok((match self {
-            SerializedSignature::Ed255(_) => 65,
-            SerializedSignature::P256(signature) => signature.len() as u16 + 1
-        } as u8).into())
-    }
-
-
-    fn encode(&self, encoder: &mut Encoder<'_>) -> BerResult<()> {
-        // NB: BIT-STRING needs to have number of "unused bits" in first byte (we have none)
+impl AsRef<[u8]> for SerializedSignature {
+    fn as_ref(&self) -> &[u8] {
+        use SerializedSignature::*;
         match self {
-            SerializedSignature::Ed255(signature) => {
-                let mut leading_zero = [0u8; 65];
-                leading_zero[1..].copy_from_slice(signature.as_ref());
-                encoder.encode(&TaggedSlice::from(
-                    Tag::BIT_STRING,
-                    &leading_zero,
-                )?)
-
-                // encoder.encode(&flexiber
-            }
-            SerializedSignature::P256(signature) => {
-                encoder.encode(&TaggedSlice::from(
-                    Tag::SEQUENCE,
-                    P256_OID_ENCODING,
-                )?)?;
-                let mut leading_zero = [0u8; 73];
-                let l = signature.len() + 1;
-                leading_zero[1..][..signature.len()].copy_from_slice(signature.as_ref());
-                encoder.encode(&TaggedSlice::from(
-                    Tag::BIT_STRING,
-                    &leading_zero[..l],
-                )?)
-            }
+            Ed255(array) => array.as_ref(),
+            P256(bytes) => bytes.as_slice(),
         }
     }
 }
+
+// impl Encodable for SerializedSignature {
+//     fn encoded_length(&self) -> BerResult<BerLength> {
+//         // a leading '00' byte to say that we have no unused bits
+//         Ok((match self {
+//             SerializedSignature::Ed255(_) => 65,
+//             SerializedSignature::P256(signature) => signature.len() as u16 + 1
+//         } as u8).into())
+//     }
+
+
+//     fn encode(&self, encoder: &mut Encoder<'_>) -> BerResult<()> {
+//         // NB: BIT-STRING needs to have number of "unused bits" in first byte (we have none)
+//         match self {
+//             SerializedSignature::Ed255(signature) => {
+//                 let mut leading_zero = [0u8; 65];
+//                 leading_zero[1..].copy_from_slice(signature.as_ref());
+//                 // encoder.encode(&leading_zero)
+//                 encoder.encode(&TaggedSlice::from(
+//                     Tag::BIT_STRING,
+//                     &leading_zero,
+//                 )?)
+
+//                 // encoder.encode(&flexiber
+//             }
+//             SerializedSignature::P256(signature) => {
+//                 encoder.encode(&TaggedSlice::from(
+//                     Tag::SEQUENCE,
+//                     P256_OID_ENCODING,
+//                 )?)?;
+//                 let mut leading_zero = [0u8; 73];
+//                 let l = signature.len() + 1;
+//                 leading_zero[1..][..signature.len()].copy_from_slice(signature.as_ref());
+//                 encoder.encode(&TaggedSlice::from(
+//                     Tag::BIT_STRING,
+//                     &leading_zero[..l],
+//                 )?)
+//             }
+//         }
+//     }
+// }
 
 #[derive(Clone, Copy, Eq, PartialEq)]
 pub enum Version {
@@ -303,6 +347,7 @@ impl TryFrom<Mechanism> for SignatureAlgorithm {
 
 // 1.2.840.10045.4.3.2 ecdsaWithSHA256 (ANSI X9.62 ECDSA algorithm with SHA256))
 const P256_OID_ENCODING: &'static [u8] = &hex!("06 08  2A 86 48 CE 3D 04 03 02");
+const P256_PUB_ENCODING: &'static [u8] = &hex!("06 07 2A 86 48 CE 3D 02 01   06 08 2A 86 48 CE  3D 03 01 07");
 // 1.3.101.112 curveEd25519 (EdDSA 25519 signature algorithm)
 const ED255_OID_ENCODING: &'static [u8] = &hex!("06 03  2B 65 70");
 
@@ -329,23 +374,27 @@ pub struct Name<'l> {
     /// TODO: enforce
     country: Option<[u8; 2]>,
     organization: Option<&'l str>,
+    state: Option<&'l str>,
 }
 
 #[derive(Clone, Copy, Encodable, Eq, PartialEq)]
 #[tlv(constructed, number = "0x10")]  // SEQUENCE = 0x10
-struct EncodedOrganization<'l> {
+struct EncodedPart<'l> {
     #[tlv(number = "0x6")] // OBJECT_IDENTIFIER
     oid: &'l [u8],
     #[tlv(number = "0xC")] // UTF8_STRING
-    organization: &'l [u8],
+    part: &'l [u8],
 }
 
 impl<'l> Name<'l> {
-    pub fn with_country(self, country: [u8; 2]) -> Self {
-        Self { country: Some(country), organization: self.organization }
+    pub fn with_country(self, country: &[u8; 2]) -> Self {
+        Self { country: Some(*country), ..self }
     }
     pub fn with_organization(self, organization: &'l str) -> Self {
-        Self { country: self.country, organization: Some(organization) }
+        Self { organization: Some(organization), ..self }
+    }
+    pub fn with_state(self, state: &'l str) -> Self {
+        Self { state: Some(state), ..self }
     }
 }
 
@@ -358,21 +407,31 @@ impl Encodable for Name<'_> {
         if let Some(organization) = self.organization {
             l += 11 + organization.as_bytes().len() as u16;
         }
+        if let Some(state) = self.state {
+            l += 11 + state.as_bytes().len() as u16;
+        }
         Ok(l.into())
     }
 
     fn encode(&self, encoder: &mut Encoder<'_>) -> BerResult<()> {
+        // Order by OID for good measure
         if let Some(country) = self.country {
             // "31 0B 30 09 06 03 55  04 06 13 02 43 48"
             let mut encoding: [u8; 0xB] = hex!("30 09 06 03 55  04 06 13 02 00 00");
             encoding[9..].copy_from_slice(&country);
             encoder.encode(&TaggedSlice::from(Tag::SET, &encoding)?)?;
         }
+        if let Some(state) = self.state {
+            let encoded_state = EncodedPart {
+                oid: &hex!("55 04 08"),
+                part: state.as_bytes(),
+            };
+            encoder.encode(&TaggedValue::new(Tag::SET, &encoded_state))?;
+        }
         if let Some(organization) = self.organization {
-            let encoded_organization = EncodedOrganization {
+            let encoded_organization = EncodedPart {
                 oid: &hex!("55 04 0A"),
-                // oid: const_oid::ObjectIdentifier::parse("2.5.4.10").as_bytes(),  // blabla temporary which is freed blabla
-                organization: organization.as_bytes(),
+                part: organization.as_bytes(),
             };
             encoder.encode(&TaggedValue::new(Tag::SET, &encoded_organization))?;
         }
@@ -391,30 +450,6 @@ pub struct Extensions<'l>(&'l [Extension]);
 impl Encodable for Extensions<'_> {
     fn encoded_length(&self) -> BerResult<BerLength> { Ok(0u8.into()) }
     fn encode(&self, _encoder: &mut Encoder<'_>) -> BerResult<()> { Ok(()) }
-}
-
-#[derive(Clone, Copy, Eq, PartialEq)]
-/// Encoded as "YYYYMMDDHHMMSSZ", encoding takes care of truncating YYYY to YY if necessary.
-pub struct Datetime<'l> (&'l [u8]);
-
-impl Encodable for Datetime<'_> {
-    fn encoded_length(&self) -> BerResult<BerLength> {
-        // before 2050: UtcTime -> truncate YYYY to YY
-        Ok(if &self.0[..4] < b"2050" {
-            0xFu8
-        // starting 2050: GeneralizedTime -> keep YYYY
-        } else {
-            0x11u8
-        }.into())
-    }
-    fn encode(&self, encoder: &mut Encoder<'_>) -> BerResult<()> {
-        let tagged_slice = if &self.0[..4] < b"2050" {
-            TaggedSlice::from(Tag::UTC_TIME, &self.0[2..])?
-        } else {
-            TaggedSlice::from(Tag::GENERALIZED_TIME, &self.0)?
-        };
-        encoder.encode(&tagged_slice)
-    }
 }
 
 pub struct ParsedDatetime {
@@ -461,6 +496,31 @@ impl ParsedDatetime {
 }
 
 #[derive(Clone, Copy, Eq, PartialEq)]
+/// Encoded as "YYYYMMDDHHMMSSZ", encoding takes care of truncating YYYY to YY if necessary.
+pub struct Datetime<'l> (&'l [u8]);
+
+impl Encodable for Datetime<'_> {
+    fn encoded_length(&self) -> BerResult<BerLength> {
+        // before 2050: UtcTime -> truncate YYYY to YY
+        Ok(if &self.0[..4] < b"2050" {
+            0xFu8
+        // starting 2050: GeneralizedTime -> keep YYYY
+        } else {
+            0x11u8
+        }.into())
+    }
+    fn encode(&self, encoder: &mut Encoder<'_>) -> BerResult<()> {
+        let tagged_slice = if &self.0[..4] < b"2050" {
+            TaggedSlice::from(Tag::UTC_TIME, &self.0[2..])?
+        } else {
+            TaggedSlice::from(Tag::GENERALIZED_TIME, &self.0)?
+        };
+        let result = encoder.encode(&tagged_slice);
+        result
+    }
+}
+
+#[derive(Clone, Copy, Eq, PartialEq)]
 pub struct Validity<'l> {
     /// Encoded as "YYYYMMDDHHMMSSZ", encoding takes care of truncating YYYY to YY if necessary.
     start: Datetime<'l>,
@@ -471,7 +531,7 @@ pub struct Validity<'l> {
 impl Encodable for Validity<'_> {
     fn encoded_length(&self) -> BerResult<BerLength> {
         // before 2050: UtcTime -> truncate YYYY to YY
-        self.start.encoded_length()? + self.end.encoded_length()?
+        self.start.encoded_length()? + self.end.unwrap_or(Datetime(b"99991231235959Z")).encoded_length()?
     }
 
     fn encode(&self, encoder: &mut Encoder<'_>) -> BerResult<()> {
@@ -484,14 +544,14 @@ impl Encodable for Validity<'_> {
 pub enum SerializedSubjectPublicKey {
     Ed255([u8; 32]),
     // This is the DER version with leading '04'
-    P256([u8; 65]),
+    P256([u8; 33]),
 }
 
 impl Encodable for SerializedSubjectPublicKey {
     fn encoded_length(&self) -> BerResult<BerLength> {
         Ok((match self {
             SerializedSubjectPublicKey::Ed255(_) => 0x2A,
-            SerializedSubjectPublicKey::P256(_) => 0x59,
+            SerializedSubjectPublicKey::P256(_) => 0x39,
         } as u8).into())
     }
 
@@ -516,9 +576,9 @@ impl Encodable for SerializedSubjectPublicKey {
             SerializedSubjectPublicKey::P256(pub_key) => {
                 encoder.encode(&TaggedSlice::from(
                     Tag::SEQUENCE,
-                    P256_OID_ENCODING,
+                    P256_PUB_ENCODING,
                 )?)?;
-                let mut leading_zero = [0u8; 66];
+                let mut leading_zero = [0u8; 34];
                 leading_zero[1..].copy_from_slice(pub_key.as_ref());
                 encoder.encode(&TaggedSlice::from(
                     Tag::BIT_STRING,
@@ -527,30 +587,6 @@ impl Encodable for SerializedSubjectPublicKey {
             }
         }
     }
-}
-
-#[derive(Clone, Copy, Encodable, Eq, PartialEq)]
-pub struct TbsCertificate<'l> {
-    // this is "EXPLICIT [0]", where 0 translates to 0x00 and EXPLICIT to constructed|context
-    #[tlv(constructed, context, number = "0x0")]
-    version: Version,
-    #[tlv(number = "0x2")] // INTEGER
-    serial: BigEndianInteger<'l>,
-    #[tlv(constructed, number = "0x10")] // SEQUENCE
-    signature_algorithm: SignatureAlgorithm,
-    /// TODO: This MUST be non-empty. Maybe just put O=Trussed
-    #[tlv(constructed, number = "0x10")] // SEQUENCE
-    issuer: Name<'l>,
-    #[tlv(constructed, number = "0x10")] // SEQUENCE
-    validity: Validity<'l>,
-    /// This one seems optional
-    #[tlv(constructed, number = "0x10")] // SEQUENCE
-    subject: Name<'l>,
-    #[tlv(constructed, number = "0x10")] // SEQUENCE
-    subject_public_key_info: SerializedSubjectPublicKey,
-
-    // optional
-    // extensions: Extensions
 }
 
 //use der::{Any, Encodable, Decodable, Message, ObjectIdentifier};
