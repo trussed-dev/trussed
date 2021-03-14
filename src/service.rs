@@ -138,10 +138,9 @@ impl<P: Platform> ServiceResources<P> {
             },
 
             Request::Attest(request) => {
-                let mut drbg = self.drbg().map_err(|_| Error::EntropyMalfunction)?;
                 let mut attn_keystore: ClientKeystore<'_, P> = ClientKeystore::new(
                     PathBuf::from("attn"),
-                    &mut drbg,
+                    &mut split_drbg,
                     full_store,
                 );
                 attest::try_attest(&mut attn_keystore, certstore, counterstore, keystore, request).map(Reply::Attest)

@@ -289,6 +289,17 @@ pub trait CryptoClient: PollClient {
         Ok(r)
     }
 
+    fn attest(&mut self, signing_mechanism: Mechanism, private_key: ObjectHandle)
+        -> ClientResult<'_, reply::Attest, Self>
+    {
+        let r = self.request(request::Attest {
+            signing_mechanism,
+            private_key,
+        })?;
+        r.client.syscall();
+        Ok(r)
+    }
+
     fn decrypt<'c>(&'c mut self, mechanism: Mechanism, key: ObjectHandle,
                        message: &[u8], associated_data: &[u8],
                        nonce: &[u8], tag: &[u8],

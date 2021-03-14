@@ -231,6 +231,9 @@ impl SerializeKey for super::P256
                 ).map_err(|_| Error::InternalError)?;
                 serialized_key
             }
+            // KeySerialization::Der => {
+            //     Message::try_from_slice(&public_key.to_der()).unwrap()
+            // }
             // _ => {
             //     return Err(Error::InternalError);
             // }

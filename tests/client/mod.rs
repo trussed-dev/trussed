@@ -13,6 +13,19 @@ pub fn get<R>(
     unsafe { trussed::pipe::TrussedInterchange::reset_claims(); }
     let trussed_platform = init_platform();
     let mut trussed_service = trussed::service::Service::new(trussed_platform);
+
+    // preparations for attestation
+    let client_id = "attn";
+    let mut attn_client = trussed_service.try_as_new_client(client_id).unwrap();
+
+    use trussed::client::mechanisms::Ed255;
+    let attn_ed255_key = trussed::syscall!(attn_client.generate_ed255_private_key(trussed::types::Location::Internal)).key;
+    use trussed::client::mechanisms::P256;
+    let attn_p256_key = trussed::syscall!(attn_client.generate_p256_private_key(trussed::types::Location::Internal)).key;
+
+    // destroy this attestation client
+    unsafe { trussed::pipe::TrussedInterchange::reset_claims(); }
+
     let client_id = "test";
     let mut trussed_client = trussed_service.try_as_new_client(client_id).unwrap();
     test(&mut trussed_client)
@@ -52,12 +65,12 @@ pub mod ui {
 
 pub mod store {
     pub use generic_array::typenum::consts;
-    use littlefs2::{const_ram_storage, fs::{Allocation, Filesystem}};
+    use littlefs2::const_ram_storage;
     use trussed::types::{LfsResult, LfsStorage};
 
-    const_ram_storage!(InternalStorage, 8192);
-    const_ram_storage!(ExternalStorage, 8192);
-    const_ram_storage!(VolatileStorage, 8192);
+    const_ram_storage!(InternalStorage, 16384);
+    const_ram_storage!(ExternalStorage, 16384);
+    const_ram_storage!(VolatileStorage, 16384);
 
     trussed::store!(Store,
         Internal: InternalStorage,

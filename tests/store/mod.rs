@@ -1,5 +1,5 @@
 pub use generic_array::typenum::consts;
-use littlefs2::{const_ram_storage, fs::{Allocation, Filesystem}};
+use littlefs2::const_ram_storage;
 use trussed::types::{LfsResult, LfsStorage};
 
 const_ram_storage!(InternalStorage, 8192);
