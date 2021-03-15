@@ -96,7 +96,7 @@ impl<P: Platform> ServiceResources<P> {
         // prepare keystore, bound to client_id, for cryptographic calls
         let mut keystore: ClientKeystore<P> = ClientKeystore::new(
             client_id.clone(),
-            &mut drbg,
+            self.drbg().map_err(|_| Error::EntropyMalfunction)?,
             full_store,
         );
         let keystore = &mut keystore;
@@ -138,9 +138,9 @@ impl<P: Platform> ServiceResources<P> {
             },
 
             Request::Attest(request) => {
-                let mut attn_keystore: ClientKeystore<'_, P> = ClientKeystore::new(
+                let mut attn_keystore: ClientKeystore<P> = ClientKeystore::new(
                     PathBuf::from("attn"),
-                    &mut split_drbg,
+                    self.drbg().map_err(|_| Error::EntropyMalfunction)?,
                     full_store,
                 );
                 attest::try_attest(&mut attn_keystore, certstore, counterstore, keystore, request).map(Reply::Attest)
