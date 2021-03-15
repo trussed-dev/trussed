@@ -19,9 +19,9 @@ pub fn get<R>(
     let mut attn_client = trussed_service.try_as_new_client(client_id).unwrap();
 
     use trussed::client::mechanisms::Ed255;
-    let attn_ed255_key = trussed::syscall!(attn_client.generate_ed255_private_key(trussed::types::Location::Internal)).key;
+    let _attn_ed255_key = trussed::syscall!(attn_client.generate_ed255_private_key(trussed::types::Location::Internal)).key;
     use trussed::client::mechanisms::P256;
-    let attn_p256_key = trussed::syscall!(attn_client.generate_p256_private_key(trussed::types::Location::Internal)).key;
+    let _attn_p256_key = trussed::syscall!(attn_client.generate_p256_private_key(trussed::types::Location::Internal)).key;
 
     // destroy this attestation client
     unsafe { trussed::pipe::TrussedInterchange::reset_claims(); }

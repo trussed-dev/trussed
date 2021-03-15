@@ -11,8 +11,8 @@ fn ed255_attest() {
     client::get(|client| {
         let private_key = syscall!(client.generate_ed255_private_key(Internal)).key;
         let attn_cert_id = syscall!(client.attest(Mechanism::Ed255, private_key)).certificate;
-        let cert = syscall!(client.read_certificate(attn_cert_id)).der;
-        // panic!("DER:\n{:x}", delog::hex_str!(&cert));
+        let _cert = syscall!(client.read_certificate(attn_cert_id)).der;
+        // panic!("DER:\n{:x}", delog::hex_str!(&_cert));
     })
 }
 
@@ -21,7 +21,7 @@ fn p256_attest() {
     client::get(|client| {
         let private_key = syscall!(client.generate_p256_private_key(Internal)).key;
         let attn_cert_id = syscall!(client.attest(Mechanism::P256, private_key)).certificate;
-        let cert = syscall!(client.read_certificate(attn_cert_id)).der;
-        // panic!("DER:\n{:x}", delog::hex_str!(&cert));
+        let _cert = syscall!(client.read_certificate(attn_cert_id)).der;
+        // panic!("DER:\n{:x}", delog::hex_str!(&_cert));
     })
 }
