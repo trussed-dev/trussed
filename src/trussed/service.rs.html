@@ -704,8 +704,6 @@
 <span id="701">701</span>
 <span id="702">702</span>
 <span id="703">703</span>
-<span id="704">704</span>
-<span id="705">705</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">rand_core</span>::{<span class="ident">RngCore</span>, <span class="ident">SeedableRng</span>};
 <span class="kw">use</span> <span class="ident">interchange</span>::<span class="ident">Responder</span>;
@@ -1236,73 +1234,71 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">drbg</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">ChaCha8Rng</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
 
         <span class="comment">// Check if our RNG is loaded.</span>
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">rng_state</span>.<span class="ident">is_none</span>() {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">drbg</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">rng_state</span>.<span class="ident">take</span>() {
+            <span class="prelude-val">Some</span>(<span class="ident">drbg</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">drbg</span>,
+            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">filestore</span>: <span class="ident">ClientFilestore</span><span class="op">&lt;</span><span class="ident">P</span>::<span class="ident">S</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">ClientFilestore</span>::<span class="ident">new</span>(
+                    <span class="ident">PathBuf</span>::<span class="ident">from</span>(<span class="string">&quot;trussed&quot;</span>),
+                    <span class="self">self</span>.<span class="ident">platform</span>.<span class="ident">store</span>(),
+                );
 
-            <span class="comment">// dogfood our own construction</span>
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">filestore</span>: <span class="ident">ClientFilestore</span><span class="op">&lt;</span><span class="ident">P</span>::<span class="ident">S</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">ClientFilestore</span>::<span class="ident">new</span>(
-                <span class="ident">PathBuf</span>::<span class="ident">from</span>(<span class="string">&quot;trussed&quot;</span>),
-                <span class="self">self</span>.<span class="ident">platform</span>.<span class="ident">store</span>(),
-            );
-            <span class="kw">let</span> <span class="ident">filestore</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">filestore</span>;
+                <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">PathBuf</span>::<span class="ident">from</span>(<span class="string">&quot;rng-state.bin&quot;</span>);
 
-            <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">PathBuf</span>::<span class="ident">from</span>(<span class="string">&quot;rng-state.bin&quot;</span>);
+                <span class="comment">// Load previous seed, e.g., externally injected entropy on first run.</span>
+                <span class="comment">// Else, default to zeros - will mix in new HW RNG entropy next</span>
+                <span class="kw">let</span> <span class="ident">mixin_seed</span> <span class="op">=</span> <span class="kw">if</span> <span class="op">!</span> <span class="ident">filestore</span>.<span class="ident">exists</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>, <span class="ident">Location</span>::<span class="ident">Internal</span>) {
+                    [<span class="number">0u8</span>; <span class="number">32</span>]
+                } <span class="kw">else</span> {
+                    <span class="comment">// Use the last saved state.</span>
+                    <span class="kw">let</span> <span class="ident">mixin_bytes</span>: <span class="ident">Bytes</span><span class="op">&lt;</span><span class="ident">consts</span>::<span class="ident">U32</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">filestore</span>.<span class="ident">read</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>, <span class="ident">Location</span>::<span class="ident">Internal</span>)<span class="question-mark">?</span>;
+                    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">mixin_seed</span> <span class="op">=</span> [<span class="number">0u8</span>; <span class="number">32</span>];
+                    <span class="ident">mixin_seed</span>.<span class="ident">clone_from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">mixin_bytes</span>);
+                    <span class="ident">mixin_seed</span>
+                };
 
-            <span class="comment">// If it hasn&#39;t been saved to flash yet, generate it from HW RNG.</span>
-            <span class="kw">let</span> <span class="ident">stored_seed</span> <span class="op">=</span> <span class="kw">if</span> <span class="op">!</span> <span class="ident">filestore</span>.<span class="ident">exists</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>, <span class="ident">Location</span>::<span class="ident">Internal</span>) {
-                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">stored_seed</span> <span class="op">=</span> [<span class="number">0u8</span>; <span class="number">32</span>];
-                <span class="self">self</span>.<span class="ident">platform</span>.<span class="ident">rng</span>().<span class="ident">try_fill_bytes</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">stored_seed</span>)
+                <span class="comment">// Generally, the TRNG is fed through a DRBG to whiten its output.</span>
+                <span class="comment">//</span>
+                <span class="comment">// In principal seeding a DRBG like Chacha8Rng from &quot;good&quot; HW/external entropy</span>
+                <span class="comment">// should be good enough for the lifetime of the key.</span>
+                <span class="comment">//</span>
+                <span class="comment">// Since we have a TRNG though, we might as well mix in some new entropy</span>
+                <span class="comment">// on each boot. We do not do so on each DRBG draw to avoid excessive flash writes.</span>
+                <span class="comment">// (e.g., if some app exposes unlimited &quot;read-entropy&quot; functionality to users).</span>
+                <span class="comment">//</span>
+                <span class="comment">// Additionally, we use a twist on the ideas of Haskell&#39;s splittable RNGs, and store</span>
+                <span class="comment">// the hash of the current seed as input seed for the next boot. In this way, even if</span>
+                <span class="comment">// the HW entropy &quot;goes bad&quot; (e.g., starts returning all zeros), the properties of the</span>
+                <span class="comment">// hash function should ensure that there are no cycles or repeats of entropy in the</span>
+                <span class="comment">// output to apps.</span>
+
+                <span class="comment">// 1. First, draw fresh entropy from the HW TRNG.</span>
+                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">entropy</span> <span class="op">=</span> [<span class="number">0u8</span>; <span class="number">32</span>];
+                <span class="self">self</span>.<span class="ident">platform</span>.<span class="ident">rng</span>().<span class="ident">try_fill_bytes</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">entropy</span>)
                     .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error</span>::<span class="ident">EntropyMalfunction</span>)<span class="question-mark">?</span>;
-                <span class="ident">stored_seed</span>
-            } <span class="kw">else</span> {
-                <span class="comment">// Use the last saved state.</span>
-                <span class="kw">let</span> <span class="ident">stored_seed_bytebuf</span>: <span class="ident">Bytes</span><span class="op">&lt;</span><span class="ident">consts</span>::<span class="ident">U32</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">filestore</span>.<span class="ident">read</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>, <span class="ident">Location</span>::<span class="ident">Internal</span>)<span class="question-mark">?</span>;
-                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">stored_seed</span> <span class="op">=</span> [<span class="number">0u8</span>; <span class="number">32</span>];
-                <span class="ident">stored_seed</span>.<span class="ident">clone_from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">stored_seed_bytebuf</span>);
-                <span class="ident">stored_seed</span>
-            };
 
-            <span class="comment">// Generally, the TRNG is fed through a DRBG to whiten its output.</span>
-            <span class="comment">//</span>
-            <span class="comment">// In principal seeding a DRBG like Chacha8Rng from &quot;good&quot; HW/external entropy</span>
-            <span class="comment">// should be good enough for the lifetime of the key.</span>
-            <span class="comment">//</span>
-            <span class="comment">// Since we have a TRNG though, we might as well mix in some new entropy</span>
-            <span class="comment">// on each boot. We do not do so on each DRBG draw to avoid excessive flash writes.</span>
-            <span class="comment">// (e.g., if some app exposes unlimited &quot;read-entropy&quot; functionality to users).</span>
-            <span class="comment">//</span>
-            <span class="comment">// Additionally, we use a twist on the ideas of Haskell&#39;s splittable RNGs, and store</span>
-            <span class="comment">// the hash of the current seed as input seed for the next boot. In this way, even if</span>
-            <span class="comment">// the HW entropy &quot;goes bad&quot; (e.g., starts returning all zeros), the properties of the</span>
-            <span class="comment">// hash function should ensure that there are no cycles or repeats of entropy in the</span>
-            <span class="comment">// output to apps.</span>
+                <span class="comment">// 2. Mix into our previously stored seed.</span>
+                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">our_seed</span> <span class="op">=</span> [<span class="number">0u8</span>; <span class="number">32</span>];
+                <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="number">32</span> {
+                    <span class="ident">our_seed</span>[<span class="ident">i</span>] <span class="op">=</span> <span class="ident">mixin_seed</span>[<span class="ident">i</span>] <span class="op">^</span> <span class="ident">entropy</span>[<span class="ident">i</span>];
+                }
 
-            <span class="comment">// 1. First, draw fresh entropy from the HW TRNG.</span>
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">entropy</span> <span class="op">=</span> [<span class="number">0u8</span>; <span class="number">32</span>];
-            <span class="self">self</span>.<span class="ident">platform</span>.<span class="ident">rng</span>().<span class="ident">try_fill_bytes</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">entropy</span>)
-                .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error</span>::<span class="ident">EntropyMalfunction</span>)<span class="question-mark">?</span>;
+                <span class="comment">// 3. Initialize ChaCha8 construction with our seed.</span>
+                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">drbg</span> <span class="op">=</span> <span class="ident">chacha20</span>::<span class="ident">ChaCha8Rng</span>::<span class="ident">from_seed</span>(<span class="ident">our_seed</span>);
 
-            <span class="comment">// 2. Mix into our previously stored seed.</span>
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">our_seed</span> <span class="op">=</span> [<span class="number">0u8</span>; <span class="number">32</span>];
-            <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="number">32</span> {
-                <span class="ident">our_seed</span>[<span class="ident">i</span>] <span class="op">=</span> <span class="ident">stored_seed</span>[<span class="ident">i</span>] <span class="op">^</span> <span class="ident">entropy</span>[<span class="ident">i</span>];
-            }
+                <span class="comment">// 4. Store freshly drawn seed for next boot.</span>
+                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">seed_to_store</span> <span class="op">=</span> [<span class="number">0u8</span>; <span class="number">32</span>];
+                <span class="ident">drbg</span>.<span class="ident">fill_bytes</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">seed_to_store</span>);
+                <span class="ident">filestore</span>.<span class="ident">write</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>, <span class="ident">Location</span>::<span class="ident">Internal</span>, <span class="ident">seed_to_store</span>.<span class="ident">as_ref</span>()).<span class="ident">unwrap</span>();
 
-            <span class="comment">// Initialize ChaCha8 construction with our seed.</span>
-            <span class="self">self</span>.<span class="ident">rng_state</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">chacha20</span>::<span class="ident">ChaCha8Rng</span>::<span class="ident">from_seed</span>(<span class="ident">our_seed</span>));
+                <span class="comment">// 5. Finish</span>
+                <span class="prelude-val">Ok</span>(<span class="ident">drbg</span>)
+            }<span class="question-mark">?</span>
+        };
 
-            <span class="comment">// 3. Store hash of seed for next boot.</span>
-            <span class="kw">use</span> <span class="ident">sha2</span>::<span class="ident">digest</span>::<span class="ident">Digest</span>;
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">hash</span> <span class="op">=</span> <span class="ident">sha2</span>::<span class="ident">Sha256</span>::<span class="ident">new</span>();
-            <span class="ident">hash</span>.<span class="ident">update</span>(<span class="kw-2">&amp;</span><span class="ident">our_seed</span>);
-            <span class="kw">let</span> <span class="ident">seed_to_store</span> <span class="op">=</span> <span class="ident">hash</span>.<span class="ident">finalize</span>();
-
-            <span class="ident">filestore</span>.<span class="ident">write</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>, <span class="ident">Location</span>::<span class="ident">Internal</span>, <span class="ident">seed_to_store</span>.<span class="ident">as_ref</span>()).<span class="ident">unwrap</span>();
-        }
-
-        <span class="comment">// no panic - just ensured existence</span>
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">chacha</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">rng_state</span>.<span class="ident">as_mut</span>().<span class="ident">unwrap</span>();
-
-        <span class="ident">ChaCha8Rng</span>::<span class="ident">from_rng</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">chacha</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error</span>::<span class="ident">EntropyMalfunction</span>)
+        <span class="comment">// split off another DRBG</span>
+        <span class="kw">let</span> <span class="ident">split_drbg</span> <span class="op">=</span> <span class="ident">ChaCha8Rng</span>::<span class="ident">from_rng</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">drbg</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error</span>::<span class="ident">EntropyMalfunction</span>);
+        <span class="self">self</span>.<span class="ident">rng_state</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">drbg</span>);
+        <span class="ident">split_drbg</span>
     }
 
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">fill_random_bytes</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">bytes</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
