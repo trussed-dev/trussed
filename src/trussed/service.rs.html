@@ -703,6 +703,9 @@
 <span id="700">700</span>
 <span id="701">701</span>
 <span id="702">702</span>
+<span id="703">703</span>
+<span id="704">704</span>
+<span id="705">705</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">rand_core</span>::{<span class="ident">RngCore</span>, <span class="ident">SeedableRng</span>};
 <span class="kw">use</span> <span class="ident">interchange</span>::<span class="ident">Responder</span>;
@@ -798,7 +801,7 @@
         <span class="kw">let</span> <span class="ident">full_store</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">platform</span>.<span class="ident">store</span>();
 
         <span class="comment">// prepare keystore, bound to client_id, for cryptographic calls</span>
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">keystore</span>: <span class="ident">ClientKeystore</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">P</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">ClientKeystore</span>::<span class="ident">new</span>(
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">keystore</span>: <span class="ident">ClientKeystore</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">ClientKeystore</span>::<span class="ident">new</span>(
             <span class="ident">client_id</span>.<span class="ident">clone</span>(),
             <span class="self">self</span>.<span class="ident">drbg</span>().<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error</span>::<span class="ident">EntropyMalfunction</span>)<span class="question-mark">?</span>,
             <span class="ident">full_store</span>,
@@ -1228,7 +1231,9 @@
         }
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">drbg</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ChaCha8Rng</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="doccomment">/// Applies a splitting aka forking construction to the inner DRBG,</span>
+    <span class="doccomment">/// returning an independent DRBG.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">drbg</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">ChaCha8Rng</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
 
         <span class="comment">// Check if our RNG is loaded.</span>
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">rng_state</span>.<span class="ident">is_none</span>() {
@@ -1295,8 +1300,9 @@
         }
 
         <span class="comment">// no panic - just ensured existence</span>
-        <span class="kw">let</span> <span class="ident">chacha</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">rng_state</span>.<span class="ident">as_mut</span>().<span class="ident">unwrap</span>();
-        <span class="prelude-val">Ok</span>(<span class="ident">chacha</span>)
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">chacha</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">rng_state</span>.<span class="ident">as_mut</span>().<span class="ident">unwrap</span>();
+
+        <span class="ident">ChaCha8Rng</span>::<span class="ident">from_rng</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">chacha</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error</span>::<span class="ident">EntropyMalfunction</span>)
     }
 
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">fill_random_bytes</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">bytes</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
