@@ -527,73 +527,70 @@ impl<P: Platform> ServiceResources<P> {
     pub fn drbg(&mut self) -> Result<ChaCha8Rng, Error> {
 
         // Check if our RNG is loaded.
-        if self.rng_state.is_none() {
+        let mut drbg = match self.rng_state.take() {
+            Some(drbg) => drbg,
+            None => {
+                let mut filestore: ClientFilestore<P::S> = ClientFilestore::new(
+                    PathBuf::from("trussed"),
+                    self.platform.store(),
+                );
 
-            // dogfood our own construction
-            let mut filestore: ClientFilestore<P::S> = ClientFilestore::new(
-                PathBuf::from("trussed"),
-                self.platform.store(),
-            );
-            let filestore = &mut filestore;
+                let path = PathBuf::from("rng-state.bin");
 
-            let path = PathBuf::from("rng-state.bin");
+                // Load previous seed, e.g., externally injected entropy on first run.
+                // Else, default to zeros - will mix in new HW RNG entropy next
+                let mixin_seed = if ! filestore.exists(&path, Location::Internal) {
+                    [0u8; 32]
+                } else {
+                    // Use the last saved state.
+                    let mixin_bytes: Bytes<consts::U32> = filestore.read(&path, Location::Internal)?;
+                    let mut mixin_seed = [0u8; 32];
+                    mixin_seed.clone_from_slice(&mixin_bytes);
+                    mixin_seed
+                };
 
-            // If it hasn't been saved to flash yet, generate it from HW RNG.
-            let stored_seed = if ! filestore.exists(&path, Location::Internal) {
-                let mut stored_seed = [0u8; 32];
-                self.platform.rng().try_fill_bytes(&mut stored_seed)
+                // Generally, the TRNG is fed through a DRBG to whiten its output.
+                //
+                // In principal seeding a DRBG like Chacha8Rng from "good" HW/external entropy
+                // should be good enough for the lifetime of the key.
+                //
+                // Since we have a TRNG though, we might as well mix in some new entropy
+                // on each boot. We do not do so on each DRBG draw to avoid excessive flash writes.
+                // (e.g., if some app exposes unlimited "read-entropy" functionality to users).
+                //
+                // Additionally, we use a twist on the ideas of Haskell's splittable RNGs, and store
+                // an input seed for the next boot. In this way, even if the HW entropy "goes bad"
+                // (e.g., starts returning all zeros), there are still no cycles or repeats of entropy
+                // in the output to apps.
+
+                // 1. First, draw fresh entropy from the HW TRNG.
+                let mut entropy = [0u8; 32];
+                self.platform.rng().try_fill_bytes(&mut entropy)
                     .map_err(|_| Error::EntropyMalfunction)?;
-                stored_seed
-            } else {
-                // Use the last saved state.
-                let stored_seed_bytebuf: Bytes<consts::U32> = filestore.read(&path, Location::Internal)?;
-                let mut stored_seed = [0u8; 32];
-                stored_seed.clone_from_slice(&stored_seed_bytebuf);
-                stored_seed
-            };
 
-            // Generally, the TRNG is fed through a DRBG to whiten its output.
-            //
-            // In principal seeding a DRBG like Chacha8Rng from "good" HW/external entropy
-            // should be good enough for the lifetime of the key.
-            //
-            // Since we have a TRNG though, we might as well mix in some new entropy
-            // on each boot. We do not do so on each DRBG draw to avoid excessive flash writes.
-            // (e.g., if some app exposes unlimited "read-entropy" functionality to users).
-            //
-            // Additionally, we use a twist on the ideas of Haskell's splittable RNGs, and store
-            // the hash of the current seed as input seed for the next boot. In this way, even if
-            // the HW entropy "goes bad" (e.g., starts returning all zeros), the properties of the
-            // hash function should ensure that there are no cycles or repeats of entropy in the
-            // output to apps.
+                // 2. Mix into our previously stored seed.
+                let mut our_seed = [0u8; 32];
+                for i in 0..32 {
+                    our_seed[i] = mixin_seed[i] ^ entropy[i];
+                }
 
-            // 1. First, draw fresh entropy from the HW TRNG.
-            let mut entropy = [0u8; 32];
-            self.platform.rng().try_fill_bytes(&mut entropy)
-                .map_err(|_| Error::EntropyMalfunction)?;
+                // 3. Initialize ChaCha8 construction with our seed.
+                let mut drbg = chacha20::ChaCha8Rng::from_seed(our_seed);
 
-            // 2. Mix into our previously stored seed.
-            let mut our_seed = [0u8; 32];
-            for i in 0..32 {
-                our_seed[i] = stored_seed[i] ^ entropy[i];
-            }
+                // 4. Store freshly drawn seed for next boot.
+                let mut seed_to_store = [0u8; 32];
+                drbg.fill_bytes(&mut seed_to_store);
+                filestore.write(&path, Location::Internal, seed_to_store.as_ref()).unwrap();
 
-            // Initialize ChaCha8 construction with our seed.
-            self.rng_state = Some(chacha20::ChaCha8Rng::from_seed(our_seed));
+                // 5. Finish
+                Ok(drbg)
+            }?
+        };
 
-            // 3. Store hash of seed for next boot.
-            use sha2::digest::Digest;
-            let mut hash = sha2::Sha256::new();
-            hash.update(&our_seed);
-            let seed_to_store = hash.finalize();
-
-            filestore.write(&path, Location::Internal, seed_to_store.as_ref()).unwrap();
-        }
-
-        // no panic - just ensured existence
-        let mut chacha = self.rng_state.as_mut().unwrap();
-
-        ChaCha8Rng::from_rng(&mut chacha).map_err(|_| Error::EntropyMalfunction)
+        // split off another DRBG
+        let split_drbg = ChaCha8Rng::from_rng(&mut drbg).map_err(|_| Error::EntropyMalfunction);
+        self.rng_state = Some(drbg);
+        split_drbg
     }
 
     pub fn fill_random_bytes(&mut self, bytes: &mut[u8]) -> Result<(), Error> {
