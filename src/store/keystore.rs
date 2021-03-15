@@ -16,17 +16,17 @@ use crate::{
 pub type ClientId = littlefs2::path::PathBuf;
 pub type KeyId = crate::types::UniqueId;
 
-pub struct ClientKeystore<'a, P>
+pub struct ClientKeystore<P>
 where
     P: Platform,
 {
     client_id: ClientId,
-    drbg: &'a mut ChaCha8Rng,
+    drbg: ChaCha8Rng,
     store: P::S,
 }
 
-impl<'a, P: Platform> ClientKeystore<'a, P> {
-    pub fn new(client_id: ClientId, drbg: &'a mut ChaCha8Rng, store: P::S) -> Self {
+impl<'a, P: Platform> ClientKeystore<P> {
+    pub fn new(client_id: ClientId, drbg: ChaCha8Rng, store: P::S) -> Self {
         Self { client_id, drbg, store }
     }
 }
@@ -47,7 +47,7 @@ pub trait Keystore {
     fn location(&self, secrecy: key::Secrecy, id: &KeyId) -> Option<Location>;
 }
 
-impl<P: Platform> ClientKeystore<'_, P> {
+impl<P: Platform> ClientKeystore<P> {
 
     pub fn generate_key_id(&mut self) -> KeyId {
         let mut id = [0u8; 16];
@@ -72,10 +72,10 @@ impl<P: Platform> ClientKeystore<'_, P> {
 
 }
 
-impl<P: Platform> Keystore for ClientKeystore<'_, P> {
+impl<P: Platform> Keystore for ClientKeystore<P> {
 
     fn drbg(&mut self) -> &mut ChaCha8Rng {
-        self.drbg
+        &mut self.drbg
     }
 
     fn store_key(&mut self, location: Location, secrecy: key::Secrecy, kind: key::Kind, material: &[u8]) -> Result<KeyId> {

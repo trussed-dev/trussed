@@ -92,7 +92,7 @@ impl<P: Platform> ServiceResources<P> {
         let full_store = self.platform.store();
 
         // prepare keystore, bound to client_id, for cryptographic calls
-        let mut keystore: ClientKeystore<'_, P> = ClientKeystore::new(
+        let mut keystore: ClientKeystore<P> = ClientKeystore::new(
             client_id.clone(),
             self.drbg().map_err(|_| Error::EntropyMalfunction)?,
             full_store,
@@ -522,7 +522,9 @@ impl<P: Platform> ServiceResources<P> {
         }
     }
 
-    pub fn drbg(&mut self) -> Result<&mut ChaCha8Rng, Error> {
+    /// Applies a splitting aka forking construction to the inner DRBG,
+    /// returning an independent DRBG.
+    pub fn drbg(&mut self) -> Result<ChaCha8Rng, Error> {
 
         // Check if our RNG is loaded.
         if self.rng_state.is_none() {
@@ -589,8 +591,9 @@ impl<P: Platform> ServiceResources<P> {
         }
 
         // no panic - just ensured existence
-        let chacha = self.rng_state.as_mut().unwrap();
-        Ok(chacha)
+        let mut chacha = self.rng_state.as_mut().unwrap();
+
+        ChaCha8Rng::from_rng(&mut chacha).map_err(|_| Error::EntropyMalfunction)
     }
 
     pub fn fill_random_bytes(&mut self, bytes: &mut[u8]) -> Result<(), Error> {
