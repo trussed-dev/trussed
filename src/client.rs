@@ -606,6 +606,14 @@ pub trait FilesystemClient: PollClient {
         Ok(r)
     }
 
+    fn remove_dir(&mut self, location: Location, path: PathBuf)
+        -> ClientResult<'_, reply::RemoveDirAll, Self>
+    {
+        let r = self.request(request::RemoveDir { location, path } )?;
+        r.client.syscall();
+        Ok(r)
+    }
+
     fn remove_dir_all(&mut self, location: Location, path: PathBuf)
         -> ClientResult<'_, reply::RemoveDirAll, Self>
     {

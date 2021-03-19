@@ -67,6 +67,7 @@ pub trait Filestore {
     fn write(&mut self, path: &PathBuf, location: Location, data: &[u8]) -> Result<()>;
     fn exists(&mut self, path: &PathBuf, location: Location) -> bool;
     fn remove_file(&mut self, path: &PathBuf, location: Location) -> Result<()>;
+    fn remove_dir(&mut self, path: &PathBuf, location: Location) -> Result<()>;
     fn remove_dir_all(&mut self, path: &PathBuf, location: Location) -> Result<usize>;
     fn locate_file(&mut self, location: Location, underneath: Option<PathBuf>, filename: PathBuf) -> Result<Option<PathBuf>>;
 
@@ -122,6 +123,15 @@ impl<S: Store> Filestore for ClientFilestore<S> {
     }
 
     fn remove_file(&mut self, path: &PathBuf, location: Location) -> Result<()> {
+        let path = self.actual_path(path);
+
+        match store::delete(self.store, location, &path) {
+            true => Ok(()),
+            false => Err(Error::InternalError),
+        }
+    }
+
+    fn remove_dir(&mut self, path: &PathBuf, location: Location) -> Result<()> {
         let path = self.actual_path(path);
 
         match store::delete(self.store, location, &path) {
