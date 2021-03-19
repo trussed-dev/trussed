@@ -76,6 +76,7 @@ pub fn try_attest(
                 &request::DeriveKey {
                     mechanism: Mechanism::Ed255,
                     base_key: request.private_key,
+                    additional_data: None,
                     attributes: StorageAttributes { persistence: Location::Volatile },
                 },
             )?.key;
@@ -100,6 +101,7 @@ pub fn try_attest(
                 &request::DeriveKey {
                     mechanism: Mechanism::P256,
                     base_key: request.private_key,
+                    additional_data: None,
                     attributes: StorageAttributes { persistence: Location::Volatile },
                 },
             )?.key;

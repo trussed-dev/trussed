@@ -66,10 +66,13 @@ pub trait Chacha8Poly1305: CryptoClient {
 impl<S: Syscall> HmacSha1 for ClientImplementation<S> {}
 
 pub trait HmacSha1: CryptoClient {
-    fn generate_hmacsha1_key(&mut self, persistence: Location)
-        -> ClientResult<'_, reply::GenerateKey, Self>
+    fn hmacsha1_derive_key(&mut self, base_key: ObjectHandle, message: &[u8], persistence: Location)
+        -> ClientResult<'_, reply::DeriveKey, Self>
     {
-        self.generate_key(Mechanism::HmacSha1, StorageAttributes::new().set_persistence(persistence))
+        self.derive_key(
+            Mechanism::HmacSha1, base_key,
+            Some(MediumData::try_from_slice(message).map_err(|_| ClientError::DataTooLarge)?),
+            StorageAttributes::new().set_persistence(persistence))
     }
 
     fn sign_hmacsha1<'c>(&'c mut self, key: ObjectHandle, message: &[u8])
@@ -84,10 +87,13 @@ pub trait HmacSha1: CryptoClient {
 impl<S: Syscall> HmacSha256 for ClientImplementation<S> {}
 
 pub trait HmacSha256: CryptoClient {
-    fn generate_hmacsha256_key(&mut self, persistence: Location)
-        -> ClientResult<'_, reply::GenerateKey, Self>
+    fn hmacsha256_derive_key(&mut self, base_key: ObjectHandle, message: &[u8], persistence: Location)
+        -> ClientResult<'_, reply::DeriveKey, Self>
     {
-        self.generate_key(Mechanism::HmacSha256, StorageAttributes::new().set_persistence(persistence))
+        self.derive_key(
+            Mechanism::HmacSha256, base_key,
+            Some(MediumData::try_from_slice(message).map_err(|_| ClientError::DataTooLarge)?),
+            StorageAttributes::new().set_persistence(persistence))
     }
 
     fn sign_hmacsha256<'c>(&'c mut self, key: ObjectHandle, message: &[u8])
@@ -102,10 +108,13 @@ pub trait HmacSha256: CryptoClient {
 impl<S: Syscall> HmacSha512 for ClientImplementation<S> {}
 
 pub trait HmacSha512: CryptoClient {
-    fn generate_hmacsha512_key(&mut self, persistence: Location)
-        -> ClientResult<'_, reply::GenerateKey, Self>
+    fn hmacsha512_derive_key(&mut self, base_key: ObjectHandle, message: &[u8], persistence: Location)
+        -> ClientResult<'_, reply::DeriveKey, Self>
     {
-        self.generate_key(Mechanism::HmacSha512, StorageAttributes::new().set_persistence(persistence))
+        self.derive_key(
+            Mechanism::HmacSha512, base_key,
+            Some(MediumData::try_from_slice(message).map_err(|_| ClientError::DataTooLarge)?),
+            StorageAttributes::new().set_persistence(persistence))
     }
 
     fn sign_hmacsha512<'c>(&'c mut self, key: ObjectHandle, message: &[u8])
@@ -129,7 +138,7 @@ pub trait Ed255: CryptoClient {
     fn derive_ed255_public_key(&mut self, private_key: ObjectHandle, persistence: Location)
         -> ClientResult<'_, reply::DeriveKey, Self>
     {
-        self.derive_key(Mechanism::Ed255, private_key, StorageAttributes::new().set_persistence(persistence))
+        self.derive_key(Mechanism::Ed255, private_key, None, StorageAttributes::new().set_persistence(persistence))
     }
 
     fn deserialize_ed255_key<'c>(&'c mut self, serialized_key: &[u8], format: KeySerialization, attributes: StorageAttributes)
@@ -170,7 +179,7 @@ pub trait P256: CryptoClient {
     fn derive_p256_public_key(&mut self, private_key: ObjectHandle, persistence: Location)
         -> ClientResult<'_, reply::DeriveKey, Self>
     {
-        self.derive_key(Mechanism::P256, private_key, StorageAttributes::new().set_persistence(persistence))
+        self.derive_key(Mechanism::P256, private_key, None, StorageAttributes::new().set_persistence(persistence))
     }
 
     fn deserialize_p256_key<'c>(&'c mut self, serialized_key: &[u8], format: KeySerialization, attributes: StorageAttributes)
@@ -219,6 +228,12 @@ pub trait P256: CryptoClient {
 impl<S: Syscall> Sha256 for ClientImplementation<S> {}
 
 pub trait Sha256: CryptoClient {
+    fn sha256_derive_key(&mut self, shared_key: ObjectHandle, persistence: Location)
+        -> ClientResult<'_, reply::DeriveKey, Self>
+    {
+        self.derive_key(Mechanism::Sha256, shared_key, None, StorageAttributes::new().set_persistence(persistence))
+    }
+
     fn hash_sha256<'c>(&'c mut self, message: &[u8])
         -> ClientResult<'c, reply::Hash, Self>
     {
@@ -270,7 +285,7 @@ pub trait X255: CryptoClient {
     fn derive_x255_public_key(&mut self, secret_key: ObjectHandle, persistence: Location)
         -> ClientResult<'_, reply::DeriveKey, Self>
     {
-        self.derive_key(Mechanism::X255, secret_key, StorageAttributes::new().set_persistence(persistence))
+        self.derive_key(Mechanism::X255, secret_key, None, StorageAttributes::new().set_persistence(persistence))
     }
 
     fn agree_x255(&mut self, private_key: ObjectHandle, public_key: ObjectHandle, persistence: Location)
