@@ -510,6 +510,19 @@ pub fn remove_dir(store: impl Store, location: Location, path: &Path) -> bool {
     outcome.is_ok()
 }
 
+pub fn remove_dir_all_where<P>(store: impl Store, location: Location, path: &Path, predicate: P) -> Result<usize, Error>
+where
+    P: Fn(&DirEntry) -> bool,
+{
+    debug_now!("remove_dir'ing {}", &path);
+    let outcome = match location {
+        Location::Internal => store.ifs().remove_dir_all_where(path, &predicate),
+        Location::External => store.efs().remove_dir_all_where(path, &predicate),
+        Location::Volatile => store.vfs().remove_dir_all_where(path, &predicate),
+    };
+    outcome.map_err(|_| Error::FilesystemWriteFailure)
+}
+
 // pub fn delete_volatile(store: impl Store, handle: &ObjectHandle) -> bool {
 //     let secrecies = [
 //         Secrecy::Secret,

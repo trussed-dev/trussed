@@ -33,6 +33,7 @@ generate_enums! {
     DeserializeKey: 5
     Encrypt: 6
     Delete: 7
+    DeleteAllKeys: 25
     Exists: 8
     // DeriveKeypair: 3
     FindObjects: 9
@@ -69,8 +70,7 @@ generate_enums! {
     // // ReadDirFilesNext: 24 // <-- returns contents
     // ReadFile: 25
     RemoveFile: 33
-    RemoveDir: 34 //   <-- what for
-    // RemoveDirAll: 28
+    RemoveDirAll: 34
     // WriteFile: 29
     LocateFile: 35
 
@@ -137,6 +137,9 @@ pub mod request {
 
         Delete:
           - key: ObjectHandle
+
+        DeleteAllKeys:
+          - location: Location
 
         // DeleteBlob:
         //   - prefix: Option<Letters>
@@ -232,7 +235,7 @@ pub mod request {
           - location: Location
           - path: PathBuf
 
-        RemoveDir:
+        RemoveDirAll:
           - location: Location
           - path: PathBuf
 
@@ -350,6 +353,9 @@ pub mod reply {
         Delete:
             - success: bool
 
+        DeleteAllKeys:
+            - count: usize
+
         DeriveKey:
             - key: ObjectHandle
 
@@ -399,7 +405,8 @@ pub mod reply {
         ReadFile:
           - data: Message
 
-        RemoveDir:
+        RemoveDirAll:
+          - count: usize
 
         RemoveFile:
 

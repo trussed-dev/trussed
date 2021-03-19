@@ -199,6 +199,11 @@ impl<P: Platform> ServiceResources<P> {
                 Ok(Reply::Delete(reply::Delete { success } ))
             },
 
+            Request::DeleteAllKeys(request) => {
+                let count = keystore.delete_all(request.location)?;
+                Ok(Reply::DeleteAllKeys(reply::DeleteAllKeys { count } ))
+            },
+
             Request::Exists(request) => {
                 match request.mechanism {
 
@@ -363,9 +368,9 @@ impl<P: Platform> ServiceResources<P> {
                 Ok(Reply::ReadDirFilesNext(reply::ReadDirFilesNext { data: maybe_data } ))
             }
 
-            Request::RemoveDir(request) => {
-                filestore.remove_dir(&request.path, request.location)?;
-                Ok(Reply::RemoveDir(reply::RemoveDir {} ))
+            Request::RemoveDirAll(request) => {
+                let count = filestore.remove_dir_all(&request.path, request.location)?;
+                Ok(Reply::RemoveDirAll(reply::RemoveDirAll { count } ))
             }
 
             Request::RemoveFile(request) => {

@@ -326,6 +326,15 @@ pub trait CryptoClient: PollClient {
         Ok(r)
     }
 
+    /// Skips deleting read-only / manufacture keys (currently, "low ID").
+    fn delete_all(&mut self, location: Location)
+        -> ClientResult<'_, reply::DeleteAllKeys, Self>
+    {
+        let r = self.request(request::DeleteAllKeys { location })?;
+        r.client.syscall();
+        Ok(r)
+    }
+
     fn derive_key(&mut self, mechanism: Mechanism, base_key: ObjectHandle, additional_data: Option<MediumData>, attributes: StorageAttributes)
         -> ClientResult<'_, reply::DeriveKey, Self>
     {
@@ -597,10 +606,10 @@ pub trait FilesystemClient: PollClient {
         Ok(r)
     }
 
-    fn remove_dir(&mut self, location: Location, path: PathBuf)
-        -> ClientResult<'_, reply::RemoveFile, Self>
+    fn remove_dir_all(&mut self, location: Location, path: PathBuf)
+        -> ClientResult<'_, reply::RemoveDirAll, Self>
     {
-        let r = self.request(request::RemoveDir { location, path } )?;
+        let r = self.request(request::RemoveDirAll { location, path } )?;
         r.client.syscall();
         Ok(r)
     }
