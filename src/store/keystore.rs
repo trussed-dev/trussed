@@ -59,16 +59,18 @@ impl<P: Platform> ClientKeystore<P> {
         crate::types::UniqueId(id)
     }
 
-    pub fn key_path(&self, secrecy: key::Secrecy, id: &KeyId) -> PathBuf {
+    pub fn key_directory(&self, secrecy: key::Secrecy) -> PathBuf {
         let mut path = PathBuf::new();
         path.push(&self.client_id);
-        // TODO: huh?!?!
-        // If I change these prefixes to shorter,
-        // DebugDumpStore skips the directory contents
         path.push(&match secrecy {
             key::Secrecy::Secret => PathBuf::from("sec"),
             key::Secrecy::Public => PathBuf::from("pub"),
         });
+        path
+    }
+
+    pub fn key_path(&self, secrecy: key::Secrecy, id: &KeyId) -> PathBuf {
+        let mut path = self.key_directory(secrecy);
         path.push(&PathBuf::from(id.hex().as_ref()));
         path
     }
@@ -134,7 +136,12 @@ impl<P: Platform> Keystore for ClientKeystore<P> {
     /// TODO: This uses the predicate "filename.len() >= 4"
     /// Be more principled :)
     fn delete_all(&self, location: Location) -> Result<usize> {
-        store::remove_dir_all_where(self.store, location, &PathBuf::new(), |dir_entry| {
+        let path = self.key_directory(key::Secrecy::Secret);
+        store::remove_dir_all_where(self.store, location, &path, |dir_entry| {
+            dir_entry.file_name().as_ref().len() >= 4
+        })?;
+        let path = self.key_directory(key::Secrecy::Public);
+        store::remove_dir_all_where(self.store, location, &path, |dir_entry| {
             dir_entry.file_name().as_ref().len() >= 4
         })
     }

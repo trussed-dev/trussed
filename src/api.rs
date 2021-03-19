@@ -70,6 +70,7 @@ generate_enums! {
     // // ReadDirFilesNext: 24 // <-- returns contents
     // ReadFile: 25
     RemoveFile: 33
+    RemoveDir: 36
     RemoveDirAll: 34
     // WriteFile: 29
     LocateFile: 35
@@ -232,6 +233,10 @@ pub mod request {
           - path: PathBuf
 
         RemoveFile:
+          - location: Location
+          - path: PathBuf
+
+        RemoveDir:
           - location: Location
           - path: PathBuf
 
@@ -404,6 +409,8 @@ pub mod reply {
 
         ReadFile:
           - data: Message
+
+        RemoveDir:
 
         RemoveDirAll:
           - count: usize
