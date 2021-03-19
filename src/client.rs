@@ -326,12 +326,13 @@ pub trait CryptoClient: PollClient {
         Ok(r)
     }
 
-    fn derive_key(&mut self, mechanism: Mechanism, base_key: ObjectHandle, attributes: StorageAttributes)
+    fn derive_key(&mut self, mechanism: Mechanism, base_key: ObjectHandle, additional_data: Option<MediumData>, attributes: StorageAttributes)
         -> ClientResult<'_, reply::DeriveKey, Self>
     {
         let r = self.request(request::DeriveKey {
             mechanism,
             base_key,
+            additional_data,
             attributes,
         })?;
         r.client.syscall();
@@ -378,6 +379,17 @@ pub trait CryptoClient: PollClient {
         let r = self.request(request::GenerateKey {
             mechanism,
             attributes,
+        })?;
+        r.client.syscall();
+        Ok(r)
+    }
+
+    fn generate_secret_key(&mut self, size: usize, persistence: Location)
+        -> ClientResult<'_, reply::GenerateSecretKey, Self>
+    {
+        let r = self.request(request::GenerateSecretKey {
+            size,
+            attributes: StorageAttributes::new().set_persistence(persistence),
         })?;
         r.client.syscall();
         Ok(r)

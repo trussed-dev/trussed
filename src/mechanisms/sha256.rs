@@ -1,7 +1,4 @@
-use core::convert::TryInto;
-
 use crate::api::*;
-// use crate::config::*;
 use crate::error::Error;
 use crate::service::*;
 use crate::types::*;
@@ -15,11 +12,9 @@ impl DeriveKey for super::Sha256
     {
         let base_id = &request.base_key.object_id;
 
-        let shared_secret: [u8; 32] = keystore
-            .load_key(key::Secrecy::Secret, Some(key::Kind::Shared(32)), base_id)?
-            .material.as_ref()
-            .try_into()
-            .map_err(|_| Error::InternalError)?;
+        let shared_secret = keystore
+            .load_key(key::Secrecy::Secret, None, base_id)?
+            .material;
 
         // hash it
         use sha2::digest::Digest;
@@ -31,7 +26,6 @@ impl DeriveKey for super::Sha256
             request.attributes.persistence,
             key::Secrecy::Secret, key::Kind::Symmetric(32),
             &symmetric_key)?;
-            // keystore.generate_unique_id()?;
 
         Ok(reply::DeriveKey {
             key: ObjectHandle { object_id: key_id },
@@ -57,9 +51,7 @@ impl Hash for super::Sha256
     }
 }
 
-// impl // Agree for super::P256 {}
 #[cfg(not(feature = "sha256"))]
 impl DeriveKey for super::Sha256 {}
-// impl // GenerateKey for super::P256 {}
-// impl // Sign for super::P256 {}
-// impl // Verify for super::P256 {}
+#[cfg(not(feature = "sha256"))]
+impl Hash for super::Sha256 {}

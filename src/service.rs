@@ -160,6 +160,9 @@ impl<P: Platform> ServiceResources<P> {
             Request::DeriveKey(request) => {
                 match request.mechanism {
 
+                    Mechanism::HmacSha1 => mechanisms::HmacSha256::derive_key(keystore, request),
+                    Mechanism::HmacSha256 => mechanisms::HmacSha256::derive_key(keystore, request),
+                    Mechanism::HmacSha512 => mechanisms::HmacSha256::derive_key(keystore, request),
                     Mechanism::Ed255 => mechanisms::Ed255::derive_key(keystore, request),
                     Mechanism::P256 => mechanisms::P256::derive_key(keystore, request),
                     Mechanism::Sha256 => mechanisms::Sha256::derive_key(keystore, request),
@@ -212,9 +215,6 @@ impl<P: Platform> ServiceResources<P> {
                 match request.mechanism {
                     Mechanism::Chacha8Poly1305 => mechanisms::Chacha8Poly1305::generate_key(keystore, request),
                     Mechanism::Ed255 => mechanisms::Ed255::generate_key(keystore, request),
-                    Mechanism::HmacSha1 => mechanisms::HmacSha1::generate_key(keystore, request),
-                    Mechanism::HmacSha256 => mechanisms::HmacSha256::generate_key(keystore, request),
-                    Mechanism::HmacSha512 => mechanisms::HmacSha512::generate_key(keystore, request),
                     Mechanism::P256 => mechanisms::P256::generate_key(keystore, request),
                     Mechanism::X255 => mechanisms::X255::generate_key(keystore, request),
                     _ => Err(Error::MechanismNotAvailable),

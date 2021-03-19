@@ -29,30 +29,31 @@ generate_enums! {
     CreateObject: 2
     // TODO: why do Decrypt and DeriveKey both have discriminant 3?!
     Decrypt: 3
-    DeriveKey: 3
-    DeserializeKey: 4
-    Encrypt: 5
-    Delete: 18
-    Exists: 16
+    DeriveKey: 4
+    DeserializeKey: 5
+    Encrypt: 6
+    Delete: 7
+    Exists: 8
     // DeriveKeypair: 3
-    FindObjects: 6
-    GenerateKey: 7
+    FindObjects: 9
+    GenerateKey: 10
+    GenerateSecretKey: 11
     // GenerateKeypair: 6
-    Hash: 8
+    Hash: 12
     // TODO: add ReadDir{First,Next}, not loading data, if needed for efficiency
-    ReadDirFilesFirst: 19
-    ReadDirFilesNext: 20
-    ReadFile: 9
+    ReadDirFilesFirst: 13
+    ReadDirFilesNext: 14
+    ReadFile: 15
     // ReadCounter: 7
-    RandomBytes: 17
-    SerializeKey: 10
-    Sign: 11
-    WriteFile: 12
-    UnsafeInjectKey: 31
-    UnsafeInjectSharedKey: 32
-    UnwrapKey: 13
-    Verify: 14
-    WrapKey: 15
+    RandomBytes: 16
+    SerializeKey: 17
+    Sign: 18
+    WriteFile: 19
+    UnsafeInjectKey: 20
+    UnsafeInjectSharedKey: 21
+    UnwrapKey: 22
+    Verify: 23
+    WrapKey: 24
 
     Attest: 0xFF
 
@@ -61,40 +62,40 @@ generate_enums! {
     /////////////
 
     // // CreateDir,    <-- implied by WriteFile
-    ReadDirFirst: 21 //      <-- gets Option<FileType> to restrict to just dir/file DirEntries,
-    ReadDirNext: 22 //      <-- gets Option<FileType> to restrict to just dir/file DirEntries,
+    ReadDirFirst: 31 //      <-- gets Option<FileType> to restrict to just dir/file DirEntries,
+    ReadDirNext: 32 //      <-- gets Option<FileType> to restrict to just dir/file DirEntries,
     //                   // returns simplified Metadata
     // // ReadDirFilesFirst: 23 // <-- returns contents
     // // ReadDirFilesNext: 24 // <-- returns contents
     // ReadFile: 25
-    RemoveFile: 26
-    RemoveDir: 27 //   <-- what for
+    RemoveFile: 33
+    RemoveDir: 34 //   <-- what for
     // RemoveDirAll: 28
     // WriteFile: 29
-    LocateFile: 30
+    LocateFile: 35
 
     ////////
     // UI //
     ////////
 
-    RequestUserConsent: 33
-    Reboot: 34
-    Uptime: 35
+    RequestUserConsent: 41
+    Reboot: 42
+    Uptime: 43
 
     //////////////
     // Counters //
     //////////////
 
-    CreateCounter: 40
-    IncrementCounter: 41
+    CreateCounter: 50
+    IncrementCounter: 51
 
     //////////////////
     // Certificates //
     //////////////////
 
-    DeleteCertificate: 40
-    ReadCertificate: 41
-    WriteCertificate: 42
+    DeleteCertificate: 60
+    ReadCertificate: 61
+    WriteCertificate: 62
 
     ///////////
     // Other //
@@ -149,7 +150,7 @@ pub mod request {
             - mechanism: Mechanism
             - base_key: ObjectHandle
             // - auxiliary_key: Option<ObjectHandle>
-            // - additional_data: LongData
+            - additional_data: Option<MediumData>
             // - attributes: KeyAttributes
             - attributes: StorageAttributes
 
@@ -181,6 +182,11 @@ pub mod request {
 
         GenerateKey:
             - mechanism: Mechanism        // -> implies key type
+            // - attributes: KeyAttributes
+            - attributes: StorageAttributes
+
+        GenerateSecretKey:
+            - size: usize        // -> implies key type
             // - attributes: KeyAttributes
             - attributes: StorageAttributes
 
@@ -363,6 +369,9 @@ pub mod reply {
             - exists: bool
 
         GenerateKey:
+            - key: ObjectHandle
+
+        GenerateSecretKey:
             - key: ObjectHandle
 
         // GenerateKeypair:
