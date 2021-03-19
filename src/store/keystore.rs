@@ -43,6 +43,7 @@ pub trait Keystore {
     /// Return Header of key, if it exists
     fn key_info(&self, secrecy: key::Secrecy, id: &KeyId) -> Option<key::Info>;
     fn delete_key(&self, id: &KeyId) -> bool;
+    fn delete_all(&self, location: Location) -> Result<usize>;
     fn load_key(&self, secrecy: key::Secrecy, kind: Option<key::Kind>, id: &KeyId) -> Result<key::Key>;
     fn overwrite_key(&self, location: Location, secrecy: key::Secrecy, kind: key::Kind, id: &KeyId, material: &[u8]) -> Result<()>;
     fn drbg(&mut self) -> &mut ChaCha8Rng;
@@ -127,6 +128,14 @@ impl<P: Platform> Keystore for ClientKeystore<P> {
             locations.iter().any(|location| {
                 store::delete(self.store, *location, &path)
             })
+        })
+    }
+
+    /// TODO: This uses the predicate "filename.len() >= 4"
+    /// Be more principled :)
+    fn delete_all(&self, location: Location) -> Result<usize> {
+        store::remove_dir_all_where(self.store, location, &PathBuf::new(), |dir_entry| {
+            dir_entry.file_name().as_ref().len() >= 4
         })
     }
 
