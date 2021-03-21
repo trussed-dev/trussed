@@ -226,6 +226,20 @@ impl<P: Platform> ServiceResources<P> {
                 }.map(Reply::GenerateKey)
             },
 
+            Request::GenerateSecretKey(request) => {
+                let mut secret_key = MediumData::new();
+                let size = request.size;
+                secret_key.resize_default(request.size).map_err(|_| Error::ImplementationError)?;
+                keystore.drbg().fill_bytes(&mut secret_key[..size]);
+                let key_id = keystore.store_key(
+                    request.attributes.persistence,
+                    key::Secrecy::Secret,
+                    key::Kind::Symmetric(size),
+                    &secret_key[..size],
+                )?;
+                Ok(Reply::GenerateSecretKey(reply::GenerateSecretKey { key: ObjectHandle { object_id: key_id } }))
+            },
+
             Request::UnsafeInjectKey(request) => {
                 match request.mechanism {
                     _ => Err(Error::MechanismNotAvailable),
