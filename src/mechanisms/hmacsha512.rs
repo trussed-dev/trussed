@@ -1,5 +1,3 @@
-use core::convert::TryInto;
-
 use crate::api::*;
 use crate::error::Error;
 use crate::service::*;
@@ -13,7 +11,7 @@ impl DeriveKey for super::HmacSha512
         -> Result<reply::DeriveKey, Error>
     {
         use hmac::{Hmac, Mac, NewMac};
-        type HmacSha256 = Hmac<sha2::Sha512>;
+        type HmacSha512 = Hmac<sha2::Sha512>;
 
         let key_id = request.base_key.object_id;
         let shared_secret = keystore.load_key(key::Secrecy::Secret, None, &key_id)?.material;
@@ -24,10 +22,11 @@ impl DeriveKey for super::HmacSha512
         if let Some(additional_data) = &request.additional_data {
             mac.update(&additional_data);
         }
-        let derived_key: [u8; 32] = mac.finalize().into_bytes().try_into().map_err(|_| Error::InternalError)?;
+        let mut derived_key = [0u8; 64];
+        derived_key.copy_from_slice(&mac.finalize().into_bytes());//.try_into().map_err(|_| Error::InternalError)?;
         let key_id = keystore.store_key(
             request.attributes.persistence,
-            key::Secrecy::Secret, key::Kind::Symmetric(32),
+            key::Secrecy::Secret, key::Kind::Symmetric(64),
             &derived_key)?;
 
         Ok(reply::DeriveKey { key: ObjectHandle { object_id: key_id } })
