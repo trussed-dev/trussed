@@ -252,11 +252,11 @@ impl Sign for super::P256
         let serialized_signature = match request.format {
             SignatureSerialization::Asn1Der => {
                 let mut buffer = [0u8; 72];
-                let l = signature.to_der(&mut buffer);
+                let l = signature.to_sec1_bytes(&mut buffer);
                 Signature::try_from_slice(&buffer[..l]).unwrap()
             }
             SignatureSerialization::Raw => {
-                Signature::try_from_slice(&signature.to_bytes()).unwrap()
+                Signature::try_from_slice(&signature.to_untagged_bytes()).unwrap()
             }
         };
 
@@ -282,11 +282,11 @@ impl Sign for super::P256Prehashed
         let serialized_signature = match request.format {
             SignatureSerialization::Asn1Der => {
                 let mut buffer = [0u8; 72];
-                let l = signature.to_der(&mut buffer);
+                let l = signature.to_sec1_bytes(&mut buffer);
                 Signature::try_from_slice(&buffer[..l]).unwrap()
             }
             SignatureSerialization::Raw => {
-                Signature::try_from_slice(&signature.to_bytes()).unwrap()
+                Signature::try_from_slice(&signature.to_untagged_bytes()).unwrap()
             }
         };
 
@@ -307,7 +307,7 @@ impl Verify for super::P256
 
         let public_key = load_public_key(keystore, &key_id)?;
 
-        let signature = p256_cortex_m4::Signature::try_from_bytes(&request.signature)
+        let signature = p256_cortex_m4::Signature::from_untagged_bytes(&request.signature)
             // well... or wrong encoding, need r,s in range 1..=n-1
             .map_err(|_| Error::WrongSignatureLength)?;
 
