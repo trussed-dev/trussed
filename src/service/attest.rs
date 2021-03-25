@@ -52,7 +52,7 @@ pub fn try_attest(
     enum KeyAlgorithm {
         Ed255,
         P256,
-    };
+    }
 
     let key_algorithm = match keystore.key_info(key::Secrecy::Secret, &request.private_key.object_id) {
         None => return Err(Error::NoSuchKey),
