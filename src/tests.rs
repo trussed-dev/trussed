@@ -332,7 +332,7 @@ fn agree_p256() {
         assert_ne!(&shared_secret, &alt_shared_secret);
 
         let symmetric_key = block!(
-            client.derive_key(Mechanism::Sha256, shared_secret.clone(),
+            client.derive_key(Mechanism::Sha256, shared_secret.clone(), None,
                               StorageAttributes::new().set_persistence(Location::Volatile))
                 .expect("no client error"))
             .expect("no errors").key;

@@ -117,7 +117,7 @@ impl<P: Platform> ServiceResources<P> {
 
         // prepare filestore, bound to client_id, for storage calls
         let mut filestore: ClientFilestore<P::S> = ClientFilestore::new(
-            client_id.clone(),
+            client_id,
             full_store,
         );
         let filestore = &mut filestore;
@@ -240,10 +240,9 @@ impl<P: Platform> ServiceResources<P> {
                 Ok(Reply::GenerateSecretKey(reply::GenerateSecretKey { key: ObjectHandle { object_id: key_id } }))
             },
 
-            Request::UnsafeInjectKey(request) => {
-                match request.mechanism {
-                    _ => Err(Error::MechanismNotAvailable),
-                }.map(Reply::UnsafeInjectKey)
+            // deprecated
+            Request::UnsafeInjectKey(_request) => {
+                Err(Error::MechanismNotAvailable)
             },
 
             Request::UnsafeInjectSharedKey(request) => {

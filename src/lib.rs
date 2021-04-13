@@ -41,8 +41,8 @@ pub use cbor_smol::{cbor_serialize, cbor_serialize_bytes, cbor_deserialize};
 pub use heapless_bytes::{ArrayLength, Bytes, consts};
 pub use postcard::{from_bytes as postcard_deserialize, to_slice as postcard_serialize};
 
-pub fn postcard_serialize_bytes<'a, 'b, N: ArrayLength<u8>, T: serde::Serialize>(
-    object: &'a T,
+pub fn postcard_serialize_bytes<N: ArrayLength<u8>, T: serde::Serialize>(
+    object: &T,
 ) -> postcard::Result<Bytes<N>> {
     let vec = postcard::to_vec(object)?;
     Ok(Bytes::from(vec))
