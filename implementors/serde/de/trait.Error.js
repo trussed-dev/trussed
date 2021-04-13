@@ -1,6 +1,6 @@
 (function() {var implementors = {};
-implementors["cbor_smol"] = [{"text":"impl Error for Error","synthetic":false,"types":[]}];
-implementors["postcard"] = [{"text":"impl Error for Error","synthetic":false,"types":[]}];
+implementors["cbor_smol"] = [{"text":"impl <a class=\"trait\" href=\"serde/de/trait.Error.html\" title=\"trait serde::de::Error\">Error</a> for <a class=\"enum\" href=\"cbor_smol/error/enum.Error.html\" title=\"enum cbor_smol::error::Error\">Error</a>","synthetic":false,"types":["cbor_smol::error::Error"]}];
+implementors["postcard"] = [{"text":"impl <a class=\"trait\" href=\"serde/de/trait.Error.html\" title=\"trait serde::de::Error\">Error</a> for <a class=\"enum\" href=\"postcard/enum.Error.html\" title=\"enum postcard::Error\">Error</a>","synthetic":false,"types":["postcard::error::Error"]}];
 implementors["serde"] = [];
-implementors["serde_cbor"] = [{"text":"impl Error for Error","synthetic":false,"types":[]}];
+implementors["serde_cbor"] = [{"text":"impl <a class=\"trait\" href=\"serde/de/trait.Error.html\" title=\"trait serde::de::Error\">Error</a> for <a class=\"struct\" href=\"serde_cbor/struct.Error.html\" title=\"struct serde_cbor::Error\">Error</a>","synthetic":false,"types":["serde_cbor::error::Error"]}];
 if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

@@ -144,6 +144,7 @@
 <span id="141">141</span>
 <span id="142">142</span>
 <span id="143">143</span>
+<span id="144">144</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="ident">core</span>::{
     <span class="ident">convert</span>::<span class="ident">TryInto</span>,
@@ -201,7 +202,7 @@
     }
 
     <span class="kw">fn</span> <span class="ident">increment_location</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">location</span>: <span class="ident">Location</span>, <span class="ident">id</span>: <span class="ident">Id</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Counter</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">prev_counter</span>: <span class="ident">u128</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">read_counter</span>(<span class="ident">location</span>, <span class="ident">id</span>.<span class="number">0</span>)<span class="question-mark">?</span>.<span class="ident">into</span>();
+        <span class="kw">let</span> <span class="ident">prev_counter</span>: <span class="ident">u128</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">read_counter</span>(<span class="ident">location</span>, <span class="ident">id</span>.<span class="number">0</span>)<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">counter</span> <span class="op">=</span> <span class="ident">prev_counter</span> <span class="op">+</span> <span class="number">1</span>;
         <span class="self">self</span>.<span class="ident">write_counter</span>(<span class="ident">location</span>, <span class="ident">id</span>.<span class="number">0</span>, <span class="ident">counter</span>)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="ident">counter</span>)
@@ -210,9 +211,10 @@
 
 <span class="doccomment">/// Trait intended for use by mechanism implementations.</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Counterstore</span> {
+    <span class="kw">const</span> <span class="ident">DEFAULT_START_AT</span>: <span class="ident">u128</span> <span class="op">=</span> <span class="number">256</span>;
     <span class="kw">fn</span> <span class="ident">create_starting_at</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">location</span>: <span class="ident">Location</span>, <span class="ident">starting_at</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Counter</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Id</span><span class="op">&gt;</span>;
     <span class="kw">fn</span> <span class="ident">create</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">location</span>: <span class="ident">Location</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Id</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">create_starting_at</span>(<span class="ident">location</span>, <span class="number">0u128</span>)
+        <span class="self">self</span>.<span class="ident">create_starting_at</span>(<span class="ident">location</span>, <span class="self">Self</span>::<span class="ident">DEFAULT_START_AT</span>)
     }
     <span class="kw">fn</span> <span class="ident">increment</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">id</span>: <span class="ident">Id</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">u128</span><span class="op">&gt;</span>;
     <span class="kw">fn</span> <span class="ident">increment_counter_zero</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u128</span>;
@@ -221,7 +223,7 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Store</span><span class="op">&gt;</span> <span class="ident">Counterstore</span> <span class="kw">for</span> <span class="ident">ClientCounterstore</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span> {
     <span class="kw">fn</span> <span class="ident">create_starting_at</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">location</span>: <span class="ident">Location</span>, <span class="ident">starting_at</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Counter</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Id</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">next_id</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">increment_counter_zero</span>();
-        <span class="self">self</span>.<span class="ident">write_counter</span>(<span class="ident">location</span>, <span class="ident">next_id</span>, <span class="ident">u128</span>::<span class="ident">from</span>(<span class="ident">starting_at</span>.<span class="ident">into</span>()))<span class="question-mark">?</span>;
+        <span class="self">self</span>.<span class="ident">write_counter</span>(<span class="ident">location</span>, <span class="ident">next_id</span>, <span class="ident">starting_at</span>.<span class="ident">into</span>())<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="ident">Id</span>(<span class="ident">next_id</span>))
     }
 
@@ -289,4 +291,5 @@
 <span class="comment">// }</span>
 
 </pre></div>
-</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../../";window.currentCrate = "trussed";</script><script src="../../../main.js"></script><script src="../../../source-script.js"></script><script src="../../../source-files.js"></script><script defer src="../../../search-index.js"></script></body></html>
+</section><section id="search" class="content hidden"></section><section class="footer"></section><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="trussed"></div>
+    <script src="../../../main.js"></script><script src="../../../source-script.js"></script><script src="../../../source-files.js"></script><script defer src="../../../search-index.js"></script></body></html>

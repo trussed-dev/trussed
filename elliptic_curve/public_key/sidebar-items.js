@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["PublicKey","Elliptic curve public keys."]]});

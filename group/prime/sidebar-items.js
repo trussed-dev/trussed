@@ -1,0 +1,1 @@
+initSidebarItems({"trait":[["PrimeCurve","Efficient representation of an elliptic curve point guaranteed to be in the correct prime order subgroup."],["PrimeCurveAffine","Affine representation of an elliptic curve point guaranteed to be in the correct prime order subgroup."],["PrimeGroup","This trait represents an element of a prime-order cryptographic group."]]});

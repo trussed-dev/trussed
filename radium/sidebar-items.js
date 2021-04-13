@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["marker","Marker traits used by [`Radium`]."]],"trait":[["Radium","A maybe-atomic shared mutable fundamental type `T`."]]});

@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["Kind",""],["Secrecy","A key can either be public, of secret."]],"struct":[["Bytes",""],["Flags","All non-used bits are RFU."],["Key","A key object in Trussed."]],"type":[["Material",""],["SerializedKeyBytes",""]]});
+initSidebarItems({"enum":[["Kind",""],["Secrecy","A key can either be public, of secret."]],"struct":[["Bytes",""],["Flags","All non-used bits are RFU."],["Info",""],["Key","A key object in Trussed."]],"type":[["Material",""],["SerializedKeyBytes",""]]});

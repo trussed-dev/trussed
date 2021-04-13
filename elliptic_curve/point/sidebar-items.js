@@ -1,0 +1,1 @@
+initSidebarItems({"trait":[["ProjectiveArithmetic","Elliptic curve with projective arithmetic implementation."]],"type":[["AffinePoint","Affine point type for a given curve with a [`ProjectiveArithmetic`] implementation."],["ProjectivePoint","Projective point type for a given curve with a [`ProjectiveArithmetic`] implementation."]]});

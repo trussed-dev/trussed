@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["NonZeroScalar","Non-zero scalar type."]],"type":[["Scalar","Scalar field element for a particular elliptic curve."],["ScalarBits","Bit representation of a scalar field element of a given curve."]]});

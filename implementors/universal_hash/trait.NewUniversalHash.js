@@ -1,3 +1,3 @@
 (function() {var implementors = {};
-implementors["poly1305"] = [{"text":"impl NewUniversalHash for Poly1305","synthetic":false,"types":[]}];
+implementors["poly1305"] = [{"text":"impl <a class=\"trait\" href=\"universal_hash/trait.NewUniversalHash.html\" title=\"trait universal_hash::NewUniversalHash\">NewUniversalHash</a> for <a class=\"struct\" href=\"poly1305/struct.Poly1305.html\" title=\"struct poly1305::Poly1305\">Poly1305</a>","synthetic":false,"types":["poly1305::Poly1305"]}];
 if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["p256"] = [{"text":"impl <a class=\"trait\" href=\"ff/trait.PrimeField.html\" title=\"trait ff::PrimeField\">PrimeField</a> for <a class=\"struct\" href=\"p256/struct.Scalar.html\" title=\"struct p256::Scalar\">Scalar</a>","synthetic":false,"types":["p256::arithmetic::scalar::Scalar"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

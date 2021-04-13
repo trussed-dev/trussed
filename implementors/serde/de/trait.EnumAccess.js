@@ -1,5 +1,5 @@
 (function() {var implementors = {};
-implementors["cbor_smol"] = [{"text":"impl&lt;'de, 'a&gt; EnumAccess&lt;'de&gt; for &amp;'a mut Deserializer&lt;'de&gt;","synthetic":false,"types":[]}];
-implementors["postcard"] = [{"text":"impl&lt;'de, 'a&gt; EnumAccess&lt;'de&gt; for &amp;'a mut Deserializer&lt;'de&gt;","synthetic":false,"types":[]}];
+implementors["cbor_smol"] = [{"text":"impl&lt;'de, 'a&gt; <a class=\"trait\" href=\"serde/de/trait.EnumAccess.html\" title=\"trait serde::de::EnumAccess\">EnumAccess</a>&lt;'de&gt; for &amp;'a mut <a class=\"struct\" href=\"cbor_smol/de/struct.Deserializer.html\" title=\"struct cbor_smol::de::Deserializer\">Deserializer</a>&lt;'de&gt;","synthetic":false,"types":["cbor_smol::de::Deserializer"]}];
+implementors["postcard"] = [{"text":"impl&lt;'de, 'a&gt; <a class=\"trait\" href=\"serde/de/trait.EnumAccess.html\" title=\"trait serde::de::EnumAccess\">EnumAccess</a>&lt;'de&gt; for &amp;'a mut <a class=\"struct\" href=\"postcard/struct.Deserializer.html\" title=\"struct postcard::Deserializer\">Deserializer</a>&lt;'de&gt;","synthetic":false,"types":["postcard::de::deserializer::Deserializer"]}];
 implementors["serde"] = [];
 if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

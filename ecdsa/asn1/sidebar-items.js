@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Signature","ASN.1 DER-encoded signature."]],"type":[["MaxOverhead","Maximum overhead of an ASN.1 DER-encoded ECDSA signature for a given curve: 9-bytes."],["MaxSize","Maximum size of an ASN.1 DER encoded signature for the given elliptic curve."]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Error","Signature errors."]],"type":[["Asn1Signature","ECDSA/P-256 signature (ASN.1 DER encoded)"],["Signature","ECDSA/P-256 signature (fixed-size)"],["SigningKey","ECDSA/P-256 signing key"],["VerifyingKey","ECDSA/P-256 verification key (i.e. public key)"]]});

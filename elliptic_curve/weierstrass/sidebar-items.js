@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["point","Traits for Weierstrass elliptic curve points"]],"trait":[["Curve","Marker trait for elliptic curves in short Weierstrass form"]]});
