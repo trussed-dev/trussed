@@ -32,6 +32,12 @@ pub struct Id(pub(crate) u128);
 
 impl Eq for Id {}
 
+impl From<SpecialId> for Id {
+    fn from(special_id: u8) -> Self {
+        Self(special_id as _)
+    }
+}
+
 pub mod ui {
     use super::*;
 

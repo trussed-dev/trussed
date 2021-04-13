@@ -63,9 +63,10 @@ impl<S: Store> ClientCounterstore<S> {
 
 /// Trait intended for use by mechanism implementations.
 pub trait Counterstore {
+    const DEFAULT_START_AT: u128 = 256;
     fn create_starting_at(&mut self, location: Location, starting_at: impl Into<Counter>) -> Result<Id>;
     fn create(&mut self, location: Location) -> Result<Id> {
-        self.create_starting_at(location, 0u128)
+        self.create_starting_at(location, Self::DEFAULT_START_AT)
     }
     fn increment(&mut self, id: Id) -> Result<u128>;
     fn increment_counter_zero(&mut self) -> u128;
