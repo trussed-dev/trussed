@@ -54,7 +54,7 @@ impl<S: Store> ClientCounterstore<S> {
     }
 
     fn increment_location(&mut self, location: Location, id: Id) -> Result<Counter> {
-        let prev_counter: u128 = self.read_counter(location, id.0)?.into();
+        let prev_counter: u128 = self.read_counter(location, id.0)?;
         let counter = prev_counter + 1;
         self.write_counter(location, id.0, counter)?;
         Ok(counter)
@@ -74,7 +74,7 @@ pub trait Counterstore {
 impl<S: Store> Counterstore for ClientCounterstore<S> {
     fn create_starting_at(&mut self, location: Location, starting_at: impl Into<Counter>) -> Result<Id> {
         let next_id = self.increment_counter_zero();
-        self.write_counter(location, next_id, u128::from(starting_at.into()))?;
+        self.write_counter(location, next_id, starting_at.into())?;
         Ok(Id(next_id))
     }
 

@@ -1,3 +1,4 @@
+#![allow(clippy::transmute_ptr_to_ptr)]
 use interchange::Responder;
 
 use crate::api::{Request, Reply};

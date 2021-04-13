@@ -145,7 +145,7 @@ pub fn try_attest(
                 &request::Sign {
                     mechanism: Mechanism::Ed255,
                     key: ObjectHandle { object_id: ED255_ATTN_KEY },
-                    message: message.clone(),
+                    message,
                     format: SignatureSerialization::Raw,
                 },
             ).unwrap().signature;
@@ -157,7 +157,7 @@ pub fn try_attest(
                 &request::Sign {
                     mechanism: Mechanism::P256,
                     key: ObjectHandle { object_id: P256_ATTN_KEY },
-                    message: message.clone(),
+                    message,
                     format: SignatureSerialization::Asn1Der,
                 },
             ).unwrap().signature.as_ref()).unwrap())
@@ -348,10 +348,10 @@ impl TryFrom<Mechanism> for SignatureAlgorithm {
 }
 
 // 1.2.840.10045.4.3.2 ecdsaWithSHA256 (ANSI X9.62 ECDSA algorithm with SHA256))
-const P256_OID_ENCODING: &'static [u8] = &hex!("06 08  2A 86 48 CE 3D 04 03 02");
-const P256_PUB_ENCODING: &'static [u8] = &hex!("06 07 2A 86 48 CE 3D 02 01   06 08 2A 86 48 CE  3D 03 01 07");
+const P256_OID_ENCODING: &[u8] = &hex!("06 08  2A 86 48 CE 3D 04 03 02");
+const P256_PUB_ENCODING: &[u8] = &hex!("06 07 2A 86 48 CE 3D 02 01   06 08 2A 86 48 CE  3D 03 01 07");
 // 1.3.101.112 curveEd25519 (EdDSA 25519 signature algorithm)
-const ED255_OID_ENCODING: &'static [u8] = &hex!("06 03  2B 65 70");
+const ED255_OID_ENCODING: &[u8] = &hex!("06 03  2B 65 70");
 
 impl Encodable for SignatureAlgorithm {
 
@@ -464,7 +464,7 @@ pub struct ParsedDatetime {
 }
 
 impl ParsedDatetime {
-    pub fn new(year: u16, month: u8, day: u8, hour: u8, minute: u8, second: u8) -> Result<Self, ()> {
+    pub fn new(year: u16, month: u8, day: u8, hour: u8, minute: u8, second: u8) -> Option<Self> {
         let valid = [
             year >= 2000,
             year <= 9999,
@@ -478,9 +478,9 @@ impl ParsedDatetime {
         ].iter().all(|b| *b);
 
         if valid {
-            Ok(Self { year, month, day, hour, minute, second })
+            Some(Self { year, month, day, hour, minute, second })
         } else {
-            Err(())
+            None
         }
     }
 
@@ -517,8 +517,7 @@ impl Encodable for Datetime<'_> {
         } else {
             TaggedSlice::from(Tag::GENERALIZED_TIME, &self.0)?
         };
-        let result = encoder.encode(&tagged_slice);
-        result
+        encoder.encode(&tagged_slice)
     }
 }
 
