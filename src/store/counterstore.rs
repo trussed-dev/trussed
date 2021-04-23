@@ -94,7 +94,7 @@ impl<S: Store> Counterstore for ClientCounterstore<S> {
     fn increment_counter_zero(&mut self) -> Counter {
         self.increment_location(Location::Internal, COUNTER_ZERO)
             .unwrap_or_else(|_| {
-                self.write_counter(Location::Internal, 0, 0).map_err(|_| {
+                self.write_counter(Location::Internal, 0, Self::DEFAULT_START_AT).map_err(|_| {
                         panic!("writing to {} failed", &self.counter_path(0));
                 }).unwrap();
                 self.increment_location(Location::Internal, COUNTER_ZERO).unwrap()
