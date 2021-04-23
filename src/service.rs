@@ -715,7 +715,7 @@ impl<P: Platform> Service<P> {
 
                 // resources.currently_serving = ep.client_id.clone();
                 let reply_result = resources.reply_to(ep.client_id.clone(), &request);
-                ep.interchange.respond(reply_result).ok();
+                ep.interchange.respond(&reply_result).ok();
 
             }
         }
