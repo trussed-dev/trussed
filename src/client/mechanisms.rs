@@ -62,6 +62,27 @@ pub trait Chacha8Poly1305: CryptoClient {
     }
 }
 
+#[cfg(feature = "hmac-blake2s")]
+impl<S: Syscall> HmacBlake2s for ClientImplementation<S> {}
+
+pub trait HmacBlake2s: CryptoClient {
+    fn hmacblake2s_derive_key(&mut self, base_key: ObjectHandle, message: &[u8], persistence: Location)
+        -> ClientResult<'_, reply::DeriveKey, Self>
+    {
+        self.derive_key(
+            Mechanism::HmacBlake2s, base_key,
+            Some(MediumData::try_from_slice(message).map_err(|_| ClientError::DataTooLarge)?),
+            StorageAttributes::new().set_persistence(persistence))
+    }
+
+    fn sign_hmacblake2s<'c>(&'c mut self, key: ObjectHandle, message: &[u8])
+        -> ClientResult<'c, reply::Sign, Self>
+    {
+        self.sign(Mechanism::HmacBlake2s, key, message, SignatureSerialization::Raw)
+    }
+
+}
+
 #[cfg(feature = "hmac-sha1")]
 impl<S: Syscall> HmacSha1 for ClientImplementation<S> {}
 

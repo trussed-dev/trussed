@@ -20,6 +20,14 @@ mod chacha8poly1305;
 pub struct Ed255 {}
 mod ed255;
 
+pub struct HmacBlake2s {}
+#[cfg(feature = "hmac-blake2s")]
+mod hmacblake2s;
+#[cfg(not(feature = "hmac-blake2s"))]
+impl crate::service::DeriveKey for HmacBlake2s {}
+#[cfg(not(feature = "hmac-blake2s"))]
+impl crate::service::Sign for HmacBlake2s {}
+
 pub struct HmacSha1 {}
 mod hmacsha1;
 
@@ -30,7 +38,7 @@ pub struct HmacSha512 {}
 #[cfg(feature = "hmac-sha512")]
 mod hmacsha512;
 #[cfg(not(feature = "hmac-sha512"))]
-impl crate::service::GenerateKey for HmacSha512 {}
+impl crate::service::DeriveKey for HmacSha512 {}
 #[cfg(not(feature = "hmac-sha512"))]
 impl crate::service::Sign for HmacSha512 {}
 
