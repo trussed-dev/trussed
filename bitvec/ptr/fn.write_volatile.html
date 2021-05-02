@@ -1,0 +1,46 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="API documentation for the Rust `write_volatile` fn in crate `bitvec`."><meta name="keywords" content="rust, rustlang, rust-lang, write_volatile"><title>bitvec::ptr::write_volatile - Rust</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings"></script><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<link rel="alternate icon" type="image/png" href="../../favicon-16x16.png">
+<link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc fn"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../bitvec/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a><div class="sidebar-elems"><p class="location"><a href="../index.html">bitvec</a>::<wbr><a href="index.html">ptr</a></p><div id="sidebar-vars" data-name="write_volatile" data-ty="fn" data-relpath=""></div><script defer src="sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
+                <a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class="fqn"><span class="in-band">Function <a href="../index.html">bitvec</a>::<wbr><a href="index.html">ptr</a>::<wbr><a class="fn" href="">write_volatile</a></span><span class="out-of-band"><span id="render-detail"><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span><a class="srclink" href="../../src/bitvec/ptr.rs.html#755-761" title="goto source code">[src]</a></span></h1><pre class="rust fn">pub unsafe fn write_volatile&lt;O, T&gt;(dst: <a class="struct" href="../../bitvec/prelude/struct.BitPtr.html" title="struct bitvec::prelude::BitPtr">BitPtr</a>&lt;<a class="struct" href="../../bitvec/ptr/struct.Mut.html" title="struct bitvec::ptr::Mut">Mut</a>, O, T&gt;, value: bool) <span class="where fmt-newline">where<br>&nbsp;&nbsp;&nbsp;&nbsp;O: <a class="trait" href="../../bitvec/order/trait.BitOrder.html" title="trait bitvec::order::BitOrder">BitOrder</a>,<br>&nbsp;&nbsp;&nbsp;&nbsp;T: <a class="trait" href="../../bitvec/store/trait.BitStore.html" title="trait bitvec::store::BitStore">BitStore</a>,&nbsp;</span></pre><div class="docblock"><p>Performs a volatile write of a memory location with the given bit.</p>
+<p>Because processors do not have single-bit write instructions, this must
+perform a volatile read of the location, perform the bit modification within
+the processor register, then perform a volatile write back to memory. These
+three steps are guaranteed to be atomic.</p>
+<p>Volatile operations are intended to act on I/O memory, and are guaranteed
+not to be elided or reördered by the compiler across other volatile
+operations.</p>
+<h1 id="original" class="section-header"><a href="#original">Original</a></h1>
+<p><a href="https://doc.rust-lang.org/nightly/core/ptr/fn.write_volatile.html"><code>ptr::write_volatile</code></a></p>
+<h1 id="notes" class="section-header"><a href="#notes">Notes</a></h1>
+<p>Rust does not curretnly have a rigorously and formally defined memory model,
+so the precise semantics of what “volatile” means here is subject to change
+over time. That being said, the semantics will almost always end up pretty
+similar to <a href="http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1570.pdf">C11’s definition of volatile</a>.</p>
+<p>The compiler shouldn’t change the relative order or number of volatile
+memory operations.</p>
+<h1 id="safety" class="section-header"><a href="#safety">Safety</a></h1>
+<p>Behavior is undefined if any of the following conditions are violated:</p>
+<ul>
+<li><code>dst</code> must be <a href="https://doc.rust-lang.org/core/ptr/index.html#safety">valid</a> for writes</li>
+<li>no other pointer must race <code>dst</code> to view or modify the referent location
+unless <code>T</code> is capable of ensuring race safety.</li>
+</ul>
+<p>Just like in C, whether an operation is volatile has no bearing whatsoëver
+on questions involving concurrent access from multiple threads. Volatile
+accesses behave exactly like non-atomic accesses in that regard. In
+particular, a race between a <code>write_volatile</code> and any other operation
+(reading or writing) on the same location is undefined behavior.</p>
+<p>This is true even for atomic types! This instruction is an ordinary store
+that the compiler will not remove. It is <em>not</em> an atomic instruction.</p>
+<h1 id="examples" class="section-header"><a href="#examples">Examples</a></h1>
+<div class="example-wrap"><pre class="rust rust-example-rendered">
+<span class="kw">use</span> <span class="ident">bitvec</span>::<span class="ident">prelude</span>::<span class="kw-2">*</span>;
+
+<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">data</span> <span class="op">=</span> <span class="number">0u8</span>;
+<span class="kw">let</span> <span class="ident">ptr</span> <span class="op">=</span> <span class="ident">BitPtr</span>::<span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">Lsb0</span>, <span class="kw">_</span><span class="op">&gt;</span>::<span class="ident">from_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">data</span>);
+<span class="kw">unsafe</span> {
+  <span class="ident">bitvec</span>::<span class="ident">ptr</span>::<span class="ident">write_volatile</span>(<span class="ident">ptr</span>, <span class="bool-val">true</span>);
+  <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">bitvec</span>::<span class="ident">ptr</span>::<span class="ident">read_volatile</span>(<span class="ident">ptr</span>.<span class="ident">immut</span>()));
+}</pre></div>
+</div></section><section id="search" class="content hidden"></section><section class="footer"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="bitvec"></div>
+    <script src="../../main.js"></script><script defer src="../../search-index.js"></script></body></html>

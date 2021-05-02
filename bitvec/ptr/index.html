@@ -1,0 +1,104 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="API documentation for the Rust `ptr` mod in crate `bitvec`."><meta name="keywords" content="rust, rustlang, rust-lang, ptr"><title>bitvec::ptr - Rust</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings"></script><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<link rel="alternate icon" type="image/png" href="../../favicon-16x16.png">
+<link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc mod"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../bitvec/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a><p class="location">Module ptr</p><div class="sidebar-elems"><div class="block items"><ul><li><a href="#structs">Structs</a></li><li><a href="#enums">Enums</a></li><li><a href="#functions">Functions</a></li></ul></div><p class="location"><a href="../index.html">bitvec</a></p><div id="sidebar-vars" data-name="ptr" data-ty="mod" data-relpath="../"></div><script defer src="../sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
+                <a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class="fqn"><span class="in-band">Module <a href="../index.html">bitvec</a>::<wbr><a class="mod" href="">ptr</a></span><span class="out-of-band"><span id="render-detail"><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span><a class="srclink" href="../../src/bitvec/ptr.rs.html#1-764" title="goto source code">[src]</a></span></h1><div class="docblock"><p>Mirror of the <a href="https://doc.rust-lang.org/nightly/core/ptr/index.html"><code>core::ptr</code></a> module and <code>bitvec</code>-specific pointer structures.</p>
+<h1 id="types" class="section-header"><a href="#types">Types</a></h1>
+<p>As <code>bitvec</code> is not the standard library, it does not have the freedom to use
+language builtins such as actual pointers. Instead, <code>bitvec</code> uses its own
+analagous structures:</p>
+<ul>
+<li>
+<p><a href="../../bitvec/prelude/struct.BitPtr.html"><code>BitPtr&lt;M, O, T&gt;</code></a>: This represents a pointer to a single bit, and is vaguely
+similar to <code>*const bool</code>, <code>*mut bool</code>, and <code>NonNull&lt;bool&gt;</code>. It consists of a
+(non-null, well-aligned) pointer to a <code>T</code> memory element and a bit-index
+within that element. It uses the <code>O</code> ordering implementation to access the
+selected bit, and uses <code>M</code> to determine whether it has write permissions to
+the location.</p>
+</li>
+<li>
+<p><a href="../../bitvec/prelude/struct.BitPtrRange.html"><code>BitPtrRange&lt;M, O, T&gt;</code></a>: This is equivalent to <code>Range&lt;BitPtr&lt;M, O, T&gt;&gt;</code>. It
+exists because <a href="https://doc.rust-lang.org/nightly/core/ops/range/struct.Range.html"><code>Range</code></a> has some associated types that are still unstable to
+implement for its type parameters. It is also smaller than the <code>Range</code> would
+be, because it can take advantage of layout optimizations.</p>
+</li>
+<li>
+<p><a href="../../bitvec/prelude/struct.BitRef.html"><code>BitRef&lt;M, O, T&gt;</code></a>: This is a proxy reference type, equivalent to the C++
+<a href="https://en.cppreference.com/w/cpp/utility/bitset/reference"><code>bitset&lt;N&gt;::reference</code></a>. It implements <code>Deref</code> and, if <code>M</code> is <code>Mut</code>,
+<code>DerefMut</code> to bool, so that it can be read from and written to as if it were
+an <code>&amp;bool</code> or <code>&amp;mut bool</code>. It is <strong>not</strong> a referent type, and cannot be used
+in APIs that expect actual references. It is implemented under the hood as a
+<code>BitPtr</code> with a <code>bool</code> cached in one of the padding bytes.</p>
+</li>
+<li>
+<p><code>BitSpan&lt;M, O, T&gt;</code>: This is a crate-internal type that encodes a <code>BitPtr</code> and
+a length counter into a two-word structure that can be transmuted into
+<code>*BitSlice&lt;O, T&gt;</code>. This type enforces the non-null/well-aligned rule, and is
+the source of the limitation that <code>bitvec</code> region types can only address ⅛ of
+a <code>usize</code>, rather than the ½ limitation of the standard library collections.</p>
+<p>This type is not public API; it will only ever appear in its transmuted form,
+<code>*BitSlice&lt;O, T&gt;</code>. Users are <strong>not permitted</strong> to use any of the <a href="https://doc.rust-lang.org/nightly/core/ptr/index.html"><code>core::ptr</code></a>
+or <a href="https://doc.rust-lang.org/std/primitive.pointer.html"><code>pointer</code></a> functions to view or modify <code>*BitSlice</code> pointers, or their
+referent locations, in any way.</p>
+</li>
+</ul>
+<h1 id="safety" class="section-header"><a href="#safety">Safety</a></h1>
+<p>The functions in this module take <code>bitvec</code> equivalents to raw pointers as their
+arguments and read from or write to them. For this to be safe, these pointers
+must be <em>valid</em>. Whether a pointer is valid depends on the operation it is used
+for (reading or writing), and the extent of the memory that is accessed (i.e.
+how many bits are read/written in and how many underlying memory elements are
+accessed). Most functions use <a href="../../bitvec/prelude/struct.BitPtr.html"><code>BitPtr</code></a> to access only a single bit, in which
+case the documentation omits the size and implicitly assumes it to be one bit in
+one <code>T</code> element.</p>
+<p>The Rust rules about pointer validity are always in effect; <code>bitvec</code> refines
+them to a bit-precision granularity, but must still respect the byte-level and
+element-level rules.</p>
+<h1 id="crate-specific-restrictions" class="section-header"><a href="#crate-specific-restrictions">Crate-Specific Restrictions</a></h1>
+<p><code>bitvec</code> uses an internal encoding scheme to make bit-region pointers fit into a
+standard Rust slice pointer. This encoding requires that the base element
+address of a bit-pointer be <em>non-null</em> and <em>well-aligned</em> for all pointers that
+are used in the encoding scheme.</p>
+<p>The <code>bitvec</code> structure used to emulate a pointer to a single bit is larger than
+one processor word, and thus cannot be encoded to fit in a <code>*const Bit</code>. To ease
+internal complexity, these restrictions are universal in <code>bitvec</code>: the crate as
+a whole refuses to operate on null pointers, or pointers that are not aligned to
+their referent type, even if your usage never touches the span encoding.</p>
+<p>As such, the pointer types in this module can essentially only be sourced from
+references, not from arbitrary address values. While this module attempts to
+rely on actual Rust references as much as possible, and instead use only the
+ordinary <a href="https://doc.rust-lang.org/nightly/core/ptr/index.html"><code>core::ptr</code></a> and <a href="https://doc.rust-lang.org/std/primitive.pointer.html"><code>pointer</code></a> functions. This is not always possible;
+in particular, Rust does not offer stable atomic intrinsics, and instead only
+allows them to be used on references.</p>
+</div><h2 id="structs" class="section-header"><a href="#structs">Structs</a></h2>
+<table><tr class="module-item"><td><a class="struct" href="struct.Address.html" title="bitvec::ptr::Address struct">Address</a></td><td class="docblock-short"><p>A non-null, well-aligned, <code>BitStore</code> element address.</p>
+</td></tr><tr class="module-item"><td><a class="struct" href="struct.BitPtr.html" title="bitvec::ptr::BitPtr struct">BitPtr</a></td><td class="docblock-short"><p>Pointer to an individual bit in a memory element. Analagous to <code>*bool</code>.</p>
+</td></tr><tr class="module-item"><td><a class="struct" href="struct.BitPtrRange.html" title="bitvec::ptr::BitPtrRange struct">BitPtrRange</a></td><td class="docblock-short"><p>Equivalent to <code>Range&lt;BitPtr&lt;M, O, T&gt;&gt;</code>.</p>
+</td></tr><tr class="module-item"><td><a class="struct" href="struct.BitRef.html" title="bitvec::ptr::BitRef struct">BitRef</a></td><td class="docblock-short"><p>A proxy reference, equivalent to C++ <a href="https://en.cppreference.com/w/cpp/utility/bitset/reference"><code>std::bitset&lt;N&gt;::reference</code></a>.</p>
+</td></tr><tr class="module-item"><td><a class="struct" href="struct.Const.html" title="bitvec::ptr::Const struct">Const</a></td><td class="docblock-short"><p>An immutable pointer.</p>
+</td></tr><tr class="module-item"><td><a class="struct" href="struct.Mut.html" title="bitvec::ptr::Mut struct">Mut</a></td><td class="docblock-short"><p>A mutable pointer. Contexts with a <code>Mutable</code> may lower to <code>Immutable</code>, then
+re-raise to <code>Mutable</code>; contexts with <code>Immutable</code> may not raise to <code>Mutable</code>
+on their own.</p>
+</td></tr></table><h2 id="enums" class="section-header"><a href="#enums">Enums</a></h2>
+<table><tr class="module-item"><td><a class="enum" href="enum.AddressError.html" title="bitvec::ptr::AddressError enum">AddressError</a></td><td class="docblock-short"><p>An error produced when consuming <code>BitStore</code> memory addresses.</p>
+</td></tr><tr class="module-item"><td><a class="enum" href="enum.BitPtrError.html" title="bitvec::ptr::BitPtrError enum">BitPtrError</a></td><td class="docblock-short"><p>Errors produced by invalid bit-pointer components.</p>
+</td></tr><tr class="module-item"><td><a class="enum" href="enum.BitSpanError.html" title="bitvec::ptr::BitSpanError enum">BitSpanError</a></td><td class="docblock-short"><p>An error produced when creating <code>BitSpan</code> encoded references.</p>
+</td></tr></table><h2 id="functions" class="section-header"><a href="#functions">Functions</a></h2>
+<table><tr class="module-item"><td><a class="fn" href="fn.bitslice_from_raw_parts.html" title="bitvec::ptr::bitslice_from_raw_parts fn">bitslice_from_raw_parts</a></td><td class="docblock-short"><p>Forms a raw bit-slice from a bit-pointer and a length.</p>
+</td></tr><tr class="module-item"><td><a class="fn" href="fn.bitslice_from_raw_parts_mut.html" title="bitvec::ptr::bitslice_from_raw_parts_mut fn">bitslice_from_raw_parts_mut</a></td><td class="docblock-short"><p>Performs the same functionality as <a href="../../bitvec/ptr/fn.bitslice_from_raw_parts.html"><code>bitslice_from_raw_parts</code></a>, except that
+a raw mutable bit-slice is returned, as opposed to a raw immutable bit-slice.</p>
+</td></tr><tr class="module-item"><td><a class="fn" href="fn.copy.html" title="bitvec::ptr::copy fn">copy</a><a title="unsafe function" href="#"><sup>⚠</sup></a></td><td class="docblock-short"><p>Copies <code>count</code> bits from <code>src</code> to <code>dst</code>. The source and destination may
+overlap.</p>
+</td></tr><tr class="module-item"><td><a class="fn" href="fn.copy_nonoverlapping.html" title="bitvec::ptr::copy_nonoverlapping fn">copy_nonoverlapping</a><a title="unsafe function" href="#"><sup>⚠</sup></a></td><td class="docblock-short"><p>Copies <code>count</code> bits from <code>src</code> to <code>dst</code>. The source and destination must
+<em>not</em> overlap.</p>
+</td></tr><tr class="module-item"><td><a class="fn" href="fn.eq.html" title="bitvec::ptr::eq fn">eq</a></td><td class="docblock-short"><p>Compares raw bit-pointers for equality.</p>
+</td></tr><tr class="module-item"><td><a class="fn" href="fn.hash.html" title="bitvec::ptr::hash fn">hash</a></td><td class="docblock-short"><p>Hash a raw bit-pointer.</p>
+</td></tr><tr class="module-item"><td><a class="fn" href="fn.read.html" title="bitvec::ptr::read fn">read</a><a title="unsafe function" href="#"><sup>⚠</sup></a></td><td class="docblock-short"><p>Reads the bit from <code>src</code>.</p>
+</td></tr><tr class="module-item"><td><a class="fn" href="fn.read_volatile.html" title="bitvec::ptr::read_volatile fn">read_volatile</a><a title="unsafe function" href="#"><sup>⚠</sup></a></td><td class="docblock-short"><p>Performs a volatile read of the bit from <code>src</code>.</p>
+</td></tr><tr class="module-item"><td><a class="fn" href="fn.replace.html" title="bitvec::ptr::replace fn">replace</a><a title="unsafe function" href="#"><sup>⚠</sup></a></td><td class="docblock-short"><p>Moves <code>src</code> into the pointed <code>dst</code>, returning the previous <code>dst</code> bit.</p>
+</td></tr><tr class="module-item"><td><a class="fn" href="fn.swap.html" title="bitvec::ptr::swap fn">swap</a><a title="unsafe function" href="#"><sup>⚠</sup></a></td><td class="docblock-short"><p>Swaps the values at two mutable locations.</p>
+</td></tr><tr class="module-item"><td><a class="fn" href="fn.swap_nonoverlapping.html" title="bitvec::ptr::swap_nonoverlapping fn">swap_nonoverlapping</a><a title="unsafe function" href="#"><sup>⚠</sup></a></td><td class="docblock-short"><p>Swaps <code>count</code> bits between the two regions of memory beginning at <code>x</code> and
+<code>y</code>. The two regions must <em>not</em> overlap.</p>
+</td></tr><tr class="module-item"><td><a class="fn" href="fn.write.html" title="bitvec::ptr::write fn">write</a><a title="unsafe function" href="#"><sup>⚠</sup></a></td><td class="docblock-short"><p>Overwrites a memory location with the given bit.</p>
+</td></tr><tr class="module-item"><td><a class="fn" href="fn.write_volatile.html" title="bitvec::ptr::write_volatile fn">write_volatile</a><a title="unsafe function" href="#"><sup>⚠</sup></a></td><td class="docblock-short"><p>Performs a volatile write of a memory location with the given bit.</p>
+</td></tr></table></section><section id="search" class="content hidden"></section><section class="footer"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="bitvec"></div>
+    <script src="../../main.js"></script><script defer src="../../search-index.js"></script></body></html>

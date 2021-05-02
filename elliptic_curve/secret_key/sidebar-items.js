@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["SecretBytes","Newtype wrapper for [`FieldBytes`] which impls [`Zeroize`]."],["SecretKey","Elliptic curve secret keys."]],"trait":[["SecretValue","Inner value stored by a [`SecretKey`]."]]});

@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["point","Traits for Weierstrass elliptic curve points"]],"trait":[["Curve","Marker trait for elliptic curves in short Weierstrass form"]]});
+initSidebarItems({"trait":[["Curve","Marker trait for elliptic curves in short Weierstrass form."],["DecompressPoint","Attempt to decompress an elliptic curve point from its x-coordinate and a boolean flag indicating whether or not the y-coordinate is odd."],["PointCompression","Point compression settings."]]});

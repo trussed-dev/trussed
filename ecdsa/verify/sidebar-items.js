@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["VerifyingKey","ECDSA verify key"]]});

@@ -1,4 +1,0 @@
-(function() {var implementors = {};
-implementors["chacha20"] = [{"text":"impl&lt;R:&nbsp;Rounds&gt; <a class=\"trait\" href=\"cipher/stream/trait.NewStreamCipher.html\" title=\"trait cipher::stream::NewStreamCipher\">NewStreamCipher</a> for <a class=\"struct\" href=\"chacha20/struct.ChaCha.html\" title=\"struct chacha20::ChaCha\">ChaCha</a>&lt;R&gt;","synthetic":false,"types":["chacha20::chacha::ChaCha"]},{"text":"impl <a class=\"trait\" href=\"cipher/stream/trait.NewStreamCipher.html\" title=\"trait cipher::stream::NewStreamCipher\">NewStreamCipher</a> for <a class=\"struct\" href=\"chacha20/struct.XChaCha20.html\" title=\"struct chacha20::XChaCha20\">XChaCha20</a>","synthetic":false,"types":["chacha20::xchacha::XChaCha20"]}];
-implementors["cipher"] = [];
-if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

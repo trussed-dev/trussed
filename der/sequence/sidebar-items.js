@@ -1,1 +1,0 @@
-initSidebarItems({"fn":[["encoded_len","Obtain the length of an ASN.1 `SEQUENCE` of [`Encodable`] values when serialized as ASN.1 DER, including the `SEQUENCE` tag and length prefix."]],"struct":[["Sequence","ASN.1 `SEQUENCE` type."]]});

@@ -1,1 +1,0 @@
-initSidebarItems({"trait":[["Compression","Point compression settings"],["Decompress","Attempt to decompress an elliptic curve point from its x-coordinate and a boolean flag indicating whether or not the y-coordinate is odd."]]});
