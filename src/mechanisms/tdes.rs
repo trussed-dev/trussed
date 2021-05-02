@@ -7,7 +7,7 @@
 
 use core::convert::TryInto;
 // needed to even get ::new() from des...
-use des::cipher::{BlockCipher, NewBlockCipher};
+use des::cipher::{BlockDecrypt, BlockEncrypt, NewBlockCipher};
 
 use crate::api::*;
 use crate::error::Error;

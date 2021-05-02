@@ -32,7 +32,7 @@ impl Encrypt for super::Aes256Cbc
             .map_err(|_| Error::InternalError)?;
 
         let zero_iv = [0u8; 16];
-		let cipher = Aes256Cbc::new_var(&symmetric_key, &zero_iv).unwrap();
+		let cipher = Aes256Cbc::new_from_slices(&symmetric_key, &zero_iv).unwrap();
 
 		// buffer must have enough space for message+padding
 		let mut buffer = request.message.clone();
@@ -105,7 +105,7 @@ impl Decrypt for super::Aes256Cbc
             .map_err(|_| Error::InternalError)?;
 
         let zero_iv = [0u8; 16];
-		let cipher = Aes256Cbc::new_var(&symmetric_key, &zero_iv).unwrap();
+		let cipher = Aes256Cbc::new_from_slices(&symmetric_key, &zero_iv).unwrap();
 
 		// buffer must have enough space for message+padding
 		let mut buffer = request.message.clone();

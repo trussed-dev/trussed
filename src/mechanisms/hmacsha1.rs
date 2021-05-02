@@ -18,7 +18,7 @@ impl DeriveKey for super::HmacSha1
         let key_id = request.base_key.object_id;
         let shared_secret = keystore.load_key(key::Secrecy::Secret, None, &key_id)?.material;
 
-        let mut mac = HmacSha1::new_varkey(&shared_secret.as_ref())
+        let mut mac = HmacSha1::new_from_slice(&shared_secret.as_ref())
             .map_err(|_| Error::InternalError)?;
 
         if let Some(additional_data) = &request.additional_data {
@@ -49,7 +49,7 @@ impl Sign for super::HmacSha1
         let key_id = request.key.object_id;
         let shared_secret = keystore.load_key(key::Secrecy::Secret, None, &key_id)?.material;
 
-        let mut mac = HmacSha1::new_varkey(&shared_secret.as_ref())
+        let mut mac = HmacSha1::new_from_slice(&shared_secret.as_ref())
             .map_err(|_| Error::InternalError)?;
 
         mac.update(&request.message);
