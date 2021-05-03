@@ -1,7 +1,6 @@
 var N = null;var sourcesIndex = {};
 sourcesIndex["aead"] = {"name":"","files":["lib.rs"]};
 sourcesIndex["aes"] = {"name":"","dirs":[{"name":"ni","dirs":[{"name":"aes128","files":["expand.rs"]},{"name":"aes192","files":["expand.rs"]},{"name":"aes256","files":["expand.rs"]}],"files":["aes128.rs","aes192.rs","aes256.rs","utils.rs"]},{"name":"soft","files":["fixslice64.rs","impls.rs"]}],"files":["autodetect.rs","lib.rs","ni.rs","soft.rs"]};
-sourcesIndex["as_slice"] = {"name":"","files":["lib.rs"]};
 sourcesIndex["bitflags"] = {"name":"","files":["lib.rs"]};
 sourcesIndex["bitvec"] = {"name":"","dirs":[{"name":"array","files":["iter.rs","ops.rs","traits.rs"]},{"name":"macros","files":["internal.rs"]},{"name":"ptr","files":["address.rs","proxy.rs","range.rs","single.rs","span.rs"]},{"name":"slice","files":["api.rs","iter.rs","ops.rs","specialization.rs","traits.rs"]}],"files":["access.rs","array.rs","devel.rs","domain.rs","field.rs","index.rs","lib.rs","macros.rs","mem.rs","mutability.rs","order.rs","prelude.rs","ptr.rs","slice.rs","store.rs","view.rs"]};
 sourcesIndex["block_buffer"] = {"name":"","files":["lib.rs"]};
@@ -35,7 +34,7 @@ sourcesIndex["generic_array"] = {"name":"","files":["arr.rs","functional.rs","he
 sourcesIndex["group"] = {"name":"","files":["cofactor.rs","lib.rs","prime.rs"]};
 sourcesIndex["half"] = {"name":"","dirs":[{"name":"bfloat","files":["convert.rs"]},{"name":"binary16","files":["convert.rs"]}],"files":["bfloat.rs","binary16.rs","lib.rs","slice.rs"]};
 sourcesIndex["hash32"] = {"name":"","files":["fnv.rs","lib.rs","murmur3.rs"]};
-sourcesIndex["heapless"] = {"name":"","dirs":[{"name":"pool","files":["cas.rs","mod.rs","singleton.rs"]},{"name":"spsc","files":["mod.rs","split.rs"]}],"files":["binary_heap.rs","de.rs","histbuf.rs","i.rs","indexmap.rs","indexset.rs","lib.rs","linear_map.rs","mpmc.rs","sealed.rs","ser.rs","string.rs","vec.rs"]};
+sourcesIndex["heapless"] = {"name":"","files":["binary_heap.rs","histbuf.rs","indexmap.rs","indexset.rs","lib.rs","linear_map.rs","sealed.rs","spsc.rs","string.rs","vec.rs"]};
 sourcesIndex["heapless_bytes"] = {"name":"","files":["lib.rs"]};
 sourcesIndex["hex_literal"] = {"name":"","files":["lib.rs"]};
 sourcesIndex["hmac"] = {"name":"","files":["lib.rs"]};

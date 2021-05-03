@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["Box","A memory block that belongs to the global memory pool, `POOL`"]],"trait":[["Pool","A global singleton memory pool"]]});

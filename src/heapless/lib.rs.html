@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/heapless-0.6.1/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings"></script><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/heapless-0.7.0/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings"></script><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg">
 <link rel="alternate icon" type="image/png" href="../../favicon-16x16.png">
 <link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../heapless/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
                 <a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
@@ -108,12 +108,6 @@
 <span id="105">105</span>
 <span id="106">106</span>
 <span id="107">107</span>
-<span id="108">108</span>
-<span id="109">109</span>
-<span id="110">110</span>
-<span id="111">111</span>
-<span id="112">112</span>
-<span id="113">113</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! `static` friendly data structures that don&#39;t require dynamic memory allocation</span>
 <span class="doccomment">//!</span>
@@ -127,17 +121,14 @@
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ```</span>
 <span class="doccomment">//! use heapless::Vec; // fixed capacity `std::Vec`</span>
-<span class="doccomment">//! use heapless::consts::U8; // type level integer used to specify capacity</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! // on the stack</span>
-<span class="doccomment">//! let mut xs: Vec&lt;u8, U8&gt; = Vec::new(); // can hold up to 8 elements</span>
+<span class="doccomment">//! let mut xs: Vec&lt;u8, 8&gt; = Vec::new(); // can hold up to 8 elements</span>
 <span class="doccomment">//! xs.push(42).unwrap();</span>
 <span class="doccomment">//! assert_eq!(xs.pop(), Some(42));</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! // in a `static` variable</span>
-<span class="doccomment">//! // (because `const-fn` has not been fully stabilized you need to use the helper structs in</span>
-<span class="doccomment">//! // the `i` module, which must be wrapped in a tuple struct)</span>
-<span class="doccomment">//! static mut XS: Vec&lt;u8, U8&gt; = Vec(heapless::i::Vec::new());</span>
+<span class="doccomment">//! static mut XS: Vec&lt;u8, 8&gt; = Vec::new();</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! let xs = unsafe { &amp;mut XS };</span>
 <span class="doccomment">//!</span>
@@ -145,7 +136,7 @@
 <span class="doccomment">//! assert_eq!(xs.pop(), Some(42));</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! // in the heap (though kind of pointless because no reallocation)</span>
-<span class="doccomment">//! let mut ys: Box&lt;Vec&lt;u8, U8&gt;&gt; = Box::new(Vec::new());</span>
+<span class="doccomment">//! let mut ys: Box&lt;Vec&lt;u8, 8&gt;&gt; = Box::new(Vec::new());</span>
 <span class="doccomment">//! ys.push(42).unwrap();</span>
 <span class="doccomment">//! assert_eq!(ys.pop(), Some(42));</span>
 <span class="doccomment">//! ```</span>
@@ -183,7 +174,7 @@
 <span class="doccomment">//!</span>
 <span class="doccomment">//! # Minimum Supported Rust Version (MSRV)</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! This crate is guaranteed to compile on stable Rust 1.36 and up with its default set of features.</span>
+<span class="doccomment">//! This crate is guaranteed to compile on stable Rust 1.51 and up with its default set of features.</span>
 <span class="doccomment">//! It *might* compile on older versions but that may change in any new patch release.</span>
 
 <span class="attribute">#![<span class="ident">cfg_attr</span>(<span class="ident">not</span>(<span class="ident">test</span>), <span class="ident">no_std</span>)]</span>
@@ -193,8 +184,6 @@
 <span class="attribute">#![<span class="ident">deny</span>(<span class="ident">warnings</span>)]</span>
 
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">binary_heap</span>::<span class="ident">BinaryHeap</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">generic_array</span>::<span class="ident">typenum</span>::{<span class="ident">consts</span>, <span class="ident">PowerOfTwo</span>};
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">generic_array</span>::<span class="ident">ArrayLength</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">histbuf</span>::<span class="ident">HistoryBuffer</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">indexmap</span>::{<span class="ident">Bucket</span>, <span class="ident">FnvIndexMap</span>, <span class="ident">IndexMap</span>, <span class="ident">Pos</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">indexset</span>::{<span class="ident">FnvIndexSet</span>, <span class="ident">IndexSet</span>};
@@ -216,7 +205,6 @@
 <span class="kw">mod</span> <span class="ident">ser</span>;
 
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">binary_heap</span>;
-<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">i</span>;
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">has_cas</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;cas&quot;</span>))]</span>
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">mpmc</span>;
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">has_cas</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;cas&quot;</span>))]</span>
