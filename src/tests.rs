@@ -1,5 +1,4 @@
 #![cfg(test)]
-
 use chacha20::ChaCha20;
 
 use crate::*;
@@ -17,8 +16,7 @@ pub struct MockRng(ChaCha20);
 
 impl MockRng {
     pub fn new() -> Self {
-		// use chacha20::stream_cipher::generic_array::GenericArray;
-		use chacha20::cipher::NewStreamCipher;
+        use chacha20::cipher::NewCipher;
         let key = GenericArray::from_slice(b"an example very very secret key.");
         let nonce = GenericArray::from_slice(b"secret nonce");
         Self(ChaCha20::new(&key, &nonce))
@@ -29,7 +27,7 @@ impl rand_core::CryptoRng for MockRng {}
 
 impl crate::service::RngCore for MockRng {
     fn fill_bytes(&mut self, buf: &mut [u8]) {
-		use chacha20::cipher::SyncStreamCipher;
+		use chacha20::cipher::StreamCipher;
         self.0.apply_keystream(buf);
     }
 
