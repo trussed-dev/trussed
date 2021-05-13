@@ -27,7 +27,7 @@ impl rand_core::CryptoRng for MockRng {}
 
 impl crate::service::RngCore for MockRng {
     fn fill_bytes(&mut self, buf: &mut [u8]) {
-		use chacha20::cipher::StreamCipher;
+        use chacha20::cipher::StreamCipher;
         self.0.apply_keystream(buf);
     }
 
