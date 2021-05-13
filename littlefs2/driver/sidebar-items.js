@@ -1,1 +1,1 @@
-initSidebarItems({"trait":[["Storage","Users of this library provide a \"storage driver\" by implementing this trait."]]});
+initSidebarItems({"trait":[["Storage","Users of this library provide a “storage driver” by implementing this trait."]]});
