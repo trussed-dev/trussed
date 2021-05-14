@@ -15,7 +15,7 @@
 //! // use trussed::Client as _;
 //! fn sign<'c>(&'c mut self,
 //!   mechanism: Mechanism,
-//!   key: ObjectHandle,
+//!   key: KeyId,
 //!   data: &[u8],
 //!   format: SignatureSerialization
 //! ) -> ClientResult<'c, reply::Sign, Self>;
@@ -25,7 +25,7 @@
 //! `Ed255`, which also specializes the mechanism, e.g.
 //! ```ignore
 //! // use trussed::client::Ed255 as _;
-//! fn sign_ed255<'c>(&'c mut self, key: &ObjectHandle, message: &[u8])
+//! fn sign_ed255<'c>(&'c mut self, key: &KeyId, message: &[u8])
 //!   -> ClientResult<'c, reply::Sign, Self>
 //! ```
 //!
@@ -235,7 +235,7 @@ impl<S: Syscall> UiClient for ClientImplementation<S> {}
 /// Read/Write + Delete certificates
 pub trait CertificateClient: PollClient {
 
-    fn delete_certificate(&mut self, id: Id)
+    fn delete_certificate(&mut self, id: CertId)
         -> ClientResult<'_, reply::DeleteCertificate, Self>
     {
         let r = self.request(request::DeleteCertificate { id })?;
@@ -243,7 +243,7 @@ pub trait CertificateClient: PollClient {
         Ok(r)
     }
 
-    fn read_certificate(&mut self, id: Id)
+    fn read_certificate(&mut self, id: CertId)
         -> ClientResult<'_, reply::ReadCertificate, Self>
     {
         let r = self.request(request::ReadCertificate { id })?;
@@ -274,7 +274,7 @@ pub trait CryptoClient: PollClient {
 
     fn agree(
         &mut self, mechanism: Mechanism,
-        private_key: ObjectHandle, public_key: ObjectHandle,
+        private_key: KeyId, public_key: KeyId,
         attributes: StorageAttributes,
         )
         -> ClientResult<'_, reply::Agree, Self>
@@ -289,7 +289,7 @@ pub trait CryptoClient: PollClient {
         Ok(r)
     }
 
-    fn attest(&mut self, signing_mechanism: Mechanism, private_key: ObjectHandle)
+    fn attest(&mut self, signing_mechanism: Mechanism, private_key: KeyId)
         -> ClientResult<'_, reply::Attest, Self>
     {
         let r = self.request(request::Attest {
@@ -300,7 +300,7 @@ pub trait CryptoClient: PollClient {
         Ok(r)
     }
 
-    fn decrypt<'c>(&'c mut self, mechanism: Mechanism, key: ObjectHandle,
+    fn decrypt<'c>(&'c mut self, mechanism: Mechanism, key: KeyId,
                        message: &[u8], associated_data: &[u8],
                        nonce: &[u8], tag: &[u8],
                        )
@@ -315,7 +315,7 @@ pub trait CryptoClient: PollClient {
         Ok(r)
     }
 
-    fn delete(&mut self, key: ObjectHandle)
+    fn delete(&mut self, key: KeyId)
         -> ClientResult<'_, reply::Delete, Self>
     {
         let r = self.request(request::Delete {
@@ -335,7 +335,7 @@ pub trait CryptoClient: PollClient {
         Ok(r)
     }
 
-    fn derive_key(&mut self, mechanism: Mechanism, base_key: ObjectHandle, additional_data: Option<MediumData>, attributes: StorageAttributes)
+    fn derive_key(&mut self, mechanism: Mechanism, base_key: KeyId, additional_data: Option<MediumData>, attributes: StorageAttributes)
         -> ClientResult<'_, reply::DeriveKey, Self>
     {
         let r = self.request(request::DeriveKey {
@@ -360,7 +360,7 @@ pub trait CryptoClient: PollClient {
         Ok(r)
     }
 
-    fn encrypt<'c>(&'c mut self, mechanism: Mechanism, key: ObjectHandle,
+    fn encrypt<'c>(&'c mut self, mechanism: Mechanism, key: KeyId,
                        message: &[u8], associated_data: &[u8], nonce: Option<ShortData>)
         -> ClientResult<'c, reply::Encrypt, Self>
     {
@@ -371,7 +371,7 @@ pub trait CryptoClient: PollClient {
         Ok(r)
     }
 
-    fn exists(&mut self, mechanism: Mechanism, key: ObjectHandle)
+    fn exists(&mut self, mechanism: Mechanism, key: KeyId)
         -> ClientResult<'_, reply::Exists, Self>
     {
         let r = self.request(request::Exists {
@@ -420,7 +420,7 @@ pub trait CryptoClient: PollClient {
         Ok(r)
     }
 
-    fn serialize_key(&mut self, mechanism: Mechanism, key: ObjectHandle, format: KeySerialization)
+    fn serialize_key(&mut self, mechanism: Mechanism, key: KeyId, format: KeySerialization)
         -> ClientResult<'_, reply::SerializeKey, Self>
     {
         let r = self.request(request::SerializeKey {
@@ -435,7 +435,7 @@ pub trait CryptoClient: PollClient {
     fn sign<'c>(
         &'c mut self,
         mechanism: Mechanism,
-        key: ObjectHandle,
+        key: KeyId,
         data: &[u8],
         format: SignatureSerialization,
     )
@@ -454,7 +454,7 @@ pub trait CryptoClient: PollClient {
     fn verify<'c>(
         &'c mut self,
         mechanism: Mechanism,
-        key: ObjectHandle,
+        key: KeyId,
         message: &[u8],
         signature: &[u8],
         format: SignatureSerialization,
@@ -502,7 +502,7 @@ pub trait CryptoClient: PollClient {
         Ok(r)
     }
 
-    fn unwrap_key<'c>(&'c mut self, mechanism: Mechanism, wrapping_key: ObjectHandle, wrapped_key: Message,
+    fn unwrap_key<'c>(&'c mut self, mechanism: Mechanism, wrapping_key: KeyId, wrapped_key: Message,
                        associated_data: &[u8], attributes: StorageAttributes)
         -> ClientResult<'c, reply::UnwrapKey, Self>
     {
@@ -518,7 +518,7 @@ pub trait CryptoClient: PollClient {
         Ok(r)
     }
 
-    fn wrap_key(&mut self, mechanism: Mechanism, wrapping_key: ObjectHandle, key: ObjectHandle,
+    fn wrap_key(&mut self, mechanism: Mechanism, wrapping_key: KeyId, key: KeyId,
                        associated_data: &[u8])
         -> ClientResult<'_, reply::WrapKey, Self>
     {
@@ -541,7 +541,7 @@ pub trait CounterClient: PollClient {
         Ok(r)
     }
 
-    fn increment_counter(&mut self, id: Id)
+    fn increment_counter(&mut self, id: CounterId)
         -> ClientResult<'_, reply::IncrementCounter, Self>
     {
         let r = self.request(request::IncrementCounter { id })?;

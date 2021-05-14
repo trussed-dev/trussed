@@ -7,7 +7,6 @@
 
 use core::hint::unreachable_unchecked;
 use core::time::Duration;
-use crate::config;
 use crate::types::*;
 
 #[macro_use]
@@ -26,7 +25,7 @@ generate_enums! {
     ////////////
 
     Agree: 1
-    CreateObject: 2
+    // CreateObject: 2
     // TODO: why do Decrypt and DeriveKey both have discriminant 3?!
     Decrypt: 3
     DeriveKey: 4
@@ -36,7 +35,7 @@ generate_enums! {
     DeleteAllKeys: 25
     Exists: 8
     // DeriveKeypair: 3
-    FindObjects: 9
+    // FindObjects: 9
     GenerateKey: 10
     GenerateSecretKey: 11
     // GenerateKeypair: 6
@@ -110,34 +109,34 @@ pub mod request {
     impl_request! {
         Agree:
             - mechanism: Mechanism
-            - private_key: ObjectHandle
-            - public_key: ObjectHandle
+            - private_key: KeyId
+            - public_key: KeyId
             - attributes: StorageAttributes
 
         Attest:
             // only Ed255 + P256
             - signing_mechanism: Mechanism
             // only Ed255 + P256
-            - private_key: ObjectHandle
+            - private_key: KeyId
 
-        // examples:
-        // - store public keys from external source
-        // - store certificates
-        CreateObject:
-            - attributes: Attributes
+        // // examples:
+        // // - store public keys from external source
+        // // - store certificates
+        // CreateObject:
+        //     - attributes: Attributes
 
         DebugDumpStore:
 
         Decrypt:
           - mechanism: Mechanism
-          - key: ObjectHandle
+          - key: KeyId
           - message: Message
           - associated_data: Message
           - nonce: ShortData
           - tag: ShortData
 
         Delete:
-          - key: ObjectHandle
+          - key: KeyId
 
         DeleteAllKeys:
           - location: Location
@@ -152,7 +151,7 @@ pub mod request {
         // - hierarchical deterministic wallet stuff
         DeriveKey:
             - mechanism: Mechanism
-            - base_key: ObjectHandle
+            - base_key: KeyId
             // - auxiliary_key: Option<ObjectHandle>
             - additional_data: Option<MediumData>
             // - attributes: KeyAttributes
@@ -172,17 +171,17 @@ pub mod request {
 
         Encrypt:
           - mechanism: Mechanism
-          - key: ObjectHandle
+          - key: KeyId
           - message: Message
           - associated_data: ShortData
           - nonce: Option<ShortData>
 
         Exists:
           - mechanism: Mechanism
-          - key: ObjectHandle
+          - key: KeyId
 
-        FindObjects:
-            // - attributes: Attributes
+        // FindObjects:
+        //     // - attributes: Attributes
 
         GenerateKey:
             - mechanism: Mechanism        // -> implies key type
@@ -253,12 +252,12 @@ pub mod request {
 
         SerializeKey:
           - mechanism: Mechanism
-          - key: ObjectHandle
+          - key: KeyId
           - format: KeySerialization
 
         Sign:
           - mechanism: Mechanism
-          - key: ObjectHandle
+          - key: KeyId
           - message: Message
           - format: SignatureSerialization
 
@@ -279,14 +278,14 @@ pub mod request {
 
         UnwrapKey:
           - mechanism: Mechanism
-          - wrapping_key: ObjectHandle
+          - wrapping_key: KeyId
           - wrapped_key: Message
           - associated_data: Message
           - attributes: StorageAttributes
 
         Verify:
           - mechanism: Mechanism
-          - key: ObjectHandle
+          - key: KeyId
           - message: Message
           - signature: Signature
           - format: SignatureSerialization
@@ -294,8 +293,8 @@ pub mod request {
         // this should always be an AEAD algorithm
         WrapKey:
           - mechanism: Mechanism
-          - wrapping_key: ObjectHandle
-          - key: ObjectHandle
+          - wrapping_key: KeyId
+          - key: KeyId
           - associated_data: Message
 
         RequestUserConsent:
@@ -311,13 +310,13 @@ pub mod request {
           - location: Location
 
         IncrementCounter:
-          - id: Id
+          - id: CounterId
 
         DeleteCertificate:
-          - id: Id
+          - id: CertId
 
         ReadCertificate:
-          - id: Id
+          - id: CertId
 
         WriteCertificate:
           - location: Location
@@ -337,18 +336,18 @@ pub mod reply {
         // e.g.: P256Raw -> SharedSecret32
         //       P256Sha256 -> SymmetricKey32
         Agree:
-            - shared_secret: ObjectHandle
+            - shared_secret: KeyId
 
         Attest:
-            - certificate: Id
+            - certificate: CertId
 
-        CreateObject:
-            - object: ObjectHandle
+        // CreateObject:
+        //     - object: ObjectHandle
 
-        FindObjects:
-            - objects: Vec<ObjectHandle, config::MAX_OBJECT_HANDLES>
-            // can be higher than capacity of vector
-            - num_objects: usize
+        // FindObjects:
+        //     - objects: Vec<ObjectHandle, config::MAX_OBJECT_HANDLES>
+        //     // can be higher than capacity of vector
+        //     - num_objects: usize
 
         DebugDumpStore:
 
@@ -362,14 +361,14 @@ pub mod reply {
             - count: usize
 
         DeriveKey:
-            - key: ObjectHandle
+            - key: KeyId
 
         // DeriveKeypair:
         //     - private_key: ObjectHandle
         //     - public_key: ObjectHandle
 
         DeserializeKey:
-            - key: ObjectHandle
+            - key: KeyId
 
 		Encrypt:
             - ciphertext: Message
@@ -380,14 +379,14 @@ pub mod reply {
             - exists: bool
 
         GenerateKey:
-            - key: ObjectHandle
+            - key: KeyId
 
         GenerateSecretKey:
-            - key: ObjectHandle
+            - key: KeyId
 
         // GenerateKeypair:
-        //     - private_key: ObjectHandle
-        //     - public_key: ObjectHandle
+        //     - private_key: KeyId
+        //     - public_key: KeyId
 
         Hash:
           - hash: ShortData
@@ -435,13 +434,13 @@ pub mod reply {
             - valid: bool
 
         UnsafeInjectKey:
-            - key: ObjectHandle
+            - key: KeyId
 
         UnsafeInjectSharedKey:
-            - key: ObjectHandle
+            - key: KeyId
 
         UnwrapKey:
-            - key: Option<ObjectHandle>
+            - key: Option<KeyId>
 
         WrapKey:
             - wrapped_key: Message
@@ -456,7 +455,7 @@ pub mod reply {
           - uptime: Duration
 
         CreateCounter:
-          - id: Id
+          - id: CounterId
 
         IncrementCounter:
           - counter: u128
@@ -467,7 +466,7 @@ pub mod reply {
           - der: Message
 
         WriteCertificate:
-          - id: Id
+          - id: CertId
     }
 
 }

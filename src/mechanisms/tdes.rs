@@ -24,7 +24,7 @@ impl Encrypt for super::Tdes
     {
         if request.message.len() != 8 { return Err(Error::WrongMessageLength); }
 
-        let key_id = request.key.object_id;
+        let key_id = request.key;
 
         let symmetric_key: [u8; 24] = keystore
             .load_key(key::Secrecy::Secret, None, &key_id)?
@@ -50,7 +50,7 @@ impl Decrypt for super::Tdes
     {
         if request.message.len() != 8 { return Err(Error::WrongMessageLength); }
 
-        let key_id = request.key.object_id;
+        let key_id = request.key;
 
         let symmetric_key: [u8; 24] = keystore
             .load_key(key::Secrecy::Secret, None, &key_id)?

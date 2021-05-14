@@ -1,5 +1,6 @@
 use core::convert::TryFrom;
 use core::marker::PhantomData;
+use core::ops::Deref;
 
 pub use generic_array::GenericArray;
 
@@ -18,6 +19,7 @@ pub use littlefs2::{
     path::PathBuf,
 };
 
+use rand_core::{CryptoRng, RngCore};
 use serde::{Deserialize, Serialize};
 
 use crate::config::*;
@@ -26,17 +28,140 @@ use crate::key::Secrecy;
 pub use crate::platform::Platform;
 pub use crate::client::FutureResult;
 
-#[derive(Copy, Clone, Debug, serde::Deserialize, PartialEq, PartialOrd, serde::Serialize)]
-#[serde(transparent)]
+/// The ID of a Trussed object.
+///
+/// Apart from the 256 "special" IDs, generated as a random 128-bit number,
+/// hence globally unique without coordination or counters.
+///
+/// Specific object types have more specific IDs, e.g., currently: [`CertId`], [`CounterId`], [`KeyId`].
+///
+/// When serialized to the file system, the `hex` method is used, which
+/// generates a big-endian hex representation with leading zero bytes trimmed.
+///
+/// Open question: Should `PublicKey` and `SecretKey` be distinguished?
+#[derive(Copy, Clone, PartialEq, PartialOrd)]
 pub struct Id(pub(crate) u128);
-
 impl Eq for Id {}
 
-impl From<SpecialId> for Id {
-    fn from(special_id: u8) -> Self {
-        Self(special_id as _)
+impl core::fmt::Debug for Id {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        write!(f, "Id(")?;
+        for ch in &self.hex() {
+            write!(f, "{}", &(*ch as char))?;
+        }
+        write!(f, ")")
     }
 }
+
+
+pub type SpecialId = u8;
+
+pub trait ObjectId: Deref<Target = Id> {}
+
+impl Id {
+    /// Generate an ID, using a cryptographically secure random number generator.
+    pub(crate) fn new(rng: &mut (impl CryptoRng + RngCore)) -> Self {
+        let mut id = [0u8; 16];
+        rng.fill_bytes(&mut id);
+        Self(u128::from_be_bytes(id))
+    }
+
+    /// Is a non-random, constructible u8 ID.
+    pub fn is_special(&self) -> bool {
+        self.0 < 256
+    }
+
+    /// skips leading zeros
+    pub fn hex(&self) -> Bytes<consts::U32> {
+        const HEX_CHARS: &[u8] = b"0123456789abcdef";
+        let mut buffer = Bytes::new();
+        let array = self.0.to_be_bytes();
+
+        for i in 0 .. array.len() {
+            if array[i] == 0 && i != (array.len() - 1) {
+                // Skip leading zeros.
+                continue;
+            }
+
+            buffer.push(HEX_CHARS[(array[i] >> 4) as usize]).unwrap();
+            buffer.push(HEX_CHARS[(array[i] & 0xf) as usize]).unwrap();
+        }
+
+        buffer
+    }
+
+    // NOT IMPLEMENTED, as this would allow clients to create non-random (non-special) IDs.
+    // For testing, can construct directly as the newtypes have pub(crate) access.
+    // #[allow(clippy::result_unit_err)]
+    // pub fn try_from_hex(hex: &[u8]) -> core::result::Result<Self, ()> {
+    //     // https://stackoverflow.com/a/52992629
+    //     // (0..hex.len())
+    //     // use hex::FromHex;
+    //     // let maybe_bytes = <[u8; 16]>::from_hex(hex).map_err(|e| ());
+    //     // maybe_bytes.map(|bytes| Self(Bytes::try_from_slice(&bytes).unwrap()))
+    //     if (hex.len() & 1) == 1 {
+    //         // panic!("hex len & 1 =  {}", hex.len() & 1);
+    //         return Err(());
+    //     }
+    //     if hex.len() > 32 {
+    //         // panic!("hex len {}", hex.len());
+    //         return Err(());
+    //     }
+    //     // let hex = core::str::from_utf8(hex).map_err(|e| ())?;
+    //     let hex = core::str::from_utf8(hex).unwrap();
+    //     // let hex = core::str::from_utf8_unchecked(hex);
+    //     let mut bytes = [0u8; 16];
+    //     for i in 0..(hex.len() >> 1) {
+    //         // bytes[i] = u8::from_str_radix(&hex[i..][..2], 16).map_err(|e| ())?;
+    //         bytes[i] = u8::from_str_radix(&hex[2*i..][..2], 16).unwrap();
+    //     }
+    //     Ok(Self(u128::from_be_bytes(bytes)))
+    // }
+}
+
+macro_rules! impl_id { ($Name:ident) => {
+    #[derive(Copy, Clone, Debug, serde::Deserialize, PartialEq, PartialOrd, serde::Serialize)]
+    #[serde(transparent)]
+    pub struct $Name(pub(crate) Id);
+    impl Eq for $Name {}
+
+    impl ObjectId for $Name {}
+
+    /// TODO: Is this a good idea (motivation: save implementions...)
+    impl Deref for $Name {
+        type Target = Id;
+        fn deref(&self) -> &Self::Target {
+            &self.0
+        }
+    }
+
+    impl $Name {
+        pub fn new(rng: &mut (impl CryptoRng + RngCore)) -> Self {
+            Self(Id::new(rng))
+        }
+
+        pub const fn from_special(special_id: u8) -> Self {
+            Self(Id(special_id as _))
+        }
+    }
+
+    impl From<SpecialId> for $Name {
+        fn from(id: u8) -> Self {
+            Self(Id(id as _))
+        }
+    }
+
+}}
+
+impl_id!(CertId);
+impl_id!(CounterId);
+impl_id!(KeyId);
+// TODO: decide whether this is good idea.
+// It would allow using the same underlying u128 ID for the public key of the private
+// key in a keypair. However, DeleteKey and others would need to be adjusted.
+// impl_id!(PublicKeyId);
+// impl_id!(SecretKeyId);
+
 
 pub mod ui {
     use super::*;
@@ -100,16 +225,16 @@ pub mod consent {
 // a monotonic incrementing counter that
 // "increments on each read" --> save +=1 operation
 
-#[derive(Copy, Clone, Eq, PartialEq, Debug)]
-pub struct AeadUniqueId {
-    unique_id: [u8; 16],
-    nonce: [u8; 12],
-    tag: [u8; 16],
-}
+// #[derive(Copy, Clone, Eq, PartialEq, Debug)]
+// pub struct AeadUniqueId {
+//     unique_id: [u8; 16],
+//     nonce: [u8; 12],
+//     tag: [u8; 16],
+// }
 
-pub type AeadKey = [u8; 32];
-pub type AeadNonce = [u8; 12];
-pub type AeadTag = [u8; 16];
+// pub type AeadKey = [u8; 32];
+// pub type AeadNonce = [u8; 12];
+// pub type AeadTag = [u8; 16];
 
 // pub type ClientId = heapless::Vec<u8, heapless::consts::U32>;
 pub type ClientId = PathBuf;
@@ -231,59 +356,16 @@ impl TryFrom<ShortData> for Letters {
     }
 }
 
-/// Opaque key handle
-///
-/// Ideally, this would be authenticated encryption
-/// around the information that allows locating the key.
-///
-/// So e.g. users can't get at keys they don't own
-///
-#[derive(Copy, Clone, Eq, PartialEq, Debug)]//, Deserialize, Serialize)]
-pub struct ObjectHandle{
-    pub object_id: UniqueId,
-}
-
-// #[derive(Clone, Eq, PartialEq, Debug)]//, Deserialize, Serialize)]
-// pub struct AutoDrop<STORE: crate::store::Store> {
-//     handle: ObjectHandle,
-//     store:  STORE,
-// }
-
-// impl<S: crate::store::Store> core::ops::Deref for AutoDrop<_> {
-//     type Target = ObjectHandle;
-//     fn deref(&self) -> &Self::Target {
-//         &self.handle
-//     }
-// }
-
-// impl<S: crate::store::Store> core::ops::DerefMut for AutoDrop {
-//     fn deref_mut(&mut self) -> &mut Self::Target {
-//         &mut self.handle
-//     }
-// }
-
-// impl<S: crate::store::Store> core::ops::Drop for AutoDrop {
-//     fn drop(&mut self) {
-//         // crate::store::delete_volatile(self.platform.store(), &self.handle);
-//     }
-// }
-
-// impl AutoDrop {
-//     pub fn new(handle: ObjectHandle) -> Self {
-//         Self(handle)
-//     }
-// }
-
-impl serde::Serialize for ObjectHandle {
+impl serde::Serialize for Id {
     fn serialize<S>(&self, serializer: S) -> core::result::Result<S::Ok, S::Error>
     where
         S: serde::Serializer,
     {
-        serializer.serialize_bytes(&self.object_id.0)
+        serializer.serialize_bytes(&self.0.to_be_bytes())
     }
 }
 
-impl<'de> serde::Deserialize<'de> for ObjectHandle {
+impl<'de> serde::Deserialize<'de> for Id {
     fn deserialize<D>(deserializer: D) -> core::result::Result<Self, D::Error>
     where
         D: serde::Deserializer<'de>,
@@ -292,7 +374,7 @@ impl<'de> serde::Deserialize<'de> for ObjectHandle {
 
         impl<'de> serde::de::Visitor<'de> for ValueVisitor<'de>
         {
-            type Value = ObjectHandle;
+            type Value = Id;
 
             fn expecting(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
                 formatter.write_str("16 bytes")
@@ -306,7 +388,7 @@ impl<'de> serde::Deserialize<'de> for ObjectHandle {
                 if v.len() != 16 {
                     return Err(E::invalid_length(v.len(), &self));
                 }
-                Ok(ObjectHandle { object_id: UniqueId(v.try_into().unwrap()) } )
+                Ok(Id(u128::from_be_bytes(v.try_into().unwrap())))
             }
         }
 
@@ -455,81 +537,6 @@ pub enum SignatureSerialization {
     // Cose,
     Raw,
     // Sec1,
-}
-
-pub type SpecialId = u8;
-
-// TODO: We rely on the RNG being good, so 15 zero bytes are improbable, and there
-// are no clashes between trussed-generated and special (app-chosen) IDs.
-// We may or may not want to model this in more detail as enum { Special, Random },
-// and make sure the randomly generated IDs are never in the "special" range.
-#[derive(Copy, Clone, Eq, PartialEq)]//, Deserialize, Serialize)]
-pub struct UniqueId(pub(crate) [u8; 16]);
-
-impl From<SpecialId> for UniqueId {
-    fn from(special_id: u8) -> Self {
-        let mut unique_id = [0u8; 16];
-        // consider this a "big endian" u256, so "first" 256
-        // keys are "special" or "well-known"
-        // E.g. /app/sec/000000000000000000000000000000XX
-        unique_id[15] = special_id;
-        Self(unique_id)
-    }
-}
-
-impl UniqueId {
-    pub fn hex(&self) -> Bytes<consts::U32> {
-        const HEX_CHARS: &[u8] = b"0123456789abcdef";
-        let mut buffer = Bytes::new();
-
-        for i in 0 .. self.0.len() {
-            if self.0[i] == 0 && i != (self.0.len()-1) {
-                // Skip leading zeros.
-                continue;
-            }
-
-            buffer.push(HEX_CHARS[(self.0[i] >> 4) as usize]).unwrap();
-            buffer.push(HEX_CHARS[(self.0[i] & 0xf) as usize]).unwrap();
-        }
-
-        buffer
-    }
-
-    #[allow(clippy::result_unit_err)]
-    pub fn try_from_hex(hex: &[u8]) -> core::result::Result<Self, ()> {
-        // https://stackoverflow.com/a/52992629
-        // (0..hex.len())
-        // use hex::FromHex;
-        // let maybe_bytes = <[u8; 16]>::from_hex(hex).map_err(|e| ());
-        // maybe_bytes.map(|bytes| Self(Bytes::try_from_slice(&bytes).unwrap()))
-        if (hex.len() & 1) == 1 {
-            // panic!("hex len & 1 =  {}", hex.len() & 1);
-            return Err(());
-        }
-        if hex.len() > 32 {
-            // panic!("hex len {}", hex.len());
-            return Err(());
-        }
-        // let hex = core::str::from_utf8(hex).map_err(|e| ())?;
-        let hex = core::str::from_utf8(hex).unwrap();
-        // let hex = core::str::from_utf8_unchecked(hex);
-        let mut bytes = [0u8; 16];
-        for i in 0..(hex.len() >> 1) {
-            // bytes[i] = u8::from_str_radix(&hex[i..][..2], 16).map_err(|e| ())?;
-            bytes[i] = u8::from_str_radix(&hex[2*i..][..2], 16).unwrap();
-        }
-        Ok(UniqueId(bytes))
-    }
-}
-
-impl core::fmt::Debug for UniqueId {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        write!(f, "UniqueId(")?;
-        for ch in &self.hex() {
-            write!(f, "{}", &(*ch as char))?;
-        }
-        write!(f, ")")
-    }
 }
 
 pub type UserAttribute = Bytes<MAX_USER_ATTRIBUTE_LENGTH>;

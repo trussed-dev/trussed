@@ -24,7 +24,7 @@ impl GenerateKey for super::Chacha8Poly1305 {
         let mut serialized = [0u8; 44];
 
         let entropy = &mut serialized[..32];
-        keystore.drbg().fill_bytes(entropy);
+        keystore.rng().fill_bytes(entropy);
 
         // store keys
         let key_id = keystore.store_key(
@@ -34,7 +34,7 @@ impl GenerateKey for super::Chacha8Poly1305 {
             &serialized,
         )?;
 
-        Ok(reply::GenerateKey { key: ObjectHandle { object_id: key_id } })
+        Ok(reply::GenerateKey { key: key_id })
     }
 }
 
@@ -64,7 +64,7 @@ impl Decrypt for super::Chacha8Poly1305
         use chacha20poly1305::aead::{AeadInPlace, NewAead};
 
         let serialized_material = keystore
-            .load_key(key::Secrecy::Secret, Some(key::Kind::Symmetric32Nonce(12)), &request.key.object_id)?
+            .load_key(key::Secrecy::Secret, Some(key::Kind::Symmetric32Nonce(12)), &request.key)?
             .material;
         let serialized = serialized_material.as_ref();
 
@@ -110,7 +110,7 @@ impl Encrypt for super::Chacha8Poly1305
         // load key and nonce
         let secrecy = key::Secrecy::Secret;
         let key_kind = key::Kind::Symmetric32Nonce(12);
-        let key_id = &request.key.object_id;
+        let key_id = &request.key;
         let mut serialized_material = keystore
             .load_key(secrecy, Some(key_kind), key_id)?
             .material;
@@ -121,7 +121,7 @@ impl Encrypt for super::Chacha8Poly1305
         // no panic by above early return
         let location = keystore.location(secrecy, key_id).unwrap();
 
-        // let key_id = request.key.object_id;
+        // let key_id = request.key;
         // let path = keystore.prepare_path_for_key(key::Secrecy::Secret, &key_id)?;
         // let mut serialized = [0u8; 44];
         // debug!("loading encryption key: {:?}", &path);
@@ -173,7 +173,7 @@ impl WrapKey for super::Chacha8Poly1305
 
         // TODO: need to check both secret and private keys
         let serialized_key = keystore
-            .load_key(key::Secrecy::Secret, None, &request.key.object_id)?;
+            .load_key(key::Secrecy::Secret, None, &request.key)?;
 
         let message = serialized_key.serialize().try_convert_into().unwrap();
 
@@ -230,7 +230,7 @@ impl UnwrapKey for super::Chacha8Poly1305
             &material,
         )?;
 
-        Ok(reply::UnwrapKey { key: Some(ObjectHandle { object_id: key_id }) } )
+        Ok(reply::UnwrapKey { key: Some(key_id) })
     }
 }
 
@@ -282,7 +282,7 @@ impl UnwrapKey for super::Chacha8Poly1305
 //         // TODO: perhaps use NoPadding and have client pad, to emphasize spec-conformance?
 //         type Aes256Cbc = Cbc<Aes256, ZeroPadding>;
 
-//         let key_id = request.key.object_id;
+//         let key_id = request.key;
 //         let mut symmetric_key = [0u8; 32];
 //         let path = keystore.prepare_path_for_key(key::Secrecy::Secret, &key_id)?;
 //         keystore.load_serialized_key(&path, key::Kind::SymmetricKey32, &mut symmetric_key)?;
@@ -322,7 +322,7 @@ impl UnwrapKey for super::Chacha8Poly1305
 //     {
 //         use chacha20poly1305::ChaCha8Poly1305;
 
-//         let key_id = request.key.object_id;
+//         let key_id = request.key;
 //         let path = keystore.prepare_path_for_key(key::Secrecy::Secret, &key_id)?;
 
 //         let mut symmetric_key = [0u8; 32];

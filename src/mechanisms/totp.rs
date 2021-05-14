@@ -50,7 +50,7 @@ impl Sign for super::Totp
     fn sign(keystore: &mut impl Keystore, request: &request::Sign)
         -> Result<reply::Sign, Error>
     {
-        let key_id = request.key.object_id;
+        let key_id = request.key;
 
         let secret = keystore
             .load_key(key::Secrecy::Secret, None, &key_id)?
@@ -75,7 +75,7 @@ impl Exists for super::Totp
     fn exists(keystore: &mut impl Keystore, request: &request::Exists)
         -> Result<reply::Exists, Error>
     {
-        let key_id = request.key.object_id;
+        let key_id = request.key;
 
         let exists = keystore.exists_key(key::Secrecy::Secret, Some(key::Kind::Symmetric(20)), &key_id);
         Ok(reply::Exists { exists })

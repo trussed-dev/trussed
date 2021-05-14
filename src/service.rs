@@ -96,7 +96,7 @@ impl<P: Platform> ServiceResources<P> {
         // prepare keystore, bound to client_id, for cryptographic calls
         let mut keystore: ClientKeystore<P> = ClientKeystore::new(
             client_id.clone(),
-            self.drbg().map_err(|_| Error::EntropyMalfunction)?,
+            self.rng().map_err(|_| Error::EntropyMalfunction)?,
             full_store,
         );
         let keystore = &mut keystore;
@@ -104,6 +104,7 @@ impl<P: Platform> ServiceResources<P> {
         // prepare certstore, bound to client_id, for cert calls
         let mut certstore: ClientCertstore<P::S> = ClientCertstore::new(
             client_id.clone(),
+            self.rng().map_err(|_| Error::EntropyMalfunction)?,
             full_store,
         );
         let certstore = &mut certstore;
@@ -111,6 +112,7 @@ impl<P: Platform> ServiceResources<P> {
         // prepare counterstore, bound to client_id, for counter calls
         let mut counterstore: ClientCounterstore<P::S> = ClientCounterstore::new(
             client_id.clone(),
+            self.rng().map_err(|_| Error::EntropyMalfunction)?,
             full_store,
         );
         let counterstore = &mut counterstore;
@@ -140,10 +142,10 @@ impl<P: Platform> ServiceResources<P> {
             Request::Attest(request) => {
                 let mut attn_keystore: ClientKeystore<P> = ClientKeystore::new(
                     PathBuf::from("attn"),
-                    self.drbg().map_err(|_| Error::EntropyMalfunction)?,
+                    self.rng().map_err(|_| Error::EntropyMalfunction)?,
                     full_store,
                 );
-                attest::try_attest(&mut attn_keystore, certstore, counterstore, keystore, request).map(Reply::Attest)
+                attest::try_attest(&mut attn_keystore, certstore, keystore, request).map(Reply::Attest)
             }
 
             Request::Decrypt(request) => {
@@ -196,7 +198,7 @@ impl<P: Platform> ServiceResources<P> {
             },
 
             Request::Delete(request) => {
-                let success = keystore.delete_key(&request.key.object_id);
+                let success = keystore.delete_key(&request.key);
                 Ok(Reply::Delete(reply::Delete { success } ))
             },
 
@@ -231,14 +233,14 @@ impl<P: Platform> ServiceResources<P> {
                 let mut secret_key = MediumData::new();
                 let size = request.size;
                 secret_key.resize_default(request.size).map_err(|_| Error::ImplementationError)?;
-                keystore.drbg().fill_bytes(&mut secret_key[..size]);
+                keystore.rng().fill_bytes(&mut secret_key[..size]);
                 let key_id = keystore.store_key(
                     request.attributes.persistence,
                     key::Secrecy::Secret,
                     key::Kind::Symmetric(size),
                     &secret_key[..size],
                 )?;
-                Ok(Reply::GenerateSecretKey(reply::GenerateSecretKey { key: ObjectHandle { object_id: key_id } }))
+                Ok(Reply::GenerateSecretKey(reply::GenerateSecretKey { key: key_id }))
             },
 
             // deprecated
@@ -247,14 +249,14 @@ impl<P: Platform> ServiceResources<P> {
             },
 
             Request::UnsafeInjectSharedKey(request) => {
-                let key = ObjectHandle { object_id: keystore.store_key(
+                let key_id = keystore.store_key(
                     request.location,
                     key::Secrecy::Secret,
                     key::Kind::Shared(request.raw_key.len()),
                     &request.raw_key,
-                )? };
+                )?;
 
-                Ok(Reply::UnsafeInjectSharedKey(reply::UnsafeInjectSharedKey { key } ))
+                Ok(Reply::UnsafeInjectSharedKey(reply::UnsafeInjectSharedKey { key: key_id } ))
             },
 
             Request::Hash(request) => {
@@ -407,7 +409,7 @@ impl<P: Platform> ServiceResources<P> {
                 if request.count < 1024 {
                     let mut bytes = Message::new();
                     bytes.resize_default(request.count).unwrap();
-                    self.drbg()?.fill_bytes(&mut bytes);
+                    self.rng()?.fill_bytes(&mut bytes);
                     Ok(Reply::RandomBytes(reply::RandomBytes { bytes } ))
                 } else {
                     Err(Error::MechanismNotAvailable)
@@ -546,25 +548,25 @@ impl<P: Platform> ServiceResources<P> {
             }
 
             Request::WriteCertificate(request) => {
-                certstore.write_certificate(request.location, &request.der, counterstore)
+                certstore.write_certificate(request.location, &request.der)
                     .map(|id| Reply::WriteCertificate(reply::WriteCertificate { id } ))
             }
 
-            _ => {
-                // #[cfg(test)]
-                // println!("todo: {:?} request!", &request);
-                Err(Error::RequestNotAvailable)
-            },
+            // _ => {
+            //     // #[cfg(test)]
+            //     // println!("todo: {:?} request!", &request);
+            //     Err(Error::RequestNotAvailable)
+            // },
         }
     }
 
     /// Applies a splitting aka forking construction to the inner DRBG,
     /// returning an independent DRBG.
-    pub fn drbg(&mut self) -> Result<ChaCha8Rng, Error> {
+    pub fn rng(&mut self) -> Result<ChaCha8Rng, Error> {
 
         // Check if our RNG is loaded.
-        let mut drbg = match self.rng_state.take() {
-            Some(drbg) => drbg,
+        let mut rng = match self.rng_state.take() {
+            Some(rng) => rng,
             None => {
                 let mut filestore: ClientFilestore<P::S> = ClientFilestore::new(
                     PathBuf::from("trussed"),
@@ -611,26 +613,26 @@ impl<P: Platform> ServiceResources<P> {
                 }
 
                 // 3. Initialize ChaCha8 construction with our seed.
-                let mut drbg = chacha20::ChaCha8Rng::from_seed(our_seed);
+                let mut rng = chacha20::ChaCha8Rng::from_seed(our_seed);
 
                 // 4. Store freshly drawn seed for next boot.
                 let mut seed_to_store = [0u8; 32];
-                drbg.fill_bytes(&mut seed_to_store);
+                rng.fill_bytes(&mut seed_to_store);
                 filestore.write(&path, Location::Internal, seed_to_store.as_ref()).unwrap();
 
                 // 5. Finish
-                Ok(drbg)
+                Ok(rng)
             }?
         };
 
         // split off another DRBG
-        let split_drbg = ChaCha8Rng::from_rng(&mut drbg).map_err(|_| Error::EntropyMalfunction);
-        self.rng_state = Some(drbg);
-        split_drbg
+        let split_rng = ChaCha8Rng::from_rng(&mut rng).map_err(|_| Error::EntropyMalfunction);
+        self.rng_state = Some(rng);
+        split_rng
     }
 
     pub fn fill_random_bytes(&mut self, bytes: &mut[u8]) -> Result<(), Error> {
-        self.drbg()?.fill_bytes(bytes);
+        self.rng()?.fill_bytes(bytes);
         Ok(())
     }
 

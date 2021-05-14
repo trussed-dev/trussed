@@ -1,7 +1,6 @@
 use chacha20::ChaCha8Rng;
 pub use heapless::consts;
 use littlefs2::path::PathBuf;
-use rand_core::RngCore as _;
 
 use crate::{
     Bytes,
@@ -9,25 +8,24 @@ use crate::{
     key,
     Platform,
     store::{self, Store as _},
-    types::Location as Location,
+    types::{KeyId, Location},
 };
 
 
 pub type ClientId = littlefs2::path::PathBuf;
-pub type KeyId = crate::types::UniqueId;
 
 pub struct ClientKeystore<P>
 where
     P: Platform,
 {
     client_id: ClientId,
-    drbg: ChaCha8Rng,
+    rng: ChaCha8Rng,
     store: P::S,
 }
 
 impl<'a, P: Platform> ClientKeystore<P> {
-    pub fn new(client_id: ClientId, drbg: ChaCha8Rng, store: P::S) -> Self {
-        Self { client_id, drbg, store }
+    pub fn new(client_id: ClientId, rng: ChaCha8Rng, store: P::S) -> Self {
+        Self { client_id, rng, store }
     }
 }
 
@@ -46,17 +44,14 @@ pub trait Keystore {
     fn delete_all(&self, location: Location) -> Result<usize>;
     fn load_key(&self, secrecy: key::Secrecy, kind: Option<key::Kind>, id: &KeyId) -> Result<key::Key>;
     fn overwrite_key(&self, location: Location, secrecy: key::Secrecy, kind: key::Kind, id: &KeyId, material: &[u8]) -> Result<()>;
-    fn drbg(&mut self) -> &mut ChaCha8Rng;
+    fn rng(&mut self) -> &mut ChaCha8Rng;
     fn location(&self, secrecy: key::Secrecy, id: &KeyId) -> Option<Location>;
 }
 
 impl<P: Platform> ClientKeystore<P> {
 
     pub fn generate_key_id(&mut self) -> KeyId {
-        let mut id = [0u8; 16];
-
-        self.drbg.fill_bytes(&mut id);
-        crate::types::UniqueId(id)
+        KeyId::new(self.rng())
     }
 
     pub fn key_directory(&self, secrecy: key::Secrecy) -> PathBuf {
@@ -79,8 +74,8 @@ impl<P: Platform> ClientKeystore<P> {
 
 impl<P: Platform> Keystore for ClientKeystore<P> {
 
-    fn drbg(&mut self) -> &mut ChaCha8Rng {
-        &mut self.drbg
+    fn rng(&mut self) -> &mut ChaCha8Rng {
+        &mut self.rng
     }
 
     #[inline(never)]
