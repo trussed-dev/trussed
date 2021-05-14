@@ -473,7 +473,6 @@
 <span id="470">470</span>
 <span id="471">471</span>
 <span id="472">472</span>
-<span id="473">473</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! This (incomplete!) API loosely follows [PKCS#11 v3][pkcs11-v3].</span>
 <span class="doccomment">//!</span>
@@ -484,7 +483,6 @@
 
 <span class="kw">use</span> <span class="ident">core</span>::<span class="ident">hint</span>::<span class="ident">unreachable_unchecked</span>;
 <span class="kw">use</span> <span class="ident">core</span>::<span class="ident">time</span>::<span class="ident">Duration</span>;
-<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">config</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">types</span>::<span class="kw-2">*</span>;
 
 <span class="attribute">#[<span class="ident">macro_use</span>]</span>
@@ -503,7 +501,7 @@
     <span class="comment">////////////</span>
 
     <span class="ident">Agree</span>: <span class="number">1</span>
-    <span class="ident">CreateObject</span>: <span class="number">2</span>
+    <span class="comment">// CreateObject: 2</span>
     <span class="comment">// TODO: why do Decrypt and DeriveKey both have discriminant 3?!</span>
     <span class="ident">Decrypt</span>: <span class="number">3</span>
     <span class="ident">DeriveKey</span>: <span class="number">4</span>
@@ -513,7 +511,7 @@
     <span class="ident">DeleteAllKeys</span>: <span class="number">25</span>
     <span class="ident">Exists</span>: <span class="number">8</span>
     <span class="comment">// DeriveKeypair: 3</span>
-    <span class="ident">FindObjects</span>: <span class="number">9</span>
+    <span class="comment">// FindObjects: 9</span>
     <span class="ident">GenerateKey</span>: <span class="number">10</span>
     <span class="ident">GenerateSecretKey</span>: <span class="number">11</span>
     <span class="comment">// GenerateKeypair: 6</span>
@@ -587,34 +585,34 @@
     <span class="macro">impl_request</span><span class="macro">!</span> {
         <span class="ident">Agree</span>:
             <span class="op">-</span> <span class="ident">mechanism</span>: <span class="ident">Mechanism</span>
-            <span class="op">-</span> <span class="ident">private_key</span>: <span class="ident">ObjectHandle</span>
-            <span class="op">-</span> <span class="ident">public_key</span>: <span class="ident">ObjectHandle</span>
+            <span class="op">-</span> <span class="ident">private_key</span>: <span class="ident">KeyId</span>
+            <span class="op">-</span> <span class="ident">public_key</span>: <span class="ident">KeyId</span>
             <span class="op">-</span> <span class="ident">attributes</span>: <span class="ident">StorageAttributes</span>
 
         <span class="ident">Attest</span>:
             <span class="comment">// only Ed255 + P256</span>
             <span class="op">-</span> <span class="ident">signing_mechanism</span>: <span class="ident">Mechanism</span>
             <span class="comment">// only Ed255 + P256</span>
-            <span class="op">-</span> <span class="ident">private_key</span>: <span class="ident">ObjectHandle</span>
+            <span class="op">-</span> <span class="ident">private_key</span>: <span class="ident">KeyId</span>
 
-        <span class="comment">// examples:</span>
-        <span class="comment">// - store public keys from external source</span>
-        <span class="comment">// - store certificates</span>
-        <span class="ident">CreateObject</span>:
-            <span class="op">-</span> <span class="ident">attributes</span>: <span class="ident">Attributes</span>
+        <span class="comment">// // examples:</span>
+        <span class="comment">// // - store public keys from external source</span>
+        <span class="comment">// // - store certificates</span>
+        <span class="comment">// CreateObject:</span>
+        <span class="comment">//     - attributes: Attributes</span>
 
         <span class="ident">DebugDumpStore</span>:
 
         <span class="ident">Decrypt</span>:
           <span class="op">-</span> <span class="ident">mechanism</span>: <span class="ident">Mechanism</span>
-          <span class="op">-</span> <span class="ident">key</span>: <span class="ident">ObjectHandle</span>
+          <span class="op">-</span> <span class="ident">key</span>: <span class="ident">KeyId</span>
           <span class="op">-</span> <span class="ident">message</span>: <span class="ident">Message</span>
           <span class="op">-</span> <span class="ident">associated_data</span>: <span class="ident">Message</span>
           <span class="op">-</span> <span class="ident">nonce</span>: <span class="ident">ShortData</span>
           <span class="op">-</span> <span class="ident">tag</span>: <span class="ident">ShortData</span>
 
         <span class="ident">Delete</span>:
-          <span class="op">-</span> <span class="ident">key</span>: <span class="ident">ObjectHandle</span>
+          <span class="op">-</span> <span class="ident">key</span>: <span class="ident">KeyId</span>
 
         <span class="ident">DeleteAllKeys</span>:
           <span class="op">-</span> <span class="ident">location</span>: <span class="ident">Location</span>
@@ -629,7 +627,7 @@
         <span class="comment">// - hierarchical deterministic wallet stuff</span>
         <span class="ident">DeriveKey</span>:
             <span class="op">-</span> <span class="ident">mechanism</span>: <span class="ident">Mechanism</span>
-            <span class="op">-</span> <span class="ident">base_key</span>: <span class="ident">ObjectHandle</span>
+            <span class="op">-</span> <span class="ident">base_key</span>: <span class="ident">KeyId</span>
             <span class="comment">// - auxiliary_key: Option&lt;ObjectHandle&gt;</span>
             <span class="op">-</span> <span class="ident">additional_data</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">MediumData</span><span class="op">&gt;</span>
             <span class="comment">// - attributes: KeyAttributes</span>
@@ -649,17 +647,17 @@
 
         <span class="ident">Encrypt</span>:
           <span class="op">-</span> <span class="ident">mechanism</span>: <span class="ident">Mechanism</span>
-          <span class="op">-</span> <span class="ident">key</span>: <span class="ident">ObjectHandle</span>
+          <span class="op">-</span> <span class="ident">key</span>: <span class="ident">KeyId</span>
           <span class="op">-</span> <span class="ident">message</span>: <span class="ident">Message</span>
           <span class="op">-</span> <span class="ident">associated_data</span>: <span class="ident">ShortData</span>
           <span class="op">-</span> <span class="ident">nonce</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ShortData</span><span class="op">&gt;</span>
 
         <span class="ident">Exists</span>:
           <span class="op">-</span> <span class="ident">mechanism</span>: <span class="ident">Mechanism</span>
-          <span class="op">-</span> <span class="ident">key</span>: <span class="ident">ObjectHandle</span>
+          <span class="op">-</span> <span class="ident">key</span>: <span class="ident">KeyId</span>
 
-        <span class="ident">FindObjects</span>:
-            <span class="comment">// - attributes: Attributes</span>
+        <span class="comment">// FindObjects:</span>
+        <span class="comment">//     // - attributes: Attributes</span>
 
         <span class="ident">GenerateKey</span>:
             <span class="op">-</span> <span class="ident">mechanism</span>: <span class="ident">Mechanism</span>        <span class="comment">// -&gt; implies key type</span>
@@ -730,12 +728,12 @@
 
         <span class="ident">SerializeKey</span>:
           <span class="op">-</span> <span class="ident">mechanism</span>: <span class="ident">Mechanism</span>
-          <span class="op">-</span> <span class="ident">key</span>: <span class="ident">ObjectHandle</span>
+          <span class="op">-</span> <span class="ident">key</span>: <span class="ident">KeyId</span>
           <span class="op">-</span> <span class="ident">format</span>: <span class="ident">KeySerialization</span>
 
         <span class="ident">Sign</span>:
           <span class="op">-</span> <span class="ident">mechanism</span>: <span class="ident">Mechanism</span>
-          <span class="op">-</span> <span class="ident">key</span>: <span class="ident">ObjectHandle</span>
+          <span class="op">-</span> <span class="ident">key</span>: <span class="ident">KeyId</span>
           <span class="op">-</span> <span class="ident">message</span>: <span class="ident">Message</span>
           <span class="op">-</span> <span class="ident">format</span>: <span class="ident">SignatureSerialization</span>
 
@@ -756,14 +754,14 @@
 
         <span class="ident">UnwrapKey</span>:
           <span class="op">-</span> <span class="ident">mechanism</span>: <span class="ident">Mechanism</span>
-          <span class="op">-</span> <span class="ident">wrapping_key</span>: <span class="ident">ObjectHandle</span>
+          <span class="op">-</span> <span class="ident">wrapping_key</span>: <span class="ident">KeyId</span>
           <span class="op">-</span> <span class="ident">wrapped_key</span>: <span class="ident">Message</span>
           <span class="op">-</span> <span class="ident">associated_data</span>: <span class="ident">Message</span>
           <span class="op">-</span> <span class="ident">attributes</span>: <span class="ident">StorageAttributes</span>
 
         <span class="ident">Verify</span>:
           <span class="op">-</span> <span class="ident">mechanism</span>: <span class="ident">Mechanism</span>
-          <span class="op">-</span> <span class="ident">key</span>: <span class="ident">ObjectHandle</span>
+          <span class="op">-</span> <span class="ident">key</span>: <span class="ident">KeyId</span>
           <span class="op">-</span> <span class="ident">message</span>: <span class="ident">Message</span>
           <span class="op">-</span> <span class="ident">signature</span>: <span class="ident">Signature</span>
           <span class="op">-</span> <span class="ident">format</span>: <span class="ident">SignatureSerialization</span>
@@ -771,8 +769,8 @@
         <span class="comment">// this should always be an AEAD algorithm</span>
         <span class="ident">WrapKey</span>:
           <span class="op">-</span> <span class="ident">mechanism</span>: <span class="ident">Mechanism</span>
-          <span class="op">-</span> <span class="ident">wrapping_key</span>: <span class="ident">ObjectHandle</span>
-          <span class="op">-</span> <span class="ident">key</span>: <span class="ident">ObjectHandle</span>
+          <span class="op">-</span> <span class="ident">wrapping_key</span>: <span class="ident">KeyId</span>
+          <span class="op">-</span> <span class="ident">key</span>: <span class="ident">KeyId</span>
           <span class="op">-</span> <span class="ident">associated_data</span>: <span class="ident">Message</span>
 
         <span class="ident">RequestUserConsent</span>:
@@ -788,13 +786,13 @@
           <span class="op">-</span> <span class="ident">location</span>: <span class="ident">Location</span>
 
         <span class="ident">IncrementCounter</span>:
-          <span class="op">-</span> <span class="ident">id</span>: <span class="ident">Id</span>
+          <span class="op">-</span> <span class="ident">id</span>: <span class="ident">CounterId</span>
 
         <span class="ident">DeleteCertificate</span>:
-          <span class="op">-</span> <span class="ident">id</span>: <span class="ident">Id</span>
+          <span class="op">-</span> <span class="ident">id</span>: <span class="ident">CertId</span>
 
         <span class="ident">ReadCertificate</span>:
-          <span class="op">-</span> <span class="ident">id</span>: <span class="ident">Id</span>
+          <span class="op">-</span> <span class="ident">id</span>: <span class="ident">CertId</span>
 
         <span class="ident">WriteCertificate</span>:
           <span class="op">-</span> <span class="ident">location</span>: <span class="ident">Location</span>
@@ -814,18 +812,18 @@
         <span class="comment">// e.g.: P256Raw -&gt; SharedSecret32</span>
         <span class="comment">//       P256Sha256 -&gt; SymmetricKey32</span>
         <span class="ident">Agree</span>:
-            <span class="op">-</span> <span class="ident">shared_secret</span>: <span class="ident">ObjectHandle</span>
+            <span class="op">-</span> <span class="ident">shared_secret</span>: <span class="ident">KeyId</span>
 
         <span class="ident">Attest</span>:
-            <span class="op">-</span> <span class="ident">certificate</span>: <span class="ident">Id</span>
+            <span class="op">-</span> <span class="ident">certificate</span>: <span class="ident">CertId</span>
 
-        <span class="ident">CreateObject</span>:
-            <span class="op">-</span> <span class="ident">object</span>: <span class="ident">ObjectHandle</span>
+        <span class="comment">// CreateObject:</span>
+        <span class="comment">//     - object: ObjectHandle</span>
 
-        <span class="ident">FindObjects</span>:
-            <span class="op">-</span> <span class="ident">objects</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ObjectHandle</span>, <span class="ident">config</span>::<span class="ident">MAX_OBJECT_HANDLES</span><span class="op">&gt;</span>
-            <span class="comment">// can be higher than capacity of vector</span>
-            <span class="op">-</span> <span class="ident">num_objects</span>: <span class="ident">usize</span>
+        <span class="comment">// FindObjects:</span>
+        <span class="comment">//     - objects: Vec&lt;ObjectHandle, config::MAX_OBJECT_HANDLES&gt;</span>
+        <span class="comment">//     // can be higher than capacity of vector</span>
+        <span class="comment">//     - num_objects: usize</span>
 
         <span class="ident">DebugDumpStore</span>:
 
@@ -839,14 +837,14 @@
             <span class="op">-</span> <span class="ident">count</span>: <span class="ident">usize</span>
 
         <span class="ident">DeriveKey</span>:
-            <span class="op">-</span> <span class="ident">key</span>: <span class="ident">ObjectHandle</span>
+            <span class="op">-</span> <span class="ident">key</span>: <span class="ident">KeyId</span>
 
         <span class="comment">// DeriveKeypair:</span>
         <span class="comment">//     - private_key: ObjectHandle</span>
         <span class="comment">//     - public_key: ObjectHandle</span>
 
         <span class="ident">DeserializeKey</span>:
-            <span class="op">-</span> <span class="ident">key</span>: <span class="ident">ObjectHandle</span>
+            <span class="op">-</span> <span class="ident">key</span>: <span class="ident">KeyId</span>
 
 		<span class="ident">Encrypt</span>:
             <span class="op">-</span> <span class="ident">ciphertext</span>: <span class="ident">Message</span>
@@ -857,14 +855,14 @@
             <span class="op">-</span> <span class="ident">exists</span>: <span class="ident">bool</span>
 
         <span class="ident">GenerateKey</span>:
-            <span class="op">-</span> <span class="ident">key</span>: <span class="ident">ObjectHandle</span>
+            <span class="op">-</span> <span class="ident">key</span>: <span class="ident">KeyId</span>
 
         <span class="ident">GenerateSecretKey</span>:
-            <span class="op">-</span> <span class="ident">key</span>: <span class="ident">ObjectHandle</span>
+            <span class="op">-</span> <span class="ident">key</span>: <span class="ident">KeyId</span>
 
         <span class="comment">// GenerateKeypair:</span>
-        <span class="comment">//     - private_key: ObjectHandle</span>
-        <span class="comment">//     - public_key: ObjectHandle</span>
+        <span class="comment">//     - private_key: KeyId</span>
+        <span class="comment">//     - public_key: KeyId</span>
 
         <span class="ident">Hash</span>:
           <span class="op">-</span> <span class="ident">hash</span>: <span class="ident">ShortData</span>
@@ -912,13 +910,13 @@
             <span class="op">-</span> <span class="ident">valid</span>: <span class="ident">bool</span>
 
         <span class="ident">UnsafeInjectKey</span>:
-            <span class="op">-</span> <span class="ident">key</span>: <span class="ident">ObjectHandle</span>
+            <span class="op">-</span> <span class="ident">key</span>: <span class="ident">KeyId</span>
 
         <span class="ident">UnsafeInjectSharedKey</span>:
-            <span class="op">-</span> <span class="ident">key</span>: <span class="ident">ObjectHandle</span>
+            <span class="op">-</span> <span class="ident">key</span>: <span class="ident">KeyId</span>
 
         <span class="ident">UnwrapKey</span>:
-            <span class="op">-</span> <span class="ident">key</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ObjectHandle</span><span class="op">&gt;</span>
+            <span class="op">-</span> <span class="ident">key</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">KeyId</span><span class="op">&gt;</span>
 
         <span class="ident">WrapKey</span>:
             <span class="op">-</span> <span class="ident">wrapped_key</span>: <span class="ident">Message</span>
@@ -933,7 +931,7 @@
           <span class="op">-</span> <span class="ident">uptime</span>: <span class="ident">Duration</span>
 
         <span class="ident">CreateCounter</span>:
-          <span class="op">-</span> <span class="ident">id</span>: <span class="ident">Id</span>
+          <span class="op">-</span> <span class="ident">id</span>: <span class="ident">CounterId</span>
 
         <span class="ident">IncrementCounter</span>:
           <span class="op">-</span> <span class="ident">counter</span>: <span class="ident">u128</span>
@@ -944,7 +942,7 @@
           <span class="op">-</span> <span class="ident">der</span>: <span class="ident">Message</span>
 
         <span class="ident">WriteCertificate</span>:
-          <span class="op">-</span> <span class="ident">id</span>: <span class="ident">Id</span>
+          <span class="op">-</span> <span class="ident">id</span>: <span class="ident">CertId</span>
     }
 
 }
