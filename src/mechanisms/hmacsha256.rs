@@ -15,7 +15,7 @@ impl DeriveKey for super::HmacSha256
         use hmac::{Hmac, Mac, NewMac};
         type HmacSha256 = Hmac<sha2::Sha256>;
 
-        let key_id = request.base_key.object_id;
+        let key_id = request.base_key;
         let shared_secret = keystore.load_key(key::Secrecy::Secret, None, &key_id)?.material;
 
         let mut mac = HmacSha256::new_from_slice(&shared_secret.as_ref())
@@ -30,7 +30,7 @@ impl DeriveKey for super::HmacSha256
             key::Secrecy::Secret, key::Kind::Symmetric(32),
             &derived_key)?;
 
-        Ok(reply::DeriveKey { key: ObjectHandle { object_id: key_id } })
+        Ok(reply::DeriveKey { key: key_id })
 
     }
 }
@@ -46,7 +46,7 @@ impl Sign for super::HmacSha256
         use hmac::{Hmac, Mac, NewMac};
         type HmacSha256 = Hmac<Sha256>;
 
-        let key_id = request.key.object_id;
+        let key_id = request.key;
         let shared_secret = keystore.load_key(key::Secrecy::Secret, None, &key_id)?.material;
 
         let mut mac = HmacSha256::new_from_slice(&shared_secret.as_ref())

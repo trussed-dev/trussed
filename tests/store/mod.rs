@@ -13,6 +13,7 @@ trussed::store!(Store,
     Volatile: VolatileStorage
 );
 
+#[allow(dead_code)]
 pub fn get<R>(
         test: impl FnOnce(&mut Store) -> R
     )
@@ -22,6 +23,7 @@ pub fn get<R>(
     test(&mut store)
 }
 
+#[allow(dead_code)]
 fn init_store() -> Store {
     Store::format(
         InternalStorage::new(),

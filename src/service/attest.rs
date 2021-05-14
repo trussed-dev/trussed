@@ -16,25 +16,23 @@ use crate::{
     mechanisms,
     service::{DeriveKey, SerializeKey, Sign},
     store::certstore::Certstore,
-    store::counterstore::Counterstore,
     store::keystore::Keystore,
-    types::{KeySerialization, Location, Mechanism, Message, ObjectHandle, SignatureSerialization, StorageAttributes, UniqueId},
+    types::{KeyId, KeySerialization, Location, Mechanism, Message, SignatureSerialization, StorageAttributes},
 };
 
 #[cfg(not(feature = "test-attestation-cert-ids"))]
-pub const ED255_ATTN_KEY: UniqueId = UniqueId([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1]);
+pub const ED255_ATTN_KEY: KeyId = KeyId::from_special(1);
 #[cfg(feature = "test-attestation-cert-ids")]
-pub const ED255_ATTN_KEY: UniqueId = UniqueId([0x12,0xd2,0xa7,0xe4,0x03,0x55,0x21,0x42,0x99,0xf1,0x57,0x34,0xc5,0xd7,0xd0,0xe7]);
+pub const ED255_ATTN_KEY: KeyId = KeyId(Id(u128::from_be_bytes([0x12,0xd2,0xa7,0xe4,0x03,0x55,0x21,0x42,0x99,0xf1,0x57,0x34,0xc5,0xd7,0xd0,0xe7])));
 #[cfg(not(feature = "test-attestation-cert-ids"))]
-pub const P256_ATTN_KEY: UniqueId = UniqueId([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2]);
+pub const P256_ATTN_KEY: KeyId = KeyId::from_special(2);
 #[cfg(feature = "test-attestation-cert-ids")]
-pub const P256_ATTN_KEY: UniqueId = UniqueId([0xc8,0xd6,0x77,0xa3,0x93,0x46,0xc9,0x8f,0xc8,0x5a,0xb0,0x5d,0x29,0xc5,0x75,0x32]);
+pub const P256_ATTN_KEY: KeyId = KeyId(Id(u128::from_be_bytes([0xc8,0xd6,0x77,0xa3,0x93,0x46,0xc9,0x8f,0xc8,0x5a,0xb0,0x5d,0x29,0xc5,0x75,0x32])));
 
 #[inline(never)]
 pub fn try_attest(
     attn_keystore: &mut impl Keystore,
     certstore: &mut impl Certstore,
-    counterstore: &mut impl Counterstore,
     keystore: &mut impl Keystore,
     request: &AttestRequest,
 )
@@ -47,14 +45,14 @@ pub fn try_attest(
     // 1. Construct the TBS Certificate
 
     let mut serial = [0u8; 20];
-    keystore.drbg().fill_bytes(&mut serial);
+    keystore.rng().fill_bytes(&mut serial);
 
     enum KeyAlgorithm {
         Ed255,
         P256,
     }
 
-    let key_algorithm = match keystore.key_info(key::Secrecy::Secret, &request.private_key.object_id) {
+    let key_algorithm = match keystore.key_info(key::Secrecy::Secret, &request.private_key) {
         None => return Err(Error::NoSuchKey),
         Some(info) => {
             if !info.flags.contains(key::Flags::LOCAL) {
@@ -88,7 +86,7 @@ pub fn try_attest(
                     format: KeySerialization::Raw,
                 },
             ).unwrap().serialized_key;
-            keystore.delete_key(&public_key.object_id);
+            keystore.delete_key(&public_key);
 
             SerializedSubjectPublicKey::Ed255(
                 serialized_key.as_ref().try_into().map_err(|_| Error::ImplementationError)?
@@ -113,7 +111,7 @@ pub fn try_attest(
                     format: KeySerialization::Sec1,
                 },
             ).unwrap().serialized_key;
-            keystore.delete_key(&public_key.object_id);
+            keystore.delete_key(&public_key);
 
             SerializedSubjectPublicKey::P256(
                 serialized_key.as_ref().try_into().map_err(|_| Error::ImplementationError)?
@@ -144,7 +142,7 @@ pub fn try_attest(
                 attn_keystore,
                 &request::Sign {
                     mechanism: Mechanism::Ed255,
-                    key: ObjectHandle { object_id: ED255_ATTN_KEY },
+                    key: ED255_ATTN_KEY,
                     message,
                     format: SignatureSerialization::Raw,
                 },
@@ -156,7 +154,7 @@ pub fn try_attest(
                 attn_keystore,
                 &request::Sign {
                     mechanism: Mechanism::P256,
-                    key: ObjectHandle { object_id: P256_ATTN_KEY },
+                    key: P256_ATTN_KEY,
                     message,
                     format: SignatureSerialization::Asn1Der,
                 },
@@ -177,7 +175,7 @@ pub fn try_attest(
         .to_heapless_vec()
         .map_err(|_| Error::ImplementationError)?);
 
-    let id = certstore.write_certificate(Location::Internal, &certificate, counterstore)?;
+    let id = certstore.write_certificate(Location::Internal, &certificate)?;
 
     Ok(AttestReply { certificate: id })
 }

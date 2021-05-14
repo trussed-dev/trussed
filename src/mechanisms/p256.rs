@@ -7,7 +7,7 @@ use crate::service::*;
 use crate::types::*;
 
 #[inline(never)]
-fn load_secret_key(keystore: &mut impl Keystore, key_id: &UniqueId)
+fn load_secret_key(keystore: &mut impl Keystore, key_id: &KeyId)
     -> Result<p256_cortex_m4::SecretKey, Error>
 {
 
@@ -24,7 +24,7 @@ fn load_secret_key(keystore: &mut impl Keystore, key_id: &UniqueId)
 }
 
 #[inline(never)]
-fn load_public_key(keystore: &mut impl Keystore, key_id: &UniqueId)
+fn load_public_key(keystore: &mut impl Keystore, key_id: &KeyId)
     -> Result<p256_cortex_m4::PublicKey, Error>
 {
     let compressed_public_key: [u8; 33] = keystore
@@ -44,8 +44,8 @@ impl Agree for super::P256
     fn agree(keystore: &mut impl Keystore, request: &request::Agree)
         -> Result<reply::Agree, Error>
     {
-        let private_id = request.private_key.object_id;
-        let public_id = request.public_key.object_id;
+        let private_id = request.private_key;
+        let public_id = request.public_key;
 
         let secret_key = load_secret_key(keystore, &private_id)?;
         let public_key = load_public_key(keystore, &public_id)?;
@@ -58,7 +58,7 @@ impl Agree for super::P256
             shared_secret.as_bytes())?;
 
         // return handle
-        Ok(reply::Agree { shared_secret: ObjectHandle { object_id: key_id } })
+        Ok(reply::Agree { shared_secret: key_id })
     }
 }
 
@@ -69,7 +69,7 @@ impl DeriveKey for super::P256
     fn derive_key(keystore: &mut impl Keystore, request: &request::DeriveKey)
         -> Result<reply::DeriveKey, Error>
     {
-        let base_id = request.base_key.object_id;
+        let base_id = request.base_key;
 
         let secret_key = load_secret_key(keystore, &base_id)?;
         let public_key = secret_key.public_key();
@@ -80,7 +80,7 @@ impl DeriveKey for super::P256
             &public_key.to_compressed_sec1_bytes())?;
 
         Ok(reply::DeriveKey {
-            key: ObjectHandle { object_id: public_id },
+            key: public_id
         })
     }
 }
@@ -150,9 +150,7 @@ impl DeserializeKey for super::P256
             &public_key.to_compressed_sec1_bytes())?;
 
 
-        Ok(reply::DeserializeKey {
-            key: ObjectHandle { object_id: public_id },
-        })
+        Ok(reply::DeserializeKey { key: public_id })
     }
 }
 
@@ -163,7 +161,7 @@ impl GenerateKey for super::P256
     fn generate_key(keystore: &mut impl Keystore, request: &request::GenerateKey)
         -> Result<reply::GenerateKey, Error>
     {
-        let keypair = p256_cortex_m4::Keypair::random(&mut keystore.drbg());
+        let keypair = p256_cortex_m4::Keypair::random(&mut keystore.rng());
 
         // store keys
         let key_id = keystore.store_key(
@@ -174,7 +172,7 @@ impl GenerateKey for super::P256
         )?;
 
         // return handle
-        Ok(reply::GenerateKey { key: ObjectHandle { object_id: key_id } })
+        Ok(reply::GenerateKey { key: key_id })
     }
 
 }
@@ -187,7 +185,7 @@ impl SerializeKey for super::P256
         -> Result<reply::SerializeKey, Error>
     {
 
-        let key_id = request.key.object_id;
+        let key_id = request.key;
 
         let public_key = load_public_key(keystore, &key_id)?;
 
@@ -230,7 +228,7 @@ impl Exists for super::P256
     fn exists(keystore: &mut impl Keystore, request: &request::Exists)
         -> Result<reply::Exists, Error>
     {
-        let key_id = request.key.object_id;
+        let key_id = request.key;
         let exists = keystore.exists_key(key::Secrecy::Secret, Some(key::Kind::P256), &key_id);
         Ok(reply::Exists { exists })
     }
@@ -243,10 +241,10 @@ impl Sign for super::P256
     fn sign(keystore: &mut impl Keystore, request: &request::Sign)
         -> Result<reply::Sign, Error>
     {
-        let key_id = request.key.object_id;
+        let key_id = request.key;
 
         let secret_key = load_secret_key(keystore, &key_id)?;
-        let signature = secret_key.sign(&request.message, keystore.drbg());
+        let signature = secret_key.sign(&request.message, keystore.rng());
 
         // debug_now!("making signature");
         let serialized_signature = match request.format {
@@ -273,10 +271,10 @@ impl Sign for super::P256Prehashed
     fn sign(keystore: &mut impl Keystore, request: &request::Sign)
         -> Result<reply::Sign, Error>
     {
-        let key_id = request.key.object_id;
+        let key_id = request.key;
 
         let secret_key = load_secret_key(keystore, &key_id)?;
-        let signature = secret_key.sign_prehashed(&request.message, keystore.drbg());
+        let signature = secret_key.sign_prehashed(&request.message, keystore.rng());
 
         // debug_now!("making signature");
         let serialized_signature = match request.format {
@@ -303,7 +301,7 @@ impl Verify for super::P256
     fn verify(keystore: &mut impl Keystore, request: &request::Verify)
         -> Result<reply::Verify, Error>
     {
-        let key_id = request.key.object_id;
+        let key_id = request.key;
 
         let public_key = load_public_key(keystore, &key_id)?;
 

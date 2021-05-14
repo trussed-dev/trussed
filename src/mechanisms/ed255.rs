@@ -8,7 +8,7 @@ use crate::service::*;
 use crate::types::*;
 
     #[inline(never)]
-fn load_public_key(keystore: &mut impl Keystore, key_id: &UniqueId)
+fn load_public_key(keystore: &mut impl Keystore, key_id: &KeyId)
     -> Result<salty::PublicKey, Error> {
 
     let public_bytes: [u8; 32] = keystore
@@ -23,7 +23,7 @@ fn load_public_key(keystore: &mut impl Keystore, key_id: &UniqueId)
 }
 
     #[inline(never)]
-fn load_keypair(keystore: &mut impl Keystore, key_id: &UniqueId)
+fn load_keypair(keystore: &mut impl Keystore, key_id: &KeyId)
     -> Result<salty::Keypair, Error> {
 
     let seed: [u8; 32] = keystore
@@ -44,7 +44,7 @@ impl DeriveKey for super::Ed255
     fn derive_key(keystore: &mut impl Keystore, request: &request::DeriveKey)
         -> Result<reply::DeriveKey, Error>
     {
-        let base_id = &request.base_key.object_id;
+        let base_id = &request.base_key;
         let keypair = load_keypair(keystore, base_id)?;
 
         let public_id = keystore.store_key(
@@ -53,7 +53,7 @@ impl DeriveKey for super::Ed255
             keypair.public.as_bytes())?;
 
         Ok(reply::DeriveKey {
-            key: ObjectHandle { object_id: public_id },
+            key: public_id,
         })
     }
 }
@@ -87,7 +87,7 @@ impl DeserializeKey for super::Ed255
             public_key.as_bytes())?;
 
         Ok(reply::DeserializeKey {
-            key: ObjectHandle { object_id: public_id },
+            key: public_id
         })
     }
 }
@@ -100,7 +100,7 @@ impl GenerateKey for super::Ed255
         -> Result<reply::GenerateKey, Error>
     {
         let mut seed = [0u8; 32];
-        keystore.drbg().fill_bytes(&mut seed);
+        keystore.rng().fill_bytes(&mut seed);
 
         // let keypair = salty::signature::Keypair::from(&seed);
         // #[cfg(all(test, feature = "verbose-tests"))]
@@ -114,7 +114,7 @@ impl GenerateKey for super::Ed255
             &seed)?;
 
         // return handle
-        Ok(reply::GenerateKey { key: ObjectHandle { object_id: key_id } })
+        Ok(reply::GenerateKey { key: key_id })
     }
 }
 
@@ -125,7 +125,7 @@ impl SerializeKey for super::Ed255
     fn serialize_key(keystore: &mut impl Keystore, request: &request::SerializeKey)
         -> Result<reply::SerializeKey, Error>
     {
-        let key_id = request.key.object_id;
+        let key_id = request.key;
         let public_key = load_public_key(keystore, &key_id)?;
 
         let serialized_key = match request.format {
@@ -159,7 +159,7 @@ impl Exists for super::Ed255
     fn exists(keystore: &mut impl Keystore, request: &request::Exists)
         -> Result<reply::Exists, Error>
     {
-        let key_id = request.key.object_id;
+        let key_id = request.key;
 
         let exists = keystore.exists_key(key::Secrecy::Secret, Some(key::Kind::Ed255), &key_id);
         Ok(reply::Exists { exists })
@@ -183,7 +183,7 @@ impl Sign for super::Ed255
         //     return Err(Error::InvalidSerializationFormat);
         // }
 
-        let key_id = request.key.object_id;
+        let key_id = request.key;
 
         let keypair = load_keypair(keystore, &key_id)?;
 
@@ -216,7 +216,7 @@ impl Verify for super::Ed255
             return Err(Error::WrongSignatureLength);
         }
 
-        let key_id = request.key.object_id;
+        let key_id = request.key;
         let public_key = load_public_key(keystore, &key_id)?;
 
         let mut signature_array = [0u8; salty::constants::SIGNATURE_SERIALIZED_LENGTH];

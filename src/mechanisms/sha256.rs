@@ -10,7 +10,7 @@ impl DeriveKey for super::Sha256
     fn derive_key(keystore: &mut impl Keystore, request: &request::DeriveKey)
         -> Result<reply::DeriveKey, Error>
     {
-        let base_id = &request.base_key.object_id;
+        let base_id = &request.base_key;
 
         let shared_secret = keystore
             .load_key(key::Secrecy::Secret, None, base_id)?
@@ -27,9 +27,7 @@ impl DeriveKey for super::Sha256
             key::Secrecy::Secret, key::Kind::Symmetric(32),
             &symmetric_key)?;
 
-        Ok(reply::DeriveKey {
-            key: ObjectHandle { object_id: key_id },
-        })
+        Ok(reply::DeriveKey { key: key_id })
     }
 }
 

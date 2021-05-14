@@ -15,7 +15,7 @@ impl DeriveKey for super::HmacSha1
         use hmac::{Hmac, Mac, NewMac};
         type HmacSha1 = Hmac<sha1::Sha1>;
 
-        let key_id = request.base_key.object_id;
+        let key_id = request.base_key;
         let shared_secret = keystore.load_key(key::Secrecy::Secret, None, &key_id)?.material;
 
         let mut mac = HmacSha1::new_from_slice(&shared_secret.as_ref())
@@ -30,7 +30,7 @@ impl DeriveKey for super::HmacSha1
             key::Secrecy::Secret, key::Kind::Symmetric(20),
             &derived_key)?;
 
-        Ok(reply::DeriveKey { key: ObjectHandle { object_id: key_id } })
+        Ok(reply::DeriveKey { key: key_id })
 
     }
 }
@@ -46,7 +46,7 @@ impl Sign for super::HmacSha1
         use hmac::{Hmac, Mac, NewMac};
         type HmacSha1 = Hmac<Sha1>;
 
-        let key_id = request.key.object_id;
+        let key_id = request.key;
         let shared_secret = keystore.load_key(key::Secrecy::Secret, None, &key_id)?.material;
 
         let mut mac = HmacSha1::new_from_slice(&shared_secret.as_ref())
