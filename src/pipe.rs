@@ -5,77 +5,60 @@ use crate::api::{Request, Reply};
 use crate::error::Error;
 use crate::types::ClientId;
 
-#[cfg(not(any(
-    feature = "clients-2",
-    feature = "clients-3",
-    feature = "clients-4",
-    feature = "clients-5",
-    feature = "clients-6",
-    feature = "clients-7",
-    feature = "clients-8",
-    feature = "clients-9",
-    feature = "clients-10",
-    feature = "clients-11",
-    feature = "clients-12",
-)))]
-interchange::interchange! {
-    TrussedInterchange: (Request, Result<Reply, Error>)
+
+cfg_if::cfg_if! {
+
+    if #[cfg(feature = "clients-12")] {
+        interchange::interchange! {
+            TrussedInterchange: (Request, Result<Reply, Error>, 12)
+        }
+    } else if #[cfg(feature = "clients-11")] {
+        interchange::interchange! {
+            TrussedInterchange: (Request, Result<Reply, Error>, 11)
+        }
+    } else if #[cfg(feature = "clients-10")] {
+        interchange::interchange! {
+            TrussedInterchange: (Request, Result<Reply, Error>, 10)
+        }
+    } else if #[cfg(feature = "clients-9")] {
+        interchange::interchange! {
+            TrussedInterchange: (Request, Result<Reply, Error>, 9)
+        }
+    } else if #[cfg(feature = "clients-8")] {
+        interchange::interchange! {
+            TrussedInterchange: (Request, Result<Reply, Error>, 8)
+        }
+    } else if #[cfg(feature = "clients-7")] {
+        interchange::interchange! {
+            TrussedInterchange: (Request, Result<Reply, Error>, 7)
+        }
+    } else if #[cfg(feature = "clients-6")] {
+        interchange::interchange! {
+            TrussedInterchange: (Request, Result<Reply, Error>, 6)
+        }
+    } else if #[cfg(feature = "clients-5")] {
+        interchange::interchange! {
+            TrussedInterchange: (Request, Result<Reply, Error>, 5)
+        }
+    } else if #[cfg(feature = "clients-4")] {
+        interchange::interchange! {
+            TrussedInterchange: (Request, Result<Reply, Error>, 4)
+        }
+    } else if #[cfg(feature = "clients-3")] {
+        interchange::interchange! {
+            TrussedInterchange: (Request, Result<Reply, Error>, 3)
+        }
+    } else if #[cfg(feature = "clients-2")] {
+        interchange::interchange! {
+            TrussedInterchange: (Request, Result<Reply, Error>, 2)
+        }
+    } else if #[cfg(feature = "clients-1")] {
+        interchange::interchange! {
+            TrussedInterchange: (Request, Result<Reply, Error>, 1)
+        }
+    }
 }
 
-#[cfg(feature = "clients-2")]
-interchange::interchange! {
-    TrussedInterchange: (Request, Result<Reply, Error>, 2)
-}
-
-#[cfg(feature = "clients-3")]
-interchange::interchange! {
-    TrussedInterchange: (Request, Result<Reply, Error>, 3)
-}
-
-#[cfg(feature = "clients-4")]
-interchange::interchange! {
-    TrussedInterchange: (Request, Result<Reply, Error>, 4)
-}
-
-#[cfg(feature = "clients-5")]
-interchange::interchange! {
-    TrussedInterchange: (Request, Result<Reply, Error>, 5)
-}
-
-#[cfg(feature = "clients-6")]
-interchange::interchange! {
-    TrussedInterchange: (Request, Result<Reply, Error>, 6)
-}
-
-#[cfg(feature = "clients-7")]
-interchange::interchange! {
-    TrussedInterchange: (Request, Result<Reply, Error>, 7)
-}
-
-#[cfg(feature = "clients-8")]
-interchange::interchange! {
-    TrussedInterchange: (Request, Result<Reply, Error>, 8)
-}
-
-#[cfg(feature = "clients-9")]
-interchange::interchange! {
-    TrussedInterchange: (Request, Result<Reply, Error>, 9)
-}
-
-#[cfg(feature = "clients-10")]
-interchange::interchange! {
-    TrussedInterchange: (Request, Result<Reply, Error>, 10)
-}
-
-#[cfg(feature = "clients-11")]
-interchange::interchange! {
-    TrussedInterchange: (Request, Result<Reply, Error>, 11)
-}
-
-#[cfg(feature = "clients-12")]
-interchange::interchange! {
-    TrussedInterchange: (Request, Result<Reply, Error>, 12)
-}
 
 // pub use interchange::TrussedInterchange;
 
