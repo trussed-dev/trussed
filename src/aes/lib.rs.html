@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/aes-0.7.1/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings"></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../aes/index.html'><div class='logo-container'><img src='https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/aes-0.7.4/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings"></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../aes/index.html'><div class='logo-container'><img src='https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
                 <a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
@@ -102,23 +102,74 @@
 <span id="101">101</span>
 <span id="102">102</span>
 <span id="103">103</span>
+<span id="104">104</span>
+<span id="105">105</span>
+<span id="106">106</span>
+<span id="107">107</span>
+<span id="108">108</span>
+<span id="109">109</span>
+<span id="110">110</span>
+<span id="111">111</span>
+<span id="112">112</span>
+<span id="113">113</span>
+<span id="114">114</span>
+<span id="115">115</span>
+<span id="116">116</span>
+<span id="117">117</span>
+<span id="118">118</span>
+<span id="119">119</span>
+<span id="120">120</span>
+<span id="121">121</span>
+<span id="122">122</span>
+<span id="123">123</span>
+<span id="124">124</span>
+<span id="125">125</span>
+<span id="126">126</span>
+<span id="127">127</span>
+<span id="128">128</span>
+<span id="129">129</span>
+<span id="130">130</span>
+<span id="131">131</span>
+<span id="132">132</span>
+<span id="133">133</span>
+<span id="134">134</span>
+<span id="135">135</span>
+<span id="136">136</span>
+<span id="137">137</span>
+<span id="138">138</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! Pure Rust implementation of the Advanced Encryption Standard</span>
 <span class="doccomment">//! (a.k.a. Rijndael)</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! # Supported platforms</span>
+<span class="doccomment">//! # Supported backends</span>
+<span class="doccomment">//! This crate provides multiple backends including a portable pure Rust</span>
+<span class="doccomment">//! backend as well as ones based on CPU intrinsics.</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! This crate provides two different backends based on what target features</span>
-<span class="doccomment">//! are available:</span>
+<span class="doccomment">//! By default, it performs runtime detection of CPU intrinsics and uses them</span>
+<span class="doccomment">//! if they are available.</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! - &quot;soft&quot; portable constant-time implementation based on [fixslicing].</span>
-<span class="doccomment">//!   Enabling the `compact` Cargo feature will reduce the code size of this</span>
-<span class="doccomment">//!   backend at the cost of decreased performance (using a modified form of</span>
-<span class="doccomment">//!   the fixslicing technique called &quot;semi-fixslicing&quot;).</span>
-<span class="doccomment">//! - [AES-NI] accelerated implementation for `i686`/`x86_64` target</span>
-<span class="doccomment">//!   architectures with `target-feature=+aes`, as well as an accelerated</span>
-<span class="doccomment">//!   AES-CTR implementation with `target-feature=+aes,+ssse3`</span>
+<span class="doccomment">//! ## &quot;soft&quot; portable backend</span>
+<span class="doccomment">//! As a baseline implementation, this crate provides a constant-time pure Rust</span>
+<span class="doccomment">//! implementation based on [fixslicing], a more advanced form of bitslicing</span>
+<span class="doccomment">//! implemented entirely in terms of bitwise arithmetic with no use of any</span>
+<span class="doccomment">//! lookup tables or data-dependent branches.</span>
 <span class="doccomment">//!</span>
+<span class="doccomment">//! Enabling the `compact` Cargo feature will reduce the code size of this</span>
+<span class="doccomment">//! backend at the cost of decreased performance (using a modified form of</span>
+<span class="doccomment">//! the fixslicing technique called &quot;semi-fixslicing&quot;).</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! ## ARMv8 intrinsics (nightly-only)</span>
+<span class="doccomment">//! On `aarch64` targets including `aarch64-apple-darwin` (Apple M1) and Linux</span>
+<span class="doccomment">//! targets such as `aarch64-unknown-linux-gnu` and `aarch64-unknown-linux-musl`,</span>
+<span class="doccomment">//! support for using AES intrinsics provided by the ARMv8 Cryptography Extensions</span>
+<span class="doccomment">//! is available when using the nightly compiler, and can be enabled using the</span>
+<span class="doccomment">//! `armv8` crate feature.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! On Linux and macOS, when the `armv8` feature is enabled support for AES</span>
+<span class="doccomment">//! intrinsics is autodetected at runtime. On other platforms the `crypto`</span>
+<span class="doccomment">//! target feature must be enabled via RUSTFLAGS.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! ## `x86`/`x86_64` intrinsics (AES-NI)</span>
 <span class="doccomment">//! By default this crate uses runtime detection on `i686`/`x86_64` targets</span>
 <span class="doccomment">//! in order to determine if AES-NI is available, and if it is not, it will</span>
 <span class="doccomment">//! fallback to using a constant-time software implementation.</span>
@@ -128,17 +179,20 @@
 <span class="doccomment">//! Programs built in this manner will crash with an illegal instruction on</span>
 <span class="doccomment">//! CPUs which do not have AES-NI enabled.</span>
 <span class="doccomment">//!</span>
+<span class="doccomment">//! Note: runtime detection is not possible on SGX targets. Please use the</span>
+<span class="doccomment">//! afforementioned `RUSTFLAGS` to leverage AES-NI on these targets.</span>
+<span class="doccomment">//!</span>
 <span class="doccomment">//! # Usage example</span>
 <span class="doccomment">//! ```</span>
-<span class="doccomment">//! use aes::Aes128;</span>
+<span class="doccomment">//! use aes::{Aes128, Block, ParBlocks};</span>
 <span class="doccomment">//! use aes::cipher::{</span>
 <span class="doccomment">//!     BlockCipher, BlockEncrypt, BlockDecrypt, NewBlockCipher,</span>
 <span class="doccomment">//!     generic_array::GenericArray,</span>
 <span class="doccomment">//! };</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! let key = GenericArray::from_slice(&amp;[0u8; 16]);</span>
-<span class="doccomment">//! let mut block = GenericArray::clone_from_slice(&amp;[0u8; 16]);</span>
-<span class="doccomment">//! let mut block8 = GenericArray::clone_from_slice(&amp;[block; 8]);</span>
+<span class="doccomment">//! let mut block = Block::default();</span>
+<span class="doccomment">//! let mut block8 = ParBlocks::default();</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! // Initialize cipher</span>
 <span class="doccomment">//! let cipher = Aes128::new(&amp;key);</span>
@@ -168,6 +222,10 @@
 <span class="doccomment">//! [`block-modes`]: https://docs.rs/block-modes</span>
 
 <span class="attribute">#![<span class="ident">no_std</span>]</span>
+<span class="attribute">#![<span class="ident">cfg_attr</span>(
+    <span class="ident">all</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;armv8&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;aarch64&quot;</span>),
+    <span class="ident">feature</span>(<span class="ident">stdsimd</span>, <span class="ident">aarch64_target_feature</span>)
+)]</span>
 <span class="attribute">#![<span class="ident">cfg_attr</span>(<span class="ident">docsrs</span>, <span class="ident">feature</span>(<span class="ident">doc_cfg</span>))]</span>
 <span class="attribute">#![<span class="ident">doc</span>(
     <span class="ident">html_logo_url</span> <span class="op">=</span> <span class="string">&quot;https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg&quot;</span>,
@@ -175,23 +233,32 @@
 )]</span>
 <span class="attribute">#![<span class="ident">warn</span>(<span class="ident">missing_docs</span>, <span class="ident">rust_2018_idioms</span>)]</span>
 
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;hazmat&quot;</span>)]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">hazmat</span>;
+
+<span class="kw">mod</span> <span class="ident">soft</span>;
+
 <span class="kw">use</span> <span class="ident">cfg_if</span>::<span class="ident">cfg_if</span>;
 
 <span class="macro">cfg_if</span><span class="macro">!</span> {
-    <span class="kw">if</span> <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(
-        <span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>),
+    <span class="kw">if</span> <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;aarch64&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;armv8&quot;</span>, <span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;force-soft&quot;</span>)))]</span> {
+        <span class="kw">mod</span> <span class="ident">armv8</span>;
+        <span class="kw">mod</span> <span class="ident">autodetect</span>;
+        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">autodetect</span>::{<span class="ident">Aes128</span>, <span class="ident">Aes192</span>, <span class="ident">Aes256</span>};
+
+        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;ctr&quot;</span>)]</span>
+        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">autodetect</span>::<span class="ident">ctr</span>::{<span class="ident">Aes128Ctr</span>, <span class="ident">Aes192Ctr</span>, <span class="ident">Aes256Ctr</span>};
+    } <span class="kw">else</span> <span class="kw">if</span> <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(
+        <span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>),
         <span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;force-soft&quot;</span>)
     ))]</span> {
         <span class="kw">mod</span> <span class="ident">autodetect</span>;
         <span class="kw">mod</span> <span class="ident">ni</span>;
-        <span class="kw">mod</span> <span class="ident">soft</span>;
-
         <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">autodetect</span>::{<span class="ident">Aes128</span>, <span class="ident">Aes192</span>, <span class="ident">Aes256</span>};
 
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;ctr&quot;</span>)]</span>
         <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">autodetect</span>::<span class="ident">ctr</span>::{<span class="ident">Aes128Ctr</span>, <span class="ident">Aes192Ctr</span>, <span class="ident">Aes256Ctr</span>};
     } <span class="kw">else</span> {
-        <span class="kw">mod</span> <span class="ident">soft</span>;
         <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">soft</span>::{<span class="ident">Aes128</span>, <span class="ident">Aes192</span>, <span class="ident">Aes256</span>};
 
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;ctr&quot;</span>)]</span>
@@ -206,6 +273,9 @@
 
 <span class="doccomment">/// 8 x 128-bit AES blocks to be processed in parallel</span>
 <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">ParBlocks</span> <span class="op">=</span> <span class="ident">cipher</span>::<span class="ident">generic_array</span>::<span class="ident">GenericArray</span><span class="op">&lt;</span><span class="ident">Block</span>, <span class="ident">cipher</span>::<span class="ident">consts</span>::<span class="ident">U8</span><span class="op">&gt;</span>;
+
+<span class="doccomment">/// Size of an AES block (128-bits; 16-bytes)</span>
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">BLOCK_SIZE</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">16</span>;
 </pre></div>
 </section><section id="search" class="content hidden"></section><section class="footer"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="aes" data-search-js="../../search-index.js"></div>
     <script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script></body></html>
