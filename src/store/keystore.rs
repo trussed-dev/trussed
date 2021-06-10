@@ -1,5 +1,4 @@
 use chacha20::ChaCha8Rng;
-pub use heapless::consts;
 use littlefs2::path::PathBuf;
 
 use crate::{
@@ -66,7 +65,7 @@ impl<P: Platform> ClientKeystore<P> {
 
     pub fn key_path(&self, secrecy: key::Secrecy, id: &KeyId) -> PathBuf {
         let mut path = self.key_directory(secrecy);
-        path.push(&PathBuf::from(id.hex().as_ref()));
+        path.push(&PathBuf::from(id.hex().as_slice()));
         path
     }
 
@@ -89,7 +88,7 @@ impl<P: Platform> Keystore for ClientKeystore<P> {
         let key = key::Key {
             flags: info.flags,
             kind: info.kind,
-            material: key::Material::try_from_slice(material).unwrap(),
+            material: key::Material::from_slice(material).unwrap(),
         };
 
         let id = self.generate_key_id();
@@ -147,7 +146,7 @@ impl<P: Platform> Keystore for ClientKeystore<P> {
 
         let location = self.location(secrecy, id).ok_or(Error::NoSuchKey)?;
 
-        let bytes: Bytes<consts::U128> = store::read(self.store, location, &path)?;
+        let bytes: Bytes<128> = store::read(self.store, location, &path)?;
 
         let key = key::Key::try_deserialize(&bytes)?;
 
@@ -167,7 +166,7 @@ impl<P: Platform> Keystore for ClientKeystore<P> {
         let key = key::Key {
             flags: Default::default(),
             kind,
-            material: key::Material::try_from_slice(material).unwrap(),
+            material: key::Material::from_slice(material).unwrap(),
         };
 
         let path = self.key_path(secrecy, id);

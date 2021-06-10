@@ -150,7 +150,7 @@ pub fn try_attest(
             SerializedSignature::Ed255(signature.as_ref().try_into().unwrap())
         }
         SignatureAlgorithm::P256 => {
-            SerializedSignature::P256(heapless_bytes::Bytes::try_from_slice(&mechanisms::P256::sign(
+            SerializedSignature::P256(heapless_bytes::Bytes::from_slice(&mechanisms::P256::sign(
                 attn_keystore,
                 &request::Sign {
                     mechanism: Mechanism::P256,
@@ -219,7 +219,7 @@ pub struct Certificate<'l> {
 pub enum SerializedSignature {
     Ed255([u8; 64]),
     // This is the DER version with leading '04'
-    P256(heapless_bytes::Bytes<heapless::consts::U72>),
+    P256(heapless_bytes::Bytes<72>),
 }
 
 impl AsRef<[u8]> for SerializedSignature {
@@ -483,7 +483,7 @@ impl ParsedDatetime {
     }
 
     pub fn to_bytes(&self) -> [u8; 15] {
-        let mut buffer: heapless::Vec<u8, heapless::consts::U15> = Default::default();
+        let mut buffer: heapless::Vec<u8, 15> = Default::default();
         buffer.resize_default(15).unwrap();
         core::fmt::write(&mut buffer, format_args!(
             "{}{:02}{:02}{:02}{:02}{:02}Z",

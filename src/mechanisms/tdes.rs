@@ -28,7 +28,7 @@ impl Encrypt for super::Tdes
 
         let symmetric_key: [u8; 24] = keystore
             .load_key(key::Secrecy::Secret, None, &key_id)?
-            .material.as_ref().try_into()
+            .material.as_slice().try_into()
             .map_err(|_| Error::InternalError)?;
 
 		let cipher = des::TdesEde3::new(GenericArray::from_slice(&symmetric_key));
@@ -54,7 +54,7 @@ impl Decrypt for super::Tdes
 
         let symmetric_key: [u8; 24] = keystore
             .load_key(key::Secrecy::Secret, None, &key_id)?
-            .material.as_ref().try_into()
+            .material.as_slice().try_into()
             .map_err(|_| Error::InternalError)?;
 
 		let cipher = des::TdesEde3::new(GenericArray::from_slice(&symmetric_key));

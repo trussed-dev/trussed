@@ -13,7 +13,7 @@ fn load_public_key(keystore: &mut impl Keystore, key_id: &KeyId)
 
     let public_bytes: [u8; 32] = keystore
         .load_key(key::Secrecy::Public, Some(key::Kind::Ed255), &key_id)?
-        .material.as_ref()
+        .material.as_slice()
         .try_into()
         .map_err(|_| Error::InternalError)?;
 
@@ -28,7 +28,7 @@ fn load_keypair(keystore: &mut impl Keystore, key_id: &KeyId)
 
     let seed: [u8; 32] = keystore
         .load_key(key::Secrecy::Secret, Some(key::Kind::Ed255), &key_id)?
-        .material.as_ref()
+        .material.as_slice()
         .try_into()
         .map_err(|_| Error::InternalError)?;
 
@@ -131,9 +131,9 @@ impl SerializeKey for super::Ed255
         let serialized_key = match request.format {
             KeySerialization::Cose => {
                 let cose_pk = cosey::Ed25519PublicKey {
-                    // x: Bytes::try_from_slice(public_key.x_coordinate()).unwrap(),
-                    // x: Bytes::try_from_slice(&buf).unwrap(),
-                    x: Bytes::try_from_slice(public_key.as_bytes()).unwrap(),
+                    // x: Bytes::from_slice(public_key.x_coordinate()).unwrap(),
+                    // x: Bytes::from_slice(&buf).unwrap(),
+                    x: Bytes::from_slice(public_key.as_bytes()).unwrap(),
                 };
                 crate::cbor_serialize_bytes(&cose_pk).map_err(|_| Error::CborError)?
             }
@@ -188,7 +188,7 @@ impl Sign for super::Ed255
         let keypair = load_keypair(keystore, &key_id)?;
 
         let native_signature = keypair.sign(&request.message);
-        let our_signature = Signature::try_from_slice(&native_signature.to_bytes()).unwrap();
+        let our_signature = Signature::from_slice(&native_signature.to_bytes()).unwrap();
 
         // hprintln!("Ed255 signature:").ok();
         // hprintln!("msg: {:?}", &request.message).ok();

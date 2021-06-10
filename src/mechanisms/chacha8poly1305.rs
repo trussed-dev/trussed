@@ -66,7 +66,7 @@ impl Decrypt for super::Chacha8Poly1305
         let serialized_material = keystore
             .load_key(key::Secrecy::Secret, Some(key::Kind::Symmetric32Nonce(12)), &request.key)?
             .material;
-        let serialized = serialized_material.as_ref();
+        let serialized = serialized_material.as_slice();
 
         // if serialized.len() != 44 {
         //     return Error::InternalError;
@@ -114,7 +114,7 @@ impl Encrypt for super::Chacha8Poly1305
         let mut serialized_material = keystore
             .load_key(secrecy, Some(key_kind), key_id)?
             .material;
-        let serialized = serialized_material.as_mut();
+        let serialized: &mut [u8] = serialized_material.as_mut();
 
         assert!(serialized.len() == 44);
 
@@ -154,10 +154,10 @@ impl Encrypt for super::Chacha8Poly1305
             &mut ciphertext,
         ).unwrap().as_slice().try_into().unwrap();
 
-        let nonce = ShortData::try_from_slice(nonce).unwrap();
-        let tag = ShortData::try_from_slice(&tag).unwrap();
+        let nonce = ShortData::from_slice(nonce).unwrap();
+        let tag = ShortData::from_slice(&tag).unwrap();
 
-        // let ciphertext = Message::try_from_slice(&ciphertext).unwrap();
+        // let ciphertext = Message::from_slice(&ciphertext).unwrap();
         Ok(reply::Encrypt { ciphertext, nonce, tag })
     }
 }
@@ -175,7 +175,7 @@ impl WrapKey for super::Chacha8Poly1305
         let serialized_key = keystore
             .load_key(key::Secrecy::Secret, None, &request.key)?;
 
-        let message = serialized_key.serialize().try_convert_into().unwrap();
+        let message = Message::from_slice(&serialized_key.serialize()).unwrap();
 
         let encryption_request = request::Encrypt {
             mechanism: Mechanism::Chacha8Poly1305,
@@ -301,7 +301,7 @@ impl UnwrapKey for super::Chacha8Poly1305
 //         // Returns an error if buffer length is not multiple of block size and
 //         // if after decoding message has malformed padding.
 // 		let plaintext = cipher.decrypt(&mut buffer).unwrap();
-//         let plaintext = Message::try_from_slice(&plaintext).unwrap();
+//         let plaintext = Message::from_slice(&plaintext).unwrap();
 
 //         Ok(reply::Decrypt { plaintext: Ok(plaintext) })
 //     }
@@ -350,7 +350,7 @@ impl UnwrapKey for super::Chacha8Poly1305
 //         // // The padding space should be big enough for padding, otherwise method will return Err(BlockModeError).
 // 		// let ciphertext = cipher.encrypt(&mut buffer, l).unwrap();
 
-//         // let ciphertext = Message::try_from_slice(&ciphertext).unwrap();
+//         // let ciphertext = Message::from_slice(&ciphertext).unwrap();
 //         Ok(reply::Encrypt { ciphertext })
 //     }
 // }

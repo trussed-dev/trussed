@@ -28,7 +28,7 @@ impl Encrypt for super::Aes256Cbc
 
         let symmetric_key: [u8; 32] = keystore
             .load_key(key::Secrecy::Secret, None, &key_id)?
-            .material.as_ref().try_into()
+            .material.as_slice().try_into()
             .map_err(|_| Error::InternalError)?;
 
         let zero_iv = [0u8; 16];
@@ -47,7 +47,7 @@ impl Encrypt for super::Aes256Cbc
         // The padding space should be big enough for padding, otherwise method will return Err(BlockModeError).
 		let ciphertext = cipher.encrypt(&mut buffer, l).unwrap();
 
-        let ciphertext = Message::try_from_slice(&ciphertext).unwrap();
+        let ciphertext = Message::from_slice(&ciphertext).unwrap();
         Ok(reply::Encrypt { ciphertext, nonce: ShortData::new(), tag: ShortData::new()  })
     }
 }
@@ -64,9 +64,9 @@ impl WrapKey for super::Aes256Cbc
 
         // let message: Message = serialized_key.material.try_to_byte_buf().map_err(|_| Error::InternalError)?;
 
-        let message: Message = crate::Bytes::try_from_slice(keystore
+        let message = Message::from_slice(keystore
             .load_key(key::Secrecy::Secret, None, &request.key)?
-            .material.as_ref()).map_err(|_| Error::InternalError)?;
+            .material.as_slice()).map_err(|_| Error::InternalError)?;
 
         let encryption_request = request::Encrypt {
             mechanism: Mechanism::Aes256Cbc,
@@ -100,7 +100,7 @@ impl Decrypt for super::Aes256Cbc
         let key_id = request.key;
         let symmetric_key: [u8; 32] = keystore
             .load_key(key::Secrecy::Secret, None, &key_id)?
-            .material.as_ref()
+            .material.as_slice()
             .try_into()
             .map_err(|_| Error::InternalError)?;
 
@@ -121,7 +121,7 @@ impl Decrypt for super::Aes256Cbc
         // hprintln!("symmetric key: {:?}", &symmetric_key).ok();
 		let plaintext = cipher.decrypt(&mut buffer).unwrap();
         // hprintln!("decrypted: {:?}", &plaintext).ok();
-        let plaintext = Message::try_from_slice(&plaintext).unwrap();
+        let plaintext = Message::from_slice(&plaintext).unwrap();
 
         Ok(reply::Decrypt { plaintext: Some(plaintext) })
     }

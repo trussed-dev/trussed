@@ -52,7 +52,7 @@ impl Sign for super::HmacSha512
 
         mac.update(&request.message);
         let result = mac.finalize();
-        let signature = Signature::try_from_slice(&result.into_bytes()).unwrap();
+        let signature = Signature::from_slice(&result.into_bytes()).unwrap();
 
         Ok(reply::Sign { signature })
 
