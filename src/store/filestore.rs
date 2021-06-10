@@ -1,5 +1,4 @@
 use crate::{
-    ArrayLength,
     Bytes,
     error::{Error, Result},
     // service::ReadDirState,
@@ -63,7 +62,7 @@ impl<S: Store> ClientFilestore<S> {
 }
 
 pub trait Filestore {
-    fn read<N: ArrayLength<u8>>(&mut self, path: &PathBuf, location: Location) -> Result<Bytes<N>>;
+    fn read<const N: usize>(&mut self, path: &PathBuf, location: Location) -> Result<Bytes<N>>;
     fn write(&mut self, path: &PathBuf, location: Location, data: &[u8]) -> Result<()>;
     fn exists(&mut self, path: &PathBuf, location: Location) -> bool;
     fn remove_file(&mut self, path: &PathBuf, location: Location) -> Result<()>;
@@ -106,7 +105,7 @@ pub trait Filestore {
 }
 
 impl<S: Store> Filestore for ClientFilestore<S> {
-    fn read<N: ArrayLength<u8>>(&mut self, path: &PathBuf, location: Location) -> Result<Bytes<N>> {
+    fn read<const N: usize>(&mut self, path: &PathBuf, location: Location) -> Result<Bytes<N>> {
         let path = self.actual_path(path);
 
         store::read(self.store, location, &path)

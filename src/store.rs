@@ -451,7 +451,7 @@ pub fn create_directories<'s, S: LfsStorage>(
 }
 
 /// Reads contents from path in location of store.
-pub fn read<N: heapless::ArrayLength<u8>>(store: impl Store, location: Location, path: &Path) -> Result<Bytes<N>, Error> {
+pub fn read<const N: usize>(store: impl Store, location: Location, path: &Path) -> Result<Bytes<N>, Error> {
     debug_now!("reading {}", &path);
     match location {
         Location::Internal => store.ifs().read(path),

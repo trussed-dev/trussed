@@ -5,7 +5,6 @@ use core::ops::Deref;
 pub use generic_array::GenericArray;
 
 pub use heapless::{
-    consts,
     String,
     Vec,
 };
@@ -72,7 +71,7 @@ impl Id {
     }
 
     /// skips leading zeros
-    pub fn hex(&self) -> Bytes<consts::U32> {
+    pub fn hex(&self) -> Bytes<32> {
         const HEX_CHARS: &[u8] = b"0123456789abcdef";
         let mut buffer = Bytes::new();
         let array = self.0.to_be_bytes();
@@ -98,7 +97,7 @@ impl Id {
     //     // (0..hex.len())
     //     // use hex::FromHex;
     //     // let maybe_bytes = <[u8; 16]>::from_hex(hex).map_err(|e| ());
-    //     // maybe_bytes.map(|bytes| Self(Bytes::try_from_slice(&bytes).unwrap()))
+    //     // maybe_bytes.map(|bytes| Self(Bytes::from_slice(&bytes).unwrap()))
     //     if (hex.len() & 1) == 1 {
     //         // panic!("hex len & 1 =  {}", hex.len() & 1);
     //         return Err(());

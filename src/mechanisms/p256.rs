@@ -14,7 +14,7 @@ fn load_secret_key(keystore: &mut impl Keystore, key_id: &KeyId)
     // info_now!("loading keypair");
     let secret_scalar: [u8; 32] = keystore
         .load_key(key::Secrecy::Secret, Some(key::Kind::P256), &key_id)?
-        .material.as_ref()
+        .material.as_slice()
         .try_into()
         .map_err(|_| Error::InternalError)?;
 
@@ -29,7 +29,7 @@ fn load_public_key(keystore: &mut impl Keystore, key_id: &KeyId)
 {
     let compressed_public_key: [u8; 33] = keystore
         .load_key(key::Secrecy::Public, Some(key::Kind::P256), &key_id)?
-        .material.as_ref()
+        .material.as_slice()
         .try_into()
         .map_err(|_| Error::InternalError)?;
 
@@ -192,15 +192,15 @@ impl SerializeKey for super::P256
         let serialized_key = match request.format {
             KeySerialization::EcdhEsHkdf256 => {
                 let cose_pk = cosey::EcdhEsHkdf256PublicKey {
-                    x: Bytes::try_from_slice(&public_key.x()).unwrap(),
-                    y: Bytes::try_from_slice(&public_key.y()).unwrap(),
+                    x: Bytes::from_slice(&public_key.x()).unwrap(),
+                    y: Bytes::from_slice(&public_key.y()).unwrap(),
                 };
                 crate::cbor_serialize_bytes(&cose_pk).map_err(|_| Error::CborError)?
             }
             KeySerialization::Cose => {
                 let cose_pk = cosey::P256PublicKey {
-                    x: Bytes::try_from_slice(&public_key.x()).unwrap(),
-                    y: Bytes::try_from_slice(&public_key.y()).unwrap(),
+                    x: Bytes::from_slice(&public_key.x()).unwrap(),
+                    y: Bytes::from_slice(&public_key.y()).unwrap(),
                 };
                 crate::cbor_serialize_bytes(&cose_pk).map_err(|_| Error::CborError)?
             }
@@ -251,10 +251,10 @@ impl Sign for super::P256
             SignatureSerialization::Asn1Der => {
                 let mut buffer = [0u8; 72];
                 let l = signature.to_sec1_bytes(&mut buffer);
-                Signature::try_from_slice(&buffer[..l]).unwrap()
+                Signature::from_slice(&buffer[..l]).unwrap()
             }
             SignatureSerialization::Raw => {
-                Signature::try_from_slice(&signature.to_untagged_bytes()).unwrap()
+                Signature::from_slice(&signature.to_untagged_bytes()).unwrap()
             }
         };
 
@@ -281,10 +281,10 @@ impl Sign for super::P256Prehashed
             SignatureSerialization::Asn1Der => {
                 let mut buffer = [0u8; 72];
                 let l = signature.to_sec1_bytes(&mut buffer);
-                Signature::try_from_slice(&buffer[..l]).unwrap()
+                Signature::from_slice(&buffer[..l]).unwrap()
             }
             SignatureSerialization::Raw => {
-                Signature::try_from_slice(&signature.to_untagged_bytes()).unwrap()
+                Signature::from_slice(&signature.to_untagged_bytes()).unwrap()
             }
         };
 

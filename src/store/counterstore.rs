@@ -30,13 +30,13 @@ impl<S: Store> ClientCounterstore<S> {
         let mut path = PathBuf::new();
         path.push(&self.client_id);
         path.push(&PathBuf::from("ctr"));
-        path.push(&PathBuf::from(id.hex().as_ref()));
+        path.push(&PathBuf::from(id.hex().as_slice()));
         path
     }
 
     fn read_counter(&mut self, location: Location, id: CounterId) -> Result<Counter> {
         let path = self.counter_path(id);
-        let mut bytes: crate::Bytes<crate::consts::U16> = store::read(self.store, location, &path)?;
+        let mut bytes: crate::Bytes<16> = store::read(self.store, location, &path)?;
         bytes.resize_default(16).ok();
         Ok(u128::from_le_bytes(bytes.as_slice().try_into().unwrap()))
     }

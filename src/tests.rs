@@ -3,7 +3,7 @@ use chacha20::ChaCha20;
 
 use crate::*;
 use crate::types::*;
-use littlefs2::fs::{Allocation, Filesystem};
+use littlefs2::{consts, fs::{Allocation, Filesystem}};
 use littlefs2::const_ram_storage;
 use interchange::Interchange;
 use entropy::shannon_entropy;

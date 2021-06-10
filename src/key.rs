@@ -1,3 +1,4 @@
+use heapless::Vec;
 use serde::{Deserialize, Serialize};
 use serde_indexed::{DeserializeIndexed, SerializeIndexed};
 use zeroize::Zeroize;
@@ -8,8 +9,8 @@ use crate::{
     config::{MAX_KEY_MATERIAL_LENGTH, MAX_SERIALIZED_KEY_LENGTH},
 };
 
-pub type Material = Bytes<MAX_KEY_MATERIAL_LENGTH>;
-pub type SerializedKeyBytes = Bytes<MAX_SERIALIZED_KEY_LENGTH>;
+pub type Material = Vec<u8, {MAX_KEY_MATERIAL_LENGTH}>;
+pub type SerializedKeyBytes = Vec<u8, {MAX_SERIALIZED_KEY_LENGTH}>;
 
 // We don't implement serde to make sure nobody inadvertently still uses it
 // Should we use references here only?
@@ -112,7 +113,7 @@ impl Key {
         Ok(Key {
             flags,
             kind,
-            material: Material::try_from_slice(material).map_err(|_| Error::InvalidSerializedKey)?,
+            material: Material::from_slice(material).map_err(|_| Error::InvalidSerializedKey)?,
         })
     }
 }

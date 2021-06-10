@@ -38,10 +38,10 @@ pub use platform::Platform;
 pub use service::Service;
 
 pub use cbor_smol::{cbor_serialize, cbor_serialize_bytes, cbor_deserialize};
-pub use heapless_bytes::{ArrayLength, Bytes, consts};
+pub use heapless_bytes::Bytes;
 pub use postcard::{from_bytes as postcard_deserialize, to_slice as postcard_serialize};
 
-pub fn postcard_serialize_bytes<N: ArrayLength<u8>, T: serde::Serialize>(
+pub fn postcard_serialize_bytes<T: serde::Serialize, const N: usize>(
     object: &T,
 ) -> postcard::Result<Bytes<N>> {
     let vec = postcard::to_vec(object)?;

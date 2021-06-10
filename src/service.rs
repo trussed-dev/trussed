@@ -2,6 +2,7 @@ pub use rand_core::{RngCore, SeedableRng};
 use interchange::Responder;
 use littlefs2::path::PathBuf;
 use chacha20::ChaCha8Rng;
+use heapless_bytes::Unsigned;
 
 use crate::api::*;
 use crate::Bytes;
@@ -78,7 +79,7 @@ impl<P: Platform> ServiceResources<P> {
 }
 
 pub struct Service<P> where P: Platform {
-    eps: Vec<ServiceEndpoint, MAX_SERVICE_CLIENTS>,
+    eps: Vec<ServiceEndpoint, {MAX_SERVICE_CLIENTS::USIZE}>,
     resources: ServiceResources<P>,
 }
 
@@ -298,7 +299,7 @@ impl<P: Platform> ServiceResources<P> {
                                 recursively_list(fs, PathBuf::from(entry.path()));
                             }
                             if entry.file_type().is_file() {
-                                let _contents: Vec<u8, consts::U256> = fs.read(entry.path()).unwrap();
+                                let _contents: Vec<u8, 256> = fs.read(entry.path()).unwrap();
                                 // info_now!("{} ?= {}", entry.metadata().len(), contents.len()).ok();
                                 // info_now!("{:?}", &contents).ok();
                             }
@@ -581,7 +582,7 @@ impl<P: Platform> ServiceResources<P> {
                     [0u8; 32]
                 } else {
                     // Use the last saved state.
-                    let mixin_bytes: Bytes<consts::U32> = filestore.read(&path, Location::Internal)?;
+                    let mixin_bytes: Bytes<32> = filestore.read(&path, Location::Internal)?;
                     let mut mixin_seed = [0u8; 32];
                     mixin_seed.clone_from_slice(&mixin_bytes);
                     mixin_seed
