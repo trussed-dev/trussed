@@ -469,7 +469,7 @@
         <span class="kw">let</span> <span class="ident">serialized_material</span> <span class="op">=</span> <span class="ident">keystore</span>
             .<span class="ident">load_key</span>(<span class="ident">key</span>::<span class="ident">Secrecy</span>::<span class="ident">Secret</span>, <span class="prelude-val">Some</span>(<span class="ident">key</span>::<span class="ident">Kind</span>::<span class="ident">Symmetric32Nonce</span>(<span class="number">12</span>)), <span class="kw-2">&amp;</span><span class="ident">request</span>.<span class="ident">key</span>)<span class="question-mark">?</span>
             .<span class="ident">material</span>;
-        <span class="kw">let</span> <span class="ident">serialized</span> <span class="op">=</span> <span class="ident">serialized_material</span>.<span class="ident">as_ref</span>();
+        <span class="kw">let</span> <span class="ident">serialized</span> <span class="op">=</span> <span class="ident">serialized_material</span>.<span class="ident">as_slice</span>();
 
         <span class="comment">// if serialized.len() != 44 {</span>
         <span class="comment">//     return Error::InternalError;</span>
@@ -517,7 +517,7 @@
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">serialized_material</span> <span class="op">=</span> <span class="ident">keystore</span>
             .<span class="ident">load_key</span>(<span class="ident">secrecy</span>, <span class="prelude-val">Some</span>(<span class="ident">key_kind</span>), <span class="ident">key_id</span>)<span class="question-mark">?</span>
             .<span class="ident">material</span>;
-        <span class="kw">let</span> <span class="ident">serialized</span> <span class="op">=</span> <span class="ident">serialized_material</span>.<span class="ident">as_mut</span>();
+        <span class="kw">let</span> <span class="ident">serialized</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">u8</span>] <span class="op">=</span> <span class="ident">serialized_material</span>.<span class="ident">as_mut</span>();
 
         <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">serialized</span>.<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span> <span class="number">44</span>);
 
@@ -557,10 +557,10 @@
             <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ciphertext</span>,
         ).<span class="ident">unwrap</span>().<span class="ident">as_slice</span>().<span class="ident">try_into</span>().<span class="ident">unwrap</span>();
 
-        <span class="kw">let</span> <span class="ident">nonce</span> <span class="op">=</span> <span class="ident">ShortData</span>::<span class="ident">try_from_slice</span>(<span class="ident">nonce</span>).<span class="ident">unwrap</span>();
-        <span class="kw">let</span> <span class="ident">tag</span> <span class="op">=</span> <span class="ident">ShortData</span>::<span class="ident">try_from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">tag</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">nonce</span> <span class="op">=</span> <span class="ident">ShortData</span>::<span class="ident">from_slice</span>(<span class="ident">nonce</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">tag</span> <span class="op">=</span> <span class="ident">ShortData</span>::<span class="ident">from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">tag</span>).<span class="ident">unwrap</span>();
 
-        <span class="comment">// let ciphertext = Message::try_from_slice(&amp;ciphertext).unwrap();</span>
+        <span class="comment">// let ciphertext = Message::from_slice(&amp;ciphertext).unwrap();</span>
         <span class="prelude-val">Ok</span>(<span class="ident">reply</span>::<span class="ident">Encrypt</span> { <span class="ident">ciphertext</span>, <span class="ident">nonce</span>, <span class="ident">tag</span> })
     }
 }
@@ -578,7 +578,7 @@
         <span class="kw">let</span> <span class="ident">serialized_key</span> <span class="op">=</span> <span class="ident">keystore</span>
             .<span class="ident">load_key</span>(<span class="ident">key</span>::<span class="ident">Secrecy</span>::<span class="ident">Secret</span>, <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span><span class="ident">request</span>.<span class="ident">key</span>)<span class="question-mark">?</span>;
 
-        <span class="kw">let</span> <span class="ident">message</span> <span class="op">=</span> <span class="ident">serialized_key</span>.<span class="ident">serialize</span>().<span class="ident">try_convert_into</span>().<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">message</span> <span class="op">=</span> <span class="ident">Message</span>::<span class="ident">from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">serialized_key</span>.<span class="ident">serialize</span>()).<span class="ident">unwrap</span>();
 
         <span class="kw">let</span> <span class="ident">encryption_request</span> <span class="op">=</span> <span class="ident">request</span>::<span class="ident">Encrypt</span> {
             <span class="ident">mechanism</span>: <span class="ident">Mechanism</span>::<span class="ident">Chacha8Poly1305</span>,
@@ -704,7 +704,7 @@
 <span class="comment">//         // Returns an error if buffer length is not multiple of block size and</span>
 <span class="comment">//         // if after decoding message has malformed padding.</span>
 <span class="comment">// 		let plaintext = cipher.decrypt(&amp;mut buffer).unwrap();</span>
-<span class="comment">//         let plaintext = Message::try_from_slice(&amp;plaintext).unwrap();</span>
+<span class="comment">//         let plaintext = Message::from_slice(&amp;plaintext).unwrap();</span>
 
 <span class="comment">//         Ok(reply::Decrypt { plaintext: Ok(plaintext) })</span>
 <span class="comment">//     }</span>
@@ -753,7 +753,7 @@
 <span class="comment">//         // // The padding space should be big enough for padding, otherwise method will return Err(BlockModeError).</span>
 <span class="comment">// 		// let ciphertext = cipher.encrypt(&amp;mut buffer, l).unwrap();</span>
 
-<span class="comment">//         // let ciphertext = Message::try_from_slice(&amp;ciphertext).unwrap();</span>
+<span class="comment">//         // let ciphertext = Message::from_slice(&amp;ciphertext).unwrap();</span>
 <span class="comment">//         Ok(reply::Encrypt { ciphertext })</span>
 <span class="comment">//     }</span>
 <span class="comment">// }</span>
