@@ -504,6 +504,7 @@ pub enum Mechanism {
     // P256XSha256,
     P256,
     P256Prehashed,
+    P384,
     // clients can also do hashing by themselves
     Sha256,
     Tdes,

@@ -11,6 +11,21 @@
 // should be revisited.
 
 // TODO: rename to aes256-cbc-zero-iv
+
+#[allow(unused_macros)]
+macro_rules! dummy_impl {
+    ($Mechanism:ident) => {
+        impl crate::service::Agree for $Mechanism {}
+        impl crate::service::DeriveKey for $Mechanism {}
+        impl crate::service::DeserializeKey for $Mechanism {}
+        impl crate::service::Exists for $Mechanism {}
+        impl crate::service::GenerateKey for $Mechanism {}
+        impl crate::service::SerializeKey for $Mechanism {}
+        impl crate::service::Sign for $Mechanism {}
+        impl crate::service::Verify for $Mechanism {}
+    }
+}
+
 pub struct Aes256Cbc {}
 mod aes256cbc;
 
@@ -41,6 +56,17 @@ mod hmacsha512;
 impl crate::service::DeriveKey for HmacSha512 {}
 #[cfg(not(feature = "hmac-sha512"))]
 impl crate::service::Sign for HmacSha512 {}
+
+pub struct P384 {}
+#[cfg(feature = "p384")]
+mod p384;
+#[cfg(not(feature = "p384"))]
+dummy_impl!(P384);
+
+
+pub struct Rsa2k {}
+#[cfg(feature = "rsa2k")]
+mod rsa2k;
 
 pub struct P256 {}
 pub struct P256Prehashed {}
