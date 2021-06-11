@@ -18,7 +18,8 @@ pub const MAX_KEY_MATERIAL_LENGTH: usize = 128;
 pub const MAX_SERIALIZED_KEY_LENGTH: usize = 132;
 pub type MAX_SERVICE_CLIENTS = consts::U5;
 pub const MAX_SHORT_DATA_LENGTH: usize = 128;
-pub const MAX_SIGNATURE_LENGTH: usize = 72;
+// 72 was for P256, raw P384 is 96
+pub const MAX_SIGNATURE_LENGTH: usize = 96;
 pub const MAX_USER_ATTRIBUTE_LENGTH: usize = 256;
 
 pub const USER_ATTRIBUTE_NUMBER: u8 = 37;
