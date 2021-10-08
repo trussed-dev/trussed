@@ -4,14 +4,14 @@ use littlefs2::path::PathBuf;
 use crate::{
     error::{Error, Result},
     store::{self, Store},
-    types::{CertId, ClientId, Location, Message},
+    types::{CertId, Location, Message},
 };
 
 pub struct ClientCertstore<S>
 where
     S: Store,
 {
-    client_id: ClientId,
+    client_id: PathBuf,
     rng: ChaCha8Rng,
     store: S,
 }
@@ -54,7 +54,7 @@ impl<S: Store> Certstore for ClientCertstore<S> {
 }
 
 impl<S: Store> ClientCertstore<S> {
-    pub fn new(client_id: ClientId, rng: ChaCha8Rng, store: S) -> Self {
+    pub fn new(client_id: PathBuf, rng: ChaCha8Rng, store: S) -> Self {
         Self {
             client_id,
             rng,

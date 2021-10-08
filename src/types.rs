@@ -232,8 +232,31 @@ pub mod consent {
 // pub type AeadNonce = [u8; 12];
 // pub type AeadTag = [u8; 16];
 
-// pub type ClientId = heapless::Vec<u8, heapless::consts::U32>;
-pub type ClientId = PathBuf;
+// The "ClientContext" struct is the closest equivalent to a PCB that Trussed
+// currently has. Trussed currently uses it to choose the client-specific
+// subtree in the filesystem (see docs in src/store.rs) and to maintain
+// the walker state of the directory traversal syscalls.
+pub struct ClientContext {
+    pub path: PathBuf,
+}
+
+impl ClientContext {
+    pub fn new(path: PathBuf) -> Self {
+        Self { path }
+    }
+}
+
+impl From<PathBuf> for ClientContext {
+    fn from(path: PathBuf) -> Self {
+        Self::new(path)
+    }
+}
+
+impl From<&str> for ClientContext {
+    fn from(s: &str) -> Self {
+        Self::new(s.into())
+    }
+}
 
 // Object Hierarchy according to Cryptoki
 // - Storage
