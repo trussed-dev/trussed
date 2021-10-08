@@ -3,7 +3,7 @@ use interchange::Responder;
 
 use crate::api::{Reply, Request};
 use crate::error::Error;
-use crate::types::ClientId;
+use crate::types::ClientContext;
 
 cfg_if::cfg_if! {
 
@@ -72,7 +72,7 @@ pub struct ServiceEndpoint {
     pub interchange: Responder<TrussedInterchange>,
     // service (trusted) has this, not client (untrusted)
     // used among other things to namespace cryptographic material
-    pub client_id: ClientId,
+    pub client_ctx: ClientContext,
 }
 
 // pub type ClientEndpoint = Requester<TrussedInterchange>;
