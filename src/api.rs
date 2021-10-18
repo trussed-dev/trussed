@@ -81,6 +81,7 @@ generate_enums! {
     RequestUserConsent: 41
     Reboot: 42
     Uptime: 43
+    Wink: 44
 
     //////////////
     // Counters //
@@ -306,6 +307,9 @@ pub mod request {
 
         Uptime:
 
+        Wink:
+          - duration: core::time::Duration
+
         CreateCounter:
           - location: Location
 
@@ -453,6 +457,8 @@ pub mod reply {
 
         Uptime:
           - uptime: Duration
+
+        Wink:
 
         CreateCounter:
           - id: CounterId

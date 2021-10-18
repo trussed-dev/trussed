@@ -703,6 +703,11 @@ pub trait UiClient: PollClient {
         Ok(r)
     }
 
+    fn wink(&mut self, duration: core::time::Duration) -> ClientResult<'_, reply::Wink, Self> {
+        let r = self.request(request::Wink { duration } )?;
+        r.client.syscall();
+        Ok(r)
+    }
 }
 
 

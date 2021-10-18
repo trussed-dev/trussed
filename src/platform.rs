@@ -29,6 +29,10 @@ pub trait UserInterface {
 
     /// Exit / reset the application
     fn reboot (&mut self, to: reboot::To) -> !;
+
+    /// Trigger a visible or audible effect for the given duration that allows the user to identify
+    /// the device.
+    fn wink(&mut self, duration: core::time::Duration);
 }
 
 // This is the same trick as in "store.rs",

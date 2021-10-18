@@ -60,6 +60,7 @@ pub mod ui {
         fn refresh(&mut self) {}
         fn uptime(&mut self) -> core::time::Duration { self.start_time.elapsed() }
         fn reboot(&mut self, _to: reboot::To) -> ! { loop { continue; } }
+        fn wink(&mut self, _duration: core::time::Duration) {}
     }
 }
 
