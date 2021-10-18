@@ -75,6 +75,8 @@ impl crate::platform::UserInterface for UserInterface
         std::process::exit(25);
     }
 
+    fn wink(&mut self, _duration: core::time::Duration) {}
+
 }
 
 const_ram_storage!(InternalStorage, 4096*10);
