@@ -16,23 +16,36 @@ pub use crate::types::consent;
 pub trait UserInterface {
     /// Check if the user has indicated their presence so as to give
     /// consent to an action.
-    fn check_user_presence(&mut self) -> consent::Level;
+    fn check_user_presence(&mut self) -> consent::Level {
+        consent::Level::None
+    }
 
     /// Set the state of Trussed to give potential feedback to the user.
-    fn set_status(&mut self, status: ui::Status);
+    fn set_status(&mut self, status: ui::Status) {
+        let _ = status;
+    }
 
     /// May be called during idle periods to give the UI the opportunity to update.
-    fn refresh(&mut self);
+    fn refresh(&mut self) {}
 
     /// Return the duration since startup.
-    fn uptime(&mut self) -> core::time::Duration;
+    fn uptime(&mut self) -> core::time::Duration {
+        Default::default()
+    }
 
     /// Exit / reset the application
-    fn reboot (&mut self, to: reboot::To) -> !;
+    fn reboot (&mut self, to: reboot::To) -> ! {
+        let _ = to;
+        loop {
+            continue
+        }
+    }
 
     /// Trigger a visible or audible effect for the given duration that allows the user to identify
     /// the device.
-    fn wink(&mut self, duration: core::time::Duration);
+    fn wink(&mut self, duration: core::time::Duration) {
+        let _ = duration;
+    }
 }
 
 // This is the same trick as in "store.rs",
