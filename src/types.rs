@@ -511,6 +511,10 @@ pub enum Mechanism {
     X255,
     /// Used to serialize the output of a diffie-hellman
     SharedSecret,
+    //TODO: Do we want to distinguish PKCS_v1.5 vs PSS/OAEP right here?
+    Rsa2k,
+    Rsa3k,
+    Rsa4k,
 }
 
 pub type LongData = Bytes<MAX_LONG_DATA_LENGTH>;
