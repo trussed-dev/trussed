@@ -19,6 +19,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::*;
 use crate::key::Secrecy;
+use crate::store::filestore::{ReadDirFilesState, ReadDirState};
 
 pub use crate::client::FutureResult;
 pub use crate::platform::Platform;
@@ -238,11 +239,17 @@ pub mod consent {
 // the walker state of the directory traversal syscalls.
 pub struct ClientContext {
     pub path: PathBuf,
+    pub read_dir_state: Option<ReadDirState>,
+    pub read_dir_files_state: Option<ReadDirFilesState>,
 }
 
 impl ClientContext {
     pub fn new(path: PathBuf) -> Self {
-        Self { path }
+        Self {
+            path,
+            read_dir_state: None,
+            read_dir_files_state: None,
+        }
     }
 }
 
