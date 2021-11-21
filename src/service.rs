@@ -171,6 +171,7 @@ impl<P: Platform> ServiceResources<P> {
                     Mechanism::P256 => mechanisms::P256::derive_key(keystore, request),
                     Mechanism::Sha256 => mechanisms::Sha256::derive_key(keystore, request),
                     Mechanism::X255 => mechanisms::X255::derive_key(keystore, request),
+                    Mechanism::Rsa2kPkcs => mechanisms::Rsa2kPkcs::derive_key(keystore, request),
                     _ => Err(Error::MechanismNotAvailable),
 
                 }.map(Reply::DeriveKey)
@@ -182,6 +183,7 @@ impl<P: Platform> ServiceResources<P> {
                     Mechanism::Ed255 => mechanisms::Ed255::deserialize_key(keystore, request),
                     Mechanism::P256 => mechanisms::P256::deserialize_key(keystore, request),
                     Mechanism::X255 => mechanisms::X255::deserialize_key(keystore, request),
+                    Mechanism::Rsa2kPkcs => mechanisms::Rsa2kPkcs::deserialize_key(keystore, request),
                     _ => Err(Error::MechanismNotAvailable),
 
                 }.map(Reply::DeserializeKey)
@@ -215,6 +217,7 @@ impl<P: Platform> ServiceResources<P> {
                     Mechanism::P256 => mechanisms::P256::exists(keystore, request),
                     Mechanism::Totp => mechanisms::Totp::exists(keystore, request),
                     Mechanism::X255 => mechanisms::X255::exists(keystore, request),
+                    Mechanism::Rsa2kPkcs => mechanisms::Rsa2kPkcs::exists(keystore, request),
                     _ => Err(Error::MechanismNotAvailable),
 
                 }.map(Reply::Exists)
@@ -226,6 +229,7 @@ impl<P: Platform> ServiceResources<P> {
                     Mechanism::Ed255 => mechanisms::Ed255::generate_key(keystore, request),
                     Mechanism::P256 => mechanisms::P256::generate_key(keystore, request),
                     Mechanism::X255 => mechanisms::X255::generate_key(keystore, request),
+                    Mechanism::Rsa2kPkcs => mechanisms::Rsa2kPkcs::generate_key(keystore, request),
                     _ => Err(Error::MechanismNotAvailable),
                 }.map(Reply::GenerateKey)
             },
@@ -437,6 +441,7 @@ impl<P: Platform> ServiceResources<P> {
                     Mechanism::P256 => mechanisms::P256::serialize_key(keystore, request),
                     Mechanism::X255 => mechanisms::X255::serialize_key(keystore, request),
                     Mechanism::SharedSecret => mechanisms::SharedSecret::serialize_key(keystore, request),
+                    Mechanism::Rsa2kPkcs => mechanisms::Rsa2kPkcs::serialize_key(keystore, request),
                     _ => Err(Error::MechanismNotAvailable),
 
                 }.map(Reply::SerializeKey)
@@ -453,6 +458,7 @@ impl<P: Platform> ServiceResources<P> {
                     Mechanism::P256 => mechanisms::P256::sign(keystore, request),
                     Mechanism::P256Prehashed => mechanisms::P256Prehashed::sign(keystore, request),
                     Mechanism::Totp => mechanisms::Totp::sign(keystore, request),
+                    Mechanism::Rsa2kPkcs => mechanisms::Rsa2kPkcs::sign(keystore, request),
                     _ => Err(Error::MechanismNotAvailable),
 
                 }.map(Reply::Sign)
@@ -477,6 +483,7 @@ impl<P: Platform> ServiceResources<P> {
 
                     Mechanism::Ed255 => mechanisms::Ed255::verify(keystore, request),
                     Mechanism::P256 => mechanisms::P256::verify(keystore, request),
+                    Mechanism::Rsa2kPkcs => mechanisms::Rsa2kPkcs::verify(keystore, request),
                     _ => Err(Error::MechanismNotAvailable),
 
                 }.map(Reply::Verify)

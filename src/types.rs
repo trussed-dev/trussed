@@ -513,6 +513,7 @@ pub enum Mechanism {
     SharedSecret,
     //TODO: Do we want to distinguish PKCS_v1.5 vs PSS/OAEP right here?
     Rsa2k,
+    Rsa2kPkcs,
     Rsa3k,
     Rsa4k,
 }

@@ -152,8 +152,8 @@ impl Kind {
             Kind::P256 => 5,
             Kind::X255 => 6,
             Kind::Rsa2k => 0x7,
-            // Kind::Rsa3k => 0xE0,
-            // Kind::Rsa4k => 0xE1,
+            //Kind::Rsa3k => 0xE0,
+            //Kind::Rsa4k => 0xE1,
         }
     }
 
@@ -167,7 +167,8 @@ impl Kind {
             6 => Self::X255,
 
             0x7 => Self::Rsa2k,
-
+            //0xE0 => Kind::Rsa3k,
+            //0xE1 => Kind::Rsa4k,
             _ => return Err(Error::InvalidSerializedKey),
         })
     }
