@@ -45,14 +45,19 @@ cfg_if::cfg_if! {
 }
 pub const MAX_SHORT_DATA_LENGTH: usize = 128;
 
-//TODO: Do we want better granularity here?
-#[cfg(any(feature = "rsa2k", feature = "rsa3k", feature = "rsa4k"))]
+//TODO: Do we want better keylength granularity here?
+#[cfg(any(feature = "rsa2k-pkcs", feature = "rsa3k", feature = "rsa4k"))]
 pub const MAX_SIGNATURE_LENGTH: usize = 512;
-pub const MAX_KEY_MATERIAL_LENGTH: usize = 2 * 512; //TODO: Assuming (e/d, N) for now
-#[cfg(not(any(feature = "rsa2k", feature = "rsa3k", feature = "rsa4k")))]
+#[cfg(any(feature = "rsa2k-pkcs", feature = "rsa3k", feature = "rsa4k"))]
+pub const MAX_KEY_MATERIAL_LENGTH: usize = 2 * 512; //TODO: Assuming plain (<e OR d>, N) for now
+
+#[cfg(not(any(feature = "rsa2k-pkcs", feature = "rsa3k", feature = "rsa4k")))]
 pub const MAX_SIGNATURE_LENGTH: usize = 72;
+#[cfg(not(any(feature = "rsa2k-pkcs", feature = "rsa3k", feature = "rsa4k")))]
 pub const MAX_KEY_MATERIAL_LENGTH: usize = 128;
 
+// must be MAX_KEY_MATERIAL_LENGTH + 4
+pub const MAX_SERIALIZED_KEY_LENGTH: usize = MAX_KEY_MATERIAL_LENGTH + 4;
 pub const MAX_USER_ATTRIBUTE_LENGTH: usize = 256;
 
 pub const USER_ATTRIBUTE_NUMBER: u8 = 37;

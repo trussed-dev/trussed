@@ -8,19 +8,17 @@ use crate::service::*;
 use crate::types::*;
 
 #[inline(never)]
-fn load_public_key(
-    keystore: &mut impl Keystore,
-    key_id: &KeyId,
-) -> Result<salty::PublicKey, Error> {
-    let public_bytes: [u8; 256] = keystore
+fn load_public_key(keystore: &mut impl Keystore, key_id: &KeyId) -> Result<rsa::PublicKey, Error> {
+    //TODO: The key size should better be defined somewhere instead of hardcoding
+    let public_bytes: [u8; 512] = keystore
         .load_key(key::Secrecy::Public, Some(key::Kind::Rsa2k), &key_id)?
         .material
         .as_slice()
         .try_into()
         .map_err(|_| Error::InternalError)?;
 
-    let public_key =
-        salty::signature::PublicKey::try_from(&public_bytes).map_err(|_| Error::InternalError)?;
+    // let public_key = salty::signature::PublicKey::try_from(&public_bytes).map_err(|_| Error::InternalError)?;
+    let public_key = rsa::PublicKey::try_from(&public_bytes).map_err(|_| Error::InternalError)?;
 
     Ok(public_key)
 }
@@ -28,7 +26,7 @@ fn load_public_key(
 #[inline(never)]
 fn load_keypair(keystore: &mut impl Keystore, key_id: &KeyId) -> Result<salty::Keypair, Error> {
     let seed: [u8; 32] = keystore
-        .load_key(key::Secrecy::Secret, Some(key::Kind::Ed255), &key_id)?
+        .load_key(key::Secrecy::Secret, Some(key::Kind::Rsa2k), &key_id)?
         .material
         .as_slice()
         .try_into()
@@ -39,8 +37,8 @@ fn load_keypair(keystore: &mut impl Keystore, key_id: &KeyId) -> Result<salty::K
     Ok(keypair)
 }
 
-#[cfg(feature = "ed255")]
-impl DeriveKey for super::Ed255 {
+#[cfg(feature = "rsa2k-pkcs")]
+impl DeriveKey for super::Rsa2kPkcs {
     #[inline(never)]
     fn derive_key(
         keystore: &mut impl Keystore,
@@ -52,7 +50,7 @@ impl DeriveKey for super::Ed255 {
         let public_id = keystore.store_key(
             request.attributes.persistence,
             key::Secrecy::Public,
-            key::Kind::Ed255,
+            key::Kind::Rsa2k,
             keypair.public.as_bytes(),
         )?;
 
@@ -60,8 +58,8 @@ impl DeriveKey for super::Ed255 {
     }
 }
 
-#[cfg(feature = "ed255")]
-impl DeserializeKey for super::Ed255 {
+#[cfg(feature = "rsa2k-pkcs")]
+impl DeserializeKey for super::Rsa2kPkcs {
     #[inline(never)]
     fn deserialize_key(
         keystore: &mut impl Keystore,
@@ -86,7 +84,7 @@ impl DeserializeKey for super::Ed255 {
         let public_id = keystore.store_key(
             request.attributes.persistence,
             key::Secrecy::Public,
-            key::Kind::Ed255,
+            key::Kind::Rsa2k,
             public_key.as_bytes(),
         )?;
 
@@ -94,8 +92,8 @@ impl DeserializeKey for super::Ed255 {
     }
 }
 
-#[cfg(feature = "ed255")]
-impl GenerateKey for super::Ed255 {
+#[cfg(feature = "rsa2k-pkcs")]
+impl GenerateKey for super::Rsa2kPkcs {
     #[inline(never)]
     fn generate_key(
         keystore: &mut impl Keystore,
@@ -106,13 +104,13 @@ impl GenerateKey for super::Ed255 {
 
         // let keypair = salty::signature::Keypair::from(&seed);
         // #[cfg(all(test, feature = "verbose-tests"))]
-        // println!("ed255 keypair with public key = {:?}", &keypair.public);
+        // println!("rsa2k-pkcs keypair with public key = {:?}", &keypair.public);
 
         // store keys
         let key_id = keystore.store_key(
             request.attributes.persistence,
             key::Secrecy::Secret,
-            key::Info::from(key::Kind::Ed255).with_local_flag(),
+            key::Info::from(key::Kind::Rsa2k).with_local_flag(),
             &seed,
         )?;
 
@@ -121,8 +119,8 @@ impl GenerateKey for super::Ed255 {
     }
 }
 
-#[cfg(feature = "ed255")]
-impl SerializeKey for super::Ed255 {
+#[cfg(feature = "rsa2k-pkcs")]
+impl SerializeKey for super::Rsa2kPkcs {
     #[inline(never)]
     fn serialize_key(
         keystore: &mut impl Keystore,
@@ -159,8 +157,8 @@ impl SerializeKey for super::Ed255 {
     }
 }
 
-#[cfg(feature = "ed255")]
-impl Exists for super::Ed255 {
+#[cfg(feature = "rsa2k-pkcs")]
+impl Exists for super::Rsa2kPkcs {
     #[inline(never)]
     fn exists(
         keystore: &mut impl Keystore,
@@ -168,25 +166,15 @@ impl Exists for super::Ed255 {
     ) -> Result<reply::Exists, Error> {
         let key_id = request.key;
 
-        let exists = keystore.exists_key(key::Secrecy::Secret, Some(key::Kind::Ed255), &key_id);
+        let exists = keystore.exists_key(key::Secrecy::Secret, Some(key::Kind::Rsa2k), &key_id);
         Ok(reply::Exists { exists })
     }
 }
 
-#[cfg(feature = "ed255")]
-impl Sign for super::Ed255 {
+#[cfg(feature = "rsa2k-pkcs")]
+impl Sign for super::Rsa2kPkcs {
     #[inline(never)]
     fn sign(keystore: &mut impl Keystore, request: &request::Sign) -> Result<reply::Sign, Error> {
-        // Not so nice, expands to
-        // `trussed::/home/nicolas/projects/solo-bee/components/trussed/src/mechanisms/ed255.rs:151
-        // Ed255::Sign`, i.e. VEERY long
-        // debug!("trussed::{}:{} Ed255::Sign", file!(), line!()).ok();
-        // debug!("trussed: Ed255::Sign").ok();
-        // if let SignatureSerialization::Raw = request.format {
-        // } else {
-        //     return Err(Error::InvalidSerializationFormat);
-        // }
-
         let key_id = request.key;
 
         let keypair = load_keypair(keystore, &key_id)?;
@@ -194,7 +182,7 @@ impl Sign for super::Ed255 {
         let native_signature = keypair.sign(&request.message);
         let our_signature = Signature::from_slice(&native_signature.to_bytes()).unwrap();
 
-        // hprintln!("Ed255 signature:").ok();
+        // hprintln!("RSA2K-PKCS_v1.5 signature:").ok();
         // hprintln!("msg: {:?}", &request.message).ok();
         // hprintln!("pk:  {:?}", &keypair.public.as_bytes()).ok();
         // hprintln!("sig: {:?}", &our_signature).ok();
@@ -206,8 +194,8 @@ impl Sign for super::Ed255 {
     }
 }
 
-#[cfg(feature = "ed255")]
-impl Verify for super::Ed255 {
+#[cfg(feature = "rsa2k-pkcs")]
+impl Verify for super::Rsa2kPkcs {
     #[inline(never)]
     fn verify(
         keystore: &mut impl Keystore,
@@ -237,11 +225,11 @@ impl Verify for super::Ed255 {
     }
 }
 
-#[cfg(not(feature = "ed255"))]
-impl DeriveKey for super::Ed255 {}
-#[cfg(not(feature = "ed255"))]
-impl GenerateKey for super::Ed255 {}
-#[cfg(not(feature = "ed255"))]
-impl Sign for super::Ed255 {}
-#[cfg(not(feature = "ed255"))]
-impl Verify for super::Ed255 {}
+#[cfg(not(feature = "rsa2k-pkcs"))]
+impl DeriveKey for super::Rsa2kPkcs {}
+#[cfg(not(feature = "rsa2k-pkcs"))]
+impl GenerateKey for super::Rsa2kPkcs {}
+#[cfg(not(feature = "rsa2k-pkcs"))]
+impl Sign for super::Rsa2kPkcs {}
+#[cfg(not(feature = "rsa2k-pkcs"))]
+impl Verify for super::Rsa2kPkcs {}
