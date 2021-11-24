@@ -1,5 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/p256-0.8.1/src/arithmetic/affine.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>affine.rs - source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings"></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="shortcut icon" href="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../p256/index.html'><div class='logo-container'><img src='https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><script src="../../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
-                <a id="settings-menu" href="../../../settings.html"><img src="../../../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;p256-0.8.1&#x2F;src&#x2F;arithmetic&#x2F;affine.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>affine.rs - source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="shortcut icon" href="https:&#x2F;&#x2F;raw.githubusercontent.com&#x2F;RustCrypto&#x2F;meta&#x2F;master&#x2F;logo.svg"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../p256/index.html'><div class='logo-container rust-logo'><img src='https:&#x2F;&#x2F;raw.githubusercontent.com&#x2F;RustCrypto&#x2F;meta&#x2F;master&#x2F;logo.svg' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -268,21 +267,20 @@
 <span id="267">267</span>
 <span id="268">268</span>
 <span id="269">269</span>
-</pre><div class="example-wrap"><pre class="rust ">
-<span class="doccomment">//! Affine points</span>
+</pre><pre class="rust"><code><span class="doccomment">//! Affine points</span>
 
 <span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">FieldElement</span>, <span class="ident">ProjectivePoint</span>, <span class="ident">CURVE_EQUATION_A</span>, <span class="ident">CURVE_EQUATION_B</span>, <span class="ident">MODULUS</span>};
 <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">EncodedPoint</span>, <span class="ident">FieldBytes</span>, <span class="ident">NistP256</span>, <span class="ident">NonZeroScalar</span>};
-<span class="kw">use</span> <span class="ident">core</span>::<span class="ident">ops</span>::{<span class="ident">Mul</span>, <span class="ident">Neg</span>};
+<span class="kw">use</span> <span class="ident">core::ops</span>::{<span class="ident">Mul</span>, <span class="ident">Neg</span>};
 <span class="kw">use</span> <span class="ident">elliptic_curve</span>::{
-    <span class="ident">generic_array</span>::<span class="ident">arr</span>,
+    <span class="ident">generic_array::arr</span>,
     <span class="ident">sec1</span>::{<span class="self">self</span>, <span class="ident">FromEncodedPoint</span>, <span class="ident">ToEncodedPoint</span>},
     <span class="ident">subtle</span>::{<span class="ident">Choice</span>, <span class="ident">ConditionallySelectable</span>, <span class="ident">ConstantTimeEq</span>, <span class="ident">CtOption</span>},
-    <span class="ident">weierstrass</span>::<span class="ident">DecompressPoint</span>,
+    <span class="ident">weierstrass::DecompressPoint</span>,
 };
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;zeroize&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident">elliptic_curve</span>::<span class="ident">zeroize</span>::<span class="ident">Zeroize</span>;
+<span class="kw">use</span> <span class="ident">elliptic_curve::zeroize::Zeroize</span>;
 
 <span class="doccomment">/// A point on the secp256r1 curve in affine coordinates.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">Debug</span>)]</span>
@@ -300,28 +298,28 @@
         <span class="comment">// x = 6b17d1f2 e12c4247 f8bce6e5 63a440f2 77037d81 2deb33a0 f4a13945 d898c296</span>
         <span class="comment">// y = 4fe342e2 fe1a7f9b 8ee7eb4a 7c0f9e16 2bce3357 6b315ece cbb64068 37bf51f5</span>
         <span class="ident">AffinePoint</span> {
-            <span class="ident">x</span>: <span class="ident">FieldElement</span>::<span class="ident">from_bytes</span>(<span class="kw-2">&amp;</span><span class="macro">arr</span><span class="macro">!</span>[<span class="ident">u8</span>;
+            <span class="ident">x</span>: <span class="ident">FieldElement::from_bytes</span>(<span class="kw-2">&amp;</span><span class="macro">arr!</span>[<span class="ident">u8</span>;
                 <span class="number">0x6b</span>, <span class="number">0x17</span>, <span class="number">0xd1</span>, <span class="number">0xf2</span>, <span class="number">0xe1</span>, <span class="number">0x2c</span>, <span class="number">0x42</span>, <span class="number">0x47</span>, <span class="number">0xf8</span>, <span class="number">0xbc</span>, <span class="number">0xe6</span>, <span class="number">0xe5</span>, <span class="number">0x63</span>, <span class="number">0xa4</span>,
                 <span class="number">0x40</span>, <span class="number">0xf2</span>, <span class="number">0x77</span>, <span class="number">0x03</span>, <span class="number">0x7d</span>, <span class="number">0x81</span>, <span class="number">0x2d</span>, <span class="number">0xeb</span>, <span class="number">0x33</span>, <span class="number">0xa0</span>, <span class="number">0xf4</span>, <span class="number">0xa1</span>, <span class="number">0x39</span>, <span class="number">0x45</span>,
                 <span class="number">0xd8</span>, <span class="number">0x98</span>, <span class="number">0xc2</span>, <span class="number">0x96</span>
             ])
             .<span class="ident">unwrap</span>(),
-            <span class="ident">y</span>: <span class="ident">FieldElement</span>::<span class="ident">from_bytes</span>(<span class="kw-2">&amp;</span><span class="macro">arr</span><span class="macro">!</span>[<span class="ident">u8</span>;
+            <span class="ident">y</span>: <span class="ident">FieldElement::from_bytes</span>(<span class="kw-2">&amp;</span><span class="macro">arr!</span>[<span class="ident">u8</span>;
                 <span class="number">0x4f</span>, <span class="number">0xe3</span>, <span class="number">0x42</span>, <span class="number">0xe2</span>, <span class="number">0xfe</span>, <span class="number">0x1a</span>, <span class="number">0x7f</span>, <span class="number">0x9b</span>, <span class="number">0x8e</span>, <span class="number">0xe7</span>, <span class="number">0xeb</span>, <span class="number">0x4a</span>, <span class="number">0x7c</span>, <span class="number">0x0f</span>,
                 <span class="number">0x9e</span>, <span class="number">0x16</span>, <span class="number">0x2b</span>, <span class="number">0xce</span>, <span class="number">0x33</span>, <span class="number">0x57</span>, <span class="number">0x6b</span>, <span class="number">0x31</span>, <span class="number">0x5e</span>, <span class="number">0xce</span>, <span class="number">0xcb</span>, <span class="number">0xb6</span>, <span class="number">0x40</span>, <span class="number">0x68</span>,
                 <span class="number">0x37</span>, <span class="number">0xbf</span>, <span class="number">0x51</span>, <span class="number">0xf5</span>
             ])
             .<span class="ident">unwrap</span>(),
-            <span class="ident">infinity</span>: <span class="ident">Choice</span>::<span class="ident">from</span>(<span class="number">0</span>),
+            <span class="ident">infinity</span>: <span class="ident">Choice::from</span>(<span class="number">0</span>),
         }
     }
 
     <span class="doccomment">/// Returns the identity of the group: the point at infinity.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">identity</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">AffinePoint</span> {
         <span class="self">Self</span> {
-            <span class="ident">x</span>: <span class="ident">FieldElement</span>::<span class="ident">zero</span>(),
-            <span class="ident">y</span>: <span class="ident">FieldElement</span>::<span class="ident">zero</span>(),
-            <span class="ident">infinity</span>: <span class="ident">Choice</span>::<span class="ident">from</span>(<span class="number">1</span>),
+            <span class="ident">x</span>: <span class="ident">FieldElement::zero</span>(),
+            <span class="ident">y</span>: <span class="ident">FieldElement::zero</span>(),
+            <span class="ident">infinity</span>: <span class="ident">Choice::from</span>(<span class="number">1</span>),
         }
     }
 
@@ -334,9 +332,9 @@
 <span class="kw">impl</span> <span class="ident">ConditionallySelectable</span> <span class="kw">for</span> <span class="ident">AffinePoint</span> {
     <span class="kw">fn</span> <span class="ident">conditional_select</span>(<span class="ident">a</span>: <span class="kw-2">&amp;</span><span class="ident">AffinePoint</span>, <span class="ident">b</span>: <span class="kw-2">&amp;</span><span class="ident">AffinePoint</span>, <span class="ident">choice</span>: <span class="ident">Choice</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">AffinePoint</span> {
         <span class="ident">AffinePoint</span> {
-            <span class="ident">x</span>: <span class="ident">FieldElement</span>::<span class="ident">conditional_select</span>(<span class="kw-2">&amp;</span><span class="ident">a</span>.<span class="ident">x</span>, <span class="kw-2">&amp;</span><span class="ident">b</span>.<span class="ident">x</span>, <span class="ident">choice</span>),
-            <span class="ident">y</span>: <span class="ident">FieldElement</span>::<span class="ident">conditional_select</span>(<span class="kw-2">&amp;</span><span class="ident">a</span>.<span class="ident">y</span>, <span class="kw-2">&amp;</span><span class="ident">b</span>.<span class="ident">y</span>, <span class="ident">choice</span>),
-            <span class="ident">infinity</span>: <span class="ident">Choice</span>::<span class="ident">conditional_select</span>(<span class="kw-2">&amp;</span><span class="ident">a</span>.<span class="ident">infinity</span>, <span class="kw-2">&amp;</span><span class="ident">b</span>.<span class="ident">infinity</span>, <span class="ident">choice</span>),
+            <span class="ident">x</span>: <span class="ident">FieldElement::conditional_select</span>(<span class="kw-2">&amp;</span><span class="ident">a</span>.<span class="ident">x</span>, <span class="kw-2">&amp;</span><span class="ident">b</span>.<span class="ident">x</span>, <span class="ident">choice</span>),
+            <span class="ident">y</span>: <span class="ident">FieldElement::conditional_select</span>(<span class="kw-2">&amp;</span><span class="ident">a</span>.<span class="ident">y</span>, <span class="kw-2">&amp;</span><span class="ident">b</span>.<span class="ident">y</span>, <span class="ident">choice</span>),
+            <span class="ident">infinity</span>: <span class="ident">Choice::conditional_select</span>(<span class="kw-2">&amp;</span><span class="ident">a</span>.<span class="ident">infinity</span>, <span class="kw-2">&amp;</span><span class="ident">b</span>.<span class="ident">infinity</span>, <span class="ident">choice</span>),
         }
     }
 }
@@ -349,7 +347,7 @@
 
 <span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">AffinePoint</span> {
     <span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">Self</span>::<span class="ident">identity</span>()
+        <span class="ident"><span class="self">Self</span>::identity</span>()
     }
 }
 
@@ -363,12 +361,12 @@
 
 <span class="kw">impl</span> <span class="ident">DecompressPoint</span><span class="op">&lt;</span><span class="ident">NistP256</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">AffinePoint</span> {
     <span class="kw">fn</span> <span class="ident">decompress</span>(<span class="ident">x_bytes</span>: <span class="kw-2">&amp;</span><span class="ident">FieldBytes</span>, <span class="ident">y_is_odd</span>: <span class="ident">Choice</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">CtOption</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
-        <span class="ident">FieldElement</span>::<span class="ident">from_bytes</span>(<span class="ident">x_bytes</span>).<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> {
+        <span class="ident">FieldElement::from_bytes</span>(<span class="ident">x_bytes</span>).<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> {
             <span class="kw">let</span> <span class="ident">alpha</span> <span class="op">=</span> <span class="ident">x</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">x</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">x</span> <span class="op">+</span> <span class="kw-2">&amp;</span>(<span class="ident">CURVE_EQUATION_A</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">x</span>) <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">CURVE_EQUATION_B</span>;
             <span class="kw">let</span> <span class="ident">beta</span> <span class="op">=</span> <span class="ident">alpha</span>.<span class="ident">sqrt</span>();
 
             <span class="ident">beta</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">beta</span><span class="op">|</span> {
-                <span class="kw">let</span> <span class="ident">y</span> <span class="op">=</span> <span class="ident">FieldElement</span>::<span class="ident">conditional_select</span>(
+                <span class="kw">let</span> <span class="ident">y</span> <span class="op">=</span> <span class="ident">FieldElement::conditional_select</span>(
                     <span class="kw-2">&amp;</span>(<span class="ident">MODULUS</span> <span class="op">-</span> <span class="kw-2">&amp;</span><span class="ident">beta</span>),
                     <span class="kw-2">&amp;</span><span class="ident">beta</span>,
                     <span class="ident">beta</span>.<span class="ident">is_odd</span>().<span class="ident">ct_eq</span>(<span class="kw-2">&amp;</span><span class="ident">y_is_odd</span>),
@@ -377,7 +375,7 @@
                 <span class="self">Self</span> {
                     <span class="ident">x</span>,
                     <span class="ident">y</span>,
-                    <span class="ident">infinity</span>: <span class="ident">Choice</span>::<span class="ident">from</span>(<span class="number">0</span>),
+                    <span class="ident">infinity</span>: <span class="ident">Choice::from</span>(<span class="number">0</span>),
                 }
             })
         })
@@ -392,13 +390,13 @@
     <span class="doccomment">/// `None` value if `encoded_point` is not on the secp256r1 curve.</span>
     <span class="kw">fn</span> <span class="ident">from_encoded_point</span>(<span class="ident">encoded_point</span>: <span class="kw-2">&amp;</span><span class="ident">EncodedPoint</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="ident">encoded_point</span>.<span class="ident">coordinates</span>() {
-            <span class="ident">sec1</span>::<span class="ident">Coordinates</span>::<span class="ident">Identity</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="self">Self</span>::<span class="ident">identity</span>()),
-            <span class="ident">sec1</span>::<span class="ident">Coordinates</span>::<span class="ident">Compressed</span> { <span class="ident">x</span>, <span class="ident">y_is_odd</span> } <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="ident">AffinePoint</span>::<span class="ident">decompress</span>(<span class="ident">x</span>, <span class="ident">Choice</span>::<span class="ident">from</span>(<span class="ident">y_is_odd</span> <span class="kw">as</span> <span class="ident">u8</span>)).<span class="ident">into</span>()
+            <span class="ident">sec1::Coordinates::Identity</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident"><span class="self">Self</span>::identity</span>()),
+            <span class="ident">sec1::Coordinates::Compressed</span> { <span class="ident">x</span>, <span class="ident">y_is_odd</span> } <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="ident">AffinePoint::decompress</span>(<span class="ident">x</span>, <span class="ident">Choice::from</span>(<span class="ident">y_is_odd</span> <span class="kw">as</span> <span class="ident">u8</span>)).<span class="ident">into</span>()
             }
-            <span class="ident">sec1</span>::<span class="ident">Coordinates</span>::<span class="ident">Uncompressed</span> { <span class="ident">x</span>, <span class="ident">y</span> } <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="kw">let</span> <span class="ident">x</span> <span class="op">=</span> <span class="ident">FieldElement</span>::<span class="ident">from_bytes</span>(<span class="ident">x</span>);
-                <span class="kw">let</span> <span class="ident">y</span> <span class="op">=</span> <span class="ident">FieldElement</span>::<span class="ident">from_bytes</span>(<span class="ident">y</span>);
+            <span class="ident">sec1::Coordinates::Uncompressed</span> { <span class="ident">x</span>, <span class="ident">y</span> } <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="kw">let</span> <span class="ident">x</span> <span class="op">=</span> <span class="ident">FieldElement::from_bytes</span>(<span class="ident">x</span>);
+                <span class="kw">let</span> <span class="ident">y</span> <span class="op">=</span> <span class="ident">FieldElement::from_bytes</span>(<span class="ident">y</span>);
 
                 <span class="ident">x</span>.<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> {
                     <span class="ident">y</span>.<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">y</span><span class="op">|</span> {
@@ -408,9 +406,9 @@
                         <span class="kw">let</span> <span class="ident">point</span> <span class="op">=</span> <span class="ident">AffinePoint</span> {
                             <span class="ident">x</span>,
                             <span class="ident">y</span>,
-                            <span class="ident">infinity</span>: <span class="ident">Choice</span>::<span class="ident">from</span>(<span class="number">0</span>),
+                            <span class="ident">infinity</span>: <span class="ident">Choice::from</span>(<span class="number">0</span>),
                         };
-                        <span class="ident">CtOption</span>::<span class="ident">new</span>(<span class="ident">point</span>, <span class="ident">lhs</span>.<span class="ident">ct_eq</span>(<span class="kw-2">&amp;</span><span class="ident">rhs</span>))
+                        <span class="ident">CtOption::new</span>(<span class="ident">point</span>, <span class="ident">lhs</span>.<span class="ident">ct_eq</span>(<span class="kw-2">&amp;</span><span class="ident">rhs</span>))
                     })
                 })
                 .<span class="ident">into</span>()
@@ -421,13 +419,13 @@
 
 <span class="kw">impl</span> <span class="ident">ToEncodedPoint</span><span class="op">&lt;</span><span class="ident">NistP256</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">AffinePoint</span> {
     <span class="kw">fn</span> <span class="ident">to_encoded_point</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">compress</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">EncodedPoint</span> {
-        <span class="ident">EncodedPoint</span>::<span class="ident">conditional_select</span>(
-            <span class="kw-2">&amp;</span><span class="ident">EncodedPoint</span>::<span class="ident">from_affine_coordinates</span>(
+        <span class="ident">EncodedPoint::conditional_select</span>(
+            <span class="kw-2">&amp;</span><span class="ident">EncodedPoint::from_affine_coordinates</span>(
                 <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">x</span>.<span class="ident">to_bytes</span>(),
                 <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">y</span>.<span class="ident">to_bytes</span>(),
                 <span class="ident">compress</span>,
             ),
-            <span class="kw-2">&amp;</span><span class="ident">EncodedPoint</span>::<span class="ident">identity</span>(),
+            <span class="kw-2">&amp;</span><span class="ident">EncodedPoint::identity</span>(),
             <span class="self">self</span>.<span class="ident">infinity</span>,
         )
     }
@@ -444,14 +442,14 @@
     <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">AffinePoint</span>;
 
     <span class="kw">fn</span> <span class="ident">mul</span>(<span class="self">self</span>, <span class="ident">scalar</span>: <span class="ident">NonZeroScalar</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        (<span class="ident">ProjectivePoint</span>::<span class="ident">from</span>(<span class="self">self</span>) <span class="op">*</span> <span class="ident">scalar</span>.<span class="ident">as_ref</span>()).<span class="ident">to_affine</span>()
+        (<span class="ident">ProjectivePoint::from</span>(<span class="self">self</span>) <span class="op">*</span> <span class="ident">scalar</span>.<span class="ident">as_ref</span>()).<span class="ident">to_affine</span>()
     }
 }
 
 <span class="kw">impl</span> <span class="ident">Neg</span> <span class="kw">for</span> <span class="ident">AffinePoint</span> {
     <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">AffinePoint</span>;
 
-    <span class="kw">fn</span> <span class="ident">neg</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>::<span class="ident">Output</span> {
+    <span class="kw">fn</span> <span class="ident">neg</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::Output</span> {
         <span class="ident">AffinePoint</span> {
             <span class="ident">x</span>: <span class="self">self</span>.<span class="ident">x</span>,
             <span class="ident">y</span>: <span class="op">-</span><span class="self">self</span>.<span class="ident">y</span>,
@@ -470,74 +468,75 @@
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">tests</span> {
-    <span class="kw">use</span> <span class="kw">super</span>::<span class="ident">AffinePoint</span>;
-    <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">EncodedPoint</span>;
-    <span class="kw">use</span> <span class="ident">elliptic_curve</span>::<span class="ident">sec1</span>::{<span class="ident">FromEncodedPoint</span>, <span class="ident">ToEncodedPoint</span>};
-    <span class="kw">use</span> <span class="ident">hex_literal</span>::<span class="ident">hex</span>;
+    <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::AffinePoint</span>;
+    <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::EncodedPoint</span>;
+    <span class="kw">use</span> <span class="ident">elliptic_curve::sec1</span>::{<span class="ident">FromEncodedPoint</span>, <span class="ident">ToEncodedPoint</span>};
+    <span class="kw">use</span> <span class="ident">hex_literal::hex</span>;
 
-    <span class="kw">const</span> <span class="ident">UNCOMPRESSED_BASEPOINT</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span> <span class="kw-2">&amp;</span><span class="macro">hex</span><span class="macro">!</span>(
+    <span class="kw">const</span> <span class="ident">UNCOMPRESSED_BASEPOINT</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span> <span class="kw-2">&amp;</span><span class="macro">hex!</span>(
         <span class="string">&quot;046B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296
          4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5&quot;</span>
     );
 
     <span class="kw">const</span> <span class="ident">COMPRESSED_BASEPOINT</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span>
-        <span class="kw-2">&amp;</span><span class="macro">hex</span><span class="macro">!</span>(<span class="string">&quot;036B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296&quot;</span>);
+        <span class="kw-2">&amp;</span><span class="macro">hex!</span>(<span class="string">&quot;036B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296&quot;</span>);
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">uncompressed_round_trip</span>() {
-        <span class="kw">let</span> <span class="ident">pubkey</span> <span class="op">=</span> <span class="ident">EncodedPoint</span>::<span class="ident">from_bytes</span>(<span class="ident">UNCOMPRESSED_BASEPOINT</span>).<span class="ident">unwrap</span>();
-        <span class="kw">let</span> <span class="ident">point</span> <span class="op">=</span> <span class="ident">AffinePoint</span>::<span class="ident">from_encoded_point</span>(<span class="kw-2">&amp;</span><span class="ident">pubkey</span>).<span class="ident">unwrap</span>();
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">point</span>, <span class="ident">AffinePoint</span>::<span class="ident">generator</span>());
+        <span class="kw">let</span> <span class="ident">pubkey</span> <span class="op">=</span> <span class="ident">EncodedPoint::from_bytes</span>(<span class="ident">UNCOMPRESSED_BASEPOINT</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">point</span> <span class="op">=</span> <span class="ident">AffinePoint::from_encoded_point</span>(<span class="kw-2">&amp;</span><span class="ident">pubkey</span>).<span class="ident">unwrap</span>();
+        <span class="macro">assert_eq!</span>(<span class="ident">point</span>, <span class="ident">AffinePoint::generator</span>());
 
         <span class="kw">let</span> <span class="ident">res</span>: <span class="ident">EncodedPoint</span> <span class="op">=</span> <span class="ident">point</span>.<span class="ident">into</span>();
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">res</span>, <span class="ident">pubkey</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">res</span>, <span class="ident">pubkey</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">compressed_round_trip</span>() {
-        <span class="kw">let</span> <span class="ident">pubkey</span> <span class="op">=</span> <span class="ident">EncodedPoint</span>::<span class="ident">from_bytes</span>(<span class="ident">COMPRESSED_BASEPOINT</span>).<span class="ident">unwrap</span>();
-        <span class="kw">let</span> <span class="ident">point</span> <span class="op">=</span> <span class="ident">AffinePoint</span>::<span class="ident">from_encoded_point</span>(<span class="kw-2">&amp;</span><span class="ident">pubkey</span>).<span class="ident">unwrap</span>();
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">point</span>, <span class="ident">AffinePoint</span>::<span class="ident">generator</span>());
+        <span class="kw">let</span> <span class="ident">pubkey</span> <span class="op">=</span> <span class="ident">EncodedPoint::from_bytes</span>(<span class="ident">COMPRESSED_BASEPOINT</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">point</span> <span class="op">=</span> <span class="ident">AffinePoint::from_encoded_point</span>(<span class="kw-2">&amp;</span><span class="ident">pubkey</span>).<span class="ident">unwrap</span>();
+        <span class="macro">assert_eq!</span>(<span class="ident">point</span>, <span class="ident">AffinePoint::generator</span>());
 
         <span class="kw">let</span> <span class="ident">res</span>: <span class="ident">EncodedPoint</span> <span class="op">=</span> <span class="ident">point</span>.<span class="ident">to_encoded_point</span>(<span class="bool-val">true</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">res</span>, <span class="ident">pubkey</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">res</span>, <span class="ident">pubkey</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">uncompressed_to_compressed</span>() {
-        <span class="kw">let</span> <span class="ident">encoded</span> <span class="op">=</span> <span class="ident">EncodedPoint</span>::<span class="ident">from_bytes</span>(<span class="ident">UNCOMPRESSED_BASEPOINT</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">encoded</span> <span class="op">=</span> <span class="ident">EncodedPoint::from_bytes</span>(<span class="ident">UNCOMPRESSED_BASEPOINT</span>).<span class="ident">unwrap</span>();
 
-        <span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">AffinePoint</span>::<span class="ident">from_encoded_point</span>(<span class="kw-2">&amp;</span><span class="ident">encoded</span>)
+        <span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">AffinePoint::from_encoded_point</span>(<span class="kw-2">&amp;</span><span class="ident">encoded</span>)
             .<span class="ident">unwrap</span>()
             .<span class="ident">to_encoded_point</span>(<span class="bool-val">true</span>);
 
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">res</span>.<span class="ident">as_bytes</span>(), <span class="ident">COMPRESSED_BASEPOINT</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">res</span>.<span class="ident">as_bytes</span>(), <span class="ident">COMPRESSED_BASEPOINT</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">compressed_to_uncompressed</span>() {
-        <span class="kw">let</span> <span class="ident">encoded</span> <span class="op">=</span> <span class="ident">EncodedPoint</span>::<span class="ident">from_bytes</span>(<span class="ident">COMPRESSED_BASEPOINT</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">encoded</span> <span class="op">=</span> <span class="ident">EncodedPoint::from_bytes</span>(<span class="ident">COMPRESSED_BASEPOINT</span>).<span class="ident">unwrap</span>();
 
-        <span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">AffinePoint</span>::<span class="ident">from_encoded_point</span>(<span class="kw-2">&amp;</span><span class="ident">encoded</span>)
+        <span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">AffinePoint::from_encoded_point</span>(<span class="kw-2">&amp;</span><span class="ident">encoded</span>)
             .<span class="ident">unwrap</span>()
             .<span class="ident">to_encoded_point</span>(<span class="bool-val">false</span>);
 
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">res</span>.<span class="ident">as_bytes</span>(), <span class="ident">UNCOMPRESSED_BASEPOINT</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">res</span>.<span class="ident">as_bytes</span>(), <span class="ident">UNCOMPRESSED_BASEPOINT</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">decompress</span>() {
-        <span class="kw">let</span> <span class="ident">encoded</span> <span class="op">=</span> <span class="ident">EncodedPoint</span>::<span class="ident">from_bytes</span>(<span class="ident">COMPRESSED_BASEPOINT</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">encoded</span> <span class="op">=</span> <span class="ident">EncodedPoint::from_bytes</span>(<span class="ident">COMPRESSED_BASEPOINT</span>).<span class="ident">unwrap</span>();
         <span class="kw">let</span> <span class="ident">decompressed</span> <span class="op">=</span> <span class="ident">encoded</span>.<span class="ident">decompress</span>().<span class="ident">unwrap</span>();
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">decompressed</span>.<span class="ident">as_bytes</span>(), <span class="ident">UNCOMPRESSED_BASEPOINT</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">decompressed</span>.<span class="ident">as_bytes</span>(), <span class="ident">UNCOMPRESSED_BASEPOINT</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">affine_negation</span>() {
-        <span class="kw">let</span> <span class="ident">basepoint</span> <span class="op">=</span> <span class="ident">AffinePoint</span>::<span class="ident">generator</span>();
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="op">-</span>(<span class="op">-</span><span class="ident">basepoint</span>), <span class="ident">basepoint</span>);
+        <span class="kw">let</span> <span class="ident">basepoint</span> <span class="op">=</span> <span class="ident">AffinePoint::generator</span>();
+        <span class="macro">assert_eq!</span>(<span class="op">-</span>(<span class="op">-</span><span class="ident">basepoint</span>), <span class="ident">basepoint</span>);
     }
 }
-</pre></div>
-</section><section id="search" class="content hidden"></section><section class="footer"></section><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="p256" data-search-js="../../../search-index.js"></div>
-    <script src="../../../main.js"></script><script src="../../../source-script.js"></script><script src="../../../source-files.js"></script></body></html>
+</code></pre></div>
+</section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="p256" data-search-index-js="../../../search-index.js" data-search-js="../../../search.js"></div>
+    <script src="../../../main.js"></script><script src="../../../source-script.js"></script><script src="../../../source-files.js"></script>
+</body></html>

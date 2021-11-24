@@ -1,7 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/poly1305-0.7.0/src/backend/avx2/helpers.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>helpers.rs - source</title><link rel="stylesheet" type="text/css" href="../../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../../ayu.css" disabled ><script id="default-settings"></script><script src="../../../../storage.js"></script><script src="../../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../../../favicon.svg">
-<link rel="alternate icon" type="image/png" href="../../../../favicon-16x16.png">
-<link rel="alternate icon" type="image/png" href="../../../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../../poly1305/index.html'><div class='logo-container'><img src='https://raw.githubusercontent.com/RustCrypto/meta/master/logo_small.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../../../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><script src="../../../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
-                <a id="settings-menu" href="../../../../settings.html"><img src="../../../../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">   1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;poly1305-0.7.2&#x2F;src&#x2F;backend&#x2F;avx2&#x2F;helpers.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>helpers.rs - source</title><link rel="stylesheet" type="text/css" href="../../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../../../storage.js"></script><script src="../../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../../noscript.css"></noscript><link rel="shortcut icon" href="https:&#x2F;&#x2F;raw.githubusercontent.com&#x2F;RustCrypto&#x2F;media&#x2F;8f1a9894&#x2F;logo.svg"><style type="text/css">#crate-search{background-image:url("../../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../../poly1305/index.html'><div class='logo-container rust-logo'><img src='https:&#x2F;&#x2F;raw.githubusercontent.com&#x2F;RustCrypto&#x2F;media&#x2F;8f1a9894&#x2F;logo.svg' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">   1</span>
 <span id="2">   2</span>
 <span id="3">   3</span>
 <span id="4">   4</span>
@@ -1980,16 +1977,15 @@
 <span id="1977">1977</span>
 <span id="1978">1978</span>
 <span id="1979">1979</span>
-</pre><div class="example-wrap"><pre class="rust ">
-<span class="doccomment">//! AVX2 helpers for implementing Poly1305 using 26-bit limbs.</span>
+</pre><pre class="rust"><code><span class="doccomment">//! AVX2 helpers for implementing Poly1305 using 26-bit limbs.</span>
 
-<span class="kw">use</span> <span class="ident">core</span>::<span class="ident">fmt</span>;
-<span class="kw">use</span> <span class="ident">core</span>::<span class="ident">ops</span>::{<span class="ident">Add</span>, <span class="ident">Mul</span>};
+<span class="kw">use</span> <span class="ident">core::fmt</span>;
+<span class="kw">use</span> <span class="ident">core::ops</span>::{<span class="ident">Add</span>, <span class="ident">Mul</span>};
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident">core</span>::<span class="ident">arch</span>::<span class="ident">x86</span>::<span class="kw-2">*</span>;
+<span class="kw">use</span> <span class="ident">core::arch::x86</span>::<span class="kw-2">*</span>;
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident">core</span>::<span class="ident">arch</span>::<span class="ident">x86_64</span>::<span class="kw-2">*</span>;
+<span class="kw">use</span> <span class="ident">core::arch::x86_64</span>::<span class="kw-2">*</span>;
 
 <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">Block</span>, <span class="ident">Key</span>};
 
@@ -1998,7 +1994,7 @@
 }
 
 <span class="doccomment">/// Helper for Display impls of aligned values.</span>
-<span class="kw">fn</span> <span class="ident">write_130</span>(<span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt</span>::<span class="ident">Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>, <span class="ident">limbs</span>: [<span class="ident">u32</span>; <span class="number">5</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt</span>::<span class="prelude-ty">Result</span> {
+<span class="kw">fn</span> <span class="ident">write_130</span>(<span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>, <span class="ident">limbs</span>: [<span class="ident">u32</span>; <span class="number">5</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
     <span class="kw">let</span> <span class="ident">r0</span> <span class="op">=</span> <span class="ident">limbs</span>[<span class="number">0</span>] <span class="kw">as</span> <span class="ident">u128</span>;
     <span class="kw">let</span> <span class="ident">r1</span> <span class="op">=</span> <span class="ident">limbs</span>[<span class="number">1</span>] <span class="kw">as</span> <span class="ident">u128</span>;
     <span class="kw">let</span> <span class="ident">r2</span> <span class="op">=</span> <span class="ident">limbs</span>[<span class="number">2</span>] <span class="kw">as</span> <span class="ident">u128</span>;
@@ -2010,11 +2006,11 @@
     <span class="kw">let</span> (<span class="ident">l0</span>, <span class="ident">c</span>) <span class="op">=</span> <span class="ident">l0</span>.<span class="ident">overflowing_add</span>(<span class="ident">r4</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">104</span>);
     <span class="kw">let</span> <span class="ident">l1</span> <span class="op">=</span> (<span class="ident">r4</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">24</span>) <span class="op">+</span> <span class="kw">if</span> <span class="ident">c</span> { <span class="number">1</span> } <span class="kw">else</span> { <span class="number">0</span> };
 
-    <span class="macro">write</span><span class="macro">!</span>(<span class="ident">f</span>, <span class="string">&quot;0x{:02x}{:032x}&quot;</span>, <span class="ident">l1</span>, <span class="ident">l0</span>)
+    <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;0x{:02x}{:032x}&quot;</span>, <span class="ident">l1</span>, <span class="ident">l0</span>)
 }
 
 <span class="doccomment">/// Helper for Display impls of unreduced values.</span>
-<span class="kw">fn</span> <span class="ident">write_130_wide</span>(<span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt</span>::<span class="ident">Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>, <span class="ident">limbs</span>: [<span class="ident">u64</span>; <span class="number">5</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt</span>::<span class="prelude-ty">Result</span> {
+<span class="kw">fn</span> <span class="ident">write_130_wide</span>(<span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>, <span class="ident">limbs</span>: [<span class="ident">u64</span>; <span class="number">5</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
     <span class="kw">let</span> <span class="ident">r0</span> <span class="op">=</span> <span class="ident">limbs</span>[<span class="number">0</span>] <span class="kw">as</span> <span class="ident">u128</span>;
     <span class="kw">let</span> <span class="ident">r1</span> <span class="op">=</span> <span class="ident">limbs</span>[<span class="number">1</span>] <span class="kw">as</span> <span class="ident">u128</span>;
     <span class="kw">let</span> <span class="ident">r2</span> <span class="op">=</span> <span class="ident">limbs</span>[<span class="number">2</span>] <span class="kw">as</span> <span class="ident">u128</span>;
@@ -2027,7 +2023,7 @@
     <span class="kw">let</span> (<span class="ident">l0</span>, <span class="ident">c2</span>) <span class="op">=</span> <span class="ident">l0</span>.<span class="ident">overflowing_add</span>(<span class="ident">r4</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">104</span>);
     <span class="kw">let</span> <span class="ident">l1</span> <span class="op">=</span> (<span class="ident">r3</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">50</span>) <span class="op">+</span> (<span class="ident">r4</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">24</span>) <span class="op">+</span> <span class="kw">if</span> <span class="ident">c1</span> { <span class="number">1</span> } <span class="kw">else</span> { <span class="number">0</span> } <span class="op">+</span> <span class="kw">if</span> <span class="ident">c2</span> { <span class="number">1</span> } <span class="kw">else</span> { <span class="number">0</span> };
 
-    <span class="macro">write</span><span class="macro">!</span>(<span class="ident">f</span>, <span class="string">&quot;0x{:02x}{:032x}&quot;</span>, <span class="ident">l1</span>, <span class="ident">l0</span>)
+    <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;0x{:02x}{:032x}&quot;</span>, <span class="ident">l1</span>, <span class="ident">l0</span>)
 }
 
 <span class="doccomment">/// Derives the Poly1305 addition and polynomial keys.</span>
@@ -2043,7 +2039,7 @@
     ));
 
     <span class="comment">// Prepare polynomial key R = k &amp; 0xffffffc0ffffffc0ffffffc0fffffff:</span>
-    <span class="kw">let</span> <span class="ident">r</span> <span class="op">=</span> <span class="ident">Aligned130</span>::<span class="ident">new</span>(<span class="ident">_mm256_and_si256</span>(
+    <span class="kw">let</span> <span class="ident">r</span> <span class="op">=</span> <span class="ident">Aligned130::new</span>(<span class="ident">_mm256_and_si256</span>(
         <span class="ident">key</span>,
         <span class="ident">_mm256_set_epi32</span>(<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0x0ffffffc</span>, <span class="number">0x0ffffffc</span>, <span class="number">0x0ffffffc</span>, <span class="number">0x0fffffff</span>),
     ));
@@ -2057,27 +2053,27 @@
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">struct</span> <span class="ident">Aligned130</span>(<span class="kw">pub</span>(<span class="kw">super</span>) <span class="ident">__m256i</span>);
 
-<span class="kw">impl</span> <span class="ident">fmt</span>::<span class="ident">Display</span> <span class="kw">for</span> <span class="ident">Aligned130</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt</span>::<span class="ident">Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt</span>::<span class="prelude-ty">Result</span> {
-        <span class="kw">use</span> <span class="ident">core</span>::<span class="ident">convert</span>::<span class="ident">TryInto</span>;
+<span class="kw">impl</span> <span class="ident">fmt::Display</span> <span class="kw">for</span> <span class="ident">Aligned130</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+        <span class="kw">use</span> <span class="ident">core::convert::TryInto</span>;
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">v0</span> <span class="op">=</span> [<span class="number">0u8</span>; <span class="number">32</span>];
         <span class="kw">unsafe</span> {
             <span class="ident">_mm256_storeu_si256</span>(<span class="ident">v0</span>.<span class="ident">as_mut_ptr</span>() <span class="kw">as</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="kw">_</span>, <span class="self">self</span>.<span class="number">0</span>);
         }
 
-        <span class="macro">write</span><span class="macro">!</span>(<span class="ident">f</span>, <span class="string">&quot;Aligned130(&quot;</span>)<span class="question-mark">?</span>;
+        <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;Aligned130(&quot;</span>)<span class="question-mark">?</span>;
         <span class="ident">write_130</span>(
             <span class="ident">f</span>,
             [
-                <span class="ident">u32</span>::<span class="ident">from_le_bytes</span>(<span class="ident">v0</span>[<span class="number">0</span>..<span class="number">4</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
-                <span class="ident">u32</span>::<span class="ident">from_le_bytes</span>(<span class="ident">v0</span>[<span class="number">4</span>..<span class="number">8</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
-                <span class="ident">u32</span>::<span class="ident">from_le_bytes</span>(<span class="ident">v0</span>[<span class="number">8</span>..<span class="number">12</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
-                <span class="ident">u32</span>::<span class="ident">from_le_bytes</span>(<span class="ident">v0</span>[<span class="number">12</span>..<span class="number">16</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
-                <span class="ident">u32</span>::<span class="ident">from_le_bytes</span>(<span class="ident">v0</span>[<span class="number">16</span>..<span class="number">20</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
+                <span class="ident">u32::from_le_bytes</span>(<span class="ident">v0</span>[<span class="number">0</span>..<span class="number">4</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
+                <span class="ident">u32::from_le_bytes</span>(<span class="ident">v0</span>[<span class="number">4</span>..<span class="number">8</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
+                <span class="ident">u32::from_le_bytes</span>(<span class="ident">v0</span>[<span class="number">8</span>..<span class="number">12</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
+                <span class="ident">u32::from_le_bytes</span>(<span class="ident">v0</span>[<span class="number">12</span>..<span class="number">16</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
+                <span class="ident">u32::from_le_bytes</span>(<span class="ident">v0</span>[<span class="number">16</span>..<span class="number">20</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
             ],
         )<span class="question-mark">?</span>;
-        <span class="macro">write</span><span class="macro">!</span>(<span class="ident">f</span>, <span class="string">&quot;)&quot;</span>)
+        <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;)&quot;</span>)
     }
 }
 
@@ -2086,7 +2082,7 @@
     <span class="doccomment">/// the high bit.</span>
     <span class="attribute">#[<span class="ident">target_feature</span>(<span class="ident">enable</span> <span class="op">=</span> <span class="string">&quot;avx2&quot;</span>)]</span>
     <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">from_block</span>(<span class="ident">block</span>: <span class="kw-2">&amp;</span><span class="ident">Block</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="ident">Aligned130</span>::<span class="ident">new</span>(<span class="ident">_mm256_or_si256</span>(
+        <span class="ident">Aligned130::new</span>(<span class="ident">_mm256_or_si256</span>(
             <span class="ident">_mm256_and_si256</span>(
                 <span class="comment">// Load the 128-bit block into a 256-bit vector.</span>
                 <span class="ident">_mm256_castsi128_si256</span>(<span class="ident">_mm_loadu_si128</span>(<span class="ident">block</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="kw">_</span>)),
@@ -2103,7 +2099,7 @@
     <span class="doccomment">/// Assumes that the high bit is already correctly set for the partial block.</span>
     <span class="attribute">#[<span class="ident">target_feature</span>(<span class="ident">enable</span> <span class="op">=</span> <span class="string">&quot;avx2&quot;</span>)]</span>
     <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">from_partial_block</span>(<span class="ident">block</span>: <span class="kw-2">&amp;</span><span class="ident">Block</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="ident">Aligned130</span>::<span class="ident">new</span>(<span class="ident">_mm256_and_si256</span>(
+        <span class="ident">Aligned130::new</span>(<span class="ident">_mm256_and_si256</span>(
             <span class="comment">// Load the 128-bit block into a 256-bit vector.</span>
             <span class="ident">_mm256_castsi128_si256</span>(<span class="ident">_mm_loadu_si128</span>(<span class="ident">block</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="kw">_</span>)),
             <span class="comment">// Mask off the upper 128 bits (undefined by _mm256_castsi128_si256).</span>
@@ -2397,9 +2393,9 @@
     <span class="ident">v1</span>: <span class="ident">__m256i</span>,
 }
 
-<span class="kw">impl</span> <span class="ident">fmt</span>::<span class="ident">Display</span> <span class="kw">for</span> <span class="ident">Unreduced130</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt</span>::<span class="ident">Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt</span>::<span class="prelude-ty">Result</span> {
-        <span class="kw">use</span> <span class="ident">core</span>::<span class="ident">convert</span>::<span class="ident">TryInto</span>;
+<span class="kw">impl</span> <span class="ident">fmt::Display</span> <span class="kw">for</span> <span class="ident">Unreduced130</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+        <span class="kw">use</span> <span class="ident">core::convert::TryInto</span>;
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">v0</span> <span class="op">=</span> [<span class="number">0u8</span>; <span class="number">32</span>];
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">v1</span> <span class="op">=</span> [<span class="number">0u8</span>; <span class="number">32</span>];
@@ -2408,18 +2404,18 @@
             <span class="ident">_mm256_storeu_si256</span>(<span class="ident">v1</span>.<span class="ident">as_mut_ptr</span>() <span class="kw">as</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="kw">_</span>, <span class="self">self</span>.<span class="ident">v1</span>);
         }
 
-        <span class="macro">write</span><span class="macro">!</span>(<span class="ident">f</span>, <span class="string">&quot;Unreduced130(&quot;</span>)<span class="question-mark">?</span>;
+        <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;Unreduced130(&quot;</span>)<span class="question-mark">?</span>;
         <span class="ident">write_130_wide</span>(
             <span class="ident">f</span>,
             [
-                <span class="ident">u64</span>::<span class="ident">from_le_bytes</span>(<span class="ident">v0</span>[<span class="number">0</span>..<span class="number">8</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
-                <span class="ident">u64</span>::<span class="ident">from_le_bytes</span>(<span class="ident">v0</span>[<span class="number">8</span>..<span class="number">16</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
-                <span class="ident">u64</span>::<span class="ident">from_le_bytes</span>(<span class="ident">v0</span>[<span class="number">16</span>..<span class="number">24</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
-                <span class="ident">u64</span>::<span class="ident">from_le_bytes</span>(<span class="ident">v0</span>[<span class="number">24</span>..<span class="number">32</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
-                <span class="ident">u64</span>::<span class="ident">from_le_bytes</span>(<span class="ident">v1</span>[<span class="number">0</span>..<span class="number">8</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
+                <span class="ident">u64::from_le_bytes</span>(<span class="ident">v0</span>[<span class="number">0</span>..<span class="number">8</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
+                <span class="ident">u64::from_le_bytes</span>(<span class="ident">v0</span>[<span class="number">8</span>..<span class="number">16</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
+                <span class="ident">u64::from_le_bytes</span>(<span class="ident">v0</span>[<span class="number">16</span>..<span class="number">24</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
+                <span class="ident">u64::from_le_bytes</span>(<span class="ident">v0</span>[<span class="number">24</span>..<span class="number">32</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
+                <span class="ident">u64::from_le_bytes</span>(<span class="ident">v1</span>[<span class="number">0</span>..<span class="number">8</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
             ],
         )<span class="question-mark">?</span>;
-        <span class="macro">write</span><span class="macro">!</span>(<span class="ident">f</span>, <span class="string">&quot;)&quot;</span>)
+        <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;)&quot;</span>)
     }
 }
 
@@ -2507,12 +2503,12 @@
     <span class="ident">v1</span>: <span class="ident">Aligned130</span>,
 }
 
-<span class="kw">impl</span> <span class="ident">fmt</span>::<span class="ident">Display</span> <span class="kw">for</span> <span class="ident">Aligned2x130</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt</span>::<span class="ident">Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt</span>::<span class="prelude-ty">Result</span> {
-        <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">f</span>, <span class="string">&quot;Aligned2x130([&quot;</span>)<span class="question-mark">?</span>;
-        <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">f</span>, <span class="string">&quot;    {},&quot;</span>, <span class="self">self</span>.<span class="ident">v0</span>)<span class="question-mark">?</span>;
-        <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">f</span>, <span class="string">&quot;    {},&quot;</span>, <span class="self">self</span>.<span class="ident">v1</span>)<span class="question-mark">?</span>;
-        <span class="macro">write</span><span class="macro">!</span>(<span class="ident">f</span>, <span class="string">&quot;])&quot;</span>)
+<span class="kw">impl</span> <span class="ident">fmt::Display</span> <span class="kw">for</span> <span class="ident">Aligned2x130</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+        <span class="macro">writeln!</span>(<span class="ident">f</span>, <span class="string">&quot;Aligned2x130([&quot;</span>)<span class="question-mark">?</span>;
+        <span class="macro">writeln!</span>(<span class="ident">f</span>, <span class="string">&quot;    {},&quot;</span>, <span class="self">self</span>.<span class="ident">v0</span>)<span class="question-mark">?</span>;
+        <span class="macro">writeln!</span>(<span class="ident">f</span>, <span class="string">&quot;    {},&quot;</span>, <span class="self">self</span>.<span class="ident">v1</span>)<span class="question-mark">?</span>;
+        <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;])&quot;</span>)
     }
 }
 
@@ -2526,8 +2522,8 @@
     <span class="attribute">#[<span class="ident">target_feature</span>(<span class="ident">enable</span> <span class="op">=</span> <span class="string">&quot;avx2&quot;</span>)]</span>
     <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">from_blocks</span>(<span class="ident">src</span>: <span class="kw-2">&amp;</span>[<span class="ident">Block</span>; <span class="number">2</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="ident">Aligned2x130</span> {
-            <span class="ident">v0</span>: <span class="ident">Aligned130</span>::<span class="ident">from_block</span>(<span class="kw-2">&amp;</span><span class="ident">src</span>[<span class="number">0</span>]),
-            <span class="ident">v1</span>: <span class="ident">Aligned130</span>::<span class="ident">from_block</span>(<span class="kw-2">&amp;</span><span class="ident">src</span>[<span class="number">1</span>]),
+            <span class="ident">v0</span>: <span class="ident">Aligned130::from_block</span>(<span class="kw-2">&amp;</span><span class="ident">src</span>[<span class="number">0</span>]),
+            <span class="ident">v1</span>: <span class="ident">Aligned130::from_block</span>(<span class="kw-2">&amp;</span><span class="ident">src</span>[<span class="number">1</span>]),
         }
     }
 
@@ -2878,9 +2874,9 @@
     <span class="ident">v2</span>: <span class="ident">__m256i</span>,
 }
 
-<span class="kw">impl</span> <span class="ident">fmt</span>::<span class="ident">Display</span> <span class="kw">for</span> <span class="ident">Aligned4x130</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt</span>::<span class="ident">Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt</span>::<span class="prelude-ty">Result</span> {
-        <span class="kw">use</span> <span class="ident">core</span>::<span class="ident">convert</span>::<span class="ident">TryInto</span>;
+<span class="kw">impl</span> <span class="ident">fmt::Display</span> <span class="kw">for</span> <span class="ident">Aligned4x130</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+        <span class="kw">use</span> <span class="ident">core::convert::TryInto</span>;
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">v0</span> <span class="op">=</span> [<span class="number">0u8</span>; <span class="number">32</span>];
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">v1</span> <span class="op">=</span> [<span class="number">0u8</span>; <span class="number">32</span>];
@@ -2891,56 +2887,56 @@
             <span class="ident">_mm256_storeu_si256</span>(<span class="ident">v2</span>.<span class="ident">as_mut_ptr</span>() <span class="kw">as</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="kw">_</span>, <span class="self">self</span>.<span class="ident">v2</span>);
         }
 
-        <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">f</span>, <span class="string">&quot;Aligned4x130([&quot;</span>)<span class="question-mark">?</span>;
-        <span class="macro">write</span><span class="macro">!</span>(<span class="ident">f</span>, <span class="string">&quot;    &quot;</span>)<span class="question-mark">?</span>;
+        <span class="macro">writeln!</span>(<span class="ident">f</span>, <span class="string">&quot;Aligned4x130([&quot;</span>)<span class="question-mark">?</span>;
+        <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;    &quot;</span>)<span class="question-mark">?</span>;
         <span class="ident">write_130</span>(
             <span class="ident">f</span>,
             [
-                <span class="ident">u32</span>::<span class="ident">from_le_bytes</span>(<span class="ident">v0</span>[<span class="number">0</span>..<span class="number">4</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
-                <span class="ident">u32</span>::<span class="ident">from_le_bytes</span>(<span class="ident">v1</span>[<span class="number">0</span>..<span class="number">4</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
-                <span class="ident">u32</span>::<span class="ident">from_le_bytes</span>(<span class="ident">v0</span>[<span class="number">4</span>..<span class="number">8</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
-                <span class="ident">u32</span>::<span class="ident">from_le_bytes</span>(<span class="ident">v1</span>[<span class="number">4</span>..<span class="number">8</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
-                <span class="ident">u32</span>::<span class="ident">from_le_bytes</span>(<span class="ident">v2</span>[<span class="number">0</span>..<span class="number">4</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
+                <span class="ident">u32::from_le_bytes</span>(<span class="ident">v0</span>[<span class="number">0</span>..<span class="number">4</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
+                <span class="ident">u32::from_le_bytes</span>(<span class="ident">v1</span>[<span class="number">0</span>..<span class="number">4</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
+                <span class="ident">u32::from_le_bytes</span>(<span class="ident">v0</span>[<span class="number">4</span>..<span class="number">8</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
+                <span class="ident">u32::from_le_bytes</span>(<span class="ident">v1</span>[<span class="number">4</span>..<span class="number">8</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
+                <span class="ident">u32::from_le_bytes</span>(<span class="ident">v2</span>[<span class="number">0</span>..<span class="number">4</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
             ],
         )<span class="question-mark">?</span>;
-        <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">f</span>, <span class="string">&quot;,&quot;</span>)<span class="question-mark">?</span>;
-        <span class="macro">write</span><span class="macro">!</span>(<span class="ident">f</span>, <span class="string">&quot;    &quot;</span>)<span class="question-mark">?</span>;
+        <span class="macro">writeln!</span>(<span class="ident">f</span>, <span class="string">&quot;,&quot;</span>)<span class="question-mark">?</span>;
+        <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;    &quot;</span>)<span class="question-mark">?</span>;
         <span class="ident">write_130</span>(
             <span class="ident">f</span>,
             [
-                <span class="ident">u32</span>::<span class="ident">from_le_bytes</span>(<span class="ident">v0</span>[<span class="number">8</span>..<span class="number">12</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
-                <span class="ident">u32</span>::<span class="ident">from_le_bytes</span>(<span class="ident">v1</span>[<span class="number">8</span>..<span class="number">12</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
-                <span class="ident">u32</span>::<span class="ident">from_le_bytes</span>(<span class="ident">v0</span>[<span class="number">12</span>..<span class="number">16</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
-                <span class="ident">u32</span>::<span class="ident">from_le_bytes</span>(<span class="ident">v1</span>[<span class="number">12</span>..<span class="number">16</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
-                <span class="ident">u32</span>::<span class="ident">from_le_bytes</span>(<span class="ident">v2</span>[<span class="number">8</span>..<span class="number">12</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
+                <span class="ident">u32::from_le_bytes</span>(<span class="ident">v0</span>[<span class="number">8</span>..<span class="number">12</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
+                <span class="ident">u32::from_le_bytes</span>(<span class="ident">v1</span>[<span class="number">8</span>..<span class="number">12</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
+                <span class="ident">u32::from_le_bytes</span>(<span class="ident">v0</span>[<span class="number">12</span>..<span class="number">16</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
+                <span class="ident">u32::from_le_bytes</span>(<span class="ident">v1</span>[<span class="number">12</span>..<span class="number">16</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
+                <span class="ident">u32::from_le_bytes</span>(<span class="ident">v2</span>[<span class="number">8</span>..<span class="number">12</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
             ],
         )<span class="question-mark">?</span>;
-        <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">f</span>, <span class="string">&quot;,&quot;</span>)<span class="question-mark">?</span>;
-        <span class="macro">write</span><span class="macro">!</span>(<span class="ident">f</span>, <span class="string">&quot;    &quot;</span>)<span class="question-mark">?</span>;
+        <span class="macro">writeln!</span>(<span class="ident">f</span>, <span class="string">&quot;,&quot;</span>)<span class="question-mark">?</span>;
+        <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;    &quot;</span>)<span class="question-mark">?</span>;
         <span class="ident">write_130</span>(
             <span class="ident">f</span>,
             [
-                <span class="ident">u32</span>::<span class="ident">from_le_bytes</span>(<span class="ident">v0</span>[<span class="number">16</span>..<span class="number">20</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
-                <span class="ident">u32</span>::<span class="ident">from_le_bytes</span>(<span class="ident">v1</span>[<span class="number">16</span>..<span class="number">20</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
-                <span class="ident">u32</span>::<span class="ident">from_le_bytes</span>(<span class="ident">v0</span>[<span class="number">20</span>..<span class="number">24</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
-                <span class="ident">u32</span>::<span class="ident">from_le_bytes</span>(<span class="ident">v1</span>[<span class="number">20</span>..<span class="number">24</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
-                <span class="ident">u32</span>::<span class="ident">from_le_bytes</span>(<span class="ident">v2</span>[<span class="number">16</span>..<span class="number">20</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
+                <span class="ident">u32::from_le_bytes</span>(<span class="ident">v0</span>[<span class="number">16</span>..<span class="number">20</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
+                <span class="ident">u32::from_le_bytes</span>(<span class="ident">v1</span>[<span class="number">16</span>..<span class="number">20</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
+                <span class="ident">u32::from_le_bytes</span>(<span class="ident">v0</span>[<span class="number">20</span>..<span class="number">24</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
+                <span class="ident">u32::from_le_bytes</span>(<span class="ident">v1</span>[<span class="number">20</span>..<span class="number">24</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
+                <span class="ident">u32::from_le_bytes</span>(<span class="ident">v2</span>[<span class="number">16</span>..<span class="number">20</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
             ],
         )<span class="question-mark">?</span>;
-        <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">f</span>, <span class="string">&quot;,&quot;</span>)<span class="question-mark">?</span>;
-        <span class="macro">write</span><span class="macro">!</span>(<span class="ident">f</span>, <span class="string">&quot;    &quot;</span>)<span class="question-mark">?</span>;
+        <span class="macro">writeln!</span>(<span class="ident">f</span>, <span class="string">&quot;,&quot;</span>)<span class="question-mark">?</span>;
+        <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;    &quot;</span>)<span class="question-mark">?</span>;
         <span class="ident">write_130</span>(
             <span class="ident">f</span>,
             [
-                <span class="ident">u32</span>::<span class="ident">from_le_bytes</span>(<span class="ident">v0</span>[<span class="number">24</span>..<span class="number">28</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
-                <span class="ident">u32</span>::<span class="ident">from_le_bytes</span>(<span class="ident">v1</span>[<span class="number">24</span>..<span class="number">28</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
-                <span class="ident">u32</span>::<span class="ident">from_le_bytes</span>(<span class="ident">v0</span>[<span class="number">28</span>..<span class="number">32</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
-                <span class="ident">u32</span>::<span class="ident">from_le_bytes</span>(<span class="ident">v1</span>[<span class="number">28</span>..<span class="number">32</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
-                <span class="ident">u32</span>::<span class="ident">from_le_bytes</span>(<span class="ident">v2</span>[<span class="number">24</span>..<span class="number">28</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
+                <span class="ident">u32::from_le_bytes</span>(<span class="ident">v0</span>[<span class="number">24</span>..<span class="number">28</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
+                <span class="ident">u32::from_le_bytes</span>(<span class="ident">v1</span>[<span class="number">24</span>..<span class="number">28</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
+                <span class="ident">u32::from_le_bytes</span>(<span class="ident">v0</span>[<span class="number">28</span>..<span class="number">32</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
+                <span class="ident">u32::from_le_bytes</span>(<span class="ident">v1</span>[<span class="number">28</span>..<span class="number">32</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
+                <span class="ident">u32::from_le_bytes</span>(<span class="ident">v2</span>[<span class="number">24</span>..<span class="number">28</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
             ],
         )<span class="question-mark">?</span>;
-        <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">f</span>, <span class="string">&quot;,&quot;</span>)<span class="question-mark">?</span>;
-        <span class="macro">write</span><span class="macro">!</span>(<span class="ident">f</span>, <span class="string">&quot;])&quot;</span>)
+        <span class="macro">writeln!</span>(<span class="ident">f</span>, <span class="string">&quot;,&quot;</span>)<span class="question-mark">?</span>;
+        <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;])&quot;</span>)
     }
 }
 
@@ -3558,9 +3554,9 @@
     <span class="ident">v4</span>: <span class="ident">__m256i</span>,
 }
 
-<span class="kw">impl</span> <span class="ident">fmt</span>::<span class="ident">Display</span> <span class="kw">for</span> <span class="ident">Unreduced4x130</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt</span>::<span class="ident">Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt</span>::<span class="prelude-ty">Result</span> {
-        <span class="kw">use</span> <span class="ident">core</span>::<span class="ident">convert</span>::<span class="ident">TryInto</span>;
+<span class="kw">impl</span> <span class="ident">fmt::Display</span> <span class="kw">for</span> <span class="ident">Unreduced4x130</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+        <span class="kw">use</span> <span class="ident">core::convert::TryInto</span>;
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">v0</span> <span class="op">=</span> [<span class="number">0u8</span>; <span class="number">32</span>];
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">v1</span> <span class="op">=</span> [<span class="number">0u8</span>; <span class="number">32</span>];
@@ -3575,56 +3571,56 @@
             <span class="ident">_mm256_storeu_si256</span>(<span class="ident">v4</span>.<span class="ident">as_mut_ptr</span>() <span class="kw">as</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="kw">_</span>, <span class="self">self</span>.<span class="ident">v4</span>);
         }
 
-        <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">f</span>, <span class="string">&quot;Unreduced4x130([&quot;</span>)<span class="question-mark">?</span>;
-        <span class="macro">write</span><span class="macro">!</span>(<span class="ident">f</span>, <span class="string">&quot;    &quot;</span>)<span class="question-mark">?</span>;
+        <span class="macro">writeln!</span>(<span class="ident">f</span>, <span class="string">&quot;Unreduced4x130([&quot;</span>)<span class="question-mark">?</span>;
+        <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;    &quot;</span>)<span class="question-mark">?</span>;
         <span class="ident">write_130_wide</span>(
             <span class="ident">f</span>,
             [
-                <span class="ident">u64</span>::<span class="ident">from_le_bytes</span>(<span class="ident">v0</span>[<span class="number">0</span>..<span class="number">8</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
-                <span class="ident">u64</span>::<span class="ident">from_le_bytes</span>(<span class="ident">v1</span>[<span class="number">0</span>..<span class="number">8</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
-                <span class="ident">u64</span>::<span class="ident">from_le_bytes</span>(<span class="ident">v2</span>[<span class="number">0</span>..<span class="number">8</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
-                <span class="ident">u64</span>::<span class="ident">from_le_bytes</span>(<span class="ident">v3</span>[<span class="number">0</span>..<span class="number">8</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
-                <span class="ident">u64</span>::<span class="ident">from_le_bytes</span>(<span class="ident">v4</span>[<span class="number">0</span>..<span class="number">8</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
+                <span class="ident">u64::from_le_bytes</span>(<span class="ident">v0</span>[<span class="number">0</span>..<span class="number">8</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
+                <span class="ident">u64::from_le_bytes</span>(<span class="ident">v1</span>[<span class="number">0</span>..<span class="number">8</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
+                <span class="ident">u64::from_le_bytes</span>(<span class="ident">v2</span>[<span class="number">0</span>..<span class="number">8</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
+                <span class="ident">u64::from_le_bytes</span>(<span class="ident">v3</span>[<span class="number">0</span>..<span class="number">8</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
+                <span class="ident">u64::from_le_bytes</span>(<span class="ident">v4</span>[<span class="number">0</span>..<span class="number">8</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
             ],
         )<span class="question-mark">?</span>;
-        <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">f</span>, <span class="string">&quot;,&quot;</span>)<span class="question-mark">?</span>;
-        <span class="macro">write</span><span class="macro">!</span>(<span class="ident">f</span>, <span class="string">&quot;    &quot;</span>)<span class="question-mark">?</span>;
+        <span class="macro">writeln!</span>(<span class="ident">f</span>, <span class="string">&quot;,&quot;</span>)<span class="question-mark">?</span>;
+        <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;    &quot;</span>)<span class="question-mark">?</span>;
         <span class="ident">write_130_wide</span>(
             <span class="ident">f</span>,
             [
-                <span class="ident">u64</span>::<span class="ident">from_le_bytes</span>(<span class="ident">v0</span>[<span class="number">8</span>..<span class="number">16</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
-                <span class="ident">u64</span>::<span class="ident">from_le_bytes</span>(<span class="ident">v1</span>[<span class="number">8</span>..<span class="number">16</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
-                <span class="ident">u64</span>::<span class="ident">from_le_bytes</span>(<span class="ident">v2</span>[<span class="number">8</span>..<span class="number">16</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
-                <span class="ident">u64</span>::<span class="ident">from_le_bytes</span>(<span class="ident">v3</span>[<span class="number">8</span>..<span class="number">16</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
-                <span class="ident">u64</span>::<span class="ident">from_le_bytes</span>(<span class="ident">v4</span>[<span class="number">8</span>..<span class="number">16</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
+                <span class="ident">u64::from_le_bytes</span>(<span class="ident">v0</span>[<span class="number">8</span>..<span class="number">16</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
+                <span class="ident">u64::from_le_bytes</span>(<span class="ident">v1</span>[<span class="number">8</span>..<span class="number">16</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
+                <span class="ident">u64::from_le_bytes</span>(<span class="ident">v2</span>[<span class="number">8</span>..<span class="number">16</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
+                <span class="ident">u64::from_le_bytes</span>(<span class="ident">v3</span>[<span class="number">8</span>..<span class="number">16</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
+                <span class="ident">u64::from_le_bytes</span>(<span class="ident">v4</span>[<span class="number">8</span>..<span class="number">16</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
             ],
         )<span class="question-mark">?</span>;
-        <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">f</span>, <span class="string">&quot;,&quot;</span>)<span class="question-mark">?</span>;
-        <span class="macro">write</span><span class="macro">!</span>(<span class="ident">f</span>, <span class="string">&quot;    &quot;</span>)<span class="question-mark">?</span>;
+        <span class="macro">writeln!</span>(<span class="ident">f</span>, <span class="string">&quot;,&quot;</span>)<span class="question-mark">?</span>;
+        <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;    &quot;</span>)<span class="question-mark">?</span>;
         <span class="ident">write_130_wide</span>(
             <span class="ident">f</span>,
             [
-                <span class="ident">u64</span>::<span class="ident">from_le_bytes</span>(<span class="ident">v0</span>[<span class="number">16</span>..<span class="number">24</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
-                <span class="ident">u64</span>::<span class="ident">from_le_bytes</span>(<span class="ident">v1</span>[<span class="number">16</span>..<span class="number">24</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
-                <span class="ident">u64</span>::<span class="ident">from_le_bytes</span>(<span class="ident">v2</span>[<span class="number">16</span>..<span class="number">24</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
-                <span class="ident">u64</span>::<span class="ident">from_le_bytes</span>(<span class="ident">v3</span>[<span class="number">16</span>..<span class="number">24</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
-                <span class="ident">u64</span>::<span class="ident">from_le_bytes</span>(<span class="ident">v4</span>[<span class="number">16</span>..<span class="number">24</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
+                <span class="ident">u64::from_le_bytes</span>(<span class="ident">v0</span>[<span class="number">16</span>..<span class="number">24</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
+                <span class="ident">u64::from_le_bytes</span>(<span class="ident">v1</span>[<span class="number">16</span>..<span class="number">24</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
+                <span class="ident">u64::from_le_bytes</span>(<span class="ident">v2</span>[<span class="number">16</span>..<span class="number">24</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
+                <span class="ident">u64::from_le_bytes</span>(<span class="ident">v3</span>[<span class="number">16</span>..<span class="number">24</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
+                <span class="ident">u64::from_le_bytes</span>(<span class="ident">v4</span>[<span class="number">16</span>..<span class="number">24</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
             ],
         )<span class="question-mark">?</span>;
-        <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">f</span>, <span class="string">&quot;,&quot;</span>)<span class="question-mark">?</span>;
-        <span class="macro">write</span><span class="macro">!</span>(<span class="ident">f</span>, <span class="string">&quot;    &quot;</span>)<span class="question-mark">?</span>;
+        <span class="macro">writeln!</span>(<span class="ident">f</span>, <span class="string">&quot;,&quot;</span>)<span class="question-mark">?</span>;
+        <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;    &quot;</span>)<span class="question-mark">?</span>;
         <span class="ident">write_130_wide</span>(
             <span class="ident">f</span>,
             [
-                <span class="ident">u64</span>::<span class="ident">from_le_bytes</span>(<span class="ident">v0</span>[<span class="number">24</span>..<span class="number">32</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
-                <span class="ident">u64</span>::<span class="ident">from_le_bytes</span>(<span class="ident">v1</span>[<span class="number">24</span>..<span class="number">32</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
-                <span class="ident">u64</span>::<span class="ident">from_le_bytes</span>(<span class="ident">v2</span>[<span class="number">24</span>..<span class="number">32</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
-                <span class="ident">u64</span>::<span class="ident">from_le_bytes</span>(<span class="ident">v3</span>[<span class="number">24</span>..<span class="number">32</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
-                <span class="ident">u64</span>::<span class="ident">from_le_bytes</span>(<span class="ident">v4</span>[<span class="number">24</span>..<span class="number">32</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
+                <span class="ident">u64::from_le_bytes</span>(<span class="ident">v0</span>[<span class="number">24</span>..<span class="number">32</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
+                <span class="ident">u64::from_le_bytes</span>(<span class="ident">v1</span>[<span class="number">24</span>..<span class="number">32</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
+                <span class="ident">u64::from_le_bytes</span>(<span class="ident">v2</span>[<span class="number">24</span>..<span class="number">32</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
+                <span class="ident">u64::from_le_bytes</span>(<span class="ident">v3</span>[<span class="number">24</span>..<span class="number">32</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
+                <span class="ident">u64::from_le_bytes</span>(<span class="ident">v4</span>[<span class="number">24</span>..<span class="number">32</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
             ],
         )<span class="question-mark">?</span>;
-        <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">f</span>, <span class="string">&quot;,&quot;</span>)<span class="question-mark">?</span>;
-        <span class="macro">write</span><span class="macro">!</span>(<span class="ident">f</span>, <span class="string">&quot;])&quot;</span>)
+        <span class="macro">writeln!</span>(<span class="ident">f</span>, <span class="string">&quot;,&quot;</span>)<span class="question-mark">?</span>;
+        <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;])&quot;</span>)
     }
 }
 
@@ -3960,6 +3956,7 @@
         }
     }
 }
-</pre></div>
-</section><section id="search" class="content hidden"></section><section class="footer"></section><div id="rustdoc-vars" data-root-path="../../../../" data-current-crate="poly1305" data-search-js="../../../../search-index.js"></div>
-    <script src="../../../../main.js"></script><script src="../../../../source-script.js"></script><script src="../../../../source-files.js"></script></body></html>
+</code></pre></div>
+</section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../../../" data-current-crate="poly1305" data-search-index-js="../../../../search-index.js" data-search-js="../../../../search.js"></div>
+    <script src="../../../../main.js"></script><script src="../../../../source-script.js"></script><script src="../../../../source-files.js"></script>
+</body></html>

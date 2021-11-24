@@ -1,5 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/elliptic-curve-0.9.12/src/sec1.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>sec1.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings"></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="https://raw.githubusercontent.com/RustCrypto/media/8f1a9894/logo.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../elliptic_curve/index.html'><div class='logo-container'><img src='https://raw.githubusercontent.com/RustCrypto/media/8f1a9894/logo.svg' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
-                <a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;elliptic-curve-0.9.12&#x2F;src&#x2F;sec1.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>sec1.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="https:&#x2F;&#x2F;raw.githubusercontent.com&#x2F;RustCrypto&#x2F;media&#x2F;8f1a9894&#x2F;logo.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../elliptic_curve/index.html'><div class='logo-container rust-logo'><img src='https:&#x2F;&#x2F;raw.githubusercontent.com&#x2F;RustCrypto&#x2F;media&#x2F;8f1a9894&#x2F;logo.svg' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -753,18 +752,17 @@
 <span id="752">752</span>
 <span id="753">753</span>
 <span id="754">754</span>
-</pre><div class="example-wrap"><pre class="rust ">
-<span class="doccomment">//! SEC1 encoding support.</span>
+</pre><pre class="rust"><code><span class="doccomment">//! SEC1 encoding support.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! Support for the `Elliptic-Curve-Point-to-Octet-String` encoding described</span>
 <span class="doccomment">//! in SEC1: Elliptic Curve Cryptography (Version 2.0) section 2.3.3 (p.10):</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! &lt;https://www.secg.org/sec1-v2.pdf&gt;</span>
 
-<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">weierstrass</span>::<span class="ident">Curve</span>, <span class="ident">Error</span>, <span class="ident">FieldBytes</span>, <span class="prelude-ty">Result</span>};
+<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">weierstrass::Curve</span>, <span class="ident">Error</span>, <span class="ident">FieldBytes</span>, <span class="prelude-ty">Result</span>};
 <span class="kw">use</span> <span class="ident">core</span>::{
     <span class="ident">fmt</span>::{<span class="self">self</span>, <span class="ident">Debug</span>},
-    <span class="ident">ops</span>::<span class="ident">Add</span>,
+    <span class="ident">ops::Add</span>,
 };
 <span class="kw">use</span> <span class="ident">generic_array</span>::{
     <span class="ident">typenum</span>::{<span class="ident">Unsigned</span>, <span class="ident">U1</span>},
@@ -773,11 +771,11 @@
 <span class="kw">use</span> <span class="ident">subtle</span>::{<span class="ident">Choice</span>, <span class="ident">ConditionallySelectable</span>};
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;alloc&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident">alloc</span>::<span class="ident">boxed</span>::<span class="ident">Box</span>;
+<span class="kw">use</span> <span class="ident">alloc::boxed::Box</span>;
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;arithmetic&quot;</span>)]</span>
 <span class="kw">use</span> <span class="kw">crate</span>::{
-    <span class="ident">ff</span>::<span class="ident">PrimeField</span>, <span class="ident">weierstrass</span>::<span class="ident">DecompressPoint</span>, <span class="ident">AffinePoint</span>, <span class="ident">ProjectiveArithmetic</span>, <span class="ident">Scalar</span>,
+    <span class="ident">ff::PrimeField</span>, <span class="ident">weierstrass::DecompressPoint</span>, <span class="ident">AffinePoint</span>, <span class="ident">ProjectiveArithmetic</span>, <span class="ident">Scalar</span>,
 };
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;arithmetic&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;zeroize&quot;</span>))]</span>
@@ -789,21 +787,21 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;zeroize&quot;</span>)]</span>
 <span class="kw">use</span> <span class="kw">crate</span>::{
     <span class="ident">secret_key</span>::{<span class="ident">SecretKey</span>, <span class="ident">SecretValue</span>},
-    <span class="ident">zeroize</span>::<span class="ident">Zeroize</span>,
+    <span class="ident">zeroize::Zeroize</span>,
 };
 
 <span class="doccomment">/// Size of a compressed point for the given elliptic curve when encoded</span>
 <span class="doccomment">/// using the SEC1 `Elliptic-Curve-Point-to-Octet-String` algorithm</span>
 <span class="doccomment">/// (including leading `0x02` or `0x03` tag byte).</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">CompressedPointSize</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> <span class="op">=</span> <span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">C</span> <span class="kw">as</span> <span class="kw">crate</span>::<span class="ident">Curve</span><span class="op">&gt;</span>::<span class="ident">FieldSize</span> <span class="kw">as</span> <span class="ident">Add</span><span class="op">&lt;</span><span class="ident">U1</span><span class="op">&gt;</span><span class="op">&gt;</span>::<span class="ident">Output</span>;
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">CompressedPointSize</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> <span class="op">=</span> <span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">C</span> <span class="kw">as</span> <span class="ident"><span class="kw">crate</span>::Curve</span><span class="op">&gt;</span><span class="ident">::FieldSize</span> <span class="kw">as</span> <span class="ident">Add</span><span class="op">&lt;</span><span class="ident">U1</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Output</span>;
 
 <span class="doccomment">/// Size of an uncompressed point for the given elliptic curve when encoded</span>
 <span class="doccomment">/// using the SEC1 `Elliptic-Curve-Point-to-Octet-String` algorithm</span>
 <span class="doccomment">/// (including leading `0x04` tag byte).</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">UncompressedPointSize</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">UntaggedPointSize</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> <span class="kw">as</span> <span class="ident">Add</span><span class="op">&lt;</span><span class="ident">U1</span><span class="op">&gt;</span><span class="op">&gt;</span>::<span class="ident">Output</span>;
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">UncompressedPointSize</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">UntaggedPointSize</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> <span class="kw">as</span> <span class="ident">Add</span><span class="op">&lt;</span><span class="ident">U1</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Output</span>;
 
 <span class="doccomment">/// Size of an untagged point for given elliptic curve.</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">UntaggedPointSize</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> <span class="op">=</span> <span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">C</span> <span class="kw">as</span> <span class="kw">crate</span>::<span class="ident">Curve</span><span class="op">&gt;</span>::<span class="ident">FieldSize</span> <span class="kw">as</span> <span class="ident">Add</span><span class="op">&gt;</span>::<span class="ident">Output</span>;
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">UntaggedPointSize</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> <span class="op">=</span> <span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">C</span> <span class="kw">as</span> <span class="ident"><span class="kw">crate</span>::Curve</span><span class="op">&gt;</span><span class="ident">::FieldSize</span> <span class="kw">as</span> <span class="ident">Add</span><span class="op">&gt;</span><span class="ident">::Output</span>;
 
 <span class="doccomment">/// SEC1 encoded curve point.</span>
 <span class="doccomment">///</span>
@@ -820,7 +818,7 @@
     <span class="ident">bytes</span>: <span class="ident">GenericArray</span><span class="op">&lt;</span><span class="ident">u8</span>, <span class="ident">UncompressedPointSize</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 }
 
-<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy</span>::<span class="ident">len_without_is_empty</span>)]</span>
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::len_without_is_empty</span>)]</span>
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> <span class="ident">EncodedPoint</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">C</span>: <span class="ident">Curve</span>,
@@ -837,16 +835,16 @@
         <span class="kw">let</span> <span class="ident">input</span> <span class="op">=</span> <span class="ident">input</span>.<span class="ident">as_ref</span>();
 
         <span class="comment">// Validate tag</span>
-        <span class="kw">let</span> <span class="ident">tag</span> <span class="op">=</span> <span class="ident">input</span>.<span class="ident">first</span>().<span class="ident">cloned</span>().<span class="ident">ok_or</span>(<span class="ident">Error</span>).<span class="ident">and_then</span>(<span class="ident">Tag</span>::<span class="ident">from_u8</span>)<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">tag</span> <span class="op">=</span> <span class="ident">input</span>.<span class="ident">first</span>().<span class="ident">cloned</span>().<span class="ident">ok_or</span>(<span class="ident">Error</span>).<span class="ident">and_then</span>(<span class="ident">Tag::from_u8</span>)<span class="question-mark">?</span>;
 
         <span class="comment">// Validate length</span>
-        <span class="kw">let</span> <span class="ident">expected_len</span> <span class="op">=</span> <span class="ident">tag</span>.<span class="ident">message_len</span>(<span class="ident">C</span>::<span class="ident">FieldSize</span>::<span class="ident">to_usize</span>());
+        <span class="kw">let</span> <span class="ident">expected_len</span> <span class="op">=</span> <span class="ident">tag</span>.<span class="ident">message_len</span>(<span class="ident">C::FieldSize::to_usize</span>());
 
         <span class="kw">if</span> <span class="ident">input</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="ident">expected_len</span> {
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>);
         }
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">bytes</span> <span class="op">=</span> <span class="ident">GenericArray</span>::<span class="ident">default</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">bytes</span> <span class="op">=</span> <span class="ident">GenericArray::default</span>();
         <span class="ident">bytes</span>[..<span class="ident">expected_len</span>].<span class="ident">copy_from_slice</span>(<span class="ident">input</span>);
         <span class="prelude-val">Ok</span>(<span class="self">Self</span> { <span class="ident">bytes</span> })
     }
@@ -855,23 +853,23 @@
     <span class="doccomment">/// encoded as the concatenated `x || y` coordinates with no leading SEC1</span>
     <span class="doccomment">/// tag byte (which would otherwise be `0x04` for an uncompressed point).</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_untagged_bytes</span>(<span class="ident">bytes</span>: <span class="kw-2">&amp;</span><span class="ident">GenericArray</span><span class="op">&lt;</span><span class="ident">u8</span>, <span class="ident">UntaggedPointSize</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="kw">let</span> (<span class="ident">x</span>, <span class="ident">y</span>) <span class="op">=</span> <span class="ident">bytes</span>.<span class="ident">split_at</span>(<span class="ident">C</span>::<span class="ident">FieldSize</span>::<span class="ident">to_usize</span>());
-        <span class="self">Self</span>::<span class="ident">from_affine_coordinates</span>(<span class="ident">x</span>.<span class="ident">into</span>(), <span class="ident">y</span>.<span class="ident">into</span>(), <span class="bool-val">false</span>)
+        <span class="kw">let</span> (<span class="ident">x</span>, <span class="ident">y</span>) <span class="op">=</span> <span class="ident">bytes</span>.<span class="ident">split_at</span>(<span class="ident">C::FieldSize::to_usize</span>());
+        <span class="ident"><span class="self">Self</span>::from_affine_coordinates</span>(<span class="ident">x</span>.<span class="ident">into</span>(), <span class="ident">y</span>.<span class="ident">into</span>(), <span class="bool-val">false</span>)
     }
 
     <span class="doccomment">/// Encode an elliptic curve point from big endian serialized coordinates</span>
     <span class="doccomment">/// (with optional point compression)</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_affine_coordinates</span>(<span class="ident">x</span>: <span class="kw-2">&amp;</span><span class="ident">FieldBytes</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>, <span class="ident">y</span>: <span class="kw-2">&amp;</span><span class="ident">FieldBytes</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>, <span class="ident">compress</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="kw">let</span> <span class="ident">tag</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">compress</span> {
-            <span class="ident">Tag</span>::<span class="ident">compress_y</span>(<span class="ident">y</span>.<span class="ident">as_slice</span>())
+            <span class="ident">Tag::compress_y</span>(<span class="ident">y</span>.<span class="ident">as_slice</span>())
         } <span class="kw">else</span> {
-            <span class="ident">Tag</span>::<span class="ident">Uncompressed</span>
+            <span class="ident">Tag::Uncompressed</span>
         };
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">bytes</span> <span class="op">=</span> <span class="ident">GenericArray</span>::<span class="ident">default</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">bytes</span> <span class="op">=</span> <span class="ident">GenericArray::default</span>();
         <span class="ident">bytes</span>[<span class="number">0</span>] <span class="op">=</span> <span class="ident">tag</span>.<span class="ident">into</span>();
 
-        <span class="kw">let</span> <span class="ident">element_size</span> <span class="op">=</span> <span class="ident">C</span>::<span class="ident">FieldSize</span>::<span class="ident">to_usize</span>();
+        <span class="kw">let</span> <span class="ident">element_size</span> <span class="op">=</span> <span class="ident">C::FieldSize::to_usize</span>();
         <span class="ident">bytes</span>[<span class="number">1</span>..(<span class="ident">element_size</span> <span class="op">+</span> <span class="number">1</span>)].<span class="ident">copy_from_slice</span>(<span class="ident">x</span>);
 
         <span class="kw">if</span> <span class="op">!</span><span class="ident">compress</span> {
@@ -894,7 +892,7 @@
         <span class="ident">AffinePoint</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>: <span class="ident">ToEncodedPoint</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>,
         <span class="ident">Scalar</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>: <span class="ident">PrimeField</span><span class="op">&lt;</span><span class="ident">Repr</span> <span class="op">=</span> <span class="ident">FieldBytes</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Zeroize</span>,
     {
-        (<span class="ident">C</span>::<span class="ident">ProjectivePoint</span>::<span class="ident">generator</span>() <span class="op">*</span> <span class="ident">secret_key</span>.<span class="ident">secret_scalar</span>().<span class="ident">as_ref</span>())
+        (<span class="ident">C::ProjectivePoint::generator</span>() <span class="op">*</span> <span class="ident">secret_key</span>.<span class="ident">secret_scalar</span>().<span class="ident">as_ref</span>())
             .<span class="ident">to_affine</span>()
             .<span class="ident">to_encoded_point</span>(<span class="ident">compress</span>)
     }
@@ -902,12 +900,12 @@
     <span class="doccomment">/// Return [`EncodedPoint`] representing the additive identity</span>
     <span class="doccomment">/// (a.k.a. point at infinity)</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">identity</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">Self</span>::<span class="ident">default</span>()
+        <span class="ident"><span class="self">Self</span>::default</span>()
     }
 
     <span class="doccomment">/// Get the length of the encoded point in bytes</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
-        <span class="self">self</span>.<span class="ident">tag</span>().<span class="ident">message_len</span>(<span class="ident">C</span>::<span class="ident">FieldSize</span>::<span class="ident">to_usize</span>())
+        <span class="self">self</span>.<span class="ident">tag</span>().<span class="ident">message_len</span>(<span class="ident">C::FieldSize::to_usize</span>())
     }
 
     <span class="doccomment">/// Get byte slice containing the serialized [`EncodedPoint`].</span>
@@ -933,7 +931,7 @@
         <span class="ident">Scalar</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>: <span class="ident">PrimeField</span><span class="op">&lt;</span><span class="ident">Repr</span> <span class="op">=</span> <span class="ident">FieldBytes</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     {
         <span class="self">self</span>.<span class="ident">decompress</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">point</span><span class="op">|</span> {
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">bytes</span> <span class="op">=</span> <span class="ident">GenericArray</span>::<span class="op">&lt;</span><span class="ident">u8</span>, <span class="ident">UntaggedPointSize</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span><span class="op">&gt;</span>::<span class="ident">default</span>();
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">bytes</span> <span class="op">=</span> <span class="ident">GenericArray</span>::<span class="op">&lt;</span><span class="ident">u8</span>, <span class="ident">UntaggedPointSize</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::default</span>();
             <span class="ident">bytes</span>.<span class="ident">copy_from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">point</span>.<span class="ident">as_bytes</span>()[<span class="number">1</span>..]);
             <span class="ident">bytes</span>
         })
@@ -952,8 +950,8 @@
     <span class="doccomment">/// Compress this [`EncodedPoint`], returning a new [`EncodedPoint`].</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">compress</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="kw">match</span> <span class="self">self</span>.<span class="ident">coordinates</span>() {
-            <span class="ident">Coordinates</span>::<span class="ident">Identity</span> <span class="op">|</span> <span class="ident">Coordinates</span>::<span class="ident">Compressed</span> { .. } <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">clone</span>(),
-            <span class="ident">Coordinates</span>::<span class="ident">Uncompressed</span> { <span class="ident">x</span>, <span class="ident">y</span> } <span class="op">=</span><span class="op">&gt;</span> <span class="self">Self</span>::<span class="ident">from_affine_coordinates</span>(<span class="ident">x</span>, <span class="ident">y</span>, <span class="bool-val">true</span>),
+            <span class="ident">Coordinates::Identity</span> <span class="op">|</span> <span class="ident">Coordinates::Compressed</span> { .. } <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">clone</span>(),
+            <span class="ident">Coordinates::Uncompressed</span> { <span class="ident">x</span>, <span class="ident">y</span> } <span class="op">=</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::from_affine_coordinates</span>(<span class="ident">x</span>, <span class="ident">y</span>, <span class="bool-val">true</span>),
         }
     }
 
@@ -967,13 +965,13 @@
         <span class="ident">AffinePoint</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>: <span class="ident">ConditionallySelectable</span> <span class="op">+</span> <span class="ident">Default</span> <span class="op">+</span> <span class="ident">DecompressPoint</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">ToEncodedPoint</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>,
     {
         <span class="kw">match</span> <span class="self">self</span>.<span class="ident">coordinates</span>() {
-            <span class="ident">Coordinates</span>::<span class="ident">Identity</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
-            <span class="ident">Coordinates</span>::<span class="ident">Compressed</span> { <span class="ident">x</span>, <span class="ident">y_is_odd</span> } <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="ident">AffinePoint</span>::<span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>::<span class="ident">decompress</span>(<span class="ident">x</span>, <span class="ident">Choice</span>::<span class="ident">from</span>(<span class="ident">y_is_odd</span> <span class="kw">as</span> <span class="ident">u8</span>))
+            <span class="ident">Coordinates::Identity</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+            <span class="ident">Coordinates::Compressed</span> { <span class="ident">x</span>, <span class="ident">y_is_odd</span> } <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="ident">AffinePoint</span>::<span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span><span class="ident">::decompress</span>(<span class="ident">x</span>, <span class="ident">Choice::from</span>(<span class="ident">y_is_odd</span> <span class="kw">as</span> <span class="ident">u8</span>))
                     .<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">to_encoded_point</span>(<span class="bool-val">false</span>))
                     .<span class="ident">into</span>()
             }
-            <span class="ident">Coordinates</span>::<span class="ident">Uncompressed</span> { .. } <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">clone</span>()),
+            <span class="ident">Coordinates::Uncompressed</span> { .. } <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">clone</span>()),
         }
     }
 
@@ -990,31 +988,31 @@
     <span class="kw">where</span>
         <span class="ident">T</span>: <span class="ident">FromEncodedPoint</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>,
     {
-        <span class="ident">T</span>::<span class="ident">from_encoded_point</span>(<span class="self">self</span>).<span class="ident">ok_or</span>(<span class="ident">Error</span>)
+        <span class="ident">T::from_encoded_point</span>(<span class="self">self</span>).<span class="ident">ok_or</span>(<span class="ident">Error</span>)
     }
 
     <span class="doccomment">/// Get the SEC1 tag for this [`EncodedPoint`]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">tag</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Tag</span> {
         <span class="comment">// Tag is ensured valid by the constructor</span>
-        <span class="ident">Tag</span>::<span class="ident">from_u8</span>(<span class="self">self</span>.<span class="ident">bytes</span>[<span class="number">0</span>]).<span class="ident">expect</span>(<span class="string">&quot;invalid tag&quot;</span>)
+        <span class="ident">Tag::from_u8</span>(<span class="self">self</span>.<span class="ident">bytes</span>[<span class="number">0</span>]).<span class="ident">expect</span>(<span class="string">&quot;invalid tag&quot;</span>)
     }
 
     <span class="doccomment">/// Get the [`Coordinates`] for this [`EncodedPoint`].</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">coordinates</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Coordinates</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">C</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">is_identity</span>() {
-            <span class="kw">return</span> <span class="ident">Coordinates</span>::<span class="ident">Identity</span>;
+            <span class="kw">return</span> <span class="ident">Coordinates::Identity</span>;
         }
 
-        <span class="kw">let</span> (<span class="ident">x</span>, <span class="ident">y</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">bytes</span>[<span class="number">1</span>..].<span class="ident">split_at</span>(<span class="ident">C</span>::<span class="ident">FieldSize</span>::<span class="ident">to_usize</span>());
+        <span class="kw">let</span> (<span class="ident">x</span>, <span class="ident">y</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">bytes</span>[<span class="number">1</span>..].<span class="ident">split_at</span>(<span class="ident">C::FieldSize::to_usize</span>());
 
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">is_compressed</span>() {
-            <span class="ident">Coordinates</span>::<span class="ident">Compressed</span> {
+            <span class="ident">Coordinates::Compressed</span> {
                 <span class="ident">x</span>: <span class="ident">x</span>.<span class="ident">into</span>(),
                 <span class="ident">y_is_odd</span>: <span class="self">self</span>.<span class="ident">tag</span>() <span class="kw">as</span> <span class="ident">u8</span> <span class="op">&amp;</span> <span class="number">1</span> <span class="op">=</span><span class="op">=</span> <span class="number">1</span>,
             }
         } <span class="kw">else</span> {
-            <span class="ident">Coordinates</span>::<span class="ident">Uncompressed</span> {
+            <span class="ident">Coordinates::Uncompressed</span> {
                 <span class="ident">x</span>: <span class="ident">x</span>.<span class="ident">into</span>(),
                 <span class="ident">y</span>: <span class="ident">y</span>.<span class="ident">into</span>(),
             }
@@ -1026,9 +1024,9 @@
     <span class="doccomment">/// Returns `None` if this point is the identity point.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">x</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">FieldBytes</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span>.<span class="ident">coordinates</span>() {
-            <span class="ident">Coordinates</span>::<span class="ident">Identity</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
-            <span class="ident">Coordinates</span>::<span class="ident">Compressed</span> { <span class="ident">x</span>, .. } <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">x</span>),
-            <span class="ident">Coordinates</span>::<span class="ident">Uncompressed</span> { <span class="ident">x</span>, .. } <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">x</span>),
+            <span class="ident">Coordinates::Identity</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+            <span class="ident">Coordinates::Compressed</span> { <span class="ident">x</span>, .. } <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">x</span>),
+            <span class="ident">Coordinates::Uncompressed</span> { <span class="ident">x</span>, .. } <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">x</span>),
         }
     }
 
@@ -1037,8 +1035,8 @@
     <span class="doccomment">/// Returns `None` if this point is compressed or the identity point.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">y</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">FieldBytes</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span>.<span class="ident">coordinates</span>() {
-            <span class="ident">Coordinates</span>::<span class="ident">Compressed</span> { .. } <span class="op">|</span> <span class="ident">Coordinates</span>::<span class="ident">Identity</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
-            <span class="ident">Coordinates</span>::<span class="ident">Uncompressed</span> { <span class="ident">y</span>, .. } <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">y</span>),
+            <span class="ident">Coordinates::Compressed</span> { .. } <span class="op">|</span> <span class="ident">Coordinates::Identity</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+            <span class="ident">Coordinates::Uncompressed</span> { <span class="ident">y</span>, .. } <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">y</span>),
         }
     }
 }
@@ -1060,13 +1058,13 @@
     <span class="ident">C</span>: <span class="ident">Curve</span>,
     <span class="ident">UntaggedPointSize</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>: <span class="ident">Add</span><span class="op">&lt;</span><span class="ident">U1</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">ArrayLength</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
     <span class="ident">UncompressedPointSize</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>: <span class="ident">ArrayLength</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
-    <span class="op">&lt;</span><span class="ident">UncompressedPointSize</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> <span class="kw">as</span> <span class="ident">ArrayLength</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>::<span class="ident">ArrayType</span>: <span class="ident">Copy</span>,
+    <span class="op">&lt;</span><span class="ident">UncompressedPointSize</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> <span class="kw">as</span> <span class="ident">ArrayLength</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::ArrayType</span>: <span class="ident">Copy</span>,
 {
     <span class="kw">fn</span> <span class="ident">conditional_select</span>(<span class="ident">a</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>, <span class="ident">b</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>, <span class="ident">choice</span>: <span class="ident">Choice</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">bytes</span> <span class="op">=</span> <span class="ident">GenericArray</span>::<span class="ident">default</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">bytes</span> <span class="op">=</span> <span class="ident">GenericArray::default</span>();
 
         <span class="kw">for</span> (<span class="ident">i</span>, <span class="ident">byte</span>) <span class="kw">in</span> <span class="ident">bytes</span>.<span class="ident">iter_mut</span>().<span class="ident">enumerate</span>() {
-            <span class="kw-2">*</span><span class="ident">byte</span> <span class="op">=</span> <span class="ident">u8</span>::<span class="ident">conditional_select</span>(<span class="kw-2">&amp;</span><span class="ident">a</span>.<span class="ident">bytes</span>[<span class="ident">i</span>], <span class="kw-2">&amp;</span><span class="ident">b</span>.<span class="ident">bytes</span>[<span class="ident">i</span>], <span class="ident">choice</span>);
+            <span class="kw-2">*</span><span class="ident">byte</span> <span class="op">=</span> <span class="ident">u8::conditional_select</span>(<span class="kw-2">&amp;</span><span class="ident">a</span>.<span class="ident">bytes</span>[<span class="ident">i</span>], <span class="kw-2">&amp;</span><span class="ident">b</span>.<span class="ident">bytes</span>[<span class="ident">i</span>], <span class="ident">choice</span>);
         }
 
         <span class="self">Self</span> { <span class="ident">bytes</span> }
@@ -1078,7 +1076,7 @@
     <span class="ident">C</span>: <span class="ident">Curve</span>,
     <span class="ident">UntaggedPointSize</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>: <span class="ident">Add</span><span class="op">&lt;</span><span class="ident">U1</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">ArrayLength</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
     <span class="ident">UncompressedPointSize</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>: <span class="ident">ArrayLength</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
-    <span class="op">&lt;</span><span class="ident">UncompressedPointSize</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> <span class="kw">as</span> <span class="ident">ArrayLength</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>::<span class="ident">ArrayType</span>: <span class="ident">Copy</span>,
+    <span class="op">&lt;</span><span class="ident">UncompressedPointSize</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> <span class="kw">as</span> <span class="ident">ArrayLength</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::ArrayType</span>: <span class="ident">Copy</span>,
 {
 }
 
@@ -1088,8 +1086,8 @@
     <span class="ident">UntaggedPointSize</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>: <span class="ident">Add</span><span class="op">&lt;</span><span class="ident">U1</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">ArrayLength</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
     <span class="ident">UncompressedPointSize</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>: <span class="ident">ArrayLength</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
 {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt</span>::<span class="ident">Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt</span>::<span class="prelude-ty">Result</span> {
-        <span class="macro">write</span><span class="macro">!</span>(<span class="ident">f</span>, <span class="string">&quot;EncodedPoint&lt;{:?}&gt;({:?})&quot;</span>, <span class="ident">C</span>::<span class="ident">default</span>(), <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">bytes</span>)
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+        <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;EncodedPoint&lt;{:?}&gt;({:?})&quot;</span>, <span class="ident">C::default</span>(), <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">bytes</span>)
     }
 }
 
@@ -1135,15 +1133,15 @@
     <span class="doccomment">/// Get the tag value needed to encode this set of [`Coordinates`]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">tag</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Tag</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident">Coordinates</span>::<span class="ident">Identity</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Tag</span>::<span class="ident">Identity</span>,
-            <span class="ident">Coordinates</span>::<span class="ident">Compressed</span> { <span class="ident">y_is_odd</span>, .. } <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">Coordinates::Identity</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Tag::Identity</span>,
+            <span class="ident">Coordinates::Compressed</span> { <span class="ident">y_is_odd</span>, .. } <span class="op">=</span><span class="op">&gt;</span> {
                 <span class="kw">if</span> <span class="kw-2">*</span><span class="ident">y_is_odd</span> {
-                    <span class="ident">Tag</span>::<span class="ident">CompressedOddY</span>
+                    <span class="ident">Tag::CompressedOddY</span>
                 } <span class="kw">else</span> {
-                    <span class="ident">Tag</span>::<span class="ident">CompressedEvenY</span>
+                    <span class="ident">Tag::CompressedEvenY</span>
                 }
             }
-            <span class="ident">Coordinates</span>::<span class="ident">Uncompressed</span> { .. } <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Tag</span>::<span class="ident">Uncompressed</span>,
+            <span class="ident">Coordinates::Uncompressed</span> { .. } <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Tag::Uncompressed</span>,
         }
     }
 }
@@ -1169,22 +1167,22 @@
     <span class="doccomment">/// Parse a tag value from a byte</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_u8</span>(<span class="ident">byte</span>: <span class="ident">u8</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="ident">byte</span> {
-            <span class="number">0</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">Tag</span>::<span class="ident">Identity</span>),
-            <span class="number">2</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">Tag</span>::<span class="ident">CompressedEvenY</span>),
-            <span class="number">3</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">Tag</span>::<span class="ident">CompressedOddY</span>),
-            <span class="number">4</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">Tag</span>::<span class="ident">Uncompressed</span>),
+            <span class="number">0</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">Tag::Identity</span>),
+            <span class="number">2</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">Tag::CompressedEvenY</span>),
+            <span class="number">3</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">Tag::CompressedOddY</span>),
+            <span class="number">4</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">Tag::Uncompressed</span>),
             <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>),
         }
     }
 
     <span class="doccomment">/// Is this point the identity point?</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_identity</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-        <span class="self">self</span> <span class="op">=</span><span class="op">=</span> <span class="ident">Tag</span>::<span class="ident">Identity</span>
+        <span class="self">self</span> <span class="op">=</span><span class="op">=</span> <span class="ident">Tag::Identity</span>
     }
 
     <span class="doccomment">/// Is this point compressed?</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_compressed</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-        <span class="macro">matches</span><span class="macro">!</span>(<span class="self">self</span>, <span class="ident">Tag</span>::<span class="ident">CompressedEvenY</span> <span class="op">|</span> <span class="ident">Tag</span>::<span class="ident">CompressedOddY</span>)
+        <span class="macro">matches!</span>(<span class="self">self</span>, <span class="ident">Tag::CompressedEvenY</span> <span class="op">|</span> <span class="ident">Tag::CompressedOddY</span>)
     }
 
     <span class="doccomment">/// Compute the expected total message length for a message prefixed</span>
@@ -1192,9 +1190,9 @@
     <span class="doccomment">/// (in bytes) for a particular elliptic curve.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">message_len</span>(<span class="self">self</span>, <span class="ident">field_element_size</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
         <span class="number">1</span> <span class="op">+</span> <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident">Tag</span>::<span class="ident">Identity</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0</span>,
-            <span class="ident">Tag</span>::<span class="ident">CompressedEvenY</span> <span class="op">|</span> <span class="ident">Tag</span>::<span class="ident">CompressedOddY</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">field_element_size</span>,
-            <span class="ident">Tag</span>::<span class="ident">Uncompressed</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">field_element_size</span> <span class="op">*</span> <span class="number">2</span>,
+            <span class="ident">Tag::Identity</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0</span>,
+            <span class="ident">Tag::CompressedEvenY</span> <span class="op">|</span> <span class="ident">Tag::CompressedOddY</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">field_element_size</span>,
+            <span class="ident">Tag::Uncompressed</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">field_element_size</span> <span class="op">*</span> <span class="number">2</span>,
         }
     }
 
@@ -1202,9 +1200,9 @@
     <span class="kw">fn</span> <span class="ident">compress_y</span>(<span class="ident">y</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="comment">// Is the y-coordinate odd in the SEC1 sense: `self mod 2 == 1`?</span>
         <span class="kw">if</span> <span class="ident">y</span>.<span class="ident">as_ref</span>().<span class="ident">last</span>().<span class="ident">expect</span>(<span class="string">&quot;empty y-coordinate&quot;</span>) <span class="op">&amp;</span> <span class="number">1</span> <span class="op">=</span><span class="op">=</span> <span class="number">1</span> {
-            <span class="ident">Tag</span>::<span class="ident">CompressedOddY</span>
+            <span class="ident">Tag::CompressedOddY</span>
         } <span class="kw">else</span> {
-            <span class="ident">Tag</span>::<span class="ident">CompressedEvenY</span>
+            <span class="ident">Tag::CompressedEvenY</span>
         }
     }
 }
@@ -1305,9 +1303,9 @@
 <span class="kw">mod</span> <span class="ident">tests</span> {
     <span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">Coordinates</span>, <span class="ident">Tag</span>};
     <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">weierstrass</span>, <span class="ident">Curve</span>};
-    <span class="kw">use</span> <span class="ident">generic_array</span>::{<span class="ident">typenum</span>::<span class="ident">U32</span>, <span class="ident">GenericArray</span>};
-    <span class="kw">use</span> <span class="ident">hex_literal</span>::<span class="ident">hex</span>;
-    <span class="kw">use</span> <span class="ident">subtle</span>::<span class="ident">ConditionallySelectable</span>;
+    <span class="kw">use</span> <span class="ident">generic_array</span>::{<span class="ident">typenum::U32</span>, <span class="ident">GenericArray</span>};
+    <span class="kw">use</span> <span class="ident">hex_literal::hex</span>;
+    <span class="kw">use</span> <span class="ident">subtle::ConditionallySelectable</span>;
 
     <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">Default</span>, <span class="ident">Eq</span>, <span class="ident">PartialEq</span>, <span class="ident">PartialOrd</span>, <span class="ident">Ord</span>)]</span>
     <span class="kw">struct</span> <span class="ident">ExampleCurve</span>;
@@ -1316,110 +1314,110 @@
         <span class="kw">type</span> <span class="ident">FieldSize</span> <span class="op">=</span> <span class="ident">U32</span>;
     }
 
-    <span class="kw">impl</span> <span class="ident">weierstrass</span>::<span class="ident">Curve</span> <span class="kw">for</span> <span class="ident">ExampleCurve</span> {}
+    <span class="kw">impl</span> <span class="ident">weierstrass::Curve</span> <span class="kw">for</span> <span class="ident">ExampleCurve</span> {}
 
-    <span class="kw">type</span> <span class="ident">EncodedPoint</span> <span class="op">=</span> <span class="kw">super</span>::<span class="ident">EncodedPoint</span><span class="op">&lt;</span><span class="ident">ExampleCurve</span><span class="op">&gt;</span>;
+    <span class="kw">type</span> <span class="ident">EncodedPoint</span> <span class="op">=</span> <span class="ident"><span class="kw">super</span>::EncodedPoint</span><span class="op">&lt;</span><span class="ident">ExampleCurve</span><span class="op">&gt;</span>;
 
     <span class="doccomment">/// Identity point</span>
     <span class="kw">const</span> <span class="ident">IDENTITY_BYTES</span>: [<span class="ident">u8</span>; <span class="number">1</span>] <span class="op">=</span> [<span class="number">0</span>];
 
     <span class="doccomment">/// Example uncompressed point</span>
-    <span class="kw">const</span> <span class="ident">UNCOMPRESSED_BYTES</span>: [<span class="ident">u8</span>; <span class="number">65</span>] <span class="op">=</span> <span class="macro">hex</span><span class="macro">!</span>(<span class="string">&quot;0411111111111111111111111111111111111111111111111111111111111111112222222222222222222222222222222222222222222222222222222222222222&quot;</span>);
+    <span class="kw">const</span> <span class="ident">UNCOMPRESSED_BYTES</span>: [<span class="ident">u8</span>; <span class="number">65</span>] <span class="op">=</span> <span class="macro">hex!</span>(<span class="string">&quot;0411111111111111111111111111111111111111111111111111111111111111112222222222222222222222222222222222222222222222222222222222222222&quot;</span>);
 
     <span class="doccomment">/// Example compressed point: `UNCOMPRESSED_BYTES` after point compression</span>
     <span class="kw">const</span> <span class="ident">COMPRESSED_BYTES</span>: [<span class="ident">u8</span>; <span class="number">33</span>] <span class="op">=</span>
-        <span class="macro">hex</span><span class="macro">!</span>(<span class="string">&quot;021111111111111111111111111111111111111111111111111111111111111111&quot;</span>);
+        <span class="macro">hex!</span>(<span class="string">&quot;021111111111111111111111111111111111111111111111111111111111111111&quot;</span>);
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">decode_compressed_point</span>() {
         <span class="comment">// Even y-coordinate</span>
         <span class="kw">let</span> <span class="ident">compressed_even_y_bytes</span> <span class="op">=</span>
-            <span class="macro">hex</span><span class="macro">!</span>(<span class="string">&quot;020100000000000000000000000000000000000000000000000000000000000000&quot;</span>);
+            <span class="macro">hex!</span>(<span class="string">&quot;020100000000000000000000000000000000000000000000000000000000000000&quot;</span>);
 
-        <span class="kw">let</span> <span class="ident">compressed_even_y</span> <span class="op">=</span> <span class="ident">EncodedPoint</span>::<span class="ident">from_bytes</span>(<span class="kw-2">&amp;</span><span class="ident">compressed_even_y_bytes</span>[..]).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">compressed_even_y</span> <span class="op">=</span> <span class="ident">EncodedPoint::from_bytes</span>(<span class="kw-2">&amp;</span><span class="ident">compressed_even_y_bytes</span>[..]).<span class="ident">unwrap</span>();
 
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">compressed_even_y</span>.<span class="ident">is_compressed</span>());
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">compressed_even_y</span>.<span class="ident">tag</span>(), <span class="ident">Tag</span>::<span class="ident">CompressedEvenY</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">compressed_even_y</span>.<span class="ident">len</span>(), <span class="number">33</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">compressed_even_y</span>.<span class="ident">as_bytes</span>(), <span class="kw-2">&amp;</span><span class="ident">compressed_even_y_bytes</span>[..]);
+        <span class="macro">assert!</span>(<span class="ident">compressed_even_y</span>.<span class="ident">is_compressed</span>());
+        <span class="macro">assert_eq!</span>(<span class="ident">compressed_even_y</span>.<span class="ident">tag</span>(), <span class="ident">Tag::CompressedEvenY</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">compressed_even_y</span>.<span class="ident">len</span>(), <span class="number">33</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">compressed_even_y</span>.<span class="ident">as_bytes</span>(), <span class="kw-2">&amp;</span><span class="ident">compressed_even_y_bytes</span>[..]);
 
-        <span class="macro">assert_eq</span><span class="macro">!</span>(
+        <span class="macro">assert_eq!</span>(
             <span class="ident">compressed_even_y</span>.<span class="ident">coordinates</span>(),
-            <span class="ident">Coordinates</span>::<span class="ident">Compressed</span> {
-                <span class="ident">x</span>: <span class="kw-2">&amp;</span><span class="macro">hex</span><span class="macro">!</span>(<span class="string">&quot;0100000000000000000000000000000000000000000000000000000000000000&quot;</span>).<span class="ident">into</span>(),
+            <span class="ident">Coordinates::Compressed</span> {
+                <span class="ident">x</span>: <span class="kw-2">&amp;</span><span class="macro">hex!</span>(<span class="string">&quot;0100000000000000000000000000000000000000000000000000000000000000&quot;</span>).<span class="ident">into</span>(),
                 <span class="ident">y_is_odd</span>: <span class="bool-val">false</span>
             }
         );
 
-        <span class="macro">assert_eq</span><span class="macro">!</span>(
+        <span class="macro">assert_eq!</span>(
             <span class="ident">compressed_even_y</span>.<span class="ident">x</span>().<span class="ident">unwrap</span>(),
-            <span class="kw-2">&amp;</span><span class="macro">hex</span><span class="macro">!</span>(<span class="string">&quot;0100000000000000000000000000000000000000000000000000000000000000&quot;</span>).<span class="ident">into</span>()
+            <span class="kw-2">&amp;</span><span class="macro">hex!</span>(<span class="string">&quot;0100000000000000000000000000000000000000000000000000000000000000&quot;</span>).<span class="ident">into</span>()
         );
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">compressed_even_y</span>.<span class="ident">y</span>(), <span class="prelude-val">None</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">compressed_even_y</span>.<span class="ident">y</span>(), <span class="prelude-val">None</span>);
 
         <span class="comment">// Odd y-coordinate</span>
         <span class="kw">let</span> <span class="ident">compressed_odd_y_bytes</span> <span class="op">=</span>
-            <span class="macro">hex</span><span class="macro">!</span>(<span class="string">&quot;030200000000000000000000000000000000000000000000000000000000000000&quot;</span>);
+            <span class="macro">hex!</span>(<span class="string">&quot;030200000000000000000000000000000000000000000000000000000000000000&quot;</span>);
 
-        <span class="kw">let</span> <span class="ident">compressed_odd_y</span> <span class="op">=</span> <span class="ident">EncodedPoint</span>::<span class="ident">from_bytes</span>(<span class="kw-2">&amp;</span><span class="ident">compressed_odd_y_bytes</span>[..]).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">compressed_odd_y</span> <span class="op">=</span> <span class="ident">EncodedPoint::from_bytes</span>(<span class="kw-2">&amp;</span><span class="ident">compressed_odd_y_bytes</span>[..]).<span class="ident">unwrap</span>();
 
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">compressed_odd_y</span>.<span class="ident">is_compressed</span>());
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">compressed_odd_y</span>.<span class="ident">tag</span>(), <span class="ident">Tag</span>::<span class="ident">CompressedOddY</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">compressed_odd_y</span>.<span class="ident">len</span>(), <span class="number">33</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">compressed_odd_y</span>.<span class="ident">as_bytes</span>(), <span class="kw-2">&amp;</span><span class="ident">compressed_odd_y_bytes</span>[..]);
+        <span class="macro">assert!</span>(<span class="ident">compressed_odd_y</span>.<span class="ident">is_compressed</span>());
+        <span class="macro">assert_eq!</span>(<span class="ident">compressed_odd_y</span>.<span class="ident">tag</span>(), <span class="ident">Tag::CompressedOddY</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">compressed_odd_y</span>.<span class="ident">len</span>(), <span class="number">33</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">compressed_odd_y</span>.<span class="ident">as_bytes</span>(), <span class="kw-2">&amp;</span><span class="ident">compressed_odd_y_bytes</span>[..]);
 
-        <span class="macro">assert_eq</span><span class="macro">!</span>(
+        <span class="macro">assert_eq!</span>(
             <span class="ident">compressed_odd_y</span>.<span class="ident">coordinates</span>(),
-            <span class="ident">Coordinates</span>::<span class="ident">Compressed</span> {
-                <span class="ident">x</span>: <span class="kw-2">&amp;</span><span class="macro">hex</span><span class="macro">!</span>(<span class="string">&quot;0200000000000000000000000000000000000000000000000000000000000000&quot;</span>).<span class="ident">into</span>(),
+            <span class="ident">Coordinates::Compressed</span> {
+                <span class="ident">x</span>: <span class="kw-2">&amp;</span><span class="macro">hex!</span>(<span class="string">&quot;0200000000000000000000000000000000000000000000000000000000000000&quot;</span>).<span class="ident">into</span>(),
                 <span class="ident">y_is_odd</span>: <span class="bool-val">true</span>
             }
         );
 
-        <span class="macro">assert_eq</span><span class="macro">!</span>(
+        <span class="macro">assert_eq!</span>(
             <span class="ident">compressed_odd_y</span>.<span class="ident">x</span>().<span class="ident">unwrap</span>(),
-            <span class="kw-2">&amp;</span><span class="macro">hex</span><span class="macro">!</span>(<span class="string">&quot;0200000000000000000000000000000000000000000000000000000000000000&quot;</span>).<span class="ident">into</span>()
+            <span class="kw-2">&amp;</span><span class="macro">hex!</span>(<span class="string">&quot;0200000000000000000000000000000000000000000000000000000000000000&quot;</span>).<span class="ident">into</span>()
         );
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">compressed_odd_y</span>.<span class="ident">y</span>(), <span class="prelude-val">None</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">compressed_odd_y</span>.<span class="ident">y</span>(), <span class="prelude-val">None</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">decode_uncompressed_point</span>() {
-        <span class="kw">let</span> <span class="ident">uncompressed_point</span> <span class="op">=</span> <span class="ident">EncodedPoint</span>::<span class="ident">from_bytes</span>(<span class="kw-2">&amp;</span><span class="ident">UNCOMPRESSED_BYTES</span>[..]).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">uncompressed_point</span> <span class="op">=</span> <span class="ident">EncodedPoint::from_bytes</span>(<span class="kw-2">&amp;</span><span class="ident">UNCOMPRESSED_BYTES</span>[..]).<span class="ident">unwrap</span>();
 
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="op">!</span><span class="ident">uncompressed_point</span>.<span class="ident">is_compressed</span>());
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">uncompressed_point</span>.<span class="ident">tag</span>(), <span class="ident">Tag</span>::<span class="ident">Uncompressed</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">uncompressed_point</span>.<span class="ident">len</span>(), <span class="number">65</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">uncompressed_point</span>.<span class="ident">as_bytes</span>(), <span class="kw-2">&amp;</span><span class="ident">UNCOMPRESSED_BYTES</span>[..]);
+        <span class="macro">assert!</span>(<span class="op">!</span><span class="ident">uncompressed_point</span>.<span class="ident">is_compressed</span>());
+        <span class="macro">assert_eq!</span>(<span class="ident">uncompressed_point</span>.<span class="ident">tag</span>(), <span class="ident">Tag::Uncompressed</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">uncompressed_point</span>.<span class="ident">len</span>(), <span class="number">65</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">uncompressed_point</span>.<span class="ident">as_bytes</span>(), <span class="kw-2">&amp;</span><span class="ident">UNCOMPRESSED_BYTES</span>[..]);
 
-        <span class="macro">assert_eq</span><span class="macro">!</span>(
+        <span class="macro">assert_eq!</span>(
             <span class="ident">uncompressed_point</span>.<span class="ident">coordinates</span>(),
-            <span class="ident">Coordinates</span>::<span class="ident">Uncompressed</span> {
-                <span class="ident">x</span>: <span class="kw-2">&amp;</span><span class="macro">hex</span><span class="macro">!</span>(<span class="string">&quot;1111111111111111111111111111111111111111111111111111111111111111&quot;</span>).<span class="ident">into</span>(),
-                <span class="ident">y</span>: <span class="kw-2">&amp;</span><span class="macro">hex</span><span class="macro">!</span>(<span class="string">&quot;2222222222222222222222222222222222222222222222222222222222222222&quot;</span>).<span class="ident">into</span>()
+            <span class="ident">Coordinates::Uncompressed</span> {
+                <span class="ident">x</span>: <span class="kw-2">&amp;</span><span class="macro">hex!</span>(<span class="string">&quot;1111111111111111111111111111111111111111111111111111111111111111&quot;</span>).<span class="ident">into</span>(),
+                <span class="ident">y</span>: <span class="kw-2">&amp;</span><span class="macro">hex!</span>(<span class="string">&quot;2222222222222222222222222222222222222222222222222222222222222222&quot;</span>).<span class="ident">into</span>()
             }
         );
 
-        <span class="macro">assert_eq</span><span class="macro">!</span>(
+        <span class="macro">assert_eq!</span>(
             <span class="ident">uncompressed_point</span>.<span class="ident">x</span>().<span class="ident">unwrap</span>(),
-            <span class="kw-2">&amp;</span><span class="macro">hex</span><span class="macro">!</span>(<span class="string">&quot;1111111111111111111111111111111111111111111111111111111111111111&quot;</span>).<span class="ident">into</span>()
+            <span class="kw-2">&amp;</span><span class="macro">hex!</span>(<span class="string">&quot;1111111111111111111111111111111111111111111111111111111111111111&quot;</span>).<span class="ident">into</span>()
         );
-        <span class="macro">assert_eq</span><span class="macro">!</span>(
+        <span class="macro">assert_eq!</span>(
             <span class="ident">uncompressed_point</span>.<span class="ident">y</span>().<span class="ident">unwrap</span>(),
-            <span class="kw-2">&amp;</span><span class="macro">hex</span><span class="macro">!</span>(<span class="string">&quot;2222222222222222222222222222222222222222222222222222222222222222&quot;</span>).<span class="ident">into</span>()
+            <span class="kw-2">&amp;</span><span class="macro">hex!</span>(<span class="string">&quot;2222222222222222222222222222222222222222222222222222222222222222&quot;</span>).<span class="ident">into</span>()
         );
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">decode_identity</span>() {
-        <span class="kw">let</span> <span class="ident">identity_point</span> <span class="op">=</span> <span class="ident">EncodedPoint</span>::<span class="ident">from_bytes</span>(<span class="kw-2">&amp;</span><span class="ident">IDENTITY_BYTES</span>[..]).<span class="ident">unwrap</span>();
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">identity_point</span>.<span class="ident">is_identity</span>());
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">identity_point</span>.<span class="ident">tag</span>(), <span class="ident">Tag</span>::<span class="ident">Identity</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">identity_point</span>.<span class="ident">len</span>(), <span class="number">1</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">identity_point</span>.<span class="ident">as_bytes</span>(), <span class="kw-2">&amp;</span><span class="ident">IDENTITY_BYTES</span>[..]);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">identity_point</span>.<span class="ident">coordinates</span>(), <span class="ident">Coordinates</span>::<span class="ident">Identity</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">identity_point</span>.<span class="ident">x</span>(), <span class="prelude-val">None</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">identity_point</span>.<span class="ident">y</span>(), <span class="prelude-val">None</span>);
+        <span class="kw">let</span> <span class="ident">identity_point</span> <span class="op">=</span> <span class="ident">EncodedPoint::from_bytes</span>(<span class="kw-2">&amp;</span><span class="ident">IDENTITY_BYTES</span>[..]).<span class="ident">unwrap</span>();
+        <span class="macro">assert!</span>(<span class="ident">identity_point</span>.<span class="ident">is_identity</span>());
+        <span class="macro">assert_eq!</span>(<span class="ident">identity_point</span>.<span class="ident">tag</span>(), <span class="ident">Tag::Identity</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">identity_point</span>.<span class="ident">len</span>(), <span class="number">1</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">identity_point</span>.<span class="ident">as_bytes</span>(), <span class="kw-2">&amp;</span><span class="ident">IDENTITY_BYTES</span>[..]);
+        <span class="macro">assert_eq!</span>(<span class="ident">identity_point</span>.<span class="ident">coordinates</span>(), <span class="ident">Coordinates::Identity</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">identity_point</span>.<span class="ident">x</span>(), <span class="prelude-val">None</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">identity_point</span>.<span class="ident">y</span>(), <span class="prelude-val">None</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
@@ -1435,8 +1433,8 @@
                 }
 
                 (<span class="kw-2">*</span><span class="ident">bytes</span>)[<span class="number">0</span>] <span class="op">=</span> <span class="ident">tag</span>;
-                <span class="kw">let</span> <span class="ident">decode_result</span> <span class="op">=</span> <span class="ident">EncodedPoint</span>::<span class="ident">from_bytes</span>(<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">bytes</span>);
-                <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">decode_result</span>.<span class="ident">is_err</span>());
+                <span class="kw">let</span> <span class="ident">decode_result</span> <span class="op">=</span> <span class="ident">EncodedPoint::from_bytes</span>(<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">bytes</span>);
+                <span class="macro">assert!</span>(<span class="ident">decode_result</span>.<span class="ident">is_err</span>());
             }
         }
     }
@@ -1445,69 +1443,70 @@
     <span class="kw">fn</span> <span class="ident">decode_truncated_point</span>() {
         <span class="kw">for</span> <span class="ident">bytes</span> <span class="kw">in</span> <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span><span class="ident">COMPRESSED_BYTES</span>[..], <span class="kw-2">&amp;</span><span class="ident">UNCOMPRESSED_BYTES</span>[..]] {
             <span class="kw">for</span> <span class="ident">len</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">bytes</span>.<span class="ident">len</span>() {
-                <span class="kw">let</span> <span class="ident">decode_result</span> <span class="op">=</span> <span class="ident">EncodedPoint</span>::<span class="ident">from_bytes</span>(<span class="kw-2">&amp;</span><span class="ident">bytes</span>[..<span class="ident">len</span>]);
-                <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">decode_result</span>.<span class="ident">is_err</span>());
+                <span class="kw">let</span> <span class="ident">decode_result</span> <span class="op">=</span> <span class="ident">EncodedPoint::from_bytes</span>(<span class="kw-2">&amp;</span><span class="ident">bytes</span>[..<span class="ident">len</span>]);
+                <span class="macro">assert!</span>(<span class="ident">decode_result</span>.<span class="ident">is_err</span>());
             }
         }
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">from_untagged_point</span>() {
-        <span class="kw">let</span> <span class="ident">untagged_bytes</span> <span class="op">=</span> <span class="macro">hex</span><span class="macro">!</span>(<span class="string">&quot;11111111111111111111111111111111111111111111111111111111111111112222222222222222222222222222222222222222222222222222222222222222&quot;</span>);
+        <span class="kw">let</span> <span class="ident">untagged_bytes</span> <span class="op">=</span> <span class="macro">hex!</span>(<span class="string">&quot;11111111111111111111111111111111111111111111111111111111111111112222222222222222222222222222222222222222222222222222222222222222&quot;</span>);
         <span class="kw">let</span> <span class="ident">uncompressed_point</span> <span class="op">=</span>
-            <span class="ident">EncodedPoint</span>::<span class="ident">from_untagged_bytes</span>(<span class="ident">GenericArray</span>::<span class="ident">from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">untagged_bytes</span>[..]));
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">uncompressed_point</span>.<span class="ident">as_bytes</span>(), <span class="kw-2">&amp;</span><span class="ident">UNCOMPRESSED_BYTES</span>[..]);
+            <span class="ident">EncodedPoint::from_untagged_bytes</span>(<span class="ident">GenericArray::from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">untagged_bytes</span>[..]));
+        <span class="macro">assert_eq!</span>(<span class="ident">uncompressed_point</span>.<span class="ident">as_bytes</span>(), <span class="kw-2">&amp;</span><span class="ident">UNCOMPRESSED_BYTES</span>[..]);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">from_affine_coordinates</span>() {
-        <span class="kw">let</span> <span class="ident">x</span> <span class="op">=</span> <span class="macro">hex</span><span class="macro">!</span>(<span class="string">&quot;1111111111111111111111111111111111111111111111111111111111111111&quot;</span>);
-        <span class="kw">let</span> <span class="ident">y</span> <span class="op">=</span> <span class="macro">hex</span><span class="macro">!</span>(<span class="string">&quot;2222222222222222222222222222222222222222222222222222222222222222&quot;</span>);
+        <span class="kw">let</span> <span class="ident">x</span> <span class="op">=</span> <span class="macro">hex!</span>(<span class="string">&quot;1111111111111111111111111111111111111111111111111111111111111111&quot;</span>);
+        <span class="kw">let</span> <span class="ident">y</span> <span class="op">=</span> <span class="macro">hex!</span>(<span class="string">&quot;2222222222222222222222222222222222222222222222222222222222222222&quot;</span>);
 
-        <span class="kw">let</span> <span class="ident">uncompressed_point</span> <span class="op">=</span> <span class="ident">EncodedPoint</span>::<span class="ident">from_affine_coordinates</span>(<span class="kw-2">&amp;</span><span class="ident">x</span>.<span class="ident">into</span>(), <span class="kw-2">&amp;</span><span class="ident">y</span>.<span class="ident">into</span>(), <span class="bool-val">false</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">uncompressed_point</span>.<span class="ident">as_bytes</span>(), <span class="kw-2">&amp;</span><span class="ident">UNCOMPRESSED_BYTES</span>[..]);
+        <span class="kw">let</span> <span class="ident">uncompressed_point</span> <span class="op">=</span> <span class="ident">EncodedPoint::from_affine_coordinates</span>(<span class="kw-2">&amp;</span><span class="ident">x</span>.<span class="ident">into</span>(), <span class="kw-2">&amp;</span><span class="ident">y</span>.<span class="ident">into</span>(), <span class="bool-val">false</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">uncompressed_point</span>.<span class="ident">as_bytes</span>(), <span class="kw-2">&amp;</span><span class="ident">UNCOMPRESSED_BYTES</span>[..]);
 
-        <span class="kw">let</span> <span class="ident">compressed_point</span> <span class="op">=</span> <span class="ident">EncodedPoint</span>::<span class="ident">from_affine_coordinates</span>(<span class="kw-2">&amp;</span><span class="ident">x</span>.<span class="ident">into</span>(), <span class="kw-2">&amp;</span><span class="ident">y</span>.<span class="ident">into</span>(), <span class="bool-val">true</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">compressed_point</span>.<span class="ident">as_bytes</span>(), <span class="kw-2">&amp;</span><span class="ident">COMPRESSED_BYTES</span>[..]);
+        <span class="kw">let</span> <span class="ident">compressed_point</span> <span class="op">=</span> <span class="ident">EncodedPoint::from_affine_coordinates</span>(<span class="kw-2">&amp;</span><span class="ident">x</span>.<span class="ident">into</span>(), <span class="kw-2">&amp;</span><span class="ident">y</span>.<span class="ident">into</span>(), <span class="bool-val">true</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">compressed_point</span>.<span class="ident">as_bytes</span>(), <span class="kw-2">&amp;</span><span class="ident">COMPRESSED_BYTES</span>[..]);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">compress</span>() {
-        <span class="kw">let</span> <span class="ident">uncompressed_point</span> <span class="op">=</span> <span class="ident">EncodedPoint</span>::<span class="ident">from_bytes</span>(<span class="kw-2">&amp;</span><span class="ident">UNCOMPRESSED_BYTES</span>[..]).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">uncompressed_point</span> <span class="op">=</span> <span class="ident">EncodedPoint::from_bytes</span>(<span class="kw-2">&amp;</span><span class="ident">UNCOMPRESSED_BYTES</span>[..]).<span class="ident">unwrap</span>();
         <span class="kw">let</span> <span class="ident">compressed_point</span> <span class="op">=</span> <span class="ident">uncompressed_point</span>.<span class="ident">compress</span>();
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">compressed_point</span>.<span class="ident">as_bytes</span>(), <span class="kw-2">&amp;</span><span class="ident">COMPRESSED_BYTES</span>[..]);
+        <span class="macro">assert_eq!</span>(<span class="ident">compressed_point</span>.<span class="ident">as_bytes</span>(), <span class="kw-2">&amp;</span><span class="ident">COMPRESSED_BYTES</span>[..]);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">conditional_select</span>() {
-        <span class="kw">let</span> <span class="ident">a</span> <span class="op">=</span> <span class="ident">EncodedPoint</span>::<span class="ident">from_bytes</span>(<span class="kw-2">&amp;</span><span class="ident">COMPRESSED_BYTES</span>[..]).<span class="ident">unwrap</span>();
-        <span class="kw">let</span> <span class="ident">b</span> <span class="op">=</span> <span class="ident">EncodedPoint</span>::<span class="ident">from_bytes</span>(<span class="kw-2">&amp;</span><span class="ident">UNCOMPRESSED_BYTES</span>[..]).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">a</span> <span class="op">=</span> <span class="ident">EncodedPoint::from_bytes</span>(<span class="kw-2">&amp;</span><span class="ident">COMPRESSED_BYTES</span>[..]).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">b</span> <span class="op">=</span> <span class="ident">EncodedPoint::from_bytes</span>(<span class="kw-2">&amp;</span><span class="ident">UNCOMPRESSED_BYTES</span>[..]).<span class="ident">unwrap</span>();
 
-        <span class="kw">let</span> <span class="ident">a_selected</span> <span class="op">=</span> <span class="ident">EncodedPoint</span>::<span class="ident">conditional_select</span>(<span class="kw-2">&amp;</span><span class="ident">a</span>, <span class="kw-2">&amp;</span><span class="ident">b</span>, <span class="number">0</span>.<span class="ident">into</span>());
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">a</span>, <span class="ident">a_selected</span>);
+        <span class="kw">let</span> <span class="ident">a_selected</span> <span class="op">=</span> <span class="ident">EncodedPoint::conditional_select</span>(<span class="kw-2">&amp;</span><span class="ident">a</span>, <span class="kw-2">&amp;</span><span class="ident">b</span>, <span class="number">0</span>.<span class="ident">into</span>());
+        <span class="macro">assert_eq!</span>(<span class="ident">a</span>, <span class="ident">a_selected</span>);
 
-        <span class="kw">let</span> <span class="ident">b_selected</span> <span class="op">=</span> <span class="ident">EncodedPoint</span>::<span class="ident">conditional_select</span>(<span class="kw-2">&amp;</span><span class="ident">a</span>, <span class="kw-2">&amp;</span><span class="ident">b</span>, <span class="number">1</span>.<span class="ident">into</span>());
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">b</span>, <span class="ident">b_selected</span>);
+        <span class="kw">let</span> <span class="ident">b_selected</span> <span class="op">=</span> <span class="ident">EncodedPoint::conditional_select</span>(<span class="kw-2">&amp;</span><span class="ident">a</span>, <span class="kw-2">&amp;</span><span class="ident">b</span>, <span class="number">1</span>.<span class="ident">into</span>());
+        <span class="macro">assert_eq!</span>(<span class="ident">b</span>, <span class="ident">b_selected</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">identity</span>() {
-        <span class="kw">let</span> <span class="ident">identity_point</span> <span class="op">=</span> <span class="ident">EncodedPoint</span>::<span class="ident">identity</span>();
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">identity_point</span>.<span class="ident">tag</span>(), <span class="ident">Tag</span>::<span class="ident">Identity</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">identity_point</span>.<span class="ident">len</span>(), <span class="number">1</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">identity_point</span>.<span class="ident">as_bytes</span>(), <span class="kw-2">&amp;</span><span class="ident">IDENTITY_BYTES</span>[..]);
+        <span class="kw">let</span> <span class="ident">identity_point</span> <span class="op">=</span> <span class="ident">EncodedPoint::identity</span>();
+        <span class="macro">assert_eq!</span>(<span class="ident">identity_point</span>.<span class="ident">tag</span>(), <span class="ident">Tag::Identity</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">identity_point</span>.<span class="ident">len</span>(), <span class="number">1</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">identity_point</span>.<span class="ident">as_bytes</span>(), <span class="kw-2">&amp;</span><span class="ident">IDENTITY_BYTES</span>[..]);
 
         <span class="comment">// identity is default</span>
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">identity_point</span>, <span class="ident">EncodedPoint</span>::<span class="ident">default</span>());
+        <span class="macro">assert_eq!</span>(<span class="ident">identity_point</span>, <span class="ident">EncodedPoint::default</span>());
     }
 
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;alloc&quot;</span>)]</span>
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">to_bytes</span>() {
-        <span class="kw">let</span> <span class="ident">uncompressed_point</span> <span class="op">=</span> <span class="ident">EncodedPoint</span>::<span class="ident">from_bytes</span>(<span class="kw-2">&amp;</span><span class="ident">UNCOMPRESSED_BYTES</span>[..]).<span class="ident">unwrap</span>();
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">uncompressed_point</span>.<span class="ident">to_bytes</span>(), <span class="kw-2">&amp;</span><span class="ident">UNCOMPRESSED_BYTES</span>[..]);
+        <span class="kw">let</span> <span class="ident">uncompressed_point</span> <span class="op">=</span> <span class="ident">EncodedPoint::from_bytes</span>(<span class="kw-2">&amp;</span><span class="ident">UNCOMPRESSED_BYTES</span>[..]).<span class="ident">unwrap</span>();
+        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">uncompressed_point</span>.<span class="ident">to_bytes</span>(), <span class="kw-2">&amp;</span><span class="ident">UNCOMPRESSED_BYTES</span>[..]);
     }
 }
-</pre></div>
-</section><section id="search" class="content hidden"></section><section class="footer"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="elliptic_curve" data-search-js="../../search-index.js"></div>
-    <script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script></body></html>
+</code></pre></div>
+</section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="elliptic_curve" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
+    <script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script>
+</body></html>

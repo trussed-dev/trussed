@@ -1,7 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/service/attest.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>attest.rs - source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings"></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../../favicon.svg">
-<link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png">
-<link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../trussed/index.html'><div class='logo-container rust-logo'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><script src="../../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
-                <a id="settings-menu" href="../../../settings.html"><img src="../../../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src&#x2F;service&#x2F;attest.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>attest.rs - source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../trussed/index.html'><div class='logo-container rust-logo'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -763,37 +760,36 @@
 <span id="760">760</span>
 <span id="761">761</span>
 <span id="762">762</span>
-</pre><div class="example-wrap"><pre class="rust ">
-<span class="kw">use</span> <span class="ident">core</span>::<span class="ident">convert</span>::<span class="ident">TryInto</span>;
-<span class="kw">use</span> <span class="ident">core</span>::<span class="ident">convert</span>::<span class="ident">TryFrom</span>;
+</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">core::convert::TryInto</span>;
+<span class="kw">use</span> <span class="ident">core::convert::TryFrom</span>;
 
 <span class="kw">use</span> <span class="ident">flexiber</span>::{<span class="ident">Encodable</span>, <span class="ident">EncodableHeapless</span>, <span class="ident">Encoder</span>, <span class="ident">Length</span> <span class="kw">as</span> <span class="ident">BerLength</span>, <span class="prelude-ty">Result</span> <span class="kw">as</span> <span class="ident">BerResult</span>, <span class="ident">Tag</span>, <span class="ident">TaggedSlice</span>, <span class="ident">TaggedValue</span>};
-<span class="kw">use</span> <span class="ident">hex_literal</span>::<span class="ident">hex</span>;
-<span class="kw">use</span> <span class="ident">rand_core</span>::<span class="ident">RngCore</span>;
+<span class="kw">use</span> <span class="ident">hex_literal::hex</span>;
+<span class="kw">use</span> <span class="ident">rand_core::RngCore</span>;
 
 <span class="kw">use</span> <span class="kw">crate</span>::{
     <span class="ident">api</span>::{
-        <span class="ident">request</span>::<span class="ident">Attest</span> <span class="kw">as</span> <span class="ident">AttestRequest</span>,
+        <span class="ident">request::Attest</span> <span class="kw">as</span> <span class="ident">AttestRequest</span>,
         <span class="ident">request</span>,
-        <span class="ident">reply</span>::<span class="ident">Attest</span> <span class="kw">as</span> <span class="ident">AttestReply</span>,
+        <span class="ident">reply::Attest</span> <span class="kw">as</span> <span class="ident">AttestReply</span>,
     },
-    <span class="ident">error</span>::<span class="ident">Error</span>,
+    <span class="ident">error::Error</span>,
     <span class="ident">key</span>,
     <span class="ident">mechanisms</span>,
     <span class="ident">service</span>::{<span class="ident">DeriveKey</span>, <span class="ident">SerializeKey</span>, <span class="ident">Sign</span>},
-    <span class="ident">store</span>::<span class="ident">certstore</span>::<span class="ident">Certstore</span>,
-    <span class="ident">store</span>::<span class="ident">keystore</span>::<span class="ident">Keystore</span>,
+    <span class="ident">store::certstore::Certstore</span>,
+    <span class="ident">store::keystore::Keystore</span>,
     <span class="ident">types</span>::{<span class="ident">KeyId</span>, <span class="ident">KeySerialization</span>, <span class="ident">Location</span>, <span class="ident">Mechanism</span>, <span class="ident">Message</span>, <span class="ident">SignatureSerialization</span>, <span class="ident">StorageAttributes</span>},
 };
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;test-attestation-cert-ids&quot;</span>))]</span>
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">ED255_ATTN_KEY</span>: <span class="ident">KeyId</span> <span class="op">=</span> <span class="ident">KeyId</span>::<span class="ident">from_special</span>(<span class="number">1</span>);
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">ED255_ATTN_KEY</span>: <span class="ident">KeyId</span> <span class="op">=</span> <span class="ident">KeyId::from_special</span>(<span class="number">1</span>);
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;test-attestation-cert-ids&quot;</span>)]</span>
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">ED255_ATTN_KEY</span>: <span class="ident">KeyId</span> <span class="op">=</span> <span class="ident">KeyId</span>(<span class="ident">Id</span>(<span class="ident">u128</span>::<span class="ident">from_be_bytes</span>([<span class="number">0x12</span>,<span class="number">0xd2</span>,<span class="number">0xa7</span>,<span class="number">0xe4</span>,<span class="number">0x03</span>,<span class="number">0x55</span>,<span class="number">0x21</span>,<span class="number">0x42</span>,<span class="number">0x99</span>,<span class="number">0xf1</span>,<span class="number">0x57</span>,<span class="number">0x34</span>,<span class="number">0xc5</span>,<span class="number">0xd7</span>,<span class="number">0xd0</span>,<span class="number">0xe7</span>])));
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">ED255_ATTN_KEY</span>: <span class="ident">KeyId</span> <span class="op">=</span> <span class="ident">KeyId</span>(<span class="ident">Id</span>(<span class="ident">u128::from_be_bytes</span>([<span class="number">0x12</span>,<span class="number">0xd2</span>,<span class="number">0xa7</span>,<span class="number">0xe4</span>,<span class="number">0x03</span>,<span class="number">0x55</span>,<span class="number">0x21</span>,<span class="number">0x42</span>,<span class="number">0x99</span>,<span class="number">0xf1</span>,<span class="number">0x57</span>,<span class="number">0x34</span>,<span class="number">0xc5</span>,<span class="number">0xd7</span>,<span class="number">0xd0</span>,<span class="number">0xe7</span>])));
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;test-attestation-cert-ids&quot;</span>))]</span>
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">P256_ATTN_KEY</span>: <span class="ident">KeyId</span> <span class="op">=</span> <span class="ident">KeyId</span>::<span class="ident">from_special</span>(<span class="number">2</span>);
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">P256_ATTN_KEY</span>: <span class="ident">KeyId</span> <span class="op">=</span> <span class="ident">KeyId::from_special</span>(<span class="number">2</span>);
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;test-attestation-cert-ids&quot;</span>)]</span>
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">P256_ATTN_KEY</span>: <span class="ident">KeyId</span> <span class="op">=</span> <span class="ident">KeyId</span>(<span class="ident">Id</span>(<span class="ident">u128</span>::<span class="ident">from_be_bytes</span>([<span class="number">0xc8</span>,<span class="number">0xd6</span>,<span class="number">0x77</span>,<span class="number">0xa3</span>,<span class="number">0x93</span>,<span class="number">0x46</span>,<span class="number">0xc9</span>,<span class="number">0x8f</span>,<span class="number">0xc8</span>,<span class="number">0x5a</span>,<span class="number">0xb0</span>,<span class="number">0x5d</span>,<span class="number">0x29</span>,<span class="number">0xc5</span>,<span class="number">0x75</span>,<span class="number">0x32</span>])));
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">P256_ATTN_KEY</span>: <span class="ident">KeyId</span> <span class="op">=</span> <span class="ident">KeyId</span>(<span class="ident">Id</span>(<span class="ident">u128::from_be_bytes</span>([<span class="number">0xc8</span>,<span class="number">0xd6</span>,<span class="number">0x77</span>,<span class="number">0xa3</span>,<span class="number">0x93</span>,<span class="number">0x46</span>,<span class="number">0xc9</span>,<span class="number">0x8f</span>,<span class="number">0xc8</span>,<span class="number">0x5a</span>,<span class="number">0xb0</span>,<span class="number">0x5d</span>,<span class="number">0x29</span>,<span class="number">0xc5</span>,<span class="number">0x75</span>,<span class="number">0x32</span>])));
 
 <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">never</span>)]</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_attest</span>(
@@ -806,7 +802,7 @@
 
 {
 
-    <span class="kw">let</span> <span class="ident">signature_algorithm</span> <span class="op">=</span> <span class="ident">SignatureAlgorithm</span>::<span class="ident">try_from</span>(<span class="ident">request</span>.<span class="ident">signing_mechanism</span>)<span class="question-mark">?</span>;
+    <span class="kw">let</span> <span class="ident">signature_algorithm</span> <span class="op">=</span> <span class="ident">SignatureAlgorithm::try_from</span>(<span class="ident">request</span>.<span class="ident">signing_mechanism</span>)<span class="question-mark">?</span>;
 
     <span class="comment">// 1. Construct the TBS Certificate</span>
 
@@ -818,111 +814,111 @@
         <span class="ident">P256</span>,
     }
 
-    <span class="kw">let</span> <span class="ident">key_algorithm</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">keystore</span>.<span class="ident">key_info</span>(<span class="ident">key</span>::<span class="ident">Secrecy</span>::<span class="ident">Secret</span>, <span class="kw-2">&amp;</span><span class="ident">request</span>.<span class="ident">private_key</span>) {
-        <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">NoSuchKey</span>),
+    <span class="kw">let</span> <span class="ident">key_algorithm</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">keystore</span>.<span class="ident">key_info</span>(<span class="ident">key::Secrecy::Secret</span>, <span class="kw-2">&amp;</span><span class="ident">request</span>.<span class="ident">private_key</span>) {
+        <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::NoSuchKey</span>),
         <span class="prelude-val">Some</span>(<span class="ident">info</span>) <span class="op">=</span><span class="op">&gt;</span> {
-            <span class="kw">if</span> <span class="op">!</span><span class="ident">info</span>.<span class="ident">flags</span>.<span class="ident">contains</span>(<span class="ident">key</span>::<span class="ident">Flags</span>::<span class="ident">LOCAL</span>) {
-                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">InvalidSerializedKey</span>);
+            <span class="kw">if</span> <span class="op">!</span><span class="ident">info</span>.<span class="ident">flags</span>.<span class="ident">contains</span>(<span class="ident">key::Flags::LOCAL</span>) {
+                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::InvalidSerializedKey</span>);
             }
 
             <span class="kw">match</span> <span class="ident">info</span>.<span class="ident">kind</span> {
-                <span class="ident">key</span>::<span class="ident">Kind</span>::<span class="ident">P256</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">KeyAlgorithm</span>::<span class="ident">P256</span>,
-                <span class="ident">key</span>::<span class="ident">Kind</span>::<span class="ident">Ed255</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">KeyAlgorithm</span>::<span class="ident">Ed255</span>,
-                <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">NoSuchKey</span>),
+                <span class="ident">key::Kind::P256</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">KeyAlgorithm::P256</span>,
+                <span class="ident">key::Kind::Ed255</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">KeyAlgorithm::Ed255</span>,
+                <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::NoSuchKey</span>),
             }
         }
     };
 
     <span class="kw">let</span> <span class="ident">spki</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">key_algorithm</span> {
-        <span class="ident">KeyAlgorithm</span>::<span class="ident">Ed255</span> <span class="op">=</span><span class="op">&gt;</span> {
-            <span class="kw">let</span> <span class="ident">public_key</span> <span class="op">=</span> <span class="ident">mechanisms</span>::<span class="ident">Ed255</span>::<span class="ident">derive_key</span>(
+        <span class="ident">KeyAlgorithm::Ed255</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="kw">let</span> <span class="ident">public_key</span> <span class="op">=</span> <span class="ident">mechanisms::Ed255::derive_key</span>(
                 <span class="ident">keystore</span>,
-                <span class="kw-2">&amp;</span><span class="ident">request</span>::<span class="ident">DeriveKey</span> {
-                    <span class="ident">mechanism</span>: <span class="ident">Mechanism</span>::<span class="ident">Ed255</span>,
+                <span class="kw-2">&amp;</span><span class="ident">request::DeriveKey</span> {
+                    <span class="ident">mechanism</span>: <span class="ident">Mechanism::Ed255</span>,
                     <span class="ident">base_key</span>: <span class="ident">request</span>.<span class="ident">private_key</span>,
                     <span class="ident">additional_data</span>: <span class="prelude-val">None</span>,
-                    <span class="ident">attributes</span>: <span class="ident">StorageAttributes</span> { <span class="ident">persistence</span>: <span class="ident">Location</span>::<span class="ident">Volatile</span> },
+                    <span class="ident">attributes</span>: <span class="ident">StorageAttributes</span> { <span class="ident">persistence</span>: <span class="ident">Location::Volatile</span> },
                 },
             )<span class="question-mark">?</span>.<span class="ident">key</span>;
-            <span class="kw">let</span> <span class="ident">serialized_key</span> <span class="op">=</span> <span class="ident">mechanisms</span>::<span class="ident">Ed255</span>::<span class="ident">serialize_key</span>(
+            <span class="kw">let</span> <span class="ident">serialized_key</span> <span class="op">=</span> <span class="ident">mechanisms::Ed255::serialize_key</span>(
                 <span class="ident">keystore</span>,
-                <span class="kw-2">&amp;</span><span class="ident">request</span>::<span class="ident">SerializeKey</span> {
-                    <span class="ident">mechanism</span>: <span class="ident">Mechanism</span>::<span class="ident">Ed255</span>,
+                <span class="kw-2">&amp;</span><span class="ident">request::SerializeKey</span> {
+                    <span class="ident">mechanism</span>: <span class="ident">Mechanism::Ed255</span>,
                     <span class="ident">key</span>: <span class="ident">public_key</span>,
-                    <span class="ident">format</span>: <span class="ident">KeySerialization</span>::<span class="ident">Raw</span>,
+                    <span class="ident">format</span>: <span class="ident">KeySerialization::Raw</span>,
                 },
             ).<span class="ident">unwrap</span>().<span class="ident">serialized_key</span>;
             <span class="ident">keystore</span>.<span class="ident">delete_key</span>(<span class="kw-2">&amp;</span><span class="ident">public_key</span>);
 
-            <span class="ident">SerializedSubjectPublicKey</span>::<span class="ident">Ed255</span>(
-                <span class="ident">serialized_key</span>.<span class="ident">as_ref</span>().<span class="ident">try_into</span>().<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error</span>::<span class="ident">ImplementationError</span>)<span class="question-mark">?</span>
+            <span class="ident">SerializedSubjectPublicKey::Ed255</span>(
+                <span class="ident">serialized_key</span>.<span class="ident">as_ref</span>().<span class="ident">try_into</span>().<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error::ImplementationError</span>)<span class="question-mark">?</span>
             )
         }
 
-        <span class="ident">KeyAlgorithm</span>::<span class="ident">P256</span> <span class="op">=</span><span class="op">&gt;</span> {
-            <span class="kw">let</span> <span class="ident">public_key</span> <span class="op">=</span> <span class="ident">mechanisms</span>::<span class="ident">P256</span>::<span class="ident">derive_key</span>(
+        <span class="ident">KeyAlgorithm::P256</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="kw">let</span> <span class="ident">public_key</span> <span class="op">=</span> <span class="ident">mechanisms::P256::derive_key</span>(
                 <span class="ident">keystore</span>,
-                <span class="kw-2">&amp;</span><span class="ident">request</span>::<span class="ident">DeriveKey</span> {
-                    <span class="ident">mechanism</span>: <span class="ident">Mechanism</span>::<span class="ident">P256</span>,
+                <span class="kw-2">&amp;</span><span class="ident">request::DeriveKey</span> {
+                    <span class="ident">mechanism</span>: <span class="ident">Mechanism::P256</span>,
                     <span class="ident">base_key</span>: <span class="ident">request</span>.<span class="ident">private_key</span>,
                     <span class="ident">additional_data</span>: <span class="prelude-val">None</span>,
-                    <span class="ident">attributes</span>: <span class="ident">StorageAttributes</span> { <span class="ident">persistence</span>: <span class="ident">Location</span>::<span class="ident">Volatile</span> },
+                    <span class="ident">attributes</span>: <span class="ident">StorageAttributes</span> { <span class="ident">persistence</span>: <span class="ident">Location::Volatile</span> },
                 },
             )<span class="question-mark">?</span>.<span class="ident">key</span>;
-            <span class="kw">let</span> <span class="ident">serialized_key</span> <span class="op">=</span> <span class="ident">mechanisms</span>::<span class="ident">P256</span>::<span class="ident">serialize_key</span>(
+            <span class="kw">let</span> <span class="ident">serialized_key</span> <span class="op">=</span> <span class="ident">mechanisms::P256::serialize_key</span>(
                 <span class="ident">keystore</span>,
-                <span class="kw-2">&amp;</span><span class="ident">request</span>::<span class="ident">SerializeKey</span> {
-                    <span class="ident">mechanism</span>: <span class="ident">Mechanism</span>::<span class="ident">P256</span>,
+                <span class="kw-2">&amp;</span><span class="ident">request::SerializeKey</span> {
+                    <span class="ident">mechanism</span>: <span class="ident">Mechanism::P256</span>,
                     <span class="ident">key</span>: <span class="ident">public_key</span>,
-                    <span class="ident">format</span>: <span class="ident">KeySerialization</span>::<span class="ident">Sec1</span>,
+                    <span class="ident">format</span>: <span class="ident">KeySerialization::Sec1</span>,
                 },
             ).<span class="ident">unwrap</span>().<span class="ident">serialized_key</span>;
             <span class="ident">keystore</span>.<span class="ident">delete_key</span>(<span class="kw-2">&amp;</span><span class="ident">public_key</span>);
 
-            <span class="ident">SerializedSubjectPublicKey</span>::<span class="ident">P256</span>(
-                <span class="ident">serialized_key</span>.<span class="ident">as_ref</span>().<span class="ident">try_into</span>().<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error</span>::<span class="ident">ImplementationError</span>)<span class="question-mark">?</span>
+            <span class="ident">SerializedSubjectPublicKey::P256</span>(
+                <span class="ident">serialized_key</span>.<span class="ident">as_ref</span>().<span class="ident">try_into</span>().<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error::ImplementationError</span>)<span class="question-mark">?</span>
             )
         }
     };
 
     <span class="kw">let</span> <span class="ident">to_be_signed_certificate</span> <span class="op">=</span> <span class="ident">TbsCertificate</span> {
-        <span class="ident">version</span>: <span class="ident">Version</span>::<span class="ident">V3</span>,
+        <span class="ident">version</span>: <span class="ident">Version::V3</span>,
         <span class="ident">serial</span>: <span class="ident">BigEndianInteger</span>(<span class="ident">serial</span>.<span class="ident">as_ref</span>()),
         <span class="ident">signature_algorithm</span>,
-        <span class="ident">issuer</span>: <span class="ident">Name</span>::<span class="ident">default</span>().<span class="ident">with_country</span>(<span class="string">b&quot;CH&quot;</span>).<span class="ident">with_organization</span>(<span class="string">&quot;Trussed&quot;</span>).<span class="ident">with_state</span>(<span class="string">&quot;Zurich&quot;</span>),
+        <span class="ident">issuer</span>: <span class="ident">Name::default</span>().<span class="ident">with_country</span>(<span class="string">b&quot;CH&quot;</span>).<span class="ident">with_organization</span>(<span class="string">&quot;Trussed&quot;</span>).<span class="ident">with_state</span>(<span class="string">&quot;Zurich&quot;</span>),
         <span class="comment">// validity: Validity { start: Datetime(b&quot;20210313120000Z&quot;), end: None },</span>
         <span class="ident">validity</span>: <span class="ident">Validity</span> { <span class="ident">start</span>: <span class="ident">Datetime</span>(<span class="string">b&quot;20210313120000Z&quot;</span>), <span class="ident">end</span>: <span class="prelude-val">None</span> },
         <span class="comment">// subject: Name::default(),</span>
-        <span class="ident">subject</span>: <span class="ident">Name</span>::<span class="ident">default</span>(), <span class="comment">//.with_country(b&quot;CH&quot;).with_organization(&quot;Trussed&quot;).with_state(&quot;Zurich&quot;),</span>
+        <span class="ident">subject</span>: <span class="ident">Name::default</span>(), <span class="comment">//.with_country(b&quot;CH&quot;).with_organization(&quot;Trussed&quot;).with_state(&quot;Zurich&quot;),</span>
         <span class="ident">subject_public_key_info</span>: <span class="ident">spki</span>,
     };
 
-    <span class="kw">let</span> <span class="ident">message</span> <span class="op">=</span> <span class="ident">Message</span>::<span class="ident">from</span>(<span class="ident">TaggedValue</span>::<span class="ident">new</span>(<span class="ident">Tag</span>::<span class="ident">SEQUENCE</span>, <span class="kw-2">&amp;</span><span class="ident">to_be_signed_certificate</span>)
+    <span class="kw">let</span> <span class="ident">message</span> <span class="op">=</span> <span class="ident">Message::from</span>(<span class="ident">TaggedValue::new</span>(<span class="ident">Tag::SEQUENCE</span>, <span class="kw-2">&amp;</span><span class="ident">to_be_signed_certificate</span>)
         .<span class="ident">to_heapless_vec</span>()
-        .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error</span>::<span class="ident">InternalError</span>)<span class="question-mark">?</span>);
+        .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error::InternalError</span>)<span class="question-mark">?</span>);
 
     <span class="comment">// 2. sign the TBS Cert</span>
     <span class="kw">let</span> <span class="ident">signature</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">signature_algorithm</span> {
-        <span class="ident">SignatureAlgorithm</span>::<span class="ident">Ed255</span> <span class="op">=</span><span class="op">&gt;</span> {
-            <span class="kw">let</span> <span class="ident">signature</span> <span class="op">=</span> <span class="ident">mechanisms</span>::<span class="ident">Ed255</span>::<span class="ident">sign</span>(
+        <span class="ident">SignatureAlgorithm::Ed255</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="kw">let</span> <span class="ident">signature</span> <span class="op">=</span> <span class="ident">mechanisms::Ed255::sign</span>(
                 <span class="ident">attn_keystore</span>,
-                <span class="kw-2">&amp;</span><span class="ident">request</span>::<span class="ident">Sign</span> {
-                    <span class="ident">mechanism</span>: <span class="ident">Mechanism</span>::<span class="ident">Ed255</span>,
+                <span class="kw-2">&amp;</span><span class="ident">request::Sign</span> {
+                    <span class="ident">mechanism</span>: <span class="ident">Mechanism::Ed255</span>,
                     <span class="ident">key</span>: <span class="ident">ED255_ATTN_KEY</span>,
                     <span class="ident">message</span>,
-                    <span class="ident">format</span>: <span class="ident">SignatureSerialization</span>::<span class="ident">Raw</span>,
+                    <span class="ident">format</span>: <span class="ident">SignatureSerialization::Raw</span>,
                 },
             ).<span class="ident">unwrap</span>().<span class="ident">signature</span>;
-            <span class="ident">SerializedSignature</span>::<span class="ident">Ed255</span>(<span class="ident">signature</span>.<span class="ident">as_ref</span>().<span class="ident">try_into</span>().<span class="ident">unwrap</span>())
+            <span class="ident">SerializedSignature::Ed255</span>(<span class="ident">signature</span>.<span class="ident">as_ref</span>().<span class="ident">try_into</span>().<span class="ident">unwrap</span>())
         }
-        <span class="ident">SignatureAlgorithm</span>::<span class="ident">P256</span> <span class="op">=</span><span class="op">&gt;</span> {
-            <span class="ident">SerializedSignature</span>::<span class="ident">P256</span>(<span class="ident">heapless_bytes</span>::<span class="ident">Bytes</span>::<span class="ident">from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">mechanisms</span>::<span class="ident">P256</span>::<span class="ident">sign</span>(
+        <span class="ident">SignatureAlgorithm::P256</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">SerializedSignature::P256</span>(<span class="ident">heapless_bytes::Bytes::from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">mechanisms::P256::sign</span>(
                 <span class="ident">attn_keystore</span>,
-                <span class="kw-2">&amp;</span><span class="ident">request</span>::<span class="ident">Sign</span> {
-                    <span class="ident">mechanism</span>: <span class="ident">Mechanism</span>::<span class="ident">P256</span>,
+                <span class="kw-2">&amp;</span><span class="ident">request::Sign</span> {
+                    <span class="ident">mechanism</span>: <span class="ident">Mechanism::P256</span>,
                     <span class="ident">key</span>: <span class="ident">P256_ATTN_KEY</span>,
                     <span class="ident">message</span>,
-                    <span class="ident">format</span>: <span class="ident">SignatureSerialization</span>::<span class="ident">Asn1Der</span>,
+                    <span class="ident">format</span>: <span class="ident">SignatureSerialization::Asn1Der</span>,
                 },
             ).<span class="ident">unwrap</span>().<span class="ident">signature</span>.<span class="ident">as_ref</span>()).<span class="ident">unwrap</span>())
         }
@@ -933,15 +929,15 @@
     <span class="ident">leading_zero_signature</span>[<span class="number">1</span>..][..<span class="ident">l</span>].<span class="ident">copy_from_slice</span>(<span class="ident">signature</span>.<span class="ident">as_ref</span>());
 
     <span class="comment">// 3. construct the entire DER-serialized cert</span>
-    <span class="kw">let</span> <span class="ident">certificate</span> <span class="op">=</span> <span class="ident">Message</span>::<span class="ident">from</span>(<span class="ident">Certificate</span> {
+    <span class="kw">let</span> <span class="ident">certificate</span> <span class="op">=</span> <span class="ident">Message::from</span>(<span class="ident">Certificate</span> {
         <span class="ident">tbs_certificate</span>: <span class="ident">to_be_signed_certificate</span>,
         <span class="ident">signature_algorithm</span>,
         <span class="ident">signature</span>: <span class="kw-2">&amp;</span><span class="ident">leading_zero_signature</span>[..<span class="ident">l</span> <span class="op">+</span> <span class="number">1</span>],
     }
         .<span class="ident">to_heapless_vec</span>()
-        .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error</span>::<span class="ident">ImplementationError</span>)<span class="question-mark">?</span>);
+        .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error::ImplementationError</span>)<span class="question-mark">?</span>);
 
-    <span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="ident">certstore</span>.<span class="ident">write_certificate</span>(<span class="ident">Location</span>::<span class="ident">Internal</span>, <span class="kw-2">&amp;</span><span class="ident">certificate</span>)<span class="question-mark">?</span>;
+    <span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="ident">certstore</span>.<span class="ident">write_certificate</span>(<span class="ident">Location::Internal</span>, <span class="kw-2">&amp;</span><span class="ident">certificate</span>)<span class="question-mark">?</span>;
 
     <span class="prelude-val">Ok</span>(<span class="ident">AttestReply</span> { <span class="ident">certificate</span>: <span class="ident">id</span> })
 }
@@ -985,7 +981,7 @@
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">SerializedSignature</span> {
     <span class="ident">Ed255</span>([<span class="ident">u8</span>; <span class="number">64</span>]),
     <span class="comment">// This is the DER version with leading &#39;04&#39;</span>
-    <span class="ident">P256</span>(<span class="ident">heapless_bytes</span>::<span class="ident">Bytes</span><span class="op">&lt;</span><span class="number">72</span><span class="op">&gt;</span>),
+    <span class="ident">P256</span>(<span class="ident">heapless_bytes::Bytes</span><span class="op">&lt;</span><span class="number">72</span><span class="op">&gt;</span>),
 }
 
 <span class="kw">impl</span> <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">SerializedSignature</span> {
@@ -1053,11 +1049,11 @@
 <span class="kw">impl</span> <span class="ident">Encodable</span> <span class="kw">for</span> <span class="ident">Version</span> {
 
     <span class="kw">fn</span> <span class="ident">encoded_length</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">BerResult</span><span class="op">&lt;</span><span class="ident">BerLength</span><span class="op">&gt;</span> {
-        <span class="prelude-val">Ok</span>((<span class="self">Self</span>::<span class="ident">ENCODING</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u8</span>).<span class="ident">into</span>())
+        <span class="prelude-val">Ok</span>((<span class="ident"><span class="self">Self</span>::ENCODING</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u8</span>).<span class="ident">into</span>())
     }
 
     <span class="kw">fn</span> <span class="ident">encode</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">encoder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Encoder</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">BerResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="ident">encoder</span>.<span class="ident">encode</span>(<span class="kw-2">&amp;</span><span class="self">Self</span>::<span class="ident">ENCODING</span>)
+        <span class="ident">encoder</span>.<span class="ident">encode</span>(<span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::ENCODING</span>)
     }
 }
 
@@ -1104,32 +1100,32 @@
     <span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">Error</span>;
     <span class="kw">fn</span> <span class="ident">try_from</span>(<span class="ident">mechanism</span>: <span class="ident">Mechanism</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="kw">match</span> <span class="ident">mechanism</span> {
-            <span class="ident">Mechanism</span>::<span class="ident">Ed255</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">SignatureAlgorithm</span>::<span class="ident">Ed255</span>,
-            <span class="ident">Mechanism</span>::<span class="ident">P256</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">SignatureAlgorithm</span>::<span class="ident">P256</span>,
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">MechanismNotAvailable</span>),
+            <span class="ident">Mechanism::Ed255</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">SignatureAlgorithm::Ed255</span>,
+            <span class="ident">Mechanism::P256</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">SignatureAlgorithm::P256</span>,
+            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::MechanismNotAvailable</span>),
         })
     }
 }
 
 <span class="comment">// 1.2.840.10045.4.3.2 ecdsaWithSHA256 (ANSI X9.62 ECDSA algorithm with SHA256))</span>
-<span class="kw">const</span> <span class="ident">P256_OID_ENCODING</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span> <span class="kw-2">&amp;</span><span class="macro">hex</span><span class="macro">!</span>(<span class="string">&quot;06 08  2A 86 48 CE 3D 04 03 02&quot;</span>);
-<span class="kw">const</span> <span class="ident">P256_PUB_ENCODING</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span> <span class="kw-2">&amp;</span><span class="macro">hex</span><span class="macro">!</span>(<span class="string">&quot;06 07 2A 86 48 CE 3D 02 01   06 08 2A 86 48 CE  3D 03 01 07&quot;</span>);
+<span class="kw">const</span> <span class="ident">P256_OID_ENCODING</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span> <span class="kw-2">&amp;</span><span class="macro">hex!</span>(<span class="string">&quot;06 08  2A 86 48 CE 3D 04 03 02&quot;</span>);
+<span class="kw">const</span> <span class="ident">P256_PUB_ENCODING</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span> <span class="kw-2">&amp;</span><span class="macro">hex!</span>(<span class="string">&quot;06 07 2A 86 48 CE 3D 02 01   06 08 2A 86 48 CE  3D 03 01 07&quot;</span>);
 <span class="comment">// 1.3.101.112 curveEd25519 (EdDSA 25519 signature algorithm)</span>
-<span class="kw">const</span> <span class="ident">ED255_OID_ENCODING</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span> <span class="kw-2">&amp;</span><span class="macro">hex</span><span class="macro">!</span>(<span class="string">&quot;06 03  2B 65 70&quot;</span>);
+<span class="kw">const</span> <span class="ident">ED255_OID_ENCODING</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span> <span class="kw-2">&amp;</span><span class="macro">hex!</span>(<span class="string">&quot;06 03  2B 65 70&quot;</span>);
 
 <span class="kw">impl</span> <span class="ident">Encodable</span> <span class="kw">for</span> <span class="ident">SignatureAlgorithm</span> {
 
     <span class="kw">fn</span> <span class="ident">encoded_length</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">BerResult</span><span class="op">&lt;</span><span class="ident">BerLength</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>((<span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident">SignatureAlgorithm</span>::<span class="ident">Ed255</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ED255_OID_ENCODING</span>.<span class="ident">len</span>(),
-            <span class="ident">SignatureAlgorithm</span>::<span class="ident">P256</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">P256_OID_ENCODING</span>.<span class="ident">len</span>(),
+            <span class="ident">SignatureAlgorithm::Ed255</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ED255_OID_ENCODING</span>.<span class="ident">len</span>(),
+            <span class="ident">SignatureAlgorithm::P256</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">P256_OID_ENCODING</span>.<span class="ident">len</span>(),
         } <span class="kw">as</span> <span class="ident">u8</span>).<span class="ident">into</span>())
     }
 
     <span class="kw">fn</span> <span class="ident">encode</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">encoder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Encoder</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">BerResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="ident">encoder</span>.<span class="ident">encode</span>(<span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident">SignatureAlgorithm</span>::<span class="ident">Ed255</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">ED255_OID_ENCODING</span>,
-            <span class="ident">SignatureAlgorithm</span>::<span class="ident">P256</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">P256_OID_ENCODING</span>,
+            <span class="ident">SignatureAlgorithm::Ed255</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">ED255_OID_ENCODING</span>,
+            <span class="ident">SignatureAlgorithm::P256</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">P256_OID_ENCODING</span>,
         })
     }
 }
@@ -1183,23 +1179,23 @@
         <span class="comment">// Order by OID for good measure</span>
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">country</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">country</span> {
             <span class="comment">// &quot;31 0B 30 09 06 03 55  04 06 13 02 43 48&quot;</span>
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">encoding</span>: [<span class="ident">u8</span>; <span class="number">0xB</span>] <span class="op">=</span> <span class="macro">hex</span><span class="macro">!</span>(<span class="string">&quot;30 09 06 03 55  04 06 13 02 00 00&quot;</span>);
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">encoding</span>: [<span class="ident">u8</span>; <span class="number">0xB</span>] <span class="op">=</span> <span class="macro">hex!</span>(<span class="string">&quot;30 09 06 03 55  04 06 13 02 00 00&quot;</span>);
             <span class="ident">encoding</span>[<span class="number">9</span>..].<span class="ident">copy_from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">country</span>);
-            <span class="ident">encoder</span>.<span class="ident">encode</span>(<span class="kw-2">&amp;</span><span class="ident">TaggedSlice</span>::<span class="ident">from</span>(<span class="ident">Tag</span>::<span class="ident">SET</span>, <span class="kw-2">&amp;</span><span class="ident">encoding</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>;
+            <span class="ident">encoder</span>.<span class="ident">encode</span>(<span class="kw-2">&amp;</span><span class="ident">TaggedSlice::from</span>(<span class="ident">Tag::SET</span>, <span class="kw-2">&amp;</span><span class="ident">encoding</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>;
         }
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">state</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">state</span> {
             <span class="kw">let</span> <span class="ident">encoded_state</span> <span class="op">=</span> <span class="ident">EncodedPart</span> {
-                <span class="ident">oid</span>: <span class="kw-2">&amp;</span><span class="macro">hex</span><span class="macro">!</span>(<span class="string">&quot;55 04 08&quot;</span>),
+                <span class="ident">oid</span>: <span class="kw-2">&amp;</span><span class="macro">hex!</span>(<span class="string">&quot;55 04 08&quot;</span>),
                 <span class="ident">part</span>: <span class="ident">state</span>.<span class="ident">as_bytes</span>(),
             };
-            <span class="ident">encoder</span>.<span class="ident">encode</span>(<span class="kw-2">&amp;</span><span class="ident">TaggedValue</span>::<span class="ident">new</span>(<span class="ident">Tag</span>::<span class="ident">SET</span>, <span class="kw-2">&amp;</span><span class="ident">encoded_state</span>))<span class="question-mark">?</span>;
+            <span class="ident">encoder</span>.<span class="ident">encode</span>(<span class="kw-2">&amp;</span><span class="ident">TaggedValue::new</span>(<span class="ident">Tag::SET</span>, <span class="kw-2">&amp;</span><span class="ident">encoded_state</span>))<span class="question-mark">?</span>;
         }
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">organization</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">organization</span> {
             <span class="kw">let</span> <span class="ident">encoded_organization</span> <span class="op">=</span> <span class="ident">EncodedPart</span> {
-                <span class="ident">oid</span>: <span class="kw-2">&amp;</span><span class="macro">hex</span><span class="macro">!</span>(<span class="string">&quot;55 04 0A&quot;</span>),
+                <span class="ident">oid</span>: <span class="kw-2">&amp;</span><span class="macro">hex!</span>(<span class="string">&quot;55 04 0A&quot;</span>),
                 <span class="ident">part</span>: <span class="ident">organization</span>.<span class="ident">as_bytes</span>(),
             };
-            <span class="ident">encoder</span>.<span class="ident">encode</span>(<span class="kw-2">&amp;</span><span class="ident">TaggedValue</span>::<span class="ident">new</span>(<span class="ident">Tag</span>::<span class="ident">SET</span>, <span class="kw-2">&amp;</span><span class="ident">encoded_organization</span>))<span class="question-mark">?</span>;
+            <span class="ident">encoder</span>.<span class="ident">encode</span>(<span class="kw-2">&amp;</span><span class="ident">TaggedValue::new</span>(<span class="ident">Tag::SET</span>, <span class="kw-2">&amp;</span><span class="ident">encoded_organization</span>))<span class="question-mark">?</span>;
         }
         <span class="prelude-val">Ok</span>(())
     }
@@ -1249,9 +1245,9 @@
     }
 
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">to_bytes</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> [<span class="ident">u8</span>; <span class="number">15</span>] {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buffer</span>: <span class="ident">heapless</span>::<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span>, <span class="number">15</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Default</span>::<span class="ident">default</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buffer</span>: <span class="ident">heapless::Vec</span><span class="op">&lt;</span><span class="ident">u8</span>, <span class="number">15</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Default::default</span>();
         <span class="ident">buffer</span>.<span class="ident">resize_default</span>(<span class="number">15</span>).<span class="ident">unwrap</span>();
-        <span class="ident">core</span>::<span class="ident">fmt</span>::<span class="ident">write</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buffer</span>, <span class="macro">format_args</span><span class="macro">!</span>(
+        <span class="ident">core::fmt::write</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buffer</span>, <span class="macro">format_args!</span>(
             <span class="string">&quot;{}{:02}{:02}{:02}{:02}{:02}Z&quot;</span>,
             <span class="self">self</span>.<span class="ident">year</span>, <span class="self">self</span>.<span class="ident">month</span>, <span class="self">self</span>.<span class="ident">day</span>, <span class="self">self</span>.<span class="ident">hour</span>, <span class="self">self</span>.<span class="ident">minute</span>, <span class="self">self</span>.<span class="ident">second</span>
         )).<span class="ident">unwrap</span>();
@@ -1277,9 +1273,9 @@
     }
     <span class="kw">fn</span> <span class="ident">encode</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">encoder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Encoder</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">BerResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">tagged_slice</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>[..<span class="number">4</span>] <span class="op">&lt;</span> <span class="string">b&quot;2050&quot;</span> {
-            <span class="ident">TaggedSlice</span>::<span class="ident">from</span>(<span class="ident">Tag</span>::<span class="ident">UTC_TIME</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>[<span class="number">2</span>..])<span class="question-mark">?</span>
+            <span class="ident">TaggedSlice::from</span>(<span class="ident">Tag::UTC_TIME</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>[<span class="number">2</span>..])<span class="question-mark">?</span>
         } <span class="kw">else</span> {
-            <span class="ident">TaggedSlice</span>::<span class="ident">from</span>(<span class="ident">Tag</span>::<span class="ident">GENERALIZED_TIME</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>)<span class="question-mark">?</span>
+            <span class="ident">TaggedSlice::from</span>(<span class="ident">Tag::GENERALIZED_TIME</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>)<span class="question-mark">?</span>
         };
         <span class="ident">encoder</span>.<span class="ident">encode</span>(<span class="kw-2">&amp;</span><span class="ident">tagged_slice</span>)
     }
@@ -1315,8 +1311,8 @@
 <span class="kw">impl</span> <span class="ident">Encodable</span> <span class="kw">for</span> <span class="ident">SerializedSubjectPublicKey</span> {
     <span class="kw">fn</span> <span class="ident">encoded_length</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">BerResult</span><span class="op">&lt;</span><span class="ident">BerLength</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>((<span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident">SerializedSubjectPublicKey</span>::<span class="ident">Ed255</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="number">0x2A</span>,
-            <span class="ident">SerializedSubjectPublicKey</span>::<span class="ident">P256</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="number">0x39</span>,
+            <span class="ident">SerializedSubjectPublicKey::Ed255</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="number">0x2A</span>,
+            <span class="ident">SerializedSubjectPublicKey::P256</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="number">0x39</span>,
         } <span class="kw">as</span> <span class="ident">u8</span>).<span class="ident">into</span>())
     }
 
@@ -1324,29 +1320,29 @@
     <span class="kw">fn</span> <span class="ident">encode</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">encoder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Encoder</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">BerResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="comment">// NB: BIT-STRING needs to have number of &quot;unused bits&quot; in first byte (we have none)</span>
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident">SerializedSubjectPublicKey</span>::<span class="ident">Ed255</span>(<span class="ident">pub_key</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="ident">encoder</span>.<span class="ident">encode</span>(<span class="kw-2">&amp;</span><span class="ident">TaggedSlice</span>::<span class="ident">from</span>(
-                    <span class="ident">Tag</span>::<span class="ident">SEQUENCE</span>,
+            <span class="ident">SerializedSubjectPublicKey::Ed255</span>(<span class="ident">pub_key</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="ident">encoder</span>.<span class="ident">encode</span>(<span class="kw-2">&amp;</span><span class="ident">TaggedSlice::from</span>(
+                    <span class="ident">Tag::SEQUENCE</span>,
                     <span class="ident">ED255_OID_ENCODING</span>,
                 )<span class="question-mark">?</span>)<span class="question-mark">?</span>;
                 <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">leading_zero</span> <span class="op">=</span> [<span class="number">0u8</span>; <span class="number">33</span>];
                 <span class="ident">leading_zero</span>[<span class="number">1</span>..].<span class="ident">copy_from_slice</span>(<span class="ident">pub_key</span>.<span class="ident">as_ref</span>());
-                <span class="ident">encoder</span>.<span class="ident">encode</span>(<span class="kw-2">&amp;</span><span class="ident">TaggedSlice</span>::<span class="ident">from</span>(
-                    <span class="ident">Tag</span>::<span class="ident">BIT_STRING</span>,
+                <span class="ident">encoder</span>.<span class="ident">encode</span>(<span class="kw-2">&amp;</span><span class="ident">TaggedSlice::from</span>(
+                    <span class="ident">Tag::BIT_STRING</span>,
                     <span class="kw-2">&amp;</span><span class="ident">leading_zero</span>,
                 )<span class="question-mark">?</span>)
 
                 <span class="comment">// encoder.encode(&amp;flexiber</span>
             }
-            <span class="ident">SerializedSubjectPublicKey</span>::<span class="ident">P256</span>(<span class="ident">pub_key</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="ident">encoder</span>.<span class="ident">encode</span>(<span class="kw-2">&amp;</span><span class="ident">TaggedSlice</span>::<span class="ident">from</span>(
-                    <span class="ident">Tag</span>::<span class="ident">SEQUENCE</span>,
+            <span class="ident">SerializedSubjectPublicKey::P256</span>(<span class="ident">pub_key</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="ident">encoder</span>.<span class="ident">encode</span>(<span class="kw-2">&amp;</span><span class="ident">TaggedSlice::from</span>(
+                    <span class="ident">Tag::SEQUENCE</span>,
                     <span class="ident">P256_PUB_ENCODING</span>,
                 )<span class="question-mark">?</span>)<span class="question-mark">?</span>;
                 <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">leading_zero</span> <span class="op">=</span> [<span class="number">0u8</span>; <span class="number">34</span>];
                 <span class="ident">leading_zero</span>[<span class="number">1</span>..].<span class="ident">copy_from_slice</span>(<span class="ident">pub_key</span>.<span class="ident">as_ref</span>());
-                <span class="ident">encoder</span>.<span class="ident">encode</span>(<span class="kw-2">&amp;</span><span class="ident">TaggedSlice</span>::<span class="ident">from</span>(
-                    <span class="ident">Tag</span>::<span class="ident">BIT_STRING</span>,
+                <span class="ident">encoder</span>.<span class="ident">encode</span>(<span class="kw-2">&amp;</span><span class="ident">TaggedSlice::from</span>(
+                    <span class="ident">Tag::BIT_STRING</span>,
                     <span class="kw-2">&amp;</span><span class="ident">leading_zero</span>,
                 )<span class="question-mark">?</span>)
             }
@@ -1526,6 +1522,7 @@
 <span class="comment">//        ))</span>
 <span class="comment">//    }</span>
 
-</pre></div>
-</section><section id="search" class="content hidden"></section><section class="footer"></section><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="trussed" data-search-js="../../../search-index.js"></div>
-    <script src="../../../main.js"></script><script src="../../../source-script.js"></script><script src="../../../source-files.js"></script></body></html>
+</code></pre></div>
+</section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="trussed" data-search-index-js="../../../search-index.js" data-search-js="../../../search.js"></div>
+    <script src="../../../main.js"></script><script src="../../../source-script.js"></script><script src="../../../source-files.js"></script>
+</body></html>

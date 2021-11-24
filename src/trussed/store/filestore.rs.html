@@ -1,7 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/store/filestore.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>filestore.rs - source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings"></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../../favicon.svg">
-<link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png">
-<link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../trussed/index.html'><div class='logo-container rust-logo'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><script src="../../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
-                <a id="settings-menu" href="../../../settings.html"><img src="../../../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src&#x2F;store&#x2F;filestore.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>filestore.rs - source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../trussed/index.html'><div class='logo-container rust-logo'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -376,8 +373,7 @@
 <span id="373">373</span>
 <span id="374">374</span>
 <span id="375">375</span>
-</pre><div class="example-wrap"><pre class="rust ">
-<span class="kw">use</span> <span class="kw">crate</span>::{
+</pre><pre class="rust"><code><span class="kw">use</span> <span class="kw">crate</span>::{
     <span class="ident">Bytes</span>,
     <span class="ident">error</span>::{<span class="ident">Error</span>, <span class="prelude-ty">Result</span>},
     <span class="comment">// service::ReadDirState,</span>
@@ -399,7 +395,7 @@
     <span class="ident">user_attribute</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">UserAttribute</span><span class="op">&gt;</span>,
 }
 
-<span class="kw">use</span> <span class="ident">littlefs2</span>::{<span class="ident">fs</span>::<span class="ident">DirEntry</span>, <span class="ident">path</span>::{<span class="ident">Path</span>, <span class="ident">PathBuf</span>}};
+<span class="kw">use</span> <span class="ident">littlefs2</span>::{<span class="ident">fs::DirEntry</span>, <span class="ident">path</span>::{<span class="ident">Path</span>, <span class="ident">PathBuf</span>}};
 <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">ClientId</span> <span class="op">=</span> <span class="ident">PathBuf</span>;
 
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ClientFilestore</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>
@@ -417,9 +413,9 @@
 
     <span class="doccomment">/// Client files are store below `/&lt;client_id&gt;/dat/`.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">actual_path</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">client_path</span>: <span class="kw-2">&amp;</span><span class="ident">PathBuf</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">PathBuf</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">PathBuf</span>::<span class="ident">new</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">PathBuf::new</span>();
         <span class="ident">path</span>.<span class="ident">push</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">client_id</span>);
-        <span class="ident">path</span>.<span class="ident">push</span>(<span class="kw-2">&amp;</span><span class="ident">PathBuf</span>::<span class="ident">from</span>(<span class="string">&quot;dat&quot;</span>));
+        <span class="ident">path</span>.<span class="ident">push</span>(<span class="kw-2">&amp;</span><span class="ident">PathBuf::from</span>(<span class="string">&quot;dat&quot;</span>));
         <span class="ident">path</span>.<span class="ident">push</span>(<span class="ident">client_path</span>);
         <span class="ident">path</span>
     }
@@ -436,7 +432,7 @@
             <span class="comment">// oh oh oh</span>
             .<span class="ident">unwrap</span>();
         <span class="kw">let</span> <span class="ident">dat_offset</span> <span class="op">=</span> <span class="string">&quot;/dat/&quot;</span>.<span class="ident">len</span>();
-        <span class="ident">PathBuf</span>::<span class="ident">from</span>(<span class="kw-2">&amp;</span><span class="ident">bytes</span>[<span class="ident">end_of_namespace</span> <span class="op">+</span> <span class="number">1</span> <span class="op">+</span> <span class="ident">offset</span> <span class="op">+</span> <span class="ident">dat_offset</span>..])
+        <span class="ident">PathBuf::from</span>(<span class="kw-2">&amp;</span><span class="ident">bytes</span>[<span class="ident">end_of_namespace</span> <span class="op">+</span> <span class="number">1</span> <span class="op">+</span> <span class="ident">offset</span> <span class="op">+</span> <span class="ident">dat_offset</span>..])
     }
 }
 
@@ -487,47 +483,47 @@
     <span class="kw">fn</span> <span class="ident">read</span><span class="op">&lt;</span><span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">PathBuf</span>, <span class="ident">location</span>: <span class="ident">Location</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Bytes</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">actual_path</span>(<span class="ident">path</span>);
 
-        <span class="ident">store</span>::<span class="ident">read</span>(<span class="self">self</span>.<span class="ident">store</span>, <span class="ident">location</span>, <span class="kw-2">&amp;</span><span class="ident">path</span>)
+        <span class="ident">store::read</span>(<span class="self">self</span>.<span class="ident">store</span>, <span class="ident">location</span>, <span class="kw-2">&amp;</span><span class="ident">path</span>)
     }
 
     <span class="kw">fn</span> <span class="ident">write</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">PathBuf</span>, <span class="ident">location</span>: <span class="ident">Location</span>, <span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">actual_path</span>(<span class="ident">path</span>);
-        <span class="ident">store</span>::<span class="ident">store</span>(<span class="self">self</span>.<span class="ident">store</span>, <span class="ident">location</span>, <span class="kw-2">&amp;</span><span class="ident">path</span>, <span class="ident">data</span>)
+        <span class="ident">store::store</span>(<span class="self">self</span>.<span class="ident">store</span>, <span class="ident">location</span>, <span class="kw-2">&amp;</span><span class="ident">path</span>, <span class="ident">data</span>)
     }
 
     <span class="kw">fn</span> <span class="ident">exists</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">PathBuf</span>, <span class="ident">location</span>: <span class="ident">Location</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
         <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">actual_path</span>(<span class="ident">path</span>);
-        <span class="ident">store</span>::<span class="ident">exists</span>(<span class="self">self</span>.<span class="ident">store</span>, <span class="ident">location</span>, <span class="kw-2">&amp;</span><span class="ident">path</span>)
+        <span class="ident">store::exists</span>(<span class="self">self</span>.<span class="ident">store</span>, <span class="ident">location</span>, <span class="kw-2">&amp;</span><span class="ident">path</span>)
     }
 
     <span class="kw">fn</span> <span class="ident">remove_file</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">PathBuf</span>, <span class="ident">location</span>: <span class="ident">Location</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">actual_path</span>(<span class="ident">path</span>);
 
-        <span class="kw">match</span> <span class="ident">store</span>::<span class="ident">delete</span>(<span class="self">self</span>.<span class="ident">store</span>, <span class="ident">location</span>, <span class="kw-2">&amp;</span><span class="ident">path</span>) {
+        <span class="kw">match</span> <span class="ident">store::delete</span>(<span class="self">self</span>.<span class="ident">store</span>, <span class="ident">location</span>, <span class="kw-2">&amp;</span><span class="ident">path</span>) {
             <span class="bool-val">true</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(()),
-            <span class="bool-val">false</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">InternalError</span>),
+            <span class="bool-val">false</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">Error::InternalError</span>),
         }
     }
 
     <span class="kw">fn</span> <span class="ident">remove_dir</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">PathBuf</span>, <span class="ident">location</span>: <span class="ident">Location</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">actual_path</span>(<span class="ident">path</span>);
 
-        <span class="kw">match</span> <span class="ident">store</span>::<span class="ident">delete</span>(<span class="self">self</span>.<span class="ident">store</span>, <span class="ident">location</span>, <span class="kw-2">&amp;</span><span class="ident">path</span>) {
+        <span class="kw">match</span> <span class="ident">store::delete</span>(<span class="self">self</span>.<span class="ident">store</span>, <span class="ident">location</span>, <span class="kw-2">&amp;</span><span class="ident">path</span>) {
             <span class="bool-val">true</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(()),
-            <span class="bool-val">false</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">InternalError</span>),
+            <span class="bool-val">false</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">Error::InternalError</span>),
         }
     }
 
     <span class="kw">fn</span> <span class="ident">remove_dir_all</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">PathBuf</span>, <span class="ident">location</span>: <span class="ident">Location</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">actual_path</span>(<span class="ident">path</span>);
 
-        <span class="ident">store</span>::<span class="ident">remove_dir_all_where</span>(<span class="self">self</span>.<span class="ident">store</span>, <span class="ident">location</span>, <span class="kw-2">&amp;</span><span class="ident">path</span>, <span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="bool-val">true</span>)
-            .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error</span>::<span class="ident">InternalError</span>)
+        <span class="ident">store::remove_dir_all_where</span>(<span class="self">self</span>.<span class="ident">store</span>, <span class="ident">location</span>, <span class="kw-2">&amp;</span><span class="ident">path</span>, <span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="bool-val">true</span>)
+            .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error::InternalError</span>)
     }
 
     <span class="kw">fn</span> <span class="ident">read_dir_first</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">clients_dir</span>: <span class="kw-2">&amp;</span><span class="ident">PathBuf</span>, <span class="ident">location</span>: <span class="ident">Location</span>, <span class="ident">not_before</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">DirEntry</span>, <span class="ident">ReadDirState</span>)<span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="ident">location</span> <span class="op">!</span><span class="op">=</span> <span class="ident">Location</span>::<span class="ident">Internal</span> {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">RequestNotAvailable</span>);
+        <span class="kw">if</span> <span class="ident">location</span> <span class="op">!</span><span class="op">=</span> <span class="ident">Location::Internal</span> {
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::RequestNotAvailable</span>);
         }
         <span class="kw">let</span> <span class="ident">fs</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">store</span>.<span class="ident">ifs</span>();
 
@@ -572,7 +568,7 @@
                 <span class="comment">// the `ok_or` dummy error followed by the `ok` in the next line is because</span>
                 <span class="comment">// `read_dir_and_then` wants to see Results (although we naturally have an Option</span>
                 <span class="comment">// at this point)</span>
-                }).<span class="ident">ok_or</span>(<span class="ident">littlefs2</span>::<span class="ident">io</span>::<span class="ident">Error</span>::<span class="ident">Io</span>)
+                }).<span class="ident">ok_or</span>(<span class="ident">littlefs2::io::Error::Io</span>)
         }).<span class="ident">ok</span>())
     }
 
@@ -598,7 +594,7 @@
 
                     (<span class="ident">entry</span>, <span class="ident">read_dir_state</span>)
                 })
-                .<span class="ident">ok_or</span>(<span class="ident">littlefs2</span>::<span class="ident">io</span>::<span class="ident">Error</span>::<span class="ident">Io</span>)
+                .<span class="ident">ok_or</span>(<span class="ident">littlefs2::io::Error::Io</span>)
 
         }).<span class="ident">ok</span>())
     }
@@ -610,8 +606,8 @@
         <span class="ident">user_attribute</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">UserAttribute</span><span class="op">&gt;</span>,
     ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Message</span><span class="op">&gt;</span>, <span class="ident">ReadDirFilesState</span>)<span class="op">&gt;</span><span class="op">&gt;</span> {
 
-        <span class="kw">if</span> <span class="ident">location</span> <span class="op">!</span><span class="op">=</span> <span class="ident">Location</span>::<span class="ident">Internal</span> {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">RequestNotAvailable</span>);
+        <span class="kw">if</span> <span class="ident">location</span> <span class="op">!</span><span class="op">=</span> <span class="ident">Location::Internal</span> {
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::RequestNotAvailable</span>);
         }
         <span class="kw">let</span> <span class="ident">fs</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">store</span>.<span class="ident">ifs</span>();
 
@@ -636,7 +632,7 @@
                     <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">user_attribute</span>) <span class="op">=</span> <span class="ident">user_attribute</span>.<span class="ident">as_ref</span>() {
                         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">dir</span>.<span class="ident">clone</span>();
                         <span class="ident">path</span>.<span class="ident">push</span>(<span class="ident">entry</span>.<span class="ident">file_name</span>());
-                        <span class="kw">let</span> <span class="ident">attribute</span> <span class="op">=</span> <span class="ident">fs</span>.<span class="ident">attribute</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>, <span class="kw">crate</span>::<span class="ident">config</span>::<span class="ident">USER_ATTRIBUTE_NUMBER</span>).<span class="ident">unwrap</span>();
+                        <span class="kw">let</span> <span class="ident">attribute</span> <span class="op">=</span> <span class="ident">fs</span>.<span class="ident">attribute</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>, <span class="ident"><span class="kw">crate</span>::config::USER_ATTRIBUTE_NUMBER</span>).<span class="ident">unwrap</span>();
 
                         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">attribute</span>) <span class="op">=</span> <span class="ident">attribute</span> {
                             <span class="ident">user_attribute</span> <span class="op">=</span><span class="op">=</span> <span class="ident">attribute</span>.<span class="ident">data</span>()
@@ -652,13 +648,13 @@
                 .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">i</span>, <span class="ident">entry</span>)<span class="op">|</span> {
                     <span class="kw">let</span> <span class="ident">read_dir_files_state</span> <span class="op">=</span> <span class="ident">ReadDirFilesState</span> { <span class="ident">real_dir</span>: <span class="ident">dir</span>.<span class="ident">clone</span>(), <span class="ident">last</span>: <span class="ident">i</span>, <span class="ident">location</span>, <span class="ident">user_attribute</span> };
                     <span class="comment">// The semantics is that for a non-existent file, we return None (not an error)</span>
-                    <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="ident">store</span>::<span class="ident">read</span>(<span class="self">self</span>.<span class="ident">store</span>, <span class="ident">location</span>, <span class="ident">entry</span>.<span class="ident">path</span>()).<span class="ident">ok</span>();
+                    <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="ident">store::read</span>(<span class="self">self</span>.<span class="ident">store</span>, <span class="ident">location</span>, <span class="ident">entry</span>.<span class="ident">path</span>()).<span class="ident">ok</span>();
                     (<span class="ident">data</span>, <span class="ident">read_dir_files_state</span>)
 
                 <span class="comment">// the `ok_or` dummy error followed by the `ok` in the next line is because</span>
                 <span class="comment">// `read_dir_and_then` wants to see Results (although we naturally have an Option</span>
                 <span class="comment">// at this point)</span>
-                }).<span class="ident">ok_or</span>(<span class="ident">littlefs2</span>::<span class="ident">io</span>::<span class="ident">Error</span>::<span class="ident">Io</span>)
+                }).<span class="ident">ok_or</span>(<span class="ident">littlefs2::io::Error::Io</span>)
         }).<span class="ident">ok</span>())
     }
 
@@ -685,7 +681,7 @@
                     <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">user_attribute</span>) <span class="op">=</span> <span class="ident">user_attribute</span>.<span class="ident">as_ref</span>() {
                         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">real_dir</span>.<span class="ident">clone</span>();
                         <span class="ident">path</span>.<span class="ident">push</span>(<span class="ident">entry</span>.<span class="ident">file_name</span>());
-                        <span class="kw">let</span> <span class="ident">attribute</span> <span class="op">=</span> <span class="ident">fs</span>.<span class="ident">attribute</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>, <span class="kw">crate</span>::<span class="ident">config</span>::<span class="ident">USER_ATTRIBUTE_NUMBER</span>).<span class="ident">unwrap</span>();
+                        <span class="kw">let</span> <span class="ident">attribute</span> <span class="op">=</span> <span class="ident">fs</span>.<span class="ident">attribute</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>, <span class="ident"><span class="kw">crate</span>::config::USER_ATTRIBUTE_NUMBER</span>).<span class="ident">unwrap</span>();
                         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">attribute</span>) <span class="op">=</span> <span class="ident">attribute</span> {
                             <span class="ident">user_attribute</span> <span class="op">=</span><span class="op">=</span> <span class="ident">attribute</span>.<span class="ident">data</span>()
                         } <span class="kw">else</span> {
@@ -697,28 +693,28 @@
                 .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">i</span>, <span class="ident">entry</span>)<span class="op">|</span> {
                     <span class="kw">let</span> <span class="ident">read_dir_files_state</span> <span class="op">=</span> <span class="ident">ReadDirFilesState</span> { <span class="ident">real_dir</span>: <span class="ident">real_dir</span>.<span class="ident">clone</span>(), <span class="ident">last</span>: <span class="ident">i</span>, <span class="ident">location</span>, <span class="ident">user_attribute</span> };
                     <span class="comment">// The semantics is that for a non-existent file, we return None (not an error)</span>
-                    <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="ident">store</span>::<span class="ident">read</span>(<span class="self">self</span>.<span class="ident">store</span>, <span class="ident">location</span>, <span class="ident">entry</span>.<span class="ident">path</span>()).<span class="ident">ok</span>();
+                    <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="ident">store::read</span>(<span class="self">self</span>.<span class="ident">store</span>, <span class="ident">location</span>, <span class="ident">entry</span>.<span class="ident">path</span>()).<span class="ident">ok</span>();
                     (<span class="ident">data</span>, <span class="ident">read_dir_files_state</span>)
                 })
 
                 <span class="comment">// convert Option into Result, again because `read_dir_and_then` expects this</span>
-                .<span class="ident">ok_or</span>(<span class="ident">littlefs2</span>::<span class="ident">io</span>::<span class="ident">Error</span>::<span class="ident">Io</span>)
+                .<span class="ident">ok_or</span>(<span class="ident">littlefs2::io::Error::Io</span>)
         }).<span class="ident">ok</span>())
     }
 
     <span class="kw">fn</span> <span class="ident">locate_file</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">location</span>: <span class="ident">Location</span>, <span class="ident">underneath</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>, <span class="ident">filename</span>: <span class="ident">PathBuf</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="ident">location</span> <span class="op">!</span><span class="op">=</span> <span class="ident">Location</span>::<span class="ident">Internal</span> {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">RequestNotAvailable</span>);
+        <span class="kw">if</span> <span class="ident">location</span> <span class="op">!</span><span class="op">=</span> <span class="ident">Location::Internal</span> {
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::RequestNotAvailable</span>);
         }
 
-        <span class="kw">let</span> <span class="ident">clients_dir</span> <span class="op">=</span> <span class="ident">underneath</span>.<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">PathBuf</span>::<span class="ident">from</span>(<span class="string">&quot;/&quot;</span>));
+        <span class="kw">let</span> <span class="ident">clients_dir</span> <span class="op">=</span> <span class="ident">underneath</span>.<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">PathBuf::from</span>(<span class="string">&quot;/&quot;</span>));
         <span class="kw">let</span> <span class="ident">dir</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">actual_path</span>(<span class="kw-2">&amp;</span><span class="ident">clients_dir</span>);
         <span class="kw">let</span> <span class="ident">fs</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">store</span>.<span class="ident">ifs</span>();
 
-        <span class="macro">info_now</span><span class="macro">!</span>(<span class="string">&quot;base dir {:?}&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">dir</span>);
+        <span class="macro">info_now!</span>(<span class="string">&quot;base dir {:?}&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">dir</span>);
 
-        <span class="kw">fn</span> <span class="ident">recursively_locate</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="lifetime">&#39;static</span> <span class="op">+</span> <span class="kw">crate</span>::<span class="ident">types</span>::<span class="ident">LfsStorage</span><span class="op">&gt;</span>(
-            <span class="ident">fs</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="kw">crate</span>::<span class="ident">store</span>::<span class="ident">Fs</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>,
+        <span class="kw">fn</span> <span class="ident">recursively_locate</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="lifetime">&#39;static</span> <span class="op">+</span> <span class="ident"><span class="kw">crate</span>::types::LfsStorage</span><span class="op">&gt;</span>(
+            <span class="ident">fs</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident"><span class="kw">crate</span>::store::Fs</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>,
             <span class="ident">dir</span>: <span class="ident">PathBuf</span>,
             <span class="ident">filename</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>
         )
@@ -732,17 +728,17 @@
                     .<span class="ident">filter_map</span>(<span class="op">|</span><span class="ident">entry</span><span class="op">|</span> {
                         <span class="kw">let</span> <span class="ident">is_file</span> <span class="op">=</span> <span class="ident">entry</span>.<span class="ident">file_type</span>().<span class="ident">is_file</span>();
                         <span class="kw">if</span> <span class="ident">is_file</span> {
-                            <span class="kw">if</span> <span class="ident">PathBuf</span>::<span class="ident">from</span>(<span class="ident">entry</span>.<span class="ident">file_name</span>()) <span class="op">=</span><span class="op">=</span> <span class="ident">PathBuf</span>::<span class="ident">from</span>(<span class="ident">filename</span>) {
-                                <span class="prelude-val">Some</span>(<span class="ident">PathBuf</span>::<span class="ident">from</span>(<span class="ident">entry</span>.<span class="ident">path</span>()))
+                            <span class="kw">if</span> <span class="ident">PathBuf::from</span>(<span class="ident">entry</span>.<span class="ident">file_name</span>()) <span class="op">=</span><span class="op">=</span> <span class="ident">PathBuf::from</span>(<span class="ident">filename</span>) {
+                                <span class="prelude-val">Some</span>(<span class="ident">PathBuf::from</span>(<span class="ident">entry</span>.<span class="ident">path</span>()))
                             } <span class="kw">else</span> {
                                 <span class="prelude-val">None</span>
                             }
                         } <span class="kw">else</span> {
-                            <span class="ident">recursively_locate</span>(<span class="ident">fs</span>, <span class="ident">PathBuf</span>::<span class="ident">from</span>(<span class="ident">entry</span>.<span class="ident">path</span>()), <span class="ident">filename</span>)
+                            <span class="ident">recursively_locate</span>(<span class="ident">fs</span>, <span class="ident">PathBuf::from</span>(<span class="ident">entry</span>.<span class="ident">path</span>()), <span class="ident">filename</span>)
                         }
                     })
                     .<span class="ident">next</span>()
-                    .<span class="ident">ok_or</span>(<span class="ident">littlefs2</span>::<span class="ident">io</span>::<span class="ident">Error</span>::<span class="ident">Io</span>)
+                    .<span class="ident">ok_or</span>(<span class="ident">littlefs2::io::Error::Io</span>)
             }).<span class="ident">ok</span>()
         }
 
@@ -752,6 +748,7 @@
         <span class="prelude-val">Ok</span>(<span class="ident">path</span>)
     }
 }
-</pre></div>
-</section><section id="search" class="content hidden"></section><section class="footer"></section><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="trussed" data-search-js="../../../search-index.js"></div>
-    <script src="../../../main.js"></script><script src="../../../source-script.js"></script><script src="../../../source-files.js"></script></body></html>
+</code></pre></div>
+</section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="trussed" data-search-index-js="../../../search-index.js" data-search-js="../../../search.js"></div>
+    <script src="../../../main.js"></script><script src="../../../source-script.js"></script><script src="../../../source-files.js"></script>
+</body></html>
