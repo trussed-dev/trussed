@@ -49,7 +49,7 @@ pub const MAX_SHORT_DATA_LENGTH: usize = 128;
 #[cfg(any(feature = "rsa2k-pkcs", feature = "rsa3k", feature = "rsa4k"))]
 pub const MAX_SIGNATURE_LENGTH: usize = 512;
 #[cfg(any(feature = "rsa2k-pkcs", feature = "rsa3k", feature = "rsa4k"))]
-pub const MAX_KEY_MATERIAL_LENGTH: usize = 2 * 512; //TODO: Assuming plain (<e OR d>, N) for now
+pub const MAX_KEY_MATERIAL_LENGTH: usize = 2 * 609; //TODO: We use PKCS#8 DER format, this value found empirically for 2K keys. Need to generalize.
 
 #[cfg(not(any(feature = "rsa2k-pkcs", feature = "rsa3k", feature = "rsa4k")))]
 pub const MAX_SIGNATURE_LENGTH: usize = 72;
