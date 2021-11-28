@@ -385,6 +385,21 @@ pub trait P256: CryptoClient {
     }
 }
 
+#[cfg(feature = "rsa2k-pkcs")]
+impl<S: Syscall> Rsa2kPkcs for ClientImplementation<S> {}
+
+pub trait Rsa2kPkcs: CryptoClient {
+    fn generate_rsa2kpkcs_private_key(
+        &mut self,
+        persistence: Location,
+    ) -> ClientResult<'_, reply::GenerateKey, Self> {
+        self.generate_key(
+            Mechanism::Rsa2kPkcs,
+            StorageAttributes::new().set_persistence(persistence),
+        )
+    }
+}
+
 #[cfg(feature = "sha256")]
 impl<S: Syscall> Sha256 for ClientImplementation<S> {}
 
