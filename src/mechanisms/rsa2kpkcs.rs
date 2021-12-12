@@ -1,6 +1,9 @@
 use core::convert::{TryFrom, TryInto};
 
-use rsa::{pkcs8::ToPrivateKey, RsaPrivateKey};
+use rsa::{
+    pkcs8::{FromPrivateKey, ToPrivateKey, ToPublicKey},
+    RsaPrivateKey, RsaPublicKey,
+};
 
 use crate::api::*;
 // use crate::config::*;
@@ -43,22 +46,42 @@ use crate::types::*;
 
 #[cfg(feature = "rsa2k-pkcs")]
 impl DeriveKey for super::Rsa2kPkcs {
-    // #[inline(never)]
-    // fn derive_key(keystore: &mut impl Keystore, request: &request::DeriveKey)
-    //     -> Result<reply::DeriveKey, Error>
-    // {
-    //     let base_id = &request.base_key;
-    //     let keypair = load_keypair(keystore, base_id)?;
+    #[inline(never)]
+    fn derive_key(
+        keystore: &mut impl Keystore,
+        request: &request::DeriveKey,
+    ) -> Result<reply::DeriveKey, Error> {
+        // Retrieve private key
+        let base_key_id = &request.base_key;
 
-    //     let public_id = keystore.store_key(
-    //         request.attributes.persistence,
-    //         key::Secrecy::Public, key::Kind::Rsa2k,
-    //         keypair.public.as_bytes())?;
+        // std::println!("Loading key: {:?}", base_key_id);
 
-    //     Ok(reply::DeriveKey {
-    //         key: public_id,
-    //     })
-    // }
+        let priv_key_der = keystore
+            .load_key(key::Secrecy::Secret, Some(key::Kind::Rsa2k), base_key_id)
+            .expect("Failed to load an RSA 2K private key with the given ID")
+            .material;
+
+        // std::println!("Loaded key material: {}", delog::hex_str!(&priv_key_der));
+        // std::println!("Key material length is {}", priv_key_der.len());
+
+        let priv_key = FromPrivateKey::from_pkcs8_der(&priv_key_der)
+            .expect("Failed to deserialize an RSA 2K private key from PKCS#8 DER");
+
+        // Derive and store public key
+        let pub_key_der = RsaPublicKey::from(&priv_key)
+            .to_public_key_der()
+            .expect("Failed to derive an RSA 2K public key or to serialize it to PKCS#8 DER");
+
+        let pub_key_id = keystore.store_key(
+            request.attributes.persistence,
+            key::Secrecy::Public,
+            key::Kind::Rsa2k,
+            pub_key_der.as_ref(),
+        )?;
+
+        // Send a reply
+        Ok(reply::DeriveKey { key: pub_key_id })
+    }
 }
 
 #[cfg(feature = "rsa2k-pkcs")]
@@ -105,24 +128,30 @@ impl GenerateKey for super::Rsa2kPkcs {
         // We want an RSA 2K key
         let bits = 2048;
 
-        let private_key = RsaPrivateKey::new(keystore.rng(), bits)
-            .expect("Failed to generate the RSA 2K private key");
-        let pk_der = ToPrivateKey::to_pkcs8_der(&private_key)
-            .expect("Failed to serialize the RSA 2K private key to PKCS#8 DER");
+        let priv_key = RsaPrivateKey::new(keystore.rng(), bits)
+            .expect("Failed to generate an RSA 2K private key");
 
+        // std::println!("Stored key material before DER: {:#?}", priv_key);
+
+        let priv_key_der = priv_key
+            .to_pkcs8_der()
+            .expect("Failed to serialize an RSA 2K private key to PKCS#8 DER");
+
+        // std::println!("Stored key material after DER: {}", delog::hex_str!(&priv_key_der));
+        // std::println!("Key material length is {}", priv_key_der.as_ref().len());
         // #[cfg(all(test, feature = "verbose-tests"))]
         // std::println!("rsa2k-pkcs private key = {:?}", &private_key);
 
         // store the key
-        let key_id = keystore.store_key(
+        let priv_key_id = keystore.store_key(
             request.attributes.persistence,
             key::Secrecy::Secret,
             key::Info::from(key::Kind::Rsa2k).with_local_flag(),
-            pk_der.as_ref(),
+            priv_key_der.as_ref(),
         )?;
 
         // return handle
-        Ok(reply::GenerateKey { key: key_id })
+        Ok(reply::GenerateKey { key: priv_key_id })
     }
 }
 
