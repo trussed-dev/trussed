@@ -2,6 +2,7 @@ use littlefs2::path::PathBuf;
 use rand_chacha::ChaCha8Rng;
 
 use crate::{
+    config::MAX_SERIALIZED_KEY_LENGTH,
     error::{Error, Result},
     key,
     store::{self, Store as _},
@@ -172,11 +173,12 @@ impl<P: Platform> Keystore for ClientKeystore<P> {
 
         let location = self.location(secrecy, id).ok_or(Error::NoSuchKey)?;
 
-        //TODO: This should better be defined in some way, instead of hardcoding
+        //TODO: This should better be defined in some way, instead of hardcoding.
+        //      I've tried referring to MAX_SERIALIZED_KEY_LENGTH, is this a good idea?
         #[cfg(not(feature = "rsa2k-pkcs"))]
         let bytes: Bytes<128> = store::read(self.store, location, &path)?;
         #[cfg(feature = "rsa2k-pkcs")]
-        let bytes: Bytes<512> = store::read(self.store, location, &path)?;
+        let bytes: Bytes<MAX_SERIALIZED_KEY_LENGTH> = store::read(self.store, location, &path)?;
 
         let key = key::Key::try_deserialize(&bytes)?;
 
