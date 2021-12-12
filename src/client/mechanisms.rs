@@ -254,6 +254,12 @@ pub trait Rsa2kPkcs: CryptoClient {
     {
         self.generate_key(Mechanism::Rsa2kPkcs, StorageAttributes::new().set_persistence(persistence))
     }
+
+    fn derive_rsa2kpkcs_public_key(&mut self, shared_key: KeyId, persistence: Location)
+        -> ClientResult<'_, reply::DeriveKey, Self>
+    {
+        self.derive_key(Mechanism::Rsa2kPkcs, shared_key, None, StorageAttributes::new().set_persistence(persistence))
+    }
 }
 
 #[cfg(feature = "sha256")]
