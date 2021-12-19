@@ -260,6 +260,18 @@ pub trait Rsa2kPkcs: CryptoClient {
     {
         self.derive_key(Mechanism::Rsa2kPkcs, shared_key, None, StorageAttributes::new().set_persistence(persistence))
     }
+
+    fn serialize_rsa2kpkcs_key(&mut self, key: KeyId, format: KeySerialization)
+        -> ClientResult<'_, reply::SerializeKey, Self>
+    {
+        self.serialize_key(Mechanism::Rsa2kPkcs, key, format)
+    }
+
+    fn deserialize_rsa2kpkcs_key<'c>(&'c mut self, serialized_key: &[u8], format: KeySerialization, attributes: StorageAttributes)
+        -> ClientResult<'c, reply::DeserializeKey, Self>
+    {
+        self.deserialize_key(Mechanism::Rsa2kPkcs, serialized_key, format, attributes)
+    }
 }
 
 #[cfg(feature = "sha256")]
