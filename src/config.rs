@@ -8,7 +8,6 @@ use littlefs2::consts;
 
 pub type MAX_APPLICATION_NAME_LENGTH = consts::U256;
 pub const MAX_LONG_DATA_LENGTH: usize = 1024;
-pub const MAX_MESSAGE_LENGTH: usize = 1024;
 pub type MAX_OBJECT_HANDLES = consts::U16;
 pub type MAX_LABEL_LENGTH = consts::U256;
 pub const MAX_MEDIUM_DATA_LENGTH: usize = 256;
@@ -45,17 +44,23 @@ cfg_if::cfg_if! {
 }
 pub const MAX_SHORT_DATA_LENGTH: usize = 128;
 
-//TODO: Do we want better keylength granularity here?
+// TODO: Do we want better keylength granularity here?
 #[cfg(any(feature = "rsa2k-pkcs", feature = "rsa3k", feature = "rsa4k"))]
 pub const MAX_SIGNATURE_LENGTH: usize = 512;
 #[cfg(any(feature = "rsa2k-pkcs", feature = "rsa3k", feature = "rsa4k"))]
-//TODO: We use PKCS#8 DER format, this value was found empirically for 2K keys. Need to generalize.
+// TODO: We use PKCS#8 DER format, this value was found empirically for 2K keys. Need to generalize.
 pub const MAX_KEY_MATERIAL_LENGTH: usize = 1217;
+#[cfg(any(feature = "rsa2k-pkcs", feature = "rsa3k", feature = "rsa4k"))]
+// TODO: This is due to the fact that KEY_MATERIAL_LENGTH is now bigger than MESSAGE_LENGTH.
+//       Double-check this is okay.
+pub const MAX_MESSAGE_LENGTH: usize = MAX_KEY_MATERIAL_LENGTH;
 
 #[cfg(not(any(feature = "rsa2k-pkcs", feature = "rsa3k", feature = "rsa4k")))]
 pub const MAX_SIGNATURE_LENGTH: usize = 72;
 #[cfg(not(any(feature = "rsa2k-pkcs", feature = "rsa3k", feature = "rsa4k")))]
 pub const MAX_KEY_MATERIAL_LENGTH: usize = 128;
+#[cfg(not(any(feature = "rsa2k-pkcs", feature = "rsa3k", feature = "rsa4k")))]
+pub const MAX_MESSAGE_LENGTH: usize = 1024;
 
 // must be MAX_KEY_MATERIAL_LENGTH + 4
 pub const MAX_SERIALIZED_KEY_LENGTH: usize = MAX_KEY_MATERIAL_LENGTH + 4;

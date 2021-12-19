@@ -99,22 +99,24 @@ impl DeserializeKey for super::Rsa2kPkcs {
             return Err(Error::InternalError);
         }
 
-        if request.serialized_key.len() != 32 {
-            return Err(Error::InvalidSerializedKey);
-        }
-
-        let serialized_key: [u8; 32] = request.serialized_key[..32].try_into().unwrap();
-        let public_key = salty::signature::PublicKey::try_from(&serialized_key)
+        let private_key: RsaPrivateKey = FromPrivateKey::from_pkcs8_der(&request.serialized_key)
             .map_err(|_| Error::InvalidSerializedKey)?;
 
-        let public_id = keystore.store_key(
+        // We store our keys in PKCS#8 DER format as well
+        let private_key_der = private_key
+            .to_pkcs8_der()
+            .expect("Failed to serialize an RSA 2K private key to PKCS#8 DER");
+
+        let private_key_id = keystore.store_key(
             request.attributes.persistence,
-            key::Secrecy::Public,
+            key::Secrecy::Secret,
             key::Kind::Rsa2k,
-            public_key.as_bytes(),
+            private_key_der.as_ref(),
         )?;
 
-        Ok(reply::DeserializeKey { key: public_id })
+        Ok(reply::DeserializeKey {
+            key: private_key_id,
+        })
     }
 }
 
@@ -157,35 +159,37 @@ impl GenerateKey for super::Rsa2kPkcs {
 
 #[cfg(feature = "rsa2k-pkcs")]
 impl SerializeKey for super::Rsa2kPkcs {
-    // #[inline(never)]
-    // fn serialize_key(keystore: &mut impl Keystore, request: &request::SerializeKey)
-    //     -> Result<reply::SerializeKey, Error>
-    // {
-    //     let key_id = request.key;
-    //     let public_key = load_public_key(keystore, &key_id)?;
+    #[inline(never)]
+    fn serialize_key(
+        keystore: &mut impl Keystore,
+        request: &request::SerializeKey,
+    ) -> Result<reply::SerializeKey, Error> {
+        let key_id = request.key;
 
-    //     let serialized_key = match request.format {
-    //         KeySerialization::Cose => {
-    //             let cose_pk = cosey::Ed25519PublicKey {
-    //                 // x: Bytes::from_slice(public_key.x_coordinate()).unwrap(),
-    //                 // x: Bytes::from_slice(&buf).unwrap(),
-    //                 x: Bytes::from_slice(public_key.as_bytes()).unwrap(),
-    //             };
-    //             crate::cbor_serialize_bytes(&cose_pk).map_err(|_| Error::CborError)?
-    //         }
+        // We rely on the fact that we store the keys in the PKCS#8 DER format already
+        let priv_key_der = keystore
+            .load_key(key::Secrecy::Secret, Some(key::Kind::Rsa2k), &key_id)
+            .expect("Failed to load an RSA 2K private key with the given ID")
+            .material;
 
-    //         KeySerialization::Raw => {
-    //             let mut serialized_key = Message::new();
-    //             serialized_key.extend_from_slice(public_key.as_bytes()).map_err(|_| Error::InternalError)?;
-    //             // serialized_key.extend_from_slice(&buf).map_err(|_| Error::InternalError)?;
-    //             serialized_key
-    //         }
+        let serialized_key = match request.format {
+            // TODO: There are "Der" and "Asn1Der" commented out in KeySerialization enum,
+            //       should those be used instead?
+            KeySerialization::Raw => {
+                let mut serialized_key = Message::new();
+                serialized_key
+                    .extend_from_slice(&priv_key_der)
+                    .map_err(|_| Error::InternalError)?;
+                serialized_key
+            }
 
-    //         _ => { return Err(Error::InternalError); }
-    //     };
+            _ => {
+                return Err(Error::InternalError);
+            }
+        };
 
-    //     Ok(reply::SerializeKey { serialized_key })
-    // }
+        Ok(reply::SerializeKey { serialized_key })
+    }
 }
 
 #[cfg(feature = "rsa2k-pkcs")]
