@@ -80,3 +80,23 @@ fn rsa2kpkcs_deserialize_key() {
         assert_ne!(deserialized_key_id, KeyId::from_special(0));
     })
 }
+
+#[test]
+fn rsa2kpkcs_sign_verify() {
+    client::get(|client| {
+        let sk = syscall!(client.generate_rsa2kpkcs_private_key(Volatile)).key;
+
+        let message = [1u8, 2u8, 3u8];
+        use sha2::digest::Digest;
+        let digest_to_sign = sha2::Sha256::digest(&message);
+        let signature = syscall!(client.sign_rsa2kpkcs(sk, &digest_to_sign)).signature;
+
+        // println!("Message: {:?}", &message);
+        // println!("Digest: {:?}", &digest_to_sign);
+        // println!("Signature (len={}): {:?}", signature.len(), &signature);
+
+        let verify_ok = syscall!(client.verify_rsa2kpkcs(sk, &digest_to_sign, &signature)).valid;
+
+        assert!(signature.len() == 256 && verify_ok);
+    })
+}

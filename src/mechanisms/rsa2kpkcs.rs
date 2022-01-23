@@ -1,8 +1,6 @@
-use core::convert::{TryFrom, TryInto};
-
 use rsa::{
     pkcs8::{FromPrivateKey, ToPrivateKey, ToPublicKey},
-    RsaPrivateKey, RsaPublicKey,
+    PublicKey, RsaPrivateKey, RsaPublicKey,
 };
 
 use crate::api::*;
@@ -208,54 +206,93 @@ impl Exists for super::Rsa2kPkcs {
 
 #[cfg(feature = "rsa2k-pkcs")]
 impl Sign for super::Rsa2kPkcs {
-    // #[inline(never)]
-    // fn sign(keystore: &mut impl Keystore, request: &request::Sign)
-    //     -> Result<reply::Sign, Error>
-    // {
+    #[inline(never)]
+    fn sign(keystore: &mut impl Keystore, request: &request::Sign) -> Result<reply::Sign, Error> {
+        // First, get the key
+        let key_id = request.key;
 
-    //     let key_id = request.key;
+        // We rely on the fact that we store the keys in the PKCS#8 DER format already
+        let priv_key_der = keystore
+            .load_key(key::Secrecy::Secret, Some(key::Kind::Rsa2k), &key_id)
+            .expect("Failed to load an RSA 2K private key with the given ID")
+            .material;
 
-    //     let keypair = load_keypair(keystore, &key_id)?;
+        let priv_key: RsaPrivateKey = FromPrivateKey::from_pkcs8_der(&priv_key_der)
+            .expect("Failed to deserialize an RSA 2K private key from PKCS#8 DER");
 
-    //     let native_signature = keypair.sign(&request.message);
-    //     let our_signature = Signature::from_slice(&native_signature.to_bytes()).unwrap();
+        // RSA lib takes in a hash value to sign, not raw data.
+        // TODO: Do we assume we get digest into this function, or we calculate it ourselves?
+        // use sha2::digest::Digest;
+        // let digest_to_sign: [u8; 32] = sha2::Sha256::digest(&request.message).into();
 
-    //     // hprintln!("RSA2K-PKCS_v1.5 signature:").ok();
-    //     // hprintln!("msg: {:?}", &request.message).ok();
-    //     // hprintln!("pk:  {:?}", &keypair.public.as_bytes()).ok();
-    //     // hprintln!("sig: {:?}", &our_signature).ok();
+        // TODO: there's also .sign_blinded(), which is supposed to protect the private key from timing side channels,
+        // but requires an RNG instance - decide if we want to always use it.
+        use rsa::hash::Hash;
+        use rsa::padding::PaddingScheme;
+        let native_signature = priv_key
+            .sign(
+                PaddingScheme::new_pkcs1v15_sign(Some(Hash::SHA2_256)),
+                &request.message,
+            )
+            .unwrap();
+        let our_signature = Signature::from_slice(&native_signature).unwrap();
 
-    //     // return signature
-    //     Ok(reply::Sign { signature: our_signature })
-    // }
+        // std::println!("RSA2K-PKCS_v1.5 signature:");
+        // std::println!("msg: {:?}", &request.message);
+        // std::println!("pk:  {:?}", &priv_key);
+        // std::println!("sig: {:?}", &our_signature);
+
+        // return signature
+        Ok(reply::Sign {
+            signature: our_signature,
+        })
+    }
 }
 
 #[cfg(feature = "rsa2k-pkcs")]
 impl Verify for super::Rsa2kPkcs {
-    // #[inline(never)]
-    // fn verify(keystore: &mut impl Keystore, request: &request::Verify)
-    //     -> Result<reply::Verify, Error>
-    // {
-    //     if let SignatureSerialization::Raw = request.format {
-    //     } else {
-    //         return Err(Error::InvalidSerializationFormat);
-    //     }
+    #[inline(never)]
+    fn verify(
+        keystore: &mut impl Keystore,
+        request: &request::Verify,
+    ) -> Result<reply::Verify, Error> {
+        if let SignatureSerialization::Raw = request.format {
+        } else {
+            return Err(Error::InvalidSerializationFormat);
+        }
 
-    //     if request.signature.len() != salty::constants::SIGNATURE_SERIALIZED_LENGTH {
-    //         return Err(Error::WrongSignatureLength);
-    //     }
+        // TODO: This must not be a hardcoded magic number, need to generalize
+        if request.signature.len() != 256 {
+            return Err(Error::WrongSignatureLength);
+        }
 
-    //     let key_id = request.key;
-    //     let public_key = load_public_key(keystore, &key_id)?;
+        let key_id = request.key;
 
-    //     let mut signature_array = [0u8; salty::constants::SIGNATURE_SERIALIZED_LENGTH];
-    //     signature_array.copy_from_slice(request.signature.as_ref());
-    //     let salty_signature = salty::signature::Signature::from(&signature_array);
+        let priv_key_der = keystore
+            .load_key(key::Secrecy::Secret, Some(key::Kind::Rsa2k), &key_id)
+            .expect("Failed to load an RSA 2K private key with the given ID")
+            .material;
 
-    //     Ok(reply::Verify { valid:
-    //         public_key.verify(&request.message, &salty_signature).is_ok()
-    //     })
-    // }
+        let priv_key = FromPrivateKey::from_pkcs8_der(&priv_key_der)
+            .expect("Failed to deserialize an RSA 2K private key from PKCS#8 DER");
+
+        // Get the public key
+        let pub_key = RsaPublicKey::from(&priv_key);
+
+        use rsa::hash::Hash;
+        use rsa::padding::PaddingScheme;
+        let verification_ok = pub_key
+            .verify(
+                PaddingScheme::new_pkcs1v15_sign(Some(Hash::SHA2_256)),
+                &request.message,
+                &request.signature,
+            )
+            .is_ok();
+
+        Ok(reply::Verify {
+            valid: verification_ok,
+        })
+    }
 }
 
 #[cfg(not(feature = "rsa2k-pkcs"))]
