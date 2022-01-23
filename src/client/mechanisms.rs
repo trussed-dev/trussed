@@ -428,6 +428,34 @@ pub trait Rsa2kPkcs: CryptoClient {
     ) -> ClientResult<'c, reply::DeserializeKey, Self> {
         self.deserialize_key(Mechanism::Rsa2kPkcs, serialized_key, format, attributes)
     }
+
+    fn sign_rsa2kpkcs<'c>(
+        &'c mut self,
+        key: KeyId,
+        message: &[u8],
+    ) -> ClientResult<'c, reply::Sign, Self> {
+        self.sign(
+            Mechanism::Rsa2kPkcs,
+            key,
+            message,
+            SignatureSerialization::Raw,
+        )
+    }
+
+    fn verify_rsa2kpkcs<'c>(
+        &'c mut self,
+        key: KeyId,
+        message: &[u8],
+        signature: &[u8],
+    ) -> ClientResult<'c, reply::Verify, Self> {
+        self.verify(
+            Mechanism::Rsa2kPkcs,
+            key,
+            message,
+            signature,
+            SignatureSerialization::Raw,
+        )
+    }
 }
 
 #[cfg(feature = "sha256")]
