@@ -88,6 +88,7 @@ unsafe impl<P: Platform> Send for Service<P> {}
 
 impl<P: Platform> ServiceResources<P> {
 
+    #[inline(never)]
     pub fn reply_to(&mut self, client_id: PathBuf, request: &Request) -> Result<Reply, Error> {
         // TODO: what we want to do here is map an enum to a generic type
         // Is there a nicer way to do this?
@@ -125,6 +126,7 @@ impl<P: Platform> ServiceResources<P> {
         );
         let filestore = &mut filestore;
 
+        debug_now!("TRUSSED {:?}", request);
         match request {
             Request::DummyRequest => {
                 Ok(Reply::DummyReply)
@@ -484,8 +486,10 @@ impl<P: Platform> ServiceResources<P> {
                 let starttime = self.platform.user_interface().uptime();
                 let timeout = core::time::Duration::from_millis(request.timeout_milliseconds as u64);
 
+                let previous_status = self.platform.user_interface().status();
                 self.platform.user_interface().set_status(ui::Status::WaitingForUserPresence);
                 loop {
+                    self.platform.user_interface().refresh();
                     let nowtime = self.platform.user_interface().uptime();
                     if (nowtime - starttime) > timeout {
                         let result = Err(consent::Error::TimedOut);
@@ -512,7 +516,7 @@ impl<P: Platform> ServiceResources<P> {
                         }
                     }
                 }
-                self.platform.user_interface().set_status(ui::Status::Idle);
+                self.platform.user_interface().set_status(previous_status);
 
                 let result = Ok(());
                 Ok(Reply::RequestUserConsent(reply::RequestUserConsent { result } ))
@@ -721,10 +725,14 @@ impl<P: Platform> Service<P> {
 
         for ep in eps.iter_mut() {
             if let Some(request) = ep.interchange.take_request() {
+                resources.platform.user_interface().set_status(ui::Status::Processing);
                 // #[cfg(test)] println!("service got request: {:?}", &request);
 
                 // resources.currently_serving = ep.client_id.clone();
                 let reply_result = resources.reply_to(ep.client_id.clone(), &request);
+
+                debug_now!("Trussed reply ready");
+                resources.platform.user_interface().set_status(ui::Status::Idle);
                 ep.interchange.respond(&reply_result).ok();
 
             }

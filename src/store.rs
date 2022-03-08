@@ -451,6 +451,7 @@ pub fn create_directories<'s, S: LfsStorage>(
 }
 
 /// Reads contents from path in location of store.
+#[inline(never)]
 pub fn read<const N: usize>(store: impl Store, location: Location, path: &Path) -> Result<Bytes<N>, Error> {
     debug_now!("reading {}", &path);
     match location {
@@ -461,6 +462,7 @@ pub fn read<const N: usize>(store: impl Store, location: Location, path: &Path) 
 }
 
 /// Writes contents to path in location of store.
+#[inline(never)]
 pub fn write(store: impl Store, location: Location, path: &Path, contents: &[u8]) -> Result<(), Error> {
     debug_now!("writing {}", &path);
     match location {
@@ -471,6 +473,7 @@ pub fn write(store: impl Store, location: Location, path: &Path, contents: &[u8]
 }
 
 /// Creates parent directory if necessary, then writes.
+#[inline(never)]
 pub fn store(store: impl Store, location: Location, path: &Path, contents: &[u8]) -> Result<(), Error> {
     debug_now!("storing {}", &path);
     match location {
@@ -481,6 +484,7 @@ pub fn store(store: impl Store, location: Location, path: &Path, contents: &[u8]
     write(store, location, path, contents)
 }
 
+#[inline(never)]
 pub fn delete(store: impl Store, location: Location, path: &Path) -> bool {
     debug_now!("deleting {}", &path);
     let outcome = match location {
@@ -491,6 +495,7 @@ pub fn delete(store: impl Store, location: Location, path: &Path) -> bool {
     outcome.is_ok()
 }
 
+#[inline(never)]
 pub fn exists(store: impl Store, location: Location, path: &Path) -> bool {
     debug_now!("checking existence of {}", &path);
     match location {
@@ -500,6 +505,7 @@ pub fn exists(store: impl Store, location: Location, path: &Path) -> bool {
     }
 }
 
+#[inline(never)]
 pub fn remove_dir(store: impl Store, location: Location, path: &Path) -> bool {
     debug_now!("remove_dir'ing {}", &path);
     let outcome = match location {
@@ -510,6 +516,7 @@ pub fn remove_dir(store: impl Store, location: Location, path: &Path) -> bool {
     outcome.is_ok()
 }
 
+#[inline(never)]
 pub fn remove_dir_all_where<P>(store: impl Store, location: Location, path: &Path, predicate: P) -> Result<usize, Error>
 where
     P: Fn(&DirEntry) -> bool,
