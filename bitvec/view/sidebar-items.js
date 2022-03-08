@@ -1,1 +1,0 @@
-initSidebarItems({"trait":[["AsBits","Views a region as an immutable `BitSlice` only."],["AsBitsMut","Views a region as a mutable `BitSlice`."],["BitView","Creates a `BitSlice` view over some type that supports it."]]});

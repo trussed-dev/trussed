@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["BIT_SIZE","Size of the inner integer in bits."],["BYTE_SIZE","Size of the inner integer in bytes."]],"struct":[["Limb","Big integers are represented as an array of smaller CPU word-size integers called “limbs”."]],"type":[["Inner","Inner integer type that the [`Limb`] newtype wraps."],["Wide","Wide integer type: double the width of [`Inner`]."]]});

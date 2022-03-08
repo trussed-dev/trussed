@@ -1,4 +1,6 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;half-1.8.2&#x2F;src&#x2F;slice.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>slice.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../half/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;half-1.8.2&#x2F;src&#x2F;slice.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>slice.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><script defer src="../../main.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script>
+    <noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a class="sidebar-logo" href="../../half/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.png" alt="logo"></div>
+        </a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../half/index.html"><img class="rust-logo" src="../../rust-logo.png" alt="logo"></a><nav class="sub"><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -982,7 +984,7 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// assert_eq!(int_buffer, [float_buffer[0].to_bits(), float_buffer[1].to_bits(), float_buffer[2].to_bits()]);</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">fn</span> <span class="ident">reinterpret_cast</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span>[<span class="ident">u16</span>];
+    <span class="kw">fn</span> <span class="ident">reinterpret_cast</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[<span class="ident">u16</span>];
 
     <span class="doccomment">/// Reinterprets a mutable slice of [`f16`] or [`bf16`] numbers as a mutable slice of [`u16`].</span>
     <span class="doccomment">/// bits</span>
@@ -1008,7 +1010,7 @@
     <span class="doccomment">/// // Note that we need to drop int_buffer before using float_buffer again or we will get a borrow error.</span>
     <span class="doccomment">/// assert_eq!(float_buffer, [f16::from_f32(0.), f16::from_f32(2.), f16::from_f32(3.)]);</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">fn</span> <span class="ident">reinterpret_cast_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">u16</span>];
+    <span class="kw">fn</span> <span class="ident">reinterpret_cast_mut</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut</span> [<span class="ident">u16</span>];
 
     <span class="doccomment">/// Converts all of the elements of a `[f32]` slice into [`f16`] or [`bf16`] values in `self`.</span>
     <span class="doccomment">///</span>
@@ -1037,7 +1039,7 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// assert_eq!(buffer, [f16::from_f32(1.), f16::from_f32(2.), f16::from_f32(3.), f16::from_f32(4.)]);</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">fn</span> <span class="ident">convert_from_f32_slice</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">src</span>: <span class="kw-2">&amp;</span>[<span class="ident">f32</span>]);
+    <span class="kw">fn</span> <span class="ident">convert_from_f32_slice</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">src</span>: <span class="kw-2">&amp;</span>[<span class="ident">f32</span>]);
 
     <span class="doccomment">/// Converts all of the elements of a `[f64]` slice into [`f16`] or [`bf16`] values in `self`.</span>
     <span class="doccomment">///</span>
@@ -1066,7 +1068,7 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// assert_eq!(buffer, [f16::from_f64(1.), f16::from_f64(2.), f16::from_f64(3.), f16::from_f64(4.)]);</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">fn</span> <span class="ident">convert_from_f64_slice</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">src</span>: <span class="kw-2">&amp;</span>[<span class="ident">f64</span>]);
+    <span class="kw">fn</span> <span class="ident">convert_from_f64_slice</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">src</span>: <span class="kw-2">&amp;</span>[<span class="ident">f64</span>]);
 
     <span class="doccomment">/// Converts all of the [`f16`] or [`bf16`] elements of `self` into [`f32`] values in `dst`.</span>
     <span class="doccomment">///</span>
@@ -1094,7 +1096,7 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// assert_eq!(buffer, [1., 2., 3., 4.]);</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">fn</span> <span class="ident">convert_to_f32_slice</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">dst</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">f32</span>]);
+    <span class="kw">fn</span> <span class="ident">convert_to_f32_slice</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">dst</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">f32</span>]);
 
     <span class="doccomment">/// Converts all of the [`f16`] or [`bf16`] elements of `self` into [`f64`] values in `dst`.</span>
     <span class="doccomment">///</span>
@@ -1122,7 +1124,7 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// assert_eq!(buffer, [1., 2., 3., 4.]);</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">fn</span> <span class="ident">convert_to_f64_slice</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">dst</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">f64</span>]);
+    <span class="kw">fn</span> <span class="ident">convert_to_f64_slice</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">dst</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">f64</span>]);
 
     <span class="comment">// Because trait is sealed, we can get away with different interfaces between features.</span>
 
@@ -1146,7 +1148,7 @@
     <span class="doccomment">/// ```</span>
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;alloc&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>))]</span>
     <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">docsrs</span>, <span class="ident">doc</span>(<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;alloc&quot;</span>)))]</span>
-    <span class="kw">fn</span> <span class="ident">to_f32_vec</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">f32</span><span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">to_f32_vec</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">f32</span><span class="op">&gt;</span>;
 
     <span class="doccomment">/// Converts all of the [`f16`] or [`bf16`] elements of `self` into [`f64`] values in a new</span>
     <span class="doccomment">/// vector.</span>
@@ -1168,7 +1170,7 @@
     <span class="doccomment">/// ```</span>
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;alloc&quot;</span>)]</span>
     <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">docsrs</span>, <span class="ident">doc</span>(<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;alloc&quot;</span>)))]</span>
-    <span class="kw">fn</span> <span class="ident">to_f64_vec</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">to_f64_vec</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span>;
 }
 
 <span class="doccomment">/// Extensions to `[u16]` slices to support reinterpret operations.</span>
@@ -1195,7 +1197,7 @@
     <span class="doccomment">/// // The following is also valid in Rust.</span>
     <span class="doccomment">/// let typed_buffer = int_buffer.reinterpret_cast::&lt;f16&gt;();</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">fn</span> <span class="ident">reinterpret_cast</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span>[<span class="ident">H</span>]
+    <span class="kw">fn</span> <span class="ident">reinterpret_cast</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[<span class="ident">H</span>]
     <span class="kw">where</span>
         <span class="ident">H</span>: <span class="ident"><span class="kw">crate</span>::private::SealedHalf</span>;
 
@@ -1229,7 +1231,7 @@
     <span class="doccomment">/// // The following is also valid in Rust.</span>
     <span class="doccomment">/// let typed_buffer = int_buffer.reinterpret_cast_mut::&lt;f16&gt;();</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">fn</span> <span class="ident">reinterpret_cast_mut</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">H</span>]
+    <span class="kw">fn</span> <span class="ident">reinterpret_cast_mut</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut</span> [<span class="ident">H</span>]
     <span class="kw">where</span>
         <span class="ident">H</span>: <span class="ident"><span class="kw">crate</span>::private::SealedHalf</span>;
 }
@@ -1247,8 +1249,8 @@
 
 <span class="kw">impl</span> <span class="ident">HalfFloatSliceExt</span> <span class="kw">for</span> [<span class="ident">f16</span>] {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">reinterpret_cast</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span>[<span class="ident">u16</span>] {
-        <span class="kw">let</span> <span class="ident">pointer</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">u16</span>;
+    <span class="kw">fn</span> <span class="ident">reinterpret_cast</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[<span class="ident">u16</span>] {
+        <span class="kw">let</span> <span class="ident">pointer</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw-2">*const</span> <span class="ident">u16</span>;
         <span class="kw">let</span> <span class="ident">length</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">len</span>();
         <span class="comment">// SAFETY: We are reconstructing full length of original slice, using its same lifetime,</span>
         <span class="comment">// and the size of elements are identical</span>
@@ -1256,15 +1258,15 @@
     }
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">reinterpret_cast_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">u16</span>] {
-        <span class="kw">let</span> <span class="ident">pointer</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">u16</span>;
+    <span class="kw">fn</span> <span class="ident">reinterpret_cast_mut</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut</span> [<span class="ident">u16</span>] {
+        <span class="kw">let</span> <span class="ident">pointer</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw-2">*mut</span> <span class="ident">u16</span>;
         <span class="kw">let</span> <span class="ident">length</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">len</span>();
         <span class="comment">// SAFETY: We are reconstructing full length of original slice, using its same lifetime,</span>
         <span class="comment">// and the size of elements are identical</span>
         <span class="kw">unsafe</span> { <span class="ident">slice::from_raw_parts_mut</span>(<span class="ident">pointer</span>, <span class="ident">length</span>) }
     }
 
-    <span class="kw">fn</span> <span class="ident">convert_from_f32_slice</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">src</span>: <span class="kw-2">&amp;</span>[<span class="ident">f32</span>]) {
+    <span class="kw">fn</span> <span class="ident">convert_from_f32_slice</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">src</span>: <span class="kw-2">&amp;</span>[<span class="ident">f32</span>]) {
         <span class="macro">assert_eq!</span>(
             <span class="self">self</span>.<span class="ident">len</span>(),
             <span class="ident">src</span>.<span class="ident">len</span>(),
@@ -1273,7 +1275,7 @@
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">chunks</span> <span class="op">=</span> <span class="ident">src</span>.<span class="ident">chunks_exact</span>(<span class="number">4</span>);
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">chunk_count</span> <span class="op">=</span> <span class="number">0usize</span>; <span class="comment">// Not using .enumerate() because we need this value for remainder</span>
-        <span class="kw">for</span> <span class="ident">chunk</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">chunks</span> {
+        <span class="kw">for</span> <span class="ident">chunk</span> <span class="kw">in</span> <span class="kw-2">&amp;mut</span> <span class="ident">chunks</span> {
             <span class="kw">let</span> <span class="ident">vec</span> <span class="op">=</span> <span class="ident">convert::f32x4_to_f16x4</span>(<span class="ident">chunk</span>);
             <span class="kw">let</span> <span class="ident">dst_idx</span> <span class="op">=</span> <span class="ident">chunk_count</span> <span class="op">*</span> <span class="number">4</span>;
             <span class="self">self</span>[<span class="ident">dst_idx</span>..<span class="ident">dst_idx</span> <span class="op">+</span> <span class="number">4</span>].<span class="ident">copy_from_slice</span>(<span class="ident">vec</span>.<span class="ident">reinterpret_cast</span>());
@@ -1291,7 +1293,7 @@
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">convert_from_f64_slice</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">src</span>: <span class="kw-2">&amp;</span>[<span class="ident">f64</span>]) {
+    <span class="kw">fn</span> <span class="ident">convert_from_f64_slice</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">src</span>: <span class="kw-2">&amp;</span>[<span class="ident">f64</span>]) {
         <span class="macro">assert_eq!</span>(
             <span class="self">self</span>.<span class="ident">len</span>(),
             <span class="ident">src</span>.<span class="ident">len</span>(),
@@ -1300,7 +1302,7 @@
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">chunks</span> <span class="op">=</span> <span class="ident">src</span>.<span class="ident">chunks_exact</span>(<span class="number">4</span>);
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">chunk_count</span> <span class="op">=</span> <span class="number">0usize</span>; <span class="comment">// Not using .enumerate() because we need this value for remainder</span>
-        <span class="kw">for</span> <span class="ident">chunk</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">chunks</span> {
+        <span class="kw">for</span> <span class="ident">chunk</span> <span class="kw">in</span> <span class="kw-2">&amp;mut</span> <span class="ident">chunks</span> {
             <span class="kw">let</span> <span class="ident">vec</span> <span class="op">=</span> <span class="ident">convert::f64x4_to_f16x4</span>(<span class="ident">chunk</span>);
             <span class="kw">let</span> <span class="ident">dst_idx</span> <span class="op">=</span> <span class="ident">chunk_count</span> <span class="op">*</span> <span class="number">4</span>;
             <span class="self">self</span>[<span class="ident">dst_idx</span>..<span class="ident">dst_idx</span> <span class="op">+</span> <span class="number">4</span>].<span class="ident">copy_from_slice</span>(<span class="ident">vec</span>.<span class="ident">reinterpret_cast</span>());
@@ -1318,7 +1320,7 @@
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">convert_to_f32_slice</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">dst</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">f32</span>]) {
+    <span class="kw">fn</span> <span class="ident">convert_to_f32_slice</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">dst</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">f32</span>]) {
         <span class="macro">assert_eq!</span>(
             <span class="self">self</span>.<span class="ident">len</span>(),
             <span class="ident">dst</span>.<span class="ident">len</span>(),
@@ -1327,7 +1329,7 @@
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">chunks</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">chunks_exact</span>(<span class="number">4</span>);
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">chunk_count</span> <span class="op">=</span> <span class="number">0usize</span>; <span class="comment">// Not using .enumerate() because we need this value for remainder</span>
-        <span class="kw">for</span> <span class="ident">chunk</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">chunks</span> {
+        <span class="kw">for</span> <span class="ident">chunk</span> <span class="kw">in</span> <span class="kw-2">&amp;mut</span> <span class="ident">chunks</span> {
             <span class="kw">let</span> <span class="ident">vec</span> <span class="op">=</span> <span class="ident">convert::f16x4_to_f32x4</span>(<span class="ident">chunk</span>.<span class="ident">reinterpret_cast</span>());
             <span class="kw">let</span> <span class="ident">dst_idx</span> <span class="op">=</span> <span class="ident">chunk_count</span> <span class="op">*</span> <span class="number">4</span>;
             <span class="ident">dst</span>[<span class="ident">dst_idx</span>..<span class="ident">dst_idx</span> <span class="op">+</span> <span class="number">4</span>].<span class="ident">copy_from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">vec</span>);
@@ -1345,7 +1347,7 @@
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">convert_to_f64_slice</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">dst</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">f64</span>]) {
+    <span class="kw">fn</span> <span class="ident">convert_to_f64_slice</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">dst</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">f64</span>]) {
         <span class="macro">assert_eq!</span>(
             <span class="self">self</span>.<span class="ident">len</span>(),
             <span class="ident">dst</span>.<span class="ident">len</span>(),
@@ -1354,7 +1356,7 @@
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">chunks</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">chunks_exact</span>(<span class="number">4</span>);
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">chunk_count</span> <span class="op">=</span> <span class="number">0usize</span>; <span class="comment">// Not using .enumerate() because we need this value for remainder</span>
-        <span class="kw">for</span> <span class="ident">chunk</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">chunks</span> {
+        <span class="kw">for</span> <span class="ident">chunk</span> <span class="kw">in</span> <span class="kw-2">&amp;mut</span> <span class="ident">chunks</span> {
             <span class="kw">let</span> <span class="ident">vec</span> <span class="op">=</span> <span class="ident">convert::f16x4_to_f64x4</span>(<span class="ident">chunk</span>.<span class="ident">reinterpret_cast</span>());
             <span class="kw">let</span> <span class="ident">dst_idx</span> <span class="op">=</span> <span class="ident">chunk_count</span> <span class="op">*</span> <span class="number">4</span>;
             <span class="ident">dst</span>[<span class="ident">dst_idx</span>..<span class="ident">dst_idx</span> <span class="op">+</span> <span class="number">4</span>].<span class="ident">copy_from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">vec</span>);
@@ -1374,33 +1376,33 @@
 
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;alloc&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>))]</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">to_f32_vec</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">f32</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">to_f32_vec</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">f32</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">vec</span> <span class="op">=</span> <span class="ident">Vec::with_capacity</span>(<span class="self">self</span>.<span class="ident">len</span>());
         <span class="comment">// SAFETY: convert will initialize every value in the vector without reading them,</span>
         <span class="comment">// so this is safe to do instead of double initialize from resize, and we&#39;re setting it to</span>
         <span class="comment">// same value as capacity.</span>
         <span class="kw">unsafe</span> { <span class="ident">vec</span>.<span class="ident">set_len</span>(<span class="self">self</span>.<span class="ident">len</span>()) };
-        <span class="self">self</span>.<span class="ident">convert_to_f32_slice</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">vec</span>);
+        <span class="self">self</span>.<span class="ident">convert_to_f32_slice</span>(<span class="kw-2">&amp;mut</span> <span class="ident">vec</span>);
         <span class="ident">vec</span>
     }
 
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;alloc&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>))]</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">to_f64_vec</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">to_f64_vec</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">vec</span> <span class="op">=</span> <span class="ident">Vec::with_capacity</span>(<span class="self">self</span>.<span class="ident">len</span>());
         <span class="comment">// SAFETY: convert will initialize every value in the vector without reading them,</span>
         <span class="comment">// so this is safe to do instead of double initialize from resize, and we&#39;re setting it to</span>
         <span class="comment">// same value as capacity.</span>
         <span class="kw">unsafe</span> { <span class="ident">vec</span>.<span class="ident">set_len</span>(<span class="self">self</span>.<span class="ident">len</span>()) };
-        <span class="self">self</span>.<span class="ident">convert_to_f64_slice</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">vec</span>);
+        <span class="self">self</span>.<span class="ident">convert_to_f64_slice</span>(<span class="kw-2">&amp;mut</span> <span class="ident">vec</span>);
         <span class="ident">vec</span>
     }
 }
 
 <span class="kw">impl</span> <span class="ident">HalfFloatSliceExt</span> <span class="kw">for</span> [<span class="ident">bf16</span>] {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">reinterpret_cast</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span>[<span class="ident">u16</span>] {
-        <span class="kw">let</span> <span class="ident">pointer</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">u16</span>;
+    <span class="kw">fn</span> <span class="ident">reinterpret_cast</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[<span class="ident">u16</span>] {
+        <span class="kw">let</span> <span class="ident">pointer</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw-2">*const</span> <span class="ident">u16</span>;
         <span class="kw">let</span> <span class="ident">length</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">len</span>();
         <span class="comment">// SAFETY: We are reconstructing full length of original slice, using its same lifetime,</span>
         <span class="comment">// and the size of elements are identical</span>
@@ -1408,15 +1410,15 @@
     }
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">reinterpret_cast_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">u16</span>] {
-        <span class="kw">let</span> <span class="ident">pointer</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">u16</span>;
+    <span class="kw">fn</span> <span class="ident">reinterpret_cast_mut</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut</span> [<span class="ident">u16</span>] {
+        <span class="kw">let</span> <span class="ident">pointer</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw-2">*mut</span> <span class="ident">u16</span>;
         <span class="kw">let</span> <span class="ident">length</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">len</span>();
         <span class="comment">// SAFETY: We are reconstructing full length of original slice, using its same lifetime,</span>
         <span class="comment">// and the size of elements are identical</span>
         <span class="kw">unsafe</span> { <span class="ident">slice::from_raw_parts_mut</span>(<span class="ident">pointer</span>, <span class="ident">length</span>) }
     }
 
-    <span class="kw">fn</span> <span class="ident">convert_from_f32_slice</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">src</span>: <span class="kw-2">&amp;</span>[<span class="ident">f32</span>]) {
+    <span class="kw">fn</span> <span class="ident">convert_from_f32_slice</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">src</span>: <span class="kw-2">&amp;</span>[<span class="ident">f32</span>]) {
         <span class="macro">assert_eq!</span>(
             <span class="self">self</span>.<span class="ident">len</span>(),
             <span class="ident">src</span>.<span class="ident">len</span>(),
@@ -1429,7 +1431,7 @@
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">convert_from_f64_slice</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">src</span>: <span class="kw-2">&amp;</span>[<span class="ident">f64</span>]) {
+    <span class="kw">fn</span> <span class="ident">convert_from_f64_slice</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">src</span>: <span class="kw-2">&amp;</span>[<span class="ident">f64</span>]) {
         <span class="macro">assert_eq!</span>(
             <span class="self">self</span>.<span class="ident">len</span>(),
             <span class="ident">src</span>.<span class="ident">len</span>(),
@@ -1442,7 +1444,7 @@
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">convert_to_f32_slice</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">dst</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">f32</span>]) {
+    <span class="kw">fn</span> <span class="ident">convert_to_f32_slice</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">dst</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">f32</span>]) {
         <span class="macro">assert_eq!</span>(
             <span class="self">self</span>.<span class="ident">len</span>(),
             <span class="ident">dst</span>.<span class="ident">len</span>(),
@@ -1455,7 +1457,7 @@
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">convert_to_f64_slice</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">dst</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">f64</span>]) {
+    <span class="kw">fn</span> <span class="ident">convert_to_f64_slice</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">dst</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">f64</span>]) {
         <span class="macro">assert_eq!</span>(
             <span class="self">self</span>.<span class="ident">len</span>(),
             <span class="ident">dst</span>.<span class="ident">len</span>(),
@@ -1470,25 +1472,25 @@
 
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;alloc&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>))]</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">to_f32_vec</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">f32</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">to_f32_vec</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">f32</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">vec</span> <span class="op">=</span> <span class="ident">Vec::with_capacity</span>(<span class="self">self</span>.<span class="ident">len</span>());
         <span class="comment">// SAFETY: convert will initialize every value in the vector without reading them,</span>
         <span class="comment">// so this is safe to do instead of double initialize from resize, and we&#39;re setting it to</span>
         <span class="comment">// same value as capacity.</span>
         <span class="kw">unsafe</span> { <span class="ident">vec</span>.<span class="ident">set_len</span>(<span class="self">self</span>.<span class="ident">len</span>()) };
-        <span class="self">self</span>.<span class="ident">convert_to_f32_slice</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">vec</span>);
+        <span class="self">self</span>.<span class="ident">convert_to_f32_slice</span>(<span class="kw-2">&amp;mut</span> <span class="ident">vec</span>);
         <span class="ident">vec</span>
     }
 
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;alloc&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>))]</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">to_f64_vec</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">to_f64_vec</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">vec</span> <span class="op">=</span> <span class="ident">Vec::with_capacity</span>(<span class="self">self</span>.<span class="ident">len</span>());
         <span class="comment">// SAFETY: convert will initialize every value in the vector without reading them,</span>
         <span class="comment">// so this is safe to do instead of double initialize from resize, and we&#39;re setting it to</span>
         <span class="comment">// same value as capacity.</span>
         <span class="kw">unsafe</span> { <span class="ident">vec</span>.<span class="ident">set_len</span>(<span class="self">self</span>.<span class="ident">len</span>()) };
-        <span class="self">self</span>.<span class="ident">convert_to_f64_slice</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">vec</span>);
+        <span class="self">self</span>.<span class="ident">convert_to_f64_slice</span>(<span class="kw-2">&amp;mut</span> <span class="ident">vec</span>);
         <span class="ident">vec</span>
     }
 }
@@ -1496,11 +1498,11 @@
 <span class="kw">impl</span> <span class="ident">HalfBitsSliceExt</span> <span class="kw">for</span> [<span class="ident">u16</span>] {
     <span class="comment">// Since we sealed all the traits involved, these are safe.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">reinterpret_cast</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span>[<span class="ident">H</span>]
+    <span class="kw">fn</span> <span class="ident">reinterpret_cast</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[<span class="ident">H</span>]
     <span class="kw">where</span>
         <span class="ident">H</span>: <span class="ident"><span class="kw">crate</span>::private::SealedHalf</span>,
     {
-        <span class="kw">let</span> <span class="ident">pointer</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">H</span>;
+        <span class="kw">let</span> <span class="ident">pointer</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw-2">*const</span> <span class="ident">H</span>;
         <span class="kw">let</span> <span class="ident">length</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">len</span>();
         <span class="comment">// SAFETY: We are reconstructing full length of original slice, using its same lifetime,</span>
         <span class="comment">// and the size of elements are identical</span>
@@ -1508,11 +1510,11 @@
     }
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">reinterpret_cast_mut</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">H</span>]
+    <span class="kw">fn</span> <span class="ident">reinterpret_cast_mut</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut</span> [<span class="ident">H</span>]
     <span class="kw">where</span>
         <span class="ident">H</span>: <span class="ident"><span class="kw">crate</span>::private::SealedHalf</span>,
     {
-        <span class="kw">let</span> <span class="ident">pointer</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">as_mut_ptr</span>() <span class="kw">as</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">H</span>;
+        <span class="kw">let</span> <span class="ident">pointer</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">as_mut_ptr</span>() <span class="kw">as</span> <span class="kw-2">*mut</span> <span class="ident">H</span>;
         <span class="kw">let</span> <span class="ident">length</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">len</span>();
         <span class="comment">// SAFETY: We are reconstructing full length of original slice, using its same lifetime,</span>
         <span class="comment">// and the size of elements are identical</span>
@@ -1526,7 +1528,7 @@
     <span class="ident">note</span> <span class="op">=</span> <span class="string">&quot;use `HalfBitsSliceExt::reinterpret_cast_mut` instead&quot;</span>
 )]</span>
 <span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_bits_mut</span>(<span class="ident">bits</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">u16</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">f16</span>] {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_bits_mut</span>(<span class="ident">bits</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">u16</span>]) -&gt; <span class="kw-2">&amp;mut</span> [<span class="ident">f16</span>] {
     <span class="ident">bits</span>.<span class="ident">reinterpret_cast_mut</span>()
 }
 
@@ -1536,7 +1538,7 @@
     <span class="ident">note</span> <span class="op">=</span> <span class="string">&quot;use `HalfFloatSliceExt::reinterpret_cast_mut` instead&quot;</span>
 )]</span>
 <span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">to_bits_mut</span>(<span class="ident">bits</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">f16</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">u16</span>] {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">to_bits_mut</span>(<span class="ident">bits</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">f16</span>]) -&gt; <span class="kw-2">&amp;mut</span> [<span class="ident">u16</span>] {
     <span class="ident">bits</span>.<span class="ident">reinterpret_cast_mut</span>()
 }
 
@@ -1546,7 +1548,7 @@
     <span class="ident">note</span> <span class="op">=</span> <span class="string">&quot;use `HalfBitsSliceExt::reinterpret_cast` instead&quot;</span>
 )]</span>
 <span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_bits</span>(<span class="ident">bits</span>: <span class="kw-2">&amp;</span>[<span class="ident">u16</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span>[<span class="ident">f16</span>] {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_bits</span>(<span class="ident">bits</span>: <span class="kw-2">&amp;</span>[<span class="ident">u16</span>]) -&gt; <span class="kw-2">&amp;</span>[<span class="ident">f16</span>] {
     <span class="ident">bits</span>.<span class="ident">reinterpret_cast</span>()
 }
 
@@ -1556,7 +1558,7 @@
     <span class="ident">note</span> <span class="op">=</span> <span class="string">&quot;use `HalfFloatSliceExt::reinterpret_cast` instead&quot;</span>
 )]</span>
 <span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">to_bits</span>(<span class="ident">bits</span>: <span class="kw-2">&amp;</span>[<span class="ident">f16</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span>[<span class="ident">u16</span>] {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">to_bits</span>(<span class="ident">bits</span>: <span class="kw-2">&amp;</span>[<span class="ident">f16</span>]) -&gt; <span class="kw-2">&amp;</span>[<span class="ident">u16</span>] {
     <span class="ident">bits</span>.<span class="ident">reinterpret_cast</span>()
 }
 
@@ -1588,7 +1590,7 @@
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_mutablility_f16</span>() {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">bits_array</span> <span class="op">=</span> [<span class="ident">f16::PI</span>.<span class="ident">to_bits</span>()];
-        <span class="kw">let</span> <span class="ident">bits</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">bits_array</span>[..];
+        <span class="kw">let</span> <span class="ident">bits</span> <span class="op">=</span> <span class="kw-2">&amp;mut</span> <span class="ident">bits_array</span>[..];
 
         {
             <span class="comment">// would not compile without these braces</span>
@@ -1624,7 +1626,7 @@
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_mutablility_bf16</span>() {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">bits_array</span> <span class="op">=</span> [<span class="ident">bf16::PI</span>.<span class="ident">to_bits</span>()];
-        <span class="kw">let</span> <span class="ident">bits</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">bits_array</span>[..];
+        <span class="kw">let</span> <span class="ident">bits</span> <span class="op">=</span> <span class="kw-2">&amp;mut</span> <span class="ident">bits_array</span>[..];
 
         {
             <span class="comment">// would not compile without these braces</span>
@@ -1655,7 +1657,7 @@
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf32</span> <span class="op">=</span> <span class="ident">vf32</span>;
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf16</span> <span class="op">=</span> <span class="ident">vf16</span>;
 
-        <span class="ident">vf16</span>.<span class="ident">convert_to_f32_slice</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buf32</span>);
+        <span class="ident">vf16</span>.<span class="ident">convert_to_f32_slice</span>(<span class="kw-2">&amp;mut</span> <span class="ident">buf32</span>);
         <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span><span class="ident">vf32</span>, <span class="kw-2">&amp;</span><span class="ident">buf32</span>);
 
         <span class="ident">buf16</span>.<span class="ident">convert_from_f32_slice</span>(<span class="kw-2">&amp;</span><span class="ident">vf32</span>);
@@ -1677,7 +1679,7 @@
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf32</span> <span class="op">=</span> <span class="ident">vf32</span>;
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf16</span> <span class="op">=</span> <span class="ident">vf16</span>;
 
-        <span class="ident">vf16</span>.<span class="ident">convert_to_f32_slice</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buf32</span>);
+        <span class="ident">vf16</span>.<span class="ident">convert_to_f32_slice</span>(<span class="kw-2">&amp;mut</span> <span class="ident">buf32</span>);
         <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span><span class="ident">vf32</span>, <span class="kw-2">&amp;</span><span class="ident">buf32</span>);
 
         <span class="ident">buf16</span>.<span class="ident">convert_from_f32_slice</span>(<span class="kw-2">&amp;</span><span class="ident">vf32</span>);
@@ -1689,7 +1691,7 @@
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf32</span> <span class="op">=</span> <span class="ident">vf32</span>;
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf16</span> <span class="op">=</span> <span class="ident">vf16</span>;
 
-        <span class="ident">vf16</span>.<span class="ident">convert_to_f32_slice</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buf32</span>);
+        <span class="ident">vf16</span>.<span class="ident">convert_to_f32_slice</span>(<span class="kw-2">&amp;mut</span> <span class="ident">buf32</span>);
         <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span><span class="ident">vf32</span>, <span class="kw-2">&amp;</span><span class="ident">buf32</span>);
 
         <span class="ident">buf16</span>.<span class="ident">convert_from_f32_slice</span>(<span class="kw-2">&amp;</span><span class="ident">vf32</span>);
@@ -1713,7 +1715,7 @@
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf32</span> <span class="op">=</span> <span class="ident">vf32</span>;
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf16</span> <span class="op">=</span> <span class="ident">vf16</span>;
 
-        <span class="ident">vf16</span>.<span class="ident">convert_to_f32_slice</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buf32</span>);
+        <span class="ident">vf16</span>.<span class="ident">convert_to_f32_slice</span>(<span class="kw-2">&amp;mut</span> <span class="ident">buf32</span>);
         <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span><span class="ident">vf32</span>, <span class="kw-2">&amp;</span><span class="ident">buf32</span>);
 
         <span class="ident">buf16</span>.<span class="ident">convert_from_f32_slice</span>(<span class="kw-2">&amp;</span><span class="ident">vf32</span>);
@@ -1735,7 +1737,7 @@
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf32</span> <span class="op">=</span> <span class="ident">vf32</span>;
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf16</span> <span class="op">=</span> <span class="ident">vf16</span>;
 
-        <span class="ident">vf16</span>.<span class="ident">convert_to_f32_slice</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buf32</span>);
+        <span class="ident">vf16</span>.<span class="ident">convert_to_f32_slice</span>(<span class="kw-2">&amp;mut</span> <span class="ident">buf32</span>);
         <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span><span class="ident">vf32</span>, <span class="kw-2">&amp;</span><span class="ident">buf32</span>);
 
         <span class="ident">buf16</span>.<span class="ident">convert_from_f32_slice</span>(<span class="kw-2">&amp;</span><span class="ident">vf32</span>);
@@ -1747,7 +1749,7 @@
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf32</span> <span class="op">=</span> <span class="ident">vf32</span>;
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf16</span> <span class="op">=</span> <span class="ident">vf16</span>;
 
-        <span class="ident">vf16</span>.<span class="ident">convert_to_f32_slice</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buf32</span>);
+        <span class="ident">vf16</span>.<span class="ident">convert_to_f32_slice</span>(<span class="kw-2">&amp;mut</span> <span class="ident">buf32</span>);
         <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span><span class="ident">vf32</span>, <span class="kw-2">&amp;</span><span class="ident">buf32</span>);
 
         <span class="ident">buf16</span>.<span class="ident">convert_from_f32_slice</span>(<span class="kw-2">&amp;</span><span class="ident">vf32</span>);
@@ -1771,7 +1773,7 @@
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf64</span> <span class="op">=</span> <span class="ident">vf64</span>;
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf16</span> <span class="op">=</span> <span class="ident">vf16</span>;
 
-        <span class="ident">vf16</span>.<span class="ident">convert_to_f64_slice</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buf64</span>);
+        <span class="ident">vf16</span>.<span class="ident">convert_to_f64_slice</span>(<span class="kw-2">&amp;mut</span> <span class="ident">buf64</span>);
         <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span><span class="ident">vf64</span>, <span class="kw-2">&amp;</span><span class="ident">buf64</span>);
 
         <span class="ident">buf16</span>.<span class="ident">convert_from_f64_slice</span>(<span class="kw-2">&amp;</span><span class="ident">vf64</span>);
@@ -1793,7 +1795,7 @@
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf64</span> <span class="op">=</span> <span class="ident">vf64</span>;
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf16</span> <span class="op">=</span> <span class="ident">vf16</span>;
 
-        <span class="ident">vf16</span>.<span class="ident">convert_to_f64_slice</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buf64</span>);
+        <span class="ident">vf16</span>.<span class="ident">convert_to_f64_slice</span>(<span class="kw-2">&amp;mut</span> <span class="ident">buf64</span>);
         <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span><span class="ident">vf64</span>, <span class="kw-2">&amp;</span><span class="ident">buf64</span>);
 
         <span class="ident">buf16</span>.<span class="ident">convert_from_f64_slice</span>(<span class="kw-2">&amp;</span><span class="ident">vf64</span>);
@@ -1805,7 +1807,7 @@
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf64</span> <span class="op">=</span> <span class="ident">vf64</span>;
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf16</span> <span class="op">=</span> <span class="ident">vf16</span>;
 
-        <span class="ident">vf16</span>.<span class="ident">convert_to_f64_slice</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buf64</span>);
+        <span class="ident">vf16</span>.<span class="ident">convert_to_f64_slice</span>(<span class="kw-2">&amp;mut</span> <span class="ident">buf64</span>);
         <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span><span class="ident">vf64</span>, <span class="kw-2">&amp;</span><span class="ident">buf64</span>);
 
         <span class="ident">buf16</span>.<span class="ident">convert_from_f64_slice</span>(<span class="kw-2">&amp;</span><span class="ident">vf64</span>);
@@ -1829,7 +1831,7 @@
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf64</span> <span class="op">=</span> <span class="ident">vf64</span>;
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf16</span> <span class="op">=</span> <span class="ident">vf16</span>;
 
-        <span class="ident">vf16</span>.<span class="ident">convert_to_f64_slice</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buf64</span>);
+        <span class="ident">vf16</span>.<span class="ident">convert_to_f64_slice</span>(<span class="kw-2">&amp;mut</span> <span class="ident">buf64</span>);
         <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span><span class="ident">vf64</span>, <span class="kw-2">&amp;</span><span class="ident">buf64</span>);
 
         <span class="ident">buf16</span>.<span class="ident">convert_from_f64_slice</span>(<span class="kw-2">&amp;</span><span class="ident">vf64</span>);
@@ -1851,7 +1853,7 @@
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf64</span> <span class="op">=</span> <span class="ident">vf64</span>;
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf16</span> <span class="op">=</span> <span class="ident">vf16</span>;
 
-        <span class="ident">vf16</span>.<span class="ident">convert_to_f64_slice</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buf64</span>);
+        <span class="ident">vf16</span>.<span class="ident">convert_to_f64_slice</span>(<span class="kw-2">&amp;mut</span> <span class="ident">buf64</span>);
         <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span><span class="ident">vf64</span>, <span class="kw-2">&amp;</span><span class="ident">buf64</span>);
 
         <span class="ident">buf16</span>.<span class="ident">convert_from_f64_slice</span>(<span class="kw-2">&amp;</span><span class="ident">vf64</span>);
@@ -1863,7 +1865,7 @@
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf64</span> <span class="op">=</span> <span class="ident">vf64</span>;
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf16</span> <span class="op">=</span> <span class="ident">vf16</span>;
 
-        <span class="ident">vf16</span>.<span class="ident">convert_to_f64_slice</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buf64</span>);
+        <span class="ident">vf16</span>.<span class="ident">convert_to_f64_slice</span>(<span class="kw-2">&amp;mut</span> <span class="ident">buf64</span>);
         <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span><span class="ident">vf64</span>, <span class="kw-2">&amp;</span><span class="ident">buf64</span>);
 
         <span class="ident">buf16</span>.<span class="ident">convert_from_f64_slice</span>(<span class="kw-2">&amp;</span><span class="ident">vf64</span>);
@@ -1891,7 +1893,7 @@
     <span class="kw">fn</span> <span class="ident">convert_to_f32_slice_len_mismatch_panics</span>() {
         <span class="kw">let</span> <span class="ident">slice1</span> <span class="op">=</span> [<span class="ident">f16::ZERO</span>; <span class="number">3</span>];
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">slice2</span> <span class="op">=</span> [<span class="number">0f32</span>; <span class="number">4</span>];
-        <span class="ident">slice1</span>.<span class="ident">convert_to_f32_slice</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">slice2</span>);
+        <span class="ident">slice1</span>.<span class="ident">convert_to_f32_slice</span>(<span class="kw-2">&amp;mut</span> <span class="ident">slice2</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
@@ -1899,10 +1901,9 @@
     <span class="kw">fn</span> <span class="ident">convert_to_f64_slice_len_mismatch_panics</span>() {
         <span class="kw">let</span> <span class="ident">slice1</span> <span class="op">=</span> [<span class="ident">f16::ZERO</span>; <span class="number">3</span>];
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">slice2</span> <span class="op">=</span> [<span class="number">0f64</span>; <span class="number">4</span>];
-        <span class="ident">slice1</span>.<span class="ident">convert_to_f64_slice</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">slice2</span>);
+        <span class="ident">slice1</span>.<span class="ident">convert_to_f64_slice</span>(<span class="kw-2">&amp;mut</span> <span class="ident">slice2</span>);
     }
 }
 </code></pre></div>
-</section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="half" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
-    <script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script>
+</section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="half" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.59.0 (9d1b2106e 2022-02-23)" ></div>
 </body></html>

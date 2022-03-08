@@ -1,4 +1,6 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;heapless-0.7.8&#x2F;src&#x2F;mpmc.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>mpmc.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../heapless/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;heapless-0.7.10&#x2F;src&#x2F;mpmc.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>mpmc.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><script defer src="../../main.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script>
+    <noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a class="sidebar-logo" href="../../heapless/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.png" alt="logo"></div>
+        </a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../heapless/index.html"><img class="rust-logo" src="../../rust-logo.png" alt="logo"></a><nav class="sub"><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -321,9 +323,13 @@
 <span id="321">321</span>
 <span id="322">322</span>
 <span id="323">323</span>
+<span id="324">324</span>
+<span id="325">325</span>
+<span id="326">326</span>
 </pre><pre class="rust"><code><span class="doccomment">//! A fixed capacity Multiple-Producer Multiple-Consumer (MPMC) lock-free queue</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! NOTE: This module is not available on targets that do *not* support CAS operations, e.g. ARMv6-M</span>
+<span class="doccomment">//! NOTE: This module is not available on targets that do *not* support CAS operations and are not</span>
+<span class="doccomment">//! emulated by the [`atomic_polyfill`] crate (e.g., MSP430).</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! # Example</span>
 <span class="doccomment">//!</span>
@@ -396,8 +402,10 @@
 <span class="doccomment">//!</span>
 <span class="doccomment">//! # Portability</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! This module is not exposed to architectures that lack the instructions to implement CAS loops.</span>
-<span class="doccomment">//! Those architectures include ARMv6-M (`thumbv6m-none-eabi`) and MSP430 (`msp430-none-elf`).</span>
+<span class="doccomment">//! This module requires CAS atomic instructions which are not available on all architectures</span>
+<span class="doccomment">//! (e.g.  ARMv6-M (`thumbv6m-none-eabi`) and MSP430 (`msp430-none-elf`)). These atomics can be emulated</span>
+<span class="doccomment">//! however with [`atomic_polyfill`], which is enabled with the `cas` feature and is enabled by default</span>
+<span class="doccomment">//! for `thumbv6m-none-eabi` and `riscv32` targets. MSP430 is currently not supported by [`atomic_polyfill`].</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! # References</span>
 <span class="doccomment">//!</span>
@@ -407,18 +415,18 @@
 
 <span class="kw">use</span> <span class="ident">core</span>::{<span class="ident">cell::UnsafeCell</span>, <span class="ident">mem::MaybeUninit</span>};
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;mpmc_large&quot;</span>, <span class="ident">not</span>(<span class="ident">armv6m</span>)))]</span>
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;mpmc_large&quot;</span>, <span class="ident">not</span>(<span class="ident">cas_atomic_polyfill</span>)))]</span>
 <span class="kw">type</span> <span class="ident">AtomicTargetSize</span> <span class="op">=</span> <span class="ident">core::sync::atomic::AtomicUsize</span>;
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;mpmc_large&quot;</span>, <span class="ident">armv6m</span>))]</span>
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;mpmc_large&quot;</span>, <span class="ident">cas_atomic_polyfill</span>))]</span>
 <span class="kw">type</span> <span class="ident">AtomicTargetSize</span> <span class="op">=</span> <span class="ident">atomic_polyfill::AtomicUsize</span>;
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;mpmc_large&quot;</span>), <span class="ident">not</span>(<span class="ident">armv6m</span>)))]</span>
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;mpmc_large&quot;</span>), <span class="ident">not</span>(<span class="ident">cas_atomic_polyfill</span>)))]</span>
 <span class="kw">type</span> <span class="ident">AtomicTargetSize</span> <span class="op">=</span> <span class="ident">core::sync::atomic::AtomicU8</span>;
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;mpmc_large&quot;</span>), <span class="ident">armv6m</span>))]</span>
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;mpmc_large&quot;</span>), <span class="ident">cas_atomic_polyfill</span>))]</span>
 <span class="kw">type</span> <span class="ident">AtomicTargetSize</span> <span class="op">=</span> <span class="ident">atomic_polyfill::AtomicU8</span>;
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">armv6m</span>))]</span>
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">cas_atomic_polyfill</span>))]</span>
 <span class="kw">type</span> <span class="ident">Ordering</span> <span class="op">=</span> <span class="ident">core::sync::atomic::Ordering</span>;
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">armv6m</span>)]</span>
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">cas_atomic_polyfill</span>)]</span>
 <span class="kw">type</span> <span class="ident">Ordering</span> <span class="op">=</span> <span class="ident">atomic_polyfill::Ordering</span>;
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;mpmc_large&quot;</span>)]</span>
@@ -460,7 +468,7 @@
     <span class="kw">const</span> <span class="ident">ASSERT</span>: [(); <span class="number">1</span>] <span class="op">=</span> [()];
 
     <span class="doccomment">/// Creates an empty queue</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="self">Self</span> {
         <span class="comment">// Const assert</span>
         <span class="ident"><span class="kw">crate</span>::sealed::greater_than_1</span>::<span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span>();
         <span class="ident"><span class="kw">crate</span>::sealed::power_of_two</span>::<span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span>();
@@ -484,17 +492,17 @@
     }
 
     <span class="doccomment">/// Returns the item in the front of the queue, or `None` if the queue is empty</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">dequeue</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="kw">unsafe</span> { <span class="ident">dequeue</span>(<span class="self">self</span>.<span class="ident">buffer</span>.<span class="ident">get</span>() <span class="kw">as</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="kw">_</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">dequeue_pos</span>, <span class="ident"><span class="self">Self</span>::MASK</span>) }
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">dequeue</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+        <span class="kw">unsafe</span> { <span class="ident">dequeue</span>(<span class="self">self</span>.<span class="ident">buffer</span>.<span class="ident">get</span>() <span class="kw">as</span> <span class="kw-2">*mut</span> <span class="kw">_</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">dequeue_pos</span>, <span class="ident"><span class="self">Self</span>::MASK</span>) }
     }
 
     <span class="doccomment">/// Adds an `item` to the end of the queue</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Returns back the `item` if the queue is full</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">enqueue</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">item</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">enqueue</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">item</span>: <span class="ident">T</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">T</span><span class="op">&gt;</span> {
         <span class="kw">unsafe</span> {
             <span class="ident">enqueue</span>(
-                <span class="self">self</span>.<span class="ident">buffer</span>.<span class="ident">get</span>() <span class="kw">as</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="kw">_</span>,
+                <span class="self">self</span>.<span class="ident">buffer</span>.<span class="ident">get</span>() <span class="kw">as</span> <span class="kw-2">*mut</span> <span class="kw">_</span>,
                 <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">enqueue_pos</span>,
                 <span class="ident"><span class="self">Self</span>::MASK</span>,
                 <span class="ident">item</span>,
@@ -504,7 +512,7 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">MpMcQueue</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">N</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
         <span class="ident"><span class="self">Self</span>::new</span>()
     }
 }
@@ -517,7 +525,7 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Cell</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">seq</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">seq</span>: <span class="ident">usize</span>) -&gt; <span class="self">Self</span> {
         <span class="self">Self</span> {
             <span class="ident">data</span>: <span class="ident">MaybeUninit::uninit</span>(),
             <span class="ident">sequence</span>: <span class="ident">AtomicTargetSize::new</span>(<span class="ident">seq</span> <span class="kw">as</span> <span class="ident">IntSize</span>),
@@ -526,10 +534,10 @@
 }
 
 <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">dequeue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(
-    <span class="ident">buffer</span>: <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">Cell</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+    <span class="ident">buffer</span>: <span class="kw-2">*mut</span> <span class="ident">Cell</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
     <span class="ident">dequeue_pos</span>: <span class="kw-2">&amp;</span><span class="ident">AtomicTargetSize</span>,
     <span class="ident">mask</span>: <span class="ident">IntSize</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">pos</span> <span class="op">=</span> <span class="ident">dequeue_pos</span>.<span class="ident">load</span>(<span class="ident">Ordering::Relaxed</span>);
 
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">cell</span>;
@@ -538,7 +546,7 @@
         <span class="kw">let</span> <span class="ident">seq</span> <span class="op">=</span> (<span class="kw-2">*</span><span class="ident">cell</span>).<span class="ident">sequence</span>.<span class="ident">load</span>(<span class="ident">Ordering::Acquire</span>);
         <span class="kw">let</span> <span class="ident">dif</span> <span class="op">=</span> (<span class="ident">seq</span> <span class="kw">as</span> <span class="ident">i8</span>).<span class="ident">wrapping_sub</span>((<span class="ident">pos</span>.<span class="ident">wrapping_add</span>(<span class="number">1</span>)) <span class="kw">as</span> <span class="ident">i8</span>);
 
-        <span class="kw">if</span> <span class="ident">dif</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+        <span class="kw">if</span> <span class="ident">dif</span> <span class="op">==</span> <span class="number">0</span> {
             <span class="kw">if</span> <span class="ident">dequeue_pos</span>
                 .<span class="ident">compare_exchange_weak</span>(
                     <span class="ident">pos</span>,
@@ -565,11 +573,11 @@
 }
 
 <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">enqueue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(
-    <span class="ident">buffer</span>: <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">Cell</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+    <span class="ident">buffer</span>: <span class="kw-2">*mut</span> <span class="ident">Cell</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
     <span class="ident">enqueue_pos</span>: <span class="kw-2">&amp;</span><span class="ident">AtomicTargetSize</span>,
     <span class="ident">mask</span>: <span class="ident">IntSize</span>,
     <span class="ident">item</span>: <span class="ident">T</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">T</span><span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">T</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">pos</span> <span class="op">=</span> <span class="ident">enqueue_pos</span>.<span class="ident">load</span>(<span class="ident">Ordering::Relaxed</span>);
 
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">cell</span>;
@@ -578,7 +586,7 @@
         <span class="kw">let</span> <span class="ident">seq</span> <span class="op">=</span> (<span class="kw-2">*</span><span class="ident">cell</span>).<span class="ident">sequence</span>.<span class="ident">load</span>(<span class="ident">Ordering::Acquire</span>);
         <span class="kw">let</span> <span class="ident">dif</span> <span class="op">=</span> (<span class="ident">seq</span> <span class="kw">as</span> <span class="ident">i8</span>).<span class="ident">wrapping_sub</span>(<span class="ident">pos</span> <span class="kw">as</span> <span class="ident">i8</span>);
 
-        <span class="kw">if</span> <span class="ident">dif</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+        <span class="kw">if</span> <span class="ident">dif</span> <span class="op">==</span> <span class="number">0</span> {
             <span class="kw">if</span> <span class="ident">enqueue_pos</span>
                 .<span class="ident">compare_exchange_weak</span>(
                     <span class="ident">pos</span>,
@@ -645,6 +653,5 @@
     }
 }
 </code></pre></div>
-</section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="heapless" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
-    <script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script>
+</section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="heapless" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.59.0 (9d1b2106e 2022-02-23)" ></div>
 </body></html>

@@ -1,1 +1,1 @@
-initSidebarItems({"derive":[["Zeroize","Derive the `Zeroize` trait."]]});
+initSidebarItems({"derive":[["Zeroize","Derive the `Zeroize` trait."],["ZeroizeOnDrop","Derive the `ZeroizeOnDrop` trait."]]});

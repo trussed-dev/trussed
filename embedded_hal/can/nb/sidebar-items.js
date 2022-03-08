@@ -1,0 +1,1 @@
+initSidebarItems({"trait":[["Can","A CAN interface that is able to transmit and receive frames."]]});

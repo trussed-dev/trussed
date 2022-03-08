@@ -1,4 +1,6 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;heapless-0.7.8&#x2F;src&#x2F;sorted_linked_list.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>sorted_linked_list.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../heapless/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;heapless-0.7.10&#x2F;src&#x2F;sorted_linked_list.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>sorted_linked_list.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><script defer src="../../main.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script>
+    <noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a class="sidebar-logo" href="../../heapless/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.png" alt="logo"></div>
+        </a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../heapless/index.html"><img class="rust-logo" src="../../rust-logo.png" alt="logo"></a><nav class="sub"><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -838,6 +840,32 @@
 <span id="838">838</span>
 <span id="839">839</span>
 <span id="840">840</span>
+<span id="841">841</span>
+<span id="842">842</span>
+<span id="843">843</span>
+<span id="844">844</span>
+<span id="845">845</span>
+<span id="846">846</span>
+<span id="847">847</span>
+<span id="848">848</span>
+<span id="849">849</span>
+<span id="850">850</span>
+<span id="851">851</span>
+<span id="852">852</span>
+<span id="853">853</span>
+<span id="854">854</span>
+<span id="855">855</span>
+<span id="856">856</span>
+<span id="857">857</span>
+<span id="858">858</span>
+<span id="859">859</span>
+<span id="860">860</span>
+<span id="861">861</span>
+<span id="862">862</span>
+<span id="863">863</span>
+<span id="864">864</span>
+<span id="865">865</span>
+<span id="866">866</span>
 </pre><pre class="rust"><code><span class="doccomment">//! A fixed sorted priority linked list, similar to [`BinaryHeap`] but with different properties</span>
 <span class="doccomment">//! on `push`, `pop`, etc.</span>
 <span class="doccomment">//! For example, the sorting of the list will never `memcpy` the underlying value, so having large</span>
@@ -865,7 +893,7 @@
 <span class="doccomment">//!</span>
 <span class="doccomment">//! [`BinaryHeap`]: `crate::binary_heap::BinaryHeap`</span>
 
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::sealed::sorted_linked_list::Kind</span> <span class="kw">as</span> <span class="ident">LLKind</span>;
+<span class="kw">use</span> <span class="ident">core::cmp::Ordering</span>;
 <span class="kw">use</span> <span class="ident">core::fmt</span>;
 <span class="kw">use</span> <span class="ident">core::marker::PhantomData</span>;
 <span class="kw">use</span> <span class="ident">core::mem::MaybeUninit</span>;
@@ -875,13 +903,13 @@
 <span class="doccomment">/// Trait for defining an index for the linked list, never implemented by users.</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">SortedLinkedListIndex</span>: <span class="ident">Copy</span> {
     <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
-    <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">new_unchecked</span>(<span class="ident">val</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>;
+    <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">new_unchecked</span>(<span class="ident">val</span>: <span class="ident">usize</span>) -&gt; <span class="self">Self</span>;
     <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
-    <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">get_unchecked</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span>;
+    <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">get_unchecked</span>(<span class="self">self</span>) -&gt; <span class="ident">usize</span>;
     <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">option</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">option</span>(<span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>;
     <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">none</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>;
+    <span class="kw">fn</span> <span class="ident">none</span>() -&gt; <span class="self">Self</span>;
 }
 
 <span class="doccomment">/// Marker for Min sorted [`SortedLinkedList`].</span>
@@ -890,6 +918,32 @@
 <span class="doccomment">/// Marker for Max sorted [`SortedLinkedList`].</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Max</span>;
 
+<span class="doccomment">/// The linked list kind: min-list or max-list</span>
+<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Kind</span>: <span class="ident">private::Sealed</span> {
+    <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+    <span class="kw">fn</span> <span class="ident">ordering</span>() -&gt; <span class="ident">Ordering</span>;
+}
+
+<span class="kw">impl</span> <span class="ident">Kind</span> <span class="kw">for</span> <span class="ident">Min</span> {
+    <span class="kw">fn</span> <span class="ident">ordering</span>() -&gt; <span class="ident">Ordering</span> {
+        <span class="ident">Ordering::Less</span>
+    }
+}
+
+<span class="kw">impl</span> <span class="ident">Kind</span> <span class="kw">for</span> <span class="ident">Max</span> {
+    <span class="kw">fn</span> <span class="ident">ordering</span>() -&gt; <span class="ident">Ordering</span> {
+        <span class="ident">Ordering::Greater</span>
+    }
+}
+
+<span class="doccomment">/// Sealed traits</span>
+<span class="kw">mod</span> <span class="ident">private</span> {
+    <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Sealed</span> {}
+}
+
+<span class="kw">impl</span> <span class="ident">private::Sealed</span> <span class="kw">for</span> <span class="ident">Max</span> {}
+<span class="kw">impl</span> <span class="ident">private::Sealed</span> <span class="kw">for</span> <span class="ident">Min</span> {}
+
 <span class="doccomment">/// A node in the [`SortedLinkedList`].</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Node</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Idx</span><span class="op">&gt;</span> {
     <span class="ident">val</span>: <span class="ident">MaybeUninit</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
@@ -897,38 +951,38 @@
 }
 
 <span class="doccomment">/// The linked list.</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SortedLinkedList</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">Kind</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SortedLinkedList</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">K</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">Idx</span>: <span class="ident">SortedLinkedListIndex</span>,
 {
     <span class="ident">list</span>: [<span class="ident">Node</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Idx</span><span class="op">&gt;</span>; <span class="ident">N</span>],
     <span class="ident">head</span>: <span class="ident">Idx</span>,
     <span class="ident">free</span>: <span class="ident">Idx</span>,
-    <span class="ident">_kind</span>: <span class="ident">PhantomData</span><span class="op">&lt;</span><span class="ident">Kind</span><span class="op">&gt;</span>,
+    <span class="ident">_kind</span>: <span class="ident">PhantomData</span><span class="op">&lt;</span><span class="ident">K</span><span class="op">&gt;</span>,
 }
 
 <span class="comment">// Internal macro for generating indexes for the linkedlist and const new for the linked list</span>
 <span class="macro">macro_rules!</span> <span class="ident">impl_index_and_const_new</span> {
-    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>:<span class="ident">ident</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span>:<span class="ident">ty</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">new_name</span>:<span class="ident">ident</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">max_val</span>:<span class="ident">literal</span>) <span class="op">=</span><span class="op">&gt;</span> {
+    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>:<span class="ident">ident</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span>:<span class="ident">ty</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">new_name</span>:<span class="ident">ident</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">max_val</span>:<span class="ident">literal</span>) =&gt; {
         <span class="doccomment">/// Index for the [`SortedLinkedList`] with specific backing storage.</span>
         <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">PartialOrd</span>, <span class="ident">Ord</span>)]</span>
         <span class="kw">pub</span> <span class="kw">struct</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span>);
 
         <span class="kw">impl</span> <span class="ident">SortedLinkedListIndex</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span> {
             <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-            <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">new_unchecked</span>(<span class="ident">val</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+            <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">new_unchecked</span>(<span class="ident">val</span>: <span class="ident">usize</span>) -&gt; <span class="self">Self</span> {
                 <span class="ident"><span class="self">Self</span>::new_unchecked</span>(<span class="ident">val</span> <span class="kw">as</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span>)
             }
 
             <span class="doccomment">/// This is only valid if `self.option()` is not `None`.</span>
             <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-            <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">get_unchecked</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+            <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">get_unchecked</span>(<span class="self">self</span>) -&gt; <span class="ident">usize</span> {
                 <span class="self">self</span>.<span class="number">0</span> <span class="kw">as</span> <span class="ident">usize</span>
             }
 
             <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-            <span class="kw">fn</span> <span class="ident">option</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
-                <span class="kw">if</span> <span class="self">self</span>.<span class="number">0</span> <span class="op">=</span><span class="op">=</span> <span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span><span class="op">&gt;</span><span class="ident">::MAX</span> {
+            <span class="kw">fn</span> <span class="ident">option</span>(<span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
+                <span class="kw">if</span> <span class="self">self</span>.<span class="number">0</span> <span class="op">==</span> <span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span><span class="op">&gt;</span><span class="ident">::MAX</span> {
                     <span class="prelude-val">None</span>
                 } <span class="kw">else</span> {
                     <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="number">0</span> <span class="kw">as</span> <span class="ident">usize</span>)
@@ -936,7 +990,7 @@
             }
 
             <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-            <span class="kw">fn</span> <span class="ident">none</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+            <span class="kw">fn</span> <span class="ident">none</span>() -&gt; <span class="self">Self</span> {
                 <span class="ident"><span class="self">Self</span>::none</span>()
             }
         }
@@ -944,25 +998,25 @@
         <span class="kw">impl</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span> {
             <span class="doccomment">/// Needed for a `const fn new()`.</span>
             <span class="attribute">#[<span class="ident">inline</span>]</span>
-            <span class="kw">const</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">new_unchecked</span>(<span class="ident">value</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+            <span class="kw">const</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">new_unchecked</span>(<span class="ident">value</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span>) -&gt; <span class="self">Self</span> {
                 <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>(<span class="ident">value</span>)
             }
 
             <span class="doccomment">/// Needed for a `const fn new()`.</span>
             <span class="attribute">#[<span class="ident">inline</span>]</span>
-            <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">none</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+            <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">none</span>() -&gt; <span class="self">Self</span> {
                 <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>(<span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span><span class="op">&gt;</span><span class="ident">::MAX</span>)
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Kind</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">SortedLinkedList</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>, <span class="ident">Kind</span>, <span class="ident">N</span><span class="op">&gt;</span> {
+        <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">K</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">SortedLinkedList</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>, <span class="ident">K</span>, <span class="ident">N</span><span class="op">&gt;</span> {
             <span class="kw">const</span> <span class="ident">UNINIT</span>: <span class="ident">Node</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Node</span> {
                 <span class="ident">val</span>: <span class="ident">MaybeUninit::uninit</span>(),
                 <span class="ident">next</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name::none</span>(),
             };
 
             <span class="doccomment">/// Create a new linked list.</span>
-            <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">new_name</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+            <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">new_name</span>() -&gt; <span class="self">Self</span> {
                 <span class="comment">// Const assert N &lt; MAX</span>
                 <span class="ident"><span class="kw">crate</span>::sealed::smaller_than</span>::<span class="op">&lt;</span><span class="ident">N</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">max_val</span><span class="op">&gt;</span>();
 
@@ -973,7 +1027,7 @@
                     <span class="ident">_kind</span>: <span class="ident">PhantomData</span>,
                 };
 
-                <span class="kw">if</span> <span class="ident">N</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+                <span class="kw">if</span> <span class="ident">N</span> <span class="op">==</span> <span class="number">0</span> {
                     <span class="ident">list</span>.<span class="ident">free</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name::none</span>();
                     <span class="kw">return</span> <span class="ident">list</span>;
                 }
@@ -996,27 +1050,27 @@
 <span class="macro">impl_index_and_const_new!</span>(<span class="ident">LinkedIndexU16</span>, <span class="ident">u16</span>, <span class="ident">new_u16</span>, <span class="number">65_534</span>); <span class="comment">// val is 2^16 - 2</span>
 <span class="macro">impl_index_and_const_new!</span>(<span class="ident">LinkedIndexUsize</span>, <span class="ident">usize</span>, <span class="ident">new_usize</span>, <span class="number">4_294_967_294</span>); <span class="comment">// val is 2^32 - 2</span>
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">Kind</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">SortedLinkedList</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">Kind</span>, <span class="ident">N</span><span class="op">&gt;</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">K</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">SortedLinkedList</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">K</span>, <span class="ident">N</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">Idx</span>: <span class="ident">SortedLinkedListIndex</span>,
 {
     <span class="doccomment">/// Internal access helper</span>
     <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">node_at</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">Node</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Idx</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">node_at</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">usize</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">Node</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Idx</span><span class="op">&gt;</span> {
         <span class="comment">// Safety: The entire `self.list` is initialized in `new`, which makes this safe.</span>
         <span class="kw">unsafe</span> { <span class="self">self</span>.<span class="ident">list</span>.<span class="ident">get_unchecked</span>(<span class="ident">index</span>) }
     }
 
     <span class="doccomment">/// Internal access helper</span>
     <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">node_at_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">index</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Node</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Idx</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">node_at_mut</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">index</span>: <span class="ident">usize</span>) -&gt; <span class="kw-2">&amp;mut</span> <span class="ident">Node</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Idx</span><span class="op">&gt;</span> {
         <span class="comment">// Safety: The entire `self.list` is initialized in `new`, which makes this safe.</span>
         <span class="kw">unsafe</span> { <span class="self">self</span>.<span class="ident">list</span>.<span class="ident">get_unchecked_mut</span>(<span class="ident">index</span>) }
     }
 
     <span class="doccomment">/// Internal access helper</span>
     <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">write_data_in_node_at</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">index</span>: <span class="ident">usize</span>, <span class="ident">data</span>: <span class="ident">T</span>) {
+    <span class="kw">fn</span> <span class="ident">write_data_in_node_at</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">index</span>: <span class="ident">usize</span>, <span class="ident">data</span>: <span class="ident">T</span>) {
         <span class="comment">// Safety: The entire `self.list` is initialized in `new`, which makes this safe.</span>
         <span class="kw">unsafe</span> {
             <span class="self">self</span>.<span class="ident">node_at_mut</span>(<span class="ident">index</span>).<span class="ident">val</span>.<span class="ident">as_mut_ptr</span>().<span class="ident">write</span>(<span class="ident">data</span>);
@@ -1025,31 +1079,31 @@
 
     <span class="doccomment">/// Internal access helper</span>
     <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">read_data_in_node_at</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">T</span> {
+    <span class="kw">fn</span> <span class="ident">read_data_in_node_at</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">usize</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">T</span> {
         <span class="comment">// Safety: The entire `self.list` is initialized in `new`, which makes this safe.</span>
         <span class="kw">unsafe</span> { <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="self">self</span>.<span class="ident">node_at</span>(<span class="ident">index</span>).<span class="ident">val</span>.<span class="ident">as_ptr</span>() }
     }
 
     <span class="doccomment">/// Internal access helper</span>
     <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">read_mut_data_in_node_at</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">index</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">T</span> {
+    <span class="kw">fn</span> <span class="ident">read_mut_data_in_node_at</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">index</span>: <span class="ident">usize</span>) -&gt; <span class="kw-2">&amp;mut</span> <span class="ident">T</span> {
         <span class="comment">// Safety: The entire `self.list` is initialized in `new`, which makes this safe.</span>
-        <span class="kw">unsafe</span> { <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span><span class="self">self</span>.<span class="ident">node_at_mut</span>(<span class="ident">index</span>).<span class="ident">val</span>.<span class="ident">as_mut_ptr</span>() }
+        <span class="kw">unsafe</span> { <span class="kw-2">&amp;mut</span> <span class="kw-2">*</span><span class="self">self</span>.<span class="ident">node_at_mut</span>(<span class="ident">index</span>).<span class="ident">val</span>.<span class="ident">as_mut_ptr</span>() }
     }
 
     <span class="doccomment">/// Internal access helper</span>
     <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">extract_data_in_node_at</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">index</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span> {
+    <span class="kw">fn</span> <span class="ident">extract_data_in_node_at</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">index</span>: <span class="ident">usize</span>) -&gt; <span class="ident">T</span> {
         <span class="comment">// Safety: The entire `self.list` is initialized in `new`, which makes this safe.</span>
         <span class="kw">unsafe</span> { <span class="self">self</span>.<span class="ident">node_at</span>(<span class="ident">index</span>).<span class="ident">val</span>.<span class="ident">as_ptr</span>().<span class="ident">read</span>() }
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">Kind</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">SortedLinkedList</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">Kind</span>, <span class="ident">N</span><span class="op">&gt;</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">K</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">SortedLinkedList</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">K</span>, <span class="ident">N</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">Ord</span>,
     <span class="ident">Idx</span>: <span class="ident">SortedLinkedListIndex</span>,
-    <span class="ident">Kind</span>: <span class="ident">LLKind</span>,
+    <span class="ident">K</span>: <span class="ident">Kind</span>,
 {
     <span class="doccomment">/// Pushes a value onto the list without checking if the list is full.</span>
     <span class="doccomment">///</span>
@@ -1058,7 +1112,7 @@
     <span class="doccomment">/// # Safety</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Assumes that the list is not full.</span>
-    <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">push_unchecked</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">value</span>: <span class="ident">T</span>) {
+    <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">push_unchecked</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">value</span>: <span class="ident">T</span>) {
         <span class="kw">let</span> <span class="ident">new</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">free</span>.<span class="ident">get_unchecked</span>();
 
         <span class="comment">// Store the data and update the next free spot</span>
@@ -1070,7 +1124,7 @@
             <span class="kw">if</span> <span class="self">self</span>
                 .<span class="ident">read_data_in_node_at</span>(<span class="ident">head</span>)
                 .<span class="ident">cmp</span>(<span class="self">self</span>.<span class="ident">read_data_in_node_at</span>(<span class="ident">new</span>))
-                <span class="op">!</span><span class="op">=</span> <span class="ident">Kind::ordering</span>()
+                <span class="op">!</span><span class="op">=</span> <span class="ident">K::ordering</span>()
             {
                 <span class="self">self</span>.<span class="ident">node_at_mut</span>(<span class="ident">new</span>).<span class="ident">next</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">head</span>;
                 <span class="self">self</span>.<span class="ident">head</span> <span class="op">=</span> <span class="ident">Idx::new_unchecked</span>(<span class="ident">new</span>);
@@ -1082,7 +1136,7 @@
                     <span class="kw">if</span> <span class="self">self</span>
                         .<span class="ident">read_data_in_node_at</span>(<span class="ident">next</span>)
                         .<span class="ident">cmp</span>(<span class="self">self</span>.<span class="ident">read_data_in_node_at</span>(<span class="ident">new</span>))
-                        <span class="op">!</span><span class="op">=</span> <span class="ident">Kind::ordering</span>()
+                        <span class="op">!</span><span class="op">=</span> <span class="ident">K::ordering</span>()
                     {
                         <span class="kw">break</span>;
                     }
@@ -1122,7 +1176,7 @@
     <span class="doccomment">/// // This will not fit in the queue.</span>
     <span class="doccomment">/// assert_eq!(ll.push(4), Err(4));</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">push</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">value</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">push</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">value</span>: <span class="ident">T</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">T</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">is_full</span>() {
             <span class="prelude-val">Ok</span>(<span class="kw">unsafe</span> { <span class="self">self</span>.<span class="ident">push_unchecked</span>(<span class="ident">value</span>) })
         } <span class="kw">else</span> {
@@ -1147,7 +1201,7 @@
     <span class="doccomment">/// assert_eq!(iter.next(), Some(&amp;1));</span>
     <span class="doccomment">/// assert_eq!(iter.next(), None);</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">iter</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Iter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">Kind</span>, <span class="ident">N</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">iter</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Iter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">K</span>, <span class="ident">N</span><span class="op">&gt;</span> {
         <span class="ident">Iter</span> {
             <span class="ident">list</span>: <span class="self">self</span>,
             <span class="ident">index</span>: <span class="self">self</span>.<span class="ident">head</span>,
@@ -1176,9 +1230,9 @@
     <span class="doccomment">/// assert_eq!(ll.pop(), Ok(1));</span>
     <span class="doccomment">/// assert_eq!(ll.pop(), Err(()));</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">find_mut</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">f</span>: <span class="ident">F</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">FindMut</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">Kind</span>, <span class="ident">N</span><span class="op">&gt;</span><span class="op">&gt;</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">find_mut</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">f</span>: <span class="ident">F</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">FindMut</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">K</span>, <span class="ident">N</span><span class="op">&gt;</span><span class="op">&gt;</span>
     <span class="kw">where</span>
-        <span class="ident">F</span>: <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span><span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span>,
+        <span class="ident">F</span>: <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span><span class="ident">T</span>) -&gt; <span class="ident">bool</span>,
     {
         <span class="kw">let</span> <span class="ident">head</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">head</span>.<span class="ident">option</span>()<span class="question-mark">?</span>;
 
@@ -1238,7 +1292,7 @@
     <span class="doccomment">/// ll_min.push(1).unwrap();</span>
     <span class="doccomment">/// assert_eq!(ll_min.peek(), Some(&amp;1));</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">peek</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">peek</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">T</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">head</span>
             .<span class="ident">option</span>()
             .<span class="ident">map</span>(<span class="op">|</span><span class="ident">head</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">read_data_in_node_at</span>(<span class="ident">head</span>))
@@ -1249,7 +1303,7 @@
     <span class="doccomment">/// # Safety</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Assumes that the list is not empty.</span>
-    <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">pop_unchecked</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span> {
+    <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">pop_unchecked</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="ident">T</span> {
         <span class="kw">let</span> <span class="ident">head</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">head</span>.<span class="ident">get_unchecked</span>();
         <span class="kw">let</span> <span class="ident">current</span> <span class="op">=</span> <span class="ident">head</span>;
         <span class="self">self</span>.<span class="ident">head</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">node_at</span>(<span class="ident">head</span>).<span class="ident">next</span>;
@@ -1276,7 +1330,7 @@
     <span class="doccomment">/// assert_eq!(ll.pop(), Ok(1));</span>
     <span class="doccomment">/// assert_eq!(ll.pop(), Err(()));</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">pop</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span>, ()<span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">pop</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span>, ()<span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">is_empty</span>() {
             <span class="prelude-val">Ok</span>(<span class="kw">unsafe</span> { <span class="self">self</span>.<span class="ident">pop_unchecked</span>() })
         } <span class="kw">else</span> {
@@ -1302,7 +1356,7 @@
     <span class="doccomment">/// assert_eq!(ll.is_full(), true);</span>
     <span class="doccomment">/// ```</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_full</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_full</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
         <span class="self">self</span>.<span class="ident">free</span>.<span class="ident">option</span>().<span class="ident">is_none</span>()
     }
 
@@ -1320,31 +1374,31 @@
     <span class="doccomment">/// assert_eq!(ll.is_empty(), false);</span>
     <span class="doccomment">/// ```</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_empty</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_empty</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
         <span class="self">self</span>.<span class="ident">head</span>.<span class="ident">option</span>().<span class="ident">is_none</span>()
     }
 }
 
 <span class="doccomment">/// Iterator for the linked list.</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Iter</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">Kind</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Iter</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">K</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">Ord</span>,
     <span class="ident">Idx</span>: <span class="ident">SortedLinkedListIndex</span>,
-    <span class="ident">Kind</span>: <span class="ident">LLKind</span>,
+    <span class="ident">K</span>: <span class="ident">Kind</span>,
 {
-    <span class="ident">list</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">SortedLinkedList</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">Kind</span>, <span class="ident">N</span><span class="op">&gt;</span>,
+    <span class="ident">list</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">SortedLinkedList</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">K</span>, <span class="ident">N</span><span class="op">&gt;</span>,
     <span class="ident">index</span>: <span class="ident">Idx</span>,
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">Kind</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">Iterator</span> <span class="kw">for</span> <span class="ident">Iter</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">Kind</span>, <span class="ident">N</span><span class="op">&gt;</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">K</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">Iterator</span> <span class="kw">for</span> <span class="ident">Iter</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">K</span>, <span class="ident">N</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">Ord</span>,
     <span class="ident">Idx</span>: <span class="ident">SortedLinkedListIndex</span>,
-    <span class="ident">Kind</span>: <span class="ident">LLKind</span>,
+    <span class="ident">K</span>: <span class="ident">Kind</span>,
 {
     <span class="kw">type</span> <span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">T</span>;
 
-    <span class="kw">fn</span> <span class="ident">next</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Item</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">next</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Item</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">index</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">index</span>.<span class="ident">option</span>()<span class="question-mark">?</span>;
 
         <span class="kw">let</span> <span class="ident">node</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">list</span>.<span class="ident">node_at</span>(<span class="ident">index</span>);
@@ -1355,26 +1409,26 @@
 }
 
 <span class="doccomment">/// Comes from [`SortedLinkedList::find_mut`].</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">FindMut</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">Kind</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">FindMut</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">K</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">Ord</span>,
     <span class="ident">Idx</span>: <span class="ident">SortedLinkedListIndex</span>,
-    <span class="ident">Kind</span>: <span class="ident">LLKind</span>,
+    <span class="ident">K</span>: <span class="ident">Kind</span>,
 {
-    <span class="ident">list</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="ident">SortedLinkedList</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">Kind</span>, <span class="ident">N</span><span class="op">&gt;</span>,
+    <span class="ident">list</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="ident">SortedLinkedList</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">K</span>, <span class="ident">N</span><span class="op">&gt;</span>,
     <span class="ident">is_head</span>: <span class="ident">bool</span>,
     <span class="ident">prev_index</span>: <span class="ident">Idx</span>,
     <span class="ident">index</span>: <span class="ident">Idx</span>,
     <span class="ident">maybe_changed</span>: <span class="ident">bool</span>,
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">Kind</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">FindMut</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">Kind</span>, <span class="ident">N</span><span class="op">&gt;</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">K</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">FindMut</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">K</span>, <span class="ident">N</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">Ord</span>,
     <span class="ident">Idx</span>: <span class="ident">SortedLinkedListIndex</span>,
-    <span class="ident">Kind</span>: <span class="ident">LLKind</span>,
+    <span class="ident">K</span>: <span class="ident">Kind</span>,
 {
-    <span class="kw">fn</span> <span class="ident">pop_internal</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span> {
+    <span class="kw">fn</span> <span class="ident">pop_internal</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="ident">T</span> {
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">is_head</span> {
             <span class="comment">// If it is the head element, we can do a normal pop</span>
             <span class="kw">unsafe</span> { <span class="self">self</span>.<span class="ident">list</span>.<span class="ident">pop_unchecked</span>() }
@@ -1417,7 +1471,7 @@
     <span class="doccomment">/// assert_eq!(ll.pop(), Err(()));</span>
     <span class="doccomment">/// ```</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">pop</span>(<span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">pop</span>(<span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">T</span> {
         <span class="self">self</span>.<span class="ident">pop_internal</span>()
     }
 
@@ -1456,13 +1510,13 @@
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">Kind</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">Drop</span> <span class="kw">for</span> <span class="ident">FindMut</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">Kind</span>, <span class="ident">N</span><span class="op">&gt;</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">K</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">Drop</span> <span class="kw">for</span> <span class="ident">FindMut</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">K</span>, <span class="ident">N</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">Ord</span>,
     <span class="ident">Idx</span>: <span class="ident">SortedLinkedListIndex</span>,
-    <span class="ident">Kind</span>: <span class="ident">LLKind</span>,
+    <span class="ident">K</span>: <span class="ident">Kind</span>,
 {
-    <span class="kw">fn</span> <span class="ident">drop</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
+    <span class="kw">fn</span> <span class="ident">drop</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
         <span class="comment">// Only resort the list if the element has changed</span>
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">maybe_changed</span> {
             <span class="kw">let</span> <span class="ident">val</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">pop_internal</span>();
@@ -1471,27 +1525,27 @@
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">Kind</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">Deref</span> <span class="kw">for</span> <span class="ident">FindMut</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">Kind</span>, <span class="ident">N</span><span class="op">&gt;</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">K</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">Deref</span> <span class="kw">for</span> <span class="ident">FindMut</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">K</span>, <span class="ident">N</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">Ord</span>,
     <span class="ident">Idx</span>: <span class="ident">SortedLinkedListIndex</span>,
-    <span class="ident">Kind</span>: <span class="ident">LLKind</span>,
+    <span class="ident">K</span>: <span class="ident">Kind</span>,
 {
     <span class="kw">type</span> <span class="ident">Target</span> <span class="op">=</span> <span class="ident">T</span>;
 
-    <span class="kw">fn</span> <span class="ident">deref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::Target</span> {
+    <span class="kw">fn</span> <span class="ident">deref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::Target</span> {
         <span class="self">self</span>.<span class="ident">list</span>
             .<span class="ident">read_data_in_node_at</span>(<span class="kw">unsafe</span> { <span class="self">self</span>.<span class="ident">index</span>.<span class="ident">get_unchecked</span>() })
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">Kind</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">DerefMut</span> <span class="kw">for</span> <span class="ident">FindMut</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">Kind</span>, <span class="ident">N</span><span class="op">&gt;</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">K</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">DerefMut</span> <span class="kw">for</span> <span class="ident">FindMut</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">K</span>, <span class="ident">N</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">Ord</span>,
     <span class="ident">Idx</span>: <span class="ident">SortedLinkedListIndex</span>,
-    <span class="ident">Kind</span>: <span class="ident">LLKind</span>,
+    <span class="ident">K</span>: <span class="ident">Kind</span>,
 {
-    <span class="kw">fn</span> <span class="ident">deref_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident"><span class="self">Self</span>::Target</span> {
+    <span class="kw">fn</span> <span class="ident">deref_mut</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut</span> <span class="ident"><span class="self">Self</span>::Target</span> {
         <span class="self">self</span>.<span class="ident">maybe_changed</span> <span class="op">=</span> <span class="bool-val">true</span>;
         <span class="self">self</span>.<span class="ident">list</span>
             .<span class="ident">read_mut_data_in_node_at</span>(<span class="kw">unsafe</span> { <span class="self">self</span>.<span class="ident">index</span>.<span class="ident">get_unchecked</span>() })
@@ -1499,11 +1553,11 @@
 }
 
 <span class="comment">// /// Useful for debug during development.</span>
-<span class="comment">// impl&lt;T, Idx, Kind, const N: usize&gt; fmt::Debug for FindMut&lt;&#39;_, T, Idx, Kind, N&gt;</span>
+<span class="comment">// impl&lt;T, Idx, K, const N: usize&gt; fmt::Debug for FindMut&lt;&#39;_, T, Idx, K, N&gt;</span>
 <span class="comment">// where</span>
 <span class="comment">//     T: Ord + core::fmt::Debug,</span>
 <span class="comment">//     Idx: SortedLinkedListIndex,</span>
-<span class="comment">//     Kind: LLKind,</span>
+<span class="comment">//     K: Kind,</span>
 <span class="comment">// {</span>
 <span class="comment">//     fn fmt(&amp;self, f: &amp;mut fmt::Formatter&lt;&#39;_&gt;) -&gt; fmt::Result {</span>
 <span class="comment">//         f.debug_struct(&quot;FindMut&quot;)</span>
@@ -1523,22 +1577,22 @@
 <span class="comment">//     }</span>
 <span class="comment">// }</span>
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">Kind</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">fmt::Debug</span> <span class="kw">for</span> <span class="ident">SortedLinkedList</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">Kind</span>, <span class="ident">N</span><span class="op">&gt;</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">K</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">fmt::Debug</span> <span class="kw">for</span> <span class="ident">SortedLinkedList</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">K</span>, <span class="ident">N</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">Ord</span> <span class="op">+</span> <span class="ident">core::fmt::Debug</span>,
     <span class="ident">Idx</span>: <span class="ident">SortedLinkedListIndex</span>,
-    <span class="ident">Kind</span>: <span class="ident">LLKind</span>,
+    <span class="ident">K</span>: <span class="ident">Kind</span>,
 {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">fmt::Result</span> {
         <span class="ident">f</span>.<span class="ident">debug_list</span>().<span class="ident">entries</span>(<span class="self">self</span>.<span class="ident">iter</span>()).<span class="ident">finish</span>()
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">Kind</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">Drop</span> <span class="kw">for</span> <span class="ident">SortedLinkedList</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">Kind</span>, <span class="ident">N</span><span class="op">&gt;</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">K</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">Drop</span> <span class="kw">for</span> <span class="ident">SortedLinkedList</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">K</span>, <span class="ident">N</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">Idx</span>: <span class="ident">SortedLinkedListIndex</span>,
 {
-    <span class="kw">fn</span> <span class="ident">drop</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
+    <span class="kw">fn</span> <span class="ident">drop</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">index</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">head</span>;
 
         <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">i</span>) <span class="op">=</span> <span class="ident">index</span>.<span class="ident">option</span>() {
@@ -1635,14 +1689,14 @@
         <span class="ident">ll</span>.<span class="ident">push</span>(<span class="number">2</span>).<span class="ident">unwrap</span>();
         <span class="ident">ll</span>.<span class="ident">push</span>(<span class="number">3</span>).<span class="ident">unwrap</span>();
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">find</span> <span class="op">=</span> <span class="ident">ll</span>.<span class="ident">find_mut</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="kw-2">*</span><span class="ident">v</span> <span class="op">=</span><span class="op">=</span> <span class="number">2</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">find</span> <span class="op">=</span> <span class="ident">ll</span>.<span class="ident">find_mut</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="kw-2">*</span><span class="ident">v</span> <span class="op">==</span> <span class="number">2</span>).<span class="ident">unwrap</span>();
 
         <span class="kw-2">*</span><span class="ident">find</span> <span class="op">+</span><span class="op">=</span> <span class="number">1000</span>;
         <span class="ident">find</span>.<span class="ident">finish</span>();
 
         <span class="macro">assert_eq!</span>(<span class="ident">ll</span>.<span class="ident">peek</span>().<span class="ident">unwrap</span>(), <span class="kw-2">&amp;</span><span class="number">1002</span>);
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">find</span> <span class="op">=</span> <span class="ident">ll</span>.<span class="ident">find_mut</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="kw-2">*</span><span class="ident">v</span> <span class="op">=</span><span class="op">=</span> <span class="number">3</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">find</span> <span class="op">=</span> <span class="ident">ll</span>.<span class="ident">find_mut</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="kw-2">*</span><span class="ident">v</span> <span class="op">==</span> <span class="number">3</span>).<span class="ident">unwrap</span>();
 
         <span class="kw-2">*</span><span class="ident">find</span> <span class="op">+</span><span class="op">=</span> <span class="number">1000</span>;
         <span class="ident">find</span>.<span class="ident">finish</span>();
@@ -1650,7 +1704,7 @@
         <span class="macro">assert_eq!</span>(<span class="ident">ll</span>.<span class="ident">peek</span>().<span class="ident">unwrap</span>(), <span class="kw-2">&amp;</span><span class="number">1003</span>);
 
         <span class="comment">// Remove largest element</span>
-        <span class="ident">ll</span>.<span class="ident">find_mut</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="kw-2">*</span><span class="ident">v</span> <span class="op">=</span><span class="op">=</span> <span class="number">1003</span>).<span class="ident">unwrap</span>().<span class="ident">pop</span>();
+        <span class="ident">ll</span>.<span class="ident">find_mut</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="kw-2">*</span><span class="ident">v</span> <span class="op">==</span> <span class="number">1003</span>).<span class="ident">unwrap</span>().<span class="ident">pop</span>();
 
         <span class="macro">assert_eq!</span>(<span class="ident">ll</span>.<span class="ident">peek</span>().<span class="ident">unwrap</span>(), <span class="kw-2">&amp;</span><span class="number">1002</span>);
     }
@@ -1670,7 +1724,7 @@
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ll</span>: <span class="ident">SortedLinkedList</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">LinkedIndexUsize</span>, <span class="ident">Max</span>, <span class="number">3</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">SortedLinkedList::new_usize</span>();
         <span class="ident">ll</span>.<span class="ident">push</span>(<span class="number">1</span>).<span class="ident">unwrap</span>();
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">find</span> <span class="op">=</span> <span class="ident">ll</span>.<span class="ident">find_mut</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="kw-2">*</span><span class="ident">v</span> <span class="op">=</span><span class="op">=</span> <span class="number">1</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">find</span> <span class="op">=</span> <span class="ident">ll</span>.<span class="ident">find_mut</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="kw-2">*</span><span class="ident">v</span> <span class="op">==</span> <span class="number">1</span>).<span class="ident">unwrap</span>();
 
         <span class="kw-2">*</span><span class="ident">find</span> <span class="op">+</span><span class="op">=</span> <span class="number">1000</span>;
         <span class="ident">find</span>.<span class="ident">finish</span>();
@@ -1679,6 +1733,5 @@
     }
 }
 </code></pre></div>
-</section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="heapless" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
-    <script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script>
+</section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="heapless" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.59.0 (9d1b2106e 2022-02-23)" ></div>
 </body></html>
