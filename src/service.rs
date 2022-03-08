@@ -481,7 +481,7 @@ impl<P: Platform> ServiceResources<P> {
             },
 
             Request::RequestUserConsent(request) => {
-                assert_eq!(request.level, consent::Level::Normal);
+                // assert_eq!(request.level, consent::Level::Normal);
 
                 let starttime = self.platform.user_interface().uptime();
                 let timeout = core::time::Duration::from_millis(request.timeout_milliseconds as u64);
@@ -731,7 +731,6 @@ impl<P: Platform> Service<P> {
                 // resources.currently_serving = ep.client_id.clone();
                 let reply_result = resources.reply_to(ep.client_id.clone(), &request);
 
-                debug_now!("Trussed reply ready");
                 resources.platform.user_interface().set_status(ui::Status::Idle);
                 ep.interchange.respond(&reply_result).ok();
 
