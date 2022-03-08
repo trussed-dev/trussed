@@ -38,7 +38,7 @@ impl GenerateKey for super::Chacha8Poly1305 {
     }
 }
 
-    #[inline(never)]
+#[inline(never)]
 fn increment_nonce(nonce: &mut [u8]) -> Result<(), Error> {
     let mut carry: u16 = 1;
     for digit in nonce.iter_mut() {

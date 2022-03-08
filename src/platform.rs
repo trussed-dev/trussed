@@ -25,6 +25,10 @@ pub trait UserInterface {
         let _ = status;
     }
 
+    fn status(&self) -> ui::Status {
+        ui::Status::Idle
+    }
+
     /// May be called during idle periods to give the UI the opportunity to update.
     fn refresh(&mut self) {}
 
