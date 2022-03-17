@@ -1,4 +1,3 @@
-use core::convert::TryFrom;
 use core::marker::PhantomData;
 use core::ops::Deref;
 
@@ -383,7 +382,6 @@ impl<'de> serde::Deserialize<'de> for Id {
             where
                 E: serde::de::Error,
             {
-                use core::convert::TryInto;
                 if v.len() != 16 {
                     return Err(E::invalid_length(v.len(), &self));
                 }

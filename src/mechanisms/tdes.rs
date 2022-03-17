@@ -5,7 +5,6 @@
 
 // use cortex_m_semihosting::{dbg, hprintln};
 
-use core::convert::TryInto;
 // needed to even get ::new() from des...
 use des::cipher::{BlockDecrypt, BlockEncrypt, NewBlockCipher};
 
