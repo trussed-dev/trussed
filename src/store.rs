@@ -235,6 +235,24 @@ macro_rules! store { (
         }
 
         #[allow(dead_code)]
+        pub fn init_raw(ifs: &'static littlefs2::fs::Filesystem<$Ifs>,
+                        efs: &'static littlefs2::fs::Filesystem<$Efs>,
+                        vfs: &'static littlefs2::fs::Filesystem<$Vfs>
+        )
+            -> Self
+        {
+            let store_ifs = $crate::store::Fs::new(ifs);
+            let store_efs = $crate::store::Fs::new(efs);
+            let store_vfs = $crate::store::Fs::new(vfs);
+            unsafe {
+                Self::ifs_ptr().write(store_ifs);
+                Self::efs_ptr().write(store_efs);
+                Self::vfs_ptr().write(store_vfs);
+            }
+            Self::claim().unwrap()
+        }
+
+        #[allow(dead_code)]
         pub fn attach(internal_fs: $Ifs, external_fs: $Efs, volatile_fs: $Vfs) -> Self {
             Self::init(internal_fs, external_fs, volatile_fs, false)
         }
