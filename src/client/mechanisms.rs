@@ -196,6 +196,20 @@ pub trait HmacSha256: CryptoClient {
     }
 }
 
+#[cfg(feature = "hmac-sha256-p256")]
+impl<S: Syscall> HmacSha256P256 for ClientImplementation<S> {}
+
+pub trait HmacSha256P256: CryptoClient {
+    fn hmacsha256p256_derive_key(&mut self, base_key: KeyId, message: &[u8], persistence: Location)
+        -> ClientResult<'_, reply::DeriveKey, Self>
+    {
+        self.derive_key(
+            Mechanism::HmacSha256P256, base_key,
+            Some(MediumData::from_slice(message).map_err(|_| ClientError::DataTooLarge)?),
+            StorageAttributes::new().set_persistence(persistence))
+    }
+}
+
 #[cfg(feature = "hmac-sha512")]
 impl<S: Syscall> HmacSha512 for ClientImplementation<S> {}
 

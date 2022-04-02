@@ -34,6 +34,9 @@ mod hmacsha1;
 pub struct HmacSha256 {}
 mod hmacsha256;
 
+pub struct HmacSha256P256 {}
+mod hmacsha256_p256;
+
 pub struct HmacSha512 {}
 #[cfg(feature = "hmac-sha512")]
 mod hmacsha512;

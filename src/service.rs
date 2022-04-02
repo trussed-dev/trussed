@@ -166,6 +166,7 @@ impl<P: Platform> ServiceResources<P> {
                     Mechanism::HmacBlake2s => mechanisms::HmacBlake2s::derive_key(keystore, request),
                     Mechanism::HmacSha1 => mechanisms::HmacSha1::derive_key(keystore, request),
                     Mechanism::HmacSha256 => mechanisms::HmacSha256::derive_key(keystore, request),
+                    Mechanism::HmacSha256P256 => mechanisms::HmacSha256P256::derive_key(keystore, request),
                     Mechanism::HmacSha512 => mechanisms::HmacSha512::derive_key(keystore, request),
                     Mechanism::Ed255 => mechanisms::Ed255::derive_key(keystore, request),
                     Mechanism::P256 => mechanisms::P256::derive_key(keystore, request),
