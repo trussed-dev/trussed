@@ -71,6 +71,7 @@ sourcesIndex["syn"] = {"name":"","dirs":[{"name":"gen","files":["clone.rs","debu
 sourcesIndex["synstructure"] = {"name":"","files":["lib.rs","macros.rs"]};
 sourcesIndex["trussed"] = {"name":"","dirs":[{"name":"api","files":["macros.rs"]},{"name":"client","files":["mechanisms.rs"]},{"name":"mechanisms","files":["aes256cbc.rs","chacha8poly1305.rs","ed255.rs","hmacsha1.rs","hmacsha256.rs","p256.rs","sha256.rs","tdes.rs","totp.rs","trng.rs","x255.rs"]},{"name":"service","files":["attest.rs"]},{"name":"store","files":["certstore.rs","counterstore.rs","filestore.rs","keystore.rs"]}],"files":["api.rs","client.rs","config.rs","error.rs","key.rs","lib.rs","mechanisms.rs","pipe.rs","platform.rs","service.rs","store.rs","types.rs"]};
 sourcesIndex["typenum"] = {"name":"","files":["array.rs","bit.rs","int.rs","lib.rs","marker_traits.rs","operator_aliases.rs","private.rs","type_operators.rs","uint.rs"]};
+sourcesIndex["unicode_ident"] = {"name":"","files":["lib.rs","tables.rs"]};
 sourcesIndex["unicode_xid"] = {"name":"","files":["lib.rs","tables.rs"]};
 sourcesIndex["universal_hash"] = {"name":"","files":["lib.rs"]};
 sourcesIndex["void"] = {"name":"","files":["lib.rs"]};
