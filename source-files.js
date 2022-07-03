@@ -1,4 +1,4 @@
-var N = null;var sourcesIndex = {};
+var sourcesIndex = {};
 sourcesIndex["aead"] = {"name":"","files":["lib.rs"]};
 sourcesIndex["aes"] = {"name":"","dirs":[{"name":"ni","dirs":[{"name":"aes128","files":["expand.rs"]},{"name":"aes192","files":["expand.rs"]},{"name":"aes256","files":["expand.rs"]}],"files":["aes128.rs","aes192.rs","aes256.rs","utils.rs"]},{"name":"soft","files":["fixslice64.rs"]}],"files":["autodetect.rs","lib.rs","ni.rs","soft.rs"]};
 sourcesIndex["bitflags"] = {"name":"","files":["lib.rs"]};
