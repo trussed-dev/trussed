@@ -136,6 +136,7 @@ impl<P: Platform> ServiceResources<P> {
                 match request.mechanism {
 
                     Mechanism::P256 => mechanisms::P256::agree(keystore, request),
+                    Mechanism::P384 => mechanisms::P384::agree(keystore, request),
                     Mechanism::X255 => mechanisms::X255::agree(keystore, request),
                     _ => Err(Error::MechanismNotAvailable),
 
@@ -171,6 +172,7 @@ impl<P: Platform> ServiceResources<P> {
                     Mechanism::HmacSha512 => mechanisms::HmacSha512::derive_key(keystore, request),
                     Mechanism::Ed255 => mechanisms::Ed255::derive_key(keystore, request),
                     Mechanism::P256 => mechanisms::P256::derive_key(keystore, request),
+                    Mechanism::P384 => mechanisms::P384::derive_key(keystore, request),
                     Mechanism::Sha256 => mechanisms::Sha256::derive_key(keystore, request),
                     Mechanism::X255 => mechanisms::X255::derive_key(keystore, request),
                     _ => Err(Error::MechanismNotAvailable),
@@ -183,6 +185,7 @@ impl<P: Platform> ServiceResources<P> {
 
                     Mechanism::Ed255 => mechanisms::Ed255::deserialize_key(keystore, request),
                     Mechanism::P256 => mechanisms::P256::deserialize_key(keystore, request),
+                    Mechanism::P384 => mechanisms::P384::deserialize_key(keystore, request),
                     Mechanism::X255 => mechanisms::X255::deserialize_key(keystore, request),
                     _ => Err(Error::MechanismNotAvailable),
 
@@ -215,6 +218,7 @@ impl<P: Platform> ServiceResources<P> {
 
                     Mechanism::Ed255 => mechanisms::Ed255::exists(keystore, request),
                     Mechanism::P256 => mechanisms::P256::exists(keystore, request),
+                    Mechanism::P384 => mechanisms::P384::exists(keystore, request),
                     Mechanism::Totp => mechanisms::Totp::exists(keystore, request),
                     Mechanism::X255 => mechanisms::X255::exists(keystore, request),
                     _ => Err(Error::MechanismNotAvailable),
@@ -227,6 +231,7 @@ impl<P: Platform> ServiceResources<P> {
                     Mechanism::Chacha8Poly1305 => mechanisms::Chacha8Poly1305::generate_key(keystore, request),
                     Mechanism::Ed255 => mechanisms::Ed255::generate_key(keystore, request),
                     Mechanism::P256 => mechanisms::P256::generate_key(keystore, request),
+                    Mechanism::P384 => mechanisms::P384::generate_key(keystore, request),
                     Mechanism::X255 => mechanisms::X255::generate_key(keystore, request),
                     _ => Err(Error::MechanismNotAvailable),
                 }.map(Reply::GenerateKey)
@@ -440,6 +445,7 @@ impl<P: Platform> ServiceResources<P> {
                     Mechanism::HmacSha512 => mechanisms::HmacSha512::sign(keystore, request),
                     Mechanism::P256 => mechanisms::P256::sign(keystore, request),
                     Mechanism::P256Prehashed => mechanisms::P256Prehashed::sign(keystore, request),
+                    Mechanism::P384 => mechanisms::P384::sign(keystore, request),
                     Mechanism::Totp => mechanisms::Totp::sign(keystore, request),
                     _ => Err(Error::MechanismNotAvailable),
 
@@ -465,6 +471,7 @@ impl<P: Platform> ServiceResources<P> {
 
                     Mechanism::Ed255 => mechanisms::Ed255::verify(keystore, request),
                     Mechanism::P256 => mechanisms::P256::verify(keystore, request),
+                    Mechanism::P384 => mechanisms::P384::verify(keystore, request),
                     _ => Err(Error::MechanismNotAvailable),
 
                 }.map(Reply::Verify)

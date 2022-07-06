@@ -63,6 +63,13 @@ pub enum Kind {
     Ed255,
     P256,
     X255,
+    P384,
+    P521,
+    Rsa2k,
+    Rsa3k,
+    Rsa4k,
+    Ed448,
+    X448,
 }
 
 bitflags::bitflags! {
@@ -136,17 +143,35 @@ impl Kind {
             Kind::Ed255 => 4,
             Kind::P256 => 5,
             Kind::X255 => 6,
+            // following PIV and our extensions
+            Kind::P384 => 0x14,
+            Kind::P521 => 0x15,
+            Kind::Rsa2k => 0x7,
+            Kind::Rsa3k => 0xE0,
+            Kind::Rsa4k => 0xE1,
+            Kind::Ed448 => 0xE4,
+            Kind::X448 => 0xE5,
         }
     }
 
     pub fn try_from(code: u16, length: usize) -> Result<Self, Error> {
+        use Kind::*;
         Ok(match code {
-            1 => Self::Shared(length),
-            2 => Self::Symmetric(length),
-            3 => Self::Symmetric32Nonce(length - 32),
-            4 => Self::Ed255,
-            5 => Self::P256,
-            6 => Self::X255,
+            1 => Shared(length),
+            2 => Symmetric(length),
+            3 => Symmetric32Nonce(length - 32),
+            4 => Ed255,
+            5 => P256,
+            6 => X255,
+
+            0x14 => P384,
+            0x15 => P521,
+            0x7 => Rsa2k,
+            0xE0 => Rsa3k,
+            0xE1 => Rsa4k,
+            0xE4 => Ed448,
+            0xE5 => X448,
+
             _ => return Err(Error::InvalidSerializedKey),
         })
     }
