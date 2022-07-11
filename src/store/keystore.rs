@@ -173,8 +173,8 @@ impl<P: Platform> Keystore for ClientKeystore<P> {
 
         let location = self.location(secrecy, id).ok_or(Error::NoSuchKey)?;
 
-        //TODO: This should better be defined in some way, instead of hardcoding.
-        //      I've tried referring to MAX_SERIALIZED_KEY_LENGTH, is this a good idea?
+        //TODO:alt3r-3go: This should better be defined in some way, instead of hardcoding.
+        //                I've tried referring to MAX_SERIALIZED_KEY_LENGTH, is this a good idea?
         #[cfg(not(feature = "rsa2k-pkcs"))]
         let bytes: Bytes<128> = store::read(self.store, location, &path)?;
         #[cfg(feature = "rsa2k-pkcs")]

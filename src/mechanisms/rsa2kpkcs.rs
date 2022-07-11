@@ -10,38 +10,6 @@ use crate::error::Error;
 use crate::service::*;
 use crate::types::*;
 
-// #[inline(never)]
-// fn load_public_key(keystore: &mut impl Keystore, key_id: &KeyId)
-//     -> Result<rsa::RsaPublicKey, Error> {
-
-//     //TODO: The key size should better be defined somewhere instead of hardcoding
-//     let public_bytes: [u8; 512] = keystore
-//         .load_key(key::Secrecy::Public, Some(key::Kind::Rsa2k), &key_id)?
-//         .material.as_slice()
-//         .try_into()
-//         .map_err(|_| Error::InternalError)?;
-
-//     // let public_key = salty::signature::PublicKey::try_from(&public_bytes).map_err(|_| Error::InternalError)?;
-//     let public_key = rsa::RsaPublicKey::try_from(&public_bytes).map_err(|_| Error::InternalError)?;
-
-//     Ok(public_key)
-// }
-
-// #[inline(never)]
-// fn load_keypair(keystore: &mut impl Keystore, key_id: &KeyId)
-//     -> Result<salty::Keypair, Error> {
-
-//     let seed: [u8; 32] = keystore
-//         .load_key(key::Secrecy::Secret, Some(key::Kind::Rsa2k), &key_id)?
-//         .material.as_slice()
-//         .try_into()
-//         .map_err(|_| Error::InternalError)?;
-
-//     let keypair = salty::signature::Keypair::from(&seed);
-//     // hprintln!("seed: {:?}", &seed).ok();
-//     Ok(keypair)
-// }
-
 #[cfg(feature = "rsa2k-pkcs")]
 impl DeriveKey for super::Rsa2kPkcs {
     #[inline(never)]
@@ -171,8 +139,8 @@ impl SerializeKey for super::Rsa2kPkcs {
             .material;
 
         let serialized_key = match request.format {
-            // TODO: There are "Der" and "Asn1Der" commented out in KeySerialization enum,
-            //       should those be used instead?
+            // TODO:alt3r-3go: There are "Der" and "Asn1Der" commented out in KeySerialization enum,
+            //                 should those be used instead?
             KeySerialization::Raw => {
                 let mut serialized_key = Message::new();
                 serialized_key
@@ -221,12 +189,12 @@ impl Sign for super::Rsa2kPkcs {
             .expect("Failed to deserialize an RSA 2K private key from PKCS#8 DER");
 
         // RSA lib takes in a hash value to sign, not raw data.
-        // TODO: Do we assume we get digest into this function, or we calculate it ourselves?
+        // TODO:alt3r-3go: Do we assume we get digest into this function, or we calculate it ourselves?
         // use sha2::digest::Digest;
         // let digest_to_sign: [u8; 32] = sha2::Sha256::digest(&request.message).into();
 
-        // TODO: there's also .sign_blinded(), which is supposed to protect the private key from timing side channels,
-        // but requires an RNG instance - decide if we want to always use it.
+        // TODO:alt3r-3go: There's also .sign_blinded(), which is supposed to protect the private key from timing side channels,
+        //                 but requires an RNG instance - decide if we want to always use it.
         use rsa::hash::Hash;
         use rsa::padding::PaddingScheme;
         let native_signature = priv_key
@@ -261,7 +229,7 @@ impl Verify for super::Rsa2kPkcs {
             return Err(Error::InvalidSerializationFormat);
         }
 
-        // TODO: This must not be a hardcoded magic number, need to generalize
+        // TODO:alt3r-3go: This must not be a hardcoded magic number, need to generalize
         if request.signature.len() != 256 {
             return Err(Error::WrongSignatureLength);
         }
