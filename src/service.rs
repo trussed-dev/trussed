@@ -751,3 +751,11 @@ where P: Platform
         self.process();
     }
 }
+
+impl<P> crate::client::Syscall for Service<P>
+where P: Platform
+{
+    fn syscall(&mut self) {
+        self.process();
+    }
+}
