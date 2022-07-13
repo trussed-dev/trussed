@@ -684,6 +684,20 @@ impl<P: Platform> Service<P> {
         Ok(crate::client::ClientImplementation::new(requester, self))
     }
 
+    /// Similar to [try_as_new_client][Service::try_as_new_client] except that the returning client owns the
+    /// Service and is therefore `'static`
+    #[allow(clippy::result_unit_err)]
+    pub fn try_into_new_client(mut self, client_id: &str)
+        -> Result<crate::client::ClientImplementation<Service<P>>, ()>
+    {
+        use interchange::Interchange;
+        let (requester, responder) = TrussedInterchange::claim().ok_or(())?;
+        let client_id = ClientId::from(client_id.as_bytes());
+        self.add_endpoint(responder, client_id).map_err(|_service_endpoint| ())?;
+
+        Ok(crate::client::ClientImplementation::new(requester, self))
+    }
+
 
     pub fn add_endpoint(&mut self, interchange: Responder<TrussedInterchange>, client_id: ClientId) -> Result<(), ServiceEndpoint> {
         if client_id == PathBuf::from("trussed") {
