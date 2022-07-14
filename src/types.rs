@@ -241,30 +241,57 @@ the walker state of the directory traversal syscalls.
 */
 pub struct ClientContext {
     pub path: PathBuf,
+    pub backends: Vec<ServiceBackends, 2>,
     pub(crate) read_dir_state: Option<ReadDirState>,
     pub(crate) read_dir_files_state: Option<ReadDirFilesState>,
 }
 
 impl core::convert::From<PathBuf> for ClientContext {
     fn from(path: PathBuf) -> Self {
-        Self::new(path)
+        Self::from_pathbuf(path)
     }
 }
 
 impl core::convert::From<&str> for ClientContext {
     fn from(path_str: &str) -> Self {
-        Self::new(PathBuf::from(path_str))
+        Self::from_pathbuf(PathBuf::from(path_str))
     }
 }
 
 impl ClientContext {
-    pub fn new(path: PathBuf) -> Self {
+    pub fn from_pathbuf(path: PathBuf) -> Self {
+        Self::new(path, Vec::from_slice(&[ServiceBackends::Software]).unwrap())
+    }
+
+    pub fn new(path: PathBuf, backends: Vec<ServiceBackends, 2>) -> Self {
         Self {
             path,
+            backends,
             read_dir_state: None,
             read_dir_files_state: None,
         }
     }
+}
+
+/**
+This enum collects the available "system call" service backends.
+Each of these backends is supposed to be self-sufficient (i.e. not reliant
+on another one or on ServiceResources itself) and to implement a subset
+of the API calls.
+
+If a backend requires ownership of a device, that device will be part of
+the customizable part of the macro-constructed Platform struct. If a
+backend further requires parametrization from the client to operate (such as
+a PIN being passed down from an app), this parameter struct should be
+added as payload for that enum variant.
+
+Backends are called from Service::process() under consideration of the
+selection and ordering the calling client has specified in its ClientId.
+*/
+#[derive(Copy, Clone, PartialEq, Eq)]
+pub enum ServiceBackends {
+    Software,
+    // SE050(Se050Parameters),
 }
 
 // Object Hierarchy according to Cryptoki
