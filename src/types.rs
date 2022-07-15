@@ -17,7 +17,9 @@ pub use littlefs2::{
 use rand_core::{CryptoRng, RngCore};
 use serde::{Deserialize, Serialize};
 
+use crate::api::{Reply, Request};
 use crate::config::*;
+use crate::error::Error;
 use crate::key::Secrecy;
 use crate::store::filestore::{ReadDirFilesState, ReadDirState};
 
@@ -288,10 +290,21 @@ added as payload for that enum variant.
 Backends are called from Service::process() under consideration of the
 selection and ordering the calling client has specified in its ClientId.
 */
-#[derive(Copy, Clone, PartialEq, Eq)]
+#[derive(Copy, Clone)]
 pub enum ServiceBackends {
     Software,
     // SE050(Se050Parameters),
+}
+
+/**
+Each service backend implements a subset of API calls through this trait.
+*/
+pub trait ServiceBackend {
+    fn reply_to(
+        &mut self,
+        client_id: &mut ClientContext,
+        request: &Request,
+    ) -> Result<Reply, Error>;
 }
 
 // Object Hierarchy according to Cryptoki

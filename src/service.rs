@@ -57,11 +57,6 @@ where
     P: Platform,
 {
     pub(crate) platform: P,
-    // // Option?
-    // currently_serving: ClientContext,
-    // TODO: how/when to clear
-    read_dir_files_state: Option<ReadDirFilesState>,
-    read_dir_state: Option<ReadDirState>,
     rng_state: Option<ChaCha8Rng>,
 }
 
@@ -69,9 +64,6 @@ impl<P: Platform> ServiceResources<P> {
     pub fn new(platform: P) -> Self {
         Self {
             platform,
-            // currently_serving: PathBuf::new(),
-            read_dir_files_state: None,
-            read_dir_state: None,
             rng_state: None,
         }
     }
@@ -763,6 +755,7 @@ impl<P: Platform> Service<P> {
     }
 
     // process one request per client which has any
+    #[allow(unreachable_patterns)]
     pub fn process(&mut self) {
         // split self since we iter-mut over eps and need &mut of the other resources
         let eps = &mut self.eps;
@@ -783,6 +776,11 @@ impl<P: Platform> Service<P> {
                     reply_result = match backend {
                         ServiceBackends::Software => {
                             resources.reply_to(&mut ep.client_ctx, &request)
+                        }
+                        sb => {
+                            resources
+                                .platform
+                                .platform_reply_to(sb, &mut ep.client_ctx, &request)
                         }
                     };
                     if reply_result != Err(Error::RequestNotAvailable) {
