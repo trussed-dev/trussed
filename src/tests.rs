@@ -5,8 +5,8 @@ use crate::types::*;
 use crate::*;
 use entropy::shannon_entropy;
 use interchange::Interchange;
-use littlefs2::const_ram_storage;
 use littlefs2::fs::{Allocation, Filesystem};
+use littlefs2::{const_ram_storage, consts};
 
 use crate::client::{CryptoClient as _, FilesystemClient as _};
 
