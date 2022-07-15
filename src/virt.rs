@@ -8,13 +8,14 @@ use once_cell::sync::Lazy;
 use rand_core::SeedableRng as _;
 
 use crate::{
+    api::{Reply, Request},
     client::mechanisms::{Ed255 as _, P256 as _},
     pipe::TrussedInterchange,
     platform,
     service::Service,
     syscall,
-    types::Location,
-    ClientImplementation, Interchange as _,
+    types::{ClientContext, Location, ServiceBackends},
+    ClientImplementation, Error, Interchange as _,
 };
 
 pub use store::{Filesystem, Ram, StoreProvider};
@@ -127,5 +128,14 @@ unsafe impl<S: StoreProvider> platform::Platform for Platform<S> {
 
     fn store(&self) -> Self::S {
         unsafe { self.store.store() }
+    }
+
+    fn platform_reply_to(
+        &mut self,
+        _backend_id: ServiceBackends,
+        _client_id: &mut ClientContext,
+        _request: &Request,
+    ) -> Result<Reply, Error> {
+        Err(Error::RequestNotAvailable)
     }
 }

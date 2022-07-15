@@ -6,7 +6,7 @@ use std::{
 };
 
 use generic_array::typenum::{U16, U512};
-use littlefs2::{const_ram_storage, driver::Storage};
+use littlefs2::{const_ram_storage, consts, driver::Storage};
 
 use crate::{
     store,
