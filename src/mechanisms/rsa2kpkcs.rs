@@ -1,5 +1,5 @@
 use rsa::{
-    pkcs8::{FromPrivateKey, ToPrivateKey, ToPublicKey},
+    pkcs8::{DecodePrivateKey, EncodePrivateKey, EncodePublicKey},
     PublicKey, RsaPrivateKey, RsaPublicKey,
 };
 
@@ -9,6 +9,10 @@ use crate::api::*;
 use crate::error::Error;
 use crate::service::*;
 use crate::types::*;
+
+//TODO:alt3r-3go: sign() and verify() are the only two methods that are actually different between -pkcs and -pss.
+//                Moreover, the key::Kind::Rsa2K could also probably be parametrized, instead of having a dedicated kind
+//                for each. Overall this means the class structure can probably be simplified - need to decide.
 
 #[cfg(feature = "rsa2k-pkcs")]
 impl DeriveKey for super::Rsa2kPkcs {
@@ -30,7 +34,7 @@ impl DeriveKey for super::Rsa2kPkcs {
         // std::println!("Loaded key material: {}", delog::hex_str!(&priv_key_der));
         // std::println!("Key material length is {}", priv_key_der.len());
 
-        let priv_key = FromPrivateKey::from_pkcs8_der(&priv_key_der)
+        let priv_key = DecodePrivateKey::from_pkcs8_der(&priv_key_der)
             .expect("Failed to deserialize an RSA 2K private key from PKCS#8 DER");
 
         // Derive and store public key
@@ -65,7 +69,7 @@ impl DeserializeKey for super::Rsa2kPkcs {
             return Err(Error::InternalError);
         }
 
-        let private_key: RsaPrivateKey = FromPrivateKey::from_pkcs8_der(&request.serialized_key)
+        let private_key: RsaPrivateKey = DecodePrivateKey::from_pkcs8_der(&request.serialized_key)
             .map_err(|_| Error::InvalidSerializedKey)?;
 
         // We store our keys in PKCS#8 DER format as well
@@ -185,7 +189,7 @@ impl Sign for super::Rsa2kPkcs {
             .expect("Failed to load an RSA 2K private key with the given ID")
             .material;
 
-        let priv_key: RsaPrivateKey = FromPrivateKey::from_pkcs8_der(&priv_key_der)
+        let priv_key: RsaPrivateKey = DecodePrivateKey::from_pkcs8_der(&priv_key_der)
             .expect("Failed to deserialize an RSA 2K private key from PKCS#8 DER");
 
         // RSA lib takes in a hash value to sign, not raw data.
@@ -241,7 +245,7 @@ impl Verify for super::Rsa2kPkcs {
             .expect("Failed to load an RSA 2K private key with the given ID")
             .material;
 
-        let priv_key = FromPrivateKey::from_pkcs8_der(&priv_key_der)
+        let priv_key = DecodePrivateKey::from_pkcs8_der(&priv_key_der)
             .expect("Failed to deserialize an RSA 2K private key from PKCS#8 DER");
 
         // Get the public key
