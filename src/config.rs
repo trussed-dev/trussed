@@ -14,7 +14,7 @@ pub const MAX_MEDIUM_DATA_LENGTH: usize = 256;
 pub type MAX_PATH_LENGTH = consts::U256;
 //pub const MAX_KEY_MATERIAL_LENGTH: usize = 128;
 // must be above + 4
-pub const MAX_SERIALIZED_KEY_LENGTH: usize = 132;
+//pub const MAX_SERIALIZED_KEY_LENGTH: usize = 132;
 cfg_if::cfg_if! {
     if #[cfg(feature = "clients-12")] {
         pub type MAX_SERVICE_CLIENTS = consts::U12;
