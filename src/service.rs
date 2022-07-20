@@ -571,6 +571,12 @@ impl<P: Platform> ServiceResources<P> {
                     .map(|id| Reply::WriteCertificate(reply::WriteCertificate { id } ))
             }
 
+            Request::SetServiceBackends(request) => {
+                client_ctx.backends.clear();
+                client_ctx.backends.extend_from_slice(&request.backends);
+                Ok(Reply::SetServiceBackends(reply::SetServiceBackends {}))
+            }
+
             // _ => {
             //     // #[cfg(test)]
             //     // println!("todo: {:?} request!", &request);

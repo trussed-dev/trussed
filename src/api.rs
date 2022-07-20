@@ -99,6 +99,11 @@ generate_enums! {
     ReadCertificate: 61
     WriteCertificate: 62
 
+    ///////////////////
+    // Backend Mgmt. //
+    ///////////////////
+    SetServiceBackends: 90
+
     ///////////
     // Other //
     ///////////
@@ -332,6 +337,8 @@ pub mod request {
           - location: Location
           - der: Message
 
+        SetServiceBackends:
+          - backends: Vec<ServiceBackends, 2>
     }
 }
 
@@ -482,5 +489,8 @@ pub mod reply {
 
         WriteCertificate:
           - id: CertId
+
+        SetServiceBackends:
+
     }
 }
