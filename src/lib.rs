@@ -1,4 +1,4 @@
-#![cfg_attr(not(test), no_std)]
+#![cfg_attr(not(any(feature = "std", test)), no_std)]
 //! # Trussed
 //!
 //! Trussed® is a minimal, modular way to write cryptographic applications on microcontroller platforms.
@@ -29,6 +29,8 @@ pub mod platform;
 pub mod service;
 pub mod store;
 pub mod types;
+#[cfg(feature = "virt")]
+pub mod virt;
 
 pub use api::Reply;
 pub use error::Error;
