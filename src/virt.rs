@@ -1,7 +1,7 @@
 mod ui;
 mod store;
 
-use std::sync::Mutex;
+use std::{path::Path, sync::Mutex};
 
 use chacha20::ChaCha8Rng;
 use once_cell::sync::Lazy;
@@ -20,7 +20,7 @@ use crate::{
 };
 
 pub use ui::UserInterface;
-pub use store::{RamStore, Reset};
+pub use store::{FilesystemStore, RamStore, Reset};
 
 const CLIENT_ID_ATTN: &str = "attn";
 
@@ -49,6 +49,14 @@ where
     F: FnOnce(ClientImplementation<Service<Platform<S>>>) -> R,
 {
     with_platform(store, |platform| platform.run_client(client_id, f))
+}
+
+pub fn with_fs_client<P, R, F>(internal: P, client_id: &str, f: F) -> R
+where
+    P: AsRef<Path>,
+    F: FnOnce(ClientImplementation<Service<Platform<FilesystemStore<'_>>>>) -> R,
+{
+    with_client(FilesystemStore::new(internal.as_ref()), client_id, f)
 }
 
 pub fn with_ram_client<R, F>(client_id: &str, f: F) -> R
