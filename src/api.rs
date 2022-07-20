@@ -44,6 +44,7 @@ generate_enums! {
     ReadDirFilesFirst: 13
     ReadDirFilesNext: 14
     ReadFile: 15
+    Metadata: 26 
     // ReadCounter: 7
     RandomBytes: 16
     SerializeKey: 17
@@ -232,6 +233,10 @@ pub mod request {
           - location: Location
           - path: PathBuf
 
+        Metadata:
+          - location: Location
+          - path: PathBuf
+
         RemoveFile:
           - location: Location
           - path: PathBuf
@@ -412,6 +417,9 @@ pub mod reply {
 
         ReadFile:
           - data: Message
+
+        Metadata:
+          - metadata: crate::types::Metadata
 
         RemoveDir:
 

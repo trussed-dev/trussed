@@ -408,6 +408,12 @@ impl<P: Platform> ServiceResources<P> {
                 }))
             }
 
+            Request::Metadata(request) => {
+                Ok(Reply::Metadata(reply::Metadata{
+                    metadata: filestore.metadata(&request.path, request.location)?
+                }))
+            }
+
             Request::RandomBytes(request) => {
                 if request.count < 1024 {
                     let mut bytes = Message::new();

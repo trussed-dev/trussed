@@ -524,6 +524,16 @@ pub fn exists(store: impl Store, location: Location, path: &Path) -> bool {
 }
 
 #[inline(never)]
+pub fn metadata(store: impl Store, location: Location, path: &Path) -> Result<Metadata, Error> {
+    debug_now!("checking existence of {}", &path);
+    match location {
+        Location::Internal => store.ifs().metadata(path),
+        Location::External => store.efs().metadata(path),
+        Location::Volatile => store.vfs().metadata(path),
+    }.map_err(|_| Error::FilesystemReadFailure)
+}
+
+#[inline(never)]
 pub fn remove_dir(store: impl Store, location: Location, path: &Path) -> bool {
     debug_now!("remove_dir'ing {}", &path);
     let outcome = match location {

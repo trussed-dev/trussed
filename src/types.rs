@@ -11,7 +11,7 @@ pub use heapless::{
 pub use crate::Bytes;
 
 pub use littlefs2::{
-    fs::{DirEntry, Filesystem},
+    fs::{DirEntry, Metadata, Filesystem},
     driver::Storage as LfsStorage,
     io::Result as LfsResult,
     path::PathBuf,
