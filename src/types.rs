@@ -74,12 +74,7 @@ impl Id {
         let mut buffer = Bytes::new();
         let array = self.0.to_be_bytes();
 
-        for i in 0..array.len() {
-            if array[i] == 0 && i != (array.len() - 1) {
-                // Skip leading zeros.
-                continue;
-            }
-
+        for i in 0 .. array.len() {
             buffer.push(HEX_CHARS[(array[i] >> 4) as usize]).unwrap();
             buffer.push(HEX_CHARS[(array[i] & 0xf) as usize]).unwrap();
         }
@@ -317,7 +312,7 @@ added as payload for that enum variant.
 Backends are called from Service::process() under consideration of the
 selection and ordering the calling client has specified in its ClientId.
 */
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, PartialEq, Eq, Debug, serde::Serialize, serde::Deserialize)]
 pub enum ServiceBackends {
     Software,
     SoftwareAuth,
