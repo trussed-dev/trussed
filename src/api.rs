@@ -419,7 +419,7 @@ pub mod reply {
           - data: Message
 
         Metadata:
-          - metadata: crate::types::Metadata
+          - metadata: Option<crate::types::Metadata>
 
         RemoveDir:
 
