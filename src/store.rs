@@ -524,13 +524,18 @@ pub fn exists(store: impl Store, location: Location, path: &Path) -> bool {
 }
 
 #[inline(never)]
-pub fn metadata(store: impl Store, location: Location, path: &Path) -> Result<Metadata, Error> {
+pub fn metadata(store: impl Store, location: Location, path: &Path) -> Result<Option<Metadata>, Error> {
     debug_now!("checking existence of {}", &path);
-    match location {
+    let result = match location {
         Location::Internal => store.ifs().metadata(path),
         Location::External => store.efs().metadata(path),
         Location::Volatile => store.vfs().metadata(path),
-    }.map_err(|_| Error::FilesystemReadFailure)
+    };
+    match result {
+        Ok(metadata) => Ok(Some(metadata)),
+        Err(littlefs2::io::Error::NoSuchEntry) => Ok(None),
+        Err(_) => Err(Error::FilesystemReadFailure),
+    }
 }
 
 #[inline(never)]
