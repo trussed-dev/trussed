@@ -22,6 +22,8 @@ use crate::{
 pub use ui::UserInterface;
 pub use store::{FilesystemStore, RamStore, Reset};
 
+pub type Client<S> = ClientImplementation<Service<Platform<S>>>;
+
 const CLIENT_ID_ATTN: &str = "attn";
 
 // We need this mutex to make sure that:
@@ -31,7 +33,11 @@ static MUTEX: Lazy<Mutex<()>> = Lazy::new(|| {
     Mutex::new(())
 });
 
-pub fn with_platform<S: Store + Reset, R>(store: S, f: impl FnOnce(Platform<S>) -> R) -> R {
+pub fn with_platform<S, R, F>(store: S, f: F) -> R
+where
+    S: Store + Reset,
+    F: FnOnce(Platform<S>) -> R,
+{
     let _guard = MUTEX.lock().unwrap_or_else(|err| err.into_inner());
     // causing a regression again
     // let rng = chacha20::ChaCha8Rng::from_rng(rand_core::OsRng).unwrap();
@@ -46,7 +52,7 @@ pub fn with_platform<S: Store + Reset, R>(store: S, f: impl FnOnce(Platform<S>) 
 pub fn with_client<S, R, F>(store: S, client_id: &str, f: F) -> R
 where
     S: Store + Reset,
-    F: FnOnce(ClientImplementation<Service<Platform<S>>>) -> R,
+    F: FnOnce(Client<S>) -> R,
 {
     with_platform(store, |platform| platform.run_client(client_id, f))
 }
@@ -54,14 +60,14 @@ where
 pub fn with_fs_client<P, R, F>(internal: P, client_id: &str, f: F) -> R
 where
     P: AsRef<Path>,
-    F: FnOnce(ClientImplementation<Service<Platform<FilesystemStore<'_>>>>) -> R,
+    F: FnOnce(Client<FilesystemStore>) -> R,
 {
     with_client(FilesystemStore::new(internal.as_ref()), client_id, f)
 }
 
 pub fn with_ram_client<R, F>(client_id: &str, f: F) -> R
 where
-    F: FnOnce(ClientImplementation<Service<Platform<RamStore>>>) -> R,
+    F: FnOnce(Client<RamStore>) -> R,
 {
     with_client(RamStore::default(), client_id, f)
 }
