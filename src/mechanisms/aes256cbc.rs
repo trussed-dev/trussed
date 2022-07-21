@@ -46,7 +46,7 @@ impl Encrypt for super::Aes256Cbc
         // The padding space should be big enough for padding, otherwise method will return Err(BlockModeError).
 		let ciphertext = cipher.encrypt(&mut buffer, l).unwrap();
 
-        let ciphertext = Message::from_slice(&ciphertext).unwrap();
+        let ciphertext = Message::from_slice(ciphertext).unwrap();
         Ok(reply::Encrypt { ciphertext, nonce: ShortData::new(), tag: ShortData::new()  })
     }
 }
@@ -120,7 +120,7 @@ impl Decrypt for super::Aes256Cbc
         // hprintln!("symmetric key: {:?}", &symmetric_key).ok();
 		let plaintext = cipher.decrypt(&mut buffer).unwrap();
         // hprintln!("decrypted: {:?}", &plaintext).ok();
-        let plaintext = Message::from_slice(&plaintext).unwrap();
+        let plaintext = Message::from_slice(plaintext).unwrap();
 
         Ok(reply::Decrypt { plaintext: Some(plaintext) })
     }

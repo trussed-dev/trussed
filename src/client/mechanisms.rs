@@ -287,7 +287,7 @@ pub trait Totp: CryptoClient {
         -> ClientResult<'_, reply::Sign, Self>
     {
         self.sign(Mechanism::Totp, key,
-            &timestamp.to_le_bytes().as_ref(),
+            timestamp.to_le_bytes().as_ref(),
             SignatureSerialization::Raw,
         )
     }

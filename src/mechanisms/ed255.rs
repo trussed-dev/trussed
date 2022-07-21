@@ -12,7 +12,7 @@ fn load_public_key(keystore: &mut impl Keystore, key_id: &KeyId)
     -> Result<salty::PublicKey, Error> {
 
     let public_bytes: [u8; 32] = keystore
-        .load_key(key::Secrecy::Public, Some(key::Kind::Ed255), &key_id)?
+        .load_key(key::Secrecy::Public, Some(key::Kind::Ed255), key_id)?
         .material.as_slice()
         .try_into()
         .map_err(|_| Error::InternalError)?;
@@ -27,7 +27,7 @@ fn load_keypair(keystore: &mut impl Keystore, key_id: &KeyId)
     -> Result<salty::Keypair, Error> {
 
     let seed: [u8; 32] = keystore
-        .load_key(key::Secrecy::Secret, Some(key::Kind::Ed255), &key_id)?
+        .load_key(key::Secrecy::Secret, Some(key::Kind::Ed255), key_id)?
         .material.as_slice()
         .try_into()
         .map_err(|_| Error::InternalError)?;

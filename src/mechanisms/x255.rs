@@ -13,7 +13,7 @@ fn load_public_key(keystore: &mut impl Keystore, key_id: &KeyId)
     -> Result<agreement::PublicKey, Error> {
 
     let public_bytes: [u8; 32] = keystore
-        .load_key(key::Secrecy::Public, Some(key::Kind::X255), &key_id)?
+        .load_key(key::Secrecy::Public, Some(key::Kind::X255), key_id)?
         .material.as_slice()
         .try_into()
         .map_err(|_| Error::InternalError)?;
@@ -27,7 +27,7 @@ fn load_secret_key(keystore: &mut impl Keystore, key_id: &KeyId)
     -> Result<agreement::SecretKey, Error> {
 
     let seed: [u8; 32] = keystore
-        .load_key(key::Secrecy::Secret, Some(key::Kind::X255), &key_id)?
+        .load_key(key::Secrecy::Secret, Some(key::Kind::X255), key_id)?
         .material.as_slice()
         .try_into()
         .map_err(|_| Error::InternalError)?;

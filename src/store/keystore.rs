@@ -22,7 +22,7 @@ where
     store: P::S,
 }
 
-impl<'a, P: Platform> ClientKeystore<P> {
+impl<P: Platform> ClientKeystore<P> {
     pub fn new(client_id: ClientId, rng: ChaCha8Rng, store: P::S) -> Self {
         Self { client_id, rng, store }
     }
@@ -120,7 +120,7 @@ impl<P: Platform> Keystore for ClientKeystore<P> {
         ];
 
         secrecies.iter().any(|secrecy| {
-            let path = self.key_path(*secrecy, &id);
+            let path = self.key_path(*secrecy, id);
             locations.iter().any(|location| {
                 store::delete(self.store, *location, &path)
             })
@@ -179,15 +179,15 @@ impl<P: Platform> Keystore for ClientKeystore<P> {
     fn location(&self, secrecy: key::Secrecy, id: &KeyId) -> Option<Location> {
         let path = self.key_path(secrecy, id);
 
-        if path.exists(&self.store.vfs()) {
+        if path.exists(self.store.vfs()) {
             return Some(Location::Volatile);
         }
 
-        if path.exists(&self.store.ifs()) {
+        if path.exists(self.store.ifs()) {
             return Some(Location::Internal);
         }
 
-        if path.exists(&self.store.efs()) {
+        if path.exists(self.store.efs()) {
             return Some(Location::External);
         }
 
