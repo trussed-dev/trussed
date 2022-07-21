@@ -148,7 +148,7 @@ pub fn try_attest(
             SerializedSignature::Ed255(signature.as_ref().try_into().unwrap())
         }
         SignatureAlgorithm::P256 => {
-            SerializedSignature::P256(heapless_bytes::Bytes::from_slice(&mechanisms::P256::sign(
+            SerializedSignature::P256(heapless_bytes::Bytes::from_slice(mechanisms::P256::sign(
                 attn_keystore,
                 &request::Sign {
                     mechanism: Mechanism::P256,
@@ -511,7 +511,7 @@ impl Encodable for Datetime<'_> {
         let tagged_slice = if &self.0[..4] < b"2050" {
             TaggedSlice::from(Tag::UTC_TIME, &self.0[2..])?
         } else {
-            TaggedSlice::from(Tag::GENERALIZED_TIME, &self.0)?
+            TaggedSlice::from(Tag::GENERALIZED_TIME, self.0)?
         };
         encoder.encode(&tagged_slice)
     }

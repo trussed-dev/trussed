@@ -133,7 +133,7 @@ pub struct Fs<S: 'static + LfsStorage> {
 impl<S: 'static + LfsStorage> core::ops::Deref for Fs<S> {
     type Target = Filesystem<'static, S>;
     fn deref(&self) -> &Self::Target {
-        &self.fs
+        self.fs
     }
 }
 

@@ -12,7 +12,7 @@ fn load_secret_key(keystore: &mut impl Keystore, key_id: &KeyId)
 
     // info_now!("loading keypair");
     let secret_scalar: [u8; 32] = keystore
-        .load_key(key::Secrecy::Secret, Some(key::Kind::P256), &key_id)?
+        .load_key(key::Secrecy::Secret, Some(key::Kind::P256), key_id)?
         .material.as_slice()
         .try_into()
         .map_err(|_| Error::InternalError)?;
@@ -27,7 +27,7 @@ fn load_public_key(keystore: &mut impl Keystore, key_id: &KeyId)
     -> Result<p256_cortex_m4::PublicKey, Error>
 {
     let compressed_public_key: [u8; 33] = keystore
-        .load_key(key::Secrecy::Public, Some(key::Kind::P256), &key_id)?
+        .load_key(key::Secrecy::Public, Some(key::Kind::P256), key_id)?
         .material.as_slice()
         .try_into()
         .map_err(|_| Error::InternalError)?;

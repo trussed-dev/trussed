@@ -464,8 +464,8 @@ pub trait CryptoClient: PollClient {
         let r = self.request(request::Verify {
             mechanism,
             key,
-            message: Message::from_slice(&message).expect("all good"),
-            signature: Signature::from_slice(&signature).expect("all good"),
+            message: Message::from_slice(message).expect("all good"),
+            signature: Signature::from_slice(signature).expect("all good"),
             format,
         })?;
         r.client.syscall();

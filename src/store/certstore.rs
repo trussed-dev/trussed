@@ -54,7 +54,7 @@ impl<S: Store> Certstore for ClientCertstore<S> {
     fn write_certificate(&mut self, location: Location, der: &Message) -> Result<CertId> {
         let id = CertId::new(&mut self.rng);
         let path = self.cert_path(id);
-        store::store(self.store, location, &path, &der.as_slice())?;
+        store::store(self.store, location, &path, der.as_slice())?;
         Ok(id)
     }
 }

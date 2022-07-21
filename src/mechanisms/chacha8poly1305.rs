@@ -74,14 +74,14 @@ impl Decrypt for super::Chacha8Poly1305
 
         let symmetric_key = &serialized[..32];
 
-        let aead = ChaCha8Poly1305::new(&GenericArray::clone_from_slice(&symmetric_key));
+        let aead = ChaCha8Poly1305::new(&GenericArray::clone_from_slice(symmetric_key));
 
         let mut plaintext = request.message.clone();
         let nonce = GenericArray::from_slice(&request.nonce);
         let tag = GenericArray::from_slice(&request.tag);
 
         let outcome = aead.decrypt_in_place_detached(
-            &nonce, &request.associated_data, &mut plaintext, &tag);
+            nonce, &request.associated_data, &mut plaintext, tag);
 
         // outcome.map_err(|_| Error::AeadError)?;
 
@@ -132,7 +132,7 @@ impl Encrypt for super::Chacha8Poly1305
         }
         // increment_nonce(&mut serialized[32..])?;
 
-        keystore.overwrite_key(location, secrecy, key_kind, key_id, &serialized)?;
+        keystore.overwrite_key(location, secrecy, key_kind, key_id, serialized)?;
 
         let (symmetric_key, generated_nonce) = serialized.split_at_mut(32);
 
