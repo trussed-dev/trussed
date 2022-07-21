@@ -762,6 +762,28 @@
 <span id="757">757</span>
 <span id="758">758</span>
 <span id="759">759</span>
+<span id="760">760</span>
+<span id="761">761</span>
+<span id="762">762</span>
+<span id="763">763</span>
+<span id="764">764</span>
+<span id="765">765</span>
+<span id="766">766</span>
+<span id="767">767</span>
+<span id="768">768</span>
+<span id="769">769</span>
+<span id="770">770</span>
+<span id="771">771</span>
+<span id="772">772</span>
+<span id="773">773</span>
+<span id="774">774</span>
+<span id="775">775</span>
+<span id="776">776</span>
+<span id="777">777</span>
+<span id="778">778</span>
+<span id="779">779</span>
+<span id="780">780</span>
+<span id="781">781</span>
 </pre><pre class="rust"><code><span class="kw">pub</span> <span class="kw">use</span> <span class="ident">rand_core</span>::{<span class="ident">RngCore</span>, <span class="ident">SeedableRng</span>};
 <span class="kw">use</span> <span class="ident">interchange::Responder</span>;
 <span class="kw">use</span> <span class="ident">littlefs2::path::PathBuf</span>;
@@ -1454,6 +1476,20 @@
         <span class="prelude-val">Ok</span>(<span class="ident"><span class="kw">crate</span>::client::ClientImplementation::new</span>(<span class="ident">requester</span>, <span class="self">self</span>))
     }
 
+    <span class="doccomment">/// Similar to [try_as_new_client][Service::try_as_new_client] except that the returning client owns the</span>
+    <span class="doccomment">/// Service and is therefore `&#39;static`</span>
+    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::result_unit_err</span>)]</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_into_new_client</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">client_id</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>)
+        -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::client::ClientImplementation</span><span class="op">&lt;</span><span class="ident">Service</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span><span class="op">&gt;</span>, ()<span class="op">&gt;</span>
+    {
+        <span class="kw">use</span> <span class="ident">interchange::Interchange</span>;
+        <span class="kw">let</span> (<span class="ident">requester</span>, <span class="ident">responder</span>) <span class="op">=</span> <span class="ident">TrussedInterchange::claim</span>().<span class="ident">ok_or</span>(())<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">client_id</span> <span class="op">=</span> <span class="ident">ClientId::from</span>(<span class="ident">client_id</span>.<span class="ident">as_bytes</span>());
+        <span class="self">self</span>.<span class="ident">add_endpoint</span>(<span class="ident">responder</span>, <span class="ident">client_id</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">_service_endpoint</span><span class="op">|</span> ())<span class="question-mark">?</span>;
+
+        <span class="prelude-val">Ok</span>(<span class="ident"><span class="kw">crate</span>::client::ClientImplementation::new</span>(<span class="ident">requester</span>, <span class="self">self</span>))
+    }
+
 
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">add_endpoint</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">interchange</span>: <span class="ident">Responder</span><span class="op">&lt;</span><span class="ident">TrussedInterchange</span><span class="op">&gt;</span>, <span class="ident">client_id</span>: <span class="ident">ClientId</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">ServiceEndpoint</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="ident">client_id</span> <span class="op">==</span> <span class="ident">PathBuf::from</span>(<span class="string">&quot;trussed&quot;</span>) {
@@ -1515,6 +1551,14 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> <span class="ident"><span class="kw">crate</span>::client::Syscall</span> <span class="kw">for</span> <span class="kw-2">&amp;mut</span> <span class="ident">Service</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>
+<span class="kw">where</span> <span class="ident">P</span>: <span class="ident">Platform</span>
+{
+    <span class="kw">fn</span> <span class="ident">syscall</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
+        <span class="self">self</span>.<span class="ident">process</span>();
+    }
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> <span class="ident"><span class="kw">crate</span>::client::Syscall</span> <span class="kw">for</span> <span class="ident">Service</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>
 <span class="kw">where</span> <span class="ident">P</span>: <span class="ident">Platform</span>
 {
     <span class="kw">fn</span> <span class="ident">syscall</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
