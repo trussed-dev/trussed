@@ -1,3 +1,5 @@
+#![cfg(feature = "virt")]
+
 mod client;
 
 use trussed::{
