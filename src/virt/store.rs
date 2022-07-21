@@ -32,11 +32,11 @@ impl Storage for FilesystemStorage {
 
     type CACHE_SIZE = U512;
     type LOOKAHEADWORDS_SIZE = U16;
-    /// TODO: We can't actually be changed currently
+    // TODO: This can't actually be changed currently
     // type FILENAME_MAX_PLUS_ONE = U256;
     // type PATH_MAX_PLUS_ONE = U256;
     // const FILEBYTES_MAX: usize = littlefs2::ll::LFS_FILE_MAX as _;
-    /// TODO: We can't actually be changed currently
+    // TODO: This can't actually be changed currently
     // type ATTRBYTES_MAX = U1022;
 
     fn read(&self, offset: usize, buffer: &mut [u8]) -> LfsResult<usize> {
