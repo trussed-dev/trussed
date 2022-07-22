@@ -3,13 +3,14 @@ use chacha20::ChaCha20;
 
 use crate::*;
 use crate::types::*;
-use littlefs2::{consts, fs::{Allocation, Filesystem}};
+use littlefs2::fs::{Allocation, Filesystem};
 use littlefs2::const_ram_storage;
 use interchange::Interchange;
 use entropy::shannon_entropy;
 
 use crate::client::{
     CryptoClient as _,
+    FilesystemClient as _,
 };
 
 pub struct MockRng(ChaCha20);
@@ -460,3 +461,85 @@ fn rng() {
 
 }
 
+#[test]
+#[serial]
+fn filesystem() {
+    setup!(client);
+
+    assert!(
+        block!(
+            client
+                .entry_metadata(Location::Internal, PathBuf::from("test_file"))
+                .expect("no client error")
+        )
+        .expect("no errors")
+        .metadata
+        .is_none(),
+    );
+
+    let data = Bytes::from_slice(&[0; 20]).unwrap();
+    block!(
+        client
+            .write_file(
+                Location::Internal,
+                PathBuf::from("test_file"),
+                data.clone(),
+                None,
+            )
+            .expect("no client error")
+    )
+    .expect("no errors");
+
+    let recv_data = block!(
+        client
+            .read_file(Location::Internal, PathBuf::from("test_file"))
+            .expect("no client error")
+    )
+    .expect("no errors")
+    .data;
+    assert_eq!(data, recv_data);
+
+    let metadata = block!(
+        client
+            .entry_metadata(Location::Internal, PathBuf::from("test_file"))
+            .expect("no client error")
+    )
+    .expect("no errors")
+    .metadata
+    .unwrap();
+    assert!(metadata.is_file());
+
+    // This returns an error because the name doesn't exist
+    block!(
+        client
+            .remove_file(Location::Internal, PathBuf::from("bad_name"))
+            .expect("no client error")
+    )
+    .ok();
+    let metadata = block!(
+        client
+            .entry_metadata(Location::Internal, PathBuf::from("test_file"))
+            .expect("no client error")
+    )
+    .expect("no errors")
+    .metadata
+    .unwrap();
+    assert!(metadata.is_file());
+
+    block!(
+        client
+            .remove_file(Location::Internal, PathBuf::from("test_file"))
+            .expect("no client error")
+    )
+    .expect("no errors");
+    assert!(
+        block!(
+            client
+                .entry_metadata(Location::Internal, PathBuf::from("test_file"))
+                .expect("no client error")
+        )
+        .expect("no errors")
+        .metadata
+        .is_none(),
+    );
+}
