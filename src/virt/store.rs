@@ -2,16 +2,20 @@ use std::{
     io::{Read as _, Seek as _, SeekFrom, Write as _},
     fs::{File, OpenOptions},
     marker::PhantomData,
-    path::{Path, PathBuf},
+    path::PathBuf,
 };
 
 use generic_array::typenum::{U16, U512};
 use littlefs2::{const_ram_storage, driver::Storage};
 
-use crate::{store, store::{Fs, Store}, types::{LfsResult, LfsStorage}};
+use crate::{store, store::Store, types::{LfsResult, LfsStorage}};
 
-pub trait Reset {
-    fn reset(&self);
+pub trait StoreProvider {
+    type Store: Store;
+
+    unsafe fn store(&self) -> Self::Store;
+
+    unsafe fn reset(&self);
 }
 
 const STORAGE_SIZE: usize = 1024 * 16;
@@ -75,13 +79,13 @@ impl Storage for FilesystemStorage {
     }
 }
 
-store!(FilesystemStoreImpl,
+store!(FilesystemStore,
   Internal: FilesystemStorage,
   External: ExternalStorage,
   Volatile: VolatileStorage
 );
 
-impl Default for FilesystemStoreImpl {
+impl Default for FilesystemStore {
     fn default() -> Self {
         Self {
             __: PhantomData,
@@ -89,59 +93,48 @@ impl Default for FilesystemStoreImpl {
     }
 }
 
-#[derive(Clone, Copy)]
-pub struct FilesystemStore<'a> {
-    inner: FilesystemStoreImpl,
-    internal: &'a Path,
+#[derive(Clone, Debug)]
+pub struct Filesystem {
+    internal: PathBuf,
     format: bool,
 }
 
-impl<'a> FilesystemStore<'a> {
-    pub fn new(internal: &'a Path) -> Self {
+impl Filesystem {
+    pub fn new(internal: impl Into<PathBuf>) -> Self {
+        let internal = internal.into();
         let len = u64::try_from(STORAGE_SIZE).unwrap();
-        let format = if let Ok(file) = File::open(internal) {
+        let format = if let Ok(file) = File::open(&internal) {
             assert_eq!(file.metadata().unwrap().len(), len);
             false
         } else {
-            let file = File::create(internal).expect("failed to create storage file");
+            let file = File::create(&internal).expect("failed to create storage file");
             file.set_len(len).expect("failed to set storage file len");
             true
         };
         Self {
-            inner: Default::default(),
             internal,
             format,
         }
     }
 }
 
-unsafe impl<'a> Store for FilesystemStore<'a> {
-    type I = <FilesystemStoreImpl as Store>::I;
-    type E = <FilesystemStoreImpl as Store>::E;
-    type V = <FilesystemStoreImpl as Store>::V;
+impl StoreProvider for Filesystem {
+    type Store = FilesystemStore;
 
-    fn ifs(self) -> &'static Fs<Self::I> {
-        self.inner.ifs()
+    unsafe fn store(&self) -> Self::Store {
+        Self::Store {
+            __: PhantomData,
+        }
     }
 
-    fn efs(self) -> &'static Fs<Self::E> {
-        self.inner.efs()
-    }
-
-    fn vfs(self) -> &'static Fs<Self::V> {
-        self.inner.vfs()
-    }
-}
-
-impl<'a> Reset for FilesystemStore<'a> {
-    fn reset(&self) {
-        let ifs = FilesystemStorage(self.internal.to_owned());
+    unsafe fn reset(&self) {
+        let ifs = FilesystemStorage(self.internal.clone());
         let efs = ExternalStorage::default();
         let vfs = VolatileStorage::default();
         let (ifs_alloc, ifs_storage, efs_alloc, efs_storage, vfs_alloc, vfs_storage) =
-            FilesystemStoreImpl::allocate(ifs, efs, vfs);
+            Self::Store::allocate(ifs, efs, vfs);
         let format = self.format;
-        self.inner
+        self.store()
             .mount(ifs_alloc, ifs_storage, efs_alloc, efs_storage, vfs_alloc, vfs_storage, format)
             .expect("failed to mount filesystem");
     }
@@ -153,22 +146,26 @@ store!(RamStore,
    Volatile: VolatileStorage
 );
 
-impl Default for RamStore {
-    fn default() -> Self {
-        Self {
+#[derive(Copy, Clone, Debug, Default)]
+pub struct Ram {}
+
+impl StoreProvider for Ram {
+    type Store = RamStore;
+
+    unsafe fn store(&self) -> Self::Store {
+        Self::Store {
             __: PhantomData,
         }
     }
-}
 
-impl Reset for RamStore {
-    fn reset(&self) {
+    unsafe fn reset(&self) {
         let ifs = InternalStorage::default();
         let efs = ExternalStorage::default();
         let vfs = VolatileStorage::default();
         let (ifs_alloc, ifs_storage, efs_alloc, efs_storage, vfs_alloc, vfs_storage) =
-            Self::allocate(ifs, efs, vfs);
-        self.mount(ifs_alloc, ifs_storage, efs_alloc, efs_storage, vfs_alloc, vfs_storage, true)
+            Self::Store::allocate(ifs, efs, vfs);
+        self.store()
+            .mount(ifs_alloc, ifs_storage, efs_alloc, efs_storage, vfs_alloc, vfs_storage, true)
             .expect("failed to mount filesystem");
     }
 }
