@@ -638,6 +638,17 @@ pub trait FilesystemClient: PollClient {
         Ok(r)
     }
 
+    /// Fetch the Metadata for a file or directory
+    ///
+    /// If the file doesn't exists, return None
+    fn entry_metadata(&mut self, location: Location, path: PathBuf)
+        -> ClientResult<'_, reply::Metadata, Self>
+    {
+        let r = self.request(request::Metadata { location, path } )?;
+        r.client.syscall();
+        Ok(r)
+    }
+
     fn locate_file(&mut self, location: Location, dir: Option<PathBuf>, filename: PathBuf)
         -> ClientResult<'_, reply::LocateFile, Self>
     {
