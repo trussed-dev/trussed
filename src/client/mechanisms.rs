@@ -385,7 +385,7 @@ pub trait P256: CryptoClient {
     }
 }
 
-#[cfg(feature = "rsa2k-pkcs")]
+#[cfg(feature = "rsa2k")]
 impl<S: Syscall> Rsa2kPkcs for ClientImplementation<S> {}
 
 pub trait Rsa2kPkcs: CryptoClient {
