@@ -509,8 +509,11 @@ pub enum Mechanism {
     Trng,
     X255,
     Rsa2kPkcs,
-    Rsa3k,
-    Rsa4k,
+    Rsa2kPss,
+    Rsa3kPkcs,
+    Rsa3kPss,
+    Rsa4kPkcs,
+    Rsa4kPss,
 }
 
 pub type LongData = Bytes<MAX_LONG_DATA_LENGTH>;
