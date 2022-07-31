@@ -10,11 +10,7 @@ use crate::error::Error;
 use crate::service::*;
 use crate::types::*;
 
-//TODO:alt3r-3go: sign() and verify() are the only two methods that are actually different between -pkcs and -pss.
-//                Moreover, the key::Kind::Rsa2K could also probably be parametrized, instead of having a dedicated kind
-//                for each. Overall this means the class structure can probably be simplified - need to decide.
-
-#[cfg(feature = "rsa2k-pkcs")]
+#[cfg(feature = "rsa2k")]
 impl DeriveKey for super::Rsa2kPkcs {
     #[inline(never)]
     fn derive_key(
@@ -54,7 +50,7 @@ impl DeriveKey for super::Rsa2kPkcs {
     }
 }
 
-#[cfg(feature = "rsa2k-pkcs")]
+#[cfg(feature = "rsa2k")]
 impl DeserializeKey for super::Rsa2kPkcs {
     #[inline(never)]
     fn deserialize_key(
@@ -72,7 +68,7 @@ impl DeserializeKey for super::Rsa2kPkcs {
         let private_key: RsaPrivateKey = DecodePrivateKey::from_pkcs8_der(&request.serialized_key)
             .map_err(|_| Error::InvalidSerializedKey)?;
 
-        // We store our keys in PKCS#8 DER format as well
+        // We store our keys in PKCS#8 DER format
         let private_key_der = private_key
             .to_pkcs8_der()
             .expect("Failed to serialize an RSA 2K private key to PKCS#8 DER");
@@ -90,7 +86,7 @@ impl DeserializeKey for super::Rsa2kPkcs {
     }
 }
 
-#[cfg(feature = "rsa2k-pkcs")]
+#[cfg(feature = "rsa2k")]
 impl GenerateKey for super::Rsa2kPkcs {
     #[inline(never)]
     fn generate_key(
@@ -127,7 +123,7 @@ impl GenerateKey for super::Rsa2kPkcs {
     }
 }
 
-#[cfg(feature = "rsa2k-pkcs")]
+#[cfg(feature = "rsa2k")]
 impl SerializeKey for super::Rsa2kPkcs {
     #[inline(never)]
     fn serialize_key(
@@ -143,8 +139,6 @@ impl SerializeKey for super::Rsa2kPkcs {
             .material;
 
         let serialized_key = match request.format {
-            // TODO:alt3r-3go: There are "Der" and "Asn1Der" commented out in KeySerialization enum,
-            //                 should those be used instead?
             KeySerialization::Raw => {
                 let mut serialized_key = Message::new();
                 serialized_key
@@ -162,7 +156,7 @@ impl SerializeKey for super::Rsa2kPkcs {
     }
 }
 
-#[cfg(feature = "rsa2k-pkcs")]
+#[cfg(feature = "rsa2k")]
 impl Exists for super::Rsa2kPkcs {
     #[inline(never)]
     fn exists(
@@ -176,7 +170,7 @@ impl Exists for super::Rsa2kPkcs {
     }
 }
 
-#[cfg(feature = "rsa2k-pkcs")]
+#[cfg(feature = "rsa2k")]
 impl Sign for super::Rsa2kPkcs {
     #[inline(never)]
     fn sign(keystore: &mut impl Keystore, request: &request::Sign) -> Result<reply::Sign, Error> {
@@ -193,12 +187,9 @@ impl Sign for super::Rsa2kPkcs {
             .expect("Failed to deserialize an RSA 2K private key from PKCS#8 DER");
 
         // RSA lib takes in a hash value to sign, not raw data.
-        // TODO:alt3r-3go: Do we assume we get digest into this function, or we calculate it ourselves?
-        // use sha2::digest::Digest;
-        // let digest_to_sign: [u8; 32] = sha2::Sha256::digest(&request.message).into();
+        // We assume we get digest into this function, too.
 
-        // TODO:alt3r-3go: There's also .sign_blinded(), which is supposed to protect the private key from timing side channels,
-        //                 but requires an RNG instance - decide if we want to always use it.
+        // TODO: Consider using .sign_blinded(), which is supposed to protect the private key from timing side channels
         use rsa::hash::Hash;
         use rsa::padding::PaddingScheme;
         let native_signature = priv_key
@@ -221,7 +212,7 @@ impl Sign for super::Rsa2kPkcs {
     }
 }
 
-#[cfg(feature = "rsa2k-pkcs")]
+#[cfg(feature = "rsa2k")]
 impl Verify for super::Rsa2kPkcs {
     #[inline(never)]
     fn verify(
@@ -233,7 +224,7 @@ impl Verify for super::Rsa2kPkcs {
             return Err(Error::InvalidSerializationFormat);
         }
 
-        // TODO:alt3r-3go: This must not be a hardcoded magic number, need to generalize
+        // TODO: This must not be a hardcoded magic number, convert when a common mechanism is available
         if request.signature.len() != 256 {
             return Err(Error::WrongSignatureLength);
         }
@@ -267,11 +258,11 @@ impl Verify for super::Rsa2kPkcs {
     }
 }
 
-#[cfg(not(feature = "rsa2k-pkcs"))]
+#[cfg(not(feature = "rsa2k"))]
 impl DeriveKey for super::Rsa2kPkcs {}
-#[cfg(not(feature = "rsa2k-pkcs"))]
+#[cfg(not(feature = "rsa2k"))]
 impl GenerateKey for super::Rsa2kPkcs {}
-#[cfg(not(feature = "rsa2k-pkcs"))]
+#[cfg(not(feature = "rsa2k"))]
 impl Sign for super::Rsa2kPkcs {}
-#[cfg(not(feature = "rsa2k-pkcs"))]
+#[cfg(not(feature = "rsa2k"))]
 impl Verify for super::Rsa2kPkcs {}

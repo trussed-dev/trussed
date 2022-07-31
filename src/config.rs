@@ -44,22 +44,20 @@ cfg_if::cfg_if! {
 }
 pub const MAX_SHORT_DATA_LENGTH: usize = 128;
 
-// TODO:alt3r-3go: Do we want better keylength granularity here?
-#[cfg(any(feature = "rsa2k-pkcs", feature = "rsa3k", feature = "rsa4k"))]
+#[cfg(any(feature = "rsa2k", feature = "rsa3k", feature = "rsa4k"))]
 pub const MAX_SIGNATURE_LENGTH: usize = 512;
-#[cfg(any(feature = "rsa2k-pkcs", feature = "rsa3k", feature = "rsa4k"))]
-// TODO:alt3r-3go: We use PKCS#8 DER format, this value was found empirically for 2K keys. Need to generalize.
+#[cfg(any(feature = "rsa2k", feature = "rsa3k", feature = "rsa4k"))]
+// TODO: We use PKCS#8 DER format, this value was found empirically for 2K keys. Need to generalize.
 pub const MAX_KEY_MATERIAL_LENGTH: usize = 1217;
-#[cfg(any(feature = "rsa2k-pkcs", feature = "rsa3k", feature = "rsa4k"))]
-// TODO:alt3r-3go: This is due to the fact that KEY_MATERIAL_LENGTH is now bigger than MESSAGE_LENGTH.
-//                 Double-check this is okay.
+#[cfg(any(feature = "rsa2k", feature = "rsa3k", feature = "rsa4k"))]
+// This is due to the fact that KEY_MATERIAL_LENGTH is bigger than MESSAGE_LENGTH for RSA.
 pub const MAX_MESSAGE_LENGTH: usize = MAX_KEY_MATERIAL_LENGTH;
 
-#[cfg(not(any(feature = "rsa2k-pkcs", feature = "rsa3k", feature = "rsa4k")))]
+#[cfg(not(any(feature = "rsa2k", feature = "rsa3k", feature = "rsa4k")))]
 pub const MAX_SIGNATURE_LENGTH: usize = 72;
-#[cfg(not(any(feature = "rsa2k-pkcs", feature = "rsa3k", feature = "rsa4k")))]
+#[cfg(not(any(feature = "rsa2k", feature = "rsa3k", feature = "rsa4k")))]
 pub const MAX_KEY_MATERIAL_LENGTH: usize = 128;
-#[cfg(not(any(feature = "rsa2k-pkcs", feature = "rsa3k", feature = "rsa4k")))]
+#[cfg(not(any(feature = "rsa2k", feature = "rsa3k", feature = "rsa4k")))]
 pub const MAX_MESSAGE_LENGTH: usize = 1024;
 
 // must be MAX_KEY_MATERIAL_LENGTH + 4
