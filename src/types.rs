@@ -434,6 +434,7 @@ pub enum Location {
 }
 
 #[derive(Clone, Eq, PartialEq, Debug, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct StorageAttributes {
     // each object must have a unique ID
     // unique_id: UniqueId,

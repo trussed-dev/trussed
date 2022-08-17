@@ -73,9 +73,7 @@ pub fn try_attest(
                     mechanism: Mechanism::Ed255,
                     base_key: request.private_key,
                     additional_data: None,
-                    attributes: StorageAttributes {
-                        persistence: Location::Volatile,
-                    },
+                    attributes: StorageAttributes::new().set_persistence(Location::Volatile),
                 },
             )?
             .key;
@@ -106,9 +104,7 @@ pub fn try_attest(
                     mechanism: Mechanism::P256,
                     base_key: request.private_key,
                     additional_data: None,
-                    attributes: StorageAttributes {
-                        persistence: Location::Volatile,
-                    },
+                    attributes: StorageAttributes::new().set_persistence(Location::Volatile),
                 },
             )?
             .key;
