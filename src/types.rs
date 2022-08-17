@@ -445,6 +445,10 @@ pub struct StorageAttributes {
     // // cryptoki: token (vs session) object
     // persistent: bool,
     pub persistence: Location,
+
+    /// Wether a the result of an [`agree`](crate::client::CryptoClient::agree) can be serialized
+    /// with [`serialize_key`](crate::client::CryptoClient::serialize_key)
+    pub serializable: bool,
     // cryptoki: user must be logged in
     // private: bool,
 
@@ -458,6 +462,11 @@ impl StorageAttributes {
         self.persistence = persistence;
         self
     }
+
+    pub fn set_serializable(mut self, serializable: bool) -> Self {
+        self.serializable = serializable;
+        self
+    }
 }
 
 impl StorageAttributes {
@@ -468,6 +477,7 @@ impl StorageAttributes {
             // label: String::new(),
             // persistent: false,
             persistence: Location::Volatile,
+            serializable: false,
             // modifiable: true,
             // copyable: true,
             // destroyable: true,

@@ -79,6 +79,10 @@ bitflags::bitflags! {
         const LOCAL = 1 << 0;
         /// Set if the key is a secret key.
         const SENSITIVE = 1 << 1;
+        // Reserved for future use
+        // const WRAPPABLE = 1 << 3;
+        /// This flag currently only applies to `kind::Shared`
+        const SERIALIZABLE = 1 << 4;
     }
 }
 
