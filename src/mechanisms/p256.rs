@@ -54,10 +54,20 @@ impl Agree for super::P256 {
 
         let shared_secret = secret_key.agree(&public_key);
 
+        let flags = if request.attributes.serializable {
+            key::Flags::SERIALIZABLE
+        } else {
+            key::Flags::empty()
+        };
+        let info = key::Info {
+            kind: key::Kind::Shared(shared_secret.as_bytes().len()),
+            flags,
+        };
+
         let key_id = keystore.store_key(
             request.attributes.persistence,
             key::Secrecy::Secret,
-            key::Kind::Shared(32),
+            info,
             shared_secret.as_bytes(),
         )?;
 
