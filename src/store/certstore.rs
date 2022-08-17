@@ -26,29 +26,23 @@ pub trait Certstore {
 }
 
 impl<S: Store> Certstore for ClientCertstore<S> {
-
     fn delete_certificate(&mut self, id: CertId) -> Result<()> {
         let path = self.cert_path(id);
-        let locations = [
-            Location::Internal,
-            Location::External,
-            Location::Volatile,
-        ];
-        locations.iter().any(|&location| {
-            store::delete(self.store, location, &path)
-        }).then(|| ()).ok_or(Error::NoSuchKey)
+        let locations = [Location::Internal, Location::External, Location::Volatile];
+        locations
+            .iter()
+            .any(|&location| store::delete(self.store, location, &path))
+            .then(|| ())
+            .ok_or(Error::NoSuchKey)
     }
 
     fn read_certificate(&mut self, id: CertId) -> Result<Message> {
         let path = self.cert_path(id);
-        let locations = [
-            Location::Internal,
-            Location::External,
-            Location::Volatile,
-        ];
-        locations.iter().find_map(|&location| {
-            store::read(self.store, location, &path).ok()
-        }).ok_or(Error::NoSuchCertificate)
+        let locations = [Location::Internal, Location::External, Location::Volatile];
+        locations
+            .iter()
+            .find_map(|&location| store::read(self.store, location, &path).ok())
+            .ok_or(Error::NoSuchCertificate)
     }
 
     fn write_certificate(&mut self, location: Location, der: &Message) -> Result<CertId> {
@@ -61,7 +55,11 @@ impl<S: Store> Certstore for ClientCertstore<S> {
 
 impl<S: Store> ClientCertstore<S> {
     pub fn new(client_id: ClientId, rng: ChaCha8Rng, store: S) -> Self {
-        Self { client_id, rng, store }
+        Self {
+            client_id,
+            rng,
+            store,
+        }
     }
 
     fn cert_path(&self, id: CertId) -> PathBuf {
@@ -82,6 +80,4 @@ impl<S: Store> ClientCertstore<S> {
     //     let path = self.cert_path(id);
     //     store::store(self.store, location, &path, &data)
     // }
-
 }
-

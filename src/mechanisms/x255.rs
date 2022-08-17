@@ -9,26 +9,31 @@ use crate::types::*;
 
 use salty::agreement;
 
-fn load_public_key(keystore: &mut impl Keystore, key_id: &KeyId)
-    -> Result<agreement::PublicKey, Error> {
-
+fn load_public_key(
+    keystore: &mut impl Keystore,
+    key_id: &KeyId,
+) -> Result<agreement::PublicKey, Error> {
     let public_bytes: [u8; 32] = keystore
         .load_key(key::Secrecy::Public, Some(key::Kind::X255), key_id)?
-        .material.as_slice()
+        .material
+        .as_slice()
         .try_into()
         .map_err(|_| Error::InternalError)?;
 
-    let public_key = agreement::PublicKey::try_from(public_bytes).map_err(|_| Error::InternalError)?;
+    let public_key =
+        agreement::PublicKey::try_from(public_bytes).map_err(|_| Error::InternalError)?;
 
     Ok(public_key)
 }
 
-fn load_secret_key(keystore: &mut impl Keystore, key_id: &KeyId)
-    -> Result<agreement::SecretKey, Error> {
-
+fn load_secret_key(
+    keystore: &mut impl Keystore,
+    key_id: &KeyId,
+) -> Result<agreement::SecretKey, Error> {
     let seed: [u8; 32] = keystore
         .load_key(key::Secrecy::Secret, Some(key::Kind::X255), key_id)?
-        .material.as_slice()
+        .material
+        .as_slice()
         .try_into()
         .map_err(|_| Error::InternalError)?;
 
@@ -37,41 +42,39 @@ fn load_secret_key(keystore: &mut impl Keystore, key_id: &KeyId)
 }
 
 #[cfg(feature = "x255")]
-impl Agree for super::X255
-{
+impl Agree for super::X255 {
     // #[inline(never)]
-    fn agree(keystore: &mut impl Keystore, request: &request::Agree)
-        -> Result<reply::Agree, Error>
-    {
-        let secret_key = load_secret_key(
-            keystore,
-            &request.private_key,
-        )?;
+    fn agree(
+        keystore: &mut impl Keystore,
+        request: &request::Agree,
+    ) -> Result<reply::Agree, Error> {
+        let secret_key = load_secret_key(keystore, &request.private_key)?;
 
-        let public_key = load_public_key(
-            keystore,
-            &request.public_key,
-        )?;
+        let public_key = load_public_key(keystore, &request.public_key)?;
 
         let shared_secret = secret_key.agree(&public_key).to_bytes();
 
         let key_id = keystore.store_key(
             request.attributes.persistence,
-            key::Secrecy::Secret, key::Kind::Shared(32),
-            &shared_secret)?;
+            key::Secrecy::Secret,
+            key::Kind::Shared(32),
+            &shared_secret,
+        )?;
 
         // return handle
-        Ok(reply::Agree { shared_secret: key_id })
+        Ok(reply::Agree {
+            shared_secret: key_id,
+        })
     }
 }
 
 #[cfg(feature = "x255")]
-impl GenerateKey for super::X255
-{
+impl GenerateKey for super::X255 {
     // #[inline(never)]
-    fn generate_key(keystore: &mut impl Keystore, request: &request::GenerateKey)
-        -> Result<reply::GenerateKey, Error>
-    {
+    fn generate_key(
+        keystore: &mut impl Keystore,
+        request: &request::GenerateKey,
+    ) -> Result<reply::GenerateKey, Error> {
         // generate keypair
         let mut seed = [0u8; 32];
         keystore.rng().fill_bytes(&mut seed);
@@ -81,7 +84,8 @@ impl GenerateKey for super::X255
             request.attributes.persistence,
             key::Secrecy::Secret,
             key::Info::from(key::Kind::X255).with_local_flag(),
-            &seed)?;
+            &seed,
+        )?;
 
         // return handle
         Ok(reply::GenerateKey { key: key_id })
@@ -89,12 +93,12 @@ impl GenerateKey for super::X255
 }
 
 #[cfg(feature = "x255")]
-impl Exists for super::X255
-{
+impl Exists for super::X255 {
     // #[inline(never)]
-    fn exists(keystore: &mut impl Keystore, request: &request::Exists)
-        -> Result<reply::Exists, Error>
-    {
+    fn exists(
+        keystore: &mut impl Keystore,
+        request: &request::Exists,
+    ) -> Result<reply::Exists, Error> {
         let key_id = request.key;
         let exists = keystore.exists_key(key::Secrecy::Secret, Some(key::Kind::X255), &key_id);
         Ok(reply::Exists { exists })
@@ -102,12 +106,12 @@ impl Exists for super::X255
 }
 
 #[cfg(feature = "x255")]
-impl DeriveKey for super::X255
-{
+impl DeriveKey for super::X255 {
     // #[inline(never)]
-    fn derive_key(keystore: &mut impl Keystore, request: &request::DeriveKey)
-        -> Result<reply::DeriveKey, Error>
-    {
+    fn derive_key(
+        keystore: &mut impl Keystore,
+        request: &request::DeriveKey,
+    ) -> Result<reply::DeriveKey, Error> {
         let base_id = request.base_key;
 
         let secret_key = load_secret_key(keystore, &base_id)?;
@@ -116,30 +120,36 @@ impl DeriveKey for super::X255
         let public_key_bytes = public_key.to_bytes();
         let public_id = keystore.store_key(
             request.attributes.persistence,
-            key::Secrecy::Public, key::Kind::X255,
-            &public_key_bytes)?;
+            key::Secrecy::Public,
+            key::Kind::X255,
+            &public_key_bytes,
+        )?;
 
         Ok(reply::DeriveKey { key: public_id })
     }
 }
 
 #[cfg(feature = "x255")]
-impl SerializeKey for super::X255
-{
+impl SerializeKey for super::X255 {
     // #[inline(never)]
-    fn serialize_key(keystore: &mut impl Keystore, request: &request::SerializeKey)
-        -> Result<reply::SerializeKey, Error>
-    {
+    fn serialize_key(
+        keystore: &mut impl Keystore,
+        request: &request::SerializeKey,
+    ) -> Result<reply::SerializeKey, Error> {
         let key_id = request.key;
         let public_key = load_public_key(keystore, &key_id)?;
 
         let mut serialized_key = Message::new();
         match request.format {
             KeySerialization::Raw => {
-                serialized_key.extend_from_slice(&public_key.to_bytes()).map_err(|_| Error::InternalError)?;
+                serialized_key
+                    .extend_from_slice(&public_key.to_bytes())
+                    .map_err(|_| Error::InternalError)?;
             }
 
-            _ => { return Err(Error::InternalError); }
+            _ => {
+                return Err(Error::InternalError);
+            }
         }
 
         Ok(reply::SerializeKey { serialized_key })
@@ -147,15 +157,15 @@ impl SerializeKey for super::X255
 }
 
 #[cfg(feature = "x255")]
-impl DeserializeKey for super::X255
-{
+impl DeserializeKey for super::X255 {
     // #[inline(never)]
-    fn deserialize_key(keystore: &mut impl Keystore, request: &request::DeserializeKey)
-        -> Result<reply::DeserializeKey, Error>
-    {
-          // - mechanism: Mechanism
-          // - serialized_key: Message
-          // - attributes: StorageAttributes
+    fn deserialize_key(
+        keystore: &mut impl Keystore,
+        request: &request::DeserializeKey,
+    ) -> Result<reply::DeserializeKey, Error> {
+        // - mechanism: Mechanism
+        // - serialized_key: Message
+        // - attributes: StorageAttributes
 
         if request.format != KeySerialization::Raw {
             return Err(Error::InternalError);
@@ -171,13 +181,14 @@ impl DeserializeKey for super::X255
 
         let public_id = keystore.store_key(
             request.attributes.persistence,
-            key::Secrecy::Public, key::Kind::X255,
-            &public_key.to_bytes())?;
+            key::Secrecy::Public,
+            key::Kind::X255,
+            &public_key.to_bytes(),
+        )?;
 
         Ok(reply::DeserializeKey { key: public_id })
     }
 }
-
 
 #[cfg(not(feature = "x255"))]
 impl Agree for super::X255 {}

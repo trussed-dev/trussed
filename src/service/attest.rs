@@ -1,31 +1,35 @@
-
-use flexiber::{Encodable, EncodableHeapless, Encoder, Length as BerLength, Result as BerResult, Tag, TaggedSlice, TaggedValue};
+use flexiber::{
+    Encodable, EncodableHeapless, Encoder, Length as BerLength, Result as BerResult, Tag,
+    TaggedSlice, TaggedValue,
+};
 use hex_literal::hex;
 use rand_core::RngCore;
 
 use crate::{
-    api::{
-        request::Attest as AttestRequest,
-        request,
-        reply::Attest as AttestReply,
-    },
+    api::{reply::Attest as AttestReply, request, request::Attest as AttestRequest},
     error::Error,
-    key,
-    mechanisms,
+    key, mechanisms,
     service::{DeriveKey, SerializeKey, Sign},
     store::certstore::Certstore,
     store::keystore::Keystore,
-    types::{KeyId, KeySerialization, Location, Mechanism, Message, SignatureSerialization, StorageAttributes},
+    types::{
+        KeyId, KeySerialization, Location, Mechanism, Message, SignatureSerialization,
+        StorageAttributes,
+    },
 };
 
 #[cfg(not(feature = "test-attestation-cert-ids"))]
 pub const ED255_ATTN_KEY: KeyId = KeyId::from_special(1);
 #[cfg(feature = "test-attestation-cert-ids")]
-pub const ED255_ATTN_KEY: KeyId = KeyId(Id(u128::from_be_bytes([0x12,0xd2,0xa7,0xe4,0x03,0x55,0x21,0x42,0x99,0xf1,0x57,0x34,0xc5,0xd7,0xd0,0xe7])));
+pub const ED255_ATTN_KEY: KeyId = KeyId(Id(u128::from_be_bytes([
+    0x12, 0xd2, 0xa7, 0xe4, 0x03, 0x55, 0x21, 0x42, 0x99, 0xf1, 0x57, 0x34, 0xc5, 0xd7, 0xd0, 0xe7,
+])));
 #[cfg(not(feature = "test-attestation-cert-ids"))]
 pub const P256_ATTN_KEY: KeyId = KeyId::from_special(2);
 #[cfg(feature = "test-attestation-cert-ids")]
-pub const P256_ATTN_KEY: KeyId = KeyId(Id(u128::from_be_bytes([0xc8,0xd6,0x77,0xa3,0x93,0x46,0xc9,0x8f,0xc8,0x5a,0xb0,0x5d,0x29,0xc5,0x75,0x32])));
+pub const P256_ATTN_KEY: KeyId = KeyId(Id(u128::from_be_bytes([
+    0xc8, 0xd6, 0x77, 0xa3, 0x93, 0x46, 0xc9, 0x8f, 0xc8, 0x5a, 0xb0, 0x5d, 0x29, 0xc5, 0x75, 0x32,
+])));
 
 #[inline(never)]
 pub fn try_attest(
@@ -33,11 +37,7 @@ pub fn try_attest(
     certstore: &mut impl Certstore,
     keystore: &mut impl Keystore,
     request: &AttestRequest,
-)
-    -> Result<AttestReply, Error>
-
-{
-
+) -> Result<AttestReply, Error> {
     let signature_algorithm = SignatureAlgorithm::try_from(request.signing_mechanism)?;
 
     // 1. Construct the TBS Certificate
@@ -73,9 +73,12 @@ pub fn try_attest(
                     mechanism: Mechanism::Ed255,
                     base_key: request.private_key,
                     additional_data: None,
-                    attributes: StorageAttributes { persistence: Location::Volatile },
+                    attributes: StorageAttributes {
+                        persistence: Location::Volatile,
+                    },
                 },
-            )?.key;
+            )?
+            .key;
             let serialized_key = mechanisms::Ed255::serialize_key(
                 keystore,
                 &request::SerializeKey {
@@ -83,11 +86,16 @@ pub fn try_attest(
                     key: public_key,
                     format: KeySerialization::Raw,
                 },
-            ).unwrap().serialized_key;
+            )
+            .unwrap()
+            .serialized_key;
             keystore.delete_key(&public_key);
 
             SerializedSubjectPublicKey::Ed255(
-                serialized_key.as_ref().try_into().map_err(|_| Error::ImplementationError)?
+                serialized_key
+                    .as_ref()
+                    .try_into()
+                    .map_err(|_| Error::ImplementationError)?,
             )
         }
 
@@ -98,9 +106,12 @@ pub fn try_attest(
                     mechanism: Mechanism::P256,
                     base_key: request.private_key,
                     additional_data: None,
-                    attributes: StorageAttributes { persistence: Location::Volatile },
+                    attributes: StorageAttributes {
+                        persistence: Location::Volatile,
+                    },
                 },
-            )?.key;
+            )?
+            .key;
             let serialized_key = mechanisms::P256::serialize_key(
                 keystore,
                 &request::SerializeKey {
@@ -108,11 +119,16 @@ pub fn try_attest(
                     key: public_key,
                     format: KeySerialization::Sec1,
                 },
-            ).unwrap().serialized_key;
+            )
+            .unwrap()
+            .serialized_key;
             keystore.delete_key(&public_key);
 
             SerializedSubjectPublicKey::P256(
-                serialized_key.as_ref().try_into().map_err(|_| Error::ImplementationError)?
+                serialized_key
+                    .as_ref()
+                    .try_into()
+                    .map_err(|_| Error::ImplementationError)?,
             )
         }
     };
@@ -121,17 +137,25 @@ pub fn try_attest(
         version: Version::V3,
         serial: BigEndianInteger(serial.as_ref()),
         signature_algorithm,
-        issuer: Name::default().with_country(b"CH").with_organization("Trussed").with_state("Zurich"),
+        issuer: Name::default()
+            .with_country(b"CH")
+            .with_organization("Trussed")
+            .with_state("Zurich"),
         // validity: Validity { start: Datetime(b"20210313120000Z"), end: None },
-        validity: Validity { start: Datetime(b"20210313120000Z"), end: None },
+        validity: Validity {
+            start: Datetime(b"20210313120000Z"),
+            end: None,
+        },
         // subject: Name::default(),
         subject: Name::default(), //.with_country(b"CH").with_organization("Trussed").with_state("Zurich"),
         subject_public_key_info: spki,
     };
 
-    let message = Message::from(TaggedValue::new(Tag::SEQUENCE, &to_be_signed_certificate)
-        .to_heapless_vec()
-        .map_err(|_| Error::InternalError)?);
+    let message = Message::from(
+        TaggedValue::new(Tag::SEQUENCE, &to_be_signed_certificate)
+            .to_heapless_vec()
+            .map_err(|_| Error::InternalError)?,
+    );
 
     // 2. sign the TBS Cert
     let signature = match signature_algorithm {
@@ -144,20 +168,28 @@ pub fn try_attest(
                     message,
                     format: SignatureSerialization::Raw,
                 },
-            ).unwrap().signature;
+            )
+            .unwrap()
+            .signature;
             SerializedSignature::Ed255(signature.as_ref().try_into().unwrap())
         }
-        SignatureAlgorithm::P256 => {
-            SerializedSignature::P256(heapless_bytes::Bytes::from_slice(mechanisms::P256::sign(
-                attn_keystore,
-                &request::Sign {
-                    mechanism: Mechanism::P256,
-                    key: P256_ATTN_KEY,
-                    message,
-                    format: SignatureSerialization::Asn1Der,
-                },
-            ).unwrap().signature.as_ref()).unwrap())
-        }
+        SignatureAlgorithm::P256 => SerializedSignature::P256(
+            heapless_bytes::Bytes::from_slice(
+                mechanisms::P256::sign(
+                    attn_keystore,
+                    &request::Sign {
+                        mechanism: Mechanism::P256,
+                        key: P256_ATTN_KEY,
+                        message,
+                        format: SignatureSerialization::Asn1Der,
+                    },
+                )
+                .unwrap()
+                .signature
+                .as_ref(),
+            )
+            .unwrap(),
+        ),
     };
 
     let mut leading_zero_signature = [0u8; 80];
@@ -165,13 +197,15 @@ pub fn try_attest(
     leading_zero_signature[1..][..l].copy_from_slice(signature.as_ref());
 
     // 3. construct the entire DER-serialized cert
-    let certificate = Message::from(Certificate {
-        tbs_certificate: to_be_signed_certificate,
-        signature_algorithm,
-        signature: &leading_zero_signature[..l + 1],
-    }
+    let certificate = Message::from(
+        Certificate {
+            tbs_certificate: to_be_signed_certificate,
+            signature_algorithm,
+            signature: &leading_zero_signature[..l + 1],
+        }
         .to_heapless_vec()
-        .map_err(|_| Error::ImplementationError)?);
+        .map_err(|_| Error::ImplementationError)?,
+    );
 
     let id = certstore.write_certificate(Location::Internal, &certificate)?;
 
@@ -197,7 +231,6 @@ pub struct TbsCertificate<'l> {
     subject: Name<'l>,
     #[tlv(constructed, number = "0x10")] // SEQUENCE
     subject_public_key_info: SerializedSubjectPublicKey,
-
     // optional
     // extensions: Extensions
 }
@@ -210,7 +243,7 @@ pub struct Certificate<'l> {
     #[tlv(constructed, number = "0x10")] // SEQUENCE
     signature_algorithm: SignatureAlgorithm,
     #[tlv(number = "0x3", slice)] // BIT-STRING
-    signature: &'l [u8],//SerializedSignature,
+    signature: &'l [u8], //SerializedSignature,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -238,7 +271,6 @@ impl AsRef<[u8]> for SerializedSignature {
 //             SerializedSignature::P256(signature) => signature.len() as u16 + 1
 //         } as u8).into())
 //     }
-
 
 //     fn encode(&self, encoder: &mut Encoder<'_>) -> BerResult<()> {
 //         // NB: BIT-STRING needs to have number of "unused bits" in first byte (we have none)
@@ -283,7 +315,6 @@ impl Version {
 }
 
 impl Encodable for Version {
-
     fn encoded_length(&self) -> BerResult<BerLength> {
         Ok((Self::ENCODING.len() as u8).into())
     }
@@ -299,7 +330,6 @@ impl Encodable for Version {
 pub struct BigEndianInteger<'a>(pub &'a [u8]);
 
 impl Encodable for BigEndianInteger<'_> {
-
     fn encoded_length(&self) -> BerResult<BerLength> {
         let mut num = self.0;
         // leading zeros must be trimmed (except zero, see below)
@@ -345,17 +375,18 @@ impl TryFrom<Mechanism> for SignatureAlgorithm {
 
 // 1.2.840.10045.4.3.2 ecdsaWithSHA256 (ANSI X9.62 ECDSA algorithm with SHA256))
 const P256_OID_ENCODING: &[u8] = &hex!("06 08  2A 86 48 CE 3D 04 03 02");
-const P256_PUB_ENCODING: &[u8] = &hex!("06 07 2A 86 48 CE 3D 02 01   06 08 2A 86 48 CE  3D 03 01 07");
+const P256_PUB_ENCODING: &[u8] =
+    &hex!("06 07 2A 86 48 CE 3D 02 01   06 08 2A 86 48 CE  3D 03 01 07");
 // 1.3.101.112 curveEd25519 (EdDSA 25519 signature algorithm)
 const ED255_OID_ENCODING: &[u8] = &hex!("06 03  2B 65 70");
 
 impl Encodable for SignatureAlgorithm {
-
     fn encoded_length(&self) -> BerResult<BerLength> {
         Ok((match self {
             SignatureAlgorithm::Ed255 => ED255_OID_ENCODING.len(),
             SignatureAlgorithm::P256 => P256_OID_ENCODING.len(),
-        } as u8).into())
+        } as u8)
+            .into())
     }
 
     fn encode(&self, encoder: &mut Encoder<'_>) -> BerResult<()> {
@@ -376,7 +407,7 @@ pub struct Name<'l> {
 }
 
 #[derive(Clone, Copy, Encodable, Eq, PartialEq)]
-#[tlv(constructed, number = "0x10")]  // SEQUENCE = 0x10
+#[tlv(constructed, number = "0x10")] // SEQUENCE = 0x10
 struct EncodedPart<'l> {
     #[tlv(number = "0x6")] // OBJECT_IDENTIFIER
     oid: &'l [u8],
@@ -386,13 +417,22 @@ struct EncodedPart<'l> {
 
 impl<'l> Name<'l> {
     pub fn with_country(self, country: &[u8; 2]) -> Self {
-        Self { country: Some(*country), ..self }
+        Self {
+            country: Some(*country),
+            ..self
+        }
     }
     pub fn with_organization(self, organization: &'l str) -> Self {
-        Self { organization: Some(organization), ..self }
+        Self {
+            organization: Some(organization),
+            ..self
+        }
     }
     pub fn with_state(self, state: &'l str) -> Self {
-        Self { state: Some(state), ..self }
+        Self {
+            state: Some(state),
+            ..self
+        }
     }
 }
 
@@ -446,8 +486,12 @@ pub enum Extension {}
 pub struct Extensions<'l>(&'l [Extension]);
 
 impl Encodable for Extensions<'_> {
-    fn encoded_length(&self) -> BerResult<BerLength> { Ok(0u8.into()) }
-    fn encode(&self, _encoder: &mut Encoder<'_>) -> BerResult<()> { Ok(()) }
+    fn encoded_length(&self) -> BerResult<BerLength> {
+        Ok(0u8.into())
+    }
+    fn encode(&self, _encoder: &mut Encoder<'_>) -> BerResult<()> {
+        Ok(())
+    }
 }
 
 pub struct ParsedDatetime {
@@ -471,10 +515,19 @@ impl ParsedDatetime {
             hour <= 23,
             minute <= 59,
             second <= 59,
-        ].iter().all(|b| *b);
+        ]
+        .iter()
+        .all(|b| *b);
 
         if valid {
-            Some(Self { year, month, day, hour, minute, second })
+            Some(Self {
+                year,
+                month,
+                day,
+                hour,
+                minute,
+                second,
+            })
         } else {
             None
         }
@@ -483,10 +536,14 @@ impl ParsedDatetime {
     pub fn to_bytes(&self) -> [u8; 15] {
         let mut buffer: heapless::Vec<u8, 15> = Default::default();
         buffer.resize_default(15).unwrap();
-        core::fmt::write(&mut buffer, format_args!(
-            "{}{:02}{:02}{:02}{:02}{:02}Z",
-            self.year, self.month, self.day, self.hour, self.minute, self.second
-        )).unwrap();
+        core::fmt::write(
+            &mut buffer,
+            format_args!(
+                "{}{:02}{:02}{:02}{:02}{:02}Z",
+                self.year, self.month, self.day, self.hour, self.minute, self.second
+            ),
+        )
+        .unwrap();
         let mut array = [0u8; 15];
         array.copy_from_slice(&buffer);
         array
@@ -495,7 +552,7 @@ impl ParsedDatetime {
 
 #[derive(Clone, Copy, Eq, PartialEq)]
 /// Encoded as "YYYYMMDDHHMMSSZ", encoding takes care of truncating YYYY to YY if necessary.
-pub struct Datetime<'l> (&'l [u8]);
+pub struct Datetime<'l>(&'l [u8]);
 
 impl Encodable for Datetime<'_> {
     fn encoded_length(&self) -> BerResult<BerLength> {
@@ -505,7 +562,8 @@ impl Encodable for Datetime<'_> {
         // starting 2050: GeneralizedTime -> keep YYYY
         } else {
             0x11u8
-        }.into())
+        }
+        .into())
     }
     fn encode(&self, encoder: &mut Encoder<'_>) -> BerResult<()> {
         let tagged_slice = if &self.0[..4] < b"2050" {
@@ -528,7 +586,11 @@ pub struct Validity<'l> {
 impl Encodable for Validity<'_> {
     fn encoded_length(&self) -> BerResult<BerLength> {
         // before 2050: UtcTime -> truncate YYYY to YY
-        self.start.encoded_length()? + self.end.unwrap_or(Datetime(b"99991231235959Z")).encoded_length()?
+        self.start.encoded_length()?
+            + self
+                .end
+                .unwrap_or(Datetime(b"99991231235959Z"))
+                .encoded_length()?
     }
 
     fn encode(&self, encoder: &mut Encoder<'_>) -> BerResult<()> {
@@ -549,38 +611,26 @@ impl Encodable for SerializedSubjectPublicKey {
         Ok((match self {
             SerializedSubjectPublicKey::Ed255(_) => 0x2A,
             SerializedSubjectPublicKey::P256(_) => 0x39,
-        } as u8).into())
+        } as u8)
+            .into())
     }
-
 
     fn encode(&self, encoder: &mut Encoder<'_>) -> BerResult<()> {
         // NB: BIT-STRING needs to have number of "unused bits" in first byte (we have none)
         match self {
             SerializedSubjectPublicKey::Ed255(pub_key) => {
-                encoder.encode(&TaggedSlice::from(
-                    Tag::SEQUENCE,
-                    ED255_OID_ENCODING,
-                )?)?;
+                encoder.encode(&TaggedSlice::from(Tag::SEQUENCE, ED255_OID_ENCODING)?)?;
                 let mut leading_zero = [0u8; 33];
                 leading_zero[1..].copy_from_slice(pub_key.as_ref());
-                encoder.encode(&TaggedSlice::from(
-                    Tag::BIT_STRING,
-                    &leading_zero,
-                )?)
+                encoder.encode(&TaggedSlice::from(Tag::BIT_STRING, &leading_zero)?)
 
                 // encoder.encode(&flexiber
             }
             SerializedSubjectPublicKey::P256(pub_key) => {
-                encoder.encode(&TaggedSlice::from(
-                    Tag::SEQUENCE,
-                    P256_PUB_ENCODING,
-                )?)?;
+                encoder.encode(&TaggedSlice::from(Tag::SEQUENCE, P256_PUB_ENCODING)?)?;
                 let mut leading_zero = [0u8; 34];
                 leading_zero[1..].copy_from_slice(pub_key.as_ref());
-                encoder.encode(&TaggedSlice::from(
-                    Tag::BIT_STRING,
-                    &leading_zero,
-                )?)
+                encoder.encode(&TaggedSlice::from(Tag::BIT_STRING, &leading_zero)?)
             }
         }
     }
@@ -720,14 +770,6 @@ impl Encodable for SerializedSubjectPublicKey {
 //    pub parameters: Option<Any<'a>>
 //}
 
-
-
-
-
-
-
-
-
 //    This is from docs.rs/x509 (version 0.2.0)
 
 //    pub fn tbs_certificate<'a, W: Write + 'a, Alg, PKI, O: Oid + 'a, N: heapless::ArrayLength<u8> + 'a>(
@@ -757,4 +799,3 @@ impl Encodable for SerializedSubjectPublicKey {
 //            extensions::<_, _, N>(exts),
 //        ))
 //    }
-

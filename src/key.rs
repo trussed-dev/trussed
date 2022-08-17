@@ -5,12 +5,12 @@ use zeroize::Zeroize;
 
 pub use crate::Bytes;
 use crate::{
-    Error,
     config::{MAX_KEY_MATERIAL_LENGTH, MAX_SERIALIZED_KEY_LENGTH},
+    Error,
 };
 
-pub type Material = Vec<u8, {MAX_KEY_MATERIAL_LENGTH}>;
-pub type SerializedKeyBytes = Vec<u8, {MAX_SERIALIZED_KEY_LENGTH}>;
+pub type Material = Vec<u8, { MAX_KEY_MATERIAL_LENGTH }>;
+pub type SerializedKeyBytes = Vec<u8, { MAX_SERIALIZED_KEY_LENGTH }>;
 
 // We don't implement serde to make sure nobody inadvertently still uses it
 // Should we use references here only?
@@ -23,15 +23,15 @@ pub type SerializedKeyBytes = Vec<u8, {MAX_SERIALIZED_KEY_LENGTH}>;
 /// [dictum]: https://twitter.com/SchmiegSophie/status/1264567198091079681
 #[derive(Clone, Debug, /*DeserializeIndexed,*/ Eq, PartialEq, /*SerializeIndexed,*/ Zeroize)]
 pub struct Key {
-   pub flags: Flags,
-   pub kind: Kind,
-   pub material: Material,
+    pub flags: Flags,
+    pub kind: Kind,
+    pub material: Material,
 }
 
 #[derive(Clone, Debug, /*DeserializeIndexed,*/ Eq, PartialEq, /*SerializeIndexed,*/ Zeroize)]
 pub struct Info {
-   pub flags: Flags,
-   pub kind: Kind,
+    pub flags: Flags,
+    pub kind: Kind,
 }
 
 impl Info {
@@ -43,7 +43,10 @@ impl Info {
 
 impl From<Kind> for Info {
     fn from(kind: Kind) -> Self {
-        Self { flags: Default::default(), kind }
+        Self {
+            flags: Default::default(),
+            kind,
+        }
     }
 }
 
@@ -92,8 +95,12 @@ impl Key {
         let mut buffer = SerializedKeyBytes::new();
         // big-endian here to ensure the first bit is enough to check compatibility
         // on breaking format change
-        buffer.extend_from_slice(&self.flags.bits().to_be_bytes()).unwrap();
-        buffer.extend_from_slice(&(self.kind.code()).to_be_bytes()).unwrap();
+        buffer
+            .extend_from_slice(&self.flags.bits().to_be_bytes())
+            .unwrap();
+        buffer
+            .extend_from_slice(&(self.kind.code()).to_be_bytes())
+            .unwrap();
         // can't fail, since MAX_SERIALIZED_KEY_LENGTH is defined as MAX_KEY_MATERIAL_LENGTH + 4
         buffer.extend_from_slice(&self.material).unwrap();
         buffer
@@ -108,7 +115,8 @@ impl Key {
         let flags = Flags::from_bits(flags_bits).ok_or(Error::InvalidSerializedKey)?;
 
         let kind_bits = u16::from_be_bytes([info[2], info[3]]);
-        let kind = Kind::try_from(kind_bits, material.len()).map_err(|_| Error::InvalidSerializedKey)?;
+        let kind =
+            Kind::try_from(kind_bits, material.len()).map_err(|_| Error::InvalidSerializedKey)?;
 
         Ok(Key {
             flags,

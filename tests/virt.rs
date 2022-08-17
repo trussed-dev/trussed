@@ -3,8 +3,8 @@
 use std::time::Duration;
 use trussed::{
     client::{FilesystemClient as _, ManagementClient as _},
-    types::{Bytes, Location, PathBuf},
     syscall,
+    types::{Bytes, Location, PathBuf},
     virt,
 };
 
@@ -16,7 +16,11 @@ fn run_test(data: u8) {
     virt::with_ram_client("test", |mut client| {
         // ensure that the filesystem is empty
         let read_dir = syscall!(client.read_dir_first(location, PathBuf::from(""), None)).entry;
-        assert!(read_dir.is_none(), "Filesystem not empty: {:?}", read_dir.unwrap());
+        assert!(
+            read_dir.is_none(),
+            "Filesystem not empty: {:?}",
+            read_dir.unwrap()
+        );
 
         // ensure that no other client is messing with our filesystem
         while syscall!(client.uptime()).uptime < Duration::from_secs(1) {

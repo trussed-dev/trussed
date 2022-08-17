@@ -1,13 +1,11 @@
-
 use chacha20::ChaCha8Rng;
 use littlefs2::path::PathBuf;
 
 use crate::{
     error::{Error, Result},
     store::{self, Store},
-    types::{ClientId, CounterId, Location as Location},
+    types::{ClientId, CounterId, Location},
 };
-
 
 pub struct ClientCounterstore<S>
 where
@@ -22,7 +20,11 @@ pub type Counter = u128;
 
 impl<S: Store> ClientCounterstore<S> {
     pub fn new(client_id: ClientId, rng: ChaCha8Rng, store: S) -> Self {
-        Self { client_id, rng, store }
+        Self {
+            client_id,
+            rng,
+            store,
+        }
     }
 
     fn counter_path(&self, id: CounterId) -> PathBuf {
@@ -56,7 +58,11 @@ impl<S: Store> ClientCounterstore<S> {
 /// Trait intended for use by mechanism implementations.
 pub trait Counterstore {
     const DEFAULT_START_AT: u128 = 0;
-    fn create_starting_at(&mut self, location: Location, starting_at: impl Into<Counter>) -> Result<CounterId>;
+    fn create_starting_at(
+        &mut self,
+        location: Location,
+        starting_at: impl Into<Counter>,
+    ) -> Result<CounterId>;
     fn create(&mut self, location: Location) -> Result<CounterId> {
         self.create_starting_at(location, Self::DEFAULT_START_AT)
     }
@@ -64,22 +70,23 @@ pub trait Counterstore {
 }
 
 impl<S: Store> Counterstore for ClientCounterstore<S> {
-    fn create_starting_at(&mut self, location: Location, starting_at: impl Into<Counter>) -> Result<CounterId> {
+    fn create_starting_at(
+        &mut self,
+        location: Location,
+        starting_at: impl Into<Counter>,
+    ) -> Result<CounterId> {
         let id = CounterId::new(&mut self.rng);
         self.write_counter(location, id, starting_at.into())?;
         Ok(id)
     }
 
     fn increment(&mut self, id: CounterId) -> Result<u128> {
-        let locations = [
-            Location::Internal,
-            Location::External,
-            Location::Volatile,
-        ];
+        let locations = [Location::Internal, Location::External, Location::Volatile];
 
-        locations.iter().filter_map(|&location| {
-            self.increment_location(location, id).ok()
-        }).next().ok_or(Error::NoSuchKey)
+        locations
+            .iter()
+            .filter_map(|&location| self.increment_location(location, id).ok())
+            .next()
+            .ok_or(Error::NoSuchKey)
     }
 }
-

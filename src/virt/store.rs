@@ -1,6 +1,6 @@
 use std::{
-    io::{Read as _, Seek as _, SeekFrom, Write as _},
     fs::{File, OpenOptions},
+    io::{Read as _, Seek as _, SeekFrom, Write as _},
     marker::PhantomData,
     path::PathBuf,
 };
@@ -8,7 +8,11 @@ use std::{
 use generic_array::typenum::{U16, U512};
 use littlefs2::{const_ram_storage, driver::Storage};
 
-use crate::{store, store::Store, types::{LfsResult, LfsStorage}};
+use crate::{
+    store,
+    store::Store,
+    types::{LfsResult, LfsStorage},
+};
 
 pub trait StoreProvider {
     type Store: Store;
@@ -52,10 +56,7 @@ impl Storage for FilesystemStorage {
     }
 
     fn write(&mut self, offset: usize, data: &[u8]) -> LfsResult<usize> {
-        let mut file = OpenOptions::new()
-            .write(true)
-            .open(&self.0)
-            .unwrap();
+        let mut file = OpenOptions::new().write(true).open(&self.0).unwrap();
         file.seek(SeekFrom::Start(offset as _)).unwrap();
         let bytes_written = file.write(data).unwrap();
         assert_eq!(bytes_written, data.len());
@@ -64,10 +65,7 @@ impl Storage for FilesystemStorage {
     }
 
     fn erase(&mut self, offset: usize, len: usize) -> LfsResult<usize> {
-        let mut file = OpenOptions::new()
-            .write(true)
-            .open(&self.0)
-            .unwrap();
+        let mut file = OpenOptions::new().write(true).open(&self.0).unwrap();
         file.seek(SeekFrom::Start(offset as _)).unwrap();
         let zero_block = [0xFFu8; Self::BLOCK_SIZE];
         for _ in 0..(len / Self::BLOCK_SIZE) {
@@ -79,17 +77,16 @@ impl Storage for FilesystemStorage {
     }
 }
 
-store!(FilesystemStore,
-  Internal: FilesystemStorage,
-  External: ExternalStorage,
-  Volatile: VolatileStorage
+store!(
+    FilesystemStore,
+    Internal: FilesystemStorage,
+    External: ExternalStorage,
+    Volatile: VolatileStorage
 );
 
 impl Default for FilesystemStore {
     fn default() -> Self {
-        Self {
-            __: PhantomData,
-        }
+        Self { __: PhantomData }
     }
 }
 
@@ -111,10 +108,7 @@ impl Filesystem {
             file.set_len(len).expect("failed to set storage file len");
             true
         };
-        Self {
-            internal,
-            format,
-        }
+        Self { internal, format }
     }
 }
 
@@ -122,9 +116,7 @@ impl StoreProvider for Filesystem {
     type Store = FilesystemStore;
 
     unsafe fn store(&self) -> Self::Store {
-        Self::Store {
-            __: PhantomData,
-        }
+        Self::Store { __: PhantomData }
     }
 
     unsafe fn reset(&self) {
@@ -135,15 +127,24 @@ impl StoreProvider for Filesystem {
             Self::Store::allocate(ifs, efs, vfs);
         let format = self.format;
         self.store()
-            .mount(ifs_alloc, ifs_storage, efs_alloc, efs_storage, vfs_alloc, vfs_storage, format)
+            .mount(
+                ifs_alloc,
+                ifs_storage,
+                efs_alloc,
+                efs_storage,
+                vfs_alloc,
+                vfs_storage,
+                format,
+            )
             .expect("failed to mount filesystem");
     }
 }
 
-store!(RamStore,
-   Internal: InternalStorage,
-   External: ExternalStorage,
-   Volatile: VolatileStorage
+store!(
+    RamStore,
+    Internal: InternalStorage,
+    External: ExternalStorage,
+    Volatile: VolatileStorage
 );
 
 #[derive(Copy, Clone, Debug, Default)]
@@ -153,9 +154,7 @@ impl StoreProvider for Ram {
     type Store = RamStore;
 
     unsafe fn store(&self) -> Self::Store {
-        Self::Store {
-            __: PhantomData,
-        }
+        Self::Store { __: PhantomData }
     }
 
     unsafe fn reset(&self) {
@@ -165,7 +164,15 @@ impl StoreProvider for Ram {
         let (ifs_alloc, ifs_storage, efs_alloc, efs_storage, vfs_alloc, vfs_storage) =
             Self::Store::allocate(ifs, efs, vfs);
         self.store()
-            .mount(ifs_alloc, ifs_storage, efs_alloc, efs_storage, vfs_alloc, vfs_storage, true)
+            .mount(
+                ifs_alloc,
+                ifs_storage,
+                efs_alloc,
+                efs_storage,
+                vfs_alloc,
+                vfs_storage,
+                true,
+            )
             .expect("failed to mount filesystem");
     }
 }

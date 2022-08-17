@@ -1,4 +1,3 @@
-
 use crate::api::*;
 use crate::error::Error;
 use crate::service::*;
@@ -9,12 +8,12 @@ const DIGITS: u32 = 6;
 
 // https://tools.ietf.org/html/rfc4226#section-5.3
 
-    #[inline(never)]
+#[inline(never)]
 fn hotp_raw(key: &[u8], counter: u64, digits: u32) -> u64 {
     hmac_and_truncate(key, &counter.to_be_bytes(), digits)
 }
 
-    #[inline(never)]
+#[inline(never)]
 fn hmac_and_truncate(key: &[u8], message: &[u8], digits: u32) -> u64 {
     use hmac::{Hmac, Mac, NewMac};
     // let mut hmac = Hmac::<D>::new(GenericArray::from_slice(key));
@@ -43,12 +42,9 @@ fn dynamic_truncation(hs: &[u8]) -> u64 {
 }
 
 #[cfg(feature = "totp")]
-impl Sign for super::Totp
-{
+impl Sign for super::Totp {
     #[inline(never)]
-    fn sign(keystore: &mut impl Keystore, request: &request::Sign)
-        -> Result<reply::Sign, Error>
-    {
+    fn sign(keystore: &mut impl Keystore, request: &request::Sign) -> Result<reply::Sign, Error> {
         let key_id = request.key;
 
         let secret = keystore
@@ -63,24 +59,29 @@ impl Sign for super::Totp
         let totp_material: u64 = hotp_raw(&secret, timestamp, DIGITS);
 
         // return signature (encode as LE)
-        Ok(reply::Sign { signature: crate::Bytes::from_slice(totp_material.to_le_bytes().as_ref()).unwrap() })
+        Ok(reply::Sign {
+            signature: crate::Bytes::from_slice(totp_material.to_le_bytes().as_ref()).unwrap(),
+        })
     }
 }
 
 #[cfg(feature = "totp")]
-impl Exists for super::Totp
-{
+impl Exists for super::Totp {
     #[inline(never)]
-    fn exists(keystore: &mut impl Keystore, request: &request::Exists)
-        -> Result<reply::Exists, Error>
-    {
+    fn exists(
+        keystore: &mut impl Keystore,
+        request: &request::Exists,
+    ) -> Result<reply::Exists, Error> {
         let key_id = request.key;
 
-        let exists = keystore.exists_key(key::Secrecy::Secret, Some(key::Kind::Symmetric(20)), &key_id);
+        let exists = keystore.exists_key(
+            key::Secrecy::Secret,
+            Some(key::Kind::Symmetric(20)),
+            &key_id,
+        );
         Ok(reply::Exists { exists })
     }
 }
-
 
 #[cfg(test)]
 mod tests {

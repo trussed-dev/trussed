@@ -5,7 +5,6 @@
 
 // use trussed::types::Location::*;
 
-
 // tests not working as no setup of the attn keys in place
 // tests were valid for previous implementation using self-signed certificates
 

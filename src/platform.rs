@@ -7,11 +7,10 @@
 //! TODO: Currently, `Platform::R` lacks the `CryptoRng` bound.
 
 // pub use rand_core::{CryptoRng, RngCore};
-pub use rand_core::{CryptoRng, RngCore};
 pub use crate::store::Store;
-pub use crate::types::{ui, reboot};
 pub use crate::types::consent;
-
+pub use crate::types::{reboot, ui};
+pub use rand_core::{CryptoRng, RngCore};
 
 pub trait UserInterface {
     /// Check if the user has indicated their presence so as to give
@@ -38,10 +37,10 @@ pub trait UserInterface {
     }
 
     /// Exit / reset the application
-    fn reboot (&mut self, to: reboot::To) -> ! {
+    fn reboot(&mut self, to: reboot::To) -> ! {
         let _ = to;
         loop {
-            continue
+            continue;
         }
     }
 
@@ -67,50 +66,54 @@ pub unsafe trait Platform {
 }
 
 #[macro_export]
-macro_rules! platform { (
+macro_rules! platform {
+    (
     $PlatformName:ident,
     R: $Rng:ty,
     S: $Store:ty,
     UI: $UserInterface:ty,
 ) => {
-
-    /// Platform struct implemented `trussed::Platform`, generated
-    /// by a Trussed-supplied macro at call site, using the platform-specific
-    /// implementations of its components.
-    pub struct $PlatformName {
-        rng: $Rng,
-        store: $Store,
-        user_interface: $UserInterface,
-    }
-
-    impl $PlatformName {
-        pub fn new(rng: $Rng, store: $Store, user_interface: $UserInterface) -> Self {
-            Self { rng, store, user_interface }
-        }
-    }
-
-    unsafe impl $crate::platform::Platform for $PlatformName {
-        type R = $Rng;
-        type S = $Store;
-        type UI = $UserInterface;
-
-        fn user_interface(&mut self) -> &mut Self::UI {
-            &mut self.user_interface
+        /// Platform struct implemented `trussed::Platform`, generated
+        /// by a Trussed-supplied macro at call site, using the platform-specific
+        /// implementations of its components.
+        pub struct $PlatformName {
+            rng: $Rng,
+            store: $Store,
+            user_interface: $UserInterface,
         }
 
-        fn rng(&mut self) -> &mut Self::R {
-            &mut self.rng
+        impl $PlatformName {
+            pub fn new(rng: $Rng, store: $Store, user_interface: $UserInterface) -> Self {
+                Self {
+                    rng,
+                    store,
+                    user_interface,
+                }
+            }
         }
 
-        fn store(&self) -> Self::S {
-            self.store
+        unsafe impl $crate::platform::Platform for $PlatformName {
+            type R = $Rng;
+            type S = $Store;
+            type UI = $UserInterface;
+
+            fn user_interface(&mut self) -> &mut Self::UI {
+                &mut self.user_interface
+            }
+
+            fn rng(&mut self) -> &mut Self::R {
+                &mut self.rng
+            }
+
+            fn store(&self) -> Self::S {
+                self.store
+            }
         }
-    }
-}}
+    };
+}
 
 /// Trussed client will call this method when making a Trussed request.
 /// This is intended to trigger a secure context on the platform.
 pub trait Syscall {
     fn syscall(&mut self);
 }
-
