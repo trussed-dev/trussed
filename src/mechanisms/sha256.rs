@@ -12,9 +12,11 @@ impl DeriveKey for super::Sha256 {
     ) -> Result<reply::DeriveKey, Error> {
         let base_id = &request.base_key;
 
-        let shared_secret = keystore
-            .load_key(key::Secrecy::Secret, None, base_id)?
-            .material;
+        let key = keystore.load_key(key::Secrecy::Secret, None, &base_id)?;
+        if !matches!(key.kind, key::Kind::Symmetric(..) | key::Kind::Shared(..)) {
+            return Err(Error::NoSuchKey);
+        }
+        let shared_secret = key.material;
 
         // hash it
         use sha2::digest::Digest;

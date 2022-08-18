@@ -14,9 +14,11 @@ impl DeriveKey for super::HmacBlake2s {
         type HmacBlake2s = Hmac<blake2::Blake2s>;
 
         let key_id = request.base_key.object_id;
-        let shared_secret = keystore
-            .load_key(key::Secrecy::Secret, None, &key_id)?
-            .material;
+        let key = keystore.load_key(key::Secrecy::Secret, None, &key_id)?;
+        if !matches!(key.kind, key::Kind::Symmetric(..) | key::Kind::Shared(..)) {
+            return Err(Error::WrongKeyKind);
+        }
+        let shared_secret = key.material;
 
         let mut mac = HmacBlake2s::new_from_slice(&shared_secret.as_ref())
             .map_err(|_| Error::InternalError)?;
@@ -51,9 +53,11 @@ impl Sign for super::HmacBlake2s {
         type HmacBlake2s = Hmac<Blake2s>;
 
         let key_id = request.key.object_id;
-        let shared_secret = keystore
-            .load_key(key::Secrecy::Secret, None, &key_id)?
-            .material;
+        let key = keystore.load_key(key::Secrecy::Secret, None, &key_id)?;
+        if !matches!(key.kind, key::Kind::Symmetric(..) | key::Kind::Shared(..)) {
+            return Err(Error::WrongKeyKind);
+        }
+        let shared_secret = key.material;
 
         let mut mac = HmacBlake2s::new_from_slice(&shared_secret.as_ref())
             .map_err(|_| Error::InternalError)?;

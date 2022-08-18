@@ -5,6 +5,7 @@ use crate::service::*;
 // code copied from https://github.com/avacariu/rust-oath
 
 const DIGITS: u32 = 6;
+const TOTP_KEY_SIZE: usize = 20;
 
 // https://tools.ietf.org/html/rfc4226#section-5.3
 
@@ -47,9 +48,16 @@ impl Sign for super::Totp {
     fn sign(keystore: &mut impl Keystore, request: &request::Sign) -> Result<reply::Sign, Error> {
         let key_id = request.key;
 
-        let secret = keystore
-            .load_key(key::Secrecy::Secret, None, &key_id)?
-            .material;
+        let key = keystore.load_key(key::Secrecy::Secret, None, &key_id)?;
+
+        if !matches!(
+            key.kind,
+            key::Kind::Symmetric(TOTP_KEY_SIZE) | key::Kind::Shared(TOTP_KEY_SIZE)
+        ) {
+            return Err(Error::WrongKeyKind);
+        }
+
+        let secret = key.material;
 
         if request.message.len() != 8 {
             return Err(Error::InternalError);

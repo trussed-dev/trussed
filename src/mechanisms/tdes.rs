@@ -13,6 +13,8 @@ use crate::error::Error;
 use crate::service::*;
 use crate::types::*;
 
+const TDES_KEY_SIZE: usize = 24;
+
 #[cfg(feature = "tdes")]
 impl Encrypt for super::Tdes {
     /// Encrypts a single block. Let's hope we don't have to support ECB!!
@@ -27,8 +29,17 @@ impl Encrypt for super::Tdes {
 
         let key_id = request.key;
 
-        let symmetric_key: [u8; 24] = keystore
-            .load_key(key::Secrecy::Secret, None, &key_id)?
+        let key = keystore.load_key(key::Secrecy::Secret, None, &key_id)?;
+        // FIXME: Symmetric keys of the correct size can't currently be obtained with without using
+        // `unsafe_inject_shared_key` so tdes needs to accept "shared" keys
+        if !matches!(
+            key.kind,
+            key::Kind::Symmetric(TDES_KEY_SIZE) | key::Kind::Shared(TDES_KEY_SIZE)
+        ) {
+            return Err(Error::WrongKeyKind);
+        }
+
+        let symmetric_key: [u8; TDES_KEY_SIZE] = key
             .material
             .as_slice()
             .try_into()

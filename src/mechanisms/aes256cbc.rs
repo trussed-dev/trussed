@@ -4,6 +4,8 @@ use crate::error::Error;
 use crate::service::*;
 use crate::types::*;
 
+const AES256_KEY_SIZE: usize = 32;
+
 #[cfg(feature = "aes256-cbc")]
 impl Encrypt for super::Aes256Cbc {
     /// Encrypts the input *with zero IV*
@@ -20,12 +22,12 @@ impl Encrypt for super::Aes256Cbc {
         type Aes256Cbc = Cbc<Aes256, ZeroPadding>;
 
         let key_id = request.key;
-        // let mut symmetric_key = [0u8; 32];
-        // let path = keystore.key_path(key::Secrecy::Secret, &key_id);
-        // keystore.load_key(&path, key::Kind::SymmetricKey32, &mut symmetric_key)?;
+        let key = keystore.load_key(key::Secrecy::Secret, None, &key_id)?;
+        if !matches!(key.kind, key::Kind::Symmetric(AES256_KEY_SIZE)) {
+            return Err(Error::WrongKeyKind);
+        }
 
-        let symmetric_key: [u8; 32] = keystore
-            .load_key(key::Secrecy::Secret, None, &key_id)?
+        let symmetric_key: [u8; AES256_KEY_SIZE] = key
             .material
             .as_slice()
             .try_into()
@@ -106,8 +108,12 @@ impl Decrypt for super::Aes256Cbc {
         type Aes256Cbc = Cbc<Aes256, ZeroPadding>;
 
         let key_id = request.key;
-        let symmetric_key: [u8; 32] = keystore
-            .load_key(key::Secrecy::Secret, None, &key_id)?
+        let key = keystore.load_key(key::Secrecy::Secret, None, &key_id)?;
+        if !matches!(key.kind, key::Kind::Symmetric(AES256_KEY_SIZE)) {
+            return Err(Error::WrongKeyKind);
+        }
+
+        let symmetric_key: [u8; AES256_KEY_SIZE] = key
             .material
             .as_slice()
             .try_into()
