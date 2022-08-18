@@ -14,9 +14,11 @@ impl DeriveKey for super::HmacSha256 {
         type HmacSha256 = Hmac<sha2::Sha256>;
 
         let key_id = request.base_key;
-        let shared_secret = keystore
-            .load_key(key::Secrecy::Secret, None, &key_id)?
-            .material;
+        let key = keystore.load_key(key::Secrecy::Secret, None, &key_id)?;
+        if !matches!(key.kind, key::Kind::Symmetric(..) | key::Kind::Shared(..)) {
+            return Err(Error::WrongKeyKind);
+        }
+        let shared_secret = key.material;
 
         let mut mac =
             HmacSha256::new_from_slice(shared_secret.as_ref()).map_err(|_| Error::InternalError)?;
@@ -49,9 +51,11 @@ impl Sign for super::HmacSha256 {
         type HmacSha256 = Hmac<Sha256>;
 
         let key_id = request.key;
-        let shared_secret = keystore
-            .load_key(key::Secrecy::Secret, None, &key_id)?
-            .material;
+        let key = keystore.load_key(key::Secrecy::Secret, None, &key_id)?;
+        if !matches!(key.kind, key::Kind::Symmetric(..) | key::Kind::Shared(..)) {
+            return Err(Error::WrongKeyKind);
+        }
+        let shared_secret = key.material;
 
         let mut mac =
             HmacSha256::new_from_slice(shared_secret.as_ref()).map_err(|_| Error::InternalError)?;

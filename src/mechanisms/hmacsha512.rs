@@ -14,9 +14,11 @@ impl DeriveKey for super::HmacSha512 {
         type HmacSha512 = Hmac<sha2::Sha512>;
 
         let key_id = request.base_key.object_id;
-        let shared_secret = keystore
-            .load_key(key::Secrecy::Secret, None, &key_id)?
-            .material;
+        let key = keystore.load_key(key::Secrecy::Secret, None, &key_id)?;
+        if !matches!(key.kind, key::Kind::Symmetric(..) | key::Kind::Shared(..)) {
+            return Err(Error::WrongKeyKind);
+        }
+        let shared_secret = key.material;
 
         let mut mac =
             HmacSha512::new_varkey(&shared_secret.as_ref()).map_err(|_| Error::InternalError)?;
@@ -48,9 +50,11 @@ impl Sign for super::HmacSha512 {
         type HmacSha512 = Hmac<Sha512>;
 
         let key_id = request.key.object_id;
-        let shared_secret = keystore
-            .load_key(key::Secrecy::Secret, None, &key_id)?
-            .material;
+        let key = keystore.load_key(key::Secrecy::Secret, None, &key_id)?;
+        if !matches!(key.kind, key::Kind::Symmetric(..) | key::Kind::Shared(..)) {
+            return Err(Error::WrongKeyKind);
+        }
+        let shared_secret = key.material;
 
         let mut mac =
             HmacSha512::new_varkey(&shared_secret.as_ref()).map_err(|_| Error::InternalError)?;
