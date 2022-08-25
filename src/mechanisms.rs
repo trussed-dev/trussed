@@ -17,6 +17,9 @@ mod aes256cbc;
 pub struct Chacha8Poly1305 {}
 mod chacha8poly1305;
 
+pub struct SharedSecret {}
+mod shared_secret;
+
 pub struct Ed255 {}
 mod ed255;
 

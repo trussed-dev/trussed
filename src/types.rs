@@ -509,6 +509,8 @@ pub enum Mechanism {
     Totp,
     Trng,
     X255,
+    /// Used to serialize the output of a diffie-hellman
+    SharedSecret,
 }
 
 pub type LongData = Bytes<MAX_LONG_DATA_LENGTH>;
