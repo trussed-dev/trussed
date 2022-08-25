@@ -75,7 +75,9 @@ bitflags::bitflags! {
     /// In particular, top bit is intended to be used to accomodate breaking format changes,
     /// i.e., if `flags >> 32 != 0`, then the format is different.
     pub struct Flags: u16 {
+        /// Set if the key has been generated on this device.
         const LOCAL = 1 << 0;
+        /// Set if the key is a secret key.
         const SENSITIVE = 1 << 1;
     }
 }
