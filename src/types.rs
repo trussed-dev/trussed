@@ -1,5 +1,6 @@
 use core::marker::PhantomData;
 use core::ops::Deref;
+use modular_bitfield::{bitfield, specifiers::*};
 
 pub use generic_array::GenericArray;
 
@@ -241,6 +242,9 @@ pub struct ClientContext {
     pub backends: Vec<ServiceBackends, 2>,
     pub(crate) read_dir_state: Option<ReadDirState>,
     pub(crate) read_dir_files_state: Option<ReadDirFilesState>,
+    pub(crate) context: ContextID,
+    pub(crate) pin: Bytes<MAX_PIN_LENGTH>,
+    pub(crate) creation_policy: Policy,
 }
 
 impl core::convert::From<PathBuf> for ClientContext {
@@ -266,6 +270,9 @@ impl ClientContext {
             backends,
             read_dir_state: None,
             read_dir_files_state: None,
+            context: ContextID::Unauthorized,
+            pin: Bytes::new(),
+            creation_policy: Policy::new(),
         }
     }
 
@@ -328,6 +335,59 @@ pub trait ServiceBackend {
         client_id: &mut ClientContext,
         request: &Request,
     ) -> Result<Reply, Error>;
+}
+
+#[bitfield]
+#[derive(Copy, Clone, PartialEq, Eq, Debug, serde::Serialize, serde::Deserialize)]
+pub struct Permission {
+    Read: bool,
+    Write: bool,
+    Encrypt: bool,
+    Decrypt: bool,
+    KeyAgreement: bool,
+    Sign: bool,
+    Verify: bool,
+    /* TODO: create a useful intersection of Trussed syscalls and SE050 policy bits */
+    #[skip]
+    _unused: B25,
+}
+
+/* three auth levels should be enough for everybody */
+#[derive(Copy, Clone, PartialEq, Eq, Debug, serde::Serialize, serde::Deserialize)]
+pub struct Policy {
+    /* explicitly avoid using an array indexed by ContextID here;
+    instead let callers explicitly specify what they want
+    (less error-prone?) */
+    unauthorized: Permission,
+    user: Permission,
+    admin: Permission,
+}
+
+impl Policy {
+    fn new() -> Self {
+        Self {
+            unauthorized: Permission::new(),
+            user: Permission::new(),
+            admin: Permission::new(),
+        }
+    }
+
+    fn set_unauthorized(&mut self, permission: Permission) {
+        self.unauthorized = permission;
+    }
+    fn set_user(&mut self, permission: Permission) {
+        self.user = permission;
+    }
+    fn set_admin(&mut self, permission: Permission) {
+        self.admin = permission;
+    }
+}
+
+#[derive(Copy, Clone, PartialEq, Eq, Debug, serde::Serialize, serde::Deserialize)]
+pub enum ContextID {
+    Unauthorized = 0,
+    User = 1,
+    Admin = 2,
 }
 
 // Object Hierarchy according to Cryptoki
@@ -611,6 +671,7 @@ pub enum Mechanism {
 pub type LongData = Bytes<MAX_LONG_DATA_LENGTH>;
 pub type MediumData = Bytes<MAX_MEDIUM_DATA_LENGTH>;
 pub type ShortData = Bytes<MAX_SHORT_DATA_LENGTH>;
+pub type PinData = Bytes<MAX_PIN_LENGTH>;
 
 pub type Message = Bytes<MAX_MESSAGE_LENGTH>;
 

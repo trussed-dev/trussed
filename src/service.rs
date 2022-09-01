@@ -574,13 +574,28 @@ impl<P: Platform> ServiceResources<P> {
             Request::SetServiceBackends(request) => {
                 /* as long as we don't do backend selection per syscall,
                    reject clients that want to drop the software backend;
-		   otherwise they will never be able to switch again! */
+		           otherwise they will never be able to switch again! */
                 if !request.backends.contains(&ServiceBackends::Software) {
                     return Err(Error::InternalError);
                 }
                 client_ctx.backends.clear();
                 client_ctx.backends.extend_from_slice(&request.backends).unwrap();
                 Ok(Reply::SetServiceBackends(reply::SetServiceBackends {}))
+            }
+
+            Request::SetContext(request) => {
+                if request.pin.len() > MAX_PIN_LENGTH {
+                    return Err(Error::InternalError);
+                }
+                client_ctx.context = request.context;
+                client_ctx.pin.clear();
+                client_ctx.pin.extend_from_slice(&request.pin);
+                Ok(Reply::SetContext(reply::SetContext {}))
+            }
+
+            Request::SetCreationPolicy(request) => {
+		        client_ctx.creation_policy = request.policy;
+                Ok(Reply::SetCreationPolicy(reply::SetCreationPolicy {}))
             }
 
             // _ => {
