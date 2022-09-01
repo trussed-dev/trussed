@@ -116,7 +116,10 @@ pub trait PollClient {
     ) -> ClientResult<'_, T, Self>;
     fn poll(&mut self) -> core::task::Poll<core::result::Result<Reply, Error>>;
     fn syscall(&mut self);
-    fn set_service_backends(&mut self, backends: Vec<ServiceBackends, 2>) -> ClientResult<'_, reply::SetServiceBackends, Self>;
+    fn set_service_backends(
+        &mut self,
+        backends: Vec<ServiceBackends, 2>,
+    ) -> ClientResult<'_, reply::SetServiceBackends, Self>;
 }
 
 pub struct FutureResult<'c, T, C: ?Sized>
@@ -239,14 +242,14 @@ where
         self.syscall.syscall()
     }
 
-    fn set_service_backends(&mut self, backends: Vec<ServiceBackends, 2>)
-        -> ClientResult<'_, reply::SetServiceBackends, Self>
-    {
+    fn set_service_backends(
+        &mut self,
+        backends: Vec<ServiceBackends, 2>,
+    ) -> ClientResult<'_, reply::SetServiceBackends, Self> {
         let r = self.request(request::SetServiceBackends { backends })?;
         r.client.syscall();
         Ok(r)
     }
-
 }
 
 impl<S: Syscall> CertificateClient for ClientImplementation<S> {}

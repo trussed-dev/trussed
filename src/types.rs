@@ -68,13 +68,12 @@ impl Id {
         self.0 < 256
     }
 
-    /// skips leading zeros
     pub fn hex(&self) -> Bytes<32> {
         const HEX_CHARS: &[u8] = b"0123456789abcdef";
         let mut buffer = Bytes::new();
         let array = self.0.to_be_bytes();
 
-        for i in 0 .. array.len() {
+        for i in 0..array.len() {
             buffer.push(HEX_CHARS[(array[i] >> 4) as usize]).unwrap();
             buffer.push(HEX_CHARS[(array[i] & 0xf) as usize]).unwrap();
         }
