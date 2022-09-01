@@ -74,7 +74,7 @@ impl Id {
         let mut buffer = Bytes::new();
         let array = self.0.to_be_bytes();
 
-        for i in 0 .. array.len() {
+        for i in 0..array.len() {
             buffer.push(HEX_CHARS[(array[i] >> 4) as usize]).unwrap();
             buffer.push(HEX_CHARS[(array[i] & 0xf) as usize]).unwrap();
         }
