@@ -120,6 +120,15 @@ pub trait PollClient {
         &mut self,
         backends: Vec<ServiceBackends, 2>,
     ) -> ClientResult<'_, reply::SetServiceBackends, Self>;
+    fn set_context(
+        &mut self,
+        context: ContextID,
+        pin: &[u8],
+    ) -> ClientResult<'_, reply::SetContext, Self>;
+    fn set_creation_policy(
+        &mut self,
+        policy: Policy,
+    ) -> ClientResult<'_, reply::SetCreationPolicy, Self>;
 }
 
 pub struct FutureResult<'c, T, C: ?Sized>
@@ -247,6 +256,29 @@ where
         backends: Vec<ServiceBackends, 2>,
     ) -> ClientResult<'_, reply::SetServiceBackends, Self> {
         let r = self.request(request::SetServiceBackends { backends })?;
+        r.client.syscall();
+        Ok(r)
+    }
+
+    fn set_context(
+        &mut self,
+        context: ContextID,
+        pin: &[u8],
+    ) -> ClientResult<'_, reply::SetContext, Self> {
+        let pin_bytes = Bytes::from_slice(&pin).map_err(|_| ClientError::DataTooLarge)?;
+        let r = self.request(request::SetContext {
+            context,
+            pin: pin_bytes,
+        })?;
+        r.client.syscall();
+        Ok(r)
+    }
+
+    fn set_creation_policy(
+        &mut self,
+        policy: Policy,
+    ) -> ClientResult<'_, reply::SetCreationPolicy, Self> {
+        let r = self.request(request::SetCreationPolicy { policy })?;
         r.client.syscall();
         Ok(r)
     }
