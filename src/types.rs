@@ -352,6 +352,22 @@ pub struct Permission {
     _unused: B25,
 }
 
+impl Permission {
+    fn unpack(self) -> u32 {
+        let bytes: [u8; 4] = self.into_bytes();
+        u32::from_le_bytes(bytes)
+    }
+    fn pack(val: u32) -> Self {
+        let bytes: [u8; 4] = u32::to_le_bytes(val);
+        Self::from_bytes(bytes)
+    }
+    fn is_single_permission(self) -> bool {
+        let val = self.unpack();
+        // fancy trick that checks whether value is a power of two (= exactly one bit set)
+        (val & (val - 1)) == 0
+    }
+}
+
 /* three auth levels should be enough for everybody */
 #[derive(Copy, Clone, PartialEq, Eq, Debug, serde::Serialize, serde::Deserialize)]
 pub struct Policy {
@@ -380,6 +396,16 @@ impl Policy {
     }
     fn set_admin(&mut self, permission: Permission) {
         self.admin = permission;
+    }
+
+    fn is_permitted(&self, context_id: ContextID, op: Permission) -> bool {
+        assert!(op.is_single_permission());
+        let effective_set = match context_id {
+            ContextID::Unauthorized => { self.unauthorized },
+            ContextID::User => { self.user },
+            ContextID::Admin => { self.admin }
+        };
+        (effective_set.unpack() | op.unpack()) != 0
     }
 }
 
