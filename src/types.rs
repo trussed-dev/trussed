@@ -24,6 +24,7 @@ use crate::error::Error;
 use crate::key::Secrecy;
 use crate::store::filestore::{ReadDirFilesState, ReadDirState};
 
+use crate::store::Store;
 pub use crate::client::FutureResult;
 pub use crate::platform::Platform;
 
@@ -76,6 +77,10 @@ impl Id {
         let array = self.0.to_be_bytes();
 
         for i in 0..array.len() {
+            if array[i] == 0 && i != (array.len() - 1) {
+                // Skip leading zeros.
+                continue;
+            }
             buffer.push(HEX_CHARS[(array[i] >> 4) as usize]).unwrap();
             buffer.push(HEX_CHARS[(array[i] & 0xf) as usize]).unwrap();
         }
@@ -329,12 +334,9 @@ pub enum ServiceBackends {
 /**
 Each service backend implements a subset of API calls through this trait.
 */
-pub trait ServiceBackend {
-    fn reply_to(
-        &mut self,
-        client_id: &mut ClientContext,
-        request: &Request,
-    ) -> Result<Reply, Error>;
+pub trait ServiceBackend<S: Store, R: CryptoRng + RngCore> {
+    fn reply_to(&mut self, store: S, rng: &mut R, client_ctx: &mut ClientContext, request: &Request)
+        -> Result<Reply, Error>;
 }
 
 #[bitfield]
@@ -350,6 +352,22 @@ pub struct Permission {
     /* TODO: create a useful intersection of Trussed syscalls and SE050 policy bits */
     #[skip]
     _unused: B25,
+}
+
+impl Permission {
+    fn unpack(self) -> u32 {
+        let bytes: [u8; 4] = self.into_bytes();
+        u32::from_le_bytes(bytes)
+    }
+    fn pack(val: u32) -> Self {
+        let bytes: [u8; 4] = u32::to_le_bytes(val);
+        Self::from_bytes(bytes)
+    }
+    fn is_single_permission(self) -> bool {
+        let val = self.unpack();
+        // fancy trick that checks whether value is a power of two (= exactly one bit set)
+        (val & (val - 1)) == 0
+    }
 }
 
 /* three auth levels should be enough for everybody */
@@ -380,6 +398,16 @@ impl Policy {
     }
     fn set_admin(&mut self, permission: Permission) {
         self.admin = permission;
+    }
+
+    fn is_permitted(&self, context_id: ContextID, op: Permission) -> bool {
+        assert!(op.is_single_permission());
+        let effective_set = match context_id {
+            ContextID::Unauthorized => { self.unauthorized },
+            ContextID::User => { self.user },
+            ContextID::Admin => { self.admin }
+        };
+        (effective_set.unpack() | op.unpack()) != 0
     }
 }
 

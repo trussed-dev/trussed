@@ -55,6 +55,7 @@ pub trait UserInterface {
 // This is the same trick as in "store.rs",
 // replacing generic parameters with associated types
 // and a macro.
+
 pub unsafe trait Platform {
     // temporarily remove CryptoRng bound until HALs come along
     type R: CryptoRng + RngCore;
@@ -78,7 +79,7 @@ macro_rules! platform { (
     R: $Rng:ty,
     S: $Store:ty,
     UI: $UserInterface:ty,
-    $($BackendID:pat, $BackendName:ident, $BackendType:ty),*
+    $($BackendID:pat, $BackendName:ident, $BackendType:ty),*$(,)?
 ) => {
 
     /// Platform struct implemented `trussed::Platform`, generated
@@ -115,10 +116,11 @@ macro_rules! platform { (
         }
 
         #[allow(unused)]
-        fn platform_reply_to(&mut self, backend_id: $crate::types::ServiceBackends, client_id: &mut $crate::types::ClientContext, request: &$crate::api::Request) -> Result<$crate::api::Reply, $crate::error::Error> {
+        fn platform_reply_to(&mut self, backend_id: $crate::types::ServiceBackends, client_ctx: &mut $crate::types::ClientContext, request: &$crate::api::Request) -> Result<$crate::api::Reply, $crate::error::Error> {
             $(if let $BackendID = backend_id {
-                let b: &mut dyn $crate::types::ServiceBackend = &mut self.$BackendName;
-                return b.reply_to(client_id, request);
+                let b: &mut dyn $crate::types::ServiceBackend<Self::S, Self::R> = &mut self.$BackendName;
+                //let b: &mut $BackendType = &mut self.$BackendName;
+                return b.reply_to(self.store, &mut self.rng, client_ctx, request);
             } );*
             return Err($crate::error::Error::RequestNotAvailable);
         }
