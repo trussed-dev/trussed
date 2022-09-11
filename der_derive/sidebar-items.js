@@ -1,1 +1,1 @@
-initSidebarItems({"derive":[["Choice","Derive the `Choice` trait on an enum."],["Message","Derive the `Message` trait on a struct."]]});
+window.SIDEBAR_ITEMS = {"derive":[["Choice","Derive the `Choice` trait on an enum."],["Message","Derive the `Message` trait on a struct."]]};

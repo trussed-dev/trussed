@@ -1,1 +1,1 @@
-initSidebarItems({"derive":[["DeserializeIndexed",""],["SerializeIndexed",""]]});
+window.SIDEBAR_ITEMS = {"derive":[["DeserializeIndexed",""],["SerializeIndexed",""]]};

@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["Serializer","A structure for serializing Rust values to CBOR."],["SliceWrite","Implements `Write` for mutable byte slices (`&mut [u8]`)."]],"trait":[["Write","A sink for serialized CBOR."]]});
+window.SIDEBAR_ITEMS = {"struct":[["Serializer","A structure for serializing Rust values to CBOR."],["SliceWrite","Implements `Write` for mutable byte slices (`&mut [u8]`)."]],"trait":[["Write","A sink for serialized CBOR."]]};

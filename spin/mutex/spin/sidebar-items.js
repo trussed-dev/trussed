@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["SpinMutex","A spin lock providing mutually exclusive access to data."],["SpinMutexGuard","A guard that provides mutable data access."]]});
+window.SIDEBAR_ITEMS = {"struct":[["SpinMutex","A spin lock providing mutually exclusive access to data."],["SpinMutexGuard","A guard that provides mutable data access."]]};

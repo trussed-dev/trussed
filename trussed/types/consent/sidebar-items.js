@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["Error",""],["Level",""],["Urgency",""]],"type":[["Result",""]]});
+window.SIDEBAR_ITEMS = {"enum":[["Error",""],["Level",""],["Urgency",""]],"type":[["Result",""]]};

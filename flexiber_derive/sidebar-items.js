@@ -1,1 +1,1 @@
-initSidebarItems({"derive":[["Decodable","Derive the `Decodable` trait on a struct."],["Encodable","Derive the `Encodable` trait on a struct."]]});
+window.SIDEBAR_ITEMS = {"derive":[["Decodable","Derive the `Decodable` trait on a struct."],["Encodable","Derive the `Encodable` trait on a struct."]]};

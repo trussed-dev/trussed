@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["BlockBuffer","Buffer for block processing of data"]]});
+window.SIDEBAR_ITEMS = {"struct":[["BlockBuffer","Buffer for block processing of data"]]};

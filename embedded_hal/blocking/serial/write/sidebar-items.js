@@ -1,1 +1,1 @@
-initSidebarItems({"trait":[["Default","Marker trait to opt into default blocking write implementation"]]});
+window.SIDEBAR_ITEMS = {"trait":[["Default","Marker trait to opt into default blocking write implementation"]]};

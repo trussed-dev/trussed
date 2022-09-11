@@ -1,1 +1,1 @@
-initSidebarItems({"trait":[["DelayMs","Millisecond delay"],["DelayUs","Microsecond delay"]]});
+window.SIDEBAR_ITEMS = {"trait":[["DelayMs","Millisecond delay"],["DelayUs","Microsecond delay"]]};

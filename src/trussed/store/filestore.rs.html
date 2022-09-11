@@ -1,9 +1,10 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/store/filestore.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>filestore.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><script defer src="../../../main.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script>
-    <noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../trussed/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/store/filestore.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>filestore.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../trussed/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div>
         </a><h2 class="location"></h2>
     </nav>
     <nav class="sidebar"><a class="sidebar-logo" href="../../../trussed/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div>
-        </a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../trussed/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><div class="theme-picker hidden"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="22" height="22" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+        </a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../trussed/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><button type="button" id="help-button" title="help">?</button><div id="settings-menu" tabindex="-1">
+                                <a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div>
+                        </div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -383,12 +384,62 @@
 <span id="378">378</span>
 <span id="379">379</span>
 <span id="380">380</span>
+<span id="381">381</span>
+<span id="382">382</span>
+<span id="383">383</span>
+<span id="384">384</span>
+<span id="385">385</span>
+<span id="386">386</span>
+<span id="387">387</span>
+<span id="388">388</span>
+<span id="389">389</span>
+<span id="390">390</span>
+<span id="391">391</span>
+<span id="392">392</span>
+<span id="393">393</span>
+<span id="394">394</span>
+<span id="395">395</span>
+<span id="396">396</span>
+<span id="397">397</span>
+<span id="398">398</span>
+<span id="399">399</span>
+<span id="400">400</span>
+<span id="401">401</span>
+<span id="402">402</span>
+<span id="403">403</span>
+<span id="404">404</span>
+<span id="405">405</span>
+<span id="406">406</span>
+<span id="407">407</span>
+<span id="408">408</span>
+<span id="409">409</span>
+<span id="410">410</span>
+<span id="411">411</span>
+<span id="412">412</span>
+<span id="413">413</span>
+<span id="414">414</span>
+<span id="415">415</span>
+<span id="416">416</span>
+<span id="417">417</span>
+<span id="418">418</span>
+<span id="419">419</span>
+<span id="420">420</span>
+<span id="421">421</span>
+<span id="422">422</span>
+<span id="423">423</span>
+<span id="424">424</span>
+<span id="425">425</span>
+<span id="426">426</span>
+<span id="427">427</span>
+<span id="428">428</span>
+<span id="429">429</span>
+<span id="430">430</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="kw">crate</span>::{
-    <span class="ident">Bytes</span>,
     <span class="ident">error</span>::{<span class="ident">Error</span>, <span class="prelude-ty">Result</span>},
     <span class="comment">// service::ReadDirState,</span>
     <span class="ident">store</span>::{<span class="self">self</span>, <span class="ident">Store</span>},
-    <span class="ident">types</span>::{<span class="ident">Message</span>, <span class="ident">Location</span> <span class="kw">as</span> <span class="ident">Location</span>, <span class="ident">UserAttribute</span>},
+    <span class="ident">types</span>::{<span class="ident">Location</span>, <span class="ident">Message</span>, <span class="ident">UserAttribute</span>},
+    <span class="ident">Bytes</span>,
 };
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>)]</span>
@@ -405,7 +456,10 @@
     <span class="ident">user_attribute</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">UserAttribute</span><span class="op">&gt;</span>,
 }
 
-<span class="kw">use</span> <span class="ident">littlefs2</span>::{<span class="ident">fs</span>::{<span class="ident">DirEntry</span>, <span class="ident">Metadata</span>}, <span class="ident">path</span>::{<span class="ident">Path</span>, <span class="ident">PathBuf</span>}};
+<span class="kw">use</span> <span class="ident">littlefs2</span>::{
+    <span class="ident">fs</span>::{<span class="ident">DirEntry</span>, <span class="ident">Metadata</span>},
+    <span class="ident">path</span>::{<span class="ident">Path</span>, <span class="ident">PathBuf</span>},
+};
 <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">ClientId</span> <span class="op">=</span> <span class="ident">PathBuf</span>;
 
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ClientFilestore</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>
@@ -438,7 +492,9 @@
         <span class="kw">let</span> <span class="ident">offset</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">absolute</span> { <span class="number">1</span> } <span class="kw">else</span> { <span class="number">0</span> };
 
         <span class="comment">// we know `client_id` here, could use its length</span>
-        <span class="kw">let</span> <span class="ident">end_of_namespace</span> <span class="op">=</span> <span class="ident">bytes</span>[<span class="number">1</span>..].<span class="ident">iter</span>().<span class="ident">position</span>(<span class="op">|</span><span class="kw-2">&amp;</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span> <span class="op">==</span> <span class="string">b&#39;/&#39;</span>)
+        <span class="kw">let</span> <span class="ident">end_of_namespace</span> <span class="op">=</span> <span class="ident">bytes</span>[<span class="number">1</span>..]
+            .<span class="ident">iter</span>()
+            .<span class="ident">position</span>(<span class="op">|</span><span class="kw-2">&amp;</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span> <span class="op">==</span> <span class="string">b&#39;/&#39;</span>)
             <span class="comment">// oh oh oh</span>
             .<span class="ident">unwrap</span>();
         <span class="kw">let</span> <span class="ident">dat_offset</span> <span class="op">=</span> <span class="string">&quot;/dat/&quot;</span>.<span class="ident">len</span>();
@@ -454,7 +510,12 @@
     <span class="kw">fn</span> <span class="ident">remove_file</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">PathBuf</span>, <span class="ident">location</span>: <span class="ident">Location</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
     <span class="kw">fn</span> <span class="ident">remove_dir</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">PathBuf</span>, <span class="ident">location</span>: <span class="ident">Location</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
     <span class="kw">fn</span> <span class="ident">remove_dir_all</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">PathBuf</span>, <span class="ident">location</span>: <span class="ident">Location</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>;
-    <span class="kw">fn</span> <span class="ident">locate_file</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">location</span>: <span class="ident">Location</span>, <span class="ident">underneath</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>, <span class="ident">filename</span>: <span class="ident">PathBuf</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span><span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">locate_file</span>(
+        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
+        <span class="ident">location</span>: <span class="ident">Location</span>,
+        <span class="ident">underneath</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
+        <span class="ident">filename</span>: <span class="ident">PathBuf</span>,
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span><span class="op">&gt;</span>;
 
     <span class="doccomment">/// Iterate over entries of a directory (both file and directory entries).</span>
     <span class="doccomment">///</span>
@@ -465,15 +526,18 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// In case an entry was found, the returned option also contains state, so the expected</span>
     <span class="doccomment">/// call to `read_dir_next` can resume operation.</span>
-    <span class="kw">fn</span> <span class="ident">read_dir_first</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">dir</span>: <span class="kw-2">&amp;</span><span class="ident">PathBuf</span>, <span class="ident">location</span>: <span class="ident">Location</span>, <span class="ident">not_before</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>)
-        -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">DirEntry</span>, <span class="ident">ReadDirState</span>)<span class="op">&gt;</span><span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">read_dir_first</span>(
+        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
+        <span class="ident">dir</span>: <span class="kw-2">&amp;</span><span class="ident">PathBuf</span>,
+        <span class="ident">location</span>: <span class="ident">Location</span>,
+        <span class="ident">not_before</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">DirEntry</span>, <span class="ident">ReadDirState</span>)<span class="op">&gt;</span><span class="op">&gt;</span>;
 
     <span class="doccomment">/// Continue iterating over entries of a directory.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Return the entry just after the previous one. If it exists, also return state for the</span>
     <span class="doccomment">/// following call.</span>
-    <span class="kw">fn</span> <span class="ident">read_dir_next</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">state</span>: <span class="ident">ReadDirState</span>)
-        -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">DirEntry</span>, <span class="ident">ReadDirState</span>)<span class="op">&gt;</span><span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">read_dir_next</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">state</span>: <span class="ident">ReadDirState</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">DirEntry</span>, <span class="ident">ReadDirState</span>)<span class="op">&gt;</span><span class="op">&gt;</span>;
 
     <span class="doccomment">/// Iterate over contents of files inside a directory.</span>
     <span class="doccomment">///</span>
@@ -482,12 +546,18 @@
     <span class="doccomment">/// with some sort of &quot;fetch data&quot;).</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Additionally, files may optionally be filtered via attributes.</span>
-    <span class="kw">fn</span> <span class="ident">read_dir_files_first</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">clients_dir</span>: <span class="kw-2">&amp;</span><span class="ident">PathBuf</span>, <span class="ident">location</span>: <span class="ident">Location</span>, <span class="ident">user_attribute</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">UserAttribute</span><span class="op">&gt;</span>)
-        -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Message</span><span class="op">&gt;</span>, <span class="ident">ReadDirFilesState</span>)<span class="op">&gt;</span><span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">read_dir_files_first</span>(
+        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
+        <span class="ident">clients_dir</span>: <span class="kw-2">&amp;</span><span class="ident">PathBuf</span>,
+        <span class="ident">location</span>: <span class="ident">Location</span>,
+        <span class="ident">user_attribute</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">UserAttribute</span><span class="op">&gt;</span>,
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Message</span><span class="op">&gt;</span>, <span class="ident">ReadDirFilesState</span>)<span class="op">&gt;</span><span class="op">&gt;</span>;
 
     <span class="doccomment">/// Continuation of `read_dir_files_first`.</span>
-    <span class="kw">fn</span> <span class="ident">read_dir_files_next</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">state</span>: <span class="ident">ReadDirFilesState</span>)
-        -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Message</span><span class="op">&gt;</span>, <span class="ident">ReadDirFilesState</span>)<span class="op">&gt;</span><span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">read_dir_files_next</span>(
+        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
+        <span class="ident">state</span>: <span class="ident">ReadDirFilesState</span>,
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Message</span><span class="op">&gt;</span>, <span class="ident">ReadDirFilesState</span>)<span class="op">&gt;</span><span class="op">&gt;</span>;
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Store</span><span class="op">&gt;</span> <span class="ident">Filestore</span> <span class="kw">for</span> <span class="ident">ClientFilestore</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span> {
@@ -536,7 +606,12 @@
             .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error::InternalError</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">read_dir_first</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">clients_dir</span>: <span class="kw-2">&amp;</span><span class="ident">PathBuf</span>, <span class="ident">location</span>: <span class="ident">Location</span>, <span class="ident">not_before</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">DirEntry</span>, <span class="ident">ReadDirState</span>)<span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">read_dir_first</span>(
+        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
+        <span class="ident">clients_dir</span>: <span class="kw-2">&amp;</span><span class="ident">PathBuf</span>,
+        <span class="ident">location</span>: <span class="ident">Location</span>,
+        <span class="ident">not_before</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">DirEntry</span>, <span class="ident">ReadDirState</span>)<span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="ident">location</span> <span class="op">!</span><span class="op">=</span> <span class="ident">Location::Internal</span> {
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::RequestNotAvailable</span>);
         }
@@ -544,74 +619,80 @@
 
         <span class="kw">let</span> <span class="ident">dir</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">actual_path</span>(<span class="ident">clients_dir</span>);
 
-        <span class="prelude-val">Ok</span>(<span class="ident">fs</span>.<span class="ident">read_dir_and_then</span>(<span class="kw-2">&amp;</span><span class="ident">dir</span>, <span class="op">|</span><span class="ident">it</span><span class="op">|</span> {
+        <span class="prelude-val">Ok</span>(<span class="ident">fs</span>
+            .<span class="ident">read_dir_and_then</span>(<span class="kw-2">&amp;</span><span class="ident">dir</span>, <span class="op">|</span><span class="ident">it</span><span class="op">|</span> {
+                <span class="comment">// this is an iterator with Item = (usize, Result&lt;DirEntry&gt;)</span>
+                <span class="ident">it</span>.<span class="ident">enumerate</span>()
+                    <span class="comment">// skip over `.` and `..`</span>
+                    .<span class="ident">skip</span>(<span class="number">2</span>)
+                    <span class="comment">// todo: try ?-ing out of this (the API matches std::fs, where read/write errors</span>
+                    <span class="comment">// can occur during operation)</span>
+                    <span class="comment">//</span>
+                    <span class="comment">// Option&lt;usize, Result&lt;DirEntry&gt;&gt; -&gt; ??</span>
+                    .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">i</span>, <span class="ident">entry</span>)<span class="op">|</span> (<span class="ident">i</span>, <span class="ident">entry</span>.<span class="ident">unwrap</span>()))
+                    <span class="comment">// if there is a &quot;not_before&quot; entry, skip all entries before it.</span>
+                    .<span class="ident">find</span>(<span class="op">|</span>(<span class="kw">_</span>, <span class="ident">entry</span>)<span class="op">|</span> {
+                        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">not_before</span>) <span class="op">=</span> <span class="ident">not_before</span> {
+                            <span class="ident">entry</span>.<span class="ident">file_name</span>() <span class="op">==</span> <span class="ident">not_before</span>.<span class="ident">as_ref</span>()
+                        } <span class="kw">else</span> {
+                            <span class="bool-val">true</span>
+                        }
+                    })
+                    <span class="comment">// if there is an entry, construct the state that needs storing out of it,</span>
+                    <span class="comment">// remove the prefix from the entry&#39;s path to not leak implementation details to</span>
+                    <span class="comment">// the client, and return both the entry and the state</span>
+                    .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">i</span>, <span class="kw-2">mut</span> <span class="ident">entry</span>)<span class="op">|</span> {
+                        <span class="kw">let</span> <span class="ident">read_dir_state</span> <span class="op">=</span> <span class="ident">ReadDirState</span> {
+                            <span class="ident">real_dir</span>: <span class="ident">dir</span>.<span class="ident">clone</span>(),
+                            <span class="ident">last</span>: <span class="ident">i</span>,
+                        };
+                        <span class="kw">let</span> <span class="ident">entry_client_path</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">client_path</span>(<span class="ident">entry</span>.<span class="ident">path</span>());
+                        <span class="comment">// trace_now!(&quot;converted path {} to client path {}&quot;, &amp;entry.path(), &amp;entry_client_path);</span>
+                        <span class="comment">// This is a hidden function which allows us to modify `entry.path`.</span>
+                        <span class="comment">// In regular use, `DirEntry` is not supposed to be constructable by the user</span>
+                        <span class="comment">// (only by querying the filesystem), which is why the function is both</span>
+                        <span class="comment">// hidden and tagged &quot;unsafe&quot; to discourage use. Our use case here is precisely</span>
+                        <span class="comment">// the reason for its existence :)</span>
+                        <span class="kw-2">*</span><span class="kw">unsafe</span> { <span class="ident">entry</span>.<span class="ident">path_buf_mut</span>() } <span class="op">=</span> <span class="ident">entry_client_path</span>;
+                        (<span class="ident">entry</span>, <span class="ident">read_dir_state</span>)
 
-            <span class="comment">// this is an iterator with Item = (usize, Result&lt;DirEntry&gt;)</span>
-            <span class="ident">it</span>.<span class="ident">enumerate</span>()
-
-                <span class="comment">// skip over `.` and `..`</span>
-                .<span class="ident">skip</span>(<span class="number">2</span>)
-
-                <span class="comment">// todo: try ?-ing out of this (the API matches std::fs, where read/write errors</span>
-                <span class="comment">// can occur during operation)</span>
-                <span class="comment">//</span>
-                <span class="comment">// Option&lt;usize, Result&lt;DirEntry&gt;&gt; -&gt; ??</span>
-                .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">i</span>, <span class="ident">entry</span>)<span class="op">|</span> (<span class="ident">i</span>, <span class="ident">entry</span>.<span class="ident">unwrap</span>()))
-
-                <span class="comment">// if there is a &quot;not_before&quot; entry, skip all entries before it.</span>
-                .<span class="ident">find</span>(<span class="op">|</span>(<span class="kw">_</span>, <span class="ident">entry</span>)<span class="op">|</span> {
-                    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">not_before</span>) <span class="op">=</span> <span class="ident">not_before</span> {
-                        <span class="ident">entry</span>.<span class="ident">file_name</span>() <span class="op">==</span> <span class="ident">not_before</span>.<span class="ident">as_ref</span>()
-                    } <span class="kw">else</span> { <span class="bool-val">true</span> }
-                })
-
-                <span class="comment">// if there is an entry, construct the state that needs storing out of it,</span>
-                <span class="comment">// remove the prefix from the entry&#39;s path to not leak implementation details to</span>
-                <span class="comment">// the client, and return both the entry and the state</span>
-                .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">i</span>, <span class="kw-2">mut</span> <span class="ident">entry</span>)<span class="op">|</span> {
-                    <span class="kw">let</span> <span class="ident">read_dir_state</span> <span class="op">=</span> <span class="ident">ReadDirState</span> { <span class="ident">real_dir</span>: <span class="ident">dir</span>.<span class="ident">clone</span>(), <span class="ident">last</span>: <span class="ident">i</span> };
-                    <span class="kw">let</span> <span class="ident">entry_client_path</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">client_path</span>(<span class="ident">entry</span>.<span class="ident">path</span>());
-                    <span class="comment">// trace_now!(&quot;converted path {} to client path {}&quot;, &amp;entry.path(), &amp;entry_client_path);</span>
-                    <span class="comment">// This is a hidden function which allows us to modify `entry.path`.</span>
-                    <span class="comment">// In regular use, `DirEntry` is not supposed to be constructable by the user</span>
-                    <span class="comment">// (only by querying the filesystem), which is why the function is both</span>
-                    <span class="comment">// hidden and tagged &quot;unsafe&quot; to discourage use. Our use case here is precisely</span>
-                    <span class="comment">// the reason for its existence :)</span>
-                    <span class="kw-2">*</span><span class="kw">unsafe</span> { <span class="ident">entry</span>.<span class="ident">path_buf_mut</span>() } <span class="op">=</span> <span class="ident">entry_client_path</span>;
-                    (<span class="ident">entry</span>, <span class="ident">read_dir_state</span>)
-
-                <span class="comment">// the `ok_or` dummy error followed by the `ok` in the next line is because</span>
-                <span class="comment">// `read_dir_and_then` wants to see Results (although we naturally have an Option</span>
-                <span class="comment">// at this point)</span>
-                }).<span class="ident">ok_or</span>(<span class="ident">littlefs2::io::Error::Io</span>)
-        }).<span class="ident">ok</span>())
+                        <span class="comment">// the `ok_or` dummy error followed by the `ok` in the next line is because</span>
+                        <span class="comment">// `read_dir_and_then` wants to see Results (although we naturally have an Option</span>
+                        <span class="comment">// at this point)</span>
+                    })
+                    .<span class="ident">ok_or</span>(<span class="ident">littlefs2::io::Error::Io</span>)
+            })
+            .<span class="ident">ok</span>())
     }
 
     <span class="kw">fn</span> <span class="ident">read_dir_next</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">state</span>: <span class="ident">ReadDirState</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">DirEntry</span>, <span class="ident">ReadDirState</span>)<span class="op">&gt;</span><span class="op">&gt;</span> {
-
         <span class="kw">let</span> <span class="ident">ReadDirState</span> { <span class="ident">real_dir</span>, <span class="ident">last</span> } <span class="op">=</span> <span class="ident">state</span>;
         <span class="kw">let</span> <span class="ident">fs</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">store</span>.<span class="ident">ifs</span>();
 
         <span class="comment">// all we want to do here is skip just past the previously found entry</span>
         <span class="comment">// in the directory iterator, then return it (plus state to continue on next call)</span>
-        <span class="prelude-val">Ok</span>(<span class="ident">fs</span>.<span class="ident">read_dir_and_then</span>(<span class="kw-2">&amp;</span><span class="ident">real_dir</span>, <span class="op">|</span><span class="ident">it</span><span class="op">|</span> {
+        <span class="prelude-val">Ok</span>(<span class="ident">fs</span>
+            .<span class="ident">read_dir_and_then</span>(<span class="kw-2">&amp;</span><span class="ident">real_dir</span>, <span class="op">|</span><span class="ident">it</span><span class="op">|</span> {
+                <span class="comment">// skip over previous</span>
+                <span class="ident">it</span>.<span class="ident">enumerate</span>()
+                    .<span class="ident">nth</span>(<span class="ident">last</span> <span class="op">+</span> <span class="number">1</span>)
+                    <span class="comment">// entry is still a Result :/ (see question in `read_dir_first`)</span>
+                    .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">i</span>, <span class="ident">entry</span>)<span class="op">|</span> (<span class="ident">i</span>, <span class="ident">entry</span>.<span class="ident">unwrap</span>()))
+                    <span class="comment">// convert Option into Result, again because `read_dir_and_then` expects this</span>
+                    .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">i</span>, <span class="kw-2">mut</span> <span class="ident">entry</span>)<span class="op">|</span> {
+                        <span class="kw">let</span> <span class="ident">read_dir_state</span> <span class="op">=</span> <span class="ident">ReadDirState</span> {
+                            <span class="ident">real_dir</span>: <span class="ident">real_dir</span>.<span class="ident">clone</span>(),
+                            <span class="ident">last</span>: <span class="ident">i</span>,
+                        };
 
-            <span class="comment">// skip over previous</span>
-            <span class="ident">it</span>.<span class="ident">enumerate</span>().<span class="ident">nth</span>(<span class="ident">last</span> <span class="op">+</span> <span class="number">1</span>)
-                <span class="comment">// entry is still a Result :/ (see question in `read_dir_first`)</span>
-                .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">i</span>,<span class="ident">entry</span>)<span class="op">|</span> (<span class="ident">i</span>, <span class="ident">entry</span>.<span class="ident">unwrap</span>()))
-                <span class="comment">// convert Option into Result, again because `read_dir_and_then` expects this</span>
-                .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">i</span>, <span class="kw-2">mut</span> <span class="ident">entry</span>)<span class="op">|</span> {
-                    <span class="kw">let</span> <span class="ident">read_dir_state</span> <span class="op">=</span> <span class="ident">ReadDirState</span> { <span class="ident">real_dir</span>: <span class="ident">real_dir</span>.<span class="ident">clone</span>(), <span class="ident">last</span>: <span class="ident">i</span> };
+                        <span class="kw">let</span> <span class="ident">entry_client_path</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">client_path</span>(<span class="ident">entry</span>.<span class="ident">path</span>());
+                        <span class="kw-2">*</span><span class="kw">unsafe</span> { <span class="ident">entry</span>.<span class="ident">path_buf_mut</span>() } <span class="op">=</span> <span class="ident">entry_client_path</span>;
 
-                    <span class="kw">let</span> <span class="ident">entry_client_path</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">client_path</span>(<span class="ident">entry</span>.<span class="ident">path</span>());
-                    <span class="kw-2">*</span><span class="kw">unsafe</span> { <span class="ident">entry</span>.<span class="ident">path_buf_mut</span>() } <span class="op">=</span> <span class="ident">entry_client_path</span>;
-
-                    (<span class="ident">entry</span>, <span class="ident">read_dir_state</span>)
-                })
-                .<span class="ident">ok_or</span>(<span class="ident">littlefs2::io::Error::Io</span>)
-
-        }).<span class="ident">ok</span>())
+                        (<span class="ident">entry</span>, <span class="ident">read_dir_state</span>)
+                    })
+                    .<span class="ident">ok_or</span>(<span class="ident">littlefs2::io::Error::Io</span>)
+            })
+            .<span class="ident">ok</span>())
     }
 
     <span class="kw">fn</span> <span class="ident">read_dir_files_first</span>(
@@ -620,7 +701,6 @@
         <span class="ident">location</span>: <span class="ident">Location</span>,
         <span class="ident">user_attribute</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">UserAttribute</span><span class="op">&gt;</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Message</span><span class="op">&gt;</span>, <span class="ident">ReadDirFilesState</span>)<span class="op">&gt;</span><span class="op">&gt;</span> {
-
         <span class="kw">if</span> <span class="ident">location</span> <span class="op">!</span><span class="op">=</span> <span class="ident">Location::Internal</span> {
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::RequestNotAvailable</span>);
         }
@@ -628,96 +708,121 @@
 
         <span class="kw">let</span> <span class="ident">dir</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">actual_path</span>(<span class="ident">clients_dir</span>);
 
-        <span class="prelude-val">Ok</span>(<span class="ident">fs</span>.<span class="ident">read_dir_and_then</span>(<span class="kw-2">&amp;</span><span class="ident">dir</span>, <span class="op">|</span><span class="ident">it</span><span class="op">|</span> {
+        <span class="prelude-val">Ok</span>(<span class="ident">fs</span>
+            .<span class="ident">read_dir_and_then</span>(<span class="kw-2">&amp;</span><span class="ident">dir</span>, <span class="op">|</span><span class="ident">it</span><span class="op">|</span> {
+                <span class="comment">// this is an iterator with Item = (usize, Result&lt;DirEntry&gt;)</span>
+                <span class="ident">it</span>.<span class="ident">enumerate</span>()
+                    <span class="comment">// todo: try ?-ing out of this (the API matches std::fs, where read/write errors</span>
+                    <span class="comment">// can occur during operation)</span>
+                    <span class="comment">//</span>
+                    <span class="comment">// Option&lt;usize, Result&lt;DirEntry&gt;&gt; -&gt; ??</span>
+                    .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">i</span>, <span class="ident">entry</span>)<span class="op">|</span> (<span class="ident">i</span>, <span class="ident">entry</span>.<span class="ident">unwrap</span>()))
+                    <span class="comment">// skip over directories (including `.` and `..`)</span>
+                    .<span class="ident">filter</span>(<span class="op">|</span>(<span class="kw">_</span>, <span class="ident">entry</span>)<span class="op">|</span> <span class="ident">entry</span>.<span class="ident">file_type</span>().<span class="ident">is_file</span>())
+                    <span class="comment">// take first entry that meets requirements</span>
+                    .<span class="ident">find</span>(<span class="op">|</span>(<span class="kw">_</span>, <span class="ident">entry</span>)<span class="op">|</span> {
+                        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">user_attribute</span>) <span class="op">=</span> <span class="ident">user_attribute</span>.<span class="ident">as_ref</span>() {
+                            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">dir</span>.<span class="ident">clone</span>();
+                            <span class="ident">path</span>.<span class="ident">push</span>(<span class="ident">entry</span>.<span class="ident">file_name</span>());
+                            <span class="kw">let</span> <span class="ident">attribute</span> <span class="op">=</span> <span class="ident">fs</span>
+                                .<span class="ident">attribute</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>, <span class="ident"><span class="kw">crate</span>::config::USER_ATTRIBUTE_NUMBER</span>)
+                                .<span class="ident">unwrap</span>();
 
-            <span class="comment">// this is an iterator with Item = (usize, Result&lt;DirEntry&gt;)</span>
-            <span class="ident">it</span>.<span class="ident">enumerate</span>()
-
-                <span class="comment">// todo: try ?-ing out of this (the API matches std::fs, where read/write errors</span>
-                <span class="comment">// can occur during operation)</span>
-                <span class="comment">//</span>
-                <span class="comment">// Option&lt;usize, Result&lt;DirEntry&gt;&gt; -&gt; ??</span>
-                .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">i</span>, <span class="ident">entry</span>)<span class="op">|</span> (<span class="ident">i</span>, <span class="ident">entry</span>.<span class="ident">unwrap</span>()))
-
-                <span class="comment">// skip over directories (including `.` and `..`)</span>
-                .<span class="ident">filter</span>(<span class="op">|</span>(<span class="kw">_</span>, <span class="ident">entry</span>)<span class="op">|</span> <span class="ident">entry</span>.<span class="ident">file_type</span>().<span class="ident">is_file</span>())
-
-                <span class="comment">// take first entry that meets requirements</span>
-                .<span class="ident">find</span>(<span class="op">|</span>(<span class="kw">_</span>, <span class="ident">entry</span>)<span class="op">|</span> {
-                    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">user_attribute</span>) <span class="op">=</span> <span class="ident">user_attribute</span>.<span class="ident">as_ref</span>() {
-                        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">dir</span>.<span class="ident">clone</span>();
-                        <span class="ident">path</span>.<span class="ident">push</span>(<span class="ident">entry</span>.<span class="ident">file_name</span>());
-                        <span class="kw">let</span> <span class="ident">attribute</span> <span class="op">=</span> <span class="ident">fs</span>.<span class="ident">attribute</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>, <span class="ident"><span class="kw">crate</span>::config::USER_ATTRIBUTE_NUMBER</span>).<span class="ident">unwrap</span>();
-
-                        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">attribute</span>) <span class="op">=</span> <span class="ident">attribute</span> {
-                            <span class="ident">user_attribute</span> <span class="op">==</span> <span class="ident">attribute</span>.<span class="ident">data</span>()
+                            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">attribute</span>) <span class="op">=</span> <span class="ident">attribute</span> {
+                                <span class="ident">user_attribute</span> <span class="op">==</span> <span class="ident">attribute</span>.<span class="ident">data</span>()
+                            } <span class="kw">else</span> {
+                                <span class="bool-val">false</span>
+                            }
                         } <span class="kw">else</span> {
-                            <span class="bool-val">false</span>
+                            <span class="bool-val">true</span>
                         }
-                    } <span class="kw">else</span> { <span class="bool-val">true</span> }
-                })
+                    })
+                    <span class="comment">// if there is an entry, construct the state that needs storing out of it,</span>
+                    <span class="comment">// and return the file&#39;s contents.</span>
+                    <span class="comment">// the client, and return both the entry and the state</span>
+                    .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">i</span>, <span class="ident">entry</span>)<span class="op">|</span> {
+                        <span class="kw">let</span> <span class="ident">read_dir_files_state</span> <span class="op">=</span> <span class="ident">ReadDirFilesState</span> {
+                            <span class="ident">real_dir</span>: <span class="ident">dir</span>.<span class="ident">clone</span>(),
+                            <span class="ident">last</span>: <span class="ident">i</span>,
+                            <span class="ident">location</span>,
+                            <span class="ident">user_attribute</span>,
+                        };
+                        <span class="comment">// The semantics is that for a non-existent file, we return None (not an error)</span>
+                        <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="ident">store::read</span>(<span class="self">self</span>.<span class="ident">store</span>, <span class="ident">location</span>, <span class="ident">entry</span>.<span class="ident">path</span>()).<span class="ident">ok</span>();
+                        (<span class="ident">data</span>, <span class="ident">read_dir_files_state</span>)
 
-                <span class="comment">// if there is an entry, construct the state that needs storing out of it,</span>
-                <span class="comment">// and return the file&#39;s contents.</span>
-                <span class="comment">// the client, and return both the entry and the state</span>
-                .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">i</span>, <span class="ident">entry</span>)<span class="op">|</span> {
-                    <span class="kw">let</span> <span class="ident">read_dir_files_state</span> <span class="op">=</span> <span class="ident">ReadDirFilesState</span> { <span class="ident">real_dir</span>: <span class="ident">dir</span>.<span class="ident">clone</span>(), <span class="ident">last</span>: <span class="ident">i</span>, <span class="ident">location</span>, <span class="ident">user_attribute</span> };
-                    <span class="comment">// The semantics is that for a non-existent file, we return None (not an error)</span>
-                    <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="ident">store::read</span>(<span class="self">self</span>.<span class="ident">store</span>, <span class="ident">location</span>, <span class="ident">entry</span>.<span class="ident">path</span>()).<span class="ident">ok</span>();
-                    (<span class="ident">data</span>, <span class="ident">read_dir_files_state</span>)
-
-                <span class="comment">// the `ok_or` dummy error followed by the `ok` in the next line is because</span>
-                <span class="comment">// `read_dir_and_then` wants to see Results (although we naturally have an Option</span>
-                <span class="comment">// at this point)</span>
-                }).<span class="ident">ok_or</span>(<span class="ident">littlefs2::io::Error::Io</span>)
-        }).<span class="ident">ok</span>())
+                        <span class="comment">// the `ok_or` dummy error followed by the `ok` in the next line is because</span>
+                        <span class="comment">// `read_dir_and_then` wants to see Results (although we naturally have an Option</span>
+                        <span class="comment">// at this point)</span>
+                    })
+                    .<span class="ident">ok_or</span>(<span class="ident">littlefs2::io::Error::Io</span>)
+            })
+            .<span class="ident">ok</span>())
     }
 
-    <span class="kw">fn</span> <span class="ident">read_dir_files_next</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">state</span>: <span class="ident">ReadDirFilesState</span>)
-        -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Message</span><span class="op">&gt;</span>, <span class="ident">ReadDirFilesState</span>)<span class="op">&gt;</span><span class="op">&gt;</span>
-    {
-        <span class="kw">let</span> <span class="ident">ReadDirFilesState</span> { <span class="ident">real_dir</span>, <span class="ident">last</span>, <span class="ident">location</span>, <span class="ident">user_attribute</span> } <span class="op">=</span> <span class="ident">state</span>;
+    <span class="kw">fn</span> <span class="ident">read_dir_files_next</span>(
+        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
+        <span class="ident">state</span>: <span class="ident">ReadDirFilesState</span>,
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Message</span><span class="op">&gt;</span>, <span class="ident">ReadDirFilesState</span>)<span class="op">&gt;</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">ReadDirFilesState</span> {
+            <span class="ident">real_dir</span>,
+            <span class="ident">last</span>,
+            <span class="ident">location</span>,
+            <span class="ident">user_attribute</span>,
+        } <span class="op">=</span> <span class="ident">state</span>;
         <span class="kw">let</span> <span class="ident">fs</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">store</span>.<span class="ident">ifs</span>();
 
         <span class="comment">// all we want to do here is skip just past the previously found entry</span>
         <span class="comment">// in the directory iterator, then return it (plus state to continue on next call)</span>
-        <span class="prelude-val">Ok</span>(<span class="ident">fs</span>.<span class="ident">read_dir_and_then</span>(<span class="kw-2">&amp;</span><span class="ident">real_dir</span>, <span class="op">|</span><span class="ident">it</span><span class="op">|</span> {
-
-            <span class="comment">// skip over previous</span>
-            <span class="ident">it</span>.<span class="ident">enumerate</span>().<span class="ident">skip</span>(<span class="ident">last</span> <span class="op">+</span> <span class="number">1</span>)
-                <span class="comment">// entry is still a Result :/ (see question in `read_dir_first`)</span>
-                .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">i</span>,<span class="ident">entry</span>)<span class="op">|</span> (<span class="ident">i</span>, <span class="ident">entry</span>.<span class="ident">unwrap</span>()))
-
-                <span class="comment">// skip over directories (including `.` and `..`)</span>
-                .<span class="ident">filter</span>(<span class="op">|</span>(<span class="kw">_</span>, <span class="ident">entry</span>)<span class="op">|</span> <span class="ident">entry</span>.<span class="ident">file_type</span>().<span class="ident">is_file</span>())
-
-                <span class="comment">// take first entry that meets requirements</span>
-                .<span class="ident">find</span>(<span class="op">|</span>(<span class="kw">_</span>, <span class="ident">entry</span>)<span class="op">|</span> {
-                    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">user_attribute</span>) <span class="op">=</span> <span class="ident">user_attribute</span>.<span class="ident">as_ref</span>() {
-                        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">real_dir</span>.<span class="ident">clone</span>();
-                        <span class="ident">path</span>.<span class="ident">push</span>(<span class="ident">entry</span>.<span class="ident">file_name</span>());
-                        <span class="kw">let</span> <span class="ident">attribute</span> <span class="op">=</span> <span class="ident">fs</span>.<span class="ident">attribute</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>, <span class="ident"><span class="kw">crate</span>::config::USER_ATTRIBUTE_NUMBER</span>).<span class="ident">unwrap</span>();
-                        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">attribute</span>) <span class="op">=</span> <span class="ident">attribute</span> {
-                            <span class="ident">user_attribute</span> <span class="op">==</span> <span class="ident">attribute</span>.<span class="ident">data</span>()
+        <span class="prelude-val">Ok</span>(<span class="ident">fs</span>
+            .<span class="ident">read_dir_and_then</span>(<span class="kw-2">&amp;</span><span class="ident">real_dir</span>, <span class="op">|</span><span class="ident">it</span><span class="op">|</span> {
+                <span class="comment">// skip over previous</span>
+                <span class="ident">it</span>.<span class="ident">enumerate</span>()
+                    .<span class="ident">skip</span>(<span class="ident">last</span> <span class="op">+</span> <span class="number">1</span>)
+                    <span class="comment">// entry is still a Result :/ (see question in `read_dir_first`)</span>
+                    .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">i</span>, <span class="ident">entry</span>)<span class="op">|</span> (<span class="ident">i</span>, <span class="ident">entry</span>.<span class="ident">unwrap</span>()))
+                    <span class="comment">// skip over directories (including `.` and `..`)</span>
+                    .<span class="ident">filter</span>(<span class="op">|</span>(<span class="kw">_</span>, <span class="ident">entry</span>)<span class="op">|</span> <span class="ident">entry</span>.<span class="ident">file_type</span>().<span class="ident">is_file</span>())
+                    <span class="comment">// take first entry that meets requirements</span>
+                    .<span class="ident">find</span>(<span class="op">|</span>(<span class="kw">_</span>, <span class="ident">entry</span>)<span class="op">|</span> {
+                        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">user_attribute</span>) <span class="op">=</span> <span class="ident">user_attribute</span>.<span class="ident">as_ref</span>() {
+                            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">real_dir</span>.<span class="ident">clone</span>();
+                            <span class="ident">path</span>.<span class="ident">push</span>(<span class="ident">entry</span>.<span class="ident">file_name</span>());
+                            <span class="kw">let</span> <span class="ident">attribute</span> <span class="op">=</span> <span class="ident">fs</span>
+                                .<span class="ident">attribute</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>, <span class="ident"><span class="kw">crate</span>::config::USER_ATTRIBUTE_NUMBER</span>)
+                                .<span class="ident">unwrap</span>();
+                            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">attribute</span>) <span class="op">=</span> <span class="ident">attribute</span> {
+                                <span class="ident">user_attribute</span> <span class="op">==</span> <span class="ident">attribute</span>.<span class="ident">data</span>()
+                            } <span class="kw">else</span> {
+                                <span class="bool-val">false</span>
+                            }
                         } <span class="kw">else</span> {
-                            <span class="bool-val">false</span>
+                            <span class="bool-val">true</span>
                         }
-                    } <span class="kw">else</span> { <span class="bool-val">true</span> }
-                })
-
-                .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">i</span>, <span class="ident">entry</span>)<span class="op">|</span> {
-                    <span class="kw">let</span> <span class="ident">read_dir_files_state</span> <span class="op">=</span> <span class="ident">ReadDirFilesState</span> { <span class="ident">real_dir</span>: <span class="ident">real_dir</span>.<span class="ident">clone</span>(), <span class="ident">last</span>: <span class="ident">i</span>, <span class="ident">location</span>, <span class="ident">user_attribute</span> };
-                    <span class="comment">// The semantics is that for a non-existent file, we return None (not an error)</span>
-                    <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="ident">store::read</span>(<span class="self">self</span>.<span class="ident">store</span>, <span class="ident">location</span>, <span class="ident">entry</span>.<span class="ident">path</span>()).<span class="ident">ok</span>();
-                    (<span class="ident">data</span>, <span class="ident">read_dir_files_state</span>)
-                })
-
-                <span class="comment">// convert Option into Result, again because `read_dir_and_then` expects this</span>
-                .<span class="ident">ok_or</span>(<span class="ident">littlefs2::io::Error::Io</span>)
-        }).<span class="ident">ok</span>())
+                    })
+                    .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">i</span>, <span class="ident">entry</span>)<span class="op">|</span> {
+                        <span class="kw">let</span> <span class="ident">read_dir_files_state</span> <span class="op">=</span> <span class="ident">ReadDirFilesState</span> {
+                            <span class="ident">real_dir</span>: <span class="ident">real_dir</span>.<span class="ident">clone</span>(),
+                            <span class="ident">last</span>: <span class="ident">i</span>,
+                            <span class="ident">location</span>,
+                            <span class="ident">user_attribute</span>,
+                        };
+                        <span class="comment">// The semantics is that for a non-existent file, we return None (not an error)</span>
+                        <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="ident">store::read</span>(<span class="self">self</span>.<span class="ident">store</span>, <span class="ident">location</span>, <span class="ident">entry</span>.<span class="ident">path</span>()).<span class="ident">ok</span>();
+                        (<span class="ident">data</span>, <span class="ident">read_dir_files_state</span>)
+                    })
+                    <span class="comment">// convert Option into Result, again because `read_dir_and_then` expects this</span>
+                    .<span class="ident">ok_or</span>(<span class="ident">littlefs2::io::Error::Io</span>)
+            })
+            .<span class="ident">ok</span>())
     }
 
-    <span class="kw">fn</span> <span class="ident">locate_file</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">location</span>: <span class="ident">Location</span>, <span class="ident">underneath</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>, <span class="ident">filename</span>: <span class="ident">PathBuf</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">locate_file</span>(
+        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
+        <span class="ident">location</span>: <span class="ident">Location</span>,
+        <span class="ident">underneath</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
+        <span class="ident">filename</span>: <span class="ident">PathBuf</span>,
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="ident">location</span> <span class="op">!</span><span class="op">=</span> <span class="ident">Location::Internal</span> {
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::RequestNotAvailable</span>);
         }
@@ -731,14 +836,10 @@
         <span class="kw">fn</span> <span class="ident">recursively_locate</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="lifetime">&#39;static</span> <span class="op">+</span> <span class="ident"><span class="kw">crate</span>::types::LfsStorage</span><span class="op">&gt;</span>(
             <span class="ident">fs</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident"><span class="kw">crate</span>::store::Fs</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>,
             <span class="ident">dir</span>: <span class="ident">PathBuf</span>,
-            <span class="ident">filename</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>
-        )
-            -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>
-        {
+            <span class="ident">filename</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>,
+        ) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span> {
             <span class="ident">fs</span>.<span class="ident">read_dir_and_then</span>(<span class="kw-2">&amp;</span><span class="ident">dir</span>, <span class="op">|</span><span class="ident">it</span><span class="op">|</span> {
-
-                <span class="ident">it</span>
-                    .<span class="ident">map</span>(<span class="op">|</span><span class="ident">entry</span><span class="op">|</span> <span class="ident">entry</span>.<span class="ident">unwrap</span>())
+                <span class="ident">it</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">entry</span><span class="op">|</span> <span class="ident">entry</span>.<span class="ident">unwrap</span>())
                     .<span class="ident">skip</span>(<span class="number">2</span>)
                     .<span class="ident">filter_map</span>(<span class="op">|</span><span class="ident">entry</span><span class="op">|</span> {
                         <span class="kw">let</span> <span class="ident">is_file</span> <span class="op">=</span> <span class="ident">entry</span>.<span class="ident">file_type</span>().<span class="ident">is_file</span>();
@@ -754,15 +855,15 @@
                     })
                     .<span class="ident">next</span>()
                     .<span class="ident">ok_or</span>(<span class="ident">littlefs2::io::Error::Io</span>)
-            }).<span class="ident">ok</span>()
+            })
+            .<span class="ident">ok</span>()
         }
 
-        <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">recursively_locate</span>(<span class="ident">fs</span>, <span class="ident">dir</span>, <span class="kw-2">&amp;</span><span class="ident">filename</span>)
-            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">path</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">client_path</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>));
+        <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">recursively_locate</span>(<span class="ident">fs</span>, <span class="ident">dir</span>, <span class="kw-2">&amp;</span><span class="ident">filename</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">path</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">client_path</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>));
 
         <span class="prelude-val">Ok</span>(<span class="ident">path</span>)
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="trussed" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.62.1 (e092d0b6b 2022-07-16)" ></div>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="trussed" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.63.0 (4b91a6ea7 2022-08-08)" ></div>
 </body></html>

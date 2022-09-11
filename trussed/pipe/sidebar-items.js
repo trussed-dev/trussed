@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["TrussedInterchange",""]],"struct":[["ServiceEndpoint",""]]});
+window.SIDEBAR_ITEMS = {"enum":[["TrussedInterchange",""]],"struct":[["ServiceEndpoint",""]]};

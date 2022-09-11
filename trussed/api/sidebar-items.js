@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["Reply",""],["Request",""]],"mod":[["reply",""],["request",""]]});
+window.SIDEBAR_ITEMS = {"enum":[["Reply",""],["Request",""]],"mod":[["reply",""],["request",""]]};

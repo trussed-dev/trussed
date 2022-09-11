@@ -1,9 +1,10 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/mechanisms/chacha8poly1305.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>chacha8poly1305.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><script defer src="../../../main.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script>
-    <noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../trussed/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/mechanisms/chacha8poly1305.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>chacha8poly1305.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../trussed/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div>
         </a><h2 class="location"></h2>
     </nav>
     <nav class="sidebar"><a class="sidebar-logo" href="../../../trussed/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div>
-        </a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../trussed/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><div class="theme-picker hidden"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="22" height="22" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+        </a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../trussed/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><button type="button" id="help-button" title="help">?</button><div id="settings-menu" tabindex="-1">
+                                <a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div>
+                        </div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -401,8 +402,19 @@
 <span id="396">396</span>
 <span id="397">397</span>
 <span id="398">398</span>
-</pre><pre class="rust"><code>
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::api</span>::<span class="kw-2">*</span>;
+<span id="399">399</span>
+<span id="400">400</span>
+<span id="401">401</span>
+<span id="402">402</span>
+<span id="403">403</span>
+<span id="404">404</span>
+<span id="405">405</span>
+<span id="406">406</span>
+<span id="407">407</span>
+<span id="408">408</span>
+<span id="409">409</span>
+<span id="410">410</span>
+</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::api</span>::<span class="kw-2">*</span>;
 <span class="comment">// use crate::config::*;</span>
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::error::Error</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::service</span>::<span class="kw-2">*</span>;
@@ -414,11 +426,11 @@
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;chacha8-poly1305&quot;</span>)]</span>
 <span class="kw">impl</span> <span class="ident">GenerateKey</span> <span class="kw">for</span> <span class="ident"><span class="kw">super</span>::Chacha8Poly1305</span> {
-
     <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">never</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">generate_key</span>(<span class="ident">keystore</span>: <span class="kw-2">&amp;mut</span> <span class="kw">impl</span> <span class="ident">Keystore</span>, <span class="ident">request</span>: <span class="kw-2">&amp;</span><span class="ident">request::GenerateKey</span>)
-        -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">reply::GenerateKey</span>, <span class="ident">Error</span><span class="op">&gt;</span>
-    {
+    <span class="kw">fn</span> <span class="ident">generate_key</span>(
+        <span class="ident">keystore</span>: <span class="kw-2">&amp;mut</span> <span class="kw">impl</span> <span class="ident">Keystore</span>,
+        <span class="ident">request</span>: <span class="kw-2">&amp;</span><span class="ident">request::GenerateKey</span>,
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">reply::GenerateKey</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">use</span> <span class="ident">rand_core::RngCore</span> <span class="kw">as</span> <span class="kw">_</span>;
 
         <span class="comment">// 32 bytes entropy</span>
@@ -456,17 +468,21 @@
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;chacha8-poly1305&quot;</span>)]</span>
-<span class="kw">impl</span> <span class="ident">Decrypt</span> <span class="kw">for</span> <span class="ident"><span class="kw">super</span>::Chacha8Poly1305</span>
-{
+<span class="kw">impl</span> <span class="ident">Decrypt</span> <span class="kw">for</span> <span class="ident"><span class="kw">super</span>::Chacha8Poly1305</span> {
     <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">never</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">decrypt</span>(<span class="ident">keystore</span>: <span class="kw-2">&amp;mut</span> <span class="kw">impl</span> <span class="ident">Keystore</span>, <span class="ident">request</span>: <span class="kw-2">&amp;</span><span class="ident">request::Decrypt</span>)
-        -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">reply::Decrypt</span>, <span class="ident">Error</span><span class="op">&gt;</span>
-    {
-        <span class="kw">use</span> <span class="ident">chacha20poly1305::ChaCha8Poly1305</span>;
+    <span class="kw">fn</span> <span class="ident">decrypt</span>(
+        <span class="ident">keystore</span>: <span class="kw-2">&amp;mut</span> <span class="kw">impl</span> <span class="ident">Keystore</span>,
+        <span class="ident">request</span>: <span class="kw-2">&amp;</span><span class="ident">request::Decrypt</span>,
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">reply::Decrypt</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">use</span> <span class="ident">chacha20poly1305::aead</span>::{<span class="ident">AeadInPlace</span>, <span class="ident">NewAead</span>};
+        <span class="kw">use</span> <span class="ident">chacha20poly1305::ChaCha8Poly1305</span>;
 
         <span class="kw">let</span> <span class="ident">serialized_material</span> <span class="op">=</span> <span class="ident">keystore</span>
-            .<span class="ident">load_key</span>(<span class="ident">key::Secrecy::Secret</span>, <span class="prelude-val">Some</span>(<span class="ident">key::Kind::Symmetric32Nonce</span>(<span class="number">12</span>)), <span class="kw-2">&amp;</span><span class="ident">request</span>.<span class="ident">key</span>)<span class="question-mark">?</span>
+            .<span class="ident">load_key</span>(
+                <span class="ident">key::Secrecy::Secret</span>,
+                <span class="prelude-val">Some</span>(<span class="ident">key::Kind::Symmetric32Nonce</span>(<span class="number">12</span>)),
+                <span class="kw-2">&amp;</span><span class="ident">request</span>.<span class="ident">key</span>,
+            )<span class="question-mark">?</span>
             .<span class="ident">material</span>;
         <span class="kw">let</span> <span class="ident">serialized</span> <span class="op">=</span> <span class="ident">serialized_material</span>.<span class="ident">as_slice</span>();
 
@@ -483,39 +499,38 @@
         <span class="kw">let</span> <span class="ident">nonce</span> <span class="op">=</span> <span class="ident">GenericArray::from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">request</span>.<span class="ident">nonce</span>);
         <span class="kw">let</span> <span class="ident">tag</span> <span class="op">=</span> <span class="ident">GenericArray::from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">request</span>.<span class="ident">tag</span>);
 
-        <span class="kw">let</span> <span class="ident">outcome</span> <span class="op">=</span> <span class="ident">aead</span>.<span class="ident">decrypt_in_place_detached</span>(
-            <span class="ident">nonce</span>, <span class="kw-2">&amp;</span><span class="ident">request</span>.<span class="ident">associated_data</span>, <span class="kw-2">&amp;mut</span> <span class="ident">plaintext</span>, <span class="ident">tag</span>);
+        <span class="kw">let</span> <span class="ident">outcome</span> <span class="op">=</span>
+            <span class="ident">aead</span>.<span class="ident">decrypt_in_place_detached</span>(<span class="ident">nonce</span>, <span class="kw-2">&amp;</span><span class="ident">request</span>.<span class="ident">associated_data</span>, <span class="kw-2">&amp;mut</span> <span class="ident">plaintext</span>, <span class="ident">tag</span>);
 
         <span class="comment">// outcome.map_err(|_| Error::AeadError)?;</span>
 
-        <span class="prelude-val">Ok</span>(<span class="ident">reply::Decrypt</span> { <span class="ident">plaintext</span>: {
-            <span class="kw">if</span> <span class="ident">outcome</span>.<span class="ident">is_ok</span>() {
-                <span class="prelude-val">Some</span>(<span class="ident">plaintext</span>)
-            } <span class="kw">else</span> {
-                <span class="prelude-val">None</span>
-            }
-        }})
+        <span class="prelude-val">Ok</span>(<span class="ident">reply::Decrypt</span> {
+            <span class="ident">plaintext</span>: {
+                <span class="kw">if</span> <span class="ident">outcome</span>.<span class="ident">is_ok</span>() {
+                    <span class="prelude-val">Some</span>(<span class="ident">plaintext</span>)
+                } <span class="kw">else</span> {
+                    <span class="prelude-val">None</span>
+                }
+            },
+        })
     }
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;chacha8-poly1305&quot;</span>)]</span>
-<span class="kw">impl</span> <span class="ident">Encrypt</span> <span class="kw">for</span> <span class="ident"><span class="kw">super</span>::Chacha8Poly1305</span>
-{
+<span class="kw">impl</span> <span class="ident">Encrypt</span> <span class="kw">for</span> <span class="ident"><span class="kw">super</span>::Chacha8Poly1305</span> {
     <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">never</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">encrypt</span>(<span class="ident">keystore</span>: <span class="kw-2">&amp;mut</span> <span class="kw">impl</span> <span class="ident">Keystore</span>, <span class="ident">request</span>: <span class="kw-2">&amp;</span><span class="ident">request::Encrypt</span>)
-        -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">reply::Encrypt</span>, <span class="ident">Error</span><span class="op">&gt;</span>
-    {
-        <span class="kw">use</span> <span class="ident">chacha20poly1305::ChaCha8Poly1305</span>;
+    <span class="kw">fn</span> <span class="ident">encrypt</span>(
+        <span class="ident">keystore</span>: <span class="kw-2">&amp;mut</span> <span class="kw">impl</span> <span class="ident">Keystore</span>,
+        <span class="ident">request</span>: <span class="kw-2">&amp;</span><span class="ident">request::Encrypt</span>,
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">reply::Encrypt</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">use</span> <span class="ident">chacha20poly1305::aead</span>::{<span class="ident">AeadInPlace</span>, <span class="ident">NewAead</span>};
-
+        <span class="kw">use</span> <span class="ident">chacha20poly1305::ChaCha8Poly1305</span>;
 
         <span class="comment">// load key and nonce</span>
         <span class="kw">let</span> <span class="ident">secrecy</span> <span class="op">=</span> <span class="ident">key::Secrecy::Secret</span>;
         <span class="kw">let</span> <span class="ident">key_kind</span> <span class="op">=</span> <span class="ident">key::Kind::Symmetric32Nonce</span>(<span class="number">12</span>);
         <span class="kw">let</span> <span class="ident">key_id</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">request</span>.<span class="ident">key</span>;
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">serialized_material</span> <span class="op">=</span> <span class="ident">keystore</span>
-            .<span class="ident">load_key</span>(<span class="ident">secrecy</span>, <span class="prelude-val">Some</span>(<span class="ident">key_kind</span>), <span class="ident">key_id</span>)<span class="question-mark">?</span>
-            .<span class="ident">material</span>;
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">serialized_material</span> <span class="op">=</span> <span class="ident">keystore</span>.<span class="ident">load_key</span>(<span class="ident">secrecy</span>, <span class="prelude-val">Some</span>(<span class="ident">key_kind</span>), <span class="ident">key_id</span>)<span class="question-mark">?</span>.<span class="ident">material</span>;
         <span class="kw">let</span> <span class="ident">serialized</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">u8</span>] <span class="op">=</span> <span class="ident">serialized_material</span>.<span class="ident">as_mut</span>();
 
         <span class="macro">assert!</span>(<span class="ident">serialized</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="number">44</span>);
@@ -544,38 +559,44 @@
             <span class="prelude-val">None</span> =&gt; <span class="ident">generated_nonce</span>,
         };
 
-
-
         <span class="comment">// keep in state?</span>
         <span class="kw">let</span> <span class="ident">aead</span> <span class="op">=</span> <span class="ident">ChaCha8Poly1305::new</span>(<span class="kw-2">&amp;</span><span class="ident">GenericArray::clone_from_slice</span>(<span class="ident">symmetric_key</span>));
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ciphertext</span> <span class="op">=</span> <span class="ident">request</span>.<span class="ident">message</span>.<span class="ident">clone</span>();
-        <span class="kw">let</span> <span class="ident">tag</span>: [<span class="ident">u8</span>; <span class="number">16</span>] <span class="op">=</span> <span class="ident">aead</span>.<span class="ident">encrypt_in_place_detached</span>(
-            <span class="kw-2">&amp;</span><span class="ident">GenericArray::clone_from_slice</span>(<span class="ident">nonce</span>),
-            <span class="kw-2">&amp;</span><span class="ident">request</span>.<span class="ident">associated_data</span>,
-            <span class="kw-2">&amp;mut</span> <span class="ident">ciphertext</span>,
-        ).<span class="ident">unwrap</span>().<span class="ident">as_slice</span>().<span class="ident">try_into</span>().<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">tag</span>: [<span class="ident">u8</span>; <span class="number">16</span>] <span class="op">=</span> <span class="ident">aead</span>
+            .<span class="ident">encrypt_in_place_detached</span>(
+                <span class="kw-2">&amp;</span><span class="ident">GenericArray::clone_from_slice</span>(<span class="ident">nonce</span>),
+                <span class="kw-2">&amp;</span><span class="ident">request</span>.<span class="ident">associated_data</span>,
+                <span class="kw-2">&amp;mut</span> <span class="ident">ciphertext</span>,
+            )
+            .<span class="ident">unwrap</span>()
+            .<span class="ident">as_slice</span>()
+            .<span class="ident">try_into</span>()
+            .<span class="ident">unwrap</span>();
 
         <span class="kw">let</span> <span class="ident">nonce</span> <span class="op">=</span> <span class="ident">ShortData::from_slice</span>(<span class="ident">nonce</span>).<span class="ident">unwrap</span>();
         <span class="kw">let</span> <span class="ident">tag</span> <span class="op">=</span> <span class="ident">ShortData::from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">tag</span>).<span class="ident">unwrap</span>();
 
         <span class="comment">// let ciphertext = Message::from_slice(&amp;ciphertext).unwrap();</span>
-        <span class="prelude-val">Ok</span>(<span class="ident">reply::Encrypt</span> { <span class="ident">ciphertext</span>, <span class="ident">nonce</span>, <span class="ident">tag</span> })
+        <span class="prelude-val">Ok</span>(<span class="ident">reply::Encrypt</span> {
+            <span class="ident">ciphertext</span>,
+            <span class="ident">nonce</span>,
+            <span class="ident">tag</span>,
+        })
     }
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;chacha8-poly1305&quot;</span>)]</span>
-<span class="kw">impl</span> <span class="ident">WrapKey</span> <span class="kw">for</span> <span class="ident"><span class="kw">super</span>::Chacha8Poly1305</span>
-{
+<span class="kw">impl</span> <span class="ident">WrapKey</span> <span class="kw">for</span> <span class="ident"><span class="kw">super</span>::Chacha8Poly1305</span> {
     <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">never</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">wrap_key</span>(<span class="ident">keystore</span>: <span class="kw-2">&amp;mut</span> <span class="kw">impl</span> <span class="ident">Keystore</span>, <span class="ident">request</span>: <span class="kw-2">&amp;</span><span class="ident">request::WrapKey</span>)
-        -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">reply::WrapKey</span>, <span class="ident">Error</span><span class="op">&gt;</span>
-    {
+    <span class="kw">fn</span> <span class="ident">wrap_key</span>(
+        <span class="ident">keystore</span>: <span class="kw-2">&amp;mut</span> <span class="kw">impl</span> <span class="ident">Keystore</span>,
+        <span class="ident">request</span>: <span class="kw-2">&amp;</span><span class="ident">request::WrapKey</span>,
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">reply::WrapKey</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="macro">debug!</span>(<span class="string">&quot;trussed: Chacha8Poly1305::WrapKey&quot;</span>);
 
         <span class="comment">// TODO: need to check both secret and private keys</span>
-        <span class="kw">let</span> <span class="ident">serialized_key</span> <span class="op">=</span> <span class="ident">keystore</span>
-            .<span class="ident">load_key</span>(<span class="ident">key::Secrecy::Secret</span>, <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span><span class="ident">request</span>.<span class="ident">key</span>)<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">serialized_key</span> <span class="op">=</span> <span class="ident">keystore</span>.<span class="ident">load_key</span>(<span class="ident">key::Secrecy::Secret</span>, <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span><span class="ident">request</span>.<span class="ident">key</span>)<span class="question-mark">?</span>;
 
         <span class="kw">let</span> <span class="ident">message</span> <span class="op">=</span> <span class="ident">Message::from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">serialized_key</span>.<span class="ident">serialize</span>()).<span class="ident">unwrap</span>();
 
@@ -588,21 +609,25 @@
         };
         <span class="kw">let</span> <span class="ident">encryption_reply</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident"><span class="kw">super</span>::Chacha8Poly1305</span><span class="op">&gt;</span><span class="ident">::encrypt</span>(<span class="ident">keystore</span>, <span class="kw-2">&amp;</span><span class="ident">encryption_request</span>)<span class="question-mark">?</span>;
 
-        <span class="kw">let</span> <span class="ident">wrapped_key</span> <span class="op">=</span> <span class="ident"><span class="kw">crate</span>::postcard_serialize_bytes</span>(<span class="kw-2">&amp;</span><span class="ident">encryption_reply</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error::CborError</span>)<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">wrapped_key</span> <span class="op">=</span>
+            <span class="ident"><span class="kw">crate</span>::postcard_serialize_bytes</span>(<span class="kw-2">&amp;</span><span class="ident">encryption_reply</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error::CborError</span>)<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(<span class="ident">reply::WrapKey</span> { <span class="ident">wrapped_key</span> })
     }
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;chacha8-poly1305&quot;</span>)]</span>
-<span class="kw">impl</span> <span class="ident">UnwrapKey</span> <span class="kw">for</span> <span class="ident"><span class="kw">super</span>::Chacha8Poly1305</span>
-{
+<span class="kw">impl</span> <span class="ident">UnwrapKey</span> <span class="kw">for</span> <span class="ident"><span class="kw">super</span>::Chacha8Poly1305</span> {
     <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">never</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">unwrap_key</span>(<span class="ident">keystore</span>: <span class="kw-2">&amp;mut</span> <span class="kw">impl</span> <span class="ident">Keystore</span>, <span class="ident">request</span>: <span class="kw-2">&amp;</span><span class="ident">request::UnwrapKey</span>)
-        -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">reply::UnwrapKey</span>, <span class="ident">Error</span><span class="op">&gt;</span>
-    {
-        <span class="kw">let</span> <span class="ident">reply::Encrypt</span> { <span class="ident">ciphertext</span>, <span class="ident">nonce</span>, <span class="ident">tag</span> } <span class="op">=</span> <span class="ident"><span class="kw">crate</span>::postcard_deserialize</span>(
-            <span class="kw-2">&amp;</span><span class="ident">request</span>.<span class="ident">wrapped_key</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error::CborError</span>)<span class="question-mark">?</span>;
+    <span class="kw">fn</span> <span class="ident">unwrap_key</span>(
+        <span class="ident">keystore</span>: <span class="kw-2">&amp;mut</span> <span class="kw">impl</span> <span class="ident">Keystore</span>,
+        <span class="ident">request</span>: <span class="kw-2">&amp;</span><span class="ident">request::UnwrapKey</span>,
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">reply::UnwrapKey</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">reply::Encrypt</span> {
+            <span class="ident">ciphertext</span>,
+            <span class="ident">nonce</span>,
+            <span class="ident">tag</span>,
+        } <span class="op">=</span> <span class="ident"><span class="kw">crate</span>::postcard_deserialize</span>(<span class="kw-2">&amp;</span><span class="ident">request</span>.<span class="ident">wrapped_key</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error::CborError</span>)<span class="question-mark">?</span>;
 
         <span class="kw">let</span> <span class="ident">decryption_request</span> <span class="op">=</span> <span class="ident">request::Decrypt</span> {
             <span class="ident">mechanism</span>: <span class="ident">Mechanism::Chacha8Poly1305</span>,
@@ -614,14 +639,19 @@
         };
 
         <span class="kw">let</span> <span class="ident">serialized_key</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">serialized_key</span>) <span class="op">=</span>
-            <span class="op">&lt;</span><span class="ident"><span class="kw">super</span>::Chacha8Poly1305</span><span class="op">&gt;</span><span class="ident">::decrypt</span>(<span class="ident">keystore</span>, <span class="kw-2">&amp;</span><span class="ident">decryption_request</span>)<span class="question-mark">?</span>.<span class="ident">plaintext</span> {
+            <span class="op">&lt;</span><span class="ident"><span class="kw">super</span>::Chacha8Poly1305</span><span class="op">&gt;</span><span class="ident">::decrypt</span>(<span class="ident">keystore</span>, <span class="kw-2">&amp;</span><span class="ident">decryption_request</span>)<span class="question-mark">?</span>.<span class="ident">plaintext</span>
+        {
             <span class="ident">serialized_key</span>
         } <span class="kw">else</span> {
-            <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">reply::UnwrapKey</span> { <span class="ident">key</span>: <span class="prelude-val">None</span> } );
+            <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">reply::UnwrapKey</span> { <span class="ident">key</span>: <span class="prelude-val">None</span> });
         };
 
         <span class="comment">// TODO: probably change this to returning Option&lt;key&gt; too</span>
-        <span class="kw">let</span> <span class="ident">key::Key</span>{ <span class="ident">flags</span>: <span class="kw">_</span>, <span class="ident">kind</span>, <span class="ident">material</span> } <span class="op">=</span> <span class="ident">key::Key::try_deserialize</span>(<span class="kw-2">&amp;</span><span class="ident">serialized_key</span>)<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">key::Key</span> {
+            <span class="ident">flags</span>: <span class="kw">_</span>,
+            <span class="ident">kind</span>,
+            <span class="ident">material</span>,
+        } <span class="op">=</span> <span class="ident">key::Key::try_deserialize</span>(<span class="kw-2">&amp;</span><span class="ident">serialized_key</span>)<span class="question-mark">?</span>;
 
         <span class="comment">// TODO: need to check both secret and private keys</span>
         <span class="kw">let</span> <span class="ident">key_id</span> <span class="op">=</span> <span class="ident">keystore</span>.<span class="ident">store_key</span>(
@@ -667,7 +697,6 @@
 <span class="comment">// //         &amp;GenericArray::clone_from_slice(tag)</span>
 <span class="comment">// //     ).map_err(|_| Error::AeadError)</span>
 <span class="comment">// // }</span>
-
 
 <span class="comment">// #[cfg(feature = &quot;chacha8-poly1305&quot;)]</span>
 <span class="comment">// impl&lt;P: Platform&gt;</span>
@@ -789,16 +818,12 @@
 <span class="comment">// //     ).map_err(|_| Error::AeadError)</span>
 <span class="comment">// // }</span>
 
-
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;chacha8-poly1305&quot;</span>))]</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">Platform</span><span class="op">&gt;</span>
-<span class="ident">Decrypt</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident"><span class="kw">super</span>::Chacha8Poly1305</span> {}
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">Platform</span><span class="op">&gt;</span> <span class="ident">Decrypt</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident"><span class="kw">super</span>::Chacha8Poly1305</span> {}
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;chacha8-poly1305&quot;</span>))]</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">Platform</span><span class="op">&gt;</span>
-<span class="ident">Encrypt</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident"><span class="kw">super</span>::Chacha8Poly1305</span> {}
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">Platform</span><span class="op">&gt;</span> <span class="ident">Encrypt</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident"><span class="kw">super</span>::Chacha8Poly1305</span> {}
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;chacha8-poly1305&quot;</span>))]</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">Platform</span><span class="op">&gt;</span>
-<span class="ident">GenerateKey</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident"><span class="kw">super</span>::Chacha8Poly1305</span> {}
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">Platform</span><span class="op">&gt;</span> <span class="ident">GenerateKey</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident"><span class="kw">super</span>::Chacha8Poly1305</span> {}
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="trussed" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.62.1 (e092d0b6b 2022-07-16)" ></div>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="trussed" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.63.0 (4b91a6ea7 2022-08-08)" ></div>
 </body></html>

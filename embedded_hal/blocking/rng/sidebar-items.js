@@ -1,1 +1,1 @@
-initSidebarItems({"trait":[["Read","Blocking read"]]});
+window.SIDEBAR_ITEMS = {"trait":[["Read","Blocking read"]]};
