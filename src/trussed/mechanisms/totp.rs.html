@@ -103,6 +103,14 @@
 <span id="97">97</span>
 <span id="98">98</span>
 <span id="99">99</span>
+<span id="100">100</span>
+<span id="101">101</span>
+<span id="102">102</span>
+<span id="103">103</span>
+<span id="104">104</span>
+<span id="105">105</span>
+<span id="106">106</span>
+<span id="107">107</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::api</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::error::Error</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::service</span>::<span class="kw-2">*</span>;
@@ -110,6 +118,7 @@
 <span class="comment">// code copied from https://github.com/avacariu/rust-oath</span>
 
 <span class="kw">const</span> <span class="ident">DIGITS</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">6</span>;
+<span class="kw">const</span> <span class="ident">TOTP_KEY_SIZE</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">20</span>;
 
 <span class="comment">// https://tools.ietf.org/html/rfc4226#section-5.3</span>
 
@@ -152,9 +161,16 @@
     <span class="kw">fn</span> <span class="ident">sign</span>(<span class="ident">keystore</span>: <span class="kw-2">&amp;mut</span> <span class="kw">impl</span> <span class="ident">Keystore</span>, <span class="ident">request</span>: <span class="kw-2">&amp;</span><span class="ident">request::Sign</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">reply::Sign</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">key_id</span> <span class="op">=</span> <span class="ident">request</span>.<span class="ident">key</span>;
 
-        <span class="kw">let</span> <span class="ident">secret</span> <span class="op">=</span> <span class="ident">keystore</span>
-            .<span class="ident">load_key</span>(<span class="ident">key::Secrecy::Secret</span>, <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span><span class="ident">key_id</span>)<span class="question-mark">?</span>
-            .<span class="ident">material</span>;
+        <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="ident">keystore</span>.<span class="ident">load_key</span>(<span class="ident">key::Secrecy::Secret</span>, <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span><span class="ident">key_id</span>)<span class="question-mark">?</span>;
+
+        <span class="kw">if</span> <span class="op">!</span><span class="macro">matches!</span>(
+            <span class="ident">key</span>.<span class="ident">kind</span>,
+            <span class="ident">key::Kind::Symmetric</span>(<span class="ident">TOTP_KEY_SIZE</span>) <span class="op">|</span> <span class="ident">key::Kind::Shared</span>(<span class="ident">TOTP_KEY_SIZE</span>)
+        ) {
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::WrongKeyKind</span>);
+        }
+
+        <span class="kw">let</span> <span class="ident">secret</span> <span class="op">=</span> <span class="ident">key</span>.<span class="ident">material</span>;
 
         <span class="kw">if</span> <span class="ident">request</span>.<span class="ident">message</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="number">8</span> {
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::InternalError</span>);
