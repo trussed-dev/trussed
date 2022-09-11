@@ -5,9 +5,9 @@
 //! [pkcs11-v3]: https://docs.oasis-open.org/pkcs11/pkcs11-base/v3.0/pkcs11-base-v3.0.html
 //! [pkcs11-headers]: https://docs.oasis-open.org/pkcs11/pkcs11-base/v3.0/cs01/include/pkcs11-v3.0/
 
+use crate::types::*;
 use core::hint::unreachable_unchecked;
 use core::time::Duration;
-use crate::types::*;
 
 #[macro_use]
 mod macros;
@@ -44,7 +44,7 @@ generate_enums! {
     ReadDirFilesFirst: 13
     ReadDirFilesNext: 14
     ReadFile: 15
-    Metadata: 26 
+    Metadata: 26
     // ReadCounter: 7
     RandomBytes: 16
     SerializeKey: 17
@@ -360,7 +360,7 @@ pub mod reply {
 
         DebugDumpStore:
 
-		Decrypt:
+        Decrypt:
             - plaintext: Option<Message>
 
         Delete:
@@ -379,7 +379,7 @@ pub mod reply {
         DeserializeKey:
             - key: KeyId
 
-		Encrypt:
+        Encrypt:
             - ciphertext: Message
             - nonce: ShortData
             - tag: ShortData
@@ -482,5 +482,4 @@ pub mod reply {
         WriteCertificate:
           - id: CertId
     }
-
 }

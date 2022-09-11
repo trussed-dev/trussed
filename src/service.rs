@@ -1,26 +1,25 @@
-pub use rand_core::{RngCore, SeedableRng};
-use interchange::Responder;
-use littlefs2::path::PathBuf;
 use chacha20::ChaCha8Rng;
 use heapless_bytes::Unsigned;
+use interchange::Responder;
+use littlefs2::path::PathBuf;
+pub use rand_core::{RngCore, SeedableRng};
 
 use crate::api::*;
-use crate::Bytes;
-use crate::platform::*;
 use crate::config::*;
 use crate::error::Error;
 pub use crate::key;
 use crate::mechanisms;
+pub use crate::pipe::ServiceEndpoint;
 use crate::pipe::TrussedInterchange;
+use crate::platform::*;
 pub use crate::store::{
-    filestore::{ClientFilestore, Filestore, ReadDirState, ReadDirFilesState},
-    certstore::{ClientCertstore, Certstore as _},
+    certstore::{Certstore as _, ClientCertstore},
     counterstore::{ClientCounterstore, Counterstore as _},
+    filestore::{ClientFilestore, Filestore, ReadDirFilesState, ReadDirState},
     keystore::{ClientKeystore, Keystore},
 };
 use crate::types::*;
-pub use crate::pipe::ServiceEndpoint;
-
+use crate::Bytes;
 
 pub mod attest;
 
@@ -54,7 +53,8 @@ rpc_trait! {
 }
 
 pub struct ServiceResources<P>
-where P: Platform
+where
+    P: Platform,
 {
     pub(crate) platform: P,
     // // Option?
@@ -66,7 +66,6 @@ where P: Platform
 }
 
 impl<P: Platform> ServiceResources<P> {
-
     pub fn new(platform: P) -> Self {
         Self {
             platform,
@@ -78,8 +77,11 @@ impl<P: Platform> ServiceResources<P> {
     }
 }
 
-pub struct Service<P> where P: Platform {
-    eps: Vec<ServiceEndpoint, {MAX_SERVICE_CLIENTS::USIZE}>,
+pub struct Service<P>
+where
+    P: Platform,
+{
+    eps: Vec<ServiceEndpoint, { MAX_SERVICE_CLIENTS::USIZE }>,
     resources: ServiceResources<P>,
 }
 
@@ -87,7 +89,6 @@ pub struct Service<P> where P: Platform {
 unsafe impl<P: Platform> Send for Service<P> {}
 
 impl<P: Platform> ServiceResources<P> {
-
     #[inline(never)]
     pub fn reply_to(&mut self, client_id: PathBuf, request: &Request) -> Result<Reply, Error> {
         // TODO: what we want to do here is map an enum to a generic type
@@ -120,10 +121,7 @@ impl<P: Platform> ServiceResources<P> {
         let counterstore = &mut counterstore;
 
         // prepare filestore, bound to client_id, for storage calls
-        let mut filestore: ClientFilestore<P::S> = ClientFilestore::new(
-            client_id,
-            full_store,
-        );
+        let mut filestore: ClientFilestore<P::S> = ClientFilestore::new(client_id, full_store);
         let filestore = &mut filestore;
 
         debug_now!("TRUSSED {:?}", request);
@@ -579,21 +577,18 @@ impl<P: Platform> ServiceResources<P> {
     /// Applies a splitting aka forking construction to the inner DRBG,
     /// returning an independent DRBG.
     pub fn rng(&mut self) -> Result<ChaCha8Rng, Error> {
-
         // Check if our RNG is loaded.
         let mut rng = match self.rng_state.take() {
             Some(rng) => rng,
             None => {
-                let mut filestore: ClientFilestore<P::S> = ClientFilestore::new(
-                    PathBuf::from("trussed"),
-                    self.platform.store(),
-                );
+                let mut filestore: ClientFilestore<P::S> =
+                    ClientFilestore::new(PathBuf::from("trussed"), self.platform.store());
 
                 let path = PathBuf::from("rng-state.bin");
 
                 // Load previous seed, e.g., externally injected entropy on first run.
                 // Else, default to zeros - will mix in new HW RNG entropy next
-                let mixin_seed = if ! filestore.exists(&path, Location::Internal) {
+                let mixin_seed = if !filestore.exists(&path, Location::Internal) {
                     [0u8; 32]
                 } else {
                     // Use the last saved state.
@@ -619,7 +614,9 @@ impl<P: Platform> ServiceResources<P> {
 
                 // 1. First, draw fresh entropy from the HW TRNG.
                 let mut entropy = [0u8; 32];
-                self.platform.rng().try_fill_bytes(&mut entropy)
+                self.platform
+                    .rng()
+                    .try_fill_bytes(&mut entropy)
                     .map_err(|_| Error::EntropyMalfunction)?;
 
                 // 2. Mix into our previously stored seed.
@@ -634,11 +631,13 @@ impl<P: Platform> ServiceResources<P> {
                 // 4. Store freshly drawn seed for next boot.
                 let mut seed_to_store = [0u8; 32];
                 rng.fill_bytes(&mut seed_to_store);
-                filestore.write(&path, Location::Internal, seed_to_store.as_ref()).unwrap();
+                filestore
+                    .write(&path, Location::Internal, seed_to_store.as_ref())
+                    .unwrap();
 
                 // 5. Finish
                 Ok(rng)
-            }?
+            }?,
         };
 
         // split off another DRBG
@@ -647,30 +646,34 @@ impl<P: Platform> ServiceResources<P> {
         split_rng
     }
 
-    pub fn fill_random_bytes(&mut self, bytes: &mut[u8]) -> Result<(), Error> {
+    pub fn fill_random_bytes(&mut self, bytes: &mut [u8]) -> Result<(), Error> {
         self.rng()?.fill_bytes(bytes);
         Ok(())
     }
-
 }
 
 impl<P: Platform> Service<P> {
-
     pub fn new(platform: P) -> Self {
         let resources = ServiceResources::new(platform);
-        Self { eps: Vec::new(), resources }
+        Self {
+            eps: Vec::new(),
+            resources,
+        }
     }
 
     /// Add a new client, claiming one of the statically configured
     /// interchange pairs.
     #[allow(clippy::result_unit_err)]
-    pub fn try_new_client<S: crate::platform::Syscall>(&mut self, client_id: &str, syscall: S)
-        -> Result<crate::client::ClientImplementation<S>, ()>
-    {
+    pub fn try_new_client<S: crate::platform::Syscall>(
+        &mut self,
+        client_id: &str,
+        syscall: S,
+    ) -> Result<crate::client::ClientImplementation<S>, ()> {
         use interchange::Interchange;
         let (requester, responder) = TrussedInterchange::claim().ok_or(())?;
         let client_id = ClientId::from(client_id.as_bytes());
-        self.add_endpoint(responder, client_id).map_err(|_service_endpoint| ())?;
+        self.add_endpoint(responder, client_id)
+            .map_err(|_service_endpoint| ())?;
 
         Ok(crate::client::ClientImplementation::new(requester, syscall))
     }
@@ -679,13 +682,15 @@ impl<P: Platform> Service<P> {
     /// (directly call self for processing). This method is only useful for single-threaded
     /// single-app runners.
     #[allow(clippy::result_unit_err)]
-    pub fn try_as_new_client(&mut self, client_id: &str)
-        -> Result<crate::client::ClientImplementation<&mut Service<P>>, ()>
-    {
+    pub fn try_as_new_client(
+        &mut self,
+        client_id: &str,
+    ) -> Result<crate::client::ClientImplementation<&mut Service<P>>, ()> {
         use interchange::Interchange;
         let (requester, responder) = TrussedInterchange::claim().ok_or(())?;
         let client_id = ClientId::from(client_id.as_bytes());
-        self.add_endpoint(responder, client_id).map_err(|_service_endpoint| ())?;
+        self.add_endpoint(responder, client_id)
+            .map_err(|_service_endpoint| ())?;
 
         Ok(crate::client::ClientImplementation::new(requester, self))
     }
@@ -693,38 +698,44 @@ impl<P: Platform> Service<P> {
     /// Similar to [try_as_new_client][Service::try_as_new_client] except that the returning client owns the
     /// Service and is therefore `'static`
     #[allow(clippy::result_unit_err)]
-    pub fn try_into_new_client(mut self, client_id: &str)
-        -> Result<crate::client::ClientImplementation<Service<P>>, ()>
-    {
+    pub fn try_into_new_client(
+        mut self,
+        client_id: &str,
+    ) -> Result<crate::client::ClientImplementation<Service<P>>, ()> {
         use interchange::Interchange;
         let (requester, responder) = TrussedInterchange::claim().ok_or(())?;
         let client_id = ClientId::from(client_id.as_bytes());
-        self.add_endpoint(responder, client_id).map_err(|_service_endpoint| ())?;
+        self.add_endpoint(responder, client_id)
+            .map_err(|_service_endpoint| ())?;
 
         Ok(crate::client::ClientImplementation::new(requester, self))
     }
 
-
-    pub fn add_endpoint(&mut self, interchange: Responder<TrussedInterchange>, client_id: ClientId) -> Result<(), ServiceEndpoint> {
+    pub fn add_endpoint(
+        &mut self,
+        interchange: Responder<TrussedInterchange>,
+        client_id: ClientId,
+    ) -> Result<(), ServiceEndpoint> {
         if client_id == PathBuf::from("trussed") {
             panic!("trussed is a reserved client ID");
         }
-        self.eps.push(ServiceEndpoint { interchange, client_id })
+        self.eps.push(ServiceEndpoint {
+            interchange,
+            client_id,
+        })
     }
 
     pub fn set_seed_if_uninitialized(&mut self, seed: &[u8; 32]) {
-
-        let mut filestore: ClientFilestore<P::S> = ClientFilestore::new(
-            PathBuf::from("trussed"),
-            self.resources.platform.store(),
-        );
+        let mut filestore: ClientFilestore<P::S> =
+            ClientFilestore::new(PathBuf::from("trussed"), self.resources.platform.store());
         let filestore = &mut filestore;
 
         let path = PathBuf::from("rng-state.bin");
         if !filestore.exists(&path, Location::Internal) {
-            filestore.write(&path, Location::Internal, seed.as_ref()).unwrap();
+            filestore
+                .write(&path, Location::Internal, seed.as_ref())
+                .unwrap();
         }
-
     }
 
     // currently, this just blinks the green heartbeat LED (former toggle_red in app_rtic.rs)
@@ -733,7 +744,8 @@ impl<P: Platform> Service<P> {
     // - generate more interesting LED visuals
     // - return "when" next to be called
     // - potentially read out button status and return "async"
-    pub fn update_ui(&mut self) /* -> u32 */ {
+    pub fn update_ui(&mut self) /* -> u32 */
+    {
         self.resources.platform.user_interface().refresh();
     }
 
@@ -745,27 +757,49 @@ impl<P: Platform> Service<P> {
 
         for ep in eps.iter_mut() {
             if let Some(request) = ep.interchange.take_request() {
-                resources.platform.user_interface().set_status(ui::Status::Processing);
+                resources
+                    .platform
+                    .user_interface()
+                    .set_status(ui::Status::Processing);
                 // #[cfg(test)] println!("service got request: {:?}", &request);
 
                 // resources.currently_serving = ep.client_id.clone();
                 let reply_result = resources.reply_to(ep.client_id.clone(), &request);
 
-                resources.platform.user_interface().set_status(ui::Status::Idle);
+                resources
+                    .platform
+                    .user_interface()
+                    .set_status(ui::Status::Idle);
                 ep.interchange.respond(&reply_result).ok();
-
             }
         }
-        debug_now!("I/E/V : {}/{}/{} >",
-              self.resources.platform.store().ifs().available_blocks().unwrap(),
-              self.resources.platform.store().efs().available_blocks().unwrap(),
-              self.resources.platform.store().vfs().available_blocks().unwrap(),
+        debug_now!(
+            "I/E/V : {}/{}/{} >",
+            self.resources
+                .platform
+                .store()
+                .ifs()
+                .available_blocks()
+                .unwrap(),
+            self.resources
+                .platform
+                .store()
+                .efs()
+                .available_blocks()
+                .unwrap(),
+            self.resources
+                .platform
+                .store()
+                .vfs()
+                .available_blocks()
+                .unwrap(),
         );
     }
 }
 
 impl<P> crate::client::Syscall for &mut Service<P>
-where P: Platform
+where
+    P: Platform,
 {
     fn syscall(&mut self) {
         self.process();
@@ -773,7 +807,8 @@ where P: Platform
 }
 
 impl<P> crate::client::Syscall for Service<P>
-where P: Platform
+where
+    P: Platform,
 {
     fn syscall(&mut self) {
         self.process();

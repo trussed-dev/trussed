@@ -1,5 +1,5 @@
-use std::time::{Duration, Instant};
 use crate::platform::{self, consent::Level, reboot::To, ui::Status};
+use std::time::{Duration, Instant};
 
 pub struct UserInterface {
     start_time: Instant,
@@ -51,7 +51,7 @@ impl platform::UserInterface for UserInterface {
         if let Some(inner) = &mut self.inner {
             inner.reboot(to);
         } else {
-            loop { 
+            loop {
                 continue;
             }
         }

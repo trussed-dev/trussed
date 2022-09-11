@@ -7,7 +7,6 @@ mod client;
 
 use trussed::types::Location::*;
 
-
 #[test]
 fn x255_agree() {
     client::get(|client| {

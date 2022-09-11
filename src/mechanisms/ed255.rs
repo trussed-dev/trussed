@@ -7,28 +7,30 @@ use crate::error::Error;
 use crate::service::*;
 use crate::types::*;
 
-    #[inline(never)]
-fn load_public_key(keystore: &mut impl Keystore, key_id: &KeyId)
-    -> Result<salty::PublicKey, Error> {
-
+#[inline(never)]
+fn load_public_key(
+    keystore: &mut impl Keystore,
+    key_id: &KeyId,
+) -> Result<salty::PublicKey, Error> {
     let public_bytes: [u8; 32] = keystore
         .load_key(key::Secrecy::Public, Some(key::Kind::Ed255), key_id)?
-        .material.as_slice()
+        .material
+        .as_slice()
         .try_into()
         .map_err(|_| Error::InternalError)?;
 
-    let public_key = salty::signature::PublicKey::try_from(&public_bytes).map_err(|_| Error::InternalError)?;
+    let public_key =
+        salty::signature::PublicKey::try_from(&public_bytes).map_err(|_| Error::InternalError)?;
 
     Ok(public_key)
 }
 
-    #[inline(never)]
-fn load_keypair(keystore: &mut impl Keystore, key_id: &KeyId)
-    -> Result<salty::Keypair, Error> {
-
+#[inline(never)]
+fn load_keypair(keystore: &mut impl Keystore, key_id: &KeyId) -> Result<salty::Keypair, Error> {
     let seed: [u8; 32] = keystore
         .load_key(key::Secrecy::Secret, Some(key::Kind::Ed255), key_id)?
-        .material.as_slice()
+        .material
+        .as_slice()
         .try_into()
         .map_err(|_| Error::InternalError)?;
 
@@ -38,36 +40,36 @@ fn load_keypair(keystore: &mut impl Keystore, key_id: &KeyId)
 }
 
 #[cfg(feature = "ed255")]
-impl DeriveKey for super::Ed255
-{
+impl DeriveKey for super::Ed255 {
     #[inline(never)]
-    fn derive_key(keystore: &mut impl Keystore, request: &request::DeriveKey)
-        -> Result<reply::DeriveKey, Error>
-    {
+    fn derive_key(
+        keystore: &mut impl Keystore,
+        request: &request::DeriveKey,
+    ) -> Result<reply::DeriveKey, Error> {
         let base_id = &request.base_key;
         let keypair = load_keypair(keystore, base_id)?;
 
         let public_id = keystore.store_key(
             request.attributes.persistence,
-            key::Secrecy::Public, key::Kind::Ed255,
-            keypair.public.as_bytes())?;
+            key::Secrecy::Public,
+            key::Kind::Ed255,
+            keypair.public.as_bytes(),
+        )?;
 
-        Ok(reply::DeriveKey {
-            key: public_id,
-        })
+        Ok(reply::DeriveKey { key: public_id })
     }
 }
 
 #[cfg(feature = "ed255")]
-impl DeserializeKey for super::Ed255
-{
+impl DeserializeKey for super::Ed255 {
     #[inline(never)]
-    fn deserialize_key(keystore: &mut impl Keystore, request: &request::DeserializeKey)
-        -> Result<reply::DeserializeKey, Error>
-    {
-          // - mechanism: Mechanism
-          // - serialized_key: Message
-          // - attributes: StorageAttributes
+    fn deserialize_key(
+        keystore: &mut impl Keystore,
+        request: &request::DeserializeKey,
+    ) -> Result<reply::DeserializeKey, Error> {
+        // - mechanism: Mechanism
+        // - serialized_key: Message
+        // - attributes: StorageAttributes
 
         if request.format != KeySerialization::Raw {
             return Err(Error::InternalError);
@@ -83,22 +85,22 @@ impl DeserializeKey for super::Ed255
 
         let public_id = keystore.store_key(
             request.attributes.persistence,
-            key::Secrecy::Public, key::Kind::Ed255,
-            public_key.as_bytes())?;
+            key::Secrecy::Public,
+            key::Kind::Ed255,
+            public_key.as_bytes(),
+        )?;
 
-        Ok(reply::DeserializeKey {
-            key: public_id
-        })
+        Ok(reply::DeserializeKey { key: public_id })
     }
 }
 
 #[cfg(feature = "ed255")]
-impl GenerateKey for super::Ed255
-{
+impl GenerateKey for super::Ed255 {
     #[inline(never)]
-    fn generate_key(keystore: &mut impl Keystore, request: &request::GenerateKey)
-        -> Result<reply::GenerateKey, Error>
-    {
+    fn generate_key(
+        keystore: &mut impl Keystore,
+        request: &request::GenerateKey,
+    ) -> Result<reply::GenerateKey, Error> {
         let mut seed = [0u8; 32];
         keystore.rng().fill_bytes(&mut seed);
 
@@ -111,7 +113,8 @@ impl GenerateKey for super::Ed255
             request.attributes.persistence,
             key::Secrecy::Secret,
             key::Info::from(key::Kind::Ed255).with_local_flag(),
-            &seed)?;
+            &seed,
+        )?;
 
         // return handle
         Ok(reply::GenerateKey { key: key_id })
@@ -119,12 +122,12 @@ impl GenerateKey for super::Ed255
 }
 
 #[cfg(feature = "ed255")]
-impl SerializeKey for super::Ed255
-{
+impl SerializeKey for super::Ed255 {
     #[inline(never)]
-    fn serialize_key(keystore: &mut impl Keystore, request: &request::SerializeKey)
-        -> Result<reply::SerializeKey, Error>
-    {
+    fn serialize_key(
+        keystore: &mut impl Keystore,
+        request: &request::SerializeKey,
+    ) -> Result<reply::SerializeKey, Error> {
         let key_id = request.key;
         let public_key = load_public_key(keystore, &key_id)?;
 
@@ -140,12 +143,16 @@ impl SerializeKey for super::Ed255
 
             KeySerialization::Raw => {
                 let mut serialized_key = Message::new();
-                serialized_key.extend_from_slice(public_key.as_bytes()).map_err(|_| Error::InternalError)?;
+                serialized_key
+                    .extend_from_slice(public_key.as_bytes())
+                    .map_err(|_| Error::InternalError)?;
                 // serialized_key.extend_from_slice(&buf).map_err(|_| Error::InternalError)?;
                 serialized_key
             }
 
-            _ => { return Err(Error::InternalError); }
+            _ => {
+                return Err(Error::InternalError);
+            }
         };
 
         Ok(reply::SerializeKey { serialized_key })
@@ -153,12 +160,12 @@ impl SerializeKey for super::Ed255
 }
 
 #[cfg(feature = "ed255")]
-impl Exists for super::Ed255
-{
+impl Exists for super::Ed255 {
     #[inline(never)]
-    fn exists(keystore: &mut impl Keystore, request: &request::Exists)
-        -> Result<reply::Exists, Error>
-    {
+    fn exists(
+        keystore: &mut impl Keystore,
+        request: &request::Exists,
+    ) -> Result<reply::Exists, Error> {
         let key_id = request.key;
 
         let exists = keystore.exists_key(key::Secrecy::Secret, Some(key::Kind::Ed255), &key_id);
@@ -167,12 +174,9 @@ impl Exists for super::Ed255
 }
 
 #[cfg(feature = "ed255")]
-impl Sign for super::Ed255
-{
+impl Sign for super::Ed255 {
     #[inline(never)]
-    fn sign(keystore: &mut impl Keystore, request: &request::Sign)
-        -> Result<reply::Sign, Error>
-    {
+    fn sign(keystore: &mut impl Keystore, request: &request::Sign) -> Result<reply::Sign, Error> {
         // Not so nice, expands to
         // `trussed::/home/nicolas/projects/solo-bee/components/trussed/src/mechanisms/ed255.rs:151
         // Ed255::Sign`, i.e. VEERY long
@@ -196,17 +200,19 @@ impl Sign for super::Ed255
         // hprintln!("sig: {:?}", &our_signature).ok();
 
         // return signature
-        Ok(reply::Sign { signature: our_signature })
+        Ok(reply::Sign {
+            signature: our_signature,
+        })
     }
 }
 
 #[cfg(feature = "ed255")]
-impl Verify for super::Ed255
-{
+impl Verify for super::Ed255 {
     #[inline(never)]
-    fn verify(keystore: &mut impl Keystore, request: &request::Verify)
-        -> Result<reply::Verify, Error>
-    {
+    fn verify(
+        keystore: &mut impl Keystore,
+        request: &request::Verify,
+    ) -> Result<reply::Verify, Error> {
         if let SignatureSerialization::Raw = request.format {
         } else {
             return Err(Error::InvalidSerializationFormat);
@@ -223,8 +229,10 @@ impl Verify for super::Ed255
         signature_array.copy_from_slice(request.signature.as_ref());
         let salty_signature = salty::signature::Signature::from(&signature_array);
 
-        Ok(reply::Verify { valid:
-            public_key.verify(&request.message, &salty_signature).is_ok()
+        Ok(reply::Verify {
+            valid: public_key
+                .verify(&request.message, &salty_signature)
+                .is_ok(),
         })
     }
 }
