@@ -100,4 +100,3 @@ macro_rules! impl_reply {
 
     )*}
 }
-

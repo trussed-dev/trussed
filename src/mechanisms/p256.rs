@@ -6,29 +6,32 @@ use crate::service::*;
 use crate::types::*;
 
 #[inline(never)]
-fn load_secret_key(keystore: &mut impl Keystore, key_id: &KeyId)
-    -> Result<p256_cortex_m4::SecretKey, Error>
-{
-
+fn load_secret_key(
+    keystore: &mut impl Keystore,
+    key_id: &KeyId,
+) -> Result<p256_cortex_m4::SecretKey, Error> {
     // info_now!("loading keypair");
     let secret_scalar: [u8; 32] = keystore
         .load_key(key::Secrecy::Secret, Some(key::Kind::P256), key_id)?
-        .material.as_slice()
+        .material
+        .as_slice()
         .try_into()
         .map_err(|_| Error::InternalError)?;
 
-    let secret_key = p256_cortex_m4::SecretKey::from_bytes(&secret_scalar)
-        .map_err(|_| Error::InternalError)?;
+    let secret_key =
+        p256_cortex_m4::SecretKey::from_bytes(&secret_scalar).map_err(|_| Error::InternalError)?;
     Ok(secret_key)
 }
 
 #[inline(never)]
-fn load_public_key(keystore: &mut impl Keystore, key_id: &KeyId)
-    -> Result<p256_cortex_m4::PublicKey, Error>
-{
+fn load_public_key(
+    keystore: &mut impl Keystore,
+    key_id: &KeyId,
+) -> Result<p256_cortex_m4::PublicKey, Error> {
     let compressed_public_key: [u8; 33] = keystore
         .load_key(key::Secrecy::Public, Some(key::Kind::P256), key_id)?
-        .material.as_slice()
+        .material
+        .as_slice()
         .try_into()
         .map_err(|_| Error::InternalError)?;
 
@@ -37,12 +40,12 @@ fn load_public_key(keystore: &mut impl Keystore, key_id: &KeyId)
 }
 
 #[cfg(feature = "p256")]
-impl Agree for super::P256
-{
+impl Agree for super::P256 {
     #[inline(never)]
-    fn agree(keystore: &mut impl Keystore, request: &request::Agree)
-        -> Result<reply::Agree, Error>
-    {
+    fn agree(
+        keystore: &mut impl Keystore,
+        request: &request::Agree,
+    ) -> Result<reply::Agree, Error> {
         let private_id = request.private_key;
         let public_id = request.public_key;
 
@@ -53,21 +56,25 @@ impl Agree for super::P256
 
         let key_id = keystore.store_key(
             request.attributes.persistence,
-            key::Secrecy::Secret, key::Kind::Shared(32),
-            shared_secret.as_bytes())?;
+            key::Secrecy::Secret,
+            key::Kind::Shared(32),
+            shared_secret.as_bytes(),
+        )?;
 
         // return handle
-        Ok(reply::Agree { shared_secret: key_id })
+        Ok(reply::Agree {
+            shared_secret: key_id,
+        })
     }
 }
 
 #[cfg(feature = "p256")]
-impl DeriveKey for super::P256
-{
+impl DeriveKey for super::P256 {
     #[inline(never)]
-    fn derive_key(keystore: &mut impl Keystore, request: &request::DeriveKey)
-        -> Result<reply::DeriveKey, Error>
-    {
+    fn derive_key(
+        keystore: &mut impl Keystore,
+        request: &request::DeriveKey,
+    ) -> Result<reply::DeriveKey, Error> {
         let base_id = request.base_key;
 
         let secret_key = load_secret_key(keystore, &base_id)?;
@@ -75,31 +82,32 @@ impl DeriveKey for super::P256
 
         let public_id = keystore.store_key(
             request.attributes.persistence,
-            key::Secrecy::Public, key::Kind::P256,
-            &public_key.to_compressed_sec1_bytes())?;
+            key::Secrecy::Public,
+            key::Kind::P256,
+            &public_key.to_compressed_sec1_bytes(),
+        )?;
 
-        Ok(reply::DeriveKey {
-            key: public_id
-        })
+        Ok(reply::DeriveKey { key: public_id })
     }
 }
 
 #[cfg(feature = "p256")]
-impl DeserializeKey for super::P256
-{
+impl DeserializeKey for super::P256 {
     #[inline(never)]
-    fn deserialize_key(keystore: &mut impl Keystore, request: &request::DeserializeKey)
-        -> Result<reply::DeserializeKey, Error>
-    {
-          // - mechanism: Mechanism
-          // - serialized_key: Message
-          // - attributes: StorageAttributes
+    fn deserialize_key(
+        keystore: &mut impl Keystore,
+        request: &request::DeserializeKey,
+    ) -> Result<reply::DeserializeKey, Error> {
+        // - mechanism: Mechanism
+        // - serialized_key: Message
+        // - attributes: StorageAttributes
 
         let public_key = match request.format {
             KeySerialization::Cose => {
                 // TODO: this should all be done upstream
-                let cose_public_key: cosey::P256PublicKey = crate::cbor_deserialize(
-                    &request.serialized_key).map_err(|_| Error::CborError)?;
+                let cose_public_key: cosey::P256PublicKey =
+                    crate::cbor_deserialize(&request.serialized_key)
+                        .map_err(|_| Error::CborError)?;
                 let mut serialized_key = [0u8; 64];
                 if cose_public_key.x.len() != 32 || cose_public_key.y.len() != 32 {
                     return Err(Error::InvalidSerializedKey);
@@ -114,8 +122,9 @@ impl DeserializeKey for super::P256
 
             KeySerialization::EcdhEsHkdf256 => {
                 // TODO: this should all be done upstream
-                let cose_public_key: cosey::EcdhEsHkdf256PublicKey = crate::cbor_deserialize(
-                    &request.serialized_key).map_err(|_| Error::CborError)?;
+                let cose_public_key: cosey::EcdhEsHkdf256PublicKey =
+                    crate::cbor_deserialize(&request.serialized_key)
+                        .map_err(|_| Error::CborError)?;
                 let mut serialized_key = [0u8; 64];
                 if cose_public_key.x.len() != 32 || cose_public_key.y.len() != 32 {
                     return Err(Error::InvalidSerializedKey);
@@ -140,26 +149,29 @@ impl DeserializeKey for super::P256
                     .map_err(|_| Error::InvalidSerializedKey)?
             }
 
-            _ => { return Err(Error::InternalError); }
+            _ => {
+                return Err(Error::InternalError);
+            }
         };
 
         let public_id = keystore.store_key(
             request.attributes.persistence,
-            key::Secrecy::Public, key::Kind::P256,
-            &public_key.to_compressed_sec1_bytes())?;
-
+            key::Secrecy::Public,
+            key::Kind::P256,
+            &public_key.to_compressed_sec1_bytes(),
+        )?;
 
         Ok(reply::DeserializeKey { key: public_id })
     }
 }
 
 #[cfg(feature = "p256")]
-impl GenerateKey for super::P256
-{
+impl GenerateKey for super::P256 {
     #[inline(never)]
-    fn generate_key(keystore: &mut impl Keystore, request: &request::GenerateKey)
-        -> Result<reply::GenerateKey, Error>
-    {
+    fn generate_key(
+        keystore: &mut impl Keystore,
+        request: &request::GenerateKey,
+    ) -> Result<reply::GenerateKey, Error> {
         let keypair = p256_cortex_m4::Keypair::random(&mut keystore.rng());
 
         // store keys
@@ -167,23 +179,21 @@ impl GenerateKey for super::P256
             request.attributes.persistence,
             key::Secrecy::Secret,
             key::Info::from(key::Kind::P256).with_local_flag(),
-            &unsafe { keypair.secret.to_bytes()  },
+            &unsafe { keypair.secret.to_bytes() },
         )?;
 
         // return handle
         Ok(reply::GenerateKey { key: key_id })
     }
-
 }
 
 #[cfg(feature = "p256")]
-impl SerializeKey for super::P256
-{
+impl SerializeKey for super::P256 {
     #[inline(never)]
-    fn serialize_key(keystore: &mut impl Keystore, request: &request::SerializeKey)
-        -> Result<reply::SerializeKey, Error>
-    {
-
+    fn serialize_key(
+        keystore: &mut impl Keystore,
+        request: &request::SerializeKey,
+    ) -> Result<reply::SerializeKey, Error> {
         let key_id = request.key;
 
         let public_key = load_public_key(keystore, &key_id)?;
@@ -205,13 +215,19 @@ impl SerializeKey for super::P256
             }
             KeySerialization::Raw => {
                 let mut serialized_key = Message::new();
-                serialized_key.extend_from_slice(&public_key.x()).map_err(|_| Error::InternalError)?;
-                serialized_key.extend_from_slice(&public_key.y()).map_err(|_| Error::InternalError)?;
+                serialized_key
+                    .extend_from_slice(&public_key.x())
+                    .map_err(|_| Error::InternalError)?;
+                serialized_key
+                    .extend_from_slice(&public_key.y())
+                    .map_err(|_| Error::InternalError)?;
                 serialized_key
             }
             KeySerialization::Sec1 => {
                 let mut serialized_key = Message::new();
-                serialized_key.extend_from_slice(&public_key.to_compressed_sec1_bytes()).map_err(|_| Error::InternalError)?;
+                serialized_key
+                    .extend_from_slice(&public_key.to_compressed_sec1_bytes())
+                    .map_err(|_| Error::InternalError)?;
                 serialized_key
             }
         };
@@ -221,12 +237,12 @@ impl SerializeKey for super::P256
 }
 
 #[cfg(feature = "p256")]
-impl Exists for super::P256
-{
+impl Exists for super::P256 {
     #[inline(never)]
-    fn exists(keystore: &mut impl Keystore, request: &request::Exists)
-        -> Result<reply::Exists, Error>
-    {
+    fn exists(
+        keystore: &mut impl Keystore,
+        request: &request::Exists,
+    ) -> Result<reply::Exists, Error> {
         let key_id = request.key;
         let exists = keystore.exists_key(key::Secrecy::Secret, Some(key::Kind::P256), &key_id);
         Ok(reply::Exists { exists })
@@ -234,12 +250,9 @@ impl Exists for super::P256
 }
 
 #[cfg(feature = "p256")]
-impl Sign for super::P256
-{
+impl Sign for super::P256 {
     #[inline(never)]
-    fn sign(keystore: &mut impl Keystore, request: &request::Sign)
-        -> Result<reply::Sign, Error>
-    {
+    fn sign(keystore: &mut impl Keystore, request: &request::Sign) -> Result<reply::Sign, Error> {
         let key_id = request.key;
 
         let secret_key = load_secret_key(keystore, &key_id)?;
@@ -258,18 +271,16 @@ impl Sign for super::P256
         };
 
         // return signature
-        Ok(reply::Sign { signature: serialized_signature })
+        Ok(reply::Sign {
+            signature: serialized_signature,
+        })
     }
-
 }
 
 #[cfg(feature = "p256")]
-impl Sign for super::P256Prehashed
-{
+impl Sign for super::P256Prehashed {
     #[inline(never)]
-    fn sign(keystore: &mut impl Keystore, request: &request::Sign)
-        -> Result<reply::Sign, Error>
-    {
+    fn sign(keystore: &mut impl Keystore, request: &request::Sign) -> Result<reply::Sign, Error> {
         let key_id = request.key;
 
         let secret_key = load_secret_key(keystore, &key_id)?;
@@ -288,18 +299,19 @@ impl Sign for super::P256Prehashed
         };
 
         // return signature
-        Ok(reply::Sign { signature: serialized_signature })
+        Ok(reply::Sign {
+            signature: serialized_signature,
+        })
     }
-
 }
 
 #[cfg(feature = "p256")]
-impl Verify for super::P256
-{
+impl Verify for super::P256 {
     #[inline(never)]
-    fn verify(keystore: &mut impl Keystore, request: &request::Verify)
-        -> Result<reply::Verify, Error>
-    {
+    fn verify(
+        keystore: &mut impl Keystore,
+        request: &request::Verify,
+    ) -> Result<reply::Verify, Error> {
         let key_id = request.key;
 
         let public_key = load_public_key(keystore, &key_id)?;
@@ -315,7 +327,7 @@ impl Verify for super::P256
         }
 
         let valid = public_key.verify(&request.message, &signature);
-        Ok(reply::Verify { valid } )
+        Ok(reply::Verify { valid })
     }
 }
 

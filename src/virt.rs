@@ -1,5 +1,5 @@
-mod ui;
 mod store;
+mod ui;
 
 use std::{path::PathBuf, sync::Mutex};
 
@@ -10,16 +10,15 @@ use rand_core::SeedableRng as _;
 use crate::{
     client::mechanisms::{Ed255 as _, P256 as _},
     pipe::TrussedInterchange,
-    service::Service,
-    types::Location,
-    ClientImplementation,
-    Interchange as _,
     platform,
+    service::Service,
     syscall,
+    types::Location,
+    ClientImplementation, Interchange as _,
 };
 
-pub use ui::UserInterface;
 pub use store::{Filesystem, Ram, StoreProvider};
+pub use ui::UserInterface;
 
 pub type Client<S> = ClientImplementation<Service<Platform<S>>>;
 
@@ -28,9 +27,7 @@ const CLIENT_ID_ATTN: &str = "attn";
 // We need this mutex to make sure that:
 // - TrussedInterchange is not used concurrently
 // - the Store is not used concurrently
-static MUTEX: Lazy<Mutex<()>> = Lazy::new(|| {
-    Mutex::new(())
-});
+static MUTEX: Lazy<Mutex<()>> = Lazy::new(|| Mutex::new(()));
 
 pub fn with_platform<S, R, F>(store: S, f: F) -> R
 where
@@ -81,7 +78,7 @@ impl<S: StoreProvider> Platform<S> {
     pub fn run_client<R>(
         self,
         client_id: &str,
-        test: impl FnOnce(ClientImplementation<Service<Self>>) -> R
+        test: impl FnOnce(ClientImplementation<Service<Self>>) -> R,
     ) -> R {
         let service = Service::from(self);
         let client = service.try_into_new_client(client_id).unwrap();
@@ -92,8 +89,12 @@ impl<S: StoreProvider> Platform<S> {
 impl<S: StoreProvider> From<Platform<S>> for Service<Platform<S>> {
     fn from(platform: Platform<S>) -> Self {
         // reset platform
-        unsafe { TrussedInterchange::reset_claims(); }
-        unsafe { platform.store.reset(); }
+        unsafe {
+            TrussedInterchange::reset_claims();
+        }
+        unsafe {
+            platform.store.reset();
+        }
 
         let mut service = Service::new(platform);
 
@@ -103,8 +104,10 @@ impl<S: StoreProvider> From<Platform<S>> for Service<Platform<S>> {
         syscall!(attn_client.generate_p256_private_key(Location::Internal));
 
         // destroy this attestation client
-        unsafe { TrussedInterchange::reset_claims(); }
-        
+        unsafe {
+            TrussedInterchange::reset_claims();
+        }
+
         service
     }
 }

@@ -1,10 +1,9 @@
 #![allow(clippy::transmute_ptr_to_ptr)]
 use interchange::Responder;
 
-use crate::api::{Request, Reply};
+use crate::api::{Reply, Request};
 use crate::error::Error;
 use crate::types::ClientId;
-
 
 cfg_if::cfg_if! {
 
@@ -59,7 +58,6 @@ cfg_if::cfg_if! {
     }
 }
 
-
 // pub use interchange::TrussedInterchange;
 
 // TODO: The request pipe should block if there is an unhandled
@@ -78,6 +76,3 @@ pub struct ServiceEndpoint {
 }
 
 // pub type ClientEndpoint = Requester<TrussedInterchange>;
-
-
-

@@ -3,11 +3,7 @@
 mod client;
 mod store;
 
-use trussed::{
-    client::CounterClient as _,
-    syscall,
-    types::Location::*,
-};
+use trussed::{client::CounterClient as _, syscall, types::Location::*};
 
 // #[test]
 // fn counter_implementation() {
@@ -36,7 +32,6 @@ use trussed::{
 #[test]
 fn counter_client() {
     client::get(|client| {
-
         let id = syscall!(client.create_counter(Volatile)).id;
         assert_eq!(syscall!(client.increment_counter(id)).counter, 0);
         assert_eq!(syscall!(client.increment_counter(id)).counter, 1);
@@ -54,6 +49,5 @@ fn counter_client() {
         for j in 2..1_000 {
             assert_eq!(syscall!(client.increment_counter(jd)).counter, j);
         }
-
     });
 }

@@ -3,16 +3,13 @@ use core::ops::Deref;
 
 pub use generic_array::GenericArray;
 
-pub use heapless::{
-    String,
-    Vec,
-};
+pub use heapless::{String, Vec};
 
 pub use crate::Bytes;
 
 pub use littlefs2::{
-    fs::{DirEntry, Metadata, Filesystem},
     driver::Storage as LfsStorage,
+    fs::{DirEntry, Filesystem, Metadata},
     io::Result as LfsResult,
     path::PathBuf,
 };
@@ -23,8 +20,8 @@ use serde::{Deserialize, Serialize};
 use crate::config::*;
 use crate::key::Secrecy;
 
-pub use crate::platform::Platform;
 pub use crate::client::FutureResult;
+pub use crate::platform::Platform;
 
 /// The ID of a Trussed object.
 ///
@@ -51,7 +48,6 @@ impl core::fmt::Debug for Id {
     }
 }
 
-
 pub type SpecialId = u8;
 
 pub trait ObjectId: Deref<Target = Id> {}
@@ -75,7 +71,7 @@ impl Id {
         let mut buffer = Bytes::new();
         let array = self.0.to_be_bytes();
 
-        for i in 0 .. array.len() {
+        for i in 0..array.len() {
             if array[i] == 0 && i != (array.len() - 1) {
                 // Skip leading zeros.
                 continue;
@@ -117,39 +113,42 @@ impl Id {
     // }
 }
 
-macro_rules! impl_id { ($Name:ident) => {
-    #[derive(Copy, Clone, Debug, serde::Deserialize, PartialEq, PartialOrd, serde::Serialize)]
-    #[serde(transparent)]
-    pub struct $Name(pub(crate) Id);
-    impl Eq for $Name {}
+macro_rules! impl_id {
+    ($Name:ident) => {
+        #[derive(
+            Copy, Clone, Debug, serde::Deserialize, PartialEq, PartialOrd, serde::Serialize,
+        )]
+        #[serde(transparent)]
+        pub struct $Name(pub(crate) Id);
+        impl Eq for $Name {}
 
-    impl ObjectId for $Name {}
+        impl ObjectId for $Name {}
 
-    /// TODO: Is this a good idea (motivation: save implementions...)
-    impl Deref for $Name {
-        type Target = Id;
-        fn deref(&self) -> &Self::Target {
-            &self.0
-        }
-    }
-
-    impl $Name {
-        pub fn new(rng: &mut (impl CryptoRng + RngCore)) -> Self {
-            Self(Id::new(rng))
+        /// TODO: Is this a good idea (motivation: save implementions...)
+        impl Deref for $Name {
+            type Target = Id;
+            fn deref(&self) -> &Self::Target {
+                &self.0
+            }
         }
 
-        pub const fn from_special(special_id: u8) -> Self {
-            Self(Id(special_id as _))
-        }
-    }
+        impl $Name {
+            pub fn new(rng: &mut (impl CryptoRng + RngCore)) -> Self {
+                Self(Id::new(rng))
+            }
 
-    impl From<SpecialId> for $Name {
-        fn from(id: u8) -> Self {
-            Self(Id(id as _))
+            pub const fn from_special(special_id: u8) -> Self {
+                Self(Id(special_id as _))
+            }
         }
-    }
 
-}}
+        impl From<SpecialId> for $Name {
+            fn from(id: u8) -> Self {
+                Self(Id(id as _))
+            }
+        }
+    };
+}
 
 impl_id!(CertId);
 impl_id!(CounterId);
@@ -159,7 +158,6 @@ impl_id!(KeyId);
 // key in a keypair. However, DeleteKey and others would need to be adjusted.
 // impl_id!(PublicKeyId);
 // impl_id!(SecretKeyId);
-
 
 pub mod ui {
     use super::*;
@@ -247,7 +245,6 @@ pub type ClientId = PathBuf;
 // - Mechanism
 // - Profiles
 
-
 #[derive(Clone, Eq, PartialEq, Debug, Serialize, Deserialize)]
 #[allow(clippy::large_enum_variant)]
 pub enum Attributes {
@@ -277,7 +274,6 @@ pub enum CertificateType {
 // pub struct CertificateAttributes {
 //     pub certificate_type CertificateType,
 // }
-
 
 #[derive(Clone, Default, Eq, PartialEq, Debug, Serialize, Deserialize)]
 pub struct DataAttributes {
@@ -370,8 +366,7 @@ impl<'de> serde::Deserialize<'de> for Id {
     {
         struct ValueVisitor<'de>(PhantomData<&'de ()>);
 
-        impl<'de> serde::de::Visitor<'de> for ValueVisitor<'de>
-        {
+        impl<'de> serde::de::Visitor<'de> for ValueVisitor<'de> {
             type Value = Id;
 
             fn expecting(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
@@ -392,7 +387,6 @@ impl<'de> serde::Deserialize<'de> for Id {
         deserializer.deserialize_bytes(ValueVisitor(PhantomData))
     }
 }
-
 
 #[derive(Clone, Eq, PartialEq, Debug)]
 pub enum ObjectType {
@@ -450,14 +444,12 @@ pub struct StorageAttributes {
     // // cryptoki: token (vs session) object
     // persistent: bool,
     pub persistence: Location,
-
     // cryptoki: user must be logged in
     // private: bool,
 
     // modifiable: bool,
     // copyable: bool,
     // destroyable: bool,
-
 }
 
 impl StorageAttributes {
@@ -474,9 +466,7 @@ impl StorageAttributes {
             // unique_id,
             // label: String::new(),
             // persistent: false,
-
             persistence: Location::Volatile,
-
             // modifiable: true,
             // copyable: true,
             // destroyable: true,
@@ -537,4 +527,3 @@ pub enum SignatureSerialization {
 }
 
 pub type UserAttribute = Bytes<MAX_USER_ATTRIBUTE_LENGTH>;
-

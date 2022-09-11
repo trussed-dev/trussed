@@ -33,13 +33,13 @@ pub mod types;
 pub mod virt;
 
 pub use api::Reply;
-pub use error::Error;
 pub use client::{Client, ClientImplementation};
+pub use error::Error;
 /// The trait that platforms need to implement to use Trussed.
 pub use platform::Platform;
 pub use service::Service;
 
-pub use cbor_smol::{cbor_serialize, cbor_serialize_bytes, cbor_deserialize};
+pub use cbor_smol::{cbor_deserialize, cbor_serialize, cbor_serialize_bytes};
 pub use heapless_bytes::Bytes;
 pub use postcard::{from_bytes as postcard_deserialize, to_slice as postcard_serialize};
 
@@ -56,4 +56,3 @@ mod tests;
 #[cfg(test)]
 #[macro_use]
 extern crate serial_test;
-
