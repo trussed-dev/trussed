@@ -533,6 +533,19 @@
 <span id="527">527</span>
 <span id="528">528</span>
 <span id="529">529</span>
+<span id="530">530</span>
+<span id="531">531</span>
+<span id="532">532</span>
+<span id="533">533</span>
+<span id="534">534</span>
+<span id="535">535</span>
+<span id="536">536</span>
+<span id="537">537</span>
+<span id="538">538</span>
+<span id="539">539</span>
+<span id="540">540</span>
+<span id="541">541</span>
+<span id="542">542</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">core::marker::PhantomData</span>;
 <span class="kw">use</span> <span class="ident">core::ops::Deref</span>;
 
@@ -969,6 +982,7 @@
 }
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Eq</span>, <span class="ident">PartialEq</span>, <span class="ident">Debug</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
+<span class="attribute">#[<span class="ident">non_exhaustive</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">StorageAttributes</span> {
     <span class="comment">// each object must have a unique ID</span>
     <span class="comment">// unique_id: UniqueId,</span>
@@ -979,6 +993,10 @@
     <span class="comment">// // cryptoki: token (vs session) object</span>
     <span class="comment">// persistent: bool,</span>
     <span class="kw">pub</span> <span class="ident">persistence</span>: <span class="ident">Location</span>,
+
+    <span class="doccomment">/// Wether a the result of an [`agree`](crate::client::CryptoClient::agree) can be serialized</span>
+    <span class="doccomment">/// with [`serialize_key`](crate::client::CryptoClient::serialize_key)</span>
+    <span class="kw">pub</span> <span class="ident">serializable</span>: <span class="ident">bool</span>,
     <span class="comment">// cryptoki: user must be logged in</span>
     <span class="comment">// private: bool,</span>
 
@@ -992,6 +1010,11 @@
         <span class="self">self</span>.<span class="ident">persistence</span> <span class="op">=</span> <span class="ident">persistence</span>;
         <span class="self">self</span>
     }
+
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_serializable</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">serializable</span>: <span class="ident">bool</span>) -&gt; <span class="self">Self</span> {
+        <span class="self">self</span>.<span class="ident">serializable</span> <span class="op">=</span> <span class="ident">serializable</span>;
+        <span class="self">self</span>
+    }
 }
 
 <span class="kw">impl</span> <span class="ident">StorageAttributes</span> {
@@ -1002,6 +1025,7 @@
             <span class="comment">// label: String::new(),</span>
             <span class="comment">// persistent: false,</span>
             <span class="ident">persistence</span>: <span class="ident">Location::Volatile</span>,
+            <span class="ident">serializable</span>: <span class="bool-val">false</span>,
             <span class="comment">// modifiable: true,</span>
             <span class="comment">// copyable: true,</span>
             <span class="comment">// destroyable: true,</span>
@@ -1033,6 +1057,8 @@
     <span class="ident">Totp</span>,
     <span class="ident">Trng</span>,
     <span class="ident">X255</span>,
+    <span class="doccomment">/// Used to serialize the output of a diffie-hellman</span>
+    <span class="ident">SharedSecret</span>,
 }
 
 <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">LongData</span> <span class="op">=</span> <span class="ident">Bytes</span><span class="op">&lt;</span><span class="ident">MAX_LONG_DATA_LENGTH</span><span class="op">&gt;</span>;

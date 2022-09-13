@@ -208,6 +208,16 @@
 <span id="202">202</span>
 <span id="203">203</span>
 <span id="204">204</span>
+<span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">core::convert</span>::{<span class="ident">TryFrom</span>, <span class="ident">TryInto</span>};
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::api</span>::<span class="kw-2">*</span>;
@@ -264,10 +274,20 @@
 
         <span class="kw">let</span> <span class="ident">shared_secret</span> <span class="op">=</span> <span class="ident">secret_key</span>.<span class="ident">agree</span>(<span class="kw-2">&amp;</span><span class="ident">public_key</span>).<span class="ident">to_bytes</span>();
 
+        <span class="kw">let</span> <span class="ident">flags</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">request</span>.<span class="ident">attributes</span>.<span class="ident">serializable</span> {
+            <span class="ident">key::Flags::SERIALIZABLE</span>
+        } <span class="kw">else</span> {
+            <span class="ident">key::Flags::empty</span>()
+        };
+        <span class="kw">let</span> <span class="ident">info</span> <span class="op">=</span> <span class="ident">key::Info</span> {
+            <span class="ident">kind</span>: <span class="ident">key::Kind::Shared</span>(<span class="ident">shared_secret</span>.<span class="ident">len</span>()),
+            <span class="ident">flags</span>,
+        };
+
         <span class="kw">let</span> <span class="ident">key_id</span> <span class="op">=</span> <span class="ident">keystore</span>.<span class="ident">store_key</span>(
             <span class="ident">request</span>.<span class="ident">attributes</span>.<span class="ident">persistence</span>,
             <span class="ident">key::Secrecy::Secret</span>,
-            <span class="ident">key::Kind::Shared</span>(<span class="number">32</span>),
+            <span class="ident">info</span>,
             <span class="kw-2">&amp;</span><span class="ident">shared_secret</span>,
         )<span class="question-mark">?</span>;
 
