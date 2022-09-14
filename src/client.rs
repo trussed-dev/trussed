@@ -530,11 +530,13 @@ pub trait CryptoClient: PollClient {
         mechanism: Mechanism,
         raw_key: &[u8],
         persistence: Location,
+        format: KeySerialization,
     ) -> ClientResult<'_, reply::UnsafeInjectKey, Self> {
         let r = self.request(request::UnsafeInjectKey {
             mechanism,
             raw_key: ShortData::from_slice(raw_key).unwrap(),
             attributes: StorageAttributes::new().set_persistence(persistence),
+            format,
         })?;
         r.client.syscall();
         Ok(r)
