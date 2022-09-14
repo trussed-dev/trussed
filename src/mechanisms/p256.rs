@@ -341,6 +341,34 @@ impl Verify for super::P256 {
     }
 }
 
+impl UnsafeInjectKey for super::P256 {
+    fn unsafe_inject_key(
+        keystore: &mut impl Keystore,
+        request: &request::UnsafeInjectKey,
+    ) -> Result<reply::UnsafeInjectKey, Error> {
+        if request.format != KeySerialization::Raw {
+            return Err(Error::InvalidSerializationFormat);
+        }
+
+        let sk = p256_cortex_m4::SecretKey::from_bytes(&request.raw_key)
+            .map_err(|_| Error::InvalidSerializedKey)?;
+
+        let info = key::Info {
+            flags: key::Flags::SENSITIVE,
+            kind: key::Kind::P256,
+        };
+
+        keystore
+            .store_key(
+                request.attributes.persistence,
+                key::Secrecy::Secret,
+                info,
+                unsafe { &sk.to_bytes() },
+            )
+            .map(|key| reply::UnsafeInjectKey { key })
+    }
+}
+
 #[cfg(not(feature = "p256"))]
 impl Agree for super::P256 {}
 #[cfg(not(feature = "p256"))]
@@ -351,3 +379,5 @@ impl GenerateKey for super::P256 {}
 impl Sign for super::P256 {}
 #[cfg(not(feature = "p256"))]
 impl Verify for super::P256 {}
+#[cfg(not(feature = "p256"))]
+impl UnsafeInjectKey for super::P256 {}
