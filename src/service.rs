@@ -247,6 +247,7 @@ impl<P: Platform> ServiceResources<P> {
             // deprecated
             Request::UnsafeInjectKey(request) => {
                 match request.mechanism {
+                    Mechanism::P256 => mechanisms::P256::unsafe_inject_key(keystore,request),
                     Mechanism::X255 => mechanisms::X255::unsafe_inject_key(keystore,request),
                     Mechanism::SharedSecret => mechanisms::SharedSecret::unsafe_inject_key(keystore, request),
                     _ => Err(Error::MechanismNotAvailable)
