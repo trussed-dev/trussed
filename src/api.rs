@@ -277,6 +277,7 @@ pub mod request {
           - mechanism: Mechanism        // -> implies key type
           - raw_key: ShortData
           - attributes: StorageAttributes
+          - format: KeySerialization
 
         UnsafeInjectSharedKey:
           - location: Location

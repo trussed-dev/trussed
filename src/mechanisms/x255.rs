@@ -200,6 +200,34 @@ impl DeserializeKey for super::X255 {
     }
 }
 
+impl UnsafeInjectKey for super::X255 {
+    fn unsafe_inject_key(
+        keystore: &mut impl Keystore,
+        request: &request::UnsafeInjectKey,
+    ) -> Result<reply::UnsafeInjectKey, Error> {
+        if request.format != KeySerialization::Raw {
+            return Err(Error::InvalidSerializationFormat);
+        }
+        let seed = (**request.raw_key)
+            .try_into()
+            .map_err(|_| Error::InvalidSerializedKey)?;
+        let sk = agreement::SecretKey::from_seed(&seed);
+        let info = key::Info {
+            flags: key::Flags::SENSITIVE,
+            kind: key::Kind::X255,
+        };
+
+        keystore
+            .store_key(
+                request.attributes.persistence,
+                key::Secrecy::Secret,
+                info,
+                &sk.to_bytes(),
+            )
+            .map(|key| reply::UnsafeInjectKey { key })
+    }
+}
+
 #[cfg(not(feature = "x255"))]
 impl Agree for super::X255 {}
 #[cfg(not(feature = "x255"))]
@@ -212,3 +240,5 @@ impl Derive for super::X255 {}
 impl SerializeKey for super::X255 {}
 #[cfg(not(feature = "x255"))]
 impl DeserializeKey for super::X255 {}
+#[cfg(not(feature = "x255"))]
+impl UnsafeInjectKey for super::X255 {}

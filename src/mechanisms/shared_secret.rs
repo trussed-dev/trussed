@@ -28,3 +28,19 @@ impl SerializeKey for super::SharedSecret {
         Ok(reply::SerializeKey { serialized_key })
     }
 }
+
+impl UnsafeInjectKey for super::SharedSecret {
+    fn unsafe_inject_key(
+        keystore: &mut impl Keystore,
+        request: &request::UnsafeInjectKey,
+    ) -> Result<reply::UnsafeInjectKey, Error> {
+        let key_id = keystore.store_key(
+            request.attributes.persistence,
+            key::Secrecy::Secret,
+            key::Kind::Shared(request.raw_key.len()),
+            &request.raw_key,
+        )?;
+
+        Ok(reply::UnsafeInjectKey { key: key_id })
+    }
+}
