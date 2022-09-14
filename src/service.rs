@@ -249,6 +249,7 @@ impl<P: Platform> ServiceResources<P> {
                 match request.mechanism {
                     Mechanism::P256 => mechanisms::P256::unsafe_inject_key(keystore,request),
                     Mechanism::X255 => mechanisms::X255::unsafe_inject_key(keystore,request),
+                    Mechanism::Ed255 => mechanisms::Ed255::unsafe_inject_key(keystore,request),
                     Mechanism::SharedSecret => mechanisms::SharedSecret::unsafe_inject_key(keystore, request),
                     _ => Err(Error::MechanismNotAvailable)
                 }.map(Reply::UnsafeInjectKey)

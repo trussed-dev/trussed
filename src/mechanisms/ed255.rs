@@ -237,6 +237,34 @@ impl Verify for super::Ed255 {
     }
 }
 
+impl UnsafeInjectKey for super::Ed255 {
+    fn unsafe_inject_key(
+        keystore: &mut impl Keystore,
+        request: &request::UnsafeInjectKey,
+    ) -> Result<reply::UnsafeInjectKey, Error> {
+        if request.format != KeySerialization::Raw {
+            return Err(Error::InvalidSerializationFormat);
+        }
+        if request.raw_key.len() != salty::constants::SECRETKEY_SERIALIZED_LENGTH {
+            return Err(Error::InvalidSerializedKey);
+        }
+
+        let info = key::Info {
+            flags: key::Flags::SENSITIVE,
+            kind: key::Kind::Ed255,
+        };
+
+        keystore
+            .store_key(
+                request.attributes.persistence,
+                key::Secrecy::Secret,
+                info,
+                &request.raw_key,
+            )
+            .map(|key| reply::UnsafeInjectKey { key })
+    }
+}
+
 #[cfg(not(feature = "ed255"))]
 impl DeriveKey for super::Ed255 {}
 #[cfg(not(feature = "ed255"))]
@@ -245,3 +273,5 @@ impl GenerateKey for super::Ed255 {}
 impl Sign for super::Ed255 {}
 #[cfg(not(feature = "ed255"))]
 impl Verify for super::Ed255 {}
+#[cfg(not(feature = "ed255"))]
+impl UnsafeInjectKey for super::ed255 {}
