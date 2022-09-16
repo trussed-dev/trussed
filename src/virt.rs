@@ -1,3 +1,8 @@
+//! Trussed platform implemented in software with RAM storage **FOR TESTING ONLY**
+//!
+//! The random number generator in this module uses a
+//! constant seed for test reproducability and by consequence is **not secure**
+
 mod store;
 mod ui;
 
