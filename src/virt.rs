@@ -9,7 +9,6 @@ mod ui;
 use std::{path::PathBuf, sync::Mutex};
 
 use chacha20::ChaCha8Rng;
-use once_cell::sync::Lazy;
 use rand_core::SeedableRng as _;
 
 use crate::{
@@ -32,7 +31,7 @@ const CLIENT_ID_ATTN: &str = "attn";
 // We need this mutex to make sure that:
 // - TrussedInterchange is not used concurrently
 // - the Store is not used concurrently
-static MUTEX: Lazy<Mutex<()>> = Lazy::new(|| Mutex::new(()));
+static MUTEX: Mutex<()> = Mutex::new(());
 
 pub fn with_platform<S, R, F>(store: S, f: F) -> R
 where
