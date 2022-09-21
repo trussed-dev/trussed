@@ -518,13 +518,6 @@ pub trait CryptoClient: PollClient {
         Ok(r)
     }
 
-    #[deprecated]
-    /// This mechanism-specific key injection is deprecated in favor of the general
-    /// injection mechanism for symmetric keys of unknown quality, i.e., "shared" keys,
-    /// of trussed::key::Kind::Shared.
-    ///
-    /// The implementations have been removed, so replace your usage with the
-    /// methoed `unsafe_inject_shared_key`.
     fn unsafe_inject_key(
         &mut self,
         mechanism: Mechanism,
