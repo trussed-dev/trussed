@@ -3,7 +3,7 @@ use std::time::{Duration, Instant};
 
 pub struct UserInterface {
     start_time: Instant,
-    inner: Option<Box<dyn platform::UserInterface>>,
+    inner: Option<Box<dyn platform::UserInterface + Sync + Send>>,
 }
 
 impl UserInterface {
@@ -14,11 +14,11 @@ impl UserInterface {
         }
     }
 
-    pub fn set_inner(&mut self, inner: impl Into<Box<dyn platform::UserInterface>>) {
+    pub fn set_inner(&mut self, inner: impl Into<Box<dyn platform::UserInterface + Sync + Send>>) {
         self.inner = Some(inner.into());
     }
 
-    pub fn take_inner(&mut self) -> Option<Box<dyn platform::UserInterface>> {
+    pub fn take_inner(&mut self) -> Option<Box<dyn platform::UserInterface + Sync + Send>> {
         self.inner.take()
     }
 }
