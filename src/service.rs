@@ -413,7 +413,7 @@ impl<P: Platform> ServiceResources<P> {
             }
 
             Request::RandomBytes(request) => {
-                if request.count < 1024 {
+                if request.count <= MAX_MESSAGE_LENGTH {
                     let mut bytes = Message::new();
                     bytes.resize_default(request.count).unwrap();
                     self.rng()?.fill_bytes(&mut bytes);
