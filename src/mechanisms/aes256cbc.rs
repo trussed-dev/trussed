@@ -144,6 +144,30 @@ impl Decrypt for super::Aes256Cbc {
     }
 }
 
+#[cfg(feature = "aes256-cbc")]
+impl UnsafeInjectKey for super::Aes256Cbc {
+    fn unsafe_inject_key(
+        keystore: &mut impl Keystore,
+        request: &request::UnsafeInjectKey,
+    ) -> Result<reply::UnsafeInjectKey, Error> {
+        if request.raw_key.len() != 32 {
+            return Err(Error::InvalidSerializedKey);
+        }
+
+        let key_id = keystore.store_key(
+            request.attributes.persistence,
+            key::Secrecy::Secret,
+            key::Kind::Symmetric(request.raw_key.len()),
+            &request.raw_key,
+        )?;
+
+        Ok(reply::UnsafeInjectKey { key: key_id })
+    }
+}
+
+#[cfg(not(feature = "aes256-cbc"))]
+impl UnsafeInjectKey for super::Aes256Cbc {}
+
 #[cfg(not(feature = "aes256-cbc"))]
 impl Decrypt for super::Aes256Cbc {}
 
