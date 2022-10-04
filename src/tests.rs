@@ -5,8 +5,8 @@ use crate::types::*;
 use crate::*;
 use entropy::shannon_entropy;
 use interchange::Interchange;
+use littlefs2::const_ram_storage;
 use littlefs2::fs::{Allocation, Filesystem};
-use littlefs2::{const_ram_storage, consts};
 
 use crate::client::{CryptoClient as _, FilesystemClient as _};
 
@@ -183,7 +183,7 @@ macro_rules! setup {
         let (test_trussed_requester, test_trussed_responder) =
             crate::pipe::TrussedInterchange::claim()
                 .expect("could not setup TEST TrussedInterchange");
-        let test_client_id = "TEST".into();
+        let test_client_id = "TEST";
 
         assert!(trussed
             .add_endpoint(test_trussed_responder, test_client_id)
