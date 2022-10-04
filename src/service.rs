@@ -84,7 +84,7 @@ impl<P: Platform> ServiceResources<P> {
     #[inline(never)]
     pub fn reply_to(
         &mut self,
-        client_id: &mut ClientContext,
+        client_ctx: &mut ClientContext,
         request: &Request,
     ) -> Result<Reply, Error> {
         // TODO: what we want to do here is map an enum to a generic type
@@ -94,7 +94,7 @@ impl<P: Platform> ServiceResources<P> {
 
         // prepare keystore, bound to client_id, for cryptographic calls
         let mut keystore: ClientKeystore<P::S> = ClientKeystore::new(
-            client_id.path.clone(),
+            client_ctx.path.clone(),
             self.rng().map_err(|_| Error::EntropyMalfunction)?,
             full_store,
         );
@@ -102,7 +102,7 @@ impl<P: Platform> ServiceResources<P> {
 
         // prepare certstore, bound to client_id, for cert calls
         let mut certstore: ClientCertstore<P::S> = ClientCertstore::new(
-            client_id.path.clone(),
+            client_ctx.path.clone(),
             self.rng().map_err(|_| Error::EntropyMalfunction)?,
             full_store,
         );
@@ -110,7 +110,7 @@ impl<P: Platform> ServiceResources<P> {
 
         // prepare counterstore, bound to client_id, for counter calls
         let mut counterstore: ClientCounterstore<P::S> = ClientCounterstore::new(
-            client_id.path.clone(),
+            client_ctx.path.clone(),
             self.rng().map_err(|_| Error::EntropyMalfunction)?,
             full_store,
         );
@@ -118,7 +118,7 @@ impl<P: Platform> ServiceResources<P> {
 
         // prepare filestore, bound to client_id, for storage calls
         let mut filestore: ClientFilestore<P::S> =
-            ClientFilestore::new(client_id.path.clone(), full_store);
+            ClientFilestore::new(client_ctx.path.clone(), full_store);
         let filestore = &mut filestore;
 
         debug_now!("TRUSSED {:?}", request);
@@ -319,11 +319,11 @@ impl<P: Platform> ServiceResources<P> {
             Request::ReadDirFirst(request) => {
                 let maybe_entry = match filestore.read_dir_first(&request.dir, request.location, request.not_before_filename.as_ref())? {
                     Some((entry, read_dir_state)) => {
-                        client_id.read_dir_state = Some(read_dir_state);
+                        client_ctx.read_dir_state = Some(read_dir_state);
                         Some(entry)
                     }
                     None => {
-                        client_id.read_dir_state = None;
+                        client_ctx.read_dir_state = None;
                         None
 
                     }
@@ -333,18 +333,18 @@ impl<P: Platform> ServiceResources<P> {
 
             Request::ReadDirNext(_request) => {
                 // ensure next call has nothing to work with, unless we store state again
-                let read_dir_state = client_id.read_dir_state.take();
+                let read_dir_state = client_ctx.read_dir_state.take();
 
                 let maybe_entry = match read_dir_state {
                     None => None,
                     Some(state) => {
                         match filestore.read_dir_next(state)? {
                             Some((entry, read_dir_state)) => {
-                                client_id.read_dir_state = Some(read_dir_state);
+                                client_ctx.read_dir_state = Some(read_dir_state);
                                 Some(entry)
                             }
                             None => {
-                                client_id.read_dir_state = None;
+                                client_ctx.read_dir_state = None;
                                 None
                             }
                         }
@@ -357,11 +357,11 @@ impl<P: Platform> ServiceResources<P> {
             Request::ReadDirFilesFirst(request) => {
                 let maybe_data = match filestore.read_dir_files_first(&request.dir, request.location, request.user_attribute.clone())? {
                     Some((data, state)) => {
-                        client_id.read_dir_files_state = Some(state);
+                        client_ctx.read_dir_files_state = Some(state);
                         data
                     }
                     None => {
-                        client_id.read_dir_files_state = None;
+                        client_ctx.read_dir_files_state = None;
                         None
                     }
                 };
@@ -369,18 +369,18 @@ impl<P: Platform> ServiceResources<P> {
             }
 
             Request::ReadDirFilesNext(_request) => {
-                let read_dir_files_state = client_id.read_dir_files_state.take();
+                let read_dir_files_state = client_ctx.read_dir_files_state.take();
 
                 let maybe_data = match read_dir_files_state {
                     None => None,
                     Some(state) => {
                         match filestore.read_dir_files_next(state)? {
                             Some((data, state)) => {
-                                client_id.read_dir_files_state = Some(state);
+                                client_ctx.read_dir_files_state = Some(state);
                                 data
                             }
                             None => {
-                                client_id.read_dir_files_state = None;
+                                client_ctx.read_dir_files_state = None;
                                 None
                             }
                         }
@@ -719,8 +719,9 @@ impl<P: Platform> Service<P> {
     pub fn add_endpoint(
         &mut self,
         interchange: Responder<TrussedInterchange>,
-        client_ctx: ClientContext,
+        client_ctx: impl Into<ClientContext>,
     ) -> Result<(), ServiceEndpoint> {
+        let client_ctx = client_ctx.into();
         if client_ctx.path == PathBuf::from("trussed") {
             panic!("trussed is a reserved client ID");
         }
