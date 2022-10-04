@@ -273,6 +273,33 @@ impl ClientContext {
             read_dir_files_state: None,
         }
     }
+
+    pub fn builder(path: PathBuf) -> ClientContextBuilder {
+        ClientContextBuilder::new(path)
+    }
+}
+
+pub struct ClientContextBuilder {
+    pub path: PathBuf,
+    pub backends: Vec<ServiceBackends, 2>,
+}
+
+impl ClientContextBuilder {
+    pub fn new(path: PathBuf) -> Self {
+        Self {
+            path,
+            backends: Vec::from_slice(&[ServiceBackends::Software]).unwrap(),
+        }
+    }
+
+    pub fn add_backend(&mut self, backend: ServiceBackends) -> &ClientContextBuilder {
+        self.backends.insert(0, backend).unwrap();
+        self
+    }
+
+    pub fn build(&self) -> ClientContext {
+        ClientContext::new(self.path.clone(), self.backends.clone())
+    }
 }
 
 /**
@@ -290,9 +317,10 @@ added as payload for that enum variant.
 Backends are called from Service::process() under consideration of the
 selection and ordering the calling client has specified in its ClientId.
 */
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub enum ServiceBackends {
     Software,
+    SoftwareAuth,
     // SE050(Se050Parameters),
 }
 
