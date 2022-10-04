@@ -815,6 +815,13 @@
 <span id="815">815</span>
 <span id="816">816</span>
 <span id="817">817</span>
+<span id="818">818</span>
+<span id="819">819</span>
+<span id="820">820</span>
+<span id="821">821</span>
+<span id="822">822</span>
+<span id="823">823</span>
+<span id="824">824</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">chacha20::ChaCha8Rng</span>;
 <span class="kw">use</span> <span class="ident">heapless_bytes::Unsigned</span>;
 <span class="kw">use</span> <span class="ident">interchange::Responder</span>;
@@ -1062,8 +1069,15 @@
             },
 
             <span class="comment">// deprecated</span>
-            <span class="ident">Request::UnsafeInjectKey</span>(<span class="ident">_request</span>) =&gt; {
-                <span class="prelude-val">Err</span>(<span class="ident">Error::MechanismNotAvailable</span>)
+            <span class="ident">Request::UnsafeInjectKey</span>(<span class="ident">request</span>) =&gt; {
+                <span class="kw">match</span> <span class="ident">request</span>.<span class="ident">mechanism</span> {
+                    <span class="ident">Mechanism::P256</span> =&gt; <span class="ident">mechanisms::P256::unsafe_inject_key</span>(<span class="ident">keystore</span>,<span class="ident">request</span>),
+                    <span class="ident">Mechanism::X255</span> =&gt; <span class="ident">mechanisms::X255::unsafe_inject_key</span>(<span class="ident">keystore</span>,<span class="ident">request</span>),
+                    <span class="ident">Mechanism::Ed255</span> =&gt; <span class="ident">mechanisms::Ed255::unsafe_inject_key</span>(<span class="ident">keystore</span>,<span class="ident">request</span>),
+                    <span class="ident">Mechanism::SharedSecret</span> =&gt; <span class="ident">mechanisms::SharedSecret::unsafe_inject_key</span>(<span class="ident">keystore</span>, <span class="ident">request</span>),
+                    <span class="ident">Mechanism::Aes256Cbc</span> =&gt; <span class="ident">mechanisms::Aes256Cbc::unsafe_inject_key</span>(<span class="ident">keystore</span>, <span class="ident">request</span>),
+                    <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">Error::MechanismNotAvailable</span>)
+                }.<span class="ident">map</span>(<span class="ident">Reply::UnsafeInjectKey</span>)
             },
 
             <span class="ident">Request::UnsafeInjectSharedKey</span>(<span class="ident">request</span>) =&gt; {
