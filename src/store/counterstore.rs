@@ -1,5 +1,5 @@
-use chacha20::ChaCha8Rng;
 use littlefs2::path::PathBuf;
+use rand_chacha::ChaCha8Rng;
 
 use crate::{
     error::{Error, Result},
