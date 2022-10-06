@@ -10,7 +10,7 @@ impl DeriveKey for super::HmacSha512 {
         keystore: &mut impl Keystore,
         request: &request::DeriveKey,
     ) -> Result<reply::DeriveKey, Error> {
-        use hmac::{Hmac, Mac, NewMac};
+        use hmac::{Hmac, Mac};
         type HmacSha512 = Hmac<sha2::Sha512>;
 
         let key = keystore.load_key(key::Secrecy::Secret, None, &request.base_key)?;
@@ -42,7 +42,7 @@ impl DeriveKey for super::HmacSha512 {
 impl Sign for super::HmacSha512 {
     #[inline(never)]
     fn sign(keystore: &mut impl Keystore, request: &request::Sign) -> Result<reply::Sign, Error> {
-        use hmac::{Hmac, Mac, NewMac};
+        use hmac::{Hmac, Mac};
         use sha2::Sha512;
         type HmacSha512 = Hmac<Sha512>;
 
