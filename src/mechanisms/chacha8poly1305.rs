@@ -67,7 +67,7 @@ impl Decrypt for super::Chacha8Poly1305 {
         keystore: &mut impl Keystore,
         request: &request::Decrypt,
     ) -> Result<reply::Decrypt, Error> {
-        use chacha20poly1305::aead::{AeadInPlace, NewAead};
+        use chacha20poly1305::aead::{AeadMutInPlace, KeyInit};
         use chacha20poly1305::ChaCha8Poly1305;
 
         let key = keystore.load_key(key::Secrecy::Secret, None, &request.key)?;
@@ -80,7 +80,7 @@ impl Decrypt for super::Chacha8Poly1305 {
 
         let symmetric_key = &serialized[..KEY_LEN];
 
-        let aead = ChaCha8Poly1305::new(&GenericArray::clone_from_slice(symmetric_key));
+        let mut aead = ChaCha8Poly1305::new(&GenericArray::clone_from_slice(symmetric_key));
 
         let mut plaintext = request.message.clone();
         let nonce = GenericArray::from_slice(&request.nonce);
@@ -110,7 +110,7 @@ impl Encrypt for super::Chacha8Poly1305 {
         keystore: &mut impl Keystore,
         request: &request::Encrypt,
     ) -> Result<reply::Encrypt, Error> {
-        use chacha20poly1305::aead::{AeadInPlace, NewAead};
+        use chacha20poly1305::aead::{AeadMutInPlace, KeyInit};
         use chacha20poly1305::ChaCha8Poly1305;
 
         // load key and nonce
@@ -138,7 +138,7 @@ impl Encrypt for super::Chacha8Poly1305 {
             _ => return Err(Error::WrongKeyKind),
         }
 
-        let aead = ChaCha8Poly1305::new(&GenericArray::from(symmetric_key));
+        let mut aead = ChaCha8Poly1305::new(&GenericArray::from(symmetric_key));
 
         let mut ciphertext = request.message.clone();
         let tag: [u8; TAG_LEN] = aead
