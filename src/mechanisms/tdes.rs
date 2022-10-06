@@ -6,7 +6,7 @@
 // use cortex_m_semihosting::{dbg, hprintln};
 
 // needed to even get ::new() from des...
-use des::cipher::{BlockDecrypt, BlockEncrypt, NewBlockCipher};
+use des::cipher::{BlockDecrypt, BlockEncrypt, KeyInit};
 
 use crate::api::*;
 use crate::error::Error;
