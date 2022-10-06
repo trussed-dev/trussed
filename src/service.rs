@@ -1,7 +1,7 @@
-use chacha20::ChaCha8Rng;
 use heapless_bytes::Unsigned;
 use interchange::Responder;
 use littlefs2::path::PathBuf;
+use rand_chacha::ChaCha8Rng;
 pub use rand_core::{RngCore, SeedableRng};
 
 use crate::api::*;
@@ -634,7 +634,7 @@ impl<P: Platform> ServiceResources<P> {
                 }
 
                 // 3. Initialize ChaCha8 construction with our seed.
-                let mut rng = chacha20::ChaCha8Rng::from_seed(our_seed);
+                let mut rng = ChaCha8Rng::from_seed(our_seed);
 
                 // 4. Store freshly drawn seed for next boot.
                 let mut seed_to_store = [0u8; 32];
