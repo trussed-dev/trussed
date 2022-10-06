@@ -60,9 +60,7 @@ fn rsa2kpkcs_deserialize_key() {
         let sk = syscall!(client.generate_rsa2kpkcs_private_key(Internal)).key;
         let serialized_key =
             syscall!(client.serialize_rsa2kpkcs_key(sk, KeySerialization::Raw)).serialized_key;
-        let location = StorageAttributes {
-            persistence: Volatile,
-        };
+        let location = StorageAttributes::new().set_persistence(Volatile);
 
         let deserialized_key_id = syscall!(client.deserialize_rsa2kpkcs_key(
             &serialized_key,
