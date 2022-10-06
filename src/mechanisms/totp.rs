@@ -16,7 +16,7 @@ fn hotp_raw(key: &[u8], counter: u64, digits: u32) -> u64 {
 
 #[inline(never)]
 fn hmac_and_truncate(key: &[u8], message: &[u8], digits: u32) -> u64 {
-    use hmac::{Hmac, Mac, NewMac};
+    use hmac::{Hmac, Mac};
     // let mut hmac = Hmac::<D>::new(GenericArray::from_slice(key));
     let mut hmac = Hmac::<sha1::Sha1>::new_from_slice(key).unwrap();
     hmac.update(message);
