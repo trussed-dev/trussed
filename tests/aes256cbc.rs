@@ -9,8 +9,7 @@ use trussed::types::Location::*;
 use trussed::types::{Mechanism, StorageAttributes};
 
 use aes::Aes256;
-use block_modes::block_padding::ZeroPadding;
-use block_modes::{BlockMode, Cbc};
+use cbc::cipher::{block_padding::ZeroPadding, BlockEncryptMut, KeyIvInit};
 use sha2::digest::Digest;
 
 #[test]
@@ -25,9 +24,11 @@ fn aes256cbc() {
 
         let hash = sha2::Sha256::new();
         let key_ref = hash.finalize();
-        let cipher = Cbc::<Aes256, ZeroPadding>::new_from_slices(&key_ref, &[0; 16]).unwrap();
+        let cipher = cbc::Encryptor::<Aes256>::new_from_slices(&key_ref, &[0; 16]).unwrap();
         let mut buffer = [48; 64];
-        cipher.encrypt(&mut buffer, 64).unwrap();
+        cipher
+            .encrypt_padded_mut::<ZeroPadding>(&mut buffer, 64)
+            .unwrap();
         assert_ne!(buffer, [48; 64]);
         assert_eq!(buffer.as_slice(), *ciphertext);
 
