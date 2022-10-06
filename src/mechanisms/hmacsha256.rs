@@ -10,7 +10,7 @@ impl DeriveKey for super::HmacSha256 {
         keystore: &mut impl Keystore,
         request: &request::DeriveKey,
     ) -> Result<reply::DeriveKey, Error> {
-        use hmac::{Hmac, Mac, NewMac};
+        use hmac::{Hmac, Mac};
         type HmacSha256 = Hmac<sha2::Sha256>;
 
         let key_id = request.base_key;
@@ -46,7 +46,7 @@ impl DeriveKey for super::HmacSha256 {
 impl Sign for super::HmacSha256 {
     #[inline(never)]
     fn sign(keystore: &mut impl Keystore, request: &request::Sign) -> Result<reply::Sign, Error> {
-        use hmac::{Hmac, Mac, NewMac};
+        use hmac::{Hmac, Mac};
         use sha2::Sha256;
         type HmacSha256 = Hmac<Sha256>;
 
