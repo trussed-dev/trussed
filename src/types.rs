@@ -535,6 +535,10 @@ pub enum KeySerialization {
     EcdhEsHkdf256,
     Raw,
     Sec1,
+    /// RSA Public key modulus
+    RsaN,
+    /// RSA Public key exponent
+    RsaE,
 }
 
 pub type Signature = Bytes<MAX_SIGNATURE_LENGTH>;

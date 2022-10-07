@@ -1,6 +1,6 @@
 use rsa::{
-    pkcs8::{DecodePrivateKey, EncodePrivateKey, EncodePublicKey},
-    PublicKey, RsaPrivateKey, RsaPublicKey,
+    pkcs8::{DecodePrivateKey, DecodePublicKey, EncodePrivateKey, EncodePublicKey},
+    PublicKey, PublicKeyParts, RsaPrivateKey, RsaPublicKey,
 };
 
 use crate::api::*;
@@ -133,20 +133,37 @@ impl SerializeKey for super::Rsa2kPkcs {
         let key_id = request.key;
 
         // We rely on the fact that we store the keys in the PKCS#8 DER format already
-        let priv_key_der = keystore
-            .load_key(key::Secrecy::Secret, Some(key::Kind::Rsa2k), &key_id)
-            .expect("Failed to load an RSA 2K private key with the given ID")
+        let pub_key_der = keystore
+            .load_key(key::Secrecy::Public, Some(key::Kind::Rsa2k), &key_id)
+            .expect("Failed to load an RSA 2K public key with the given ID")
             .material;
 
         let serialized_key = match request.format {
             KeySerialization::Raw => {
                 let mut serialized_key = Message::new();
                 serialized_key
-                    .extend_from_slice(&priv_key_der)
+                    .extend_from_slice(&pub_key_der)
                     .map_err(|_| Error::InternalError)?;
                 serialized_key
             }
-
+            KeySerialization::RsaN => {
+                let key: RsaPublicKey = DecodePublicKey::from_public_key_der(&pub_key_der)
+                    .expect("Failed to parse key");
+                let mut serialized_n = Message::new();
+                serialized_n
+                    .extend_from_slice(&key.n().to_bytes_be())
+                    .map_err(|_| Error::InternalError)?;
+                serialized_n
+            }
+            KeySerialization::RsaE => {
+                let key: RsaPublicKey = DecodePublicKey::from_public_key_der(&pub_key_der)
+                    .expect("Failed to parse key");
+                let mut serialized_e = Message::new();
+                serialized_e
+                    .extend_from_slice(&key.e().to_bytes_be())
+                    .map_err(|_| Error::InternalError)?;
+                serialized_e
+            }
             _ => {
                 return Err(Error::InternalError);
             }
