@@ -143,7 +143,10 @@ impl SerializeKey for super::Rsa2kPkcs {
                 let mut serialized_key = Message::new();
                 serialized_key
                     .extend_from_slice(&pub_key_der)
-                    .map_err(|_| Error::InternalError)?;
+                    .map_err(|_err| {
+                        error!("Failed to write public key {_err:?}");
+                        Error::InternalError
+                    })?;
                 serialized_key
             }
             KeySerialization::RsaN => {
@@ -152,7 +155,10 @@ impl SerializeKey for super::Rsa2kPkcs {
                 let mut serialized_n = Message::new();
                 serialized_n
                     .extend_from_slice(&key.n().to_bytes_be())
-                    .map_err(|_| Error::InternalError)?;
+                    .map_err(|_err| {
+                        error!("Failed to write public key {_err:?}");
+                        Error::InternalError
+                    })?;
                 serialized_n
             }
             KeySerialization::RsaE => {
@@ -161,7 +167,10 @@ impl SerializeKey for super::Rsa2kPkcs {
                 let mut serialized_e = Message::new();
                 serialized_e
                     .extend_from_slice(&key.e().to_bytes_be())
-                    .map_err(|_| Error::InternalError)?;
+                    .map_err(|_err| {
+                        error!("Failed to write public key {_err:?}");
+                        Error::InternalError
+                    })?;
                 serialized_e
             }
             _ => {
