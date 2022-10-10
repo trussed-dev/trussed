@@ -214,13 +214,9 @@ impl Sign for super::Rsa2kPkcs {
         // We assume we get digest into this function, too.
 
         // TODO: Consider using .sign_blinded(), which is supposed to protect the private key from timing side channels
-        use rsa::hash::Hash;
         use rsa::padding::PaddingScheme;
         let native_signature = priv_key
-            .sign(
-                PaddingScheme::new_pkcs1v15_sign(Some(Hash::SHA2_256)),
-                &request.message,
-            )
+            .sign(PaddingScheme::new_pkcs1v15_sign(None), &request.message)
             .unwrap();
         let our_signature = Signature::from_slice(&native_signature).unwrap();
 
@@ -266,11 +262,10 @@ impl Verify for super::Rsa2kPkcs {
         // Get the public key
         let pub_key = RsaPublicKey::from(&priv_key);
 
-        use rsa::hash::Hash;
         use rsa::padding::PaddingScheme;
         let verification_ok = pub_key
             .verify(
-                PaddingScheme::new_pkcs1v15_sign(Some(Hash::SHA2_256)),
+                PaddingScheme::new_pkcs1v15_sign(None),
                 &request.message,
                 &request.signature,
             )
