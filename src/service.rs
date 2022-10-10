@@ -155,6 +155,7 @@ impl<P: Platform> ServiceResources<P> {
                     Mechanism::Aes256Cbc => mechanisms::Aes256Cbc::decrypt(keystore, request),
                     Mechanism::Chacha8Poly1305 => mechanisms::Chacha8Poly1305::decrypt(keystore, request),
                     Mechanism::Tdes => mechanisms::Tdes::decrypt(keystore, request),
+                    Mechanism::Rsa2kPkcs => mechanisms::Rsa2kPkcs::decrypt(keystore, request),
                     _ => Err(Error::MechanismNotAvailable),
 
                 }.map(Reply::Decrypt)
