@@ -65,24 +65,22 @@ impl DeserializeKey for super::Rsa2kPkcs {
             return Err(Error::InternalError);
         }
 
-        let private_key: RsaPrivateKey = DecodePrivateKey::from_pkcs8_der(&request.serialized_key)
+        let pub_key: RsaPublicKey = DecodePublicKey::from_public_key_der(&request.serialized_key)
             .map_err(|_| Error::InvalidSerializedKey)?;
 
         // We store our keys in PKCS#8 DER format
-        let private_key_der = private_key
-            .to_pkcs8_der()
+        let pub_key_der = pub_key
+            .to_public_key_der()
             .expect("Failed to serialize an RSA 2K private key to PKCS#8 DER");
 
-        let private_key_id = keystore.store_key(
+        let pub_key_id = keystore.store_key(
             request.attributes.persistence,
             key::Secrecy::Secret,
             key::Kind::Rsa2k,
-            private_key_der.as_ref(),
+            pub_key_der.as_ref(),
         )?;
 
-        Ok(reply::DeserializeKey {
-            key: private_key_id,
-        })
+        Ok(reply::DeserializeKey { key: pub_key_id })
     }
 }
 

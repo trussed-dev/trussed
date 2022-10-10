@@ -46,9 +46,10 @@ fn rsa2kpkcs_exists_key() {
 fn rsa2kpkcs_serialize_key() {
     client::get(|client| {
         let sk = syscall!(client.generate_rsa2kpkcs_private_key(Internal)).key;
+        let pk = syscall!(client.derive_rsa2kpkcs_public_key(sk, Volatile)).key;
 
         let serialized_key =
-            syscall!(client.serialize_rsa2kpkcs_key(sk, KeySerialization::Raw)).serialized_key;
+            syscall!(client.serialize_rsa2kpkcs_key(pk, KeySerialization::Raw)).serialized_key;
 
         assert!(!serialized_key.is_empty());
     })
@@ -58,8 +59,9 @@ fn rsa2kpkcs_serialize_key() {
 fn rsa2kpkcs_deserialize_key() {
     client::get(|client| {
         let sk = syscall!(client.generate_rsa2kpkcs_private_key(Internal)).key;
+        let pk = syscall!(client.derive_rsa2kpkcs_public_key(sk, Volatile)).key;
         let serialized_key =
-            syscall!(client.serialize_rsa2kpkcs_key(sk, KeySerialization::Raw)).serialized_key;
+            syscall!(client.serialize_rsa2kpkcs_key(pk, KeySerialization::Raw)).serialized_key;
         let location = StorageAttributes::new().set_persistence(Volatile);
 
         let deserialized_key_id = syscall!(client.deserialize_rsa2kpkcs_key(
