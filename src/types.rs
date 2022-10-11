@@ -76,6 +76,10 @@ impl Id {
         let array = self.0.to_be_bytes();
 
         for i in 0..array.len() {
+            if array[i] == 0 && i != (array.len() - 1) {
+                // Skip leading zeros.
+                continue;
+            }
             buffer.push(HEX_CHARS[(array[i] >> 4) as usize]).unwrap();
             buffer.push(HEX_CHARS[(array[i] & 0xf) as usize]).unwrap();
         }
