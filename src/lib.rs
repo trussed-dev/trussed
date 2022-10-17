@@ -32,6 +32,8 @@ pub mod types;
 #[cfg(feature = "virt")]
 pub mod virt;
 
+pub mod backend;
+
 pub use api::Reply;
 pub use client::{Client, ClientImplementation};
 pub use error::Error;

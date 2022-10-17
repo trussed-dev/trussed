@@ -1,5 +1,5 @@
 use crate::types::{ServiceBackend, ClientContext};
-use crate::api::{Request, Reply};
+use crate::api::*;
 use crate::error::Error;
 
 pub struct SoftwareAuthBackend {
@@ -14,5 +14,6 @@ impl ServiceBackend for SoftwareAuthBackend {
         -> Result<Reply, Error> {
 
 
+            Ok(Reply::Wink(reply::Wink {}))
     }
 }
