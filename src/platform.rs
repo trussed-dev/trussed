@@ -78,7 +78,7 @@ macro_rules! platform { (
     R: $Rng:ty,
     S: $Store:ty,
     UI: $UserInterface:ty,
-    $($BackendID:pat, $BackendName:ident, $BackendType:ty),*
+    $($BackendID:pat, $BackendName:ident, $BackendType:ty),*$(,)?
 ) => {
 
     /// Platform struct implemented `trussed::Platform`, generated
