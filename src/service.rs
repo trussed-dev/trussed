@@ -93,7 +93,7 @@ impl<P: Platform> ServiceResources<P> {
         let full_store = self.platform.store();
 
         // prepare keystore, bound to client_id, for cryptographic calls
-        let mut keystore: ClientKeystore<P> = ClientKeystore::new(
+        let mut keystore: ClientKeystore<P::S> = ClientKeystore::new(
             client_ctx.path.clone(),
             self.rng().map_err(|_| Error::EntropyMalfunction)?,
             full_store,
@@ -138,7 +138,7 @@ impl<P: Platform> ServiceResources<P> {
             },
 
             Request::Attest(request) => {
-                let mut attn_keystore: ClientKeystore<P> = ClientKeystore::new(
+                let mut attn_keystore: ClientKeystore<P::S> = ClientKeystore::new(
                     PathBuf::from("attn"),
                     self.rng().map_err(|_| Error::EntropyMalfunction)?,
                     full_store,
