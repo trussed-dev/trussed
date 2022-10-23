@@ -4,17 +4,16 @@ use heapless_bytes::Unsigned;
 pub use rand_core::{RngCore, SeedableRng};
 use cosey::Bytes;
 
-
 use crate::types::*;
 use crate::api::*;
 use crate::platform::*;
 use crate::config::*;
 use crate::mechanisms;
 
-use crate::error::Error;
+use crate::error::{Error, Result};
 pub use crate::pipe::ServiceEndpoint;
 
-pub use crate::store::Store;
+pub use crate::store::{self, Store};
 
 pub use crate::store::{
     certstore::{Certstore as _, ClientCertstore},
@@ -29,10 +28,29 @@ pub struct SoftwareAuthBackend
 }
 
 impl SoftwareAuthBackend {
-    fn write_policy(&mut self, path: PathBuf, policy: Policy) {
+    fn write_policy_for<S: Store>(&mut self, plat_store: S, path: &PathBuf, policy: Policy) -> Result<()> {
 
+        let mut policy_path = PathBuf::new();
+        policy_path.push(&path);
+        policy_path.push(&PathBuf::from(".policy"));
+
+        let serialized: Bytes::<12> = crate::cbor_serialize_bytes(&policy).map_err(|_| Error::CborError)?;
+        store::store(plat_store, Location::Internal, &policy_path, serialized.as_slice())
     }
-    pub fn rng<R: CryptoRng + RngCore, S: Store>(&mut self, platform_rng: &mut R, platform_store: S) -> Result<ChaCha8Rng, Error> {
+
+    fn read_policy_for<S: Store>(&mut self, plat_store: S, path: &PathBuf) -> Result<Policy> {
+
+        // @TODO: check for existance
+
+        let mut policy_path = PathBuf::new();
+        policy_path.push(&path);
+        policy_path.push(&PathBuf::from(".policy"));
+
+        let policy: Bytes::<12> = store::read(plat_store, Location::Internal, &policy_path)?;
+        crate::cbor_deserialize(policy.as_slice()).map_err(|_| Error::CborError)
+    }
+
+    pub fn rng<R: CryptoRng + RngCore, S: Store>(&mut self, platform_rng: &mut R, platform_store: S) -> Result<ChaCha8Rng> {
         // Check if our RNG is loaded.
         let mut rng = match self.rng_state.take() {
             Some(rng) => rng,
@@ -105,7 +123,7 @@ impl SoftwareAuthBackend {
 impl<S: Store, R: CryptoRng + RngCore> ServiceBackend<S, R> for SoftwareAuthBackend {
 
     fn reply_to(&mut self, plat_store: S, plat_rng: &mut R, client_ctx: &mut ClientContext, request: &Request)
-        -> Result<Reply, Error> {
+        -> Result<Reply> {
 
         let full_store = plat_store;
 

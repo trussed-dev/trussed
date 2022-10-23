@@ -382,7 +382,7 @@ pub struct Policy {
 }
 
 impl Policy {
-    fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             unauthorized: Permission::new(),
             user: Permission::new(),
@@ -411,7 +411,7 @@ impl Policy {
     }
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Copy, Clone, PartialEq, Eq, Debug, Serialize, Deserialize)]
 pub enum ContextID {
     Unauthorized = 0,
     User = 1,
