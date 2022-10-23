@@ -4,24 +4,24 @@ use littlefs2::path::PathBuf;
 use crate::{
     error::{Error, Result},
     key,
-    store::{self, Store as _},
+    store::{self, Store},
     types::{KeyId, Location},
-    Bytes, Platform,
+    Bytes,
 };
 
 pub type ClientId = littlefs2::path::PathBuf;
 
-pub struct ClientKeystore<P>
+pub struct ClientKeystore<S>
 where
-    P: Platform,
+    S: Store,
 {
     client_id: ClientId,
     rng: ChaCha8Rng,
-    store: P::S,
+    store: S,
 }
 
-impl<P: Platform> ClientKeystore<P> {
-    pub fn new(client_id: ClientId, rng: ChaCha8Rng, store: P::S) -> Self {
+impl<S: Store> ClientKeystore<S> {
+    pub fn new(client_id: ClientId, rng: ChaCha8Rng, store: S) -> Self {
         Self {
             client_id,
             rng,
@@ -67,7 +67,7 @@ pub trait Keystore {
     fn location(&self, secrecy: key::Secrecy, id: &KeyId) -> Option<Location>;
 }
 
-impl<P: Platform> ClientKeystore<P> {
+impl<S: Store> ClientKeystore<S> {
     pub fn generate_key_id(&mut self) -> KeyId {
         KeyId::new(self.rng())
     }
@@ -89,7 +89,7 @@ impl<P: Platform> ClientKeystore<P> {
     }
 }
 
-impl<P: Platform> Keystore for ClientKeystore<P> {
+impl<S: Store> Keystore for ClientKeystore<S> {
     fn rng(&mut self) -> &mut ChaCha8Rng {
         &mut self.rng
     }
