@@ -24,9 +24,9 @@ use crate::error::Error;
 use crate::key::Secrecy;
 use crate::store::filestore::{ReadDirFilesState, ReadDirState};
 
-use crate::store::Store;
 pub use crate::client::FutureResult;
 pub use crate::platform::Platform;
+use crate::store::Store;
 
 /// The ID of a Trussed object.
 ///
@@ -335,8 +335,13 @@ pub enum ServiceBackends {
 Each service backend implements a subset of API calls through this trait.
 */
 pub trait ServiceBackend<S: Store, R: CryptoRng + RngCore> {
-    fn reply_to(&mut self, store: S, rng: &mut R, client_ctx: &mut ClientContext, request: &Request)
-        -> Result<Reply, Error>;
+    fn reply_to(
+        &mut self,
+        store: S,
+        rng: &mut R,
+        client_ctx: &mut ClientContext,
+        request: &Request,
+    ) -> Result<Reply, Error>;
 }
 
 #[bitfield]
@@ -403,9 +408,9 @@ impl Policy {
     fn is_permitted(&self, context_id: ContextID, op: Permission) -> bool {
         assert!(op.is_single_permission());
         let effective_set = match context_id {
-            ContextID::Unauthorized => { self.unauthorized },
-            ContextID::User => { self.user },
-            ContextID::Admin => { self.admin }
+            ContextID::Unauthorized => self.unauthorized,
+            ContextID::User => self.user,
+            ContextID::Admin => self.admin,
         };
         (effective_set.unpack() | op.unpack()) != 0
     }
