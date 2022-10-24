@@ -1,7 +1,7 @@
 use chacha20::ChaCha8Rng;
 use cosey::Bytes;
 use heapless_bytes::Unsigned;
-use littlefs2::path::PathBuf;
+use littlefs2::path::{Path, PathBuf};
 pub use rand_core::{RngCore, SeedableRng};
 
 use crate::api::*;
@@ -31,17 +31,26 @@ pub struct SoftwareAuthBackend {
 }
 
 impl SoftwareAuthBackend {
+    fn policy_path(item_path: &PathBuf) -> PathBuf {
+        let p = item_path.as_str_ref_with_trailing_nul().as_bytes();
+        let suffix = ".policy".as_bytes();
+        let nul: [u8; 1] = [0];
+
+        let mut path = Bytes::<1024>::new();
+        path.extend_from_slice(&p[..p.len() - 1]);
+        path.extend_from_slice(suffix);
+        path.extend_from_slice(&nul);
+        PathBuf::from(path.as_slice())
+    }
+
     fn write_policy_for<S: Store>(
         &mut self,
         plat_store: S,
         path: &PathBuf,
         policy: Policy,
     ) -> Result<()> {
-        let mut policy_path = PathBuf::new();
-        policy_path.push(&path);
-        policy_path.push(&PathBuf::from(".policy"));
-
-        let serialized: Bytes<12> =
+        let policy_path = Self::policy_path(path);
+        let serialized: Bytes<256> =
             crate::cbor_serialize_bytes(&policy).map_err(|_| Error::CborError)?;
         store::store(
             plat_store,
@@ -53,22 +62,30 @@ impl SoftwareAuthBackend {
 
     fn read_policy_for<S: Store>(&mut self, plat_store: S, path: &PathBuf) -> Result<Policy> {
         // @TODO: check for existance
-
-        let mut policy_path = PathBuf::new();
-        policy_path.push(&path);
-        policy_path.push(&PathBuf::from(".policy"));
-
-        let policy: Bytes<12> = store::read(plat_store, Location::Internal, &policy_path)?;
+        let policy_path = Self::policy_path(path);
+        let policy: Bytes<256> = store::read(plat_store, Location::Internal, &policy_path)?;
         crate::cbor_deserialize(policy.as_slice()).map_err(|_| Error::CborError)
     }
 
-    fn check_auth_context(&mut self, requested_ctx: &AuthContextID, pin: &PinData) -> bool {
-        // @todo: read (saved) context object from filesystem, or create it if not existant
-        match requested_ctx {
-            AuthContextID::Unauthorized => true,
-            AuthContextID::User => pin.eq("1234"), // compare against 1234
-            AuthContextID::Admin => pin.eq("123456"), // compare against 123456
+    fn check_permission<S: Store>(
+        &mut self,
+        plat_store: S,
+        auth_state: &mut AuthState<S>,
+        client_ctx: &ClientContext,
+        perm: Permission,
+        keypath: &PathBuf,
+    ) -> Result<()> {
+        if !auth_state.check(client_ctx.context, &client_ctx.pin)? {
+            return Err(Error::PermissionDenied);
         }
+
+        let policy = self.read_policy_for(plat_store, &keypath)?;
+
+        if !policy.is_permitted(client_ctx.context, perm) {
+            debug_now!("operation not permitted!");
+            return Err(Error::PermissionDenied);
+        };
+        Ok(())
     }
 
     pub fn rng<R: CryptoRng + RngCore, S: Store>(
@@ -146,6 +163,7 @@ impl SoftwareAuthBackend {
 }
 
 impl<S: Store, R: CryptoRng + RngCore> ServiceBackend<S, R> for SoftwareAuthBackend {
+    #[inline(never)]
     fn reply_to(
         &mut self,
         plat_store: S,
@@ -187,23 +205,53 @@ impl<S: Store, R: CryptoRng + RngCore> ServiceBackend<S, R> for SoftwareAuthBack
             ClientFilestore::new(client_ctx.path.clone(), full_store);
         let filestore = &mut filestore;
 
+        // client-local authentication state
+        let mut auth_state = AuthState::new(full_store, &client_ctx);
+
         match request {
             Request::DummyRequest => Ok(Reply::DummyReply),
-
-            Request::Wink(request) => {
-                //self.platform.user_interface().wink(request.duration);
-                debug_now!("was geht ab....");
-                Ok(Reply::Wink(reply::Wink {}))
-            }
 
             Request::SetAuthContext(request) => {
                 if request.pin.len() > MAX_PIN_LENGTH {
                     return Err(Error::InternalError);
                 }
+
+                auth_state.check(request.context, &request.pin)?;
+
                 client_ctx.context = request.context;
-                client_ctx.pin.clear();
-                client_ctx.pin.extend_from_slice(&request.pin);
+                /*client_ctx.pin.clear();
+                client_ctx.pin.extend_from_slice(&request.pin);*/
+                client_ctx.pin = request.pin.clone();
+
+                debug_now!(
+                    "setting auth context: {:?} with pin: {:?}",
+                    request.context,
+                    request.pin
+                );
+
                 Ok(Reply::SetAuthContext(reply::SetAuthContext {}))
+            }
+
+            Request::CheckAuthContext(request) => auth_state
+                .check(request.context, &request.pin)
+                .map(|o| Reply::CheckAuthContext(reply::CheckAuthContext { authorized: o })),
+
+            Request::GetAuthRetriesLeft(request) => {
+                let out = auth_state.retries(request.context);
+                Ok(Reply::GetAuthRetriesLeft(reply::GetAuthRetriesLeft {
+                    retries_left: out,
+                }))
+            }
+
+            Request::WriteAuthContext(request) => {
+                auth_state.check(client_ctx.context, &client_ctx.pin)?;
+
+                auth_state.set(client_ctx.context, &request.new_pin)?;
+                client_ctx.pin = request.new_pin.clone();
+
+                auth_state
+                    .write()
+                    .map(|_| Reply::WriteAuthContext(reply::WriteAuthContext {}))
             }
 
             Request::SetCreationPolicy(request) => {
@@ -211,17 +259,16 @@ impl<S: Store, R: CryptoRng + RngCore> ServiceBackend<S, R> for SoftwareAuthBack
                 Ok(Reply::SetCreationPolicy(reply::SetCreationPolicy {}))
             }
 
-            Request::CheckAuthContext(request) => Err(Error::RequestNotAvailable),
-
-            Request::WriteAuthContext(request) => Err(Error::RequestNotAvailable),
-
             Request::Agree(request) => {
-                let pub_path = keystore.key_path(key::Secrecy::Public, &request.public_key);
-                let sec_path = keystore.key_path(key::Secrecy::Secret, &request.private_key);
-
-                // get policy for pub_path
-                // compare policy with Permission::Agree
-                // continue or return Error::AuthorizationDenied
+                let perm = Permission::new().with_agree(true);
+                //self.check_permission(full_store, client_ctx, perm, &keystore.key_path(&request.public_key))?;
+                self.check_permission(
+                    full_store,
+                    &mut auth_state,
+                    client_ctx,
+                    perm,
+                    &keystore.key_path(key::Secrecy::Secret, &request.private_key),
+                )?;
 
                 match request.mechanism {
                     Mechanism::P256 => mechanisms::P256::agree(keystore, request),
@@ -232,6 +279,15 @@ impl<S: Store, R: CryptoRng + RngCore> ServiceBackend<S, R> for SoftwareAuthBack
             }
 
             Request::Attest(request) => {
+                let perm = Permission::new().with_attest(true);
+                self.check_permission(
+                    full_store,
+                    &mut auth_state,
+                    client_ctx,
+                    perm,
+                    &keystore.key_path(key::Secrecy::Secret, &request.private_key),
+                )?;
+
                 let mut attn_keystore: ClientKeystore<S> = ClientKeystore::new(
                     PathBuf::from("attn"),
                     self.rng(plat_rng, plat_store)
@@ -242,69 +298,132 @@ impl<S: Store, R: CryptoRng + RngCore> ServiceBackend<S, R> for SoftwareAuthBack
                     .map(Reply::Attest)
             }
 
-            Request::Decrypt(request) => match request.mechanism {
-                Mechanism::Aes256Cbc => mechanisms::Aes256Cbc::decrypt(keystore, request),
-                Mechanism::Chacha8Poly1305 => {
-                    mechanisms::Chacha8Poly1305::decrypt(keystore, request)
+            Request::Decrypt(request) => {
+                let perm = Permission::new().with_decrypt(true);
+                self.check_permission(
+                    full_store,
+                    &mut auth_state,
+                    client_ctx,
+                    perm,
+                    &keystore.key_path(key::Secrecy::Secret, &request.key),
+                )?;
+
+                match request.mechanism {
+                    Mechanism::Aes256Cbc => mechanisms::Aes256Cbc::decrypt(keystore, request),
+                    Mechanism::Chacha8Poly1305 => {
+                        mechanisms::Chacha8Poly1305::decrypt(keystore, request)
+                    }
+                    Mechanism::Tdes => mechanisms::Tdes::decrypt(keystore, request),
+                    _ => Err(Error::MechanismNotAvailable),
                 }
-                Mechanism::Tdes => mechanisms::Tdes::decrypt(keystore, request),
-                _ => Err(Error::MechanismNotAvailable),
+                .map(Reply::Decrypt)
             }
-            .map(Reply::Decrypt),
 
-            Request::DeriveKey(request) => match request.mechanism {
-                Mechanism::HmacBlake2s => mechanisms::HmacBlake2s::derive_key(keystore, request),
-                Mechanism::HmacSha1 => mechanisms::HmacSha1::derive_key(keystore, request),
-                Mechanism::HmacSha256 => mechanisms::HmacSha256::derive_key(keystore, request),
-                Mechanism::HmacSha512 => mechanisms::HmacSha512::derive_key(keystore, request),
-                Mechanism::Ed255 => mechanisms::Ed255::derive_key(keystore, request),
-                Mechanism::P256 => mechanisms::P256::derive_key(keystore, request),
-                Mechanism::Sha256 => mechanisms::Sha256::derive_key(keystore, request),
-                Mechanism::X255 => mechanisms::X255::derive_key(keystore, request),
-                _ => Err(Error::MechanismNotAvailable),
-            }
-            .map(Reply::DeriveKey),
+            Request::DeriveKey(request) => {
+                let perm = Permission::new().with_derive(true);
+                self.check_permission(
+                    full_store,
+                    &mut auth_state,
+                    client_ctx,
+                    perm,
+                    &keystore.key_path(key::Secrecy::Secret, &request.base_key),
+                )?;
 
-            Request::DeserializeKey(request) => match request.mechanism {
-                Mechanism::Ed255 => mechanisms::Ed255::deserialize_key(keystore, request),
-                Mechanism::P256 => mechanisms::P256::deserialize_key(keystore, request),
-                Mechanism::X255 => mechanisms::X255::deserialize_key(keystore, request),
-                _ => Err(Error::MechanismNotAvailable),
-            }
-            .map(Reply::DeserializeKey),
-
-            Request::Encrypt(request) => match request.mechanism {
-                Mechanism::Aes256Cbc => mechanisms::Aes256Cbc::encrypt(keystore, request),
-                Mechanism::Chacha8Poly1305 => {
-                    mechanisms::Chacha8Poly1305::encrypt(keystore, request)
+                match request.mechanism {
+                    Mechanism::HmacBlake2s => {
+                        mechanisms::HmacBlake2s::derive_key(keystore, request)
+                    }
+                    Mechanism::HmacSha1 => mechanisms::HmacSha1::derive_key(keystore, request),
+                    Mechanism::HmacSha256 => mechanisms::HmacSha256::derive_key(keystore, request),
+                    Mechanism::HmacSha512 => mechanisms::HmacSha512::derive_key(keystore, request),
+                    Mechanism::Ed255 => mechanisms::Ed255::derive_key(keystore, request),
+                    Mechanism::P256 => mechanisms::P256::derive_key(keystore, request),
+                    Mechanism::Sha256 => mechanisms::Sha256::derive_key(keystore, request),
+                    Mechanism::X255 => mechanisms::X255::derive_key(keystore, request),
+                    _ => Err(Error::MechanismNotAvailable),
                 }
-                Mechanism::Tdes => mechanisms::Tdes::encrypt(keystore, request),
-                _ => Err(Error::MechanismNotAvailable),
+                .map(Reply::DeriveKey)
             }
-            .map(Reply::Encrypt),
+
+            Request::DeserializeKey(request) => {
+                // Deserializing should generally be allowed for anyone
+
+                /*let perm = Permission::new().with_deserialize(true);
+                self.check_permission(full_store, client_ctx, perm, key::Secrecy::Secret, &request.key)?;*/
+
+                match request.mechanism {
+                    Mechanism::Ed255 => mechanisms::Ed255::deserialize_key(keystore, request),
+                    Mechanism::P256 => mechanisms::P256::deserialize_key(keystore, request),
+                    Mechanism::X255 => mechanisms::X255::deserialize_key(keystore, request),
+                    _ => Err(Error::MechanismNotAvailable),
+                }
+                .map(Reply::DeserializeKey)
+            }
+
+            Request::Encrypt(request) => {
+                let perm = Permission::new().with_encrypt(true);
+                self.check_permission(
+                    full_store,
+                    &mut auth_state,
+                    client_ctx,
+                    perm,
+                    &keystore.key_path(key::Secrecy::Secret, &request.key),
+                )?;
+
+                match request.mechanism {
+                    Mechanism::Aes256Cbc => mechanisms::Aes256Cbc::encrypt(keystore, request),
+                    Mechanism::Chacha8Poly1305 => {
+                        mechanisms::Chacha8Poly1305::encrypt(keystore, request)
+                    }
+                    Mechanism::Tdes => mechanisms::Tdes::encrypt(keystore, request),
+                    _ => Err(Error::MechanismNotAvailable),
+                }
+                .map(Reply::Encrypt)
+            }
 
             Request::Delete(request) => {
+                // todo: write permission == delete permission ? yes/no ?
+                let perm = Permission::new().with_write(true);
+                self.check_permission(
+                    full_store,
+                    &mut auth_state,
+                    client_ctx,
+                    perm,
+                    &keystore.key_path(key::Secrecy::Secret, &request.key),
+                )?;
+
                 let success = keystore.delete_key(&request.key);
                 Ok(Reply::Delete(reply::Delete { success }))
             }
 
             Request::DeleteAllKeys(request) => {
+                // todo: not gated currently, global permissions? client-non-key-specific permissions?
                 let count = keystore.delete_all(request.location)?;
                 Ok(Reply::DeleteAllKeys(reply::DeleteAllKeys { count }))
             }
 
-            Request::GenerateKey(request) => match request.mechanism {
-                Mechanism::Chacha8Poly1305 => {
-                    mechanisms::Chacha8Poly1305::generate_key(keystore, request)
-                }
-                Mechanism::Ed255 => mechanisms::Ed255::generate_key(keystore, request),
-                Mechanism::P256 => mechanisms::P256::generate_key(keystore, request),
-                Mechanism::X255 => mechanisms::X255::generate_key(keystore, request),
-                _ => Err(Error::MechanismNotAvailable),
+            Request::GenerateKey(request) => {
+                // todo: generating a key is essentially an operation allowed for anyone?
+                let res = match request.mechanism {
+                    Mechanism::Chacha8Poly1305 => {
+                        mechanisms::Chacha8Poly1305::generate_key(keystore, request)
+                    }
+                    Mechanism::Ed255 => mechanisms::Ed255::generate_key(keystore, request),
+                    Mechanism::P256 => mechanisms::P256::generate_key(keystore, request),
+                    Mechanism::X255 => mechanisms::X255::generate_key(keystore, request),
+                    _ => Err(Error::MechanismNotAvailable),
+                };
+                // write policy file, after successful generation using `creation_policy`
+                if let Ok(ref val) = res {
+                    let path = keystore.key_path(key::Secrecy::Secret, &val.key);
+                    self.write_policy_for(full_store, &path, client_ctx.creation_policy)?;
+                };
+
+                res.map(Reply::GenerateKey)
             }
-            .map(Reply::GenerateKey),
 
             Request::GenerateSecretKey(request) => {
+                // todo: same as GenerateKey ?
                 let mut secret_key = MediumData::new();
                 let size = request.size;
                 secret_key
@@ -317,58 +436,119 @@ impl<S: Store, R: CryptoRng + RngCore> ServiceBackend<S, R> for SoftwareAuthBack
                     key::Kind::Symmetric(size),
                     &secret_key[..size],
                 )?;
+
+                // write policy file, after successful generation using `creation_policy`
+                let path = keystore.key_path(key::Secrecy::Secret, &key_id);
+                self.write_policy_for(full_store, &path, client_ctx.creation_policy)?;
+
                 Ok(Reply::GenerateSecretKey(reply::GenerateSecretKey {
                     key: key_id,
                 }))
             }
 
-            Request::SerializeKey(request) => match request.mechanism {
-                Mechanism::Ed255 => mechanisms::Ed255::serialize_key(keystore, request),
-                Mechanism::P256 => mechanisms::P256::serialize_key(keystore, request),
-                Mechanism::X255 => mechanisms::X255::serialize_key(keystore, request),
-                Mechanism::SharedSecret => {
-                    mechanisms::SharedSecret::serialize_key(keystore, request)
+            Request::SerializeKey(request) => {
+                // todo: how to differentiate between public and private here?
+                let perm = Permission::new().with_serialize(true);
+                self.check_permission(
+                    full_store,
+                    &mut auth_state,
+                    client_ctx,
+                    perm,
+                    &keystore.key_path(key::Secrecy::Secret, &request.key),
+                )?;
+
+                match request.mechanism {
+                    Mechanism::Ed255 => mechanisms::Ed255::serialize_key(keystore, request),
+                    Mechanism::P256 => mechanisms::P256::serialize_key(keystore, request),
+                    Mechanism::X255 => mechanisms::X255::serialize_key(keystore, request),
+                    Mechanism::SharedSecret => {
+                        mechanisms::SharedSecret::serialize_key(keystore, request)
+                    }
+                    _ => Err(Error::MechanismNotAvailable),
                 }
-                _ => Err(Error::MechanismNotAvailable),
+                .map(Reply::SerializeKey)
             }
-            .map(Reply::SerializeKey),
 
-            Request::Sign(request) => match request.mechanism {
-                Mechanism::Ed255 => mechanisms::Ed255::sign(keystore, request),
-                Mechanism::HmacBlake2s => mechanisms::HmacBlake2s::sign(keystore, request),
-                Mechanism::HmacSha1 => mechanisms::HmacSha1::sign(keystore, request),
-                Mechanism::HmacSha256 => mechanisms::HmacSha256::sign(keystore, request),
-                Mechanism::HmacSha512 => mechanisms::HmacSha512::sign(keystore, request),
-                Mechanism::P256 => mechanisms::P256::sign(keystore, request),
-                Mechanism::P256Prehashed => mechanisms::P256Prehashed::sign(keystore, request),
-                Mechanism::Totp => mechanisms::Totp::sign(keystore, request),
-                _ => Err(Error::MechanismNotAvailable),
-            }
-            .map(Reply::Sign),
+            Request::Sign(request) => {
+                let perm = Permission::new().with_sign(true);
+                self.check_permission(
+                    full_store,
+                    &mut auth_state,
+                    client_ctx,
+                    perm,
+                    &keystore.key_path(key::Secrecy::Secret, &request.key),
+                )?;
 
-            Request::UnwrapKey(request) => match request.mechanism {
-                Mechanism::Chacha8Poly1305 => {
-                    mechanisms::Chacha8Poly1305::unwrap_key(keystore, request)
+                match request.mechanism {
+                    Mechanism::Ed255 => mechanisms::Ed255::sign(keystore, request),
+                    Mechanism::HmacBlake2s => mechanisms::HmacBlake2s::sign(keystore, request),
+                    Mechanism::HmacSha1 => mechanisms::HmacSha1::sign(keystore, request),
+                    Mechanism::HmacSha256 => mechanisms::HmacSha256::sign(keystore, request),
+                    Mechanism::HmacSha512 => mechanisms::HmacSha512::sign(keystore, request),
+                    Mechanism::P256 => mechanisms::P256::sign(keystore, request),
+                    Mechanism::P256Prehashed => mechanisms::P256Prehashed::sign(keystore, request),
+                    Mechanism::Totp => mechanisms::Totp::sign(keystore, request),
+                    _ => Err(Error::MechanismNotAvailable),
                 }
-                _ => Err(Error::MechanismNotAvailable),
+                .map(Reply::Sign)
             }
-            .map(Reply::UnwrapKey),
 
-            Request::Verify(request) => match request.mechanism {
-                Mechanism::Ed255 => mechanisms::Ed255::verify(keystore, request),
-                Mechanism::P256 => mechanisms::P256::verify(keystore, request),
-                _ => Err(Error::MechanismNotAvailable),
-            }
-            .map(Reply::Verify),
+            Request::UnwrapKey(request) => {
+                let perm = Permission::new().with_unwrap(true);
+                self.check_permission(
+                    full_store,
+                    &mut auth_state,
+                    client_ctx,
+                    perm,
+                    &keystore.key_path(key::Secrecy::Secret, &request.wrapping_key),
+                )?;
 
-            Request::WrapKey(request) => match request.mechanism {
-                Mechanism::Aes256Cbc => mechanisms::Aes256Cbc::wrap_key(keystore, request),
-                Mechanism::Chacha8Poly1305 => {
-                    mechanisms::Chacha8Poly1305::wrap_key(keystore, request)
+                match request.mechanism {
+                    Mechanism::Chacha8Poly1305 => {
+                        mechanisms::Chacha8Poly1305::unwrap_key(keystore, request)
+                    }
+                    _ => Err(Error::MechanismNotAvailable),
                 }
-                _ => Err(Error::MechanismNotAvailable),
+                .map(Reply::UnwrapKey)
             }
-            .map(Reply::WrapKey),
+
+            Request::Verify(request) => {
+                let perm = Permission::new().with_verify(true);
+                self.check_permission(
+                    full_store,
+                    &mut auth_state,
+                    client_ctx,
+                    perm,
+                    &keystore.key_path(key::Secrecy::Secret, &request.key),
+                )?;
+
+                match request.mechanism {
+                    Mechanism::Ed255 => mechanisms::Ed255::verify(keystore, request),
+                    Mechanism::P256 => mechanisms::P256::verify(keystore, request),
+                    _ => Err(Error::MechanismNotAvailable),
+                }
+                .map(Reply::Verify)
+            }
+
+            Request::WrapKey(request) => {
+                let perm = Permission::new().with_wrap(true);
+                self.check_permission(
+                    full_store,
+                    &mut auth_state,
+                    client_ctx,
+                    perm,
+                    &keystore.key_path(key::Secrecy::Secret, &request.wrapping_key),
+                )?;
+
+                match request.mechanism {
+                    Mechanism::Aes256Cbc => mechanisms::Aes256Cbc::wrap_key(keystore, request),
+                    Mechanism::Chacha8Poly1305 => {
+                        mechanisms::Chacha8Poly1305::wrap_key(keystore, request)
+                    }
+                    _ => Err(Error::MechanismNotAvailable),
+                }
+                .map(Reply::WrapKey)
+            }
 
             _ => Err(Error::RequestNotAvailable),
         }
