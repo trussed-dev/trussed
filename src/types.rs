@@ -345,33 +345,54 @@ pub trait ServiceBackend<S: Store, R: CryptoRng + RngCore> {
 }
 
 #[bitfield]
-#[derive(Copy, Clone, PartialEq, Eq, Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Copy, Clone, PartialEq, Eq, Debug, Serialize, Deserialize)]
 pub struct Permission {
-    Read: bool,
-    Write: bool,
-    Encrypt: bool,
-    Decrypt: bool,
-    KeyAgreement: bool,
-    Sign: bool,
-    Verify: bool,
+    pub read: bool,
+    pub write: bool,
+    pub encrypt: bool,
+    pub decrypt: bool,
+    pub agree: bool,
+    pub sign: bool,
+    pub verify: bool,
+    pub attest: bool,
+    pub derive: bool,
+    //pub deserialize: bool,
+    pub serialize: bool,
+    pub wrap: bool,
+    pub unwrap: bool,
     /* TODO: create a useful intersection of Trussed syscalls and SE050 policy bits */
     #[skip]
-    _unused: B25,
+    _unused: B20,
 }
 
 impl Permission {
-    fn unpack(self) -> u32 {
+    pub fn unpack(self) -> u32 {
         let bytes: [u8; 4] = self.into_bytes();
         u32::from_le_bytes(bytes)
     }
-    fn pack(val: u32) -> Self {
+    pub fn pack(val: u32) -> Self {
         let bytes: [u8; 4] = u32::to_le_bytes(val);
         Self::from_bytes(bytes)
     }
-    fn is_single_permission(self) -> bool {
+    pub fn is_single_permission(self) -> bool {
         let val = self.unpack();
         // fancy trick that checks whether value is a power of two (= exactly one bit set)
         (val & (val - 1)) == 0
+    }
+    pub fn with_all(&self) -> Self {
+        self.with_read(true)
+            .with_write(true)
+            .with_encrypt(true)
+            .with_decrypt(true)
+            .with_agree(true)
+            .with_sign(true)
+            .with_verify(true)
+            .with_attest(true)
+            .with_derive(true)
+            .with_serialize(true)
+            .with_wrap(true)
+            .with_unwrap(true)
+        //.with_deserialize(true)
     }
 }
 
@@ -392,24 +413,24 @@ impl Policy {
         }
     }
 
-    fn set_unauthorized(&mut self, permission: Permission) {
+    pub fn set_unauthorized(&mut self, permission: Permission) {
         self.unauthorized = permission;
     }
-    fn set_user(&mut self, permission: Permission) {
+    pub fn set_user(&mut self, permission: Permission) {
         self.user = permission;
     }
-    fn set_admin(&mut self, permission: Permission) {
+    pub fn set_admin(&mut self, permission: Permission) {
         self.admin = permission;
     }
 
-    fn is_permitted(&self, context_id: AuthContextID, op: Permission) -> bool {
+    pub fn is_permitted(&self, context_id: AuthContextID, op: Permission) -> bool {
         assert!(op.is_single_permission());
         let effective_set = match context_id {
             AuthContextID::Unauthorized => self.unauthorized,
             AuthContextID::User => self.user,
             AuthContextID::Admin => self.admin,
         };
-        (effective_set.unpack() | op.unpack()) != 0
+        (effective_set.unpack() & op.unpack()) != 0
     }
 }
 
