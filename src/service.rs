@@ -583,19 +583,20 @@ impl<P: Platform> ServiceResources<P> {
                 Ok(Reply::SetServiceBackends(reply::SetServiceBackends {}))
             }
 
-            Request::SetContext(request) => {
-                if request.pin.len() > MAX_PIN_LENGTH {
-                    return Err(Error::InternalError);
-                }
-                client_ctx.context = request.context;
-                client_ctx.pin.clear();
-                client_ctx.pin.extend_from_slice(&request.pin);
-                Ok(Reply::SetContext(reply::SetContext {}))
+            Request::SetAuthContext(request) => {
+                Err(Error::RequestNotAvailable)
+            }
+
+            Request::CheckAuthContext(request) => {
+                Err(Error::RequestNotAvailable)
+            }
+
+            Request::WriteAuthContext(request) => {
+                Err(Error::RequestNotAvailable)
             }
 
             Request::SetCreationPolicy(request) => {
-		        client_ctx.creation_policy = request.policy;
-                Ok(Reply::SetCreationPolicy(reply::SetCreationPolicy {}))
+                Err(Error::RequestNotAvailable)
             }
 
             // _ => {

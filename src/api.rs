@@ -103,8 +103,14 @@ generate_enums! {
     // Backend Mgmt. //
     ///////////////////
     SetServiceBackends: 90
-    SetContext: 91
-    SetCreationPolicy: 92
+
+    ///////////////////////////
+    // Software Auth Backend //
+    ///////////////////////////
+    SetCreationPolicy: 91
+    SetAuthContext: 92
+    CheckAuthContext: 93
+    WriteAuthContext: 94
 
     ///////////
     // Other //
@@ -342,12 +348,20 @@ pub mod request {
         SetServiceBackends:
           - backends: Vec<ServiceBackends, 2>
 
-        SetContext:
-          - context: ContextID
-          - pin: PinData
-
         SetCreationPolicy:
           - policy: Policy
+
+        SetAuthContext:
+          - context: AuthContextID
+          - pin: PinData
+
+        CheckAuthContext:
+          - context: AuthContextID
+          - pin: PinData
+
+        WriteAuthContext:
+          - new_pin: PinData
+
     }
 }
 
@@ -501,9 +515,15 @@ pub mod reply {
 
         SetServiceBackends:
 
-        SetContext:
-
         SetCreationPolicy:
+
+        SetAuthContext:
+
+        CheckAuthContext:
+          - authorized: bool
+          - retries_left: u8
+
+        WriteAuthContext:
 
     }
 }

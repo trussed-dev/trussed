@@ -40,6 +40,10 @@ pub enum Error {
     WrongKeyKind,
     WrongMessageLength,
     WrongSignatureLength,
+
+    // Software Auth Backend Errors
+    PermissionDenied,
+    NoAuthTriesLeft,
 }
 
 // pub struct FutureResult<'a, 'c> {

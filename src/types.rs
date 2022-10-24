@@ -247,7 +247,7 @@ pub struct ClientContext {
     pub backends: Vec<ServiceBackends, 2>,
     pub(crate) read_dir_state: Option<ReadDirState>,
     pub(crate) read_dir_files_state: Option<ReadDirFilesState>,
-    pub(crate) context: ContextID,
+    pub(crate) context: AuthContextID,
     pub(crate) pin: Bytes<MAX_PIN_LENGTH>,
     pub(crate) creation_policy: Policy,
 }
@@ -275,7 +275,7 @@ impl ClientContext {
             backends,
             read_dir_state: None,
             read_dir_files_state: None,
-            context: ContextID::Unauthorized,
+            context: AuthContextID::Unauthorized,
             pin: Bytes::new(),
             creation_policy: Policy::new(),
         }
@@ -376,11 +376,8 @@ impl Permission {
 }
 
 /* three auth levels should be enough for everybody */
-#[derive(Copy, Clone, PartialEq, Eq, Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Copy, Clone, PartialEq, Eq, Debug, Serialize, Deserialize)]
 pub struct Policy {
-    /* explicitly avoid using an array indexed by ContextID here;
-    instead let callers explicitly specify what they want
-    (less error-prone?) */
     unauthorized: Permission,
     user: Permission,
     admin: Permission,
@@ -405,19 +402,19 @@ impl Policy {
         self.admin = permission;
     }
 
-    fn is_permitted(&self, context_id: ContextID, op: Permission) -> bool {
+    fn is_permitted(&self, context_id: AuthContextID, op: Permission) -> bool {
         assert!(op.is_single_permission());
         let effective_set = match context_id {
-            ContextID::Unauthorized => self.unauthorized,
-            ContextID::User => self.user,
-            ContextID::Admin => self.admin,
+            AuthContextID::Unauthorized => self.unauthorized,
+            AuthContextID::User => self.user,
+            AuthContextID::Admin => self.admin,
         };
         (effective_set.unpack() | op.unpack()) != 0
     }
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug, Serialize, Deserialize)]
-pub enum ContextID {
+pub enum AuthContextID {
     Unauthorized = 0,
     User = 1,
     Admin = 2,

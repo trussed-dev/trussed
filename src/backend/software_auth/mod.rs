@@ -23,6 +23,9 @@ pub use crate::store::{
     keystore::{ClientKeystore, Keystore},
 };
 
+mod auth_state;
+use auth_state::AuthState;
+
 pub struct SoftwareAuthBackend {
     pub rng_state: Option<ChaCha8Rng>,
 }
@@ -57,6 +60,15 @@ impl SoftwareAuthBackend {
 
         let policy: Bytes<12> = store::read(plat_store, Location::Internal, &policy_path)?;
         crate::cbor_deserialize(policy.as_slice()).map_err(|_| Error::CborError)
+    }
+
+    fn check_auth_context(&mut self, requested_ctx: &AuthContextID, pin: &PinData) -> bool {
+        // @todo: read (saved) context object from filesystem, or create it if not existant
+        match requested_ctx {
+            AuthContextID::Unauthorized => true,
+            AuthContextID::User => pin.eq("1234"), // compare against 1234
+            AuthContextID::Admin => pin.eq("123456"), // compare against 123456
+        }
     }
 
     pub fn rng<R: CryptoRng + RngCore, S: Store>(
@@ -184,99 +196,120 @@ impl<S: Store, R: CryptoRng + RngCore> ServiceBackend<S, R> for SoftwareAuthBack
                 Ok(Reply::Wink(reply::Wink {}))
             }
 
-            Request::Agree(request) => {
-                match request.mechanism {
+            Request::SetAuthContext(request) => {
+                if request.pin.len() > MAX_PIN_LENGTH {
+                    return Err(Error::InternalError);
+                }
+                client_ctx.context = request.context;
+                client_ctx.pin.clear();
+                client_ctx.pin.extend_from_slice(&request.pin);
+                Ok(Reply::SetAuthContext(reply::SetAuthContext {}))
+            }
 
+            Request::SetCreationPolicy(request) => {
+                client_ctx.creation_policy = request.policy;
+                Ok(Reply::SetCreationPolicy(reply::SetCreationPolicy {}))
+            }
+
+            Request::CheckAuthContext(request) => Err(Error::RequestNotAvailable),
+
+            Request::WriteAuthContext(request) => Err(Error::RequestNotAvailable),
+
+            Request::Agree(request) => {
+                let pub_path = keystore.key_path(key::Secrecy::Public, &request.public_key);
+                let sec_path = keystore.key_path(key::Secrecy::Secret, &request.private_key);
+
+                // get policy for pub_path
+                // compare policy with Permission::Agree
+                // continue or return Error::AuthorizationDenied
+
+                match request.mechanism {
                     Mechanism::P256 => mechanisms::P256::agree(keystore, request),
                     Mechanism::X255 => mechanisms::X255::agree(keystore, request),
                     _ => Err(Error::MechanismNotAvailable),
-
-                }.map(Reply::Agree)
-            },
+                }
+                .map(Reply::Agree)
+            }
 
             Request::Attest(request) => {
-                let mut attn_keystore: ClientKeystore<P::S> = ClientKeystore::new(
+                let mut attn_keystore: ClientKeystore<S> = ClientKeystore::new(
                     PathBuf::from("attn"),
-                    self.rng().map_err(|_| Error::EntropyMalfunction)?,
+                    self.rng(plat_rng, plat_store)
+                        .map_err(|_| Error::EntropyMalfunction)?,
                     full_store,
                 );
-                attest::try_attest(&mut attn_keystore, certstore, keystore, request).map(Reply::Attest)
+                attest::try_attest(&mut attn_keystore, certstore, keystore, request)
+                    .map(Reply::Attest)
             }
 
-            Request::Decrypt(request) => {
-                match request.mechanism {
-
-                    Mechanism::Aes256Cbc => mechanisms::Aes256Cbc::decrypt(keystore, request),
-                    Mechanism::Chacha8Poly1305 => mechanisms::Chacha8Poly1305::decrypt(keystore, request),
-                    Mechanism::Tdes => mechanisms::Tdes::decrypt(keystore, request),
-                    _ => Err(Error::MechanismNotAvailable),
-
-                }.map(Reply::Decrypt)
-            },
-
-            Request::DeriveKey(request) => {
-                match request.mechanism {
-
-                    Mechanism::HmacBlake2s => mechanisms::HmacBlake2s::derive_key(keystore, request),
-                    Mechanism::HmacSha1 => mechanisms::HmacSha1::derive_key(keystore, request),
-                    Mechanism::HmacSha256 => mechanisms::HmacSha256::derive_key(keystore, request),
-                    Mechanism::HmacSha512 => mechanisms::HmacSha512::derive_key(keystore, request),
-                    Mechanism::Ed255 => mechanisms::Ed255::derive_key(keystore, request),
-                    Mechanism::P256 => mechanisms::P256::derive_key(keystore, request),
-                    Mechanism::Sha256 => mechanisms::Sha256::derive_key(keystore, request),
-                    Mechanism::X255 => mechanisms::X255::derive_key(keystore, request),
-                    _ => Err(Error::MechanismNotAvailable),
-
-                }.map(Reply::DeriveKey)
-            },
-
-            Request::DeserializeKey(request) => {
-                match request.mechanism {
-
-                    Mechanism::Ed255 => mechanisms::Ed255::deserialize_key(keystore, request),
-                    Mechanism::P256 => mechanisms::P256::deserialize_key(keystore, request),
-                    Mechanism::X255 => mechanisms::X255::deserialize_key(keystore, request),
-                    _ => Err(Error::MechanismNotAvailable),
-
-                }.map(Reply::DeserializeKey)
+            Request::Decrypt(request) => match request.mechanism {
+                Mechanism::Aes256Cbc => mechanisms::Aes256Cbc::decrypt(keystore, request),
+                Mechanism::Chacha8Poly1305 => {
+                    mechanisms::Chacha8Poly1305::decrypt(keystore, request)
+                }
+                Mechanism::Tdes => mechanisms::Tdes::decrypt(keystore, request),
+                _ => Err(Error::MechanismNotAvailable),
             }
+            .map(Reply::Decrypt),
 
-            Request::Encrypt(request) => {
-                match request.mechanism {
+            Request::DeriveKey(request) => match request.mechanism {
+                Mechanism::HmacBlake2s => mechanisms::HmacBlake2s::derive_key(keystore, request),
+                Mechanism::HmacSha1 => mechanisms::HmacSha1::derive_key(keystore, request),
+                Mechanism::HmacSha256 => mechanisms::HmacSha256::derive_key(keystore, request),
+                Mechanism::HmacSha512 => mechanisms::HmacSha512::derive_key(keystore, request),
+                Mechanism::Ed255 => mechanisms::Ed255::derive_key(keystore, request),
+                Mechanism::P256 => mechanisms::P256::derive_key(keystore, request),
+                Mechanism::Sha256 => mechanisms::Sha256::derive_key(keystore, request),
+                Mechanism::X255 => mechanisms::X255::derive_key(keystore, request),
+                _ => Err(Error::MechanismNotAvailable),
+            }
+            .map(Reply::DeriveKey),
 
-                    Mechanism::Aes256Cbc => mechanisms::Aes256Cbc::encrypt(keystore, request),
-                    Mechanism::Chacha8Poly1305 => mechanisms::Chacha8Poly1305::encrypt(keystore, request),
-                    Mechanism::Tdes => mechanisms::Tdes::encrypt(keystore, request),
-                    _ => Err(Error::MechanismNotAvailable),
+            Request::DeserializeKey(request) => match request.mechanism {
+                Mechanism::Ed255 => mechanisms::Ed255::deserialize_key(keystore, request),
+                Mechanism::P256 => mechanisms::P256::deserialize_key(keystore, request),
+                Mechanism::X255 => mechanisms::X255::deserialize_key(keystore, request),
+                _ => Err(Error::MechanismNotAvailable),
+            }
+            .map(Reply::DeserializeKey),
 
-                }.map(Reply::Encrypt)
-            },
+            Request::Encrypt(request) => match request.mechanism {
+                Mechanism::Aes256Cbc => mechanisms::Aes256Cbc::encrypt(keystore, request),
+                Mechanism::Chacha8Poly1305 => {
+                    mechanisms::Chacha8Poly1305::encrypt(keystore, request)
+                }
+                Mechanism::Tdes => mechanisms::Tdes::encrypt(keystore, request),
+                _ => Err(Error::MechanismNotAvailable),
+            }
+            .map(Reply::Encrypt),
 
             Request::Delete(request) => {
                 let success = keystore.delete_key(&request.key);
-                Ok(Reply::Delete(reply::Delete { success } ))
-            },
+                Ok(Reply::Delete(reply::Delete { success }))
+            }
 
             Request::DeleteAllKeys(request) => {
                 let count = keystore.delete_all(request.location)?;
-                Ok(Reply::DeleteAllKeys(reply::DeleteAllKeys { count } ))
-            },
+                Ok(Reply::DeleteAllKeys(reply::DeleteAllKeys { count }))
+            }
 
-
-            Request::GenerateKey(request) => {
-                match request.mechanism {
-                    Mechanism::Chacha8Poly1305 => mechanisms::Chacha8Poly1305::generate_key(keystore, request),
-                    Mechanism::Ed255 => mechanisms::Ed255::generate_key(keystore, request),
-                    Mechanism::P256 => mechanisms::P256::generate_key(keystore, request),
-                    Mechanism::X255 => mechanisms::X255::generate_key(keystore, request),
-                    _ => Err(Error::MechanismNotAvailable),
-                }.map(Reply::GenerateKey)
-            },
+            Request::GenerateKey(request) => match request.mechanism {
+                Mechanism::Chacha8Poly1305 => {
+                    mechanisms::Chacha8Poly1305::generate_key(keystore, request)
+                }
+                Mechanism::Ed255 => mechanisms::Ed255::generate_key(keystore, request),
+                Mechanism::P256 => mechanisms::P256::generate_key(keystore, request),
+                Mechanism::X255 => mechanisms::X255::generate_key(keystore, request),
+                _ => Err(Error::MechanismNotAvailable),
+            }
+            .map(Reply::GenerateKey),
 
             Request::GenerateSecretKey(request) => {
                 let mut secret_key = MediumData::new();
                 let size = request.size;
-                secret_key.resize_default(request.size).map_err(|_| Error::ImplementationError)?;
+                secret_key
+                    .resize_default(request.size)
+                    .map_err(|_| Error::ImplementationError)?;
                 keystore.rng().fill_bytes(&mut secret_key[..size]);
                 let key_id = keystore.store_key(
                     request.attributes.persistence,
@@ -284,65 +317,58 @@ impl<S: Store, R: CryptoRng + RngCore> ServiceBackend<S, R> for SoftwareAuthBack
                     key::Kind::Symmetric(size),
                     &secret_key[..size],
                 )?;
-                Ok(Reply::GenerateSecretKey(reply::GenerateSecretKey { key: key_id }))
-            },
-
-            Request::SerializeKey(request) => {
-                match request.mechanism {
-
-                    Mechanism::Ed255 => mechanisms::Ed255::serialize_key(keystore, request),
-                    Mechanism::P256 => mechanisms::P256::serialize_key(keystore, request),
-                    Mechanism::X255 => mechanisms::X255::serialize_key(keystore, request),
-                    Mechanism::SharedSecret => mechanisms::SharedSecret::serialize_key(keystore, request),
-                    _ => Err(Error::MechanismNotAvailable),
-
-                }.map(Reply::SerializeKey)
+                Ok(Reply::GenerateSecretKey(reply::GenerateSecretKey {
+                    key: key_id,
+                }))
             }
 
-            Request::Sign(request) => {
-                match request.mechanism {
-
-                    Mechanism::Ed255 => mechanisms::Ed255::sign(keystore, request),
-                    Mechanism::HmacBlake2s => mechanisms::HmacBlake2s::sign(keystore, request),
-                    Mechanism::HmacSha1 => mechanisms::HmacSha1::sign(keystore, request),
-                    Mechanism::HmacSha256 => mechanisms::HmacSha256::sign(keystore, request),
-                    Mechanism::HmacSha512 => mechanisms::HmacSha512::sign(keystore, request),
-                    Mechanism::P256 => mechanisms::P256::sign(keystore, request),
-                    Mechanism::P256Prehashed => mechanisms::P256Prehashed::sign(keystore, request),
-                    Mechanism::Totp => mechanisms::Totp::sign(keystore, request),
-                    _ => Err(Error::MechanismNotAvailable),
-
-                }.map(Reply::Sign)
-            },
-
-            Request::UnwrapKey(request) => {
-                match request.mechanism {
-
-                    Mechanism::Chacha8Poly1305 => mechanisms::Chacha8Poly1305::unwrap_key(keystore, request),
-                    _ => Err(Error::MechanismNotAvailable),
-
-                }.map(Reply::UnwrapKey)
+            Request::SerializeKey(request) => match request.mechanism {
+                Mechanism::Ed255 => mechanisms::Ed255::serialize_key(keystore, request),
+                Mechanism::P256 => mechanisms::P256::serialize_key(keystore, request),
+                Mechanism::X255 => mechanisms::X255::serialize_key(keystore, request),
+                Mechanism::SharedSecret => {
+                    mechanisms::SharedSecret::serialize_key(keystore, request)
+                }
+                _ => Err(Error::MechanismNotAvailable),
             }
+            .map(Reply::SerializeKey),
 
-            Request::Verify(request) => {
-                match request.mechanism {
+            Request::Sign(request) => match request.mechanism {
+                Mechanism::Ed255 => mechanisms::Ed255::sign(keystore, request),
+                Mechanism::HmacBlake2s => mechanisms::HmacBlake2s::sign(keystore, request),
+                Mechanism::HmacSha1 => mechanisms::HmacSha1::sign(keystore, request),
+                Mechanism::HmacSha256 => mechanisms::HmacSha256::sign(keystore, request),
+                Mechanism::HmacSha512 => mechanisms::HmacSha512::sign(keystore, request),
+                Mechanism::P256 => mechanisms::P256::sign(keystore, request),
+                Mechanism::P256Prehashed => mechanisms::P256Prehashed::sign(keystore, request),
+                Mechanism::Totp => mechanisms::Totp::sign(keystore, request),
+                _ => Err(Error::MechanismNotAvailable),
+            }
+            .map(Reply::Sign),
 
-                    Mechanism::Ed255 => mechanisms::Ed255::verify(keystore, request),
-                    Mechanism::P256 => mechanisms::P256::verify(keystore, request),
-                    _ => Err(Error::MechanismNotAvailable),
+            Request::UnwrapKey(request) => match request.mechanism {
+                Mechanism::Chacha8Poly1305 => {
+                    mechanisms::Chacha8Poly1305::unwrap_key(keystore, request)
+                }
+                _ => Err(Error::MechanismNotAvailable),
+            }
+            .map(Reply::UnwrapKey),
 
-                }.map(Reply::Verify)
-            },
+            Request::Verify(request) => match request.mechanism {
+                Mechanism::Ed255 => mechanisms::Ed255::verify(keystore, request),
+                Mechanism::P256 => mechanisms::P256::verify(keystore, request),
+                _ => Err(Error::MechanismNotAvailable),
+            }
+            .map(Reply::Verify),
 
-            Request::WrapKey(request) => {
-                match request.mechanism {
-
-                    Mechanism::Aes256Cbc => mechanisms::Aes256Cbc::wrap_key(keystore, request),
-                    Mechanism::Chacha8Poly1305 => mechanisms::Chacha8Poly1305::wrap_key(keystore, request),
-                    _ => Err(Error::MechanismNotAvailable),
-
-                }.map(Reply::WrapKey)
-            },
+            Request::WrapKey(request) => match request.mechanism {
+                Mechanism::Aes256Cbc => mechanisms::Aes256Cbc::wrap_key(keystore, request),
+                Mechanism::Chacha8Poly1305 => {
+                    mechanisms::Chacha8Poly1305::wrap_key(keystore, request)
+                }
+                _ => Err(Error::MechanismNotAvailable),
+            }
+            .map(Reply::WrapKey),
 
             _ => Err(Error::RequestNotAvailable),
         }
