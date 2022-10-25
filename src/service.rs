@@ -599,6 +599,10 @@ impl<P: Platform> ServiceResources<P> {
                 Err(Error::RequestNotAvailable)
             }
 
+            Request::GetAuthRetriesLeft(request) => {
+                Err(Error::RequestNotAvailable)
+            }
+
             // _ => {
             //     // #[cfg(test)]
             //     // println!("todo: {:?} request!", &request);

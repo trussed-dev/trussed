@@ -806,6 +806,15 @@ pub trait ManagementClient: PollClient {
         Ok(r)
     }
 
+    fn get_auth_retries_left(
+        &mut self,
+        context: AuthContextID,
+    ) -> ClientResult<'_, reply::GetAuthRetriesLeft, Self> {
+        let r = self.request(request::GetAuthRetriesLeft { context })?;
+        r.client.syscall();
+        Ok(r)
+    }
+
     fn write_auth_context(
         &mut self,
         new_pin: &[u8],

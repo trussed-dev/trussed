@@ -111,6 +111,7 @@ generate_enums! {
     SetAuthContext: 92
     CheckAuthContext: 93
     WriteAuthContext: 94
+    GetAuthRetriesLeft: 95
 
     ///////////
     // Other //
@@ -362,6 +363,9 @@ pub mod request {
         WriteAuthContext:
           - new_pin: PinData
 
+        GetAuthRetriesLeft:
+          - context: AuthContextID
+
     }
 }
 
@@ -521,9 +525,11 @@ pub mod reply {
 
         CheckAuthContext:
           - authorized: bool
-          - retries_left: u8
 
         WriteAuthContext:
+
+        GetAuthRetriesLeft:
+          - retries_left: u8
 
     }
 }
