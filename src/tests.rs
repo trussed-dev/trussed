@@ -581,3 +581,24 @@ fn filesystem() {
     .metadata
     .is_none(),);
 }
+
+#[test]
+fn policies() {
+    let mut creation_policy = Policy::new();
+    creation_policy.set_unauthorized(Permission::new().with_read(true));
+    creation_policy.set_user(
+        Permission::new()
+            .with_read(true)
+            .with_encrypt(true)
+            .with_decrypt(true)
+            .with_sign(true)
+            .with_verify(true),
+    );
+    creation_policy.set_admin(Permission::new().with_all());
+
+    let perm = Permission::new().with_sign(true);
+
+    assert!(!creation_policy.is_permitted(AuthContextID::Unauthorized, perm));
+    assert!(creation_policy.is_permitted(AuthContextID::User, perm));
+    assert!(creation_policy.is_permitted(AuthContextID::Admin, perm));
+}
