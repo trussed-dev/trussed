@@ -89,3 +89,23 @@ impl Decrypt for super::Tdes {
         })
     }
 }
+
+impl UnsafeInjectKey for super::Tdes {
+    fn unsafe_inject_key(
+        keystore: &mut impl Keystore,
+        request: &request::UnsafeInjectKey,
+    ) -> Result<reply::UnsafeInjectKey, Error> {
+        if request.raw_key.len() != 24 {
+            return Err(Error::InvalidSerializedKey);
+        }
+
+        let key_id = keystore.store_key(
+            request.attributes.persistence,
+            key::Secrecy::Secret,
+            key::Kind::Symmetric(request.raw_key.len()),
+            &request.raw_key,
+        )?;
+
+        Ok(reply::UnsafeInjectKey { key: key_id })
+    }
+}

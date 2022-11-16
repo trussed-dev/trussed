@@ -252,6 +252,7 @@ impl<P: Platform> ServiceResources<P> {
                     Mechanism::Ed255 => mechanisms::Ed255::unsafe_inject_key(keystore,request),
                     Mechanism::SharedSecret => mechanisms::SharedSecret::unsafe_inject_key(keystore, request),
                     Mechanism::Aes256Cbc => mechanisms::Aes256Cbc::unsafe_inject_key(keystore, request),
+                    Mechanism::Tdes => mechanisms::Tdes::unsafe_inject_key(keystore, request),
                     _ => Err(Error::MechanismNotAvailable)
                 }.map(Reply::UnsafeInjectKey)
             },
