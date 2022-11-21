@@ -72,7 +72,7 @@ impl Decrypt for super::Tdes {
 
         let key_id = request.key;
 
-        let symmetric_key: [u8; 24] = keystore
+        let symmetric_key: [u8; TDES_KEY_SIZE] = keystore
             .load_key(key::Secrecy::Secret, None, &key_id)?
             .material
             .as_slice()
@@ -95,7 +95,7 @@ impl UnsafeInjectKey for super::Tdes {
         keystore: &mut impl Keystore,
         request: &request::UnsafeInjectKey,
     ) -> Result<reply::UnsafeInjectKey, Error> {
-        if request.raw_key.len() != 24 {
+        if request.raw_key.len() != TDES_KEY_SIZE {
             return Err(Error::InvalidSerializedKey);
         }
 

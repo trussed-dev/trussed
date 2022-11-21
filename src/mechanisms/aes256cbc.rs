@@ -150,7 +150,7 @@ impl UnsafeInjectKey for super::Aes256Cbc {
         keystore: &mut impl Keystore,
         request: &request::UnsafeInjectKey,
     ) -> Result<reply::UnsafeInjectKey, Error> {
-        if request.raw_key.len() != 32 {
+        if request.raw_key.len() != AES256_KEY_SIZE {
             return Err(Error::InvalidSerializedKey);
         }
 
