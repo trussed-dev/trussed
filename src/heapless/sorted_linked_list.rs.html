@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/heapless-0.7.16/src/sorted_linked_list.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>sorted_linked_list.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../heapless/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../heapless/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../heapless/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/heapless-0.7.16/src/sorted_linked_list.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>sorted_linked_list.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../heapless/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../heapless/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../heapless/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -864,871 +864,871 @@
 <span id="864">864</span>
 <span id="865">865</span>
 <span id="866">866</span>
-</pre><pre class="rust"><code><span class="doccomment">//! A fixed sorted priority linked list, similar to [`BinaryHeap`] but with different properties</span>
-<span class="doccomment">//! on `push`, `pop`, etc.</span>
-<span class="doccomment">//! For example, the sorting of the list will never `memcpy` the underlying value, so having large</span>
-<span class="doccomment">//! objects in the list will not cause a performance hit.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! # Examples</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ```</span>
-<span class="doccomment">//! use heapless::sorted_linked_list::{SortedLinkedList, Max};</span>
-<span class="doccomment">//! let mut ll: SortedLinkedList&lt;_, _, Max, 3&gt; = SortedLinkedList::new_usize();</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! // The largest value will always be first</span>
-<span class="doccomment">//! ll.push(1).unwrap();</span>
-<span class="doccomment">//! assert_eq!(ll.peek(), Some(&amp;1));</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ll.push(2).unwrap();</span>
-<span class="doccomment">//! assert_eq!(ll.peek(), Some(&amp;2));</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ll.push(3).unwrap();</span>
-<span class="doccomment">//! assert_eq!(ll.peek(), Some(&amp;3));</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! // This will not fit in the queue.</span>
-<span class="doccomment">//! assert_eq!(ll.push(4), Err(4));</span>
-<span class="doccomment">//! ```</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! [`BinaryHeap`]: `crate::binary_heap::BinaryHeap`</span>
+</pre><pre class="rust"><code><span class="doccomment">//! A fixed sorted priority linked list, similar to [`BinaryHeap`] but with different properties
+//! on `push`, `pop`, etc.
+//! For example, the sorting of the list will never `memcpy` the underlying value, so having large
+//! objects in the list will not cause a performance hit.
+//!
+//! # Examples
+//!
+//! ```
+//! use heapless::sorted_linked_list::{SortedLinkedList, Max};
+//! let mut ll: SortedLinkedList&lt;_, _, Max, 3&gt; = SortedLinkedList::new_usize();
+//!
+//! // The largest value will always be first
+//! ll.push(1).unwrap();
+//! assert_eq!(ll.peek(), Some(&amp;1));
+//!
+//! ll.push(2).unwrap();
+//! assert_eq!(ll.peek(), Some(&amp;2));
+//!
+//! ll.push(3).unwrap();
+//! assert_eq!(ll.peek(), Some(&amp;3));
+//!
+//! // This will not fit in the queue.
+//! assert_eq!(ll.push(4), Err(4));
+//! ```
+//!
+//! [`BinaryHeap`]: `crate::binary_heap::BinaryHeap`
 
-<span class="kw">use</span> <span class="ident">core::cmp::Ordering</span>;
-<span class="kw">use</span> <span class="ident">core::fmt</span>;
-<span class="kw">use</span> <span class="ident">core::marker::PhantomData</span>;
-<span class="kw">use</span> <span class="ident">core::mem::MaybeUninit</span>;
-<span class="kw">use</span> <span class="ident">core::ops</span>::{<span class="ident">Deref</span>, <span class="ident">DerefMut</span>};
-<span class="kw">use</span> <span class="ident">core::ptr</span>;
+</span><span class="kw">use </span>core::cmp::Ordering;
+<span class="kw">use </span>core::fmt;
+<span class="kw">use </span>core::marker::PhantomData;
+<span class="kw">use </span>core::mem::MaybeUninit;
+<span class="kw">use </span>core::ops::{Deref, DerefMut};
+<span class="kw">use </span>core::ptr;
 
-<span class="doccomment">/// Trait for defining an index for the linked list, never implemented by users.</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">SortedLinkedListIndex</span>: <span class="ident">Copy</span> {
-    <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
-    <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">new_unchecked</span>(<span class="ident">val</span>: <span class="ident">usize</span>) -&gt; <span class="self">Self</span>;
-    <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
-    <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">get_unchecked</span>(<span class="self">self</span>) -&gt; <span class="ident">usize</span>;
-    <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">option</span>(<span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>;
-    <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">none</span>() -&gt; <span class="self">Self</span>;
+<span class="doccomment">/// Trait for defining an index for the linked list, never implemented by users.
+</span><span class="kw">pub trait </span>SortedLinkedListIndex: Copy {
+    <span class="attribute">#[doc(hidden)]
+    </span><span class="kw">unsafe fn </span>new_unchecked(val: usize) -&gt; <span class="self">Self</span>;
+    <span class="attribute">#[doc(hidden)]
+    </span><span class="kw">unsafe fn </span>get_unchecked(<span class="self">self</span>) -&gt; usize;
+    <span class="attribute">#[doc(hidden)]
+    </span><span class="kw">fn </span>option(<span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;usize&gt;;
+    <span class="attribute">#[doc(hidden)]
+    </span><span class="kw">fn </span>none() -&gt; <span class="self">Self</span>;
 }
 
-<span class="doccomment">/// Marker for Min sorted [`SortedLinkedList`].</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Min</span>;
+<span class="doccomment">/// Marker for Min sorted [`SortedLinkedList`].
+</span><span class="kw">pub struct </span>Min;
 
-<span class="doccomment">/// Marker for Max sorted [`SortedLinkedList`].</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Max</span>;
+<span class="doccomment">/// Marker for Max sorted [`SortedLinkedList`].
+</span><span class="kw">pub struct </span>Max;
 
-<span class="doccomment">/// The linked list kind: min-list or max-list</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Kind</span>: <span class="ident">private::Sealed</span> {
-    <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">ordering</span>() -&gt; <span class="ident">Ordering</span>;
+<span class="doccomment">/// The linked list kind: min-list or max-list
+</span><span class="kw">pub trait </span>Kind: private::Sealed {
+    <span class="attribute">#[doc(hidden)]
+    </span><span class="kw">fn </span>ordering() -&gt; Ordering;
 }
 
-<span class="kw">impl</span> <span class="ident">Kind</span> <span class="kw">for</span> <span class="ident">Min</span> {
-    <span class="kw">fn</span> <span class="ident">ordering</span>() -&gt; <span class="ident">Ordering</span> {
-        <span class="ident">Ordering::Less</span>
+<span class="kw">impl </span>Kind <span class="kw">for </span>Min {
+    <span class="kw">fn </span>ordering() -&gt; Ordering {
+        Ordering::Less
     }
 }
 
-<span class="kw">impl</span> <span class="ident">Kind</span> <span class="kw">for</span> <span class="ident">Max</span> {
-    <span class="kw">fn</span> <span class="ident">ordering</span>() -&gt; <span class="ident">Ordering</span> {
-        <span class="ident">Ordering::Greater</span>
+<span class="kw">impl </span>Kind <span class="kw">for </span>Max {
+    <span class="kw">fn </span>ordering() -&gt; Ordering {
+        Ordering::Greater
     }
 }
 
-<span class="doccomment">/// Sealed traits</span>
-<span class="kw">mod</span> <span class="ident">private</span> {
-    <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Sealed</span> {}
+<span class="doccomment">/// Sealed traits
+</span><span class="kw">mod </span>private {
+    <span class="kw">pub trait </span>Sealed {}
 }
 
-<span class="kw">impl</span> <span class="ident">private::Sealed</span> <span class="kw">for</span> <span class="ident">Max</span> {}
-<span class="kw">impl</span> <span class="ident">private::Sealed</span> <span class="kw">for</span> <span class="ident">Min</span> {}
+<span class="kw">impl </span>private::Sealed <span class="kw">for </span>Max {}
+<span class="kw">impl </span>private::Sealed <span class="kw">for </span>Min {}
 
-<span class="doccomment">/// A node in the [`SortedLinkedList`].</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Node</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Idx</span><span class="op">&gt;</span> {
-    <span class="ident">val</span>: <span class="ident">MaybeUninit</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-    <span class="ident">next</span>: <span class="ident">Idx</span>,
+<span class="doccomment">/// A node in the [`SortedLinkedList`].
+</span><span class="kw">pub struct </span>Node&lt;T, Idx&gt; {
+    val: MaybeUninit&lt;T&gt;,
+    next: Idx,
 }
 
-<span class="doccomment">/// The linked list.</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SortedLinkedList</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">K</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">Idx</span>: <span class="ident">SortedLinkedListIndex</span>,
+<span class="doccomment">/// The linked list.
+</span><span class="kw">pub struct </span>SortedLinkedList&lt;T, Idx, K, <span class="kw">const </span>N: usize&gt;
+<span class="kw">where
+    </span>Idx: SortedLinkedListIndex,
 {
-    <span class="ident">list</span>: [<span class="ident">Node</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Idx</span><span class="op">&gt;</span>; <span class="ident">N</span>],
-    <span class="ident">head</span>: <span class="ident">Idx</span>,
-    <span class="ident">free</span>: <span class="ident">Idx</span>,
-    <span class="ident">_kind</span>: <span class="ident">PhantomData</span><span class="op">&lt;</span><span class="ident">K</span><span class="op">&gt;</span>,
+    list: [Node&lt;T, Idx&gt;; N],
+    head: Idx,
+    free: Idx,
+    _kind: PhantomData&lt;K&gt;,
 }
 
-<span class="comment">// Internal macro for generating indexes for the linkedlist and const new for the linked list</span>
-<span class="macro">macro_rules!</span> <span class="ident">impl_index_and_const_new</span> {
-    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>:<span class="ident">ident</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span>:<span class="ident">ty</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">new_name</span>:<span class="ident">ident</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">max_val</span>:<span class="ident">expr</span>) =&gt; {
-        <span class="doccomment">/// Index for the [`SortedLinkedList`] with specific backing storage.</span>
-        <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">PartialOrd</span>, <span class="ident">Ord</span>)]</span>
-        <span class="kw">pub</span> <span class="kw">struct</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span>);
+<span class="comment">// Internal macro for generating indexes for the linkedlist and const new for the linked list
+</span><span class="macro">macro_rules! </span>impl_index_and_const_new {
+    (<span class="macro-nonterminal">$name</span>:ident, <span class="macro-nonterminal">$ty</span>:ty, <span class="macro-nonterminal">$new_name</span>:ident, <span class="macro-nonterminal">$max_val</span>:expr) =&gt; {
+        <span class="doccomment">/// Index for the [`SortedLinkedList`] with specific backing storage.
+        </span><span class="attribute">#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+        </span><span class="kw">pub struct </span><span class="macro-nonterminal">$name</span>(<span class="macro-nonterminal">$ty</span>);
 
-        <span class="kw">impl</span> <span class="ident">SortedLinkedListIndex</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span> {
-            <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-            <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">new_unchecked</span>(<span class="ident">val</span>: <span class="ident">usize</span>) -&gt; <span class="self">Self</span> {
-                <span class="ident"><span class="self">Self</span>::new_unchecked</span>(<span class="ident">val</span> <span class="kw">as</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span>)
+        <span class="kw">impl </span>SortedLinkedListIndex <span class="kw">for </span><span class="macro-nonterminal">$name </span>{
+            <span class="attribute">#[inline(always)]
+            </span><span class="kw">unsafe fn </span>new_unchecked(val: usize) -&gt; <span class="self">Self </span>{
+                <span class="self">Self</span>::new_unchecked(val <span class="kw">as </span><span class="macro-nonterminal">$ty</span>)
             }
 
-            <span class="doccomment">/// This is only valid if `self.option()` is not `None`.</span>
-            <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-            <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">get_unchecked</span>(<span class="self">self</span>) -&gt; <span class="ident">usize</span> {
-                <span class="self">self</span>.<span class="number">0</span> <span class="kw">as</span> <span class="ident">usize</span>
+            <span class="doccomment">/// This is only valid if `self.option()` is not `None`.
+            </span><span class="attribute">#[inline(always)]
+            </span><span class="kw">unsafe fn </span>get_unchecked(<span class="self">self</span>) -&gt; usize {
+                <span class="self">self</span>.<span class="number">0 </span><span class="kw">as </span>usize
             }
 
-            <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-            <span class="kw">fn</span> <span class="ident">option</span>(<span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
-                <span class="kw">if</span> <span class="self">self</span>.<span class="number">0</span> <span class="op">==</span> <span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span><span class="op">&gt;</span><span class="ident">::MAX</span> {
-                    <span class="prelude-val">None</span>
-                } <span class="kw">else</span> {
-                    <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="number">0</span> <span class="kw">as</span> <span class="ident">usize</span>)
+            <span class="attribute">#[inline(always)]
+            </span><span class="kw">fn </span>option(<span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;usize&gt; {
+                <span class="kw">if </span><span class="self">self</span>.<span class="number">0 </span>== &lt;<span class="macro-nonterminal">$ty</span>&gt;::MAX {
+                    <span class="prelude-val">None
+                </span>} <span class="kw">else </span>{
+                    <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="number">0 </span><span class="kw">as </span>usize)
                 }
             }
 
-            <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-            <span class="kw">fn</span> <span class="ident">none</span>() -&gt; <span class="self">Self</span> {
-                <span class="ident"><span class="self">Self</span>::none</span>()
+            <span class="attribute">#[inline(always)]
+            </span><span class="kw">fn </span>none() -&gt; <span class="self">Self </span>{
+                <span class="self">Self</span>::none()
             }
         }
 
-        <span class="kw">impl</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span> {
-            <span class="doccomment">/// Needed for a `const fn new()`.</span>
-            <span class="attribute">#[<span class="ident">inline</span>]</span>
-            <span class="kw">const</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">new_unchecked</span>(<span class="ident">value</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span>) -&gt; <span class="self">Self</span> {
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>(<span class="ident">value</span>)
+        <span class="kw">impl </span><span class="macro-nonterminal">$name </span>{
+            <span class="doccomment">/// Needed for a `const fn new()`.
+            </span><span class="attribute">#[inline]
+            </span><span class="kw">const unsafe fn </span>new_unchecked(value: <span class="macro-nonterminal">$ty</span>) -&gt; <span class="self">Self </span>{
+                <span class="macro-nonterminal">$name</span>(value)
             }
 
-            <span class="doccomment">/// Needed for a `const fn new()`.</span>
-            <span class="attribute">#[<span class="ident">inline</span>]</span>
-            <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">none</span>() -&gt; <span class="self">Self</span> {
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>(<span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span><span class="op">&gt;</span><span class="ident">::MAX</span>)
+            <span class="doccomment">/// Needed for a `const fn new()`.
+            </span><span class="attribute">#[inline]
+            </span><span class="kw">const fn </span>none() -&gt; <span class="self">Self </span>{
+                <span class="macro-nonterminal">$name</span>(&lt;<span class="macro-nonterminal">$ty</span>&gt;::MAX)
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">K</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">SortedLinkedList</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>, <span class="ident">K</span>, <span class="ident">N</span><span class="op">&gt;</span> {
-            <span class="kw">const</span> <span class="ident">UNINIT</span>: <span class="ident">Node</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Node</span> {
-                <span class="ident">val</span>: <span class="ident">MaybeUninit::uninit</span>(),
-                <span class="ident">next</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name::none</span>(),
+        <span class="kw">impl</span>&lt;T, K, <span class="kw">const </span>N: usize&gt; SortedLinkedList&lt;T, <span class="macro-nonterminal">$name</span>, K, N&gt; {
+            <span class="kw">const </span>UNINIT: Node&lt;T, <span class="macro-nonterminal">$name</span>&gt; = Node {
+                val: MaybeUninit::uninit(),
+                next: <span class="macro-nonterminal">$name::none</span>(),
             };
 
-            <span class="doccomment">/// Create a new linked list.</span>
-            <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">new_name</span>() -&gt; <span class="self">Self</span> {
-                <span class="comment">// Const assert N &lt; MAX</span>
-                <span class="ident"><span class="kw">crate</span>::sealed::smaller_than</span>::<span class="op">&lt;</span><span class="ident">N</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">max_val</span><span class="op">&gt;</span>();
+            <span class="doccomment">/// Create a new linked list.
+            </span><span class="kw">pub const fn </span><span class="macro-nonterminal">$new_name</span>() -&gt; <span class="self">Self </span>{
+                <span class="comment">// Const assert N &lt; MAX
+                </span><span class="kw">crate</span>::sealed::smaller_than::&lt;N, <span class="macro-nonterminal">$max_val</span>&gt;();
 
-                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">list</span> <span class="op">=</span> <span class="ident">SortedLinkedList</span> {
-                    <span class="ident">list</span>: [<span class="ident"><span class="self">Self</span>::UNINIT</span>; <span class="ident">N</span>],
-                    <span class="ident">head</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name::none</span>(),
-                    <span class="ident">free</span>: <span class="kw">unsafe</span> { <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name::new_unchecked</span>(<span class="number">0</span>) },
-                    <span class="ident">_kind</span>: <span class="ident">PhantomData</span>,
+                <span class="kw">let </span><span class="kw-2">mut </span>list = SortedLinkedList {
+                    list: [<span class="self">Self</span>::UNINIT; N],
+                    head: <span class="macro-nonterminal">$name::none</span>(),
+                    free: <span class="kw">unsafe </span>{ <span class="macro-nonterminal">$name::new_unchecked</span>(<span class="number">0</span>) },
+                    _kind: PhantomData,
                 };
 
-                <span class="kw">if</span> <span class="ident">N</span> <span class="op">==</span> <span class="number">0</span> {
-                    <span class="ident">list</span>.<span class="ident">free</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name::none</span>();
-                    <span class="kw">return</span> <span class="ident">list</span>;
+                <span class="kw">if </span>N == <span class="number">0 </span>{
+                    list.free = <span class="macro-nonterminal">$name::none</span>();
+                    <span class="kw">return </span>list;
                 }
 
-                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">free</span> <span class="op">=</span> <span class="number">0</span>;
+                <span class="kw">let </span><span class="kw-2">mut </span>free = <span class="number">0</span>;
 
-                <span class="comment">// Initialize indexes</span>
-                <span class="kw">while</span> <span class="ident">free</span> <span class="op">&lt;</span> <span class="ident">N</span> <span class="op">-</span> <span class="number">1</span> {
-                    <span class="ident">list</span>.<span class="ident">list</span>[<span class="ident">free</span>].<span class="ident">next</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name::new_unchecked</span>(<span class="ident">free</span> <span class="kw">as</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span> <span class="op">+</span> <span class="number">1</span>) };
-                    <span class="ident">free</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+                <span class="comment">// Initialize indexes
+                </span><span class="kw">while </span>free &lt; N - <span class="number">1 </span>{
+                    list.list[free].next = <span class="kw">unsafe </span>{ <span class="macro-nonterminal">$name::new_unchecked</span>(free <span class="kw">as </span><span class="macro-nonterminal">$ty </span>+ <span class="number">1</span>) };
+                    free += <span class="number">1</span>;
                 }
 
-                <span class="ident">list</span>
+                list
             }
         }
     };
 }
 
-<span class="macro">impl_index_and_const_new!</span>(<span class="ident">LinkedIndexU8</span>, <span class="ident">u8</span>, <span class="ident">new_u8</span>, { <span class="ident">u8::MAX</span> <span class="kw">as</span> <span class="ident">usize</span> <span class="op">-</span> <span class="number">1</span> });
-<span class="macro">impl_index_and_const_new!</span>(<span class="ident">LinkedIndexU16</span>, <span class="ident">u16</span>, <span class="ident">new_u16</span>, { <span class="ident">u16::MAX</span> <span class="kw">as</span> <span class="ident">usize</span> <span class="op">-</span> <span class="number">1</span> });
-<span class="macro">impl_index_and_const_new!</span>(<span class="ident">LinkedIndexUsize</span>, <span class="ident">usize</span>, <span class="ident">new_usize</span>, { <span class="ident">usize::MAX</span> <span class="op">-</span> <span class="number">1</span> });
+<span class="macro">impl_index_and_const_new!</span>(LinkedIndexU8, u8, new_u8, { u8::MAX <span class="kw">as </span>usize - <span class="number">1 </span>});
+<span class="macro">impl_index_and_const_new!</span>(LinkedIndexU16, u16, new_u16, { u16::MAX <span class="kw">as </span>usize - <span class="number">1 </span>});
+<span class="macro">impl_index_and_const_new!</span>(LinkedIndexUsize, usize, new_usize, { usize::MAX - <span class="number">1 </span>});
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">K</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">SortedLinkedList</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">K</span>, <span class="ident">N</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">Idx</span>: <span class="ident">SortedLinkedListIndex</span>,
+<span class="kw">impl</span>&lt;T, Idx, K, <span class="kw">const </span>N: usize&gt; SortedLinkedList&lt;T, Idx, K, N&gt;
+<span class="kw">where
+    </span>Idx: SortedLinkedListIndex,
 {
-    <span class="doccomment">/// Internal access helper</span>
-    <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">node_at</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">usize</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">Node</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Idx</span><span class="op">&gt;</span> {
-        <span class="comment">// Safety: The entire `self.list` is initialized in `new`, which makes this safe.</span>
-        <span class="kw">unsafe</span> { <span class="self">self</span>.<span class="ident">list</span>.<span class="ident">get_unchecked</span>(<span class="ident">index</span>) }
+    <span class="doccomment">/// Internal access helper
+    </span><span class="attribute">#[inline(always)]
+    </span><span class="kw">fn </span>node_at(<span class="kw-2">&amp;</span><span class="self">self</span>, index: usize) -&gt; <span class="kw-2">&amp;</span>Node&lt;T, Idx&gt; {
+        <span class="comment">// Safety: The entire `self.list` is initialized in `new`, which makes this safe.
+        </span><span class="kw">unsafe </span>{ <span class="self">self</span>.list.get_unchecked(index) }
     }
 
-    <span class="doccomment">/// Internal access helper</span>
-    <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">node_at_mut</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">index</span>: <span class="ident">usize</span>) -&gt; <span class="kw-2">&amp;mut</span> <span class="ident">Node</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Idx</span><span class="op">&gt;</span> {
-        <span class="comment">// Safety: The entire `self.list` is initialized in `new`, which makes this safe.</span>
-        <span class="kw">unsafe</span> { <span class="self">self</span>.<span class="ident">list</span>.<span class="ident">get_unchecked_mut</span>(<span class="ident">index</span>) }
+    <span class="doccomment">/// Internal access helper
+    </span><span class="attribute">#[inline(always)]
+    </span><span class="kw">fn </span>node_at_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>, index: usize) -&gt; <span class="kw-2">&amp;mut </span>Node&lt;T, Idx&gt; {
+        <span class="comment">// Safety: The entire `self.list` is initialized in `new`, which makes this safe.
+        </span><span class="kw">unsafe </span>{ <span class="self">self</span>.list.get_unchecked_mut(index) }
     }
 
-    <span class="doccomment">/// Internal access helper</span>
-    <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">write_data_in_node_at</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">index</span>: <span class="ident">usize</span>, <span class="ident">data</span>: <span class="ident">T</span>) {
-        <span class="comment">// Safety: The entire `self.list` is initialized in `new`, which makes this safe.</span>
-        <span class="kw">unsafe</span> {
-            <span class="self">self</span>.<span class="ident">node_at_mut</span>(<span class="ident">index</span>).<span class="ident">val</span>.<span class="ident">as_mut_ptr</span>().<span class="ident">write</span>(<span class="ident">data</span>);
+    <span class="doccomment">/// Internal access helper
+    </span><span class="attribute">#[inline(always)]
+    </span><span class="kw">fn </span>write_data_in_node_at(<span class="kw-2">&amp;mut </span><span class="self">self</span>, index: usize, data: T) {
+        <span class="comment">// Safety: The entire `self.list` is initialized in `new`, which makes this safe.
+        </span><span class="kw">unsafe </span>{
+            <span class="self">self</span>.node_at_mut(index).val.as_mut_ptr().write(data);
         }
     }
 
-    <span class="doccomment">/// Internal access helper</span>
-    <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">read_data_in_node_at</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">usize</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">T</span> {
-        <span class="comment">// Safety: The entire `self.list` is initialized in `new`, which makes this safe.</span>
-        <span class="kw">unsafe</span> { <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="self">self</span>.<span class="ident">node_at</span>(<span class="ident">index</span>).<span class="ident">val</span>.<span class="ident">as_ptr</span>() }
+    <span class="doccomment">/// Internal access helper
+    </span><span class="attribute">#[inline(always)]
+    </span><span class="kw">fn </span>read_data_in_node_at(<span class="kw-2">&amp;</span><span class="self">self</span>, index: usize) -&gt; <span class="kw-2">&amp;</span>T {
+        <span class="comment">// Safety: The entire `self.list` is initialized in `new`, which makes this safe.
+        </span><span class="kw">unsafe </span>{ <span class="kw-2">&amp;*</span><span class="self">self</span>.node_at(index).val.as_ptr() }
     }
 
-    <span class="doccomment">/// Internal access helper</span>
-    <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">read_mut_data_in_node_at</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">index</span>: <span class="ident">usize</span>) -&gt; <span class="kw-2">&amp;mut</span> <span class="ident">T</span> {
-        <span class="comment">// Safety: The entire `self.list` is initialized in `new`, which makes this safe.</span>
-        <span class="kw">unsafe</span> { <span class="kw-2">&amp;mut</span> <span class="kw-2">*</span><span class="self">self</span>.<span class="ident">node_at_mut</span>(<span class="ident">index</span>).<span class="ident">val</span>.<span class="ident">as_mut_ptr</span>() }
+    <span class="doccomment">/// Internal access helper
+    </span><span class="attribute">#[inline(always)]
+    </span><span class="kw">fn </span>read_mut_data_in_node_at(<span class="kw-2">&amp;mut </span><span class="self">self</span>, index: usize) -&gt; <span class="kw-2">&amp;mut </span>T {
+        <span class="comment">// Safety: The entire `self.list` is initialized in `new`, which makes this safe.
+        </span><span class="kw">unsafe </span>{ <span class="kw-2">&amp;mut *</span><span class="self">self</span>.node_at_mut(index).val.as_mut_ptr() }
     }
 
-    <span class="doccomment">/// Internal access helper</span>
-    <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">extract_data_in_node_at</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">index</span>: <span class="ident">usize</span>) -&gt; <span class="ident">T</span> {
-        <span class="comment">// Safety: The entire `self.list` is initialized in `new`, which makes this safe.</span>
-        <span class="kw">unsafe</span> { <span class="self">self</span>.<span class="ident">node_at</span>(<span class="ident">index</span>).<span class="ident">val</span>.<span class="ident">as_ptr</span>().<span class="ident">read</span>() }
+    <span class="doccomment">/// Internal access helper
+    </span><span class="attribute">#[inline(always)]
+    </span><span class="kw">fn </span>extract_data_in_node_at(<span class="kw-2">&amp;mut </span><span class="self">self</span>, index: usize) -&gt; T {
+        <span class="comment">// Safety: The entire `self.list` is initialized in `new`, which makes this safe.
+        </span><span class="kw">unsafe </span>{ <span class="self">self</span>.node_at(index).val.as_ptr().read() }
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">K</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">SortedLinkedList</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">K</span>, <span class="ident">N</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Ord</span>,
-    <span class="ident">Idx</span>: <span class="ident">SortedLinkedListIndex</span>,
-    <span class="ident">K</span>: <span class="ident">Kind</span>,
+<span class="kw">impl</span>&lt;T, Idx, K, <span class="kw">const </span>N: usize&gt; SortedLinkedList&lt;T, Idx, K, N&gt;
+<span class="kw">where
+    </span>T: Ord,
+    Idx: SortedLinkedListIndex,
+    K: Kind,
 {
-    <span class="doccomment">/// Pushes a value onto the list without checking if the list is full.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// Complexity is worst-case `O(N)`.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// # Safety</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// Assumes that the list is not full.</span>
-    <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">push_unchecked</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">value</span>: <span class="ident">T</span>) {
-        <span class="kw">let</span> <span class="ident">new</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">free</span>.<span class="ident">get_unchecked</span>();
+    <span class="doccomment">/// Pushes a value onto the list without checking if the list is full.
+    ///
+    /// Complexity is worst-case `O(N)`.
+    ///
+    /// # Safety
+    ///
+    /// Assumes that the list is not full.
+    </span><span class="kw">pub unsafe fn </span>push_unchecked(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: T) {
+        <span class="kw">let </span>new = <span class="self">self</span>.free.get_unchecked();
 
-        <span class="comment">// Store the data and update the next free spot</span>
-        <span class="self">self</span>.<span class="ident">write_data_in_node_at</span>(<span class="ident">new</span>, <span class="ident">value</span>);
-        <span class="self">self</span>.<span class="ident">free</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">node_at</span>(<span class="ident">new</span>).<span class="ident">next</span>;
+        <span class="comment">// Store the data and update the next free spot
+        </span><span class="self">self</span>.write_data_in_node_at(new, value);
+        <span class="self">self</span>.free = <span class="self">self</span>.node_at(new).next;
 
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">head</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">head</span>.<span class="ident">option</span>() {
-            <span class="comment">// Check if we need to replace head</span>
-            <span class="kw">if</span> <span class="self">self</span>
-                .<span class="ident">read_data_in_node_at</span>(<span class="ident">head</span>)
-                .<span class="ident">cmp</span>(<span class="self">self</span>.<span class="ident">read_data_in_node_at</span>(<span class="ident">new</span>))
-                <span class="op">!</span><span class="op">=</span> <span class="ident">K::ordering</span>()
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(head) = <span class="self">self</span>.head.option() {
+            <span class="comment">// Check if we need to replace head
+            </span><span class="kw">if </span><span class="self">self
+                </span>.read_data_in_node_at(head)
+                .cmp(<span class="self">self</span>.read_data_in_node_at(new))
+                != K::ordering()
             {
-                <span class="self">self</span>.<span class="ident">node_at_mut</span>(<span class="ident">new</span>).<span class="ident">next</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">head</span>;
-                <span class="self">self</span>.<span class="ident">head</span> <span class="op">=</span> <span class="ident">Idx::new_unchecked</span>(<span class="ident">new</span>);
-            } <span class="kw">else</span> {
-                <span class="comment">// It&#39;s not head, search the list for the correct placement</span>
-                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">current</span> <span class="op">=</span> <span class="ident">head</span>;
+                <span class="self">self</span>.node_at_mut(new).next = <span class="self">self</span>.head;
+                <span class="self">self</span>.head = Idx::new_unchecked(new);
+            } <span class="kw">else </span>{
+                <span class="comment">// It&#39;s not head, search the list for the correct placement
+                </span><span class="kw">let </span><span class="kw-2">mut </span>current = head;
 
-                <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">next</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">node_at</span>(<span class="ident">current</span>).<span class="ident">next</span>.<span class="ident">option</span>() {
-                    <span class="kw">if</span> <span class="self">self</span>
-                        .<span class="ident">read_data_in_node_at</span>(<span class="ident">next</span>)
-                        .<span class="ident">cmp</span>(<span class="self">self</span>.<span class="ident">read_data_in_node_at</span>(<span class="ident">new</span>))
-                        <span class="op">!</span><span class="op">=</span> <span class="ident">K::ordering</span>()
+                <span class="kw">while let </span><span class="prelude-val">Some</span>(next) = <span class="self">self</span>.node_at(current).next.option() {
+                    <span class="kw">if </span><span class="self">self
+                        </span>.read_data_in_node_at(next)
+                        .cmp(<span class="self">self</span>.read_data_in_node_at(new))
+                        != K::ordering()
                     {
                         <span class="kw">break</span>;
                     }
 
-                    <span class="ident">current</span> <span class="op">=</span> <span class="ident">next</span>;
+                    current = next;
                 }
 
-                <span class="self">self</span>.<span class="ident">node_at_mut</span>(<span class="ident">new</span>).<span class="ident">next</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">node_at</span>(<span class="ident">current</span>).<span class="ident">next</span>;
-                <span class="self">self</span>.<span class="ident">node_at_mut</span>(<span class="ident">current</span>).<span class="ident">next</span> <span class="op">=</span> <span class="ident">Idx::new_unchecked</span>(<span class="ident">new</span>);
+                <span class="self">self</span>.node_at_mut(new).next = <span class="self">self</span>.node_at(current).next;
+                <span class="self">self</span>.node_at_mut(current).next = Idx::new_unchecked(new);
             }
-        } <span class="kw">else</span> {
-            <span class="self">self</span>.<span class="ident">node_at_mut</span>(<span class="ident">new</span>).<span class="ident">next</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">head</span>;
-            <span class="self">self</span>.<span class="ident">head</span> <span class="op">=</span> <span class="ident">Idx::new_unchecked</span>(<span class="ident">new</span>);
+        } <span class="kw">else </span>{
+            <span class="self">self</span>.node_at_mut(new).next = <span class="self">self</span>.head;
+            <span class="self">self</span>.head = Idx::new_unchecked(new);
         }
     }
 
-    <span class="doccomment">/// Pushes an element to the linked list and sorts it into place.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// Complexity is worst-case `O(N)`.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// # Example</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// use heapless::sorted_linked_list::{SortedLinkedList, Max};</span>
-    <span class="doccomment">/// let mut ll: SortedLinkedList&lt;_, _, Max, 3&gt; = SortedLinkedList::new_usize();</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// // The largest value will always be first</span>
-    <span class="doccomment">/// ll.push(1).unwrap();</span>
-    <span class="doccomment">/// assert_eq!(ll.peek(), Some(&amp;1));</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// ll.push(2).unwrap();</span>
-    <span class="doccomment">/// assert_eq!(ll.peek(), Some(&amp;2));</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// ll.push(3).unwrap();</span>
-    <span class="doccomment">/// assert_eq!(ll.peek(), Some(&amp;3));</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// // This will not fit in the queue.</span>
-    <span class="doccomment">/// assert_eq!(ll.push(4), Err(4));</span>
-    <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">push</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">value</span>: <span class="ident">T</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">is_full</span>() {
-            <span class="prelude-val">Ok</span>(<span class="kw">unsafe</span> { <span class="self">self</span>.<span class="ident">push_unchecked</span>(<span class="ident">value</span>) })
-        } <span class="kw">else</span> {
-            <span class="prelude-val">Err</span>(<span class="ident">value</span>)
+    <span class="doccomment">/// Pushes an element to the linked list and sorts it into place.
+    ///
+    /// Complexity is worst-case `O(N)`.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use heapless::sorted_linked_list::{SortedLinkedList, Max};
+    /// let mut ll: SortedLinkedList&lt;_, _, Max, 3&gt; = SortedLinkedList::new_usize();
+    ///
+    /// // The largest value will always be first
+    /// ll.push(1).unwrap();
+    /// assert_eq!(ll.peek(), Some(&amp;1));
+    ///
+    /// ll.push(2).unwrap();
+    /// assert_eq!(ll.peek(), Some(&amp;2));
+    ///
+    /// ll.push(3).unwrap();
+    /// assert_eq!(ll.peek(), Some(&amp;3));
+    ///
+    /// // This will not fit in the queue.
+    /// assert_eq!(ll.push(4), Err(4));
+    /// ```
+    </span><span class="kw">pub fn </span>push(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: T) -&gt; <span class="prelude-ty">Result</span>&lt;(), T&gt; {
+        <span class="kw">if </span>!<span class="self">self</span>.is_full() {
+            <span class="prelude-val">Ok</span>(<span class="kw">unsafe </span>{ <span class="self">self</span>.push_unchecked(value) })
+        } <span class="kw">else </span>{
+            <span class="prelude-val">Err</span>(value)
         }
     }
 
-    <span class="doccomment">/// Get an iterator over the sorted list.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// # Example</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// use heapless::sorted_linked_list::{SortedLinkedList, Max};</span>
-    <span class="doccomment">/// let mut ll: SortedLinkedList&lt;_, _, Max, 3&gt; = SortedLinkedList::new_usize();</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// ll.push(1).unwrap();</span>
-    <span class="doccomment">/// ll.push(2).unwrap();</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// let mut iter = ll.iter();</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// assert_eq!(iter.next(), Some(&amp;2));</span>
-    <span class="doccomment">/// assert_eq!(iter.next(), Some(&amp;1));</span>
-    <span class="doccomment">/// assert_eq!(iter.next(), None);</span>
-    <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">iter</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Iter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">K</span>, <span class="ident">N</span><span class="op">&gt;</span> {
-        <span class="ident">Iter</span> {
-            <span class="ident">list</span>: <span class="self">self</span>,
-            <span class="ident">index</span>: <span class="self">self</span>.<span class="ident">head</span>,
+    <span class="doccomment">/// Get an iterator over the sorted list.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use heapless::sorted_linked_list::{SortedLinkedList, Max};
+    /// let mut ll: SortedLinkedList&lt;_, _, Max, 3&gt; = SortedLinkedList::new_usize();
+    ///
+    /// ll.push(1).unwrap();
+    /// ll.push(2).unwrap();
+    ///
+    /// let mut iter = ll.iter();
+    ///
+    /// assert_eq!(iter.next(), Some(&amp;2));
+    /// assert_eq!(iter.next(), Some(&amp;1));
+    /// assert_eq!(iter.next(), None);
+    /// ```
+    </span><span class="kw">pub fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Iter&lt;<span class="lifetime">&#39;_</span>, T, Idx, K, N&gt; {
+        Iter {
+            list: <span class="self">self</span>,
+            index: <span class="self">self</span>.head,
         }
     }
 
-    <span class="doccomment">/// Find an element in the list that can be changed and resorted.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// # Example</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// use heapless::sorted_linked_list::{SortedLinkedList, Max};</span>
-    <span class="doccomment">/// let mut ll: SortedLinkedList&lt;_, _, Max, 3&gt; = SortedLinkedList::new_usize();</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// ll.push(1).unwrap();</span>
-    <span class="doccomment">/// ll.push(2).unwrap();</span>
-    <span class="doccomment">/// ll.push(3).unwrap();</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// // Find a value and update it</span>
-    <span class="doccomment">/// let mut find = ll.find_mut(|v| *v == 2).unwrap();</span>
-    <span class="doccomment">/// *find += 1000;</span>
-    <span class="doccomment">/// find.finish();</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// assert_eq!(ll.pop(), Ok(1002));</span>
-    <span class="doccomment">/// assert_eq!(ll.pop(), Ok(3));</span>
-    <span class="doccomment">/// assert_eq!(ll.pop(), Ok(1));</span>
-    <span class="doccomment">/// assert_eq!(ll.pop(), Err(()));</span>
-    <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">find_mut</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">f</span>: <span class="ident">F</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">FindMut</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">K</span>, <span class="ident">N</span><span class="op">&gt;</span><span class="op">&gt;</span>
-    <span class="kw">where</span>
-        <span class="ident">F</span>: <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span><span class="ident">T</span>) -&gt; <span class="ident">bool</span>,
+    <span class="doccomment">/// Find an element in the list that can be changed and resorted.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use heapless::sorted_linked_list::{SortedLinkedList, Max};
+    /// let mut ll: SortedLinkedList&lt;_, _, Max, 3&gt; = SortedLinkedList::new_usize();
+    ///
+    /// ll.push(1).unwrap();
+    /// ll.push(2).unwrap();
+    /// ll.push(3).unwrap();
+    ///
+    /// // Find a value and update it
+    /// let mut find = ll.find_mut(|v| *v == 2).unwrap();
+    /// *find += 1000;
+    /// find.finish();
+    ///
+    /// assert_eq!(ll.pop(), Ok(1002));
+    /// assert_eq!(ll.pop(), Ok(3));
+    /// assert_eq!(ll.pop(), Ok(1));
+    /// assert_eq!(ll.pop(), Err(()));
+    /// ```
+    </span><span class="kw">pub fn </span>find_mut&lt;F&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw-2">mut </span>f: F) -&gt; <span class="prelude-ty">Option</span>&lt;FindMut&lt;<span class="lifetime">&#39;_</span>, T, Idx, K, N&gt;&gt;
+    <span class="kw">where
+        </span>F: FnMut(<span class="kw-2">&amp;</span>T) -&gt; bool,
     {
-        <span class="kw">let</span> <span class="ident">head</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">head</span>.<span class="ident">option</span>()<span class="question-mark">?</span>;
+        <span class="kw">let </span>head = <span class="self">self</span>.head.option()<span class="question-mark">?</span>;
 
-        <span class="comment">// Special-case, first element</span>
-        <span class="kw">if</span> <span class="ident">f</span>(<span class="self">self</span>.<span class="ident">read_data_in_node_at</span>(<span class="ident">head</span>)) {
-            <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">FindMut</span> {
-                <span class="ident">is_head</span>: <span class="bool-val">true</span>,
-                <span class="ident">prev_index</span>: <span class="ident">Idx::none</span>(),
-                <span class="ident">index</span>: <span class="self">self</span>.<span class="ident">head</span>,
-                <span class="ident">list</span>: <span class="self">self</span>,
-                <span class="ident">maybe_changed</span>: <span class="bool-val">false</span>,
+        <span class="comment">// Special-case, first element
+        </span><span class="kw">if </span>f(<span class="self">self</span>.read_data_in_node_at(head)) {
+            <span class="kw">return </span><span class="prelude-val">Some</span>(FindMut {
+                is_head: <span class="bool-val">true</span>,
+                prev_index: Idx::none(),
+                index: <span class="self">self</span>.head,
+                list: <span class="self">self</span>,
+                maybe_changed: <span class="bool-val">false</span>,
             });
         }
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">current</span> <span class="op">=</span> <span class="ident">head</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>current = head;
 
-        <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">next</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">node_at</span>(<span class="ident">current</span>).<span class="ident">next</span>.<span class="ident">option</span>() {
-            <span class="kw">if</span> <span class="ident">f</span>(<span class="self">self</span>.<span class="ident">read_data_in_node_at</span>(<span class="ident">next</span>)) {
-                <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">FindMut</span> {
-                    <span class="ident">is_head</span>: <span class="bool-val">false</span>,
-                    <span class="ident">prev_index</span>: <span class="kw">unsafe</span> { <span class="ident">Idx::new_unchecked</span>(<span class="ident">current</span>) },
-                    <span class="ident">index</span>: <span class="kw">unsafe</span> { <span class="ident">Idx::new_unchecked</span>(<span class="ident">next</span>) },
-                    <span class="ident">list</span>: <span class="self">self</span>,
-                    <span class="ident">maybe_changed</span>: <span class="bool-val">false</span>,
+        <span class="kw">while let </span><span class="prelude-val">Some</span>(next) = <span class="self">self</span>.node_at(current).next.option() {
+            <span class="kw">if </span>f(<span class="self">self</span>.read_data_in_node_at(next)) {
+                <span class="kw">return </span><span class="prelude-val">Some</span>(FindMut {
+                    is_head: <span class="bool-val">false</span>,
+                    prev_index: <span class="kw">unsafe </span>{ Idx::new_unchecked(current) },
+                    index: <span class="kw">unsafe </span>{ Idx::new_unchecked(next) },
+                    list: <span class="self">self</span>,
+                    maybe_changed: <span class="bool-val">false</span>,
                 });
             }
 
-            <span class="ident">current</span> <span class="op">=</span> <span class="ident">next</span>;
+            current = next;
         }
 
-        <span class="prelude-val">None</span>
+        <span class="prelude-val">None
+    </span>}
+
+    <span class="doccomment">/// Peek at the first element.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use heapless::sorted_linked_list::{SortedLinkedList, Max, Min};
+    /// let mut ll_max: SortedLinkedList&lt;_, _, Max, 3&gt; = SortedLinkedList::new_usize();
+    ///
+    /// // The largest value will always be first
+    /// ll_max.push(1).unwrap();
+    /// assert_eq!(ll_max.peek(), Some(&amp;1));
+    /// ll_max.push(2).unwrap();
+    /// assert_eq!(ll_max.peek(), Some(&amp;2));
+    /// ll_max.push(3).unwrap();
+    /// assert_eq!(ll_max.peek(), Some(&amp;3));
+    ///
+    /// let mut ll_min: SortedLinkedList&lt;_, _, Min, 3&gt; = SortedLinkedList::new_usize();
+    ///
+    /// // The Smallest value will always be first
+    /// ll_min.push(3).unwrap();
+    /// assert_eq!(ll_min.peek(), Some(&amp;3));
+    /// ll_min.push(2).unwrap();
+    /// assert_eq!(ll_min.peek(), Some(&amp;2));
+    /// ll_min.push(1).unwrap();
+    /// assert_eq!(ll_min.peek(), Some(&amp;1));
+    /// ```
+    </span><span class="kw">pub fn </span>peek(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>T&gt; {
+        <span class="self">self</span>.head
+            .option()
+            .map(|head| <span class="self">self</span>.read_data_in_node_at(head))
     }
 
-    <span class="doccomment">/// Peek at the first element.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// # Example</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// use heapless::sorted_linked_list::{SortedLinkedList, Max, Min};</span>
-    <span class="doccomment">/// let mut ll_max: SortedLinkedList&lt;_, _, Max, 3&gt; = SortedLinkedList::new_usize();</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// // The largest value will always be first</span>
-    <span class="doccomment">/// ll_max.push(1).unwrap();</span>
-    <span class="doccomment">/// assert_eq!(ll_max.peek(), Some(&amp;1));</span>
-    <span class="doccomment">/// ll_max.push(2).unwrap();</span>
-    <span class="doccomment">/// assert_eq!(ll_max.peek(), Some(&amp;2));</span>
-    <span class="doccomment">/// ll_max.push(3).unwrap();</span>
-    <span class="doccomment">/// assert_eq!(ll_max.peek(), Some(&amp;3));</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// let mut ll_min: SortedLinkedList&lt;_, _, Min, 3&gt; = SortedLinkedList::new_usize();</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// // The Smallest value will always be first</span>
-    <span class="doccomment">/// ll_min.push(3).unwrap();</span>
-    <span class="doccomment">/// assert_eq!(ll_min.peek(), Some(&amp;3));</span>
-    <span class="doccomment">/// ll_min.push(2).unwrap();</span>
-    <span class="doccomment">/// assert_eq!(ll_min.peek(), Some(&amp;2));</span>
-    <span class="doccomment">/// ll_min.push(1).unwrap();</span>
-    <span class="doccomment">/// assert_eq!(ll_min.peek(), Some(&amp;1));</span>
-    <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">peek</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">head</span>
-            .<span class="ident">option</span>()
-            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">head</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">read_data_in_node_at</span>(<span class="ident">head</span>))
+    <span class="doccomment">/// Pop an element from the list without checking so the list is not empty.
+    ///
+    /// # Safety
+    ///
+    /// Assumes that the list is not empty.
+    </span><span class="kw">pub unsafe fn </span>pop_unchecked(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; T {
+        <span class="kw">let </span>head = <span class="self">self</span>.head.get_unchecked();
+        <span class="kw">let </span>current = head;
+        <span class="self">self</span>.head = <span class="self">self</span>.node_at(head).next;
+        <span class="self">self</span>.node_at_mut(current).next = <span class="self">self</span>.free;
+        <span class="self">self</span>.free = Idx::new_unchecked(current);
+
+        <span class="self">self</span>.extract_data_in_node_at(current)
     }
 
-    <span class="doccomment">/// Pop an element from the list without checking so the list is not empty.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// # Safety</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// Assumes that the list is not empty.</span>
-    <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">pop_unchecked</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="ident">T</span> {
-        <span class="kw">let</span> <span class="ident">head</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">head</span>.<span class="ident">get_unchecked</span>();
-        <span class="kw">let</span> <span class="ident">current</span> <span class="op">=</span> <span class="ident">head</span>;
-        <span class="self">self</span>.<span class="ident">head</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">node_at</span>(<span class="ident">head</span>).<span class="ident">next</span>;
-        <span class="self">self</span>.<span class="ident">node_at_mut</span>(<span class="ident">current</span>).<span class="ident">next</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">free</span>;
-        <span class="self">self</span>.<span class="ident">free</span> <span class="op">=</span> <span class="ident">Idx::new_unchecked</span>(<span class="ident">current</span>);
-
-        <span class="self">self</span>.<span class="ident">extract_data_in_node_at</span>(<span class="ident">current</span>)
-    }
-
-    <span class="doccomment">/// Pops the first element in the list.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// Complexity is worst-case `O(1)`.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// # Example</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// use heapless::sorted_linked_list::{SortedLinkedList, Max};</span>
-    <span class="doccomment">/// let mut ll: SortedLinkedList&lt;_, _, Max, 3&gt; = SortedLinkedList::new_usize();</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// ll.push(1).unwrap();</span>
-    <span class="doccomment">/// ll.push(2).unwrap();</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// assert_eq!(ll.pop(), Ok(2));</span>
-    <span class="doccomment">/// assert_eq!(ll.pop(), Ok(1));</span>
-    <span class="doccomment">/// assert_eq!(ll.pop(), Err(()));</span>
-    <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">pop</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span>, ()<span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">is_empty</span>() {
-            <span class="prelude-val">Ok</span>(<span class="kw">unsafe</span> { <span class="self">self</span>.<span class="ident">pop_unchecked</span>() })
-        } <span class="kw">else</span> {
+    <span class="doccomment">/// Pops the first element in the list.
+    ///
+    /// Complexity is worst-case `O(1)`.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use heapless::sorted_linked_list::{SortedLinkedList, Max};
+    /// let mut ll: SortedLinkedList&lt;_, _, Max, 3&gt; = SortedLinkedList::new_usize();
+    ///
+    /// ll.push(1).unwrap();
+    /// ll.push(2).unwrap();
+    ///
+    /// assert_eq!(ll.pop(), Ok(2));
+    /// assert_eq!(ll.pop(), Ok(1));
+    /// assert_eq!(ll.pop(), Err(()));
+    /// ```
+    </span><span class="kw">pub fn </span>pop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;T, ()&gt; {
+        <span class="kw">if </span>!<span class="self">self</span>.is_empty() {
+            <span class="prelude-val">Ok</span>(<span class="kw">unsafe </span>{ <span class="self">self</span>.pop_unchecked() })
+        } <span class="kw">else </span>{
             <span class="prelude-val">Err</span>(())
         }
     }
 
-    <span class="doccomment">/// Checks if the linked list is full.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// # Example</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// use heapless::sorted_linked_list::{SortedLinkedList, Max};</span>
-    <span class="doccomment">/// let mut ll: SortedLinkedList&lt;_, _, Max, 3&gt; = SortedLinkedList::new_usize();</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// assert_eq!(ll.is_full(), false);</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// ll.push(1).unwrap();</span>
-    <span class="doccomment">/// assert_eq!(ll.is_full(), false);</span>
-    <span class="doccomment">/// ll.push(2).unwrap();</span>
-    <span class="doccomment">/// assert_eq!(ll.is_full(), false);</span>
-    <span class="doccomment">/// ll.push(3).unwrap();</span>
-    <span class="doccomment">/// assert_eq!(ll.is_full(), true);</span>
-    <span class="doccomment">/// ```</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_full</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
-        <span class="self">self</span>.<span class="ident">free</span>.<span class="ident">option</span>().<span class="ident">is_none</span>()
+    <span class="doccomment">/// Checks if the linked list is full.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use heapless::sorted_linked_list::{SortedLinkedList, Max};
+    /// let mut ll: SortedLinkedList&lt;_, _, Max, 3&gt; = SortedLinkedList::new_usize();
+    ///
+    /// assert_eq!(ll.is_full(), false);
+    ///
+    /// ll.push(1).unwrap();
+    /// assert_eq!(ll.is_full(), false);
+    /// ll.push(2).unwrap();
+    /// assert_eq!(ll.is_full(), false);
+    /// ll.push(3).unwrap();
+    /// assert_eq!(ll.is_full(), true);
+    /// ```
+    </span><span class="attribute">#[inline]
+    </span><span class="kw">pub fn </span>is_full(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+        <span class="self">self</span>.free.option().is_none()
     }
 
-    <span class="doccomment">/// Checks if the linked list is empty.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// # Example</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// use heapless::sorted_linked_list::{SortedLinkedList, Max};</span>
-    <span class="doccomment">/// let mut ll: SortedLinkedList&lt;_, _, Max, 3&gt; = SortedLinkedList::new_usize();</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// assert_eq!(ll.is_empty(), true);</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// ll.push(1).unwrap();</span>
-    <span class="doccomment">/// assert_eq!(ll.is_empty(), false);</span>
-    <span class="doccomment">/// ```</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_empty</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
-        <span class="self">self</span>.<span class="ident">head</span>.<span class="ident">option</span>().<span class="ident">is_none</span>()
-    }
-}
-
-<span class="doccomment">/// Iterator for the linked list.</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Iter</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">K</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Ord</span>,
-    <span class="ident">Idx</span>: <span class="ident">SortedLinkedListIndex</span>,
-    <span class="ident">K</span>: <span class="ident">Kind</span>,
-{
-    <span class="ident">list</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">SortedLinkedList</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">K</span>, <span class="ident">N</span><span class="op">&gt;</span>,
-    <span class="ident">index</span>: <span class="ident">Idx</span>,
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">K</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">Iterator</span> <span class="kw">for</span> <span class="ident">Iter</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">K</span>, <span class="ident">N</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Ord</span>,
-    <span class="ident">Idx</span>: <span class="ident">SortedLinkedListIndex</span>,
-    <span class="ident">K</span>: <span class="ident">Kind</span>,
-{
-    <span class="kw">type</span> <span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">T</span>;
-
-    <span class="kw">fn</span> <span class="ident">next</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Item</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">index</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">index</span>.<span class="ident">option</span>()<span class="question-mark">?</span>;
-
-        <span class="kw">let</span> <span class="ident">node</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">list</span>.<span class="ident">node_at</span>(<span class="ident">index</span>);
-        <span class="self">self</span>.<span class="ident">index</span> <span class="op">=</span> <span class="ident">node</span>.<span class="ident">next</span>;
-
-        <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">list</span>.<span class="ident">read_data_in_node_at</span>(<span class="ident">index</span>))
+    <span class="doccomment">/// Checks if the linked list is empty.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use heapless::sorted_linked_list::{SortedLinkedList, Max};
+    /// let mut ll: SortedLinkedList&lt;_, _, Max, 3&gt; = SortedLinkedList::new_usize();
+    ///
+    /// assert_eq!(ll.is_empty(), true);
+    ///
+    /// ll.push(1).unwrap();
+    /// assert_eq!(ll.is_empty(), false);
+    /// ```
+    </span><span class="attribute">#[inline]
+    </span><span class="kw">pub fn </span>is_empty(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+        <span class="self">self</span>.head.option().is_none()
     }
 }
 
-<span class="doccomment">/// Comes from [`SortedLinkedList::find_mut`].</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">FindMut</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">K</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Ord</span>,
-    <span class="ident">Idx</span>: <span class="ident">SortedLinkedListIndex</span>,
-    <span class="ident">K</span>: <span class="ident">Kind</span>,
+<span class="doccomment">/// Iterator for the linked list.
+</span><span class="kw">pub struct </span>Iter&lt;<span class="lifetime">&#39;a</span>, T, Idx, K, <span class="kw">const </span>N: usize&gt;
+<span class="kw">where
+    </span>T: Ord,
+    Idx: SortedLinkedListIndex,
+    K: Kind,
 {
-    <span class="ident">list</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="ident">SortedLinkedList</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">K</span>, <span class="ident">N</span><span class="op">&gt;</span>,
-    <span class="ident">is_head</span>: <span class="ident">bool</span>,
-    <span class="ident">prev_index</span>: <span class="ident">Idx</span>,
-    <span class="ident">index</span>: <span class="ident">Idx</span>,
-    <span class="ident">maybe_changed</span>: <span class="ident">bool</span>,
+    list: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>SortedLinkedList&lt;T, Idx, K, N&gt;,
+    index: Idx,
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">K</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">FindMut</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">K</span>, <span class="ident">N</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Ord</span>,
-    <span class="ident">Idx</span>: <span class="ident">SortedLinkedListIndex</span>,
-    <span class="ident">K</span>: <span class="ident">Kind</span>,
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T, Idx, K, <span class="kw">const </span>N: usize&gt; Iterator <span class="kw">for </span>Iter&lt;<span class="lifetime">&#39;a</span>, T, Idx, K, N&gt;
+<span class="kw">where
+    </span>T: Ord,
+    Idx: SortedLinkedListIndex,
+    K: Kind,
 {
-    <span class="kw">fn</span> <span class="ident">pop_internal</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="ident">T</span> {
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">is_head</span> {
-            <span class="comment">// If it is the head element, we can do a normal pop</span>
-            <span class="kw">unsafe</span> { <span class="self">self</span>.<span class="ident">list</span>.<span class="ident">pop_unchecked</span>() }
-        } <span class="kw">else</span> {
-            <span class="comment">// Somewhere in the list</span>
-            <span class="kw">let</span> <span class="ident">prev</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="self">self</span>.<span class="ident">prev_index</span>.<span class="ident">get_unchecked</span>() };
-            <span class="kw">let</span> <span class="ident">curr</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="self">self</span>.<span class="ident">index</span>.<span class="ident">get_unchecked</span>() };
+    <span class="kw">type </span>Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>T;
 
-            <span class="comment">// Re-point the previous index</span>
-            <span class="self">self</span>.<span class="ident">list</span>.<span class="ident">node_at_mut</span>(<span class="ident">prev</span>).<span class="ident">next</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">list</span>.<span class="ident">node_at_mut</span>(<span class="ident">curr</span>).<span class="ident">next</span>;
+    <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
+        <span class="kw">let </span>index = <span class="self">self</span>.index.option()<span class="question-mark">?</span>;
 
-            <span class="comment">// Release the index into the free queue</span>
-            <span class="self">self</span>.<span class="ident">list</span>.<span class="ident">node_at_mut</span>(<span class="ident">curr</span>).<span class="ident">next</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">list</span>.<span class="ident">free</span>;
-            <span class="self">self</span>.<span class="ident">list</span>.<span class="ident">free</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">index</span>;
+        <span class="kw">let </span>node = <span class="self">self</span>.list.node_at(index);
+        <span class="self">self</span>.index = node.next;
 
-            <span class="self">self</span>.<span class="ident">list</span>.<span class="ident">extract_data_in_node_at</span>(<span class="ident">curr</span>)
+        <span class="prelude-val">Some</span>(<span class="self">self</span>.list.read_data_in_node_at(index))
+    }
+}
+
+<span class="doccomment">/// Comes from [`SortedLinkedList::find_mut`].
+</span><span class="kw">pub struct </span>FindMut&lt;<span class="lifetime">&#39;a</span>, T, Idx, K, <span class="kw">const </span>N: usize&gt;
+<span class="kw">where
+    </span>T: Ord,
+    Idx: SortedLinkedListIndex,
+    K: Kind,
+{
+    list: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>SortedLinkedList&lt;T, Idx, K, N&gt;,
+    is_head: bool,
+    prev_index: Idx,
+    index: Idx,
+    maybe_changed: bool,
+}
+
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T, Idx, K, <span class="kw">const </span>N: usize&gt; FindMut&lt;<span class="lifetime">&#39;a</span>, T, Idx, K, N&gt;
+<span class="kw">where
+    </span>T: Ord,
+    Idx: SortedLinkedListIndex,
+    K: Kind,
+{
+    <span class="kw">fn </span>pop_internal(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; T {
+        <span class="kw">if </span><span class="self">self</span>.is_head {
+            <span class="comment">// If it is the head element, we can do a normal pop
+            </span><span class="kw">unsafe </span>{ <span class="self">self</span>.list.pop_unchecked() }
+        } <span class="kw">else </span>{
+            <span class="comment">// Somewhere in the list
+            </span><span class="kw">let </span>prev = <span class="kw">unsafe </span>{ <span class="self">self</span>.prev_index.get_unchecked() };
+            <span class="kw">let </span>curr = <span class="kw">unsafe </span>{ <span class="self">self</span>.index.get_unchecked() };
+
+            <span class="comment">// Re-point the previous index
+            </span><span class="self">self</span>.list.node_at_mut(prev).next = <span class="self">self</span>.list.node_at_mut(curr).next;
+
+            <span class="comment">// Release the index into the free queue
+            </span><span class="self">self</span>.list.node_at_mut(curr).next = <span class="self">self</span>.list.free;
+            <span class="self">self</span>.list.free = <span class="self">self</span>.index;
+
+            <span class="self">self</span>.list.extract_data_in_node_at(curr)
         }
     }
 
-    <span class="doccomment">/// This will pop the element from the list.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// Complexity is worst-case `O(1)`.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// # Example</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// use heapless::sorted_linked_list::{SortedLinkedList, Max};</span>
-    <span class="doccomment">/// let mut ll: SortedLinkedList&lt;_, _, Max, 3&gt; = SortedLinkedList::new_usize();</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// ll.push(1).unwrap();</span>
-    <span class="doccomment">/// ll.push(2).unwrap();</span>
-    <span class="doccomment">/// ll.push(3).unwrap();</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// // Find a value and update it</span>
-    <span class="doccomment">/// let mut find = ll.find_mut(|v| *v == 2).unwrap();</span>
-    <span class="doccomment">/// find.pop();</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// assert_eq!(ll.pop(), Ok(3));</span>
-    <span class="doccomment">/// assert_eq!(ll.pop(), Ok(1));</span>
-    <span class="doccomment">/// assert_eq!(ll.pop(), Err(()));</span>
-    <span class="doccomment">/// ```</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">pop</span>(<span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">T</span> {
-        <span class="self">self</span>.<span class="ident">pop_internal</span>()
+    <span class="doccomment">/// This will pop the element from the list.
+    ///
+    /// Complexity is worst-case `O(1)`.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use heapless::sorted_linked_list::{SortedLinkedList, Max};
+    /// let mut ll: SortedLinkedList&lt;_, _, Max, 3&gt; = SortedLinkedList::new_usize();
+    ///
+    /// ll.push(1).unwrap();
+    /// ll.push(2).unwrap();
+    /// ll.push(3).unwrap();
+    ///
+    /// // Find a value and update it
+    /// let mut find = ll.find_mut(|v| *v == 2).unwrap();
+    /// find.pop();
+    ///
+    /// assert_eq!(ll.pop(), Ok(3));
+    /// assert_eq!(ll.pop(), Ok(1));
+    /// assert_eq!(ll.pop(), Err(()));
+    /// ```
+    </span><span class="attribute">#[inline]
+    </span><span class="kw">pub fn </span>pop(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; T {
+        <span class="self">self</span>.pop_internal()
     }
 
-    <span class="doccomment">/// This will resort the element into the correct position in the list if needed. The resorting</span>
-    <span class="doccomment">/// will only happen if the element has been accessed mutably.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// Same as calling `drop`.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// Complexity is worst-case `O(N)`.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// # Example</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// use heapless::sorted_linked_list::{SortedLinkedList, Max};</span>
-    <span class="doccomment">/// let mut ll: SortedLinkedList&lt;_, _, Max, 3&gt; = SortedLinkedList::new_usize();</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// ll.push(1).unwrap();</span>
-    <span class="doccomment">/// ll.push(2).unwrap();</span>
-    <span class="doccomment">/// ll.push(3).unwrap();</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// let mut find = ll.find_mut(|v| *v == 2).unwrap();</span>
-    <span class="doccomment">/// find.finish(); // No resort, we did not access the value.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// let mut find = ll.find_mut(|v| *v == 2).unwrap();</span>
-    <span class="doccomment">/// *find += 1000;</span>
-    <span class="doccomment">/// find.finish(); // Will resort, we accessed (and updated) the value.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// assert_eq!(ll.pop(), Ok(1002));</span>
-    <span class="doccomment">/// assert_eq!(ll.pop(), Ok(3));</span>
-    <span class="doccomment">/// assert_eq!(ll.pop(), Ok(1));</span>
-    <span class="doccomment">/// assert_eq!(ll.pop(), Err(()));</span>
-    <span class="doccomment">/// ```</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">finish</span>(<span class="self">self</span>) {
-        <span class="ident">drop</span>(<span class="self">self</span>)
+    <span class="doccomment">/// This will resort the element into the correct position in the list if needed. The resorting
+    /// will only happen if the element has been accessed mutably.
+    ///
+    /// Same as calling `drop`.
+    ///
+    /// Complexity is worst-case `O(N)`.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use heapless::sorted_linked_list::{SortedLinkedList, Max};
+    /// let mut ll: SortedLinkedList&lt;_, _, Max, 3&gt; = SortedLinkedList::new_usize();
+    ///
+    /// ll.push(1).unwrap();
+    /// ll.push(2).unwrap();
+    /// ll.push(3).unwrap();
+    ///
+    /// let mut find = ll.find_mut(|v| *v == 2).unwrap();
+    /// find.finish(); // No resort, we did not access the value.
+    ///
+    /// let mut find = ll.find_mut(|v| *v == 2).unwrap();
+    /// *find += 1000;
+    /// find.finish(); // Will resort, we accessed (and updated) the value.
+    ///
+    /// assert_eq!(ll.pop(), Ok(1002));
+    /// assert_eq!(ll.pop(), Ok(3));
+    /// assert_eq!(ll.pop(), Ok(1));
+    /// assert_eq!(ll.pop(), Err(()));
+    /// ```
+    </span><span class="attribute">#[inline]
+    </span><span class="kw">pub fn </span>finish(<span class="self">self</span>) {
+        drop(<span class="self">self</span>)
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">K</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">Drop</span> <span class="kw">for</span> <span class="ident">FindMut</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">K</span>, <span class="ident">N</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Ord</span>,
-    <span class="ident">Idx</span>: <span class="ident">SortedLinkedListIndex</span>,
-    <span class="ident">K</span>: <span class="ident">Kind</span>,
+<span class="kw">impl</span>&lt;T, Idx, K, <span class="kw">const </span>N: usize&gt; Drop <span class="kw">for </span>FindMut&lt;<span class="lifetime">&#39;_</span>, T, Idx, K, N&gt;
+<span class="kw">where
+    </span>T: Ord,
+    Idx: SortedLinkedListIndex,
+    K: Kind,
 {
-    <span class="kw">fn</span> <span class="ident">drop</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
-        <span class="comment">// Only resort the list if the element has changed</span>
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">maybe_changed</span> {
-            <span class="kw">let</span> <span class="ident">val</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">pop_internal</span>();
-            <span class="kw">unsafe</span> { <span class="self">self</span>.<span class="ident">list</span>.<span class="ident">push_unchecked</span>(<span class="ident">val</span>) };
+    <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="comment">// Only resort the list if the element has changed
+        </span><span class="kw">if </span><span class="self">self</span>.maybe_changed {
+            <span class="kw">let </span>val = <span class="self">self</span>.pop_internal();
+            <span class="kw">unsafe </span>{ <span class="self">self</span>.list.push_unchecked(val) };
         }
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">K</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">Deref</span> <span class="kw">for</span> <span class="ident">FindMut</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">K</span>, <span class="ident">N</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Ord</span>,
-    <span class="ident">Idx</span>: <span class="ident">SortedLinkedListIndex</span>,
-    <span class="ident">K</span>: <span class="ident">Kind</span>,
+<span class="kw">impl</span>&lt;T, Idx, K, <span class="kw">const </span>N: usize&gt; Deref <span class="kw">for </span>FindMut&lt;<span class="lifetime">&#39;_</span>, T, Idx, K, N&gt;
+<span class="kw">where
+    </span>T: Ord,
+    Idx: SortedLinkedListIndex,
+    K: Kind,
 {
-    <span class="kw">type</span> <span class="ident">Target</span> <span class="op">=</span> <span class="ident">T</span>;
+    <span class="kw">type </span>Target = T;
 
-    <span class="kw">fn</span> <span class="ident">deref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::Target</span> {
-        <span class="self">self</span>.<span class="ident">list</span>
-            .<span class="ident">read_data_in_node_at</span>(<span class="kw">unsafe</span> { <span class="self">self</span>.<span class="ident">index</span>.<span class="ident">get_unchecked</span>() })
+    <span class="kw">fn </span>deref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="self">Self</span>::Target {
+        <span class="self">self</span>.list
+            .read_data_in_node_at(<span class="kw">unsafe </span>{ <span class="self">self</span>.index.get_unchecked() })
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">K</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">DerefMut</span> <span class="kw">for</span> <span class="ident">FindMut</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">K</span>, <span class="ident">N</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Ord</span>,
-    <span class="ident">Idx</span>: <span class="ident">SortedLinkedListIndex</span>,
-    <span class="ident">K</span>: <span class="ident">Kind</span>,
+<span class="kw">impl</span>&lt;T, Idx, K, <span class="kw">const </span>N: usize&gt; DerefMut <span class="kw">for </span>FindMut&lt;<span class="lifetime">&#39;_</span>, T, Idx, K, N&gt;
+<span class="kw">where
+    </span>T: Ord,
+    Idx: SortedLinkedListIndex,
+    K: Kind,
 {
-    <span class="kw">fn</span> <span class="ident">deref_mut</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut</span> <span class="ident"><span class="self">Self</span>::Target</span> {
-        <span class="self">self</span>.<span class="ident">maybe_changed</span> <span class="op">=</span> <span class="bool-val">true</span>;
-        <span class="self">self</span>.<span class="ident">list</span>
-            .<span class="ident">read_mut_data_in_node_at</span>(<span class="kw">unsafe</span> { <span class="self">self</span>.<span class="ident">index</span>.<span class="ident">get_unchecked</span>() })
+    <span class="kw">fn </span>deref_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self</span>::Target {
+        <span class="self">self</span>.maybe_changed = <span class="bool-val">true</span>;
+        <span class="self">self</span>.list
+            .read_mut_data_in_node_at(<span class="kw">unsafe </span>{ <span class="self">self</span>.index.get_unchecked() })
     }
 }
 
-<span class="comment">// /// Useful for debug during development.</span>
-<span class="comment">// impl&lt;T, Idx, K, const N: usize&gt; fmt::Debug for FindMut&lt;&#39;_, T, Idx, K, N&gt;</span>
-<span class="comment">// where</span>
-<span class="comment">//     T: Ord + core::fmt::Debug,</span>
-<span class="comment">//     Idx: SortedLinkedListIndex,</span>
-<span class="comment">//     K: Kind,</span>
-<span class="comment">// {</span>
-<span class="comment">//     fn fmt(&amp;self, f: &amp;mut fmt::Formatter&lt;&#39;_&gt;) -&gt; fmt::Result {</span>
-<span class="comment">//         f.debug_struct(&quot;FindMut&quot;)</span>
-<span class="comment">//             .field(&quot;prev_index&quot;, &amp;self.prev_index.option())</span>
-<span class="comment">//             .field(&quot;index&quot;, &amp;self.index.option())</span>
-<span class="comment">//             .field(</span>
-<span class="comment">//                 &quot;prev_value&quot;,</span>
-<span class="comment">//                 &amp;self</span>
-<span class="comment">//                     .list</span>
-<span class="comment">//                     .read_data_in_node_at(self.prev_index.option().unwrap()),</span>
-<span class="comment">//             )</span>
-<span class="comment">//             .field(</span>
-<span class="comment">//                 &quot;value&quot;,</span>
-<span class="comment">//                 &amp;self.list.read_data_in_node_at(self.index.option().unwrap()),</span>
-<span class="comment">//             )</span>
-<span class="comment">//             .finish()</span>
-<span class="comment">//     }</span>
-<span class="comment">// }</span>
+<span class="comment">// /// Useful for debug during development.
+// impl&lt;T, Idx, K, const N: usize&gt; fmt::Debug for FindMut&lt;&#39;_, T, Idx, K, N&gt;
+// where
+//     T: Ord + core::fmt::Debug,
+//     Idx: SortedLinkedListIndex,
+//     K: Kind,
+// {
+//     fn fmt(&amp;self, f: &amp;mut fmt::Formatter&lt;&#39;_&gt;) -&gt; fmt::Result {
+//         f.debug_struct(&quot;FindMut&quot;)
+//             .field(&quot;prev_index&quot;, &amp;self.prev_index.option())
+//             .field(&quot;index&quot;, &amp;self.index.option())
+//             .field(
+//                 &quot;prev_value&quot;,
+//                 &amp;self
+//                     .list
+//                     .read_data_in_node_at(self.prev_index.option().unwrap()),
+//             )
+//             .field(
+//                 &quot;value&quot;,
+//                 &amp;self.list.read_data_in_node_at(self.index.option().unwrap()),
+//             )
+//             .finish()
+//     }
+// }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">K</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">fmt::Debug</span> <span class="kw">for</span> <span class="ident">SortedLinkedList</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">K</span>, <span class="ident">N</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Ord</span> <span class="op">+</span> <span class="ident">core::fmt::Debug</span>,
-    <span class="ident">Idx</span>: <span class="ident">SortedLinkedListIndex</span>,
-    <span class="ident">K</span>: <span class="ident">Kind</span>,
+</span><span class="kw">impl</span>&lt;T, Idx, K, <span class="kw">const </span>N: usize&gt; fmt::Debug <span class="kw">for </span>SortedLinkedList&lt;T, Idx, K, N&gt;
+<span class="kw">where
+    </span>T: Ord + core::fmt::Debug,
+    Idx: SortedLinkedListIndex,
+    K: Kind,
 {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">fmt::Result</span> {
-        <span class="ident">f</span>.<span class="ident">debug_list</span>().<span class="ident">entries</span>(<span class="self">self</span>.<span class="ident">iter</span>()).<span class="ident">finish</span>()
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+        f.debug_list().entries(<span class="self">self</span>.iter()).finish()
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">K</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">Drop</span> <span class="kw">for</span> <span class="ident">SortedLinkedList</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Idx</span>, <span class="ident">K</span>, <span class="ident">N</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">Idx</span>: <span class="ident">SortedLinkedListIndex</span>,
+<span class="kw">impl</span>&lt;T, Idx, K, <span class="kw">const </span>N: usize&gt; Drop <span class="kw">for </span>SortedLinkedList&lt;T, Idx, K, N&gt;
+<span class="kw">where
+    </span>Idx: SortedLinkedListIndex,
 {
-    <span class="kw">fn</span> <span class="ident">drop</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">index</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">head</span>;
+    <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="kw">let </span><span class="kw-2">mut </span>index = <span class="self">self</span>.head;
 
-        <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">i</span>) <span class="op">=</span> <span class="ident">index</span>.<span class="ident">option</span>() {
-            <span class="kw">let</span> <span class="ident">node</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">node_at_mut</span>(<span class="ident">i</span>);
-            <span class="ident">index</span> <span class="op">=</span> <span class="ident">node</span>.<span class="ident">next</span>;
+        <span class="kw">while let </span><span class="prelude-val">Some</span>(i) = index.option() {
+            <span class="kw">let </span>node = <span class="self">self</span>.node_at_mut(i);
+            index = node.next;
 
-            <span class="kw">unsafe</span> {
-                <span class="ident">ptr::drop_in_place</span>(<span class="ident">node</span>.<span class="ident">val</span>.<span class="ident">as_mut_ptr</span>());
+            <span class="kw">unsafe </span>{
+                ptr::drop_in_place(node.val.as_mut_ptr());
             }
         }
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
-<span class="kw">mod</span> <span class="ident">tests</span> {
-    <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
+<span class="attribute">#[cfg(test)]
+</span><span class="kw">mod </span>tests {
+    <span class="kw">use super</span>::<span class="kw-2">*</span>;
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">const_new</span>() {
-        <span class="kw">static</span> <span class="kw-2">mut</span> <span class="ident">_V1</span>: <span class="ident">SortedLinkedList</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">LinkedIndexU8</span>, <span class="ident">Max</span>, <span class="number">100</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">SortedLinkedList::new_u8</span>();
-        <span class="kw">static</span> <span class="kw-2">mut</span> <span class="ident">_V2</span>: <span class="ident">SortedLinkedList</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">LinkedIndexU16</span>, <span class="ident">Max</span>, <span class="number">10_000</span><span class="op">&gt;</span> <span class="op">=</span>
-            <span class="ident">SortedLinkedList::new_u16</span>();
-        <span class="kw">static</span> <span class="kw-2">mut</span> <span class="ident">_V3</span>: <span class="ident">SortedLinkedList</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">LinkedIndexUsize</span>, <span class="ident">Max</span>, <span class="number">100_000</span><span class="op">&gt;</span> <span class="op">=</span>
-            <span class="ident">SortedLinkedList::new_usize</span>();
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>const_new() {
+        <span class="kw">static </span><span class="kw-2">mut </span>_V1: SortedLinkedList&lt;u32, LinkedIndexU8, Max, <span class="number">100</span>&gt; = SortedLinkedList::new_u8();
+        <span class="kw">static </span><span class="kw-2">mut </span>_V2: SortedLinkedList&lt;u32, LinkedIndexU16, Max, <span class="number">10_000</span>&gt; =
+            SortedLinkedList::new_u16();
+        <span class="kw">static </span><span class="kw-2">mut </span>_V3: SortedLinkedList&lt;u32, LinkedIndexUsize, Max, <span class="number">100_000</span>&gt; =
+            SortedLinkedList::new_usize();
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">test_peek</span>() {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ll</span>: <span class="ident">SortedLinkedList</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">LinkedIndexUsize</span>, <span class="ident">Max</span>, <span class="number">3</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">SortedLinkedList::new_usize</span>();
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>test_peek() {
+        <span class="kw">let </span><span class="kw-2">mut </span>ll: SortedLinkedList&lt;u32, LinkedIndexUsize, Max, <span class="number">3</span>&gt; = SortedLinkedList::new_usize();
 
-        <span class="ident">ll</span>.<span class="ident">push</span>(<span class="number">1</span>).<span class="ident">unwrap</span>();
-        <span class="macro">assert_eq!</span>(<span class="ident">ll</span>.<span class="ident">peek</span>().<span class="ident">unwrap</span>(), <span class="kw-2">&amp;</span><span class="number">1</span>);
+        ll.push(<span class="number">1</span>).unwrap();
+        <span class="macro">assert_eq!</span>(ll.peek().unwrap(), <span class="kw-2">&amp;</span><span class="number">1</span>);
 
-        <span class="ident">ll</span>.<span class="ident">push</span>(<span class="number">2</span>).<span class="ident">unwrap</span>();
-        <span class="macro">assert_eq!</span>(<span class="ident">ll</span>.<span class="ident">peek</span>().<span class="ident">unwrap</span>(), <span class="kw-2">&amp;</span><span class="number">2</span>);
+        ll.push(<span class="number">2</span>).unwrap();
+        <span class="macro">assert_eq!</span>(ll.peek().unwrap(), <span class="kw-2">&amp;</span><span class="number">2</span>);
 
-        <span class="ident">ll</span>.<span class="ident">push</span>(<span class="number">3</span>).<span class="ident">unwrap</span>();
-        <span class="macro">assert_eq!</span>(<span class="ident">ll</span>.<span class="ident">peek</span>().<span class="ident">unwrap</span>(), <span class="kw-2">&amp;</span><span class="number">3</span>);
+        ll.push(<span class="number">3</span>).unwrap();
+        <span class="macro">assert_eq!</span>(ll.peek().unwrap(), <span class="kw-2">&amp;</span><span class="number">3</span>);
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ll</span>: <span class="ident">SortedLinkedList</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">LinkedIndexUsize</span>, <span class="ident">Min</span>, <span class="number">3</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">SortedLinkedList::new_usize</span>();
+        <span class="kw">let </span><span class="kw-2">mut </span>ll: SortedLinkedList&lt;u32, LinkedIndexUsize, Min, <span class="number">3</span>&gt; = SortedLinkedList::new_usize();
 
-        <span class="ident">ll</span>.<span class="ident">push</span>(<span class="number">2</span>).<span class="ident">unwrap</span>();
-        <span class="macro">assert_eq!</span>(<span class="ident">ll</span>.<span class="ident">peek</span>().<span class="ident">unwrap</span>(), <span class="kw-2">&amp;</span><span class="number">2</span>);
+        ll.push(<span class="number">2</span>).unwrap();
+        <span class="macro">assert_eq!</span>(ll.peek().unwrap(), <span class="kw-2">&amp;</span><span class="number">2</span>);
 
-        <span class="ident">ll</span>.<span class="ident">push</span>(<span class="number">1</span>).<span class="ident">unwrap</span>();
-        <span class="macro">assert_eq!</span>(<span class="ident">ll</span>.<span class="ident">peek</span>().<span class="ident">unwrap</span>(), <span class="kw-2">&amp;</span><span class="number">1</span>);
+        ll.push(<span class="number">1</span>).unwrap();
+        <span class="macro">assert_eq!</span>(ll.peek().unwrap(), <span class="kw-2">&amp;</span><span class="number">1</span>);
 
-        <span class="ident">ll</span>.<span class="ident">push</span>(<span class="number">3</span>).<span class="ident">unwrap</span>();
-        <span class="macro">assert_eq!</span>(<span class="ident">ll</span>.<span class="ident">peek</span>().<span class="ident">unwrap</span>(), <span class="kw-2">&amp;</span><span class="number">1</span>);
+        ll.push(<span class="number">3</span>).unwrap();
+        <span class="macro">assert_eq!</span>(ll.peek().unwrap(), <span class="kw-2">&amp;</span><span class="number">1</span>);
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">test_full</span>() {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ll</span>: <span class="ident">SortedLinkedList</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">LinkedIndexUsize</span>, <span class="ident">Max</span>, <span class="number">3</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">SortedLinkedList::new_usize</span>();
-        <span class="ident">ll</span>.<span class="ident">push</span>(<span class="number">1</span>).<span class="ident">unwrap</span>();
-        <span class="ident">ll</span>.<span class="ident">push</span>(<span class="number">2</span>).<span class="ident">unwrap</span>();
-        <span class="ident">ll</span>.<span class="ident">push</span>(<span class="number">3</span>).<span class="ident">unwrap</span>();
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>test_full() {
+        <span class="kw">let </span><span class="kw-2">mut </span>ll: SortedLinkedList&lt;u32, LinkedIndexUsize, Max, <span class="number">3</span>&gt; = SortedLinkedList::new_usize();
+        ll.push(<span class="number">1</span>).unwrap();
+        ll.push(<span class="number">2</span>).unwrap();
+        ll.push(<span class="number">3</span>).unwrap();
 
-        <span class="macro">assert!</span>(<span class="ident">ll</span>.<span class="ident">is_full</span>())
+        <span class="macro">assert!</span>(ll.is_full())
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">test_empty</span>() {
-        <span class="kw">let</span> <span class="ident">ll</span>: <span class="ident">SortedLinkedList</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">LinkedIndexUsize</span>, <span class="ident">Max</span>, <span class="number">3</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">SortedLinkedList::new_usize</span>();
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>test_empty() {
+        <span class="kw">let </span>ll: SortedLinkedList&lt;u32, LinkedIndexUsize, Max, <span class="number">3</span>&gt; = SortedLinkedList::new_usize();
 
-        <span class="macro">assert!</span>(<span class="ident">ll</span>.<span class="ident">is_empty</span>())
+        <span class="macro">assert!</span>(ll.is_empty())
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">test_zero_size</span>() {
-        <span class="kw">let</span> <span class="ident">ll</span>: <span class="ident">SortedLinkedList</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">LinkedIndexUsize</span>, <span class="ident">Max</span>, <span class="number">0</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">SortedLinkedList::new_usize</span>();
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>test_zero_size() {
+        <span class="kw">let </span>ll: SortedLinkedList&lt;u32, LinkedIndexUsize, Max, <span class="number">0</span>&gt; = SortedLinkedList::new_usize();
 
-        <span class="macro">assert!</span>(<span class="ident">ll</span>.<span class="ident">is_empty</span>());
-        <span class="macro">assert!</span>(<span class="ident">ll</span>.<span class="ident">is_full</span>());
+        <span class="macro">assert!</span>(ll.is_empty());
+        <span class="macro">assert!</span>(ll.is_full());
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">test_rejected_push</span>() {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ll</span>: <span class="ident">SortedLinkedList</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">LinkedIndexUsize</span>, <span class="ident">Max</span>, <span class="number">3</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">SortedLinkedList::new_usize</span>();
-        <span class="ident">ll</span>.<span class="ident">push</span>(<span class="number">1</span>).<span class="ident">unwrap</span>();
-        <span class="ident">ll</span>.<span class="ident">push</span>(<span class="number">2</span>).<span class="ident">unwrap</span>();
-        <span class="ident">ll</span>.<span class="ident">push</span>(<span class="number">3</span>).<span class="ident">unwrap</span>();
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>test_rejected_push() {
+        <span class="kw">let </span><span class="kw-2">mut </span>ll: SortedLinkedList&lt;u32, LinkedIndexUsize, Max, <span class="number">3</span>&gt; = SortedLinkedList::new_usize();
+        ll.push(<span class="number">1</span>).unwrap();
+        ll.push(<span class="number">2</span>).unwrap();
+        ll.push(<span class="number">3</span>).unwrap();
 
-        <span class="comment">// This won&#39;t fit</span>
-        <span class="kw">let</span> <span class="ident">r</span> <span class="op">=</span> <span class="ident">ll</span>.<span class="ident">push</span>(<span class="number">4</span>);
+        <span class="comment">// This won&#39;t fit
+        </span><span class="kw">let </span>r = ll.push(<span class="number">4</span>);
 
-        <span class="macro">assert_eq!</span>(<span class="ident">r</span>, <span class="prelude-val">Err</span>(<span class="number">4</span>));
+        <span class="macro">assert_eq!</span>(r, <span class="prelude-val">Err</span>(<span class="number">4</span>));
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">test_updating</span>() {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ll</span>: <span class="ident">SortedLinkedList</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">LinkedIndexUsize</span>, <span class="ident">Max</span>, <span class="number">3</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">SortedLinkedList::new_usize</span>();
-        <span class="ident">ll</span>.<span class="ident">push</span>(<span class="number">1</span>).<span class="ident">unwrap</span>();
-        <span class="ident">ll</span>.<span class="ident">push</span>(<span class="number">2</span>).<span class="ident">unwrap</span>();
-        <span class="ident">ll</span>.<span class="ident">push</span>(<span class="number">3</span>).<span class="ident">unwrap</span>();
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>test_updating() {
+        <span class="kw">let </span><span class="kw-2">mut </span>ll: SortedLinkedList&lt;u32, LinkedIndexUsize, Max, <span class="number">3</span>&gt; = SortedLinkedList::new_usize();
+        ll.push(<span class="number">1</span>).unwrap();
+        ll.push(<span class="number">2</span>).unwrap();
+        ll.push(<span class="number">3</span>).unwrap();
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">find</span> <span class="op">=</span> <span class="ident">ll</span>.<span class="ident">find_mut</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="kw-2">*</span><span class="ident">v</span> <span class="op">==</span> <span class="number">2</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let </span><span class="kw-2">mut </span>find = ll.find_mut(|v| <span class="kw-2">*</span>v == <span class="number">2</span>).unwrap();
 
-        <span class="kw-2">*</span><span class="ident">find</span> <span class="op">+</span><span class="op">=</span> <span class="number">1000</span>;
-        <span class="ident">find</span>.<span class="ident">finish</span>();
+        <span class="kw-2">*</span>find += <span class="number">1000</span>;
+        find.finish();
 
-        <span class="macro">assert_eq!</span>(<span class="ident">ll</span>.<span class="ident">peek</span>().<span class="ident">unwrap</span>(), <span class="kw-2">&amp;</span><span class="number">1002</span>);
+        <span class="macro">assert_eq!</span>(ll.peek().unwrap(), <span class="kw-2">&amp;</span><span class="number">1002</span>);
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">find</span> <span class="op">=</span> <span class="ident">ll</span>.<span class="ident">find_mut</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="kw-2">*</span><span class="ident">v</span> <span class="op">==</span> <span class="number">3</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let </span><span class="kw-2">mut </span>find = ll.find_mut(|v| <span class="kw-2">*</span>v == <span class="number">3</span>).unwrap();
 
-        <span class="kw-2">*</span><span class="ident">find</span> <span class="op">+</span><span class="op">=</span> <span class="number">1000</span>;
-        <span class="ident">find</span>.<span class="ident">finish</span>();
+        <span class="kw-2">*</span>find += <span class="number">1000</span>;
+        find.finish();
 
-        <span class="macro">assert_eq!</span>(<span class="ident">ll</span>.<span class="ident">peek</span>().<span class="ident">unwrap</span>(), <span class="kw-2">&amp;</span><span class="number">1003</span>);
+        <span class="macro">assert_eq!</span>(ll.peek().unwrap(), <span class="kw-2">&amp;</span><span class="number">1003</span>);
 
-        <span class="comment">// Remove largest element</span>
-        <span class="ident">ll</span>.<span class="ident">find_mut</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="kw-2">*</span><span class="ident">v</span> <span class="op">==</span> <span class="number">1003</span>).<span class="ident">unwrap</span>().<span class="ident">pop</span>();
+        <span class="comment">// Remove largest element
+        </span>ll.find_mut(|v| <span class="kw-2">*</span>v == <span class="number">1003</span>).unwrap().pop();
 
-        <span class="macro">assert_eq!</span>(<span class="ident">ll</span>.<span class="ident">peek</span>().<span class="ident">unwrap</span>(), <span class="kw-2">&amp;</span><span class="number">1002</span>);
+        <span class="macro">assert_eq!</span>(ll.peek().unwrap(), <span class="kw-2">&amp;</span><span class="number">1002</span>);
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">test_updating_1</span>() {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ll</span>: <span class="ident">SortedLinkedList</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">LinkedIndexUsize</span>, <span class="ident">Max</span>, <span class="number">3</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">SortedLinkedList::new_usize</span>();
-        <span class="ident">ll</span>.<span class="ident">push</span>(<span class="number">1</span>).<span class="ident">unwrap</span>();
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>test_updating_1() {
+        <span class="kw">let </span><span class="kw-2">mut </span>ll: SortedLinkedList&lt;u32, LinkedIndexUsize, Max, <span class="number">3</span>&gt; = SortedLinkedList::new_usize();
+        ll.push(<span class="number">1</span>).unwrap();
 
-        <span class="kw">let</span> <span class="ident">v</span> <span class="op">=</span> <span class="ident">ll</span>.<span class="ident">pop</span>().<span class="ident">unwrap</span>();
+        <span class="kw">let </span>v = ll.pop().unwrap();
 
-        <span class="macro">assert_eq!</span>(<span class="ident">v</span>, <span class="number">1</span>);
+        <span class="macro">assert_eq!</span>(v, <span class="number">1</span>);
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">test_updating_2</span>() {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ll</span>: <span class="ident">SortedLinkedList</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">LinkedIndexUsize</span>, <span class="ident">Max</span>, <span class="number">3</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">SortedLinkedList::new_usize</span>();
-        <span class="ident">ll</span>.<span class="ident">push</span>(<span class="number">1</span>).<span class="ident">unwrap</span>();
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>test_updating_2() {
+        <span class="kw">let </span><span class="kw-2">mut </span>ll: SortedLinkedList&lt;u32, LinkedIndexUsize, Max, <span class="number">3</span>&gt; = SortedLinkedList::new_usize();
+        ll.push(<span class="number">1</span>).unwrap();
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">find</span> <span class="op">=</span> <span class="ident">ll</span>.<span class="ident">find_mut</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="kw-2">*</span><span class="ident">v</span> <span class="op">==</span> <span class="number">1</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let </span><span class="kw-2">mut </span>find = ll.find_mut(|v| <span class="kw-2">*</span>v == <span class="number">1</span>).unwrap();
 
-        <span class="kw-2">*</span><span class="ident">find</span> <span class="op">+</span><span class="op">=</span> <span class="number">1000</span>;
-        <span class="ident">find</span>.<span class="ident">finish</span>();
+        <span class="kw-2">*</span>find += <span class="number">1000</span>;
+        find.finish();
 
-        <span class="macro">assert_eq!</span>(<span class="ident">ll</span>.<span class="ident">peek</span>().<span class="ident">unwrap</span>(), <span class="kw-2">&amp;</span><span class="number">1001</span>);
+        <span class="macro">assert_eq!</span>(ll.peek().unwrap(), <span class="kw-2">&amp;</span><span class="number">1001</span>);
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="heapless" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="heapless" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

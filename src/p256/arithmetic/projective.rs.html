@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/p256-0.9.0/src/arithmetic/projective.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>projective.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="icon" href="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../p256/index.html"><div class="logo-container"><img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../p256/index.html"><div class="logo-container">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/p256-0.9.0/src/arithmetic/projective.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>projective.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="icon" href="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../p256/index.html"><div class="logo-container"><img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../p256/index.html"><div class="logo-container">
                     <img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../p256/index.html">
                         <img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
@@ -660,665 +660,665 @@
 <span id="658">658</span>
 <span id="659">659</span>
 <span id="660">660</span>
-</pre><pre class="rust"><code><span class="doccomment">//! Projective points</span>
+</pre><pre class="rust"><code><span class="doccomment">//! Projective points
 
-<span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">AffinePoint</span>, <span class="ident">FieldElement</span>, <span class="ident">Scalar</span>, <span class="ident">CURVE_EQUATION_B</span>};
-<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">CompressedPoint</span>, <span class="ident">EncodedPoint</span>, <span class="ident">NistP256</span>};
-<span class="kw">use</span> <span class="ident">core</span>::{
-    <span class="ident">iter::Sum</span>,
-    <span class="ident">ops</span>::{<span class="ident">Add</span>, <span class="ident">AddAssign</span>, <span class="ident">Mul</span>, <span class="ident">MulAssign</span>, <span class="ident">Neg</span>, <span class="ident">Sub</span>, <span class="ident">SubAssign</span>},
+</span><span class="kw">use super</span>::{AffinePoint, FieldElement, Scalar, CURVE_EQUATION_B};
+<span class="kw">use crate</span>::{CompressedPoint, EncodedPoint, NistP256};
+<span class="kw">use </span>core::{
+    iter::Sum,
+    ops::{Add, AddAssign, Mul, MulAssign, Neg, Sub, SubAssign},
 };
-<span class="kw">use</span> <span class="ident">elliptic_curve</span>::{
-    <span class="ident">group</span>::{
-        <span class="ident">ff::Field</span>,
-        <span class="ident">prime</span>::{<span class="ident">PrimeCurve</span>, <span class="ident">PrimeCurveAffine</span>, <span class="ident">PrimeGroup</span>},
-        <span class="ident">Curve</span>, <span class="ident">Group</span>, <span class="ident">GroupEncoding</span>,
+<span class="kw">use </span>elliptic_curve::{
+    group::{
+        ff::Field,
+        prime::{PrimeCurve, PrimeCurveAffine, PrimeGroup},
+        Curve, Group, GroupEncoding,
     },
-    <span class="ident">rand_core::RngCore</span>,
-    <span class="ident">sec1</span>::{<span class="ident">FromEncodedPoint</span>, <span class="ident">ToEncodedPoint</span>},
-    <span class="ident">subtle</span>::{<span class="ident">Choice</span>, <span class="ident">ConditionallySelectable</span>, <span class="ident">ConstantTimeEq</span>, <span class="ident">CtOption</span>},
-    <span class="ident">ProjectiveArithmetic</span>,
+    rand_core::RngCore,
+    sec1::{FromEncodedPoint, ToEncodedPoint},
+    subtle::{Choice, ConditionallySelectable, ConstantTimeEq, CtOption},
+    ProjectiveArithmetic,
 };
 
-<span class="kw">impl</span> <span class="ident">ProjectiveArithmetic</span> <span class="kw">for</span> <span class="ident">NistP256</span> {
-    <span class="kw">type</span> <span class="ident">ProjectivePoint</span> <span class="op">=</span> <span class="ident">ProjectivePoint</span>;
+<span class="kw">impl </span>ProjectiveArithmetic <span class="kw">for </span>NistP256 {
+    <span class="kw">type </span>ProjectivePoint = ProjectivePoint;
 }
 
-<span class="doccomment">/// A point on the secp256r1 curve in projective coordinates.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">Debug</span>)]</span>
-<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">docsrs</span>, <span class="ident">doc</span>(<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;arithmetic&quot;</span>)))]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ProjectivePoint</span> {
-    <span class="ident">x</span>: <span class="ident">FieldElement</span>,
-    <span class="ident">y</span>: <span class="ident">FieldElement</span>,
-    <span class="ident">z</span>: <span class="ident">FieldElement</span>,
+<span class="doccomment">/// A point on the secp256r1 curve in projective coordinates.
+</span><span class="attribute">#[derive(Clone, Copy, Debug)]
+#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;arithmetic&quot;</span>)))]
+</span><span class="kw">pub struct </span>ProjectivePoint {
+    x: FieldElement,
+    y: FieldElement,
+    z: FieldElement,
 }
 
-<span class="kw">impl</span> <span class="ident">Group</span> <span class="kw">for</span> <span class="ident">ProjectivePoint</span> {
-    <span class="kw">type</span> <span class="ident">Scalar</span> <span class="op">=</span> <span class="ident">Scalar</span>;
+<span class="kw">impl </span>Group <span class="kw">for </span>ProjectivePoint {
+    <span class="kw">type </span>Scalar = Scalar;
 
-    <span class="kw">fn</span> <span class="ident">random</span>(<span class="kw-2">mut</span> <span class="ident">rng</span>: <span class="kw">impl</span> <span class="ident">RngCore</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident"><span class="self">Self</span>::generator</span>() <span class="op">*</span> <span class="ident">Scalar::random</span>(<span class="kw-2">&amp;mut</span> <span class="ident">rng</span>)
+    <span class="kw">fn </span>random(<span class="kw-2">mut </span>rng: <span class="kw">impl </span>RngCore) -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>::generator() * Scalar::random(<span class="kw-2">&amp;mut </span>rng)
     }
 
-    <span class="kw">fn</span> <span class="ident">identity</span>() -&gt; <span class="self">Self</span> {
-        <span class="ident">ProjectivePoint::identity</span>()
+    <span class="kw">fn </span>identity() -&gt; <span class="self">Self </span>{
+        ProjectivePoint::identity()
     }
 
-    <span class="kw">fn</span> <span class="ident">generator</span>() -&gt; <span class="self">Self</span> {
-        <span class="ident">ProjectivePoint::generator</span>()
+    <span class="kw">fn </span>generator() -&gt; <span class="self">Self </span>{
+        ProjectivePoint::generator()
     }
 
-    <span class="kw">fn</span> <span class="ident">is_identity</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Choice</span> {
-        <span class="self">self</span>.<span class="ident">ct_eq</span>(<span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::identity</span>())
+    <span class="kw">fn </span>is_identity(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Choice {
+        <span class="self">self</span>.ct_eq(<span class="kw-2">&amp;</span><span class="self">Self</span>::identity())
     }
 
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">fn</span> <span class="ident">double</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">ProjectivePoint::double</span>(<span class="self">self</span>)
-    }
-}
-
-<span class="kw">impl</span> <span class="ident">GroupEncoding</span> <span class="kw">for</span> <span class="ident">ProjectivePoint</span> {
-    <span class="kw">type</span> <span class="ident">Repr</span> <span class="op">=</span> <span class="ident">CompressedPoint</span>;
-
-    <span class="kw">fn</span> <span class="ident">from_bytes</span>(<span class="ident">bytes</span>: <span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::Repr</span>) -&gt; <span class="ident">CtOption</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
-        <span class="op">&lt;</span><span class="ident">AffinePoint</span> <span class="kw">as</span> <span class="ident">GroupEncoding</span><span class="op">&gt;</span><span class="ident">::from_bytes</span>(<span class="ident">bytes</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">point</span><span class="op">|</span> <span class="ident">point</span>.<span class="ident">into</span>())
-    }
-
-    <span class="kw">fn</span> <span class="ident">from_bytes_unchecked</span>(<span class="ident">bytes</span>: <span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::Repr</span>) -&gt; <span class="ident">CtOption</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
-        <span class="comment">// No unchecked conversion possible for compressed points</span>
-        <span class="ident"><span class="self">Self</span>::from_bytes</span>(<span class="ident">bytes</span>)
-    }
-
-    <span class="kw">fn</span> <span class="ident">to_bytes</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident"><span class="self">Self</span>::Repr</span> {
-        <span class="ident">CompressedPoint::clone_from_slice</span>(<span class="self">self</span>.<span class="ident">to_affine</span>().<span class="ident">to_encoded_point</span>(<span class="bool-val">true</span>).<span class="ident">as_bytes</span>())
+    <span class="attribute">#[must_use]
+    </span><span class="kw">fn </span>double(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
+        ProjectivePoint::double(<span class="self">self</span>)
     }
 }
 
-<span class="kw">impl</span> <span class="ident">PrimeGroup</span> <span class="kw">for</span> <span class="ident">ProjectivePoint</span> {}
+<span class="kw">impl </span>GroupEncoding <span class="kw">for </span>ProjectivePoint {
+    <span class="kw">type </span>Repr = CompressedPoint;
 
-<span class="kw">impl</span> <span class="ident">Curve</span> <span class="kw">for</span> <span class="ident">ProjectivePoint</span> {
-    <span class="kw">type</span> <span class="ident">AffineRepr</span> <span class="op">=</span> <span class="ident">AffinePoint</span>;
+    <span class="kw">fn </span>from_bytes(bytes: <span class="kw-2">&amp;</span><span class="self">Self</span>::Repr) -&gt; CtOption&lt;<span class="self">Self</span>&gt; {
+        &lt;AffinePoint <span class="kw">as </span>GroupEncoding&gt;::from_bytes(bytes).map(|point| point.into())
+    }
 
-    <span class="kw">fn</span> <span class="ident">to_affine</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">AffinePoint</span> {
-        <span class="ident">ProjectivePoint::to_affine</span>(<span class="self">self</span>)
+    <span class="kw">fn </span>from_bytes_unchecked(bytes: <span class="kw-2">&amp;</span><span class="self">Self</span>::Repr) -&gt; CtOption&lt;<span class="self">Self</span>&gt; {
+        <span class="comment">// No unchecked conversion possible for compressed points
+        </span><span class="self">Self</span>::from_bytes(bytes)
+    }
+
+    <span class="kw">fn </span>to_bytes(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self</span>::Repr {
+        CompressedPoint::clone_from_slice(<span class="self">self</span>.to_affine().to_encoded_point(<span class="bool-val">true</span>).as_bytes())
     }
 }
 
-<span class="kw">impl</span> <span class="ident">PrimeCurve</span> <span class="kw">for</span> <span class="ident">ProjectivePoint</span> {
-    <span class="kw">type</span> <span class="ident">Affine</span> <span class="op">=</span> <span class="ident">AffinePoint</span>;
+<span class="kw">impl </span>PrimeGroup <span class="kw">for </span>ProjectivePoint {}
+
+<span class="kw">impl </span>Curve <span class="kw">for </span>ProjectivePoint {
+    <span class="kw">type </span>AffineRepr = AffinePoint;
+
+    <span class="kw">fn </span>to_affine(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; AffinePoint {
+        ProjectivePoint::to_affine(<span class="self">self</span>)
+    }
 }
 
-<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">AffinePoint</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ProjectivePoint</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">p</span>: <span class="ident">AffinePoint</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="ident">projective</span> <span class="op">=</span> <span class="ident">ProjectivePoint</span> {
-            <span class="ident">x</span>: <span class="ident">p</span>.<span class="ident">x</span>,
-            <span class="ident">y</span>: <span class="ident">p</span>.<span class="ident">y</span>,
-            <span class="ident">z</span>: <span class="ident">FieldElement::one</span>(),
+<span class="kw">impl </span>PrimeCurve <span class="kw">for </span>ProjectivePoint {
+    <span class="kw">type </span>Affine = AffinePoint;
+}
+
+<span class="kw">impl </span>From&lt;AffinePoint&gt; <span class="kw">for </span>ProjectivePoint {
+    <span class="kw">fn </span>from(p: AffinePoint) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>projective = ProjectivePoint {
+            x: p.x,
+            y: p.y,
+            z: FieldElement::one(),
         };
-        <span class="ident"><span class="self">Self</span>::conditional_select</span>(<span class="kw-2">&amp;</span><span class="ident">projective</span>, <span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::identity</span>(), <span class="ident">p</span>.<span class="ident">infinity</span>)
+        <span class="self">Self</span>::conditional_select(<span class="kw-2">&amp;</span>projective, <span class="kw-2">&amp;</span><span class="self">Self</span>::identity(), p.infinity)
     }
 }
 
-<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">ProjectivePoint</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">AffinePoint</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">p</span>: <span class="ident">ProjectivePoint</span>) -&gt; <span class="ident">AffinePoint</span> {
-        <span class="ident">p</span>.<span class="ident">to_affine</span>()
+<span class="kw">impl </span>From&lt;ProjectivePoint&gt; <span class="kw">for </span>AffinePoint {
+    <span class="kw">fn </span>from(p: ProjectivePoint) -&gt; AffinePoint {
+        p.to_affine()
     }
 }
 
-<span class="kw">impl</span> <span class="ident">FromEncodedPoint</span><span class="op">&lt;</span><span class="ident">NistP256</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ProjectivePoint</span> {
-    <span class="kw">fn</span> <span class="ident">from_encoded_point</span>(<span class="ident">p</span>: <span class="kw-2">&amp;</span><span class="ident">EncodedPoint</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
-        <span class="ident">AffinePoint::from_encoded_point</span>(<span class="ident">p</span>).<span class="ident">map</span>(<span class="ident">ProjectivePoint::from</span>)
+<span class="kw">impl </span>FromEncodedPoint&lt;NistP256&gt; <span class="kw">for </span>ProjectivePoint {
+    <span class="kw">fn </span>from_encoded_point(p: <span class="kw-2">&amp;</span>EncodedPoint) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+        AffinePoint::from_encoded_point(p).map(ProjectivePoint::from)
     }
 }
 
-<span class="kw">impl</span> <span class="ident">ToEncodedPoint</span><span class="op">&lt;</span><span class="ident">NistP256</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ProjectivePoint</span> {
-    <span class="kw">fn</span> <span class="ident">to_encoded_point</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">compress</span>: <span class="ident">bool</span>) -&gt; <span class="ident">EncodedPoint</span> {
-        <span class="self">self</span>.<span class="ident">to_affine</span>().<span class="ident">to_encoded_point</span>(<span class="ident">compress</span>)
+<span class="kw">impl </span>ToEncodedPoint&lt;NistP256&gt; <span class="kw">for </span>ProjectivePoint {
+    <span class="kw">fn </span>to_encoded_point(<span class="kw-2">&amp;</span><span class="self">self</span>, compress: bool) -&gt; EncodedPoint {
+        <span class="self">self</span>.to_affine().to_encoded_point(compress)
     }
 }
 
-<span class="kw">impl</span> <span class="ident">ConditionallySelectable</span> <span class="kw">for</span> <span class="ident">ProjectivePoint</span> {
-    <span class="kw">fn</span> <span class="ident">conditional_select</span>(<span class="ident">a</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>, <span class="ident">b</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>, <span class="ident">choice</span>: <span class="ident">Choice</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">ProjectivePoint</span> {
-            <span class="ident">x</span>: <span class="ident">FieldElement::conditional_select</span>(<span class="kw-2">&amp;</span><span class="ident">a</span>.<span class="ident">x</span>, <span class="kw-2">&amp;</span><span class="ident">b</span>.<span class="ident">x</span>, <span class="ident">choice</span>),
-            <span class="ident">y</span>: <span class="ident">FieldElement::conditional_select</span>(<span class="kw-2">&amp;</span><span class="ident">a</span>.<span class="ident">y</span>, <span class="kw-2">&amp;</span><span class="ident">b</span>.<span class="ident">y</span>, <span class="ident">choice</span>),
-            <span class="ident">z</span>: <span class="ident">FieldElement::conditional_select</span>(<span class="kw-2">&amp;</span><span class="ident">a</span>.<span class="ident">z</span>, <span class="kw-2">&amp;</span><span class="ident">b</span>.<span class="ident">z</span>, <span class="ident">choice</span>),
+<span class="kw">impl </span>ConditionallySelectable <span class="kw">for </span>ProjectivePoint {
+    <span class="kw">fn </span>conditional_select(a: <span class="kw-2">&amp;</span><span class="self">Self</span>, b: <span class="kw-2">&amp;</span><span class="self">Self</span>, choice: Choice) -&gt; <span class="self">Self </span>{
+        ProjectivePoint {
+            x: FieldElement::conditional_select(<span class="kw-2">&amp;</span>a.x, <span class="kw-2">&amp;</span>b.x, choice),
+            y: FieldElement::conditional_select(<span class="kw-2">&amp;</span>a.y, <span class="kw-2">&amp;</span>b.y, choice),
+            z: FieldElement::conditional_select(<span class="kw-2">&amp;</span>a.z, <span class="kw-2">&amp;</span>b.z, choice),
         }
     }
 }
 
-<span class="kw">impl</span> <span class="ident">ConstantTimeEq</span> <span class="kw">for</span> <span class="ident">ProjectivePoint</span> {
-    <span class="kw">fn</span> <span class="ident">ct_eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="ident">Choice</span> {
-        <span class="self">self</span>.<span class="ident">to_affine</span>().<span class="ident">ct_eq</span>(<span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">to_affine</span>())
+<span class="kw">impl </span>ConstantTimeEq <span class="kw">for </span>ProjectivePoint {
+    <span class="kw">fn </span>ct_eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; Choice {
+        <span class="self">self</span>.to_affine().ct_eq(<span class="kw-2">&amp;</span>other.to_affine())
     }
 }
 
-<span class="kw">impl</span> <span class="ident">PartialEq</span> <span class="kw">for</span> <span class="ident">ProjectivePoint</span> {
-    <span class="kw">fn</span> <span class="ident">eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="ident">bool</span> {
-        <span class="self">self</span>.<span class="ident">ct_eq</span>(<span class="ident">other</span>).<span class="ident">into</span>()
+<span class="kw">impl </span>PartialEq <span class="kw">for </span>ProjectivePoint {
+    <span class="kw">fn </span>eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; bool {
+        <span class="self">self</span>.ct_eq(other).into()
     }
 }
 
-<span class="kw">impl</span> <span class="ident">Eq</span> <span class="kw">for</span> <span class="ident">ProjectivePoint</span> {}
+<span class="kw">impl </span>Eq <span class="kw">for </span>ProjectivePoint {}
 
-<span class="kw">impl</span> <span class="ident">ProjectivePoint</span> {
-    <span class="doccomment">/// Returns the additive identity of P-256, also known as the &quot;neutral element&quot; or</span>
-    <span class="doccomment">/// &quot;point at infinity&quot;.</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">identity</span>() -&gt; <span class="ident">ProjectivePoint</span> {
-        <span class="ident">ProjectivePoint</span> {
-            <span class="ident">x</span>: <span class="ident">FieldElement::zero</span>(),
-            <span class="ident">y</span>: <span class="ident">FieldElement::one</span>(),
-            <span class="ident">z</span>: <span class="ident">FieldElement::zero</span>(),
+<span class="kw">impl </span>ProjectivePoint {
+    <span class="doccomment">/// Returns the additive identity of P-256, also known as the &quot;neutral element&quot; or
+    /// &quot;point at infinity&quot;.
+    </span><span class="kw">pub const fn </span>identity() -&gt; ProjectivePoint {
+        ProjectivePoint {
+            x: FieldElement::zero(),
+            y: FieldElement::one(),
+            z: FieldElement::zero(),
         }
     }
 
-    <span class="doccomment">/// Returns the base point of P-256.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">generator</span>() -&gt; <span class="ident">ProjectivePoint</span> {
-        <span class="ident">AffinePoint::generator</span>().<span class="ident">into</span>()
+    <span class="doccomment">/// Returns the base point of P-256.
+    </span><span class="kw">pub fn </span>generator() -&gt; ProjectivePoint {
+        AffinePoint::generator().into()
     }
 
-    <span class="doccomment">/// Returns the affine representation of this point, or `None` if it is the identity.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">to_affine</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">AffinePoint</span> {
-        <span class="self">self</span>.<span class="ident">z</span>
-            .<span class="ident">invert</span>()
-            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">zinv</span><span class="op">|</span> <span class="ident">AffinePoint</span> {
-                <span class="ident">x</span>: <span class="self">self</span>.<span class="ident">x</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">zinv</span>,
-                <span class="ident">y</span>: <span class="self">self</span>.<span class="ident">y</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">zinv</span>,
-                <span class="ident">infinity</span>: <span class="ident">Choice::from</span>(<span class="number">0</span>),
+    <span class="doccomment">/// Returns the affine representation of this point, or `None` if it is the identity.
+    </span><span class="kw">pub fn </span>to_affine(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; AffinePoint {
+        <span class="self">self</span>.z
+            .invert()
+            .map(|zinv| AffinePoint {
+                x: <span class="self">self</span>.x * <span class="kw-2">&amp;</span>zinv,
+                y: <span class="self">self</span>.y * <span class="kw-2">&amp;</span>zinv,
+                infinity: Choice::from(<span class="number">0</span>),
             })
-            .<span class="ident">unwrap_or_else</span>(<span class="ident">AffinePoint::identity</span>)
+            .unwrap_or_else(AffinePoint::identity)
     }
 
-    <span class="doccomment">/// Returns `-self`.</span>
-    <span class="kw">fn</span> <span class="ident">neg</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">ProjectivePoint</span> {
-        <span class="ident">ProjectivePoint</span> {
-            <span class="ident">x</span>: <span class="self">self</span>.<span class="ident">x</span>,
-            <span class="ident">y</span>: <span class="self">self</span>.<span class="ident">y</span>.<span class="ident">neg</span>(),
-            <span class="ident">z</span>: <span class="self">self</span>.<span class="ident">z</span>,
+    <span class="doccomment">/// Returns `-self`.
+    </span><span class="kw">fn </span>neg(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ProjectivePoint {
+        ProjectivePoint {
+            x: <span class="self">self</span>.x,
+            y: <span class="self">self</span>.y.neg(),
+            z: <span class="self">self</span>.z,
         }
     }
 
-    <span class="doccomment">/// Returns `self + other`.</span>
-    <span class="kw">fn</span> <span class="ident">add</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="ident">ProjectivePoint</span>) -&gt; <span class="ident">ProjectivePoint</span> {
-        <span class="comment">// We implement the complete addition formula from Renes-Costello-Batina 2015</span>
-        <span class="comment">// (https://eprint.iacr.org/2015/1060 Algorithm 4). The comments after each line</span>
-        <span class="comment">// indicate which algorithm steps are being performed.</span>
+    <span class="doccomment">/// Returns `self + other`.
+    </span><span class="kw">fn </span>add(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span>ProjectivePoint) -&gt; ProjectivePoint {
+        <span class="comment">// We implement the complete addition formula from Renes-Costello-Batina 2015
+        // (https://eprint.iacr.org/2015/1060 Algorithm 4). The comments after each line
+        // indicate which algorithm steps are being performed.
 
-        <span class="kw">let</span> <span class="ident">xx</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">x</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">x</span>; <span class="comment">// 1</span>
-        <span class="kw">let</span> <span class="ident">yy</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">y</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">y</span>; <span class="comment">// 2</span>
-        <span class="kw">let</span> <span class="ident">zz</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">z</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">z</span>; <span class="comment">// 3</span>
-        <span class="kw">let</span> <span class="ident">xy_pairs</span> <span class="op">=</span> ((<span class="self">self</span>.<span class="ident">x</span> <span class="op">+</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">y</span>) <span class="op">*</span> <span class="kw-2">&amp;</span>(<span class="ident">other</span>.<span class="ident">x</span> <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">y</span>)) <span class="op">-</span> <span class="kw-2">&amp;</span>(<span class="ident">xx</span> <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">yy</span>); <span class="comment">// 4, 5, 6, 7, 8</span>
-        <span class="kw">let</span> <span class="ident">yz_pairs</span> <span class="op">=</span> ((<span class="self">self</span>.<span class="ident">y</span> <span class="op">+</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">z</span>) <span class="op">*</span> <span class="kw-2">&amp;</span>(<span class="ident">other</span>.<span class="ident">y</span> <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">z</span>)) <span class="op">-</span> <span class="kw-2">&amp;</span>(<span class="ident">yy</span> <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">zz</span>); <span class="comment">// 9, 10, 11, 12, 13</span>
-        <span class="kw">let</span> <span class="ident">xz_pairs</span> <span class="op">=</span> ((<span class="self">self</span>.<span class="ident">x</span> <span class="op">+</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">z</span>) <span class="op">*</span> <span class="kw-2">&amp;</span>(<span class="ident">other</span>.<span class="ident">x</span> <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">z</span>)) <span class="op">-</span> <span class="kw-2">&amp;</span>(<span class="ident">xx</span> <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">zz</span>); <span class="comment">// 14, 15, 16, 17, 18</span>
+        </span><span class="kw">let </span>xx = <span class="self">self</span>.x * <span class="kw-2">&amp;</span>other.x; <span class="comment">// 1
+        </span><span class="kw">let </span>yy = <span class="self">self</span>.y * <span class="kw-2">&amp;</span>other.y; <span class="comment">// 2
+        </span><span class="kw">let </span>zz = <span class="self">self</span>.z * <span class="kw-2">&amp;</span>other.z; <span class="comment">// 3
+        </span><span class="kw">let </span>xy_pairs = ((<span class="self">self</span>.x + <span class="kw-2">&amp;</span><span class="self">self</span>.y) * <span class="kw-2">&amp;</span>(other.x + <span class="kw-2">&amp;</span>other.y)) - <span class="kw-2">&amp;</span>(xx + <span class="kw-2">&amp;</span>yy); <span class="comment">// 4, 5, 6, 7, 8
+        </span><span class="kw">let </span>yz_pairs = ((<span class="self">self</span>.y + <span class="kw-2">&amp;</span><span class="self">self</span>.z) * <span class="kw-2">&amp;</span>(other.y + <span class="kw-2">&amp;</span>other.z)) - <span class="kw-2">&amp;</span>(yy + <span class="kw-2">&amp;</span>zz); <span class="comment">// 9, 10, 11, 12, 13
+        </span><span class="kw">let </span>xz_pairs = ((<span class="self">self</span>.x + <span class="kw-2">&amp;</span><span class="self">self</span>.z) * <span class="kw-2">&amp;</span>(other.x + <span class="kw-2">&amp;</span>other.z)) - <span class="kw-2">&amp;</span>(xx + <span class="kw-2">&amp;</span>zz); <span class="comment">// 14, 15, 16, 17, 18
 
-        <span class="kw">let</span> <span class="ident">bzz_part</span> <span class="op">=</span> <span class="ident">xz_pairs</span> <span class="op">-</span> <span class="kw-2">&amp;</span>(<span class="ident">CURVE_EQUATION_B</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">zz</span>); <span class="comment">// 19, 20</span>
-        <span class="kw">let</span> <span class="ident">bzz3_part</span> <span class="op">=</span> <span class="ident">bzz_part</span>.<span class="ident">double</span>() <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">bzz_part</span>; <span class="comment">// 21, 22</span>
-        <span class="kw">let</span> <span class="ident">yy_m_bzz3</span> <span class="op">=</span> <span class="ident">yy</span> <span class="op">-</span> <span class="kw-2">&amp;</span><span class="ident">bzz3_part</span>; <span class="comment">// 23</span>
-        <span class="kw">let</span> <span class="ident">yy_p_bzz3</span> <span class="op">=</span> <span class="ident">yy</span> <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">bzz3_part</span>; <span class="comment">// 24</span>
+        </span><span class="kw">let </span>bzz_part = xz_pairs - <span class="kw-2">&amp;</span>(CURVE_EQUATION_B * <span class="kw-2">&amp;</span>zz); <span class="comment">// 19, 20
+        </span><span class="kw">let </span>bzz3_part = bzz_part.double() + <span class="kw-2">&amp;</span>bzz_part; <span class="comment">// 21, 22
+        </span><span class="kw">let </span>yy_m_bzz3 = yy - <span class="kw-2">&amp;</span>bzz3_part; <span class="comment">// 23
+        </span><span class="kw">let </span>yy_p_bzz3 = yy + <span class="kw-2">&amp;</span>bzz3_part; <span class="comment">// 24
 
-        <span class="kw">let</span> <span class="ident">zz3</span> <span class="op">=</span> <span class="ident">zz</span>.<span class="ident">double</span>() <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">zz</span>; <span class="comment">// 26, 27</span>
-        <span class="kw">let</span> <span class="ident">bxz_part</span> <span class="op">=</span> (<span class="ident">CURVE_EQUATION_B</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">xz_pairs</span>) <span class="op">-</span> <span class="kw-2">&amp;</span>(<span class="ident">zz3</span> <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">xx</span>); <span class="comment">// 25, 28, 29</span>
-        <span class="kw">let</span> <span class="ident">bxz3_part</span> <span class="op">=</span> <span class="ident">bxz_part</span>.<span class="ident">double</span>() <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">bxz_part</span>; <span class="comment">// 30, 31</span>
-        <span class="kw">let</span> <span class="ident">xx3_m_zz3</span> <span class="op">=</span> <span class="ident">xx</span>.<span class="ident">double</span>() <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">xx</span> <span class="op">-</span> <span class="kw-2">&amp;</span><span class="ident">zz3</span>; <span class="comment">// 32, 33, 34</span>
+        </span><span class="kw">let </span>zz3 = zz.double() + <span class="kw-2">&amp;</span>zz; <span class="comment">// 26, 27
+        </span><span class="kw">let </span>bxz_part = (CURVE_EQUATION_B * <span class="kw-2">&amp;</span>xz_pairs) - <span class="kw-2">&amp;</span>(zz3 + <span class="kw-2">&amp;</span>xx); <span class="comment">// 25, 28, 29
+        </span><span class="kw">let </span>bxz3_part = bxz_part.double() + <span class="kw-2">&amp;</span>bxz_part; <span class="comment">// 30, 31
+        </span><span class="kw">let </span>xx3_m_zz3 = xx.double() + <span class="kw-2">&amp;</span>xx - <span class="kw-2">&amp;</span>zz3; <span class="comment">// 32, 33, 34
 
-        <span class="ident">ProjectivePoint</span> {
-            <span class="ident">x</span>: (<span class="ident">yy_p_bzz3</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">xy_pairs</span>) <span class="op">-</span> <span class="kw-2">&amp;</span>(<span class="ident">yz_pairs</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">bxz3_part</span>), <span class="comment">// 35, 39, 40</span>
-            <span class="ident">y</span>: (<span class="ident">yy_p_bzz3</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">yy_m_bzz3</span>) <span class="op">+</span> <span class="kw-2">&amp;</span>(<span class="ident">xx3_m_zz3</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">bxz3_part</span>), <span class="comment">// 36, 37, 38</span>
-            <span class="ident">z</span>: (<span class="ident">yy_m_bzz3</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">yz_pairs</span>) <span class="op">+</span> <span class="kw-2">&amp;</span>(<span class="ident">xy_pairs</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">xx3_m_zz3</span>), <span class="comment">// 41, 42, 43</span>
-        }
+        </span>ProjectivePoint {
+            x: (yy_p_bzz3 * <span class="kw-2">&amp;</span>xy_pairs) - <span class="kw-2">&amp;</span>(yz_pairs * <span class="kw-2">&amp;</span>bxz3_part), <span class="comment">// 35, 39, 40
+            </span>y: (yy_p_bzz3 * <span class="kw-2">&amp;</span>yy_m_bzz3) + <span class="kw-2">&amp;</span>(xx3_m_zz3 * <span class="kw-2">&amp;</span>bxz3_part), <span class="comment">// 36, 37, 38
+            </span>z: (yy_m_bzz3 * <span class="kw-2">&amp;</span>yz_pairs) + <span class="kw-2">&amp;</span>(xy_pairs * <span class="kw-2">&amp;</span>xx3_m_zz3), <span class="comment">// 41, 42, 43
+        </span>}
     }
 
-    <span class="doccomment">/// Returns `self + other`.</span>
-    <span class="kw">fn</span> <span class="ident">add_mixed</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="ident">AffinePoint</span>) -&gt; <span class="ident">ProjectivePoint</span> {
-        <span class="comment">// We implement the complete mixed addition formula from Renes-Costello-Batina</span>
-        <span class="comment">// 2015 (Algorithm 5). The comments after each line indicate which algorithm steps</span>
-        <span class="comment">// are being performed.</span>
+    <span class="doccomment">/// Returns `self + other`.
+    </span><span class="kw">fn </span>add_mixed(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span>AffinePoint) -&gt; ProjectivePoint {
+        <span class="comment">// We implement the complete mixed addition formula from Renes-Costello-Batina
+        // 2015 (Algorithm 5). The comments after each line indicate which algorithm steps
+        // are being performed.
 
-        <span class="kw">let</span> <span class="ident">xx</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">x</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">x</span>; <span class="comment">// 1</span>
-        <span class="kw">let</span> <span class="ident">yy</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">y</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">y</span>; <span class="comment">// 2</span>
-        <span class="kw">let</span> <span class="ident">xy_pairs</span> <span class="op">=</span> ((<span class="self">self</span>.<span class="ident">x</span> <span class="op">+</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">y</span>) <span class="op">*</span> <span class="kw-2">&amp;</span>(<span class="ident">other</span>.<span class="ident">x</span> <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">y</span>)) <span class="op">-</span> <span class="kw-2">&amp;</span>(<span class="ident">xx</span> <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">yy</span>); <span class="comment">// 3, 4, 5, 6, 7</span>
-        <span class="kw">let</span> <span class="ident">yz_pairs</span> <span class="op">=</span> (<span class="ident">other</span>.<span class="ident">y</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">z</span>) <span class="op">+</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">y</span>; <span class="comment">// 8, 9 (t4)</span>
-        <span class="kw">let</span> <span class="ident">xz_pairs</span> <span class="op">=</span> (<span class="ident">other</span>.<span class="ident">x</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">z</span>) <span class="op">+</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">x</span>; <span class="comment">// 10, 11 (y3)</span>
+        </span><span class="kw">let </span>xx = <span class="self">self</span>.x * <span class="kw-2">&amp;</span>other.x; <span class="comment">// 1
+        </span><span class="kw">let </span>yy = <span class="self">self</span>.y * <span class="kw-2">&amp;</span>other.y; <span class="comment">// 2
+        </span><span class="kw">let </span>xy_pairs = ((<span class="self">self</span>.x + <span class="kw-2">&amp;</span><span class="self">self</span>.y) * <span class="kw-2">&amp;</span>(other.x + <span class="kw-2">&amp;</span>other.y)) - <span class="kw-2">&amp;</span>(xx + <span class="kw-2">&amp;</span>yy); <span class="comment">// 3, 4, 5, 6, 7
+        </span><span class="kw">let </span>yz_pairs = (other.y * <span class="kw-2">&amp;</span><span class="self">self</span>.z) + <span class="kw-2">&amp;</span><span class="self">self</span>.y; <span class="comment">// 8, 9 (t4)
+        </span><span class="kw">let </span>xz_pairs = (other.x * <span class="kw-2">&amp;</span><span class="self">self</span>.z) + <span class="kw-2">&amp;</span><span class="self">self</span>.x; <span class="comment">// 10, 11 (y3)
 
-        <span class="kw">let</span> <span class="ident">bz_part</span> <span class="op">=</span> <span class="ident">xz_pairs</span> <span class="op">-</span> <span class="kw-2">&amp;</span>(<span class="ident">CURVE_EQUATION_B</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">z</span>); <span class="comment">// 12, 13</span>
-        <span class="kw">let</span> <span class="ident">bz3_part</span> <span class="op">=</span> <span class="ident">bz_part</span>.<span class="ident">double</span>() <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">bz_part</span>; <span class="comment">// 14, 15</span>
-        <span class="kw">let</span> <span class="ident">yy_m_bzz3</span> <span class="op">=</span> <span class="ident">yy</span> <span class="op">-</span> <span class="kw-2">&amp;</span><span class="ident">bz3_part</span>; <span class="comment">// 16</span>
-        <span class="kw">let</span> <span class="ident">yy_p_bzz3</span> <span class="op">=</span> <span class="ident">yy</span> <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">bz3_part</span>; <span class="comment">// 17</span>
+        </span><span class="kw">let </span>bz_part = xz_pairs - <span class="kw-2">&amp;</span>(CURVE_EQUATION_B * <span class="kw-2">&amp;</span><span class="self">self</span>.z); <span class="comment">// 12, 13
+        </span><span class="kw">let </span>bz3_part = bz_part.double() + <span class="kw-2">&amp;</span>bz_part; <span class="comment">// 14, 15
+        </span><span class="kw">let </span>yy_m_bzz3 = yy - <span class="kw-2">&amp;</span>bz3_part; <span class="comment">// 16
+        </span><span class="kw">let </span>yy_p_bzz3 = yy + <span class="kw-2">&amp;</span>bz3_part; <span class="comment">// 17
 
-        <span class="kw">let</span> <span class="ident">z3</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">z</span>.<span class="ident">double</span>() <span class="op">+</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">z</span>; <span class="comment">// 19, 20</span>
-        <span class="kw">let</span> <span class="ident">bxz_part</span> <span class="op">=</span> (<span class="ident">CURVE_EQUATION_B</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">xz_pairs</span>) <span class="op">-</span> <span class="kw-2">&amp;</span>(<span class="ident">z3</span> <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">xx</span>); <span class="comment">// 18, 21, 22</span>
-        <span class="kw">let</span> <span class="ident">bxz3_part</span> <span class="op">=</span> <span class="ident">bxz_part</span>.<span class="ident">double</span>() <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">bxz_part</span>; <span class="comment">// 23, 24</span>
-        <span class="kw">let</span> <span class="ident">xx3_m_zz3</span> <span class="op">=</span> <span class="ident">xx</span>.<span class="ident">double</span>() <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">xx</span> <span class="op">-</span> <span class="kw-2">&amp;</span><span class="ident">z3</span>; <span class="comment">// 25, 26, 27</span>
+        </span><span class="kw">let </span>z3 = <span class="self">self</span>.z.double() + <span class="kw-2">&amp;</span><span class="self">self</span>.z; <span class="comment">// 19, 20
+        </span><span class="kw">let </span>bxz_part = (CURVE_EQUATION_B * <span class="kw-2">&amp;</span>xz_pairs) - <span class="kw-2">&amp;</span>(z3 + <span class="kw-2">&amp;</span>xx); <span class="comment">// 18, 21, 22
+        </span><span class="kw">let </span>bxz3_part = bxz_part.double() + <span class="kw-2">&amp;</span>bxz_part; <span class="comment">// 23, 24
+        </span><span class="kw">let </span>xx3_m_zz3 = xx.double() + <span class="kw-2">&amp;</span>xx - <span class="kw-2">&amp;</span>z3; <span class="comment">// 25, 26, 27
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ret</span> <span class="op">=</span> <span class="ident">ProjectivePoint</span> {
-            <span class="ident">x</span>: (<span class="ident">yy_p_bzz3</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">xy_pairs</span>) <span class="op">-</span> <span class="kw-2">&amp;</span>(<span class="ident">yz_pairs</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">bxz3_part</span>), <span class="comment">// 28, 32, 33</span>
-            <span class="ident">y</span>: (<span class="ident">yy_p_bzz3</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">yy_m_bzz3</span>) <span class="op">+</span> <span class="kw-2">&amp;</span>(<span class="ident">xx3_m_zz3</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">bxz3_part</span>), <span class="comment">// 29, 30, 31</span>
-            <span class="ident">z</span>: (<span class="ident">yy_m_bzz3</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">yz_pairs</span>) <span class="op">+</span> <span class="kw-2">&amp;</span>(<span class="ident">xy_pairs</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">xx3_m_zz3</span>), <span class="comment">// 34, 35, 36</span>
-        };
-        <span class="ident">ret</span>.<span class="ident">conditional_assign</span>(<span class="self">self</span>, <span class="ident">other</span>.<span class="ident">is_identity</span>());
-        <span class="ident">ret</span>
+        </span><span class="kw">let </span><span class="kw-2">mut </span>ret = ProjectivePoint {
+            x: (yy_p_bzz3 * <span class="kw-2">&amp;</span>xy_pairs) - <span class="kw-2">&amp;</span>(yz_pairs * <span class="kw-2">&amp;</span>bxz3_part), <span class="comment">// 28, 32, 33
+            </span>y: (yy_p_bzz3 * <span class="kw-2">&amp;</span>yy_m_bzz3) + <span class="kw-2">&amp;</span>(xx3_m_zz3 * <span class="kw-2">&amp;</span>bxz3_part), <span class="comment">// 29, 30, 31
+            </span>z: (yy_m_bzz3 * <span class="kw-2">&amp;</span>yz_pairs) + <span class="kw-2">&amp;</span>(xy_pairs * <span class="kw-2">&amp;</span>xx3_m_zz3), <span class="comment">// 34, 35, 36
+        </span>};
+        ret.conditional_assign(<span class="self">self</span>, other.is_identity());
+        ret
     }
 
-    <span class="doccomment">/// Doubles this point.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">double</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">ProjectivePoint</span> {
-        <span class="comment">// We implement the exception-free point doubling formula from</span>
-        <span class="comment">// Renes-Costello-Batina 2015 (Algorithm 6). The comments after each line</span>
-        <span class="comment">// indicate which algorithm steps are being performed.</span>
+    <span class="doccomment">/// Doubles this point.
+    </span><span class="kw">pub fn </span>double(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ProjectivePoint {
+        <span class="comment">// We implement the exception-free point doubling formula from
+        // Renes-Costello-Batina 2015 (Algorithm 6). The comments after each line
+        // indicate which algorithm steps are being performed.
 
-        <span class="kw">let</span> <span class="ident">xx</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">x</span>.<span class="ident">square</span>(); <span class="comment">// 1</span>
-        <span class="kw">let</span> <span class="ident">yy</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">y</span>.<span class="ident">square</span>(); <span class="comment">// 2</span>
-        <span class="kw">let</span> <span class="ident">zz</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">z</span>.<span class="ident">square</span>(); <span class="comment">// 3</span>
-        <span class="kw">let</span> <span class="ident">xy2</span> <span class="op">=</span> (<span class="self">self</span>.<span class="ident">x</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">y</span>).<span class="ident">double</span>(); <span class="comment">// 4, 5</span>
-        <span class="kw">let</span> <span class="ident">xz2</span> <span class="op">=</span> (<span class="self">self</span>.<span class="ident">x</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">z</span>).<span class="ident">double</span>(); <span class="comment">// 6, 7</span>
+        </span><span class="kw">let </span>xx = <span class="self">self</span>.x.square(); <span class="comment">// 1
+        </span><span class="kw">let </span>yy = <span class="self">self</span>.y.square(); <span class="comment">// 2
+        </span><span class="kw">let </span>zz = <span class="self">self</span>.z.square(); <span class="comment">// 3
+        </span><span class="kw">let </span>xy2 = (<span class="self">self</span>.x * <span class="kw-2">&amp;</span><span class="self">self</span>.y).double(); <span class="comment">// 4, 5
+        </span><span class="kw">let </span>xz2 = (<span class="self">self</span>.x * <span class="kw-2">&amp;</span><span class="self">self</span>.z).double(); <span class="comment">// 6, 7
 
-        <span class="kw">let</span> <span class="ident">bzz_part</span> <span class="op">=</span> (<span class="ident">CURVE_EQUATION_B</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">zz</span>) <span class="op">-</span> <span class="kw-2">&amp;</span><span class="ident">xz2</span>; <span class="comment">// 8, 9</span>
-        <span class="kw">let</span> <span class="ident">bzz3_part</span> <span class="op">=</span> <span class="ident">bzz_part</span>.<span class="ident">double</span>() <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">bzz_part</span>; <span class="comment">// 10, 11</span>
-        <span class="kw">let</span> <span class="ident">yy_m_bzz3</span> <span class="op">=</span> <span class="ident">yy</span> <span class="op">-</span> <span class="kw-2">&amp;</span><span class="ident">bzz3_part</span>; <span class="comment">// 12</span>
-        <span class="kw">let</span> <span class="ident">yy_p_bzz3</span> <span class="op">=</span> <span class="ident">yy</span> <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">bzz3_part</span>; <span class="comment">// 13</span>
-        <span class="kw">let</span> <span class="ident">y_frag</span> <span class="op">=</span> <span class="ident">yy_p_bzz3</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">yy_m_bzz3</span>; <span class="comment">// 14</span>
-        <span class="kw">let</span> <span class="ident">x_frag</span> <span class="op">=</span> <span class="ident">yy_m_bzz3</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">xy2</span>; <span class="comment">// 15</span>
+        </span><span class="kw">let </span>bzz_part = (CURVE_EQUATION_B * <span class="kw-2">&amp;</span>zz) - <span class="kw-2">&amp;</span>xz2; <span class="comment">// 8, 9
+        </span><span class="kw">let </span>bzz3_part = bzz_part.double() + <span class="kw-2">&amp;</span>bzz_part; <span class="comment">// 10, 11
+        </span><span class="kw">let </span>yy_m_bzz3 = yy - <span class="kw-2">&amp;</span>bzz3_part; <span class="comment">// 12
+        </span><span class="kw">let </span>yy_p_bzz3 = yy + <span class="kw-2">&amp;</span>bzz3_part; <span class="comment">// 13
+        </span><span class="kw">let </span>y_frag = yy_p_bzz3 * <span class="kw-2">&amp;</span>yy_m_bzz3; <span class="comment">// 14
+        </span><span class="kw">let </span>x_frag = yy_m_bzz3 * <span class="kw-2">&amp;</span>xy2; <span class="comment">// 15
 
-        <span class="kw">let</span> <span class="ident">zz3</span> <span class="op">=</span> <span class="ident">zz</span>.<span class="ident">double</span>() <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">zz</span>; <span class="comment">// 16, 17</span>
-        <span class="kw">let</span> <span class="ident">bxz2_part</span> <span class="op">=</span> (<span class="ident">CURVE_EQUATION_B</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">xz2</span>) <span class="op">-</span> <span class="kw-2">&amp;</span>(<span class="ident">zz3</span> <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">xx</span>); <span class="comment">// 18, 19, 20</span>
-        <span class="kw">let</span> <span class="ident">bxz6_part</span> <span class="op">=</span> <span class="ident">bxz2_part</span>.<span class="ident">double</span>() <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">bxz2_part</span>; <span class="comment">// 21, 22</span>
-        <span class="kw">let</span> <span class="ident">xx3_m_zz3</span> <span class="op">=</span> <span class="ident">xx</span>.<span class="ident">double</span>() <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">xx</span> <span class="op">-</span> <span class="kw-2">&amp;</span><span class="ident">zz3</span>; <span class="comment">// 23, 24, 25</span>
+        </span><span class="kw">let </span>zz3 = zz.double() + <span class="kw-2">&amp;</span>zz; <span class="comment">// 16, 17
+        </span><span class="kw">let </span>bxz2_part = (CURVE_EQUATION_B * <span class="kw-2">&amp;</span>xz2) - <span class="kw-2">&amp;</span>(zz3 + <span class="kw-2">&amp;</span>xx); <span class="comment">// 18, 19, 20
+        </span><span class="kw">let </span>bxz6_part = bxz2_part.double() + <span class="kw-2">&amp;</span>bxz2_part; <span class="comment">// 21, 22
+        </span><span class="kw">let </span>xx3_m_zz3 = xx.double() + <span class="kw-2">&amp;</span>xx - <span class="kw-2">&amp;</span>zz3; <span class="comment">// 23, 24, 25
 
-        <span class="kw">let</span> <span class="ident">y</span> <span class="op">=</span> <span class="ident">y_frag</span> <span class="op">+</span> <span class="kw-2">&amp;</span>(<span class="ident">xx3_m_zz3</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">bxz6_part</span>); <span class="comment">// 26, 27</span>
-        <span class="kw">let</span> <span class="ident">yz2</span> <span class="op">=</span> (<span class="self">self</span>.<span class="ident">y</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">z</span>).<span class="ident">double</span>(); <span class="comment">// 28, 29</span>
-        <span class="kw">let</span> <span class="ident">x</span> <span class="op">=</span> <span class="ident">x_frag</span> <span class="op">-</span> <span class="kw-2">&amp;</span>(<span class="ident">bxz6_part</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">yz2</span>); <span class="comment">// 30, 31</span>
-        <span class="kw">let</span> <span class="ident">z</span> <span class="op">=</span> (<span class="ident">yz2</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">yy</span>).<span class="ident">double</span>().<span class="ident">double</span>(); <span class="comment">// 32, 33, 34</span>
+        </span><span class="kw">let </span>y = y_frag + <span class="kw-2">&amp;</span>(xx3_m_zz3 * <span class="kw-2">&amp;</span>bxz6_part); <span class="comment">// 26, 27
+        </span><span class="kw">let </span>yz2 = (<span class="self">self</span>.y * <span class="kw-2">&amp;</span><span class="self">self</span>.z).double(); <span class="comment">// 28, 29
+        </span><span class="kw">let </span>x = x_frag - <span class="kw-2">&amp;</span>(bxz6_part * <span class="kw-2">&amp;</span>yz2); <span class="comment">// 30, 31
+        </span><span class="kw">let </span>z = (yz2 * <span class="kw-2">&amp;</span>yy).double().double(); <span class="comment">// 32, 33, 34
 
-        <span class="ident">ProjectivePoint</span> { <span class="ident">x</span>, <span class="ident">y</span>, <span class="ident">z</span> }
+        </span>ProjectivePoint { x, y, z }
     }
 
-    <span class="doccomment">/// Returns `self - other`.</span>
-    <span class="kw">fn</span> <span class="ident">sub</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="ident">ProjectivePoint</span>) -&gt; <span class="ident">ProjectivePoint</span> {
-        <span class="self">self</span>.<span class="ident">add</span>(<span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">neg</span>())
+    <span class="doccomment">/// Returns `self - other`.
+    </span><span class="kw">fn </span>sub(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span>ProjectivePoint) -&gt; ProjectivePoint {
+        <span class="self">self</span>.add(<span class="kw-2">&amp;</span>other.neg())
     }
 
-    <span class="doccomment">/// Returns `self - other`.</span>
-    <span class="kw">fn</span> <span class="ident">sub_mixed</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="ident">AffinePoint</span>) -&gt; <span class="ident">ProjectivePoint</span> {
-        <span class="self">self</span>.<span class="ident">add_mixed</span>(<span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">neg</span>())
+    <span class="doccomment">/// Returns `self - other`.
+    </span><span class="kw">fn </span>sub_mixed(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span>AffinePoint) -&gt; ProjectivePoint {
+        <span class="self">self</span>.add_mixed(<span class="kw-2">&amp;</span>other.neg())
     }
 
-    <span class="doccomment">/// Returns `[k] self`.</span>
-    <span class="kw">fn</span> <span class="ident">mul</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">k</span>: <span class="kw-2">&amp;</span><span class="ident">Scalar</span>) -&gt; <span class="ident">ProjectivePoint</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ret</span> <span class="op">=</span> <span class="ident">ProjectivePoint::identity</span>();
+    <span class="doccomment">/// Returns `[k] self`.
+    </span><span class="kw">fn </span>mul(<span class="kw-2">&amp;</span><span class="self">self</span>, k: <span class="kw-2">&amp;</span>Scalar) -&gt; ProjectivePoint {
+        <span class="kw">let </span><span class="kw-2">mut </span>ret = ProjectivePoint::identity();
 
-        <span class="kw">for</span> <span class="ident">limb</span> <span class="kw">in</span> <span class="ident">k</span>.<span class="number">0</span>.<span class="ident">iter</span>().<span class="ident">rev</span>() {
-            <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> (<span class="number">0</span>..<span class="number">64</span>).<span class="ident">rev</span>() {
-                <span class="ident">ret</span> <span class="op">=</span> <span class="ident">ret</span>.<span class="ident">double</span>();
-                <span class="ident">ret</span>.<span class="ident">conditional_assign</span>(<span class="kw-2">&amp;</span>(<span class="ident">ret</span> <span class="op">+</span> <span class="self">self</span>), <span class="ident">Choice::from</span>(((<span class="ident">limb</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">i</span>) <span class="op">&amp;</span> <span class="number">1u64</span>) <span class="kw">as</span> <span class="ident">u8</span>));
+        <span class="kw">for </span>limb <span class="kw">in </span>k.<span class="number">0</span>.iter().rev() {
+            <span class="kw">for </span>i <span class="kw">in </span>(<span class="number">0</span>..<span class="number">64</span>).rev() {
+                ret = ret.double();
+                ret.conditional_assign(<span class="kw-2">&amp;</span>(ret + <span class="self">self</span>), Choice::from(((limb &gt;&gt; i) &amp; <span class="number">1u64</span>) <span class="kw">as </span>u8));
             }
         }
 
-        <span class="ident">ret</span>
+        ret
     }
 }
 
-<span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">ProjectivePoint</span> {
-    <span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
-        <span class="ident"><span class="self">Self</span>::identity</span>()
+<span class="kw">impl </span>Default <span class="kw">for </span>ProjectivePoint {
+    <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>::identity()
     }
 }
 
-<span class="kw">impl</span> <span class="ident">Add</span><span class="op">&lt;</span><span class="ident">ProjectivePoint</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ProjectivePoint</span> {
-    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">ProjectivePoint</span>;
+<span class="kw">impl </span>Add&lt;ProjectivePoint&gt; <span class="kw">for </span>ProjectivePoint {
+    <span class="kw">type </span>Output = ProjectivePoint;
 
-    <span class="kw">fn</span> <span class="ident">add</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="ident">ProjectivePoint</span>) -&gt; <span class="ident">ProjectivePoint</span> {
-        <span class="ident">ProjectivePoint::add</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">&amp;</span><span class="ident">other</span>)
+    <span class="kw">fn </span>add(<span class="self">self</span>, other: ProjectivePoint) -&gt; ProjectivePoint {
+        ProjectivePoint::add(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">&amp;</span>other)
     }
 }
 
-<span class="kw">impl</span> <span class="ident">Add</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">ProjectivePoint</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="ident">ProjectivePoint</span> {
-    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">ProjectivePoint</span>;
+<span class="kw">impl </span>Add&lt;<span class="kw-2">&amp;</span>ProjectivePoint&gt; <span class="kw">for </span><span class="kw-2">&amp;</span>ProjectivePoint {
+    <span class="kw">type </span>Output = ProjectivePoint;
 
-    <span class="kw">fn</span> <span class="ident">add</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="ident">ProjectivePoint</span>) -&gt; <span class="ident">ProjectivePoint</span> {
-        <span class="ident">ProjectivePoint::add</span>(<span class="self">self</span>, <span class="ident">other</span>)
+    <span class="kw">fn </span>add(<span class="self">self</span>, other: <span class="kw-2">&amp;</span>ProjectivePoint) -&gt; ProjectivePoint {
+        ProjectivePoint::add(<span class="self">self</span>, other)
     }
 }
 
-<span class="kw">impl</span> <span class="ident">Add</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">ProjectivePoint</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ProjectivePoint</span> {
-    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">ProjectivePoint</span>;
+<span class="kw">impl </span>Add&lt;<span class="kw-2">&amp;</span>ProjectivePoint&gt; <span class="kw">for </span>ProjectivePoint {
+    <span class="kw">type </span>Output = ProjectivePoint;
 
-    <span class="kw">fn</span> <span class="ident">add</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="ident">ProjectivePoint</span>) -&gt; <span class="ident">ProjectivePoint</span> {
-        <span class="ident">ProjectivePoint::add</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>)
+    <span class="kw">fn </span>add(<span class="self">self</span>, other: <span class="kw-2">&amp;</span>ProjectivePoint) -&gt; ProjectivePoint {
+        ProjectivePoint::add(<span class="kw-2">&amp;</span><span class="self">self</span>, other)
     }
 }
 
-<span class="kw">impl</span> <span class="ident">AddAssign</span><span class="op">&lt;</span><span class="ident">ProjectivePoint</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ProjectivePoint</span> {
-    <span class="kw">fn</span> <span class="ident">add_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">rhs</span>: <span class="ident">ProjectivePoint</span>) {
-        <span class="kw-2">*</span><span class="self">self</span> <span class="op">=</span> <span class="ident">ProjectivePoint::add</span>(<span class="self">self</span>, <span class="kw-2">&amp;</span><span class="ident">rhs</span>);
+<span class="kw">impl </span>AddAssign&lt;ProjectivePoint&gt; <span class="kw">for </span>ProjectivePoint {
+    <span class="kw">fn </span>add_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, rhs: ProjectivePoint) {
+        <span class="kw-2">*</span><span class="self">self </span>= ProjectivePoint::add(<span class="self">self</span>, <span class="kw-2">&amp;</span>rhs);
     }
 }
 
-<span class="kw">impl</span> <span class="ident">AddAssign</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">ProjectivePoint</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ProjectivePoint</span> {
-    <span class="kw">fn</span> <span class="ident">add_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">rhs</span>: <span class="kw-2">&amp;</span><span class="ident">ProjectivePoint</span>) {
-        <span class="kw-2">*</span><span class="self">self</span> <span class="op">=</span> <span class="ident">ProjectivePoint::add</span>(<span class="self">self</span>, <span class="ident">rhs</span>);
+<span class="kw">impl </span>AddAssign&lt;<span class="kw-2">&amp;</span>ProjectivePoint&gt; <span class="kw">for </span>ProjectivePoint {
+    <span class="kw">fn </span>add_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, rhs: <span class="kw-2">&amp;</span>ProjectivePoint) {
+        <span class="kw-2">*</span><span class="self">self </span>= ProjectivePoint::add(<span class="self">self</span>, rhs);
     }
 }
 
-<span class="kw">impl</span> <span class="ident">Add</span><span class="op">&lt;</span><span class="ident">AffinePoint</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ProjectivePoint</span> {
-    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">ProjectivePoint</span>;
+<span class="kw">impl </span>Add&lt;AffinePoint&gt; <span class="kw">for </span>ProjectivePoint {
+    <span class="kw">type </span>Output = ProjectivePoint;
 
-    <span class="kw">fn</span> <span class="ident">add</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="ident">AffinePoint</span>) -&gt; <span class="ident">ProjectivePoint</span> {
-        <span class="ident">ProjectivePoint::add_mixed</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">&amp;</span><span class="ident">other</span>)
+    <span class="kw">fn </span>add(<span class="self">self</span>, other: AffinePoint) -&gt; ProjectivePoint {
+        ProjectivePoint::add_mixed(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">&amp;</span>other)
     }
 }
 
-<span class="kw">impl</span> <span class="ident">Add</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">AffinePoint</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="ident">ProjectivePoint</span> {
-    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">ProjectivePoint</span>;
+<span class="kw">impl </span>Add&lt;<span class="kw-2">&amp;</span>AffinePoint&gt; <span class="kw">for </span><span class="kw-2">&amp;</span>ProjectivePoint {
+    <span class="kw">type </span>Output = ProjectivePoint;
 
-    <span class="kw">fn</span> <span class="ident">add</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="ident">AffinePoint</span>) -&gt; <span class="ident">ProjectivePoint</span> {
-        <span class="ident">ProjectivePoint::add_mixed</span>(<span class="self">self</span>, <span class="ident">other</span>)
+    <span class="kw">fn </span>add(<span class="self">self</span>, other: <span class="kw-2">&amp;</span>AffinePoint) -&gt; ProjectivePoint {
+        ProjectivePoint::add_mixed(<span class="self">self</span>, other)
     }
 }
 
-<span class="kw">impl</span> <span class="ident">Add</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">AffinePoint</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ProjectivePoint</span> {
-    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">ProjectivePoint</span>;
+<span class="kw">impl </span>Add&lt;<span class="kw-2">&amp;</span>AffinePoint&gt; <span class="kw">for </span>ProjectivePoint {
+    <span class="kw">type </span>Output = ProjectivePoint;
 
-    <span class="kw">fn</span> <span class="ident">add</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="ident">AffinePoint</span>) -&gt; <span class="ident">ProjectivePoint</span> {
-        <span class="ident">ProjectivePoint::add_mixed</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>)
+    <span class="kw">fn </span>add(<span class="self">self</span>, other: <span class="kw-2">&amp;</span>AffinePoint) -&gt; ProjectivePoint {
+        ProjectivePoint::add_mixed(<span class="kw-2">&amp;</span><span class="self">self</span>, other)
     }
 }
 
-<span class="kw">impl</span> <span class="ident">AddAssign</span><span class="op">&lt;</span><span class="ident">AffinePoint</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ProjectivePoint</span> {
-    <span class="kw">fn</span> <span class="ident">add_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">rhs</span>: <span class="ident">AffinePoint</span>) {
-        <span class="kw-2">*</span><span class="self">self</span> <span class="op">=</span> <span class="ident">ProjectivePoint::add_mixed</span>(<span class="self">self</span>, <span class="kw-2">&amp;</span><span class="ident">rhs</span>);
+<span class="kw">impl </span>AddAssign&lt;AffinePoint&gt; <span class="kw">for </span>ProjectivePoint {
+    <span class="kw">fn </span>add_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, rhs: AffinePoint) {
+        <span class="kw-2">*</span><span class="self">self </span>= ProjectivePoint::add_mixed(<span class="self">self</span>, <span class="kw-2">&amp;</span>rhs);
     }
 }
 
-<span class="kw">impl</span> <span class="ident">AddAssign</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">AffinePoint</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ProjectivePoint</span> {
-    <span class="kw">fn</span> <span class="ident">add_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">rhs</span>: <span class="kw-2">&amp;</span><span class="ident">AffinePoint</span>) {
-        <span class="kw-2">*</span><span class="self">self</span> <span class="op">=</span> <span class="ident">ProjectivePoint::add_mixed</span>(<span class="self">self</span>, <span class="ident">rhs</span>);
+<span class="kw">impl </span>AddAssign&lt;<span class="kw-2">&amp;</span>AffinePoint&gt; <span class="kw">for </span>ProjectivePoint {
+    <span class="kw">fn </span>add_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, rhs: <span class="kw-2">&amp;</span>AffinePoint) {
+        <span class="kw-2">*</span><span class="self">self </span>= ProjectivePoint::add_mixed(<span class="self">self</span>, rhs);
     }
 }
 
-<span class="kw">impl</span> <span class="ident">Sum</span> <span class="kw">for</span> <span class="ident">ProjectivePoint</span> {
-    <span class="kw">fn</span> <span class="ident">sum</span><span class="op">&lt;</span><span class="ident">I</span>: <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="self">Self</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">iter</span>: <span class="ident">I</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">iter</span>.<span class="ident">fold</span>(<span class="ident">ProjectivePoint::identity</span>(), <span class="op">|</span><span class="ident">a</span>, <span class="ident">b</span><span class="op">|</span> <span class="ident">a</span> <span class="op">+</span> <span class="ident">b</span>)
+<span class="kw">impl </span>Sum <span class="kw">for </span>ProjectivePoint {
+    <span class="kw">fn </span>sum&lt;I: Iterator&lt;Item = <span class="self">Self</span>&gt;&gt;(iter: I) -&gt; <span class="self">Self </span>{
+        iter.fold(ProjectivePoint::identity(), |a, b| a + b)
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Sum</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">ProjectivePoint</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ProjectivePoint</span> {
-    <span class="kw">fn</span> <span class="ident">sum</span><span class="op">&lt;</span><span class="ident">I</span>: <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">ProjectivePoint</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">iter</span>: <span class="ident">I</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">iter</span>.<span class="ident">cloned</span>().<span class="ident">sum</span>()
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Sum&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>ProjectivePoint&gt; <span class="kw">for </span>ProjectivePoint {
+    <span class="kw">fn </span>sum&lt;I: Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>ProjectivePoint&gt;&gt;(iter: I) -&gt; <span class="self">Self </span>{
+        iter.cloned().sum()
     }
 }
 
-<span class="kw">impl</span> <span class="ident">Sub</span><span class="op">&lt;</span><span class="ident">ProjectivePoint</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ProjectivePoint</span> {
-    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">ProjectivePoint</span>;
+<span class="kw">impl </span>Sub&lt;ProjectivePoint&gt; <span class="kw">for </span>ProjectivePoint {
+    <span class="kw">type </span>Output = ProjectivePoint;
 
-    <span class="kw">fn</span> <span class="ident">sub</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="ident">ProjectivePoint</span>) -&gt; <span class="ident">ProjectivePoint</span> {
-        <span class="ident">ProjectivePoint::sub</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">&amp;</span><span class="ident">other</span>)
+    <span class="kw">fn </span>sub(<span class="self">self</span>, other: ProjectivePoint) -&gt; ProjectivePoint {
+        ProjectivePoint::sub(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">&amp;</span>other)
     }
 }
 
-<span class="kw">impl</span> <span class="ident">Sub</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">ProjectivePoint</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="ident">ProjectivePoint</span> {
-    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">ProjectivePoint</span>;
+<span class="kw">impl </span>Sub&lt;<span class="kw-2">&amp;</span>ProjectivePoint&gt; <span class="kw">for </span><span class="kw-2">&amp;</span>ProjectivePoint {
+    <span class="kw">type </span>Output = ProjectivePoint;
 
-    <span class="kw">fn</span> <span class="ident">sub</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="ident">ProjectivePoint</span>) -&gt; <span class="ident">ProjectivePoint</span> {
-        <span class="ident">ProjectivePoint::sub</span>(<span class="self">self</span>, <span class="ident">other</span>)
+    <span class="kw">fn </span>sub(<span class="self">self</span>, other: <span class="kw-2">&amp;</span>ProjectivePoint) -&gt; ProjectivePoint {
+        ProjectivePoint::sub(<span class="self">self</span>, other)
     }
 }
 
-<span class="kw">impl</span> <span class="ident">Sub</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">ProjectivePoint</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ProjectivePoint</span> {
-    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">ProjectivePoint</span>;
+<span class="kw">impl </span>Sub&lt;<span class="kw-2">&amp;</span>ProjectivePoint&gt; <span class="kw">for </span>ProjectivePoint {
+    <span class="kw">type </span>Output = ProjectivePoint;
 
-    <span class="kw">fn</span> <span class="ident">sub</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="ident">ProjectivePoint</span>) -&gt; <span class="ident">ProjectivePoint</span> {
-        <span class="ident">ProjectivePoint::sub</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>)
+    <span class="kw">fn </span>sub(<span class="self">self</span>, other: <span class="kw-2">&amp;</span>ProjectivePoint) -&gt; ProjectivePoint {
+        ProjectivePoint::sub(<span class="kw-2">&amp;</span><span class="self">self</span>, other)
     }
 }
 
-<span class="kw">impl</span> <span class="ident">SubAssign</span><span class="op">&lt;</span><span class="ident">ProjectivePoint</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ProjectivePoint</span> {
-    <span class="kw">fn</span> <span class="ident">sub_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">rhs</span>: <span class="ident">ProjectivePoint</span>) {
-        <span class="kw-2">*</span><span class="self">self</span> <span class="op">=</span> <span class="ident">ProjectivePoint::sub</span>(<span class="self">self</span>, <span class="kw-2">&amp;</span><span class="ident">rhs</span>);
+<span class="kw">impl </span>SubAssign&lt;ProjectivePoint&gt; <span class="kw">for </span>ProjectivePoint {
+    <span class="kw">fn </span>sub_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, rhs: ProjectivePoint) {
+        <span class="kw-2">*</span><span class="self">self </span>= ProjectivePoint::sub(<span class="self">self</span>, <span class="kw-2">&amp;</span>rhs);
     }
 }
 
-<span class="kw">impl</span> <span class="ident">SubAssign</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">ProjectivePoint</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ProjectivePoint</span> {
-    <span class="kw">fn</span> <span class="ident">sub_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">rhs</span>: <span class="kw-2">&amp;</span><span class="ident">ProjectivePoint</span>) {
-        <span class="kw-2">*</span><span class="self">self</span> <span class="op">=</span> <span class="ident">ProjectivePoint::sub</span>(<span class="self">self</span>, <span class="ident">rhs</span>);
+<span class="kw">impl </span>SubAssign&lt;<span class="kw-2">&amp;</span>ProjectivePoint&gt; <span class="kw">for </span>ProjectivePoint {
+    <span class="kw">fn </span>sub_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, rhs: <span class="kw-2">&amp;</span>ProjectivePoint) {
+        <span class="kw-2">*</span><span class="self">self </span>= ProjectivePoint::sub(<span class="self">self</span>, rhs);
     }
 }
 
-<span class="kw">impl</span> <span class="ident">Sub</span><span class="op">&lt;</span><span class="ident">AffinePoint</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ProjectivePoint</span> {
-    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">ProjectivePoint</span>;
+<span class="kw">impl </span>Sub&lt;AffinePoint&gt; <span class="kw">for </span>ProjectivePoint {
+    <span class="kw">type </span>Output = ProjectivePoint;
 
-    <span class="kw">fn</span> <span class="ident">sub</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="ident">AffinePoint</span>) -&gt; <span class="ident">ProjectivePoint</span> {
-        <span class="ident">ProjectivePoint::sub_mixed</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">&amp;</span><span class="ident">other</span>)
+    <span class="kw">fn </span>sub(<span class="self">self</span>, other: AffinePoint) -&gt; ProjectivePoint {
+        ProjectivePoint::sub_mixed(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">&amp;</span>other)
     }
 }
 
-<span class="kw">impl</span> <span class="ident">Sub</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">AffinePoint</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="ident">ProjectivePoint</span> {
-    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">ProjectivePoint</span>;
+<span class="kw">impl </span>Sub&lt;<span class="kw-2">&amp;</span>AffinePoint&gt; <span class="kw">for </span><span class="kw-2">&amp;</span>ProjectivePoint {
+    <span class="kw">type </span>Output = ProjectivePoint;
 
-    <span class="kw">fn</span> <span class="ident">sub</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="ident">AffinePoint</span>) -&gt; <span class="ident">ProjectivePoint</span> {
-        <span class="ident">ProjectivePoint::sub_mixed</span>(<span class="self">self</span>, <span class="ident">other</span>)
+    <span class="kw">fn </span>sub(<span class="self">self</span>, other: <span class="kw-2">&amp;</span>AffinePoint) -&gt; ProjectivePoint {
+        ProjectivePoint::sub_mixed(<span class="self">self</span>, other)
     }
 }
 
-<span class="kw">impl</span> <span class="ident">Sub</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">AffinePoint</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ProjectivePoint</span> {
-    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">ProjectivePoint</span>;
+<span class="kw">impl </span>Sub&lt;<span class="kw-2">&amp;</span>AffinePoint&gt; <span class="kw">for </span>ProjectivePoint {
+    <span class="kw">type </span>Output = ProjectivePoint;
 
-    <span class="kw">fn</span> <span class="ident">sub</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="ident">AffinePoint</span>) -&gt; <span class="ident">ProjectivePoint</span> {
-        <span class="ident">ProjectivePoint::sub_mixed</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>)
+    <span class="kw">fn </span>sub(<span class="self">self</span>, other: <span class="kw-2">&amp;</span>AffinePoint) -&gt; ProjectivePoint {
+        ProjectivePoint::sub_mixed(<span class="kw-2">&amp;</span><span class="self">self</span>, other)
     }
 }
 
-<span class="kw">impl</span> <span class="ident">SubAssign</span><span class="op">&lt;</span><span class="ident">AffinePoint</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ProjectivePoint</span> {
-    <span class="kw">fn</span> <span class="ident">sub_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">rhs</span>: <span class="ident">AffinePoint</span>) {
-        <span class="kw-2">*</span><span class="self">self</span> <span class="op">=</span> <span class="ident">ProjectivePoint::sub_mixed</span>(<span class="self">self</span>, <span class="kw-2">&amp;</span><span class="ident">rhs</span>);
+<span class="kw">impl </span>SubAssign&lt;AffinePoint&gt; <span class="kw">for </span>ProjectivePoint {
+    <span class="kw">fn </span>sub_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, rhs: AffinePoint) {
+        <span class="kw-2">*</span><span class="self">self </span>= ProjectivePoint::sub_mixed(<span class="self">self</span>, <span class="kw-2">&amp;</span>rhs);
     }
 }
 
-<span class="kw">impl</span> <span class="ident">SubAssign</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">AffinePoint</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ProjectivePoint</span> {
-    <span class="kw">fn</span> <span class="ident">sub_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">rhs</span>: <span class="kw-2">&amp;</span><span class="ident">AffinePoint</span>) {
-        <span class="kw-2">*</span><span class="self">self</span> <span class="op">=</span> <span class="ident">ProjectivePoint::sub_mixed</span>(<span class="self">self</span>, <span class="ident">rhs</span>);
+<span class="kw">impl </span>SubAssign&lt;<span class="kw-2">&amp;</span>AffinePoint&gt; <span class="kw">for </span>ProjectivePoint {
+    <span class="kw">fn </span>sub_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, rhs: <span class="kw-2">&amp;</span>AffinePoint) {
+        <span class="kw-2">*</span><span class="self">self </span>= ProjectivePoint::sub_mixed(<span class="self">self</span>, rhs);
     }
 }
 
-<span class="kw">impl</span> <span class="ident">Mul</span><span class="op">&lt;</span><span class="ident">Scalar</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ProjectivePoint</span> {
-    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">ProjectivePoint</span>;
+<span class="kw">impl </span>Mul&lt;Scalar&gt; <span class="kw">for </span>ProjectivePoint {
+    <span class="kw">type </span>Output = ProjectivePoint;
 
-    <span class="kw">fn</span> <span class="ident">mul</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="ident">Scalar</span>) -&gt; <span class="ident">ProjectivePoint</span> {
-        <span class="ident">ProjectivePoint::mul</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">&amp;</span><span class="ident">other</span>)
+    <span class="kw">fn </span>mul(<span class="self">self</span>, other: Scalar) -&gt; ProjectivePoint {
+        ProjectivePoint::mul(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">&amp;</span>other)
     }
 }
 
-<span class="kw">impl</span> <span class="ident">Mul</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Scalar</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="ident">ProjectivePoint</span> {
-    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">ProjectivePoint</span>;
+<span class="kw">impl </span>Mul&lt;<span class="kw-2">&amp;</span>Scalar&gt; <span class="kw">for </span><span class="kw-2">&amp;</span>ProjectivePoint {
+    <span class="kw">type </span>Output = ProjectivePoint;
 
-    <span class="kw">fn</span> <span class="ident">mul</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="ident">Scalar</span>) -&gt; <span class="ident">ProjectivePoint</span> {
-        <span class="ident">ProjectivePoint::mul</span>(<span class="self">self</span>, <span class="ident">other</span>)
+    <span class="kw">fn </span>mul(<span class="self">self</span>, other: <span class="kw-2">&amp;</span>Scalar) -&gt; ProjectivePoint {
+        ProjectivePoint::mul(<span class="self">self</span>, other)
     }
 }
 
-<span class="kw">impl</span> <span class="ident">Mul</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Scalar</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ProjectivePoint</span> {
-    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">ProjectivePoint</span>;
+<span class="kw">impl </span>Mul&lt;<span class="kw-2">&amp;</span>Scalar&gt; <span class="kw">for </span>ProjectivePoint {
+    <span class="kw">type </span>Output = ProjectivePoint;
 
-    <span class="kw">fn</span> <span class="ident">mul</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="ident">Scalar</span>) -&gt; <span class="ident">ProjectivePoint</span> {
-        <span class="ident">ProjectivePoint::mul</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>)
+    <span class="kw">fn </span>mul(<span class="self">self</span>, other: <span class="kw-2">&amp;</span>Scalar) -&gt; ProjectivePoint {
+        ProjectivePoint::mul(<span class="kw-2">&amp;</span><span class="self">self</span>, other)
     }
 }
 
-<span class="kw">impl</span> <span class="ident">MulAssign</span><span class="op">&lt;</span><span class="ident">Scalar</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ProjectivePoint</span> {
-    <span class="kw">fn</span> <span class="ident">mul_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">rhs</span>: <span class="ident">Scalar</span>) {
-        <span class="kw-2">*</span><span class="self">self</span> <span class="op">=</span> <span class="ident">ProjectivePoint::mul</span>(<span class="self">self</span>, <span class="kw-2">&amp;</span><span class="ident">rhs</span>);
+<span class="kw">impl </span>MulAssign&lt;Scalar&gt; <span class="kw">for </span>ProjectivePoint {
+    <span class="kw">fn </span>mul_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, rhs: Scalar) {
+        <span class="kw-2">*</span><span class="self">self </span>= ProjectivePoint::mul(<span class="self">self</span>, <span class="kw-2">&amp;</span>rhs);
     }
 }
 
-<span class="kw">impl</span> <span class="ident">MulAssign</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Scalar</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ProjectivePoint</span> {
-    <span class="kw">fn</span> <span class="ident">mul_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">rhs</span>: <span class="kw-2">&amp;</span><span class="ident">Scalar</span>) {
-        <span class="kw-2">*</span><span class="self">self</span> <span class="op">=</span> <span class="ident">ProjectivePoint::mul</span>(<span class="self">self</span>, <span class="ident">rhs</span>);
+<span class="kw">impl </span>MulAssign&lt;<span class="kw-2">&amp;</span>Scalar&gt; <span class="kw">for </span>ProjectivePoint {
+    <span class="kw">fn </span>mul_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, rhs: <span class="kw-2">&amp;</span>Scalar) {
+        <span class="kw-2">*</span><span class="self">self </span>= ProjectivePoint::mul(<span class="self">self</span>, rhs);
     }
 }
 
-<span class="kw">impl</span> <span class="ident">Neg</span> <span class="kw">for</span> <span class="ident">ProjectivePoint</span> {
-    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">ProjectivePoint</span>;
+<span class="kw">impl </span>Neg <span class="kw">for </span>ProjectivePoint {
+    <span class="kw">type </span>Output = ProjectivePoint;
 
-    <span class="kw">fn</span> <span class="ident">neg</span>(<span class="self">self</span>) -&gt; <span class="ident">ProjectivePoint</span> {
-        <span class="ident">ProjectivePoint::neg</span>(<span class="kw-2">&amp;</span><span class="self">self</span>)
+    <span class="kw">fn </span>neg(<span class="self">self</span>) -&gt; ProjectivePoint {
+        ProjectivePoint::neg(<span class="kw-2">&amp;</span><span class="self">self</span>)
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Neg</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">ProjectivePoint</span> {
-    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">ProjectivePoint</span>;
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Neg <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>ProjectivePoint {
+    <span class="kw">type </span>Output = ProjectivePoint;
 
-    <span class="kw">fn</span> <span class="ident">neg</span>(<span class="self">self</span>) -&gt; <span class="ident">ProjectivePoint</span> {
-        <span class="ident">ProjectivePoint::neg</span>(<span class="self">self</span>)
+    <span class="kw">fn </span>neg(<span class="self">self</span>) -&gt; ProjectivePoint {
+        ProjectivePoint::neg(<span class="self">self</span>)
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
-<span class="kw">mod</span> <span class="ident">tests</span> {
-    <span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">AffinePoint</span>, <span class="ident">ProjectivePoint</span>, <span class="ident">Scalar</span>};
-    <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::test_vectors::group</span>::{<span class="ident">ADD_TEST_VECTORS</span>, <span class="ident">MUL_TEST_VECTORS</span>};
-    <span class="kw">use</span> <span class="ident">elliptic_curve::group</span>::{<span class="ident">ff::PrimeField</span>, <span class="ident">prime::PrimeCurveAffine</span>};
+<span class="attribute">#[cfg(test)]
+</span><span class="kw">mod </span>tests {
+    <span class="kw">use super</span>::{AffinePoint, ProjectivePoint, Scalar};
+    <span class="kw">use </span><span class="kw">crate</span>::test_vectors::group::{ADD_TEST_VECTORS, MUL_TEST_VECTORS};
+    <span class="kw">use </span>elliptic_curve::group::{ff::PrimeField, prime::PrimeCurveAffine};
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">affine_to_projective</span>() {
-        <span class="kw">let</span> <span class="ident">basepoint_affine</span> <span class="op">=</span> <span class="ident">AffinePoint::generator</span>();
-        <span class="kw">let</span> <span class="ident">basepoint_projective</span> <span class="op">=</span> <span class="ident">ProjectivePoint::generator</span>();
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>affine_to_projective() {
+        <span class="kw">let </span>basepoint_affine = AffinePoint::generator();
+        <span class="kw">let </span>basepoint_projective = ProjectivePoint::generator();
 
         <span class="macro">assert_eq!</span>(
-            <span class="ident">ProjectivePoint::from</span>(<span class="ident">basepoint_affine</span>),
-            <span class="ident">basepoint_projective</span>,
+            ProjectivePoint::from(basepoint_affine),
+            basepoint_projective,
         );
-        <span class="macro">assert_eq!</span>(<span class="ident">basepoint_projective</span>.<span class="ident">to_affine</span>(), <span class="ident">basepoint_affine</span>);
-        <span class="macro">assert!</span>(<span class="op">!</span><span class="ident">bool::from</span>(<span class="ident">basepoint_projective</span>.<span class="ident">to_affine</span>().<span class="ident">is_identity</span>()));
+        <span class="macro">assert_eq!</span>(basepoint_projective.to_affine(), basepoint_affine);
+        <span class="macro">assert!</span>(!bool::from(basepoint_projective.to_affine().is_identity()));
 
-        <span class="macro">assert!</span>(<span class="ident">bool::from</span>(
-            <span class="ident">ProjectivePoint::identity</span>().<span class="ident">to_affine</span>().<span class="ident">is_identity</span>()
+        <span class="macro">assert!</span>(bool::from(
+            ProjectivePoint::identity().to_affine().is_identity()
         ));
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">projective_identity_addition</span>() {
-        <span class="kw">let</span> <span class="ident">identity</span> <span class="op">=</span> <span class="ident">ProjectivePoint::identity</span>();
-        <span class="kw">let</span> <span class="ident">generator</span> <span class="op">=</span> <span class="ident">ProjectivePoint::generator</span>();
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>projective_identity_addition() {
+        <span class="kw">let </span>identity = ProjectivePoint::identity();
+        <span class="kw">let </span>generator = ProjectivePoint::generator();
 
-        <span class="macro">assert_eq!</span>(<span class="ident">identity</span> <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">generator</span>, <span class="ident">generator</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">generator</span> <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">identity</span>, <span class="ident">generator</span>);
+        <span class="macro">assert_eq!</span>(identity + <span class="kw-2">&amp;</span>generator, generator);
+        <span class="macro">assert_eq!</span>(generator + <span class="kw-2">&amp;</span>identity, generator);
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">projective_mixed_addition</span>() {
-        <span class="kw">let</span> <span class="ident">identity</span> <span class="op">=</span> <span class="ident">ProjectivePoint::identity</span>();
-        <span class="kw">let</span> <span class="ident">basepoint_affine</span> <span class="op">=</span> <span class="ident">AffinePoint::generator</span>();
-        <span class="kw">let</span> <span class="ident">basepoint_projective</span> <span class="op">=</span> <span class="ident">ProjectivePoint::generator</span>();
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>projective_mixed_addition() {
+        <span class="kw">let </span>identity = ProjectivePoint::identity();
+        <span class="kw">let </span>basepoint_affine = AffinePoint::generator();
+        <span class="kw">let </span>basepoint_projective = ProjectivePoint::generator();
 
-        <span class="macro">assert_eq!</span>(<span class="ident">identity</span> <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">basepoint_affine</span>, <span class="ident">basepoint_projective</span>);
+        <span class="macro">assert_eq!</span>(identity + <span class="kw-2">&amp;</span>basepoint_affine, basepoint_projective);
         <span class="macro">assert_eq!</span>(
-            <span class="ident">basepoint_projective</span> <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">basepoint_affine</span>,
-            <span class="ident">basepoint_projective</span> <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">basepoint_projective</span>
+            basepoint_projective + <span class="kw-2">&amp;</span>basepoint_affine,
+            basepoint_projective + <span class="kw-2">&amp;</span>basepoint_projective
         );
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">test_vector_repeated_add</span>() {
-        <span class="kw">let</span> <span class="ident">generator</span> <span class="op">=</span> <span class="ident">ProjectivePoint::generator</span>();
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">p</span> <span class="op">=</span> <span class="ident">generator</span>;
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>test_vector_repeated_add() {
+        <span class="kw">let </span>generator = ProjectivePoint::generator();
+        <span class="kw">let </span><span class="kw-2">mut </span>p = generator;
 
-        <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">ADD_TEST_VECTORS</span>.<span class="ident">len</span>() {
-            <span class="kw">let</span> <span class="ident">affine</span> <span class="op">=</span> <span class="ident">p</span>.<span class="ident">to_affine</span>();
+        <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..ADD_TEST_VECTORS.len() {
+            <span class="kw">let </span>affine = p.to_affine();
 
-            <span class="kw">let</span> (<span class="ident">expected_x</span>, <span class="ident">expected_y</span>) <span class="op">=</span> <span class="ident">ADD_TEST_VECTORS</span>[<span class="ident">i</span>];
-            <span class="macro">assert_eq!</span>(<span class="ident">affine</span>.<span class="ident">x</span>.<span class="ident">to_bytes</span>(), <span class="ident">expected_x</span>.<span class="ident">into</span>());
-            <span class="macro">assert_eq!</span>(<span class="ident">affine</span>.<span class="ident">y</span>.<span class="ident">to_bytes</span>(), <span class="ident">expected_y</span>.<span class="ident">into</span>());
+            <span class="kw">let </span>(expected_x, expected_y) = ADD_TEST_VECTORS[i];
+            <span class="macro">assert_eq!</span>(affine.x.to_bytes(), expected_x.into());
+            <span class="macro">assert_eq!</span>(affine.y.to_bytes(), expected_y.into());
 
-            <span class="ident">p</span> <span class="op">+</span><span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">generator</span>;
+            p += <span class="kw-2">&amp;</span>generator;
         }
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">test_vector_repeated_add_mixed</span>() {
-        <span class="kw">let</span> <span class="ident">generator</span> <span class="op">=</span> <span class="ident">AffinePoint::generator</span>();
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">p</span> <span class="op">=</span> <span class="ident">ProjectivePoint::generator</span>();
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>test_vector_repeated_add_mixed() {
+        <span class="kw">let </span>generator = AffinePoint::generator();
+        <span class="kw">let </span><span class="kw-2">mut </span>p = ProjectivePoint::generator();
 
-        <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">ADD_TEST_VECTORS</span>.<span class="ident">len</span>() {
-            <span class="kw">let</span> <span class="ident">affine</span> <span class="op">=</span> <span class="ident">p</span>.<span class="ident">to_affine</span>();
+        <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..ADD_TEST_VECTORS.len() {
+            <span class="kw">let </span>affine = p.to_affine();
 
-            <span class="kw">let</span> (<span class="ident">expected_x</span>, <span class="ident">expected_y</span>) <span class="op">=</span> <span class="ident">ADD_TEST_VECTORS</span>[<span class="ident">i</span>];
-            <span class="macro">assert_eq!</span>(<span class="ident">affine</span>.<span class="ident">x</span>.<span class="ident">to_bytes</span>(), <span class="ident">expected_x</span>.<span class="ident">into</span>());
-            <span class="macro">assert_eq!</span>(<span class="ident">affine</span>.<span class="ident">y</span>.<span class="ident">to_bytes</span>(), <span class="ident">expected_y</span>.<span class="ident">into</span>());
+            <span class="kw">let </span>(expected_x, expected_y) = ADD_TEST_VECTORS[i];
+            <span class="macro">assert_eq!</span>(affine.x.to_bytes(), expected_x.into());
+            <span class="macro">assert_eq!</span>(affine.y.to_bytes(), expected_y.into());
 
-            <span class="ident">p</span> <span class="op">+</span><span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">generator</span>;
+            p += <span class="kw-2">&amp;</span>generator;
         }
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">test_vector_add_mixed_identity</span>() {
-        <span class="kw">let</span> <span class="ident">generator</span> <span class="op">=</span> <span class="ident">ProjectivePoint::generator</span>();
-        <span class="kw">let</span> <span class="ident">p0</span> <span class="op">=</span> <span class="ident">generator</span> <span class="op">+</span> <span class="ident">ProjectivePoint::identity</span>();
-        <span class="kw">let</span> <span class="ident">p1</span> <span class="op">=</span> <span class="ident">generator</span> <span class="op">+</span> <span class="ident">AffinePoint::identity</span>();
-        <span class="macro">assert_eq!</span>(<span class="ident">p0</span>, <span class="ident">p1</span>);
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>test_vector_add_mixed_identity() {
+        <span class="kw">let </span>generator = ProjectivePoint::generator();
+        <span class="kw">let </span>p0 = generator + ProjectivePoint::identity();
+        <span class="kw">let </span>p1 = generator + AffinePoint::identity();
+        <span class="macro">assert_eq!</span>(p0, p1);
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">test_vector_double_generator</span>() {
-        <span class="kw">let</span> <span class="ident">generator</span> <span class="op">=</span> <span class="ident">ProjectivePoint::generator</span>();
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">p</span> <span class="op">=</span> <span class="ident">generator</span>;
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>test_vector_double_generator() {
+        <span class="kw">let </span>generator = ProjectivePoint::generator();
+        <span class="kw">let </span><span class="kw-2">mut </span>p = generator;
 
-        <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="number">2</span> {
-            <span class="kw">let</span> <span class="ident">affine</span> <span class="op">=</span> <span class="ident">p</span>.<span class="ident">to_affine</span>();
+        <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..<span class="number">2 </span>{
+            <span class="kw">let </span>affine = p.to_affine();
 
-            <span class="kw">let</span> (<span class="ident">expected_x</span>, <span class="ident">expected_y</span>) <span class="op">=</span> <span class="ident">ADD_TEST_VECTORS</span>[<span class="ident">i</span>];
-            <span class="macro">assert_eq!</span>(<span class="ident">affine</span>.<span class="ident">x</span>.<span class="ident">to_bytes</span>(), <span class="ident">expected_x</span>.<span class="ident">into</span>());
-            <span class="macro">assert_eq!</span>(<span class="ident">affine</span>.<span class="ident">y</span>.<span class="ident">to_bytes</span>(), <span class="ident">expected_y</span>.<span class="ident">into</span>());
+            <span class="kw">let </span>(expected_x, expected_y) = ADD_TEST_VECTORS[i];
+            <span class="macro">assert_eq!</span>(affine.x.to_bytes(), expected_x.into());
+            <span class="macro">assert_eq!</span>(affine.y.to_bytes(), expected_y.into());
 
-            <span class="ident">p</span> <span class="op">=</span> <span class="ident">p</span>.<span class="ident">double</span>();
+            p = p.double();
         }
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">projective_add_vs_double</span>() {
-        <span class="kw">let</span> <span class="ident">generator</span> <span class="op">=</span> <span class="ident">ProjectivePoint::generator</span>();
-        <span class="macro">assert_eq!</span>(<span class="ident">generator</span> <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">generator</span>, <span class="ident">generator</span>.<span class="ident">double</span>());
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>projective_add_vs_double() {
+        <span class="kw">let </span>generator = ProjectivePoint::generator();
+        <span class="macro">assert_eq!</span>(generator + <span class="kw-2">&amp;</span>generator, generator.double());
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">projective_add_and_sub</span>() {
-        <span class="kw">let</span> <span class="ident">basepoint_affine</span> <span class="op">=</span> <span class="ident">AffinePoint::generator</span>();
-        <span class="kw">let</span> <span class="ident">basepoint_projective</span> <span class="op">=</span> <span class="ident">ProjectivePoint::generator</span>();
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>projective_add_and_sub() {
+        <span class="kw">let </span>basepoint_affine = AffinePoint::generator();
+        <span class="kw">let </span>basepoint_projective = ProjectivePoint::generator();
 
         <span class="macro">assert_eq!</span>(
-            (<span class="ident">basepoint_projective</span> <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">basepoint_projective</span>) <span class="op">-</span> <span class="kw-2">&amp;</span><span class="ident">basepoint_projective</span>,
-            <span class="ident">basepoint_projective</span>
+            (basepoint_projective + <span class="kw-2">&amp;</span>basepoint_projective) - <span class="kw-2">&amp;</span>basepoint_projective,
+            basepoint_projective
         );
         <span class="macro">assert_eq!</span>(
-            (<span class="ident">basepoint_projective</span> <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">basepoint_affine</span>) <span class="op">-</span> <span class="kw-2">&amp;</span><span class="ident">basepoint_affine</span>,
-            <span class="ident">basepoint_projective</span>
+            (basepoint_projective + <span class="kw-2">&amp;</span>basepoint_affine) - <span class="kw-2">&amp;</span>basepoint_affine,
+            basepoint_projective
         );
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">projective_double_and_sub</span>() {
-        <span class="kw">let</span> <span class="ident">generator</span> <span class="op">=</span> <span class="ident">ProjectivePoint::generator</span>();
-        <span class="macro">assert_eq!</span>(<span class="ident">generator</span>.<span class="ident">double</span>() <span class="op">-</span> <span class="kw-2">&amp;</span><span class="ident">generator</span>, <span class="ident">generator</span>);
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>projective_double_and_sub() {
+        <span class="kw">let </span>generator = ProjectivePoint::generator();
+        <span class="macro">assert_eq!</span>(generator.double() - <span class="kw-2">&amp;</span>generator, generator);
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">test_vector_scalar_mult</span>() {
-        <span class="kw">let</span> <span class="ident">generator</span> <span class="op">=</span> <span class="ident">ProjectivePoint::generator</span>();
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>test_vector_scalar_mult() {
+        <span class="kw">let </span>generator = ProjectivePoint::generator();
 
-        <span class="kw">for</span> (<span class="ident">k</span>, <span class="ident">coords</span>) <span class="kw">in</span> <span class="ident">ADD_TEST_VECTORS</span>
-            .<span class="ident">iter</span>()
-            .<span class="ident">enumerate</span>()
-            .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">k</span>, <span class="ident">coords</span>)<span class="op">|</span> (<span class="ident">Scalar::from</span>(<span class="ident">k</span> <span class="kw">as</span> <span class="ident">u64</span> <span class="op">+</span> <span class="number">1</span>), <span class="kw-2">*</span><span class="ident">coords</span>))
-            .<span class="ident">chain</span>(
-                <span class="ident">MUL_TEST_VECTORS</span>
-                    .<span class="ident">iter</span>()
-                    .<span class="ident">cloned</span>()
-                    .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">k</span>, <span class="ident">x</span>, <span class="ident">y</span>)<span class="op">|</span> (<span class="ident">Scalar::from_repr</span>(<span class="ident">k</span>.<span class="ident">into</span>()).<span class="ident">unwrap</span>(), (<span class="ident">x</span>, <span class="ident">y</span>))),
+        <span class="kw">for </span>(k, coords) <span class="kw">in </span>ADD_TEST_VECTORS
+            .iter()
+            .enumerate()
+            .map(|(k, coords)| (Scalar::from(k <span class="kw">as </span>u64 + <span class="number">1</span>), <span class="kw-2">*</span>coords))
+            .chain(
+                MUL_TEST_VECTORS
+                    .iter()
+                    .cloned()
+                    .map(|(k, x, y)| (Scalar::from_repr(k.into()).unwrap(), (x, y))),
             )
         {
-            <span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> (<span class="ident">generator</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">k</span>).<span class="ident">to_affine</span>();
-            <span class="macro">assert_eq!</span>(<span class="ident">res</span>.<span class="ident">x</span>.<span class="ident">to_bytes</span>(), <span class="ident">coords</span>.<span class="number">0</span>.<span class="ident">into</span>());
-            <span class="macro">assert_eq!</span>(<span class="ident">res</span>.<span class="ident">y</span>.<span class="ident">to_bytes</span>(), <span class="ident">coords</span>.<span class="number">1</span>.<span class="ident">into</span>());
+            <span class="kw">let </span>res = (generator * <span class="kw-2">&amp;</span>k).to_affine();
+            <span class="macro">assert_eq!</span>(res.x.to_bytes(), coords.<span class="number">0</span>.into());
+            <span class="macro">assert_eq!</span>(res.y.to_bytes(), coords.<span class="number">1</span>.into());
         }
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="p256" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="p256" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

@@ -1,4 +1,4 @@
-(function() {var implementors = {};
-implementors["heapless_bytes"] = [];
-implementors["typenum"] = [];
-if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()
+(function() {var implementors = {
+"heapless_bytes":[],
+"typenum":[]
+};if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

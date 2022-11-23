@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/littlefs2-0.3.2/src/io.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>io.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../littlefs2/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../littlefs2/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../littlefs2/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/littlefs2-0.3.2/src/io.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>io.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../littlefs2/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../littlefs2/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../littlefs2/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -170,26 +170,26 @@
 <span id="170">170</span>
 <span id="171">171</span>
 <span id="172">172</span>
-</pre><pre class="rust"><code><span class="doccomment">//! Traits and types for core I/O functionality.</span>
+</pre><pre class="rust"><code><span class="doccomment">//! Traits and types for core I/O functionality.
 
-<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">prelude</span>;
+</span><span class="kw">pub mod </span>prelude;
 
-<span class="kw">use</span> <span class="ident">littlefs2_sys</span> <span class="kw">as</span> <span class="ident">ll</span>;
+<span class="kw">use </span>littlefs2_sys <span class="kw">as </span>ll;
 
-<span class="doccomment">/// The `Read` trait allows for reading bytes from a file.</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Read</span> {
-    <span class="doccomment">/// Read at most buf.len() bytes.</span>
-    <span class="doccomment">/// Upon success, return how many bytes were read.</span>
-    <span class="kw">fn</span> <span class="ident">read</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">buf</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>;
+<span class="doccomment">/// The `Read` trait allows for reading bytes from a file.
+</span><span class="kw">pub trait </span>Read {
+    <span class="doccomment">/// Read at most buf.len() bytes.
+    /// Upon success, return how many bytes were read.
+    </span><span class="kw">fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, buf: <span class="kw-2">&amp;mut </span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt;;
 
-    <span class="kw">fn</span> <span class="ident">read_exact</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">buf</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="comment">// Same assumption as for `read_to_end`.</span>
-        <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">read</span>(<span class="ident">buf</span>)<span class="question-mark">?</span>;
-        <span class="kw">if</span> <span class="ident">len</span> <span class="op">==</span> <span class="ident">buf</span>.<span class="ident">len</span>() {
+    <span class="kw">fn </span>read_exact(<span class="kw-2">&amp;</span><span class="self">self</span>, buf: <span class="kw-2">&amp;mut </span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="comment">// Same assumption as for `read_to_end`.
+        </span><span class="kw">let </span>len = <span class="self">self</span>.read(buf)<span class="question-mark">?</span>;
+        <span class="kw">if </span>len == buf.len() {
             <span class="prelude-val">Ok</span>(())
-        } <span class="kw">else</span> {
-            <span class="comment">// TODO: Decide whether to add an equivalent of `ErrorKind::UnexpectedEof`</span>
-            <span class="prelude-val">Err</span>(<span class="ident">Error::Io</span>)
+        } <span class="kw">else </span>{
+            <span class="comment">// TODO: Decide whether to add an equivalent of `ErrorKind::UnexpectedEof`
+            </span><span class="prelude-val">Err</span>(Error::Io)
         }
     }
 
@@ -200,26 +200,26 @@
 By analogy with `std::io::Write`, we also define a `flush()`
 method. In the current implementation, writes are final and
 flush has no effect.
-*/</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Write</span> {
-    <span class="doccomment">/// Write at most data.len() bytes.</span>
-    <span class="doccomment">/// The file will not necessarily be updated unless</span>
-    <span class="doccomment">/// flush is called as there is a cache.</span>
-    <span class="doccomment">/// Upon success, return how many bytes were written.</span>
-    <span class="kw">fn</span> <span class="ident">write</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>;
+*/
+</span><span class="kw">pub trait </span>Write {
+    <span class="doccomment">/// Write at most data.len() bytes.
+    /// The file will not necessarily be updated unless
+    /// flush is called as there is a cache.
+    /// Upon success, return how many bytes were written.
+    </span><span class="kw">fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, data: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt;;
 
-    <span class="doccomment">/// Write out all pending writes to storage.</span>
-    <span class="kw">fn</span> <span class="ident">flush</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
+    <span class="doccomment">/// Write out all pending writes to storage.
+    </span><span class="kw">fn </span>flush(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt;;
 
-    <span class="kw">fn</span> <span class="ident">write_all</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">buf</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="kw">while</span> <span class="op">!</span><span class="ident">buf</span>.<span class="ident">is_empty</span>() {
-            <span class="kw">match</span> <span class="self">self</span>.<span class="ident">write</span>(<span class="ident">buf</span>) {
+    <span class="kw">fn </span>write_all(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut </span>buf: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">while </span>!buf.is_empty() {
+            <span class="kw">match </span><span class="self">self</span>.write(buf) {
                 <span class="prelude-val">Ok</span>(<span class="number">0</span>) =&gt; {
-                    <span class="comment">// failed to write whole buffer</span>
-                    <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::Io</span>)
+                    <span class="comment">// failed to write whole buffer
+                    </span><span class="kw">return </span><span class="prelude-val">Err</span>(Error::Io)
                 }
-                <span class="prelude-val">Ok</span>(<span class="ident">n</span>) =&gt; <span class="ident">buf</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">buf</span>[<span class="ident">n</span>..],
-                <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>),
+                <span class="prelude-val">Ok</span>(n) =&gt; buf = <span class="kw-2">&amp;</span>buf[n..],
+                <span class="prelude-val">Err</span>(e) =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(e),
             }
         }
         <span class="prelude-val">Ok</span>(())
@@ -229,28 +229,28 @@ flush has no effect.
 <span class="doccomment">/** Enumeration of possible methods to seek within an I/O object.
 
 Use the [`Seek`](../io/trait.Seek.html) trait.
-*/</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>,<span class="ident">Copy</span>,<span class="ident">Debug</span>,<span class="ident">Eq</span>,<span class="ident">PartialEq</span>)]</span>
-<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">SeekFrom</span> {
-    <span class="ident">Start</span>(<span class="ident">u32</span>),
-    <span class="ident">End</span>(<span class="ident">i32</span>),
-    <span class="ident">Current</span>(<span class="ident">i32</span>),
+*/
+</span><span class="attribute">#[derive(Clone,Copy,Debug,Eq,PartialEq)]
+</span><span class="kw">pub enum </span>SeekFrom {
+    Start(u32),
+    End(i32),
+    Current(i32),
 }
 
-<span class="kw">impl</span> <span class="ident">SeekFrom</span> {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">off</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
-        <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident">SeekFrom::Start</span>(<span class="ident">u</span>) =&gt; <span class="ident">u</span> <span class="kw">as</span> <span class="ident">i32</span>,
-            <span class="ident">SeekFrom::End</span>(<span class="ident">i</span>) =&gt; <span class="ident">i</span>,
-            <span class="ident">SeekFrom::Current</span>(<span class="ident">i</span>) =&gt; <span class="ident">i</span>,
+<span class="kw">impl </span>SeekFrom {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>off(<span class="self">self</span>) -&gt; i32 {
+        <span class="kw">match </span><span class="self">self </span>{
+            SeekFrom::Start(u) =&gt; u <span class="kw">as </span>i32,
+            SeekFrom::End(i) =&gt; i,
+            SeekFrom::Current(i) =&gt; i,
         }
     }
 
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">whence</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
-        <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident">SeekFrom::Start</span>(<span class="kw">_</span>) =&gt; <span class="number">0</span>,
-            <span class="ident">SeekFrom::End</span>(<span class="kw">_</span>) =&gt; <span class="number">2</span>,
-            <span class="ident">SeekFrom::Current</span>(<span class="kw">_</span>) =&gt; <span class="number">1</span>,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>whence(<span class="self">self</span>) -&gt; i32 {
+        <span class="kw">match </span><span class="self">self </span>{
+            SeekFrom::Start(<span class="kw">_</span>) =&gt; <span class="number">0</span>,
+            SeekFrom::End(<span class="kw">_</span>) =&gt; <span class="number">2</span>,
+            SeekFrom::Current(<span class="kw">_</span>) =&gt; <span class="number">1</span>,
         }
     }
 }
@@ -258,89 +258,89 @@ Use the [`Seek`](../io/trait.Seek.html) trait.
 <span class="doccomment">/** The `Seek` trait provides a cursor which can be moved within a file.
 
 It is possible to seek relative to either end or the current offset.
-*/</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Seek</span> {
-    <span class="doccomment">/// Seek to an offset in bytes.</span>
-    <span class="doccomment">/// If successful, returns the new position from start of file.</span>
-    <span class="kw">fn</span> <span class="ident">seek</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">pos</span>: <span class="ident">SeekFrom</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>;
+*/
+</span><span class="kw">pub trait </span>Seek {
+    <span class="doccomment">/// Seek to an offset in bytes.
+    /// If successful, returns the new position from start of file.
+    </span><span class="kw">fn </span>seek(<span class="kw-2">&amp;</span><span class="self">self</span>, pos: SeekFrom) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt;;
 }
 
-<span class="kw">pub</span> <span class="kw">type</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">core::result::Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Error</span><span class="op">&gt;</span>;
+<span class="kw">pub type </span><span class="prelude-ty">Result</span>&lt;T&gt; = core::result::Result&lt;T, Error&gt;;
 
-<span class="doccomment">/// Definition of errors that might be returned by filesystem functionality.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>,<span class="ident">Copy</span>,<span class="ident">Debug</span>,<span class="ident">PartialEq</span>)]</span>
-<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Error</span> {
-    <span class="doccomment">/// Error code was &gt;=0, operation was successful.</span>
-    <span class="ident">Success</span>,
-    <span class="doccomment">/// Input / output error occurred.</span>
-    <span class="ident">Io</span>,
-    <span class="doccomment">/// File or filesystem was corrupt.</span>
-    <span class="ident">Corruption</span>,
-    <span class="doccomment">/// No entry found with that name.</span>
-    <span class="ident">NoSuchEntry</span>,
-    <span class="doccomment">/// File or directory already exists.</span>
-    <span class="ident">EntryAlreadyExisted</span>,
-    <span class="doccomment">/// Path name is not a directory.</span>
-    <span class="ident">PathNotDir</span>,
-    <span class="doccomment">/// Path specification is to a directory.</span>
-    <span class="ident">PathIsDir</span>,
-    <span class="doccomment">/// Directory was not empty.</span>
-    <span class="ident">DirNotEmpty</span>,
-    <span class="doccomment">/// Bad file descriptor.</span>
-    <span class="ident">BadFileDescriptor</span>,
-    <span class="doccomment">/// File is too big.</span>
-    <span class="ident">FileTooBig</span>,
-    <span class="doccomment">/// Incorrect value specified to function.</span>
-    <span class="ident">Invalid</span>,
-    <span class="doccomment">/// No space left available for operation.</span>
-    <span class="ident">NoSpace</span>,
-    <span class="doccomment">/// No memory available for completing request.</span>
-    <span class="ident">NoMemory</span>,
-    <span class="doccomment">/// No attribute or data available</span>
-    <span class="ident">NoAttribute</span>,
-    <span class="doccomment">/// Filename too long</span>
-    <span class="ident">FilenameTooLong</span>,
-    <span class="doccomment">/// Unknown error occurred, integer code specified.</span>
-    <span class="ident">Unknown</span>(<span class="ident">i32</span>),
+<span class="doccomment">/// Definition of errors that might be returned by filesystem functionality.
+</span><span class="attribute">#[derive(Clone,Copy,Debug,PartialEq)]
+</span><span class="kw">pub enum </span>Error {
+    <span class="doccomment">/// Error code was &gt;=0, operation was successful.
+    </span>Success,
+    <span class="doccomment">/// Input / output error occurred.
+    </span>Io,
+    <span class="doccomment">/// File or filesystem was corrupt.
+    </span>Corruption,
+    <span class="doccomment">/// No entry found with that name.
+    </span>NoSuchEntry,
+    <span class="doccomment">/// File or directory already exists.
+    </span>EntryAlreadyExisted,
+    <span class="doccomment">/// Path name is not a directory.
+    </span>PathNotDir,
+    <span class="doccomment">/// Path specification is to a directory.
+    </span>PathIsDir,
+    <span class="doccomment">/// Directory was not empty.
+    </span>DirNotEmpty,
+    <span class="doccomment">/// Bad file descriptor.
+    </span>BadFileDescriptor,
+    <span class="doccomment">/// File is too big.
+    </span>FileTooBig,
+    <span class="doccomment">/// Incorrect value specified to function.
+    </span>Invalid,
+    <span class="doccomment">/// No space left available for operation.
+    </span>NoSpace,
+    <span class="doccomment">/// No memory available for completing request.
+    </span>NoMemory,
+    <span class="doccomment">/// No attribute or data available
+    </span>NoAttribute,
+    <span class="doccomment">/// Filename too long
+    </span>FilenameTooLong,
+    <span class="doccomment">/// Unknown error occurred, integer code specified.
+    </span>Unknown(i32),
 }
 
-<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::path::Error</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Error</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">_error</span>: <span class="ident"><span class="kw">crate</span>::path::Error</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">Error::Io</span>
+<span class="kw">impl </span>From&lt;<span class="kw">crate</span>::path::Error&gt; <span class="kw">for </span>Error {
+    <span class="kw">fn </span>from(_error: <span class="kw">crate</span>::path::Error) -&gt; <span class="self">Self </span>{
+        Error::Io
     }
 }
 
-<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">i32</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Error</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">error_code</span>: <span class="ident">i32</span>) -&gt; <span class="ident">Error</span> {
-        <span class="kw">match</span> <span class="ident">error_code</span> {
-            <span class="ident">n</span> <span class="kw">if</span> <span class="ident">n</span> <span class="op">&gt;</span><span class="op">=</span> <span class="number">0</span> =&gt; <span class="ident">Error::Success</span>,
-            <span class="comment">// negative codes</span>
-            <span class="ident">ll::lfs_error_LFS_ERR_IO</span> =&gt; <span class="ident">Error::Io</span>,
-            <span class="ident">ll::lfs_error_LFS_ERR_CORRUPT</span> =&gt; <span class="ident">Error::Corruption</span>,
-            <span class="ident">ll::lfs_error_LFS_ERR_NOENT</span> =&gt; <span class="ident">Error::NoSuchEntry</span>,
-            <span class="ident">ll::lfs_error_LFS_ERR_EXIST</span> =&gt; <span class="ident">Error::EntryAlreadyExisted</span>,
-            <span class="ident">ll::lfs_error_LFS_ERR_NOTDIR</span> =&gt; <span class="ident">Error::PathNotDir</span>,
-            <span class="ident">ll::lfs_error_LFS_ERR_ISDIR</span> =&gt; <span class="ident">Error::PathIsDir</span>,
-            <span class="ident">ll::lfs_error_LFS_ERR_NOTEMPTY</span> =&gt; <span class="ident">Error::DirNotEmpty</span>,
-            <span class="ident">ll::lfs_error_LFS_ERR_BADF</span> =&gt; <span class="ident">Error::BadFileDescriptor</span>,
-            <span class="ident">ll::lfs_error_LFS_ERR_FBIG</span> =&gt; <span class="ident">Error::FileTooBig</span>,
-            <span class="ident">ll::lfs_error_LFS_ERR_INVAL</span> =&gt; <span class="ident">Error::Invalid</span>,
-            <span class="ident">ll::lfs_error_LFS_ERR_NOSPC</span> =&gt; <span class="ident">Error::NoSpace</span>,
-            <span class="ident">ll::lfs_error_LFS_ERR_NOMEM</span> =&gt; <span class="ident">Error::NoMemory</span>,
-            <span class="ident">ll::lfs_error_LFS_ERR_NOATTR</span> =&gt; <span class="ident">Error::NoAttribute</span>,
-            <span class="ident">ll::lfs_error_LFS_ERR_NAMETOOLONG</span> =&gt; <span class="ident">Error::FilenameTooLong</span>,
-            <span class="comment">// positive codes should always indicate success</span>
-            <span class="kw">_</span> =&gt; <span class="ident">Error::Unknown</span>(<span class="ident">error_code</span>),
+<span class="kw">impl </span>From&lt;i32&gt; <span class="kw">for </span>Error {
+    <span class="kw">fn </span>from(error_code: i32) -&gt; Error {
+        <span class="kw">match </span>error_code {
+            n <span class="kw">if </span>n &gt;= <span class="number">0 </span>=&gt; Error::Success,
+            <span class="comment">// negative codes
+            </span>ll::lfs_error_LFS_ERR_IO =&gt; Error::Io,
+            ll::lfs_error_LFS_ERR_CORRUPT =&gt; Error::Corruption,
+            ll::lfs_error_LFS_ERR_NOENT =&gt; Error::NoSuchEntry,
+            ll::lfs_error_LFS_ERR_EXIST =&gt; Error::EntryAlreadyExisted,
+            ll::lfs_error_LFS_ERR_NOTDIR =&gt; Error::PathNotDir,
+            ll::lfs_error_LFS_ERR_ISDIR =&gt; Error::PathIsDir,
+            ll::lfs_error_LFS_ERR_NOTEMPTY =&gt; Error::DirNotEmpty,
+            ll::lfs_error_LFS_ERR_BADF =&gt; Error::BadFileDescriptor,
+            ll::lfs_error_LFS_ERR_FBIG =&gt; Error::FileTooBig,
+            ll::lfs_error_LFS_ERR_INVAL =&gt; Error::Invalid,
+            ll::lfs_error_LFS_ERR_NOSPC =&gt; Error::NoSpace,
+            ll::lfs_error_LFS_ERR_NOMEM =&gt; Error::NoMemory,
+            ll::lfs_error_LFS_ERR_NOATTR =&gt; Error::NoAttribute,
+            ll::lfs_error_LFS_ERR_NAMETOOLONG =&gt; Error::FilenameTooLong,
+            <span class="comment">// positive codes should always indicate success
+            </span><span class="kw">_ </span>=&gt; Error::Unknown(error_code),
         }
     }
 }
 
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">result_from</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">return_value</span>: <span class="ident">T</span>, <span class="ident">error_code</span>: <span class="ident">ll::lfs_error</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">let</span> <span class="ident">error</span>: <span class="ident">Error</span> <span class="op">=</span> <span class="ident">error_code</span>.<span class="ident">into</span>();
-    <span class="kw">match</span> <span class="ident">error</span> {
-        <span class="ident">Error::Success</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">return_value</span>),
-        <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">error</span>)
+<span class="kw">pub fn </span>result_from&lt;T&gt;(return_value: T, error_code: ll::lfs_error) -&gt; <span class="prelude-ty">Result</span>&lt;T&gt; {
+    <span class="kw">let </span>error: Error = error_code.into();
+    <span class="kw">match </span>error {
+        Error::Success =&gt; <span class="prelude-val">Ok</span>(return_value),
+        <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(error)
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="littlefs2" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="littlefs2" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

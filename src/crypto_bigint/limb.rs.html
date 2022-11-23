@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/crypto-bigint-0.2.11/src/limb.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>limb.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" href="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../crypto_bigint/index.html"><div class="logo-container"><img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../crypto_bigint/index.html"><div class="logo-container">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/crypto-bigint-0.2.11/src/limb.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>limb.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" href="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../crypto_bigint/index.html"><div class="logo-container"><img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../crypto_bigint/index.html"><div class="logo-container">
                     <img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../crypto_bigint/index.html">
                         <img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
@@ -138,143 +138,143 @@
 <span id="136">136</span>
 <span id="137">137</span>
 <span id="138">138</span>
-</pre><pre class="rust"><code><span class="doccomment">//! Big integers are represented as an array of smaller CPU word-size integers</span>
-<span class="doccomment">//! called &quot;limbs&quot;.</span>
+</pre><pre class="rust"><code><span class="doccomment">//! Big integers are represented as an array of smaller CPU word-size integers
+//! called &quot;limbs&quot;.
 
-<span class="attribute">#![<span class="ident">allow</span>(<span class="ident">clippy::derive_hash_xor_eq</span>)]</span>
+</span><span class="attribute">#![allow(clippy::derive_hash_xor_eq)]
 
-<span class="kw">mod</span> <span class="ident">add</span>;
-<span class="kw">mod</span> <span class="ident">bit_and</span>;
-<span class="kw">mod</span> <span class="ident">bit_or</span>;
-<span class="kw">mod</span> <span class="ident">cmp</span>;
-<span class="kw">mod</span> <span class="ident">encoding</span>;
-<span class="kw">mod</span> <span class="ident">from</span>;
-<span class="kw">mod</span> <span class="ident">mul</span>;
-<span class="kw">mod</span> <span class="ident">sub</span>;
+</span><span class="kw">mod </span>add;
+<span class="kw">mod </span>bit_and;
+<span class="kw">mod </span>bit_or;
+<span class="kw">mod </span>cmp;
+<span class="kw">mod </span>encoding;
+<span class="kw">mod </span>from;
+<span class="kw">mod </span>mul;
+<span class="kw">mod </span>sub;
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;rand&quot;</span>)]</span>
-<span class="kw">mod</span> <span class="ident">rand</span>;
+<span class="attribute">#[cfg(feature = <span class="string">&quot;rand&quot;</span>)]
+</span><span class="kw">mod </span>rand;
 
-<span class="kw">use</span> <span class="ident">core::fmt</span>;
-<span class="kw">use</span> <span class="ident">subtle</span>::{<span class="ident">Choice</span>, <span class="ident">ConditionallySelectable</span>};
+<span class="kw">use </span>core::fmt;
+<span class="kw">use </span>subtle::{Choice, ConditionallySelectable};
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">any</span>(<span class="ident">target_pointer_width</span> <span class="op">=</span> <span class="string">&quot;32&quot;</span>, <span class="ident">target_pointer_width</span> <span class="op">=</span> <span class="string">&quot;64&quot;</span>)))]</span>
-<span class="macro">compile_error!</span>(<span class="string">&quot;this crate builds on 32-bit and 64-bit platforms only&quot;</span>);
+<span class="attribute">#[cfg(not(any(target_pointer_width = <span class="string">&quot;32&quot;</span>, target_pointer_width = <span class="string">&quot;64&quot;</span>)))]
+</span><span class="macro">compile_error!</span>(<span class="string">&quot;this crate builds on 32-bit and 64-bit platforms only&quot;</span>);
 
-<span class="comment">//</span>
-<span class="comment">// 32-bit definitions</span>
-<span class="comment">//</span>
+<span class="comment">//
+// 32-bit definitions
+//
 
-<span class="doccomment">/// Size of the inner integer in bits.</span>
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_pointer_width</span> <span class="op">=</span> <span class="string">&quot;32&quot;</span>)]</span>
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">BIT_SIZE</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">32</span>;
+</span><span class="doccomment">/// Size of the inner integer in bits.
+</span><span class="attribute">#[cfg(target_pointer_width = <span class="string">&quot;32&quot;</span>)]
+</span><span class="kw">pub const </span>BIT_SIZE: usize = <span class="number">32</span>;
 
-<span class="doccomment">/// Size of the inner integer in bytes.</span>
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_pointer_width</span> <span class="op">=</span> <span class="string">&quot;32&quot;</span>)]</span>
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">BYTE_SIZE</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">4</span>;
+<span class="doccomment">/// Size of the inner integer in bytes.
+</span><span class="attribute">#[cfg(target_pointer_width = <span class="string">&quot;32&quot;</span>)]
+</span><span class="kw">pub const </span>BYTE_SIZE: usize = <span class="number">4</span>;
 
-<span class="doccomment">/// Inner integer type that the [`Limb`] newtype wraps.</span>
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_pointer_width</span> <span class="op">=</span> <span class="string">&quot;32&quot;</span>)]</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">Inner</span> <span class="op">=</span> <span class="ident">u32</span>;
+<span class="doccomment">/// Inner integer type that the [`Limb`] newtype wraps.
+</span><span class="attribute">#[cfg(target_pointer_width = <span class="string">&quot;32&quot;</span>)]
+</span><span class="kw">pub type </span>Inner = u32;
 
-<span class="doccomment">/// SignedInner integer type that the [`Limb`] newtype wraps.</span>
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_pointer_width</span> <span class="op">=</span> <span class="string">&quot;32&quot;</span>)]</span>
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">type</span> <span class="ident">SignedInner</span> <span class="op">=</span> <span class="ident">i32</span>;
+<span class="doccomment">/// SignedInner integer type that the [`Limb`] newtype wraps.
+</span><span class="attribute">#[cfg(target_pointer_width = <span class="string">&quot;32&quot;</span>)]
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">type </span>SignedInner = i32;
 
-<span class="doccomment">/// Wide integer type: double the width of [`Inner`].</span>
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_pointer_width</span> <span class="op">=</span> <span class="string">&quot;32&quot;</span>)]</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">Wide</span> <span class="op">=</span> <span class="ident">u64</span>;
+<span class="doccomment">/// Wide integer type: double the width of [`Inner`].
+</span><span class="attribute">#[cfg(target_pointer_width = <span class="string">&quot;32&quot;</span>)]
+</span><span class="kw">pub type </span>Wide = u64;
 
-<span class="doccomment">/// SignedInner integer type: double the width of [`Limb`].</span>
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_pointer_width</span> <span class="op">=</span> <span class="string">&quot;32&quot;</span>)]</span>
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">type</span> <span class="ident">SignedWide</span> <span class="op">=</span> <span class="ident">i64</span>;
+<span class="doccomment">/// SignedInner integer type: double the width of [`Limb`].
+</span><span class="attribute">#[cfg(target_pointer_width = <span class="string">&quot;32&quot;</span>)]
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">type </span>SignedWide = i64;
 
-<span class="comment">//</span>
-<span class="comment">// 64-bit definitions</span>
-<span class="comment">//</span>
+<span class="comment">//
+// 64-bit definitions
+//
 
-<span class="doccomment">/// Size of the inner integer in bits.</span>
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_pointer_width</span> <span class="op">=</span> <span class="string">&quot;64&quot;</span>)]</span>
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">BIT_SIZE</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">64</span>;
+</span><span class="doccomment">/// Size of the inner integer in bits.
+</span><span class="attribute">#[cfg(target_pointer_width = <span class="string">&quot;64&quot;</span>)]
+</span><span class="kw">pub const </span>BIT_SIZE: usize = <span class="number">64</span>;
 
-<span class="doccomment">/// Size of the inner integer in bytes.</span>
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_pointer_width</span> <span class="op">=</span> <span class="string">&quot;64&quot;</span>)]</span>
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">BYTE_SIZE</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">8</span>;
+<span class="doccomment">/// Size of the inner integer in bytes.
+</span><span class="attribute">#[cfg(target_pointer_width = <span class="string">&quot;64&quot;</span>)]
+</span><span class="kw">pub const </span>BYTE_SIZE: usize = <span class="number">8</span>;
 
-<span class="doccomment">/// Inner integer type that the [`Limb`] newtype wraps.</span>
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_pointer_width</span> <span class="op">=</span> <span class="string">&quot;64&quot;</span>)]</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">Inner</span> <span class="op">=</span> <span class="ident">u64</span>;
+<span class="doccomment">/// Inner integer type that the [`Limb`] newtype wraps.
+</span><span class="attribute">#[cfg(target_pointer_width = <span class="string">&quot;64&quot;</span>)]
+</span><span class="kw">pub type </span>Inner = u64;
 
-<span class="doccomment">/// SignedInner integer type that the [`Limb`] newtype wraps.</span>
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_pointer_width</span> <span class="op">=</span> <span class="string">&quot;64&quot;</span>)]</span>
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">type</span> <span class="ident">SignedInner</span> <span class="op">=</span> <span class="ident">i64</span>;
+<span class="doccomment">/// SignedInner integer type that the [`Limb`] newtype wraps.
+</span><span class="attribute">#[cfg(target_pointer_width = <span class="string">&quot;64&quot;</span>)]
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">type </span>SignedInner = i64;
 
-<span class="doccomment">/// Wide integer type: double the width of [`Inner`].</span>
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_pointer_width</span> <span class="op">=</span> <span class="string">&quot;64&quot;</span>)]</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">Wide</span> <span class="op">=</span> <span class="ident">u128</span>;
+<span class="doccomment">/// Wide integer type: double the width of [`Inner`].
+</span><span class="attribute">#[cfg(target_pointer_width = <span class="string">&quot;64&quot;</span>)]
+</span><span class="kw">pub type </span>Wide = u128;
 
-<span class="doccomment">/// SignedInner integer type: double the width of [`Limb`].</span>
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_pointer_width</span> <span class="op">=</span> <span class="string">&quot;64&quot;</span>)]</span>
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">type</span> <span class="ident">SignedWide</span> <span class="op">=</span> <span class="ident">i128</span>;
+<span class="doccomment">/// SignedInner integer type: double the width of [`Limb`].
+</span><span class="attribute">#[cfg(target_pointer_width = <span class="string">&quot;64&quot;</span>)]
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">type </span>SignedWide = i128;
 
-<span class="doccomment">/// Highest bit in a [`Limb`].</span>
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const</span> <span class="ident">HI_BIT</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="ident">BIT_SIZE</span> <span class="op">-</span> <span class="number">1</span>;
+<span class="doccomment">/// Highest bit in a [`Limb`].
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const </span>HI_BIT: usize = BIT_SIZE - <span class="number">1</span>;
 
-<span class="doccomment">/// Big integers are represented as an array of smaller CPU word-size integers</span>
-<span class="doccomment">/// called &quot;limbs&quot;.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">Default</span>, <span class="ident">Hash</span>)]</span>
-<span class="attribute">#[<span class="ident">repr</span>(<span class="ident">transparent</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Limb</span>(<span class="kw">pub</span> <span class="ident">Inner</span>);
+<span class="doccomment">/// Big integers are represented as an array of smaller CPU word-size integers
+/// called &quot;limbs&quot;.
+</span><span class="attribute">#[derive(Copy, Clone, Debug, Default, Hash)]
+#[repr(transparent)]
+</span><span class="kw">pub struct </span>Limb(<span class="kw">pub </span>Inner);
 
-<span class="kw">impl</span> <span class="ident">Limb</span> {
-    <span class="doccomment">/// The value `0`.</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">ZERO</span>: <span class="self">Self</span> <span class="op">=</span> <span class="ident">Limb</span>(<span class="number">0</span>);
+<span class="kw">impl </span>Limb {
+    <span class="doccomment">/// The value `0`.
+    </span><span class="kw">pub const </span>ZERO: <span class="self">Self </span>= Limb(<span class="number">0</span>);
 
-    <span class="doccomment">/// The value `1`.</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">ONE</span>: <span class="self">Self</span> <span class="op">=</span> <span class="ident">Limb</span>(<span class="number">1</span>);
+    <span class="doccomment">/// The value `1`.
+    </span><span class="kw">pub const </span>ONE: <span class="self">Self </span>= Limb(<span class="number">1</span>);
 
-    <span class="doccomment">/// Maximum value this [`Limb`] can express.</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">MAX</span>: <span class="self">Self</span> <span class="op">=</span> <span class="ident">Limb</span>(<span class="ident">Inner::MAX</span>);
+    <span class="doccomment">/// Maximum value this [`Limb`] can express.
+    </span><span class="kw">pub const </span>MAX: <span class="self">Self </span>= Limb(Inner::MAX);
 
-    <span class="doccomment">/// Return `a` if `c`!=0 or `b` if `c`==0.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// Const-friendly: we can&#39;t yet use `subtle` in `const fn` contexts.</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">ct_select</span>(<span class="ident">a</span>: <span class="self">Self</span>, <span class="ident">b</span>: <span class="self">Self</span>, <span class="ident">c</span>: <span class="ident">Inner</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">Self</span>(<span class="ident">a</span>.<span class="number">0</span> <span class="op">^</span> (<span class="ident">c</span> <span class="op">&amp;</span> (<span class="ident">a</span>.<span class="number">0</span> <span class="op">^</span> <span class="ident">b</span>.<span class="number">0</span>)))
+    <span class="doccomment">/// Return `a` if `c`!=0 or `b` if `c`==0.
+    ///
+    /// Const-friendly: we can&#39;t yet use `subtle` in `const fn` contexts.
+    </span><span class="attribute">#[inline]
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const fn </span>ct_select(a: <span class="self">Self</span>, b: <span class="self">Self</span>, c: Inner) -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>(a.<span class="number">0 </span>^ (c &amp; (a.<span class="number">0 </span>^ b.<span class="number">0</span>)))
     }
 }
 
-<span class="kw">impl</span> <span class="ident">ConditionallySelectable</span> <span class="kw">for</span> <span class="ident">Limb</span> {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">conditional_select</span>(<span class="ident">a</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>, <span class="ident">b</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>, <span class="ident">choice</span>: <span class="ident">Choice</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">Self</span>(<span class="ident">Inner::conditional_select</span>(<span class="kw-2">&amp;</span><span class="ident">a</span>.<span class="number">0</span>, <span class="kw-2">&amp;</span><span class="ident">b</span>.<span class="number">0</span>, <span class="ident">choice</span>))
+<span class="kw">impl </span>ConditionallySelectable <span class="kw">for </span>Limb {
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>conditional_select(a: <span class="kw-2">&amp;</span><span class="self">Self</span>, b: <span class="kw-2">&amp;</span><span class="self">Self</span>, choice: Choice) -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>(Inner::conditional_select(<span class="kw-2">&amp;</span>a.<span class="number">0</span>, <span class="kw-2">&amp;</span>b.<span class="number">0</span>, choice))
     }
 }
 
-<span class="kw">impl</span> <span class="ident">fmt::Display</span> <span class="kw">for</span> <span class="ident">Limb</span> {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">fmt::Result</span> {
-        <span class="ident">fmt::UpperHex::fmt</span>(<span class="self">self</span>, <span class="ident">f</span>)
+<span class="kw">impl </span>fmt::Display <span class="kw">for </span>Limb {
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+        fmt::UpperHex::fmt(<span class="self">self</span>, f)
     }
 }
 
-<span class="kw">impl</span> <span class="ident">fmt::LowerHex</span> <span class="kw">for</span> <span class="ident">Limb</span> {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">fmt::Result</span> {
-        <span class="ident">fmt::LowerHex::fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>, <span class="ident">f</span>)
+<span class="kw">impl </span>fmt::LowerHex <span class="kw">for </span>Limb {
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+        fmt::LowerHex::fmt(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>, f)
     }
 }
 
-<span class="kw">impl</span> <span class="ident">fmt::UpperHex</span> <span class="kw">for</span> <span class="ident">Limb</span> {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">fmt::Result</span> {
-        <span class="ident">fmt::UpperHex::fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>, <span class="ident">f</span>)
+<span class="kw">impl </span>fmt::UpperHex <span class="kw">for </span>Limb {
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+        fmt::UpperHex::fmt(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>, f)
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;zeroize&quot;</span>)]</span>
-<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">docsrs</span>, <span class="ident">doc</span>(<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;zeroize&quot;</span>)))]</span>
-<span class="kw">impl</span> <span class="ident">zeroize::DefaultIsZeroes</span> <span class="kw">for</span> <span class="ident">Limb</span> {}
+<span class="attribute">#[cfg(feature = <span class="string">&quot;zeroize&quot;</span>)]
+#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;zeroize&quot;</span>)))]
+</span><span class="kw">impl </span>zeroize::DefaultIsZeroes <span class="kw">for </span>Limb {}
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="crypto_bigint" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="crypto_bigint" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

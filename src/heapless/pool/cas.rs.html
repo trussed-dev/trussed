@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/heapless-0.7.16/src/pool/cas.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>cas.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../heapless/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../heapless/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../heapless/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/heapless-0.7.16/src/pool/cas.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>cas.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../heapless/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../heapless/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../heapless/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -246,253 +246,253 @@
 <span id="246">246</span>
 <span id="247">247</span>
 <span id="248">248</span>
-</pre><pre class="rust"><code><span class="doccomment">//! Stack based on CAS atomics</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! To reduce the chance of hitting the ABA problem we use a 32-bit offset + a 32-bit version tag</span>
-<span class="doccomment">//! instead of a 64-bit pointer. The version tag will be bumped on each successful `pop` operation.</span>
+</pre><pre class="rust"><code><span class="doccomment">//! Stack based on CAS atomics
+//!
+//! To reduce the chance of hitting the ABA problem we use a 32-bit offset + a 32-bit version tag
+//! instead of a 64-bit pointer. The version tag will be bumped on each successful `pop` operation.
 
-<span class="kw">use</span> <span class="ident">core</span>::{
-    <span class="ident">cell::UnsafeCell</span>,
-    <span class="ident">marker::PhantomData</span>,
-    <span class="ident">num</span>::{<span class="ident">NonZeroU32</span>, <span class="ident">NonZeroU64</span>},
-    <span class="ident">ptr::NonNull</span>,
-    <span class="ident">sync::atomic</span>::{<span class="ident">AtomicU64</span>, <span class="ident">Ordering</span>},
+</span><span class="kw">use </span>core::{
+    cell::UnsafeCell,
+    marker::PhantomData,
+    num::{NonZeroU32, NonZeroU64},
+    ptr::NonNull,
+    sync::atomic::{AtomicU64, Ordering},
 };
 
-<span class="doccomment">/// Unfortunate implementation detail required to use the</span>
-<span class="doccomment">/// [`Pool.grow_exact`](struct.Pool.html#method.grow_exact) method</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Node</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="ident">next</span>: <span class="ident">Atomic</span><span class="op">&lt;</span><span class="ident">Node</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">data</span>: <span class="ident">UnsafeCell</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+<span class="doccomment">/// Unfortunate implementation detail required to use the
+/// [`Pool.grow_exact`](struct.Pool.html#method.grow_exact) method
+</span><span class="kw">pub struct </span>Node&lt;T&gt; {
+    next: Atomic&lt;Node&lt;T&gt;&gt;,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) data: UnsafeCell&lt;T&gt;,
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Node</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">next</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">Atomic</span><span class="op">&lt;</span><span class="ident">Node</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">next</span>
+<span class="kw">impl</span>&lt;T&gt; Node&lt;T&gt; {
+    <span class="kw">fn </span>next(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Atomic&lt;Node&lt;T&gt;&gt; {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.next
     }
 }
 
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Stack</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="ident">head</span>: <span class="ident">Atomic</span><span class="op">&lt;</span><span class="ident">Node</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+<span class="kw">pub struct </span>Stack&lt;T&gt; {
+    head: Atomic&lt;Node&lt;T&gt;&gt;,
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Stack</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="self">Self</span> {
-        <span class="self">Self</span> {
-            <span class="ident">head</span>: <span class="ident">Atomic::null</span>(),
+<span class="kw">impl</span>&lt;T&gt; Stack&lt;T&gt; {
+    <span class="kw">pub const fn </span>new() -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            head: Atomic::null(),
         }
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">push</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">new_head</span>: <span class="ident">Ptr</span><span class="op">&lt;</span><span class="ident">Node</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>) {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">head</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">head</span>.<span class="ident">load</span>(<span class="ident">Ordering::Relaxed</span>);
+    <span class="kw">pub fn </span>push(<span class="kw-2">&amp;</span><span class="self">self</span>, new_head: Ptr&lt;Node&lt;T&gt;&gt;) {
+        <span class="kw">let </span><span class="kw-2">mut </span>head = <span class="self">self</span>.head.load(Ordering::Relaxed);
 
-        <span class="kw">loop</span> {
-            <span class="kw">unsafe</span> {
-                <span class="ident">new_head</span>
-                    .<span class="ident">as_raw</span>()
-                    .<span class="ident">as_ref</span>()
-                    .<span class="ident">next</span>()
-                    .<span class="ident">store</span>(<span class="ident">head</span>, <span class="ident">Ordering::Relaxed</span>);
+        <span class="kw">loop </span>{
+            <span class="kw">unsafe </span>{
+                new_head
+                    .as_raw()
+                    .as_ref()
+                    .next()
+                    .store(head, Ordering::Relaxed);
             }
 
-            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">p</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">head</span>.<span class="ident">compare_and_exchange_weak</span>(
-                <span class="ident">head</span>,
-                <span class="prelude-val">Some</span>(<span class="ident">new_head</span>),
-                <span class="ident">Ordering::Release</span>,
-                <span class="ident">Ordering::Relaxed</span>,
+            <span class="kw">if let </span><span class="prelude-val">Err</span>(p) = <span class="self">self</span>.head.compare_and_exchange_weak(
+                head,
+                <span class="prelude-val">Some</span>(new_head),
+                Ordering::Release,
+                Ordering::Relaxed,
             ) {
-                <span class="ident">head</span> <span class="op">=</span> <span class="ident">p</span>;
-            } <span class="kw">else</span> {
+                head = p;
+            } <span class="kw">else </span>{
                 <span class="kw">return</span>;
             }
         }
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_pop</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Ptr</span><span class="op">&lt;</span><span class="ident">Node</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="kw">loop</span> {
-            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">mut</span> <span class="ident">head</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">head</span>.<span class="ident">load</span>(<span class="ident">Ordering::Acquire</span>) {
-                <span class="kw">let</span> <span class="ident">next</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">head</span>.<span class="ident">as_raw</span>().<span class="ident">as_ref</span>().<span class="ident">next</span>().<span class="ident">load</span>(<span class="ident">Ordering::Relaxed</span>) };
+    <span class="kw">pub fn </span>try_pop(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;Ptr&lt;Node&lt;T&gt;&gt;&gt; {
+        <span class="kw">loop </span>{
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">mut </span>head) = <span class="self">self</span>.head.load(Ordering::Acquire) {
+                <span class="kw">let </span>next = <span class="kw">unsafe </span>{ head.as_raw().as_ref().next().load(Ordering::Relaxed) };
 
-                <span class="kw">if</span> <span class="self">self</span>
-                    .<span class="ident">head</span>
-                    .<span class="ident">compare_and_exchange_weak</span>(
-                        <span class="prelude-val">Some</span>(<span class="ident">head</span>),
-                        <span class="ident">next</span>,
-                        <span class="ident">Ordering::Release</span>,
-                        <span class="ident">Ordering::Relaxed</span>,
+                <span class="kw">if </span><span class="self">self
+                    </span>.head
+                    .compare_and_exchange_weak(
+                        <span class="prelude-val">Some</span>(head),
+                        next,
+                        Ordering::Release,
+                        Ordering::Relaxed,
                     )
-                    .<span class="ident">is_ok</span>()
+                    .is_ok()
                 {
-                    <span class="ident">head</span>.<span class="ident">incr_tag</span>();
-                    <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">head</span>);
+                    head.incr_tag();
+                    <span class="kw">return </span><span class="prelude-val">Some</span>(head);
                 }
-            } <span class="kw">else</span> {
-                <span class="comment">// stack observed empty</span>
-                <span class="kw">return</span> <span class="prelude-val">None</span>;
+            } <span class="kw">else </span>{
+                <span class="comment">// stack observed empty
+                </span><span class="kw">return </span><span class="prelude-val">None</span>;
             }
         }
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>)]</span>
-<span class="kw">fn</span> <span class="ident">anchor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">init</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">*mut</span> <span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="kw-2">*mut</span> <span class="ident">T</span> {
-    <span class="kw">use</span> <span class="ident">core::sync::atomic::AtomicU8</span>;
+<span class="attribute">#[cfg(target_arch = <span class="string">&quot;x86_64&quot;</span>)]
+</span><span class="kw">fn </span>anchor&lt;T&gt;(init: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">*mut </span>T&gt;) -&gt; <span class="kw-2">*mut </span>T {
+    <span class="kw">use </span>core::sync::atomic::AtomicU8;
 
-    <span class="kw">use</span> <span class="ident">spin::Once</span>;
+    <span class="kw">use </span>spin::Once;
 
-    <span class="kw">static</span> <span class="ident">LAZY_ANCHOR</span>: <span class="ident">Once</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Once::new</span>();
+    <span class="kw">static </span>LAZY_ANCHOR: Once&lt;usize&gt; = Once::new();
 
-    <span class="kw">let</span> <span class="ident">likely_unaligned_address</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">init</span>) <span class="op">=</span> <span class="ident">init</span> {
-        <span class="kw-2">*</span><span class="ident">LAZY_ANCHOR</span>.<span class="ident">call_once</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">init</span> <span class="kw">as</span> <span class="ident">usize</span>)
-    } <span class="kw">else</span> {
-        <span class="ident">LAZY_ANCHOR</span>.<span class="ident">get</span>().<span class="ident">copied</span>().<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> {
-            <span class="comment">// we may hit this branch with Pool of ZSTs where `grow` does not need to be called</span>
-            <span class="kw">static</span> <span class="ident">BSS_ANCHOR</span>: <span class="ident">AtomicU8</span> <span class="op">=</span> <span class="ident">AtomicU8::new</span>(<span class="number">0</span>);
-            <span class="kw-2">&amp;</span><span class="ident">BSS_ANCHOR</span> <span class="kw">as</span> <span class="kw-2">*const</span> <span class="kw">_</span> <span class="kw">as</span> <span class="ident">usize</span>
+    <span class="kw">let </span>likely_unaligned_address = <span class="kw">if let </span><span class="prelude-val">Some</span>(init) = init {
+        <span class="kw-2">*</span>LAZY_ANCHOR.call_once(|| init <span class="kw">as </span>usize)
+    } <span class="kw">else </span>{
+        LAZY_ANCHOR.get().copied().unwrap_or_else(|| {
+            <span class="comment">// we may hit this branch with Pool of ZSTs where `grow` does not need to be called
+            </span><span class="kw">static </span>BSS_ANCHOR: AtomicU8 = AtomicU8::new(<span class="number">0</span>);
+            <span class="kw-2">&amp;</span>BSS_ANCHOR <span class="kw">as </span><span class="kw-2">*const </span><span class="kw">_ as </span>usize
         })
     };
 
-    <span class="kw">let</span> <span class="ident">alignment_mask</span> <span class="op">=</span> <span class="op">!</span>(<span class="ident">core::mem::align_of</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>() <span class="op">-</span> <span class="number">1</span>);
-    <span class="kw">let</span> <span class="ident">well_aligned_address</span> <span class="op">=</span> <span class="ident">likely_unaligned_address</span> <span class="op">&amp;</span> <span class="ident">alignment_mask</span>;
-    <span class="ident">well_aligned_address</span> <span class="kw">as</span> <span class="kw-2">*mut</span> <span class="ident">T</span>
+    <span class="kw">let </span>alignment_mask = !(core::mem::align_of::&lt;T&gt;() - <span class="number">1</span>);
+    <span class="kw">let </span>well_aligned_address = likely_unaligned_address &amp; alignment_mask;
+    well_aligned_address <span class="kw">as </span><span class="kw-2">*mut </span>T
 }
 
-<span class="doccomment">/// On x86_64, anchored pointer. This is a (signed) 32-bit offset from `anchor` plus a 32-bit tag</span>
-<span class="doccomment">/// On x86, this is a pointer plus a 32-bit tag</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Ptr</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="ident">inner</span>: <span class="ident">NonZeroU64</span>,
-    <span class="ident">_marker</span>: <span class="ident">PhantomData</span><span class="op">&lt;</span><span class="kw-2">*mut</span> <span class="ident">T</span><span class="op">&gt;</span>,
+<span class="doccomment">/// On x86_64, anchored pointer. This is a (signed) 32-bit offset from `anchor` plus a 32-bit tag
+/// On x86, this is a pointer plus a 32-bit tag
+</span><span class="kw">pub struct </span>Ptr&lt;T&gt; {
+    inner: NonZeroU64,
+    _marker: PhantomData&lt;<span class="kw-2">*mut </span>T&gt;,
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Clone</span> <span class="kw">for</span> <span class="ident">Ptr</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw-2">*</span><span class="self">self</span>
-    }
+<span class="kw">impl</span>&lt;T&gt; Clone <span class="kw">for </span>Ptr&lt;T&gt; {
+    <span class="kw">fn </span>clone(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
+        <span class="kw-2">*</span><span class="self">self
+    </span>}
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Copy</span> <span class="kw">for</span> <span class="ident">Ptr</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {}
+<span class="kw">impl</span>&lt;T&gt; Copy <span class="kw">for </span>Ptr&lt;T&gt; {}
 
-<span class="kw">fn</span> <span class="ident">initial_tag_value</span>() -&gt; <span class="ident">NonZeroU32</span> {
-    <span class="ident">NonZeroU32::new</span>(<span class="number">1</span>).<span class="ident">unwrap</span>()
+<span class="kw">fn </span>initial_tag_value() -&gt; NonZeroU32 {
+    NonZeroU32::new(<span class="number">1</span>).unwrap()
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Ptr</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>)]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">p</span>: <span class="kw-2">*mut</span> <span class="ident">T</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
-        <span class="kw">use</span> <span class="ident">core::convert::TryFrom</span>;
+<span class="kw">impl</span>&lt;T&gt; Ptr&lt;T&gt; {
+    <span class="attribute">#[cfg(target_arch = <span class="string">&quot;x86_64&quot;</span>)]
+    </span><span class="kw">pub fn </span>new(p: <span class="kw-2">*mut </span>T) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+        <span class="kw">use </span>core::convert::TryFrom;
 
-        <span class="ident">i32::try_from</span>((<span class="ident">p</span> <span class="kw">as</span> <span class="ident">isize</span>).<span class="ident">wrapping_sub</span>(<span class="ident">anchor</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="prelude-val">Some</span>(<span class="ident">p</span>)) <span class="kw">as</span> <span class="ident">isize</span>))
-            .<span class="ident">ok</span>()
-            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">offset</span><span class="op">|</span> <span class="kw">unsafe</span> { <span class="ident">Ptr::from_parts</span>(<span class="ident">initial_tag_value</span>(), <span class="ident">offset</span>) })
-    }
-
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>)]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">p</span>: <span class="kw-2">*mut</span> <span class="ident">T</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
-        <span class="prelude-val">Some</span>(<span class="kw">unsafe</span> { <span class="ident">Ptr::from_parts</span>(<span class="ident">initial_tag_value</span>(), <span class="ident">p</span> <span class="kw">as</span> <span class="ident">i32</span>) })
+        i32::try_from((p <span class="kw">as </span>isize).wrapping_sub(anchor::&lt;T&gt;(<span class="prelude-val">Some</span>(p)) <span class="kw">as </span>isize))
+            .ok()
+            .map(|offset| <span class="kw">unsafe </span>{ Ptr::from_parts(initial_tag_value(), offset) })
     }
 
-    <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">from_parts</span>(<span class="ident">tag</span>: <span class="ident">NonZeroU32</span>, <span class="ident">offset</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">Self</span> {
-            <span class="ident">inner</span>: <span class="ident">NonZeroU64::new_unchecked</span>((<span class="ident">tag</span>.<span class="ident">get</span>() <span class="kw">as</span> <span class="ident">u64</span>) <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">32</span> <span class="op">|</span> (<span class="ident">offset</span> <span class="kw">as</span> <span class="ident">u32</span> <span class="kw">as</span> <span class="ident">u64</span>)),
-            <span class="ident">_marker</span>: <span class="ident">PhantomData</span>,
+    <span class="attribute">#[cfg(target_arch = <span class="string">&quot;x86&quot;</span>)]
+    </span><span class="kw">pub fn </span>new(p: <span class="kw-2">*mut </span>T) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+        <span class="prelude-val">Some</span>(<span class="kw">unsafe </span>{ Ptr::from_parts(initial_tag_value(), p <span class="kw">as </span>i32) })
+    }
+
+    <span class="kw">unsafe fn </span>from_parts(tag: NonZeroU32, offset: i32) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            inner: NonZeroU64::new_unchecked((tag.get() <span class="kw">as </span>u64) &lt;&lt; <span class="number">32 </span>| (offset <span class="kw">as </span>u32 <span class="kw">as </span>u64)),
+            _marker: PhantomData,
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">from_u64</span>(<span class="ident">p</span>: <span class="ident">u64</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
-        <span class="ident">NonZeroU64::new</span>(<span class="ident">p</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">inner</span><span class="op">|</span> <span class="self">Self</span> {
-            <span class="ident">inner</span>,
-            <span class="ident">_marker</span>: <span class="ident">PhantomData</span>,
+    <span class="kw">fn </span>from_u64(p: u64) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+        NonZeroU64::new(p).map(|inner| <span class="self">Self </span>{
+            inner,
+            _marker: PhantomData,
         })
     }
 
-    <span class="kw">fn</span> <span class="ident">into_u64</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u64</span> {
-        <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">get</span>()
+    <span class="kw">fn </span>into_u64(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u64 {
+        <span class="self">self</span>.inner.get()
     }
 
-    <span class="kw">fn</span> <span class="ident">tag</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">NonZeroU32</span> {
-        <span class="kw">let</span> <span class="ident">tag</span> <span class="op">=</span> (<span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">get</span>() <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">32</span>) <span class="kw">as</span> <span class="ident">u32</span>;
-        <span class="macro">debug_assert_ne!</span>(<span class="number">0</span>, <span class="ident">tag</span>, <span class="string">&quot;broken non-zero invariant&quot;</span>);
-        <span class="kw">unsafe</span> { <span class="ident">NonZeroU32::new_unchecked</span>(<span class="ident">tag</span>) }
+    <span class="kw">fn </span>tag(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; NonZeroU32 {
+        <span class="kw">let </span>tag = (<span class="self">self</span>.inner.get() &gt;&gt; <span class="number">32</span>) <span class="kw">as </span>u32;
+        <span class="macro">debug_assert_ne!</span>(<span class="number">0</span>, tag, <span class="string">&quot;broken non-zero invariant&quot;</span>);
+        <span class="kw">unsafe </span>{ NonZeroU32::new_unchecked(tag) }
     }
 
-    <span class="kw">fn</span> <span class="ident">incr_tag</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
-        <span class="kw">let</span> <span class="ident">maybe_zero_tag</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">tag</span>().<span class="ident">get</span>().<span class="ident">wrapping_add</span>(<span class="number">1</span>);
-        <span class="kw">let</span> <span class="ident">tag</span> <span class="op">=</span> <span class="ident">NonZeroU32::new</span>(<span class="ident">maybe_zero_tag</span>).<span class="ident">unwrap_or</span>(<span class="ident">initial_tag_value</span>());
-        <span class="kw">let</span> <span class="ident">offset</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">offset</span>();
+    <span class="kw">fn </span>incr_tag(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="kw">let </span>maybe_zero_tag = <span class="self">self</span>.tag().get().wrapping_add(<span class="number">1</span>);
+        <span class="kw">let </span>tag = NonZeroU32::new(maybe_zero_tag).unwrap_or(initial_tag_value());
+        <span class="kw">let </span>offset = <span class="self">self</span>.offset();
 
-        <span class="kw-2">*</span><span class="self">self</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">Ptr::from_parts</span>(<span class="ident">tag</span>, <span class="ident">offset</span>) };
+        <span class="kw-2">*</span><span class="self">self </span>= <span class="kw">unsafe </span>{ Ptr::from_parts(tag, offset) };
     }
 
-    <span class="kw">fn</span> <span class="ident">offset</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">i32</span> {
-        <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">get</span>() <span class="kw">as</span> <span class="ident">i32</span>
+    <span class="kw">fn </span>offset(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; i32 {
+        <span class="self">self</span>.inner.get() <span class="kw">as </span>i32
     }
 
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">NonNull</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="kw">unsafe</span> {
-            <span class="ident">NonNull::new_unchecked</span>(
-                (<span class="ident">anchor</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="prelude-val">None</span>) <span class="kw">as</span> <span class="ident">isize</span>).<span class="ident">wrapping_add</span>(<span class="self">self</span>.<span class="ident">offset</span>() <span class="kw">as</span> <span class="ident">isize</span>) <span class="kw">as</span> <span class="kw-2">*mut</span> <span class="ident">T</span>,
+    <span class="attribute">#[cfg(target_arch = <span class="string">&quot;x86_64&quot;</span>)]
+    </span><span class="kw">fn </span>as_raw(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; NonNull&lt;T&gt; {
+        <span class="kw">unsafe </span>{
+            NonNull::new_unchecked(
+                (anchor::&lt;T&gt;(<span class="prelude-val">None</span>) <span class="kw">as </span>isize).wrapping_add(<span class="self">self</span>.offset() <span class="kw">as </span>isize) <span class="kw">as </span><span class="kw-2">*mut </span>T,
             )
         }
     }
 
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">NonNull</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="kw">unsafe</span> { <span class="ident">NonNull::new_unchecked</span>(<span class="self">self</span>.<span class="ident">offset</span>() <span class="kw">as</span> <span class="kw-2">*mut</span> <span class="ident">T</span>) }
+    <span class="attribute">#[cfg(target_arch = <span class="string">&quot;x86&quot;</span>)]
+    </span><span class="kw">fn </span>as_raw(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; NonNull&lt;T&gt; {
+        <span class="kw">unsafe </span>{ NonNull::new_unchecked(<span class="self">self</span>.offset() <span class="kw">as </span><span class="kw-2">*mut </span>T) }
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">dangling</span>() -&gt; <span class="self">Self</span> {
-        <span class="comment">// `anchor()` returns a well-aligned pointer so an offset of 0 will also produce a well-aligned pointer</span>
-        <span class="kw">unsafe</span> { <span class="ident"><span class="self">Self</span>::from_parts</span>(<span class="ident">initial_tag_value</span>(), <span class="number">0</span>) }
+    <span class="kw">pub fn </span>dangling() -&gt; <span class="self">Self </span>{
+        <span class="comment">// `anchor()` returns a well-aligned pointer so an offset of 0 will also produce a well-aligned pointer
+        </span><span class="kw">unsafe </span>{ <span class="self">Self</span>::from_parts(initial_tag_value(), <span class="number">0</span>) }
     }
 
-    <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">as_ref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">T</span> {
-        <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="self">self</span>.<span class="ident">as_raw</span>().<span class="ident">as_ptr</span>()
+    <span class="kw">pub unsafe fn </span>as_ref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>T {
+        <span class="kw-2">&amp;*</span><span class="self">self</span>.as_raw().as_ptr()
     }
 }
 
-<span class="kw">struct</span> <span class="ident">Atomic</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="ident">inner</span>: <span class="ident">AtomicU64</span>,
-    <span class="ident">_marker</span>: <span class="ident">PhantomData</span><span class="op">&lt;</span><span class="kw-2">*mut</span> <span class="ident">T</span><span class="op">&gt;</span>,
+<span class="kw">struct </span>Atomic&lt;T&gt; {
+    inner: AtomicU64,
+    _marker: PhantomData&lt;<span class="kw-2">*mut </span>T&gt;,
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Atomic</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">null</span>() -&gt; <span class="self">Self</span> {
-        <span class="self">Self</span> {
-            <span class="ident">inner</span>: <span class="ident">AtomicU64::new</span>(<span class="number">0</span>),
-            <span class="ident">_marker</span>: <span class="ident">PhantomData</span>,
+<span class="kw">impl</span>&lt;T&gt; Atomic&lt;T&gt; {
+    <span class="kw">const fn </span>null() -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            inner: AtomicU64::new(<span class="number">0</span>),
+            _marker: PhantomData,
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">compare_and_exchange_weak</span>(
+    <span class="kw">fn </span>compare_and_exchange_weak(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">current</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Ptr</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-        <span class="ident">new</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Ptr</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-        <span class="ident">succ</span>: <span class="ident">Ordering</span>,
-        <span class="ident">fail</span>: <span class="ident">Ordering</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Ptr</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">inner</span>
-            .<span class="ident">compare_exchange_weak</span>(
-                <span class="ident">current</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">p</span><span class="op">|</span> <span class="ident">p</span>.<span class="ident">into_u64</span>()).<span class="ident">unwrap_or</span>(<span class="number">0</span>),
-                <span class="ident">new</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">p</span><span class="op">|</span> <span class="ident">p</span>.<span class="ident">into_u64</span>()).<span class="ident">unwrap_or</span>(<span class="number">0</span>),
-                <span class="ident">succ</span>,
-                <span class="ident">fail</span>,
+        current: <span class="prelude-ty">Option</span>&lt;Ptr&lt;T&gt;&gt;,
+        new: <span class="prelude-ty">Option</span>&lt;Ptr&lt;T&gt;&gt;,
+        succ: Ordering,
+        fail: Ordering,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;(), <span class="prelude-ty">Option</span>&lt;Ptr&lt;T&gt;&gt;&gt; {
+        <span class="self">self</span>.inner
+            .compare_exchange_weak(
+                current.map(|p| p.into_u64()).unwrap_or(<span class="number">0</span>),
+                new.map(|p| p.into_u64()).unwrap_or(<span class="number">0</span>),
+                succ,
+                fail,
             )
-            .<span class="ident">map</span>(<span class="ident">drop</span>)
-            .<span class="ident">map_err</span>(<span class="ident">Ptr::from_u64</span>)
+            .map(drop)
+            .map_err(Ptr::from_u64)
     }
 
-    <span class="kw">fn</span> <span class="ident">load</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ord</span>: <span class="ident">Ordering</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Ptr</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="ident">NonZeroU64::new</span>(<span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">load</span>(<span class="ident">ord</span>)).<span class="ident">map</span>(<span class="op">|</span><span class="ident">inner</span><span class="op">|</span> <span class="ident">Ptr</span> {
-            <span class="ident">inner</span>,
-            <span class="ident">_marker</span>: <span class="ident">PhantomData</span>,
+    <span class="kw">fn </span>load(<span class="kw-2">&amp;</span><span class="self">self</span>, ord: Ordering) -&gt; <span class="prelude-ty">Option</span>&lt;Ptr&lt;T&gt;&gt; {
+        NonZeroU64::new(<span class="self">self</span>.inner.load(ord)).map(|inner| Ptr {
+            inner,
+            _marker: PhantomData,
         })
     }
 
-    <span class="kw">fn</span> <span class="ident">store</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">val</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Ptr</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">ord</span>: <span class="ident">Ordering</span>) {
-        <span class="self">self</span>.<span class="ident">inner</span>
-            .<span class="ident">store</span>(<span class="ident">val</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">p</span><span class="op">|</span> <span class="ident">p</span>.<span class="ident">into_u64</span>()).<span class="ident">unwrap_or</span>(<span class="number">0</span>), <span class="ident">ord</span>)
+    <span class="kw">fn </span>store(<span class="kw-2">&amp;</span><span class="self">self</span>, val: <span class="prelude-ty">Option</span>&lt;Ptr&lt;T&gt;&gt;, ord: Ordering) {
+        <span class="self">self</span>.inner
+            .store(val.map(|p| p.into_u64()).unwrap_or(<span class="number">0</span>), ord)
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="heapless" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="heapless" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

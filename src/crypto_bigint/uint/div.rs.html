@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/crypto-bigint-0.2.11/src/uint/div.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>div.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="icon" href="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../crypto_bigint/index.html"><div class="logo-container"><img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../crypto_bigint/index.html"><div class="logo-container">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/crypto-bigint-0.2.11/src/uint/div.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>div.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="icon" href="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../crypto_bigint/index.html"><div class="logo-container"><img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../crypto_bigint/index.html"><div class="logo-container">
                     <img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../crypto_bigint/index.html">
                         <img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
@@ -459,464 +459,464 @@
 <span id="457">457</span>
 <span id="458">458</span>
 <span id="459">459</span>
-</pre><pre class="rust"><code><span class="doccomment">//! [`UInt`] division operations.</span>
+</pre><pre class="rust"><code><span class="doccomment">//! [`UInt`] division operations.
 
-<span class="kw">use</span> <span class="ident"><span class="kw">super</span>::UInt</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::limb</span>::{<span class="ident">Inner</span>, <span class="ident">SignedInner</span>, <span class="ident">BIT_SIZE</span>};
-<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">Integer</span>, <span class="ident">Limb</span>, <span class="ident">NonZero</span>, <span class="ident">Wrapping</span>};
-<span class="kw">use</span> <span class="ident">core::ops</span>::{<span class="ident">Div</span>, <span class="ident">DivAssign</span>, <span class="ident">Rem</span>, <span class="ident">RemAssign</span>};
-<span class="kw">use</span> <span class="ident">subtle</span>::{<span class="ident">Choice</span>, <span class="ident">CtOption</span>};
+</span><span class="kw">use </span><span class="kw">super</span>::UInt;
+<span class="kw">use </span><span class="kw">crate</span>::limb::{Inner, SignedInner, BIT_SIZE};
+<span class="kw">use crate</span>::{Integer, Limb, NonZero, Wrapping};
+<span class="kw">use </span>core::ops::{Div, DivAssign, Rem, RemAssign};
+<span class="kw">use </span>subtle::{Choice, CtOption};
 
-<span class="kw">const</span> <span class="ident">BIT_SIZE_M_1</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="ident">BIT_SIZE</span> <span class="op">-</span> <span class="number">1</span>;
+<span class="kw">const </span>BIT_SIZE_M_1: usize = BIT_SIZE - <span class="number">1</span>;
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="kw">const</span> <span class="ident">LIMBS</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Computes `self` / `rhs`, returns the quotient (q), remainder (r)</span>
-    <span class="doccomment">/// and 1 for is_some or 0 for is_none. The results can be wrapped in [`CtOption`].</span>
-    <span class="doccomment">/// NOTE: Use only if you need to access const fn. Otherwise use `div_rem` because</span>
-    <span class="doccomment">/// the value for is_some needs to be checked before using `q` and `r`.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// This is variable only with respect to `rhs`.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// When used with a fixed `rhs`, this function is constant-time with respect</span>
-    <span class="doccomment">/// to `self`.</span>
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">ct_div_rem</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rhs</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; (<span class="self">Self</span>, <span class="self">Self</span>, <span class="ident">u8</span>) {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">bd</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">bits</span>().<span class="ident">saturating_sub</span>(<span class="ident">rhs</span>.<span class="ident">bits</span>()) <span class="kw">as</span> <span class="ident">usize</span>;
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rem</span> <span class="op">=</span> <span class="kw-2">*</span><span class="self">self</span>;
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">quo</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::ZERO</span>;
+<span class="kw">impl</span>&lt;<span class="kw">const </span>LIMBS: usize&gt; UInt&lt;LIMBS&gt; {
+    <span class="doccomment">/// Computes `self` / `rhs`, returns the quotient (q), remainder (r)
+    /// and 1 for is_some or 0 for is_none. The results can be wrapped in [`CtOption`].
+    /// NOTE: Use only if you need to access const fn. Otherwise use `div_rem` because
+    /// the value for is_some needs to be checked before using `q` and `r`.
+    ///
+    /// This is variable only with respect to `rhs`.
+    ///
+    /// When used with a fixed `rhs`, this function is constant-time with respect
+    /// to `self`.
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const fn </span>ct_div_rem(<span class="kw-2">&amp;</span><span class="self">self</span>, rhs: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; (<span class="self">Self</span>, <span class="self">Self</span>, u8) {
+        <span class="kw">let </span><span class="kw-2">mut </span>bd = <span class="self">self</span>.bits().saturating_sub(rhs.bits()) <span class="kw">as </span>usize;
+        <span class="kw">let </span><span class="kw-2">mut </span>rem = <span class="kw-2">*</span><span class="self">self</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>quo = <span class="self">Self</span>::ZERO;
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">c</span> <span class="op">=</span> <span class="ident">rhs</span>.<span class="ident">shl_vartime</span>(<span class="ident">bd</span>);
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">e</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::ONE</span>.<span class="ident">shl_vartime</span>(<span class="ident">bd</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>c = rhs.shl_vartime(bd);
+        <span class="kw">let </span><span class="kw-2">mut </span>e = <span class="self">Self</span>::ONE.shl_vartime(bd);
 
-        <span class="kw">loop</span> {
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">r</span>: <span class="self">Self</span> <span class="op">=</span> <span class="ident">rem</span>.<span class="ident">wrapping_sub</span>(<span class="kw-2">&amp;</span><span class="ident">c</span>);
-            <span class="kw">let</span> <span class="ident">d</span> <span class="op">=</span> <span class="op">-</span>(((<span class="number">1</span> <span class="op">-</span> (<span class="ident">r</span>.<span class="ident">limbs</span>[<span class="ident">LIMBS</span> <span class="op">-</span> <span class="number">1</span>].<span class="number">0</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">BIT_SIZE_M_1</span>)) <span class="op">&amp;</span> <span class="number">1</span>) <span class="kw">as</span> <span class="ident">SignedInner</span>);
-            <span class="kw">let</span> <span class="ident">d</span> <span class="op">=</span> <span class="ident">d</span> <span class="kw">as</span> <span class="ident">Inner</span>;
-            <span class="ident">rem</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::ct_select</span>(<span class="ident">rem</span>, <span class="ident">r</span>, <span class="ident">d</span>);
-            <span class="ident">r</span> <span class="op">=</span> <span class="ident">quo</span>;
-            <span class="ident">r</span> <span class="op">=</span> <span class="ident">r</span>.<span class="ident">wrapping_add</span>(<span class="kw-2">&amp;</span><span class="ident">e</span>);
-            <span class="ident">quo</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::ct_select</span>(<span class="ident">quo</span>, <span class="ident">r</span>, <span class="ident">d</span>);
-            <span class="kw">if</span> <span class="ident">bd</span> <span class="op">==</span> <span class="number">0</span> {
+        <span class="kw">loop </span>{
+            <span class="kw">let </span><span class="kw-2">mut </span>r: <span class="self">Self </span>= rem.wrapping_sub(<span class="kw-2">&amp;</span>c);
+            <span class="kw">let </span>d = -(((<span class="number">1 </span>- (r.limbs[LIMBS - <span class="number">1</span>].<span class="number">0 </span>&gt;&gt; BIT_SIZE_M_1)) &amp; <span class="number">1</span>) <span class="kw">as </span>SignedInner);
+            <span class="kw">let </span>d = d <span class="kw">as </span>Inner;
+            rem = <span class="self">Self</span>::ct_select(rem, r, d);
+            r = quo;
+            r = r.wrapping_add(<span class="kw-2">&amp;</span>e);
+            quo = <span class="self">Self</span>::ct_select(quo, r, d);
+            <span class="kw">if </span>bd == <span class="number">0 </span>{
                 <span class="kw">break</span>;
             }
-            <span class="ident">bd</span> <span class="op">-</span><span class="op">=</span> <span class="number">1</span>;
-            <span class="ident">c</span> <span class="op">=</span> <span class="ident">c</span>.<span class="ident">shr_vartime</span>(<span class="number">1</span>);
-            <span class="ident">e</span> <span class="op">=</span> <span class="ident">e</span>.<span class="ident">shr_vartime</span>(<span class="number">1</span>);
+            bd -= <span class="number">1</span>;
+            c = c.shr_vartime(<span class="number">1</span>);
+            e = e.shr_vartime(<span class="number">1</span>);
         }
-        <span class="comment">// If `self`&lt;rhs</span>
-        <span class="comment">// set quo and rem to Self::ZERO</span>
-        <span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">ct_cmp</span>(<span class="ident">rhs</span>) <span class="op">+</span> <span class="number">1</span>;
-        <span class="kw">let</span> <span class="ident">gt</span> <span class="op">=</span> <span class="ident">Limb::is_nonzero</span>(<span class="ident">Limb</span>(<span class="ident">res</span> <span class="kw">as</span> <span class="ident">Inner</span>));
-        <span class="ident">quo</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::ct_select</span>(<span class="ident"><span class="self">Self</span>::ZERO</span>, <span class="ident">quo</span>, <span class="ident">gt</span>);
-        <span class="ident">rem</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::ct_select</span>(<span class="ident"><span class="self">Self</span>::ZERO</span>, <span class="ident">rem</span>, <span class="ident">gt</span>);
-        <span class="kw">let</span> <span class="ident">is_some</span> <span class="op">=</span> <span class="ident">rhs</span>.<span class="ident">ct_is_nonzero</span>() <span class="op">&amp;</span> <span class="number">1</span>;
-        (<span class="ident">quo</span>, <span class="ident">rem</span>, <span class="ident">is_some</span> <span class="kw">as</span> <span class="ident">u8</span>)
+        <span class="comment">// If `self`&lt;rhs
+        // set quo and rem to Self::ZERO
+        </span><span class="kw">let </span>res = <span class="self">self</span>.ct_cmp(rhs) + <span class="number">1</span>;
+        <span class="kw">let </span>gt = Limb::is_nonzero(Limb(res <span class="kw">as </span>Inner));
+        quo = <span class="self">Self</span>::ct_select(<span class="self">Self</span>::ZERO, quo, gt);
+        rem = <span class="self">Self</span>::ct_select(<span class="self">Self</span>::ZERO, rem, gt);
+        <span class="kw">let </span>is_some = rhs.ct_is_nonzero() &amp; <span class="number">1</span>;
+        (quo, rem, is_some <span class="kw">as </span>u8)
     }
 
-    <span class="doccomment">/// Computes `self` % `rhs`, returns the remainder and</span>
-    <span class="doccomment">/// and 1 for is_some or 0 for is_none. The results can be wrapped in [`CtOption`].</span>
-    <span class="doccomment">/// NOTE: Use only if you need to access const fn. Otherwise use `reduce`</span>
-    <span class="doccomment">/// This is variable only with respect to `rhs`.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// When used with a fixed `rhs`, this function is constant-time with respect</span>
-    <span class="doccomment">/// to `self`.</span>
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">ct_reduce</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rhs</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; (<span class="self">Self</span>, <span class="ident">u8</span>) {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">bd</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">bits</span>().<span class="ident">saturating_sub</span>(<span class="ident">rhs</span>.<span class="ident">bits</span>()) <span class="kw">as</span> <span class="ident">usize</span>;
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rem</span> <span class="op">=</span> <span class="kw-2">*</span><span class="self">self</span>;
+    <span class="doccomment">/// Computes `self` % `rhs`, returns the remainder and
+    /// and 1 for is_some or 0 for is_none. The results can be wrapped in [`CtOption`].
+    /// NOTE: Use only if you need to access const fn. Otherwise use `reduce`
+    /// This is variable only with respect to `rhs`.
+    ///
+    /// When used with a fixed `rhs`, this function is constant-time with respect
+    /// to `self`.
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const fn </span>ct_reduce(<span class="kw-2">&amp;</span><span class="self">self</span>, rhs: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; (<span class="self">Self</span>, u8) {
+        <span class="kw">let </span><span class="kw-2">mut </span>bd = <span class="self">self</span>.bits().saturating_sub(rhs.bits()) <span class="kw">as </span>usize;
+        <span class="kw">let </span><span class="kw-2">mut </span>rem = <span class="kw-2">*</span><span class="self">self</span>;
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">c</span> <span class="op">=</span> <span class="ident">rhs</span>.<span class="ident">shl_vartime</span>(<span class="ident">bd</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>c = rhs.shl_vartime(bd);
 
-        <span class="kw">loop</span> {
-            <span class="kw">let</span> <span class="ident">r</span>: <span class="self">Self</span> <span class="op">=</span> <span class="ident">rem</span>.<span class="ident">wrapping_sub</span>(<span class="kw-2">&amp;</span><span class="ident">c</span>);
-            <span class="kw">let</span> <span class="ident">d</span> <span class="op">=</span> <span class="op">-</span>(((<span class="number">1</span> <span class="op">-</span> (<span class="ident">r</span>.<span class="ident">limbs</span>[<span class="ident">LIMBS</span> <span class="op">-</span> <span class="number">1</span>].<span class="number">0</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">BIT_SIZE_M_1</span>)) <span class="op">&amp;</span> <span class="number">1</span>) <span class="kw">as</span> <span class="ident">SignedInner</span>);
-            <span class="kw">let</span> <span class="ident">d</span> <span class="op">=</span> <span class="ident">d</span> <span class="kw">as</span> <span class="ident">Inner</span>;
-            <span class="ident">rem</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::ct_select</span>(<span class="ident">rem</span>, <span class="ident">r</span>, <span class="ident">d</span>);
-            <span class="kw">if</span> <span class="ident">bd</span> <span class="op">==</span> <span class="number">0</span> {
+        <span class="kw">loop </span>{
+            <span class="kw">let </span>r: <span class="self">Self </span>= rem.wrapping_sub(<span class="kw-2">&amp;</span>c);
+            <span class="kw">let </span>d = -(((<span class="number">1 </span>- (r.limbs[LIMBS - <span class="number">1</span>].<span class="number">0 </span>&gt;&gt; BIT_SIZE_M_1)) &amp; <span class="number">1</span>) <span class="kw">as </span>SignedInner);
+            <span class="kw">let </span>d = d <span class="kw">as </span>Inner;
+            rem = <span class="self">Self</span>::ct_select(rem, r, d);
+            <span class="kw">if </span>bd == <span class="number">0 </span>{
                 <span class="kw">break</span>;
             }
-            <span class="ident">bd</span> <span class="op">-</span><span class="op">=</span> <span class="number">1</span>;
-            <span class="ident">c</span> <span class="op">=</span> <span class="ident">c</span>.<span class="ident">shr_vartime</span>(<span class="number">1</span>);
+            bd -= <span class="number">1</span>;
+            c = c.shr_vartime(<span class="number">1</span>);
         }
-        <span class="comment">// If `self`&lt;rhs</span>
-        <span class="comment">// set rem to Self::ZERO</span>
-        <span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">ct_cmp</span>(<span class="ident">rhs</span>) <span class="op">+</span> <span class="number">1</span>;
-        <span class="kw">let</span> <span class="ident">gt</span> <span class="op">=</span> <span class="ident">Limb::is_nonzero</span>(<span class="ident">Limb</span>(<span class="ident">res</span> <span class="kw">as</span> <span class="ident">Inner</span>));
-        <span class="ident">rem</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::ct_select</span>(<span class="ident"><span class="self">Self</span>::ZERO</span>, <span class="ident">rem</span>, <span class="ident">gt</span>);
-        <span class="kw">let</span> <span class="ident">is_some</span> <span class="op">=</span> <span class="ident">rhs</span>.<span class="ident">ct_is_nonzero</span>() <span class="op">&amp;</span> <span class="number">1</span>;
-        (<span class="ident">rem</span>, <span class="ident">is_some</span> <span class="kw">as</span> <span class="ident">u8</span>)
+        <span class="comment">// If `self`&lt;rhs
+        // set rem to Self::ZERO
+        </span><span class="kw">let </span>res = <span class="self">self</span>.ct_cmp(rhs) + <span class="number">1</span>;
+        <span class="kw">let </span>gt = Limb::is_nonzero(Limb(res <span class="kw">as </span>Inner));
+        rem = <span class="self">Self</span>::ct_select(<span class="self">Self</span>::ZERO, rem, gt);
+        <span class="kw">let </span>is_some = rhs.ct_is_nonzero() &amp; <span class="number">1</span>;
+        (rem, is_some <span class="kw">as </span>u8)
     }
 
-    <span class="doccomment">/// Computes self / rhs, returns the quotient, remainder</span>
-    <span class="doccomment">/// if rhs != 0</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">div_rem</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rhs</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="ident">CtOption</span><span class="op">&lt;</span>(<span class="self">Self</span>, <span class="self">Self</span>)<span class="op">&gt;</span> {
-        <span class="kw">let</span> (<span class="ident">q</span>, <span class="ident">r</span>, <span class="ident">c</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">ct_div_rem</span>(<span class="ident">rhs</span>);
-        <span class="ident">CtOption::new</span>((<span class="ident">q</span>, <span class="ident">r</span>), <span class="ident">Choice::from</span>(<span class="ident">c</span>))
+    <span class="doccomment">/// Computes self / rhs, returns the quotient, remainder
+    /// if rhs != 0
+    </span><span class="kw">pub fn </span>div_rem(<span class="kw-2">&amp;</span><span class="self">self</span>, rhs: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; CtOption&lt;(<span class="self">Self</span>, <span class="self">Self</span>)&gt; {
+        <span class="kw">let </span>(q, r, c) = <span class="self">self</span>.ct_div_rem(rhs);
+        CtOption::new((q, r), Choice::from(c))
     }
 
-    <span class="doccomment">/// Computes self % rhs, returns the remainder</span>
-    <span class="doccomment">/// if rhs != 0</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">reduce</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rhs</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="ident">CtOption</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> (<span class="ident">r</span>, <span class="ident">c</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">ct_reduce</span>(<span class="ident">rhs</span>);
-        <span class="ident">CtOption::new</span>(<span class="ident">r</span>, <span class="ident">Choice::from</span>(<span class="ident">c</span>))
+    <span class="doccomment">/// Computes self % rhs, returns the remainder
+    /// if rhs != 0
+    </span><span class="kw">pub fn </span>reduce(<span class="kw-2">&amp;</span><span class="self">self</span>, rhs: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; CtOption&lt;<span class="self">Self</span>&gt; {
+        <span class="kw">let </span>(r, c) = <span class="self">self</span>.ct_reduce(rhs);
+        CtOption::new(r, Choice::from(c))
     }
 
-    <span class="doccomment">/// Wrapped division is just normal division i.e. `self` / `rhs`</span>
-    <span class="doccomment">/// There’s no way wrapping could ever happen.</span>
-    <span class="doccomment">/// This function exists, so that all operations are accounted for in the wrapping operations.</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">wrapping_div</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rhs</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> (<span class="ident">q</span>, <span class="kw">_</span>, <span class="ident">c</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">ct_div_rem</span>(<span class="ident">rhs</span>);
-        <span class="macro">const_assert!</span>(<span class="ident">c</span> <span class="op">==</span> <span class="number">1</span>, <span class="string">&quot;divide by zero&quot;</span>);
-        <span class="ident">q</span>
+    <span class="doccomment">/// Wrapped division is just normal division i.e. `self` / `rhs`
+    /// There’s no way wrapping could ever happen.
+    /// This function exists, so that all operations are accounted for in the wrapping operations.
+    </span><span class="kw">pub const fn </span>wrapping_div(<span class="kw-2">&amp;</span><span class="self">self</span>, rhs: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>(q, <span class="kw">_</span>, c) = <span class="self">self</span>.ct_div_rem(rhs);
+        <span class="macro">const_assert!</span>(c == <span class="number">1</span>, <span class="string">&quot;divide by zero&quot;</span>);
+        q
     }
 
-    <span class="doccomment">/// Perform checked division, returning a [`CtOption`] which `is_some`</span>
-    <span class="doccomment">/// only if the rhs != 0</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">checked_div</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rhs</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="ident">CtOption</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> (<span class="ident">q</span>, <span class="kw">_</span>, <span class="ident">c</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">ct_div_rem</span>(<span class="ident">rhs</span>);
-        <span class="ident">CtOption::new</span>(<span class="ident">q</span>, <span class="ident">Choice::from</span>(<span class="ident">c</span>))
+    <span class="doccomment">/// Perform checked division, returning a [`CtOption`] which `is_some`
+    /// only if the rhs != 0
+    </span><span class="kw">pub fn </span>checked_div(<span class="kw-2">&amp;</span><span class="self">self</span>, rhs: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; CtOption&lt;<span class="self">Self</span>&gt; {
+        <span class="kw">let </span>(q, <span class="kw">_</span>, c) = <span class="self">self</span>.ct_div_rem(rhs);
+        CtOption::new(q, Choice::from(c))
     }
 
-    <span class="doccomment">/// Wrapped (modular) remainder calculation is just `self` % `rhs`.</span>
-    <span class="doccomment">/// There’s no way wrapping could ever happen.</span>
-    <span class="doccomment">/// This function exists, so that all operations are accounted for in the wrapping operations.</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">wrapping_rem</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rhs</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> (<span class="ident">r</span>, <span class="ident">c</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">ct_reduce</span>(<span class="ident">rhs</span>);
-        <span class="macro">const_assert!</span>(<span class="ident">c</span> <span class="op">==</span> <span class="number">1</span>, <span class="string">&quot;modulo zero&quot;</span>);
-        <span class="ident">r</span>
+    <span class="doccomment">/// Wrapped (modular) remainder calculation is just `self` % `rhs`.
+    /// There’s no way wrapping could ever happen.
+    /// This function exists, so that all operations are accounted for in the wrapping operations.
+    </span><span class="kw">pub const fn </span>wrapping_rem(<span class="kw-2">&amp;</span><span class="self">self</span>, rhs: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>(r, c) = <span class="self">self</span>.ct_reduce(rhs);
+        <span class="macro">const_assert!</span>(c == <span class="number">1</span>, <span class="string">&quot;modulo zero&quot;</span>);
+        r
     }
 
-    <span class="doccomment">/// Perform checked reduction, returning a [`CtOption`] which `is_some`</span>
-    <span class="doccomment">/// only if the rhs != 0</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">checked_rem</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rhs</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="ident">CtOption</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> (<span class="ident">r</span>, <span class="ident">c</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">ct_reduce</span>(<span class="ident">rhs</span>);
-        <span class="ident">CtOption::new</span>(<span class="ident">r</span>, <span class="ident">Choice::from</span>(<span class="ident">c</span>))
+    <span class="doccomment">/// Perform checked reduction, returning a [`CtOption`] which `is_some`
+    /// only if the rhs != 0
+    </span><span class="kw">pub fn </span>checked_rem(<span class="kw-2">&amp;</span><span class="self">self</span>, rhs: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; CtOption&lt;<span class="self">Self</span>&gt; {
+        <span class="kw">let </span>(r, c) = <span class="self">self</span>.ct_reduce(rhs);
+        CtOption::new(r, Choice::from(c))
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="kw">const</span> <span class="ident">LIMBS</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">Div</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">NonZero</span><span class="op">&lt;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span>: <span class="ident">Integer</span>,
+<span class="kw">impl</span>&lt;<span class="kw">const </span>LIMBS: usize&gt; Div&lt;<span class="kw-2">&amp;</span>NonZero&lt;UInt&lt;LIMBS&gt;&gt;&gt; <span class="kw">for </span><span class="kw-2">&amp;</span>UInt&lt;LIMBS&gt;
+<span class="kw">where
+    </span>UInt&lt;LIMBS&gt;: Integer,
 {
-    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span>;
+    <span class="kw">type </span>Output = UInt&lt;LIMBS&gt;;
 
-    <span class="kw">fn</span> <span class="ident">div</span>(<span class="self">self</span>, <span class="ident">rhs</span>: <span class="kw-2">&amp;</span><span class="ident">NonZero</span><span class="op">&lt;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span><span class="op">&gt;</span>) -&gt; <span class="ident"><span class="self">Self</span>::Output</span> {
-        <span class="kw-2">*</span><span class="self">self</span> <span class="op">/</span> <span class="kw-2">*</span><span class="ident">rhs</span>
+    <span class="kw">fn </span>div(<span class="self">self</span>, rhs: <span class="kw-2">&amp;</span>NonZero&lt;UInt&lt;LIMBS&gt;&gt;) -&gt; <span class="self">Self</span>::Output {
+        <span class="kw-2">*</span><span class="self">self </span>/ <span class="kw-2">*</span>rhs
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="kw">const</span> <span class="ident">LIMBS</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">Div</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">NonZero</span><span class="op">&lt;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span>: <span class="ident">Integer</span>,
+<span class="kw">impl</span>&lt;<span class="kw">const </span>LIMBS: usize&gt; Div&lt;<span class="kw-2">&amp;</span>NonZero&lt;UInt&lt;LIMBS&gt;&gt;&gt; <span class="kw">for </span>UInt&lt;LIMBS&gt;
+<span class="kw">where
+    </span>UInt&lt;LIMBS&gt;: Integer,
 {
-    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span>;
+    <span class="kw">type </span>Output = UInt&lt;LIMBS&gt;;
 
-    <span class="kw">fn</span> <span class="ident">div</span>(<span class="self">self</span>, <span class="ident">rhs</span>: <span class="kw-2">&amp;</span><span class="ident">NonZero</span><span class="op">&lt;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span><span class="op">&gt;</span>) -&gt; <span class="ident"><span class="self">Self</span>::Output</span> {
-        <span class="self">self</span> <span class="op">/</span> <span class="kw-2">*</span><span class="ident">rhs</span>
+    <span class="kw">fn </span>div(<span class="self">self</span>, rhs: <span class="kw-2">&amp;</span>NonZero&lt;UInt&lt;LIMBS&gt;&gt;) -&gt; <span class="self">Self</span>::Output {
+        <span class="self">self </span>/ <span class="kw-2">*</span>rhs
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="kw">const</span> <span class="ident">LIMBS</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">Div</span><span class="op">&lt;</span><span class="ident">NonZero</span><span class="op">&lt;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span>: <span class="ident">Integer</span>,
+<span class="kw">impl</span>&lt;<span class="kw">const </span>LIMBS: usize&gt; Div&lt;NonZero&lt;UInt&lt;LIMBS&gt;&gt;&gt; <span class="kw">for </span><span class="kw-2">&amp;</span>UInt&lt;LIMBS&gt;
+<span class="kw">where
+    </span>UInt&lt;LIMBS&gt;: Integer,
 {
-    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span>;
+    <span class="kw">type </span>Output = UInt&lt;LIMBS&gt;;
 
-    <span class="kw">fn</span> <span class="ident">div</span>(<span class="self">self</span>, <span class="ident">rhs</span>: <span class="ident">NonZero</span><span class="op">&lt;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span><span class="op">&gt;</span>) -&gt; <span class="ident"><span class="self">Self</span>::Output</span> {
-        <span class="kw-2">*</span><span class="self">self</span> <span class="op">/</span> <span class="ident">rhs</span>
+    <span class="kw">fn </span>div(<span class="self">self</span>, rhs: NonZero&lt;UInt&lt;LIMBS&gt;&gt;) -&gt; <span class="self">Self</span>::Output {
+        <span class="kw-2">*</span><span class="self">self </span>/ rhs
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="kw">const</span> <span class="ident">LIMBS</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">Div</span><span class="op">&lt;</span><span class="ident">NonZero</span><span class="op">&lt;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span>: <span class="ident">Integer</span>,
+<span class="kw">impl</span>&lt;<span class="kw">const </span>LIMBS: usize&gt; Div&lt;NonZero&lt;UInt&lt;LIMBS&gt;&gt;&gt; <span class="kw">for </span>UInt&lt;LIMBS&gt;
+<span class="kw">where
+    </span>UInt&lt;LIMBS&gt;: Integer,
 {
-    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span>;
+    <span class="kw">type </span>Output = UInt&lt;LIMBS&gt;;
 
-    <span class="kw">fn</span> <span class="ident">div</span>(<span class="self">self</span>, <span class="ident">rhs</span>: <span class="ident">NonZero</span><span class="op">&lt;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span><span class="op">&gt;</span>) -&gt; <span class="ident"><span class="self">Self</span>::Output</span> {
-        <span class="kw">let</span> (<span class="ident">q</span>, <span class="kw">_</span>, <span class="kw">_</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">ct_div_rem</span>(<span class="kw-2">&amp;</span><span class="ident">rhs</span>);
-        <span class="ident">q</span>
+    <span class="kw">fn </span>div(<span class="self">self</span>, rhs: NonZero&lt;UInt&lt;LIMBS&gt;&gt;) -&gt; <span class="self">Self</span>::Output {
+        <span class="kw">let </span>(q, <span class="kw">_</span>, <span class="kw">_</span>) = <span class="self">self</span>.ct_div_rem(<span class="kw-2">&amp;</span>rhs);
+        q
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="kw">const</span> <span class="ident">LIMBS</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">DivAssign</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">NonZero</span><span class="op">&lt;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span>: <span class="ident">Integer</span>,
+<span class="kw">impl</span>&lt;<span class="kw">const </span>LIMBS: usize&gt; DivAssign&lt;<span class="kw-2">&amp;</span>NonZero&lt;UInt&lt;LIMBS&gt;&gt;&gt; <span class="kw">for </span>UInt&lt;LIMBS&gt;
+<span class="kw">where
+    </span>UInt&lt;LIMBS&gt;: Integer,
 {
-    <span class="kw">fn</span> <span class="ident">div_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">rhs</span>: <span class="kw-2">&amp;</span><span class="ident">NonZero</span><span class="op">&lt;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span><span class="op">&gt;</span>) {
-        <span class="kw">let</span> (<span class="ident">q</span>, <span class="kw">_</span>, <span class="kw">_</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">ct_div_rem</span>(<span class="ident">rhs</span>);
-        <span class="kw-2">*</span><span class="self">self</span> <span class="op">=</span> <span class="ident">q</span>
+    <span class="kw">fn </span>div_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, rhs: <span class="kw-2">&amp;</span>NonZero&lt;UInt&lt;LIMBS&gt;&gt;) {
+        <span class="kw">let </span>(q, <span class="kw">_</span>, <span class="kw">_</span>) = <span class="self">self</span>.ct_div_rem(rhs);
+        <span class="kw-2">*</span><span class="self">self </span>= q
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="kw">const</span> <span class="ident">LIMBS</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">DivAssign</span><span class="op">&lt;</span><span class="ident">NonZero</span><span class="op">&lt;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span>: <span class="ident">Integer</span>,
+<span class="kw">impl</span>&lt;<span class="kw">const </span>LIMBS: usize&gt; DivAssign&lt;NonZero&lt;UInt&lt;LIMBS&gt;&gt;&gt; <span class="kw">for </span>UInt&lt;LIMBS&gt;
+<span class="kw">where
+    </span>UInt&lt;LIMBS&gt;: Integer,
 {
-    <span class="kw">fn</span> <span class="ident">div_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">rhs</span>: <span class="ident">NonZero</span><span class="op">&lt;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span><span class="op">&gt;</span>) {
-        <span class="kw-2">*</span><span class="self">self</span> <span class="op">/</span><span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">rhs</span>;
+    <span class="kw">fn </span>div_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, rhs: NonZero&lt;UInt&lt;LIMBS&gt;&gt;) {
+        <span class="kw-2">*</span><span class="self">self </span>/= <span class="kw-2">&amp;</span>rhs;
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="kw">const</span> <span class="ident">LIMBS</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">Div</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Wrapping</span><span class="op">&lt;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="ident">Wrapping</span><span class="op">&lt;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">Wrapping</span><span class="op">&lt;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span><span class="op">&gt;</span>;
+<span class="kw">impl</span>&lt;<span class="kw">const </span>LIMBS: usize&gt; Div&lt;<span class="kw-2">&amp;</span>Wrapping&lt;UInt&lt;LIMBS&gt;&gt;&gt; <span class="kw">for </span><span class="kw-2">&amp;</span>Wrapping&lt;UInt&lt;LIMBS&gt;&gt; {
+    <span class="kw">type </span>Output = Wrapping&lt;UInt&lt;LIMBS&gt;&gt;;
 
-    <span class="kw">fn</span> <span class="ident">div</span>(<span class="self">self</span>, <span class="ident">rhs</span>: <span class="kw-2">&amp;</span><span class="ident">Wrapping</span><span class="op">&lt;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span><span class="op">&gt;</span>) -&gt; <span class="ident"><span class="self">Self</span>::Output</span> {
-        <span class="kw-2">*</span><span class="self">self</span> <span class="op">/</span> <span class="kw-2">*</span><span class="ident">rhs</span>
+    <span class="kw">fn </span>div(<span class="self">self</span>, rhs: <span class="kw-2">&amp;</span>Wrapping&lt;UInt&lt;LIMBS&gt;&gt;) -&gt; <span class="self">Self</span>::Output {
+        <span class="kw-2">*</span><span class="self">self </span>/ <span class="kw-2">*</span>rhs
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="kw">const</span> <span class="ident">LIMBS</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">Div</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Wrapping</span><span class="op">&lt;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Wrapping</span><span class="op">&lt;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">Wrapping</span><span class="op">&lt;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span><span class="op">&gt;</span>;
+<span class="kw">impl</span>&lt;<span class="kw">const </span>LIMBS: usize&gt; Div&lt;<span class="kw-2">&amp;</span>Wrapping&lt;UInt&lt;LIMBS&gt;&gt;&gt; <span class="kw">for </span>Wrapping&lt;UInt&lt;LIMBS&gt;&gt; {
+    <span class="kw">type </span>Output = Wrapping&lt;UInt&lt;LIMBS&gt;&gt;;
 
-    <span class="kw">fn</span> <span class="ident">div</span>(<span class="self">self</span>, <span class="ident">rhs</span>: <span class="kw-2">&amp;</span><span class="ident">Wrapping</span><span class="op">&lt;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span><span class="op">&gt;</span>) -&gt; <span class="ident"><span class="self">Self</span>::Output</span> {
-        <span class="self">self</span> <span class="op">/</span> <span class="kw-2">*</span><span class="ident">rhs</span>
+    <span class="kw">fn </span>div(<span class="self">self</span>, rhs: <span class="kw-2">&amp;</span>Wrapping&lt;UInt&lt;LIMBS&gt;&gt;) -&gt; <span class="self">Self</span>::Output {
+        <span class="self">self </span>/ <span class="kw-2">*</span>rhs
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="kw">const</span> <span class="ident">LIMBS</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">Div</span><span class="op">&lt;</span><span class="ident">Wrapping</span><span class="op">&lt;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="ident">Wrapping</span><span class="op">&lt;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">Wrapping</span><span class="op">&lt;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span><span class="op">&gt;</span>;
+<span class="kw">impl</span>&lt;<span class="kw">const </span>LIMBS: usize&gt; Div&lt;Wrapping&lt;UInt&lt;LIMBS&gt;&gt;&gt; <span class="kw">for </span><span class="kw-2">&amp;</span>Wrapping&lt;UInt&lt;LIMBS&gt;&gt; {
+    <span class="kw">type </span>Output = Wrapping&lt;UInt&lt;LIMBS&gt;&gt;;
 
-    <span class="kw">fn</span> <span class="ident">div</span>(<span class="self">self</span>, <span class="ident">rhs</span>: <span class="ident">Wrapping</span><span class="op">&lt;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span><span class="op">&gt;</span>) -&gt; <span class="ident"><span class="self">Self</span>::Output</span> {
-        <span class="kw-2">*</span><span class="self">self</span> <span class="op">/</span> <span class="ident">rhs</span>
+    <span class="kw">fn </span>div(<span class="self">self</span>, rhs: Wrapping&lt;UInt&lt;LIMBS&gt;&gt;) -&gt; <span class="self">Self</span>::Output {
+        <span class="kw-2">*</span><span class="self">self </span>/ rhs
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="kw">const</span> <span class="ident">LIMBS</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">Div</span> <span class="kw">for</span> <span class="ident">Wrapping</span><span class="op">&lt;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">Wrapping</span><span class="op">&lt;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span><span class="op">&gt;</span>;
+<span class="kw">impl</span>&lt;<span class="kw">const </span>LIMBS: usize&gt; Div <span class="kw">for </span>Wrapping&lt;UInt&lt;LIMBS&gt;&gt; {
+    <span class="kw">type </span>Output = Wrapping&lt;UInt&lt;LIMBS&gt;&gt;;
 
-    <span class="kw">fn</span> <span class="ident">div</span>(<span class="self">self</span>, <span class="ident">rhs</span>: <span class="self">Self</span>) -&gt; <span class="ident"><span class="self">Self</span>::Output</span> {
-        <span class="ident">Wrapping</span>(<span class="self">self</span>.<span class="number">0</span>.<span class="ident">checked_div</span>(<span class="kw-2">&amp;</span><span class="ident">rhs</span>.<span class="number">0</span>).<span class="ident">unwrap</span>())
+    <span class="kw">fn </span>div(<span class="self">self</span>, rhs: <span class="self">Self</span>) -&gt; <span class="self">Self</span>::Output {
+        Wrapping(<span class="self">self</span>.<span class="number">0</span>.checked_div(<span class="kw-2">&amp;</span>rhs.<span class="number">0</span>).unwrap())
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="kw">const</span> <span class="ident">LIMBS</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">DivAssign</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Wrapping</span><span class="op">&lt;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Wrapping</span><span class="op">&lt;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">div_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">rhs</span>: <span class="kw-2">&amp;</span><span class="ident">Wrapping</span><span class="op">&lt;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span><span class="op">&gt;</span>) {
-        <span class="kw-2">*</span><span class="self">self</span> <span class="op">=</span> <span class="ident">Wrapping</span>(<span class="self">self</span>.<span class="number">0</span>.<span class="ident">checked_div</span>(<span class="kw-2">&amp;</span><span class="ident">rhs</span>.<span class="number">0</span>).<span class="ident">unwrap</span>())
+<span class="kw">impl</span>&lt;<span class="kw">const </span>LIMBS: usize&gt; DivAssign&lt;<span class="kw-2">&amp;</span>Wrapping&lt;UInt&lt;LIMBS&gt;&gt;&gt; <span class="kw">for </span>Wrapping&lt;UInt&lt;LIMBS&gt;&gt; {
+    <span class="kw">fn </span>div_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, rhs: <span class="kw-2">&amp;</span>Wrapping&lt;UInt&lt;LIMBS&gt;&gt;) {
+        <span class="kw-2">*</span><span class="self">self </span>= Wrapping(<span class="self">self</span>.<span class="number">0</span>.checked_div(<span class="kw-2">&amp;</span>rhs.<span class="number">0</span>).unwrap())
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="kw">const</span> <span class="ident">LIMBS</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">DivAssign</span> <span class="kw">for</span> <span class="ident">Wrapping</span><span class="op">&lt;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">div_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">rhs</span>: <span class="self">Self</span>) {
-        <span class="kw-2">*</span><span class="self">self</span> <span class="op">/</span><span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">rhs</span>;
+<span class="kw">impl</span>&lt;<span class="kw">const </span>LIMBS: usize&gt; DivAssign <span class="kw">for </span>Wrapping&lt;UInt&lt;LIMBS&gt;&gt; {
+    <span class="kw">fn </span>div_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, rhs: <span class="self">Self</span>) {
+        <span class="kw-2">*</span><span class="self">self </span>/= <span class="kw-2">&amp;</span>rhs;
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="kw">const</span> <span class="ident">LIMBS</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">Rem</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">NonZero</span><span class="op">&lt;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span>: <span class="ident">Integer</span>,
+<span class="kw">impl</span>&lt;<span class="kw">const </span>LIMBS: usize&gt; Rem&lt;<span class="kw-2">&amp;</span>NonZero&lt;UInt&lt;LIMBS&gt;&gt;&gt; <span class="kw">for </span><span class="kw-2">&amp;</span>UInt&lt;LIMBS&gt;
+<span class="kw">where
+    </span>UInt&lt;LIMBS&gt;: Integer,
 {
-    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span>;
+    <span class="kw">type </span>Output = UInt&lt;LIMBS&gt;;
 
-    <span class="kw">fn</span> <span class="ident">rem</span>(<span class="self">self</span>, <span class="ident">rhs</span>: <span class="kw-2">&amp;</span><span class="ident">NonZero</span><span class="op">&lt;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span><span class="op">&gt;</span>) -&gt; <span class="ident"><span class="self">Self</span>::Output</span> {
-        <span class="kw-2">*</span><span class="self">self</span> <span class="op">%</span> <span class="kw-2">*</span><span class="ident">rhs</span>
+    <span class="kw">fn </span>rem(<span class="self">self</span>, rhs: <span class="kw-2">&amp;</span>NonZero&lt;UInt&lt;LIMBS&gt;&gt;) -&gt; <span class="self">Self</span>::Output {
+        <span class="kw-2">*</span><span class="self">self </span>% <span class="kw-2">*</span>rhs
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="kw">const</span> <span class="ident">LIMBS</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">Rem</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">NonZero</span><span class="op">&lt;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span>: <span class="ident">Integer</span>,
+<span class="kw">impl</span>&lt;<span class="kw">const </span>LIMBS: usize&gt; Rem&lt;<span class="kw-2">&amp;</span>NonZero&lt;UInt&lt;LIMBS&gt;&gt;&gt; <span class="kw">for </span>UInt&lt;LIMBS&gt;
+<span class="kw">where
+    </span>UInt&lt;LIMBS&gt;: Integer,
 {
-    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span>;
+    <span class="kw">type </span>Output = UInt&lt;LIMBS&gt;;
 
-    <span class="kw">fn</span> <span class="ident">rem</span>(<span class="self">self</span>, <span class="ident">rhs</span>: <span class="kw-2">&amp;</span><span class="ident">NonZero</span><span class="op">&lt;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span><span class="op">&gt;</span>) -&gt; <span class="ident"><span class="self">Self</span>::Output</span> {
-        <span class="self">self</span> <span class="op">%</span> <span class="kw-2">*</span><span class="ident">rhs</span>
+    <span class="kw">fn </span>rem(<span class="self">self</span>, rhs: <span class="kw-2">&amp;</span>NonZero&lt;UInt&lt;LIMBS&gt;&gt;) -&gt; <span class="self">Self</span>::Output {
+        <span class="self">self </span>% <span class="kw-2">*</span>rhs
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="kw">const</span> <span class="ident">LIMBS</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">Rem</span><span class="op">&lt;</span><span class="ident">NonZero</span><span class="op">&lt;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span>: <span class="ident">Integer</span>,
+<span class="kw">impl</span>&lt;<span class="kw">const </span>LIMBS: usize&gt; Rem&lt;NonZero&lt;UInt&lt;LIMBS&gt;&gt;&gt; <span class="kw">for </span><span class="kw-2">&amp;</span>UInt&lt;LIMBS&gt;
+<span class="kw">where
+    </span>UInt&lt;LIMBS&gt;: Integer,
 {
-    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span>;
+    <span class="kw">type </span>Output = UInt&lt;LIMBS&gt;;
 
-    <span class="kw">fn</span> <span class="ident">rem</span>(<span class="self">self</span>, <span class="ident">rhs</span>: <span class="ident">NonZero</span><span class="op">&lt;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span><span class="op">&gt;</span>) -&gt; <span class="ident"><span class="self">Self</span>::Output</span> {
-        <span class="kw-2">*</span><span class="self">self</span> <span class="op">%</span> <span class="ident">rhs</span>
+    <span class="kw">fn </span>rem(<span class="self">self</span>, rhs: NonZero&lt;UInt&lt;LIMBS&gt;&gt;) -&gt; <span class="self">Self</span>::Output {
+        <span class="kw-2">*</span><span class="self">self </span>% rhs
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="kw">const</span> <span class="ident">LIMBS</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">Rem</span><span class="op">&lt;</span><span class="ident">NonZero</span><span class="op">&lt;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span>: <span class="ident">Integer</span>,
+<span class="kw">impl</span>&lt;<span class="kw">const </span>LIMBS: usize&gt; Rem&lt;NonZero&lt;UInt&lt;LIMBS&gt;&gt;&gt; <span class="kw">for </span>UInt&lt;LIMBS&gt;
+<span class="kw">where
+    </span>UInt&lt;LIMBS&gt;: Integer,
 {
-    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span>;
+    <span class="kw">type </span>Output = UInt&lt;LIMBS&gt;;
 
-    <span class="kw">fn</span> <span class="ident">rem</span>(<span class="self">self</span>, <span class="ident">rhs</span>: <span class="ident">NonZero</span><span class="op">&lt;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span><span class="op">&gt;</span>) -&gt; <span class="ident"><span class="self">Self</span>::Output</span> {
-        <span class="kw">let</span> (<span class="ident">r</span>, <span class="kw">_</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">ct_reduce</span>(<span class="kw-2">&amp;</span><span class="ident">rhs</span>);
-        <span class="ident">r</span>
+    <span class="kw">fn </span>rem(<span class="self">self</span>, rhs: NonZero&lt;UInt&lt;LIMBS&gt;&gt;) -&gt; <span class="self">Self</span>::Output {
+        <span class="kw">let </span>(r, <span class="kw">_</span>) = <span class="self">self</span>.ct_reduce(<span class="kw-2">&amp;</span>rhs);
+        r
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="kw">const</span> <span class="ident">LIMBS</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">RemAssign</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">NonZero</span><span class="op">&lt;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span>: <span class="ident">Integer</span>,
+<span class="kw">impl</span>&lt;<span class="kw">const </span>LIMBS: usize&gt; RemAssign&lt;<span class="kw-2">&amp;</span>NonZero&lt;UInt&lt;LIMBS&gt;&gt;&gt; <span class="kw">for </span>UInt&lt;LIMBS&gt;
+<span class="kw">where
+    </span>UInt&lt;LIMBS&gt;: Integer,
 {
-    <span class="kw">fn</span> <span class="ident">rem_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">rhs</span>: <span class="kw-2">&amp;</span><span class="ident">NonZero</span><span class="op">&lt;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span><span class="op">&gt;</span>) {
-        <span class="kw">let</span> (<span class="ident">r</span>, <span class="kw">_</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">ct_reduce</span>(<span class="kw-2">&amp;</span><span class="ident">rhs</span>);
-        <span class="kw-2">*</span><span class="self">self</span> <span class="op">=</span> <span class="ident">r</span>
+    <span class="kw">fn </span>rem_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, rhs: <span class="kw-2">&amp;</span>NonZero&lt;UInt&lt;LIMBS&gt;&gt;) {
+        <span class="kw">let </span>(r, <span class="kw">_</span>) = <span class="self">self</span>.ct_reduce(<span class="kw-2">&amp;</span>rhs);
+        <span class="kw-2">*</span><span class="self">self </span>= r
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="kw">const</span> <span class="ident">LIMBS</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">RemAssign</span><span class="op">&lt;</span><span class="ident">NonZero</span><span class="op">&lt;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span>: <span class="ident">Integer</span>,
+<span class="kw">impl</span>&lt;<span class="kw">const </span>LIMBS: usize&gt; RemAssign&lt;NonZero&lt;UInt&lt;LIMBS&gt;&gt;&gt; <span class="kw">for </span>UInt&lt;LIMBS&gt;
+<span class="kw">where
+    </span>UInt&lt;LIMBS&gt;: Integer,
 {
-    <span class="kw">fn</span> <span class="ident">rem_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">rhs</span>: <span class="ident">NonZero</span><span class="op">&lt;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span><span class="op">&gt;</span>) {
-        <span class="kw-2">*</span><span class="self">self</span> <span class="op">%</span><span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">rhs</span>;
+    <span class="kw">fn </span>rem_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, rhs: NonZero&lt;UInt&lt;LIMBS&gt;&gt;) {
+        <span class="kw-2">*</span><span class="self">self </span>%= <span class="kw-2">&amp;</span>rhs;
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="kw">const</span> <span class="ident">LIMBS</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">Rem</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Wrapping</span><span class="op">&lt;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="ident">Wrapping</span><span class="op">&lt;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">Wrapping</span><span class="op">&lt;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span><span class="op">&gt;</span>;
+<span class="kw">impl</span>&lt;<span class="kw">const </span>LIMBS: usize&gt; Rem&lt;<span class="kw-2">&amp;</span>Wrapping&lt;UInt&lt;LIMBS&gt;&gt;&gt; <span class="kw">for </span><span class="kw-2">&amp;</span>Wrapping&lt;UInt&lt;LIMBS&gt;&gt; {
+    <span class="kw">type </span>Output = Wrapping&lt;UInt&lt;LIMBS&gt;&gt;;
 
-    <span class="kw">fn</span> <span class="ident">rem</span>(<span class="self">self</span>, <span class="ident">rhs</span>: <span class="kw-2">&amp;</span><span class="ident">Wrapping</span><span class="op">&lt;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span><span class="op">&gt;</span>) -&gt; <span class="ident"><span class="self">Self</span>::Output</span> {
-        <span class="kw-2">*</span><span class="self">self</span> <span class="op">%</span> <span class="kw-2">*</span><span class="ident">rhs</span>
+    <span class="kw">fn </span>rem(<span class="self">self</span>, rhs: <span class="kw-2">&amp;</span>Wrapping&lt;UInt&lt;LIMBS&gt;&gt;) -&gt; <span class="self">Self</span>::Output {
+        <span class="kw-2">*</span><span class="self">self </span>% <span class="kw-2">*</span>rhs
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="kw">const</span> <span class="ident">LIMBS</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">Rem</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Wrapping</span><span class="op">&lt;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Wrapping</span><span class="op">&lt;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">Wrapping</span><span class="op">&lt;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span><span class="op">&gt;</span>;
+<span class="kw">impl</span>&lt;<span class="kw">const </span>LIMBS: usize&gt; Rem&lt;<span class="kw-2">&amp;</span>Wrapping&lt;UInt&lt;LIMBS&gt;&gt;&gt; <span class="kw">for </span>Wrapping&lt;UInt&lt;LIMBS&gt;&gt; {
+    <span class="kw">type </span>Output = Wrapping&lt;UInt&lt;LIMBS&gt;&gt;;
 
-    <span class="kw">fn</span> <span class="ident">rem</span>(<span class="self">self</span>, <span class="ident">rhs</span>: <span class="kw-2">&amp;</span><span class="ident">Wrapping</span><span class="op">&lt;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span><span class="op">&gt;</span>) -&gt; <span class="ident"><span class="self">Self</span>::Output</span> {
-        <span class="self">self</span> <span class="op">%</span> <span class="kw-2">*</span><span class="ident">rhs</span>
+    <span class="kw">fn </span>rem(<span class="self">self</span>, rhs: <span class="kw-2">&amp;</span>Wrapping&lt;UInt&lt;LIMBS&gt;&gt;) -&gt; <span class="self">Self</span>::Output {
+        <span class="self">self </span>% <span class="kw-2">*</span>rhs
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="kw">const</span> <span class="ident">LIMBS</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">Rem</span><span class="op">&lt;</span><span class="ident">Wrapping</span><span class="op">&lt;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="ident">Wrapping</span><span class="op">&lt;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">Wrapping</span><span class="op">&lt;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span><span class="op">&gt;</span>;
+<span class="kw">impl</span>&lt;<span class="kw">const </span>LIMBS: usize&gt; Rem&lt;Wrapping&lt;UInt&lt;LIMBS&gt;&gt;&gt; <span class="kw">for </span><span class="kw-2">&amp;</span>Wrapping&lt;UInt&lt;LIMBS&gt;&gt; {
+    <span class="kw">type </span>Output = Wrapping&lt;UInt&lt;LIMBS&gt;&gt;;
 
-    <span class="kw">fn</span> <span class="ident">rem</span>(<span class="self">self</span>, <span class="ident">rhs</span>: <span class="ident">Wrapping</span><span class="op">&lt;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span><span class="op">&gt;</span>) -&gt; <span class="ident"><span class="self">Self</span>::Output</span> {
-        <span class="kw-2">*</span><span class="self">self</span> <span class="op">%</span> <span class="ident">rhs</span>
+    <span class="kw">fn </span>rem(<span class="self">self</span>, rhs: Wrapping&lt;UInt&lt;LIMBS&gt;&gt;) -&gt; <span class="self">Self</span>::Output {
+        <span class="kw-2">*</span><span class="self">self </span>% rhs
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="kw">const</span> <span class="ident">LIMBS</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">Rem</span> <span class="kw">for</span> <span class="ident">Wrapping</span><span class="op">&lt;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">Wrapping</span><span class="op">&lt;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span><span class="op">&gt;</span>;
+<span class="kw">impl</span>&lt;<span class="kw">const </span>LIMBS: usize&gt; Rem <span class="kw">for </span>Wrapping&lt;UInt&lt;LIMBS&gt;&gt; {
+    <span class="kw">type </span>Output = Wrapping&lt;UInt&lt;LIMBS&gt;&gt;;
 
-    <span class="kw">fn</span> <span class="ident">rem</span>(<span class="self">self</span>, <span class="ident">rhs</span>: <span class="ident">Wrapping</span><span class="op">&lt;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span><span class="op">&gt;</span>) -&gt; <span class="ident"><span class="self">Self</span>::Output</span> {
-        <span class="ident">Wrapping</span>(<span class="self">self</span>.<span class="number">0</span>.<span class="ident">checked_rem</span>(<span class="kw-2">&amp;</span><span class="ident">rhs</span>.<span class="number">0</span>).<span class="ident">unwrap</span>())
+    <span class="kw">fn </span>rem(<span class="self">self</span>, rhs: Wrapping&lt;UInt&lt;LIMBS&gt;&gt;) -&gt; <span class="self">Self</span>::Output {
+        Wrapping(<span class="self">self</span>.<span class="number">0</span>.checked_rem(<span class="kw-2">&amp;</span>rhs.<span class="number">0</span>).unwrap())
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="kw">const</span> <span class="ident">LIMBS</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">RemAssign</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Wrapping</span><span class="op">&lt;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Wrapping</span><span class="op">&lt;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">rem_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">rhs</span>: <span class="kw-2">&amp;</span><span class="ident">Wrapping</span><span class="op">&lt;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span><span class="op">&gt;</span>) {
-        <span class="kw-2">*</span><span class="self">self</span> <span class="op">=</span> <span class="ident">Wrapping</span>(<span class="self">self</span>.<span class="number">0</span>.<span class="ident">checked_rem</span>(<span class="kw-2">&amp;</span><span class="ident">rhs</span>.<span class="number">0</span>).<span class="ident">unwrap</span>())
+<span class="kw">impl</span>&lt;<span class="kw">const </span>LIMBS: usize&gt; RemAssign&lt;<span class="kw-2">&amp;</span>Wrapping&lt;UInt&lt;LIMBS&gt;&gt;&gt; <span class="kw">for </span>Wrapping&lt;UInt&lt;LIMBS&gt;&gt; {
+    <span class="kw">fn </span>rem_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, rhs: <span class="kw-2">&amp;</span>Wrapping&lt;UInt&lt;LIMBS&gt;&gt;) {
+        <span class="kw-2">*</span><span class="self">self </span>= Wrapping(<span class="self">self</span>.<span class="number">0</span>.checked_rem(<span class="kw-2">&amp;</span>rhs.<span class="number">0</span>).unwrap())
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="kw">const</span> <span class="ident">LIMBS</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">RemAssign</span> <span class="kw">for</span> <span class="ident">Wrapping</span><span class="op">&lt;</span><span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">rem_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">rhs</span>: <span class="self">Self</span>) {
-        <span class="kw-2">*</span><span class="self">self</span> <span class="op">%</span><span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">rhs</span>;
+<span class="kw">impl</span>&lt;<span class="kw">const </span>LIMBS: usize&gt; RemAssign <span class="kw">for </span>Wrapping&lt;UInt&lt;LIMBS&gt;&gt; {
+    <span class="kw">fn </span>rem_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, rhs: <span class="self">Self</span>) {
+        <span class="kw-2">*</span><span class="self">self </span>%= <span class="kw-2">&amp;</span>rhs;
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
-<span class="kw">mod</span> <span class="ident">tests</span> {
-    <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
-    <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::limb::HI_BIT</span>;
-    <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::Limb</span>;
-    <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::U256</span>;
+<span class="attribute">#[cfg(test)]
+</span><span class="kw">mod </span>tests {
+    <span class="kw">use super</span>::<span class="kw-2">*</span>;
+    <span class="kw">use </span><span class="kw">crate</span>::limb::HI_BIT;
+    <span class="kw">use </span><span class="kw">crate</span>::Limb;
+    <span class="kw">use </span><span class="kw">crate</span>::U256;
 
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;rand&quot;</span>)]</span>
-    <span class="kw">use</span> {<span class="ident">rand_chacha::ChaChaRng</span>, <span class="ident">rand_core::SeedableRng</span>};
+    <span class="attribute">#[cfg(feature = <span class="string">&quot;rand&quot;</span>)]
+    </span><span class="kw">use </span>{rand_chacha::ChaChaRng, rand_core::SeedableRng};
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">div_word</span>() {
-        <span class="kw">for</span> (<span class="ident">n</span>, <span class="ident">d</span>, <span class="ident">e</span>) <span class="kw">in</span> <span class="kw-2">&amp;</span>[
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>div_word() {
+        <span class="kw">for </span>(n, d, e) <span class="kw">in </span><span class="kw-2">&amp;</span>[
             (<span class="number">200u64</span>, <span class="number">2u64</span>, <span class="number">100u64</span>),
             (<span class="number">100u64</span>, <span class="number">25u64</span>, <span class="number">4u64</span>),
             (<span class="number">100u64</span>, <span class="number">10u64</span>, <span class="number">10u64</span>),
             (<span class="number">1024u64</span>, <span class="number">8u64</span>, <span class="number">128u64</span>),
         ] {
-            <span class="kw">let</span> <span class="ident">lhs</span> <span class="op">=</span> <span class="ident">U256::from</span>(<span class="kw-2">*</span><span class="ident">n</span>);
-            <span class="kw">let</span> <span class="ident">rhs</span> <span class="op">=</span> <span class="ident">U256::from</span>(<span class="kw-2">*</span><span class="ident">d</span>);
-            <span class="kw">let</span> <span class="ident">expected</span> <span class="op">=</span> <span class="ident">U256::from</span>(<span class="kw-2">*</span><span class="ident">e</span>);
-            <span class="kw">let</span> (<span class="ident">q</span>, <span class="ident">r</span>, <span class="ident">is_some</span>) <span class="op">=</span> <span class="ident">lhs</span>.<span class="ident">ct_div_rem</span>(<span class="kw-2">&amp;</span><span class="ident">rhs</span>);
-            <span class="macro">assert_eq!</span>(<span class="ident">is_some</span>, <span class="number">1</span>);
-            <span class="macro">assert_eq!</span>(<span class="ident">expected</span>, <span class="ident">q</span>);
-            <span class="macro">assert_eq!</span>(<span class="ident">U256::default</span>(), <span class="ident">r</span>);
+            <span class="kw">let </span>lhs = U256::from(<span class="kw-2">*</span>n);
+            <span class="kw">let </span>rhs = U256::from(<span class="kw-2">*</span>d);
+            <span class="kw">let </span>expected = U256::from(<span class="kw-2">*</span>e);
+            <span class="kw">let </span>(q, r, is_some) = lhs.ct_div_rem(<span class="kw-2">&amp;</span>rhs);
+            <span class="macro">assert_eq!</span>(is_some, <span class="number">1</span>);
+            <span class="macro">assert_eq!</span>(expected, q);
+            <span class="macro">assert_eq!</span>(U256::default(), r);
         }
     }
 
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;rand&quot;</span>)]</span>
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">div</span>() {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rng</span> <span class="op">=</span> <span class="ident">ChaChaRng::from_seed</span>([<span class="number">7u8</span>; <span class="number">32</span>]);
-        <span class="kw">for</span> <span class="kw">_</span> <span class="kw">in</span> <span class="number">0</span>..<span class="number">25</span> {
-            <span class="kw">let</span> <span class="ident">num</span> <span class="op">=</span> <span class="ident">U256::random</span>(<span class="kw-2">&amp;mut</span> <span class="ident">rng</span>).<span class="ident">shr_vartime</span>(<span class="number">128</span>);
-            <span class="kw">let</span> <span class="ident">den</span> <span class="op">=</span> <span class="ident">U256::random</span>(<span class="kw-2">&amp;mut</span> <span class="ident">rng</span>).<span class="ident">shr_vartime</span>(<span class="number">128</span>);
-            <span class="kw">let</span> <span class="ident">n</span> <span class="op">=</span> <span class="ident">num</span>.<span class="ident">checked_mul</span>(<span class="kw-2">&amp;</span><span class="ident">den</span>);
-            <span class="kw">if</span> <span class="ident">n</span>.<span class="ident">is_some</span>().<span class="ident">unwrap_u8</span>() <span class="op">==</span> <span class="number">1</span> {
-                <span class="kw">let</span> (<span class="ident">q</span>, <span class="kw">_</span>, <span class="ident">is_some</span>) <span class="op">=</span> <span class="ident">n</span>.<span class="ident">unwrap</span>().<span class="ident">ct_div_rem</span>(<span class="kw-2">&amp;</span><span class="ident">den</span>);
-                <span class="macro">assert_eq!</span>(<span class="ident">is_some</span>, <span class="number">1</span>);
-                <span class="macro">assert_eq!</span>(<span class="ident">q</span>, <span class="ident">num</span>);
+    <span class="attribute">#[cfg(feature = <span class="string">&quot;rand&quot;</span>)]
+    #[test]
+    </span><span class="kw">fn </span>div() {
+        <span class="kw">let </span><span class="kw-2">mut </span>rng = ChaChaRng::from_seed([<span class="number">7u8</span>; <span class="number">32</span>]);
+        <span class="kw">for _ in </span><span class="number">0</span>..<span class="number">25 </span>{
+            <span class="kw">let </span>num = U256::random(<span class="kw-2">&amp;mut </span>rng).shr_vartime(<span class="number">128</span>);
+            <span class="kw">let </span>den = U256::random(<span class="kw-2">&amp;mut </span>rng).shr_vartime(<span class="number">128</span>);
+            <span class="kw">let </span>n = num.checked_mul(<span class="kw-2">&amp;</span>den);
+            <span class="kw">if </span>n.is_some().unwrap_u8() == <span class="number">1 </span>{
+                <span class="kw">let </span>(q, <span class="kw">_</span>, is_some) = n.unwrap().ct_div_rem(<span class="kw-2">&amp;</span>den);
+                <span class="macro">assert_eq!</span>(is_some, <span class="number">1</span>);
+                <span class="macro">assert_eq!</span>(q, num);
             }
         }
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">div_max</span>() {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">a</span> <span class="op">=</span> <span class="ident">U256::ZERO</span>;
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">b</span> <span class="op">=</span> <span class="ident">U256::ZERO</span>;
-        <span class="ident">b</span>.<span class="ident">limbs</span>[<span class="ident">b</span>.<span class="ident">limbs</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="number">1</span>] <span class="op">=</span> <span class="ident">Limb</span>(<span class="ident">Inner::MAX</span>);
-        <span class="kw">let</span> <span class="ident">q</span> <span class="op">=</span> <span class="ident">a</span>.<span class="ident">wrapping_div</span>(<span class="kw-2">&amp;</span><span class="ident">b</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">q</span>, <span class="ident">UInt::ZERO</span>);
-        <span class="ident">a</span>.<span class="ident">limbs</span>[<span class="ident">a</span>.<span class="ident">limbs</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="number">1</span>] <span class="op">=</span> <span class="ident">Limb</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="ident">HI_BIT</span> <span class="op">-</span> <span class="number">7</span>);
-        <span class="ident">b</span>.<span class="ident">limbs</span>[<span class="ident">b</span>.<span class="ident">limbs</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="number">1</span>] <span class="op">=</span> <span class="ident">Limb</span>(<span class="number">0x82</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="ident">HI_BIT</span> <span class="op">-</span> <span class="number">7</span>);
-        <span class="kw">let</span> <span class="ident">q</span> <span class="op">=</span> <span class="ident">a</span>.<span class="ident">wrapping_div</span>(<span class="kw-2">&amp;</span><span class="ident">b</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">q</span>, <span class="ident">UInt::ZERO</span>);
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>div_max() {
+        <span class="kw">let </span><span class="kw-2">mut </span>a = U256::ZERO;
+        <span class="kw">let </span><span class="kw-2">mut </span>b = U256::ZERO;
+        b.limbs[b.limbs.len() - <span class="number">1</span>] = Limb(Inner::MAX);
+        <span class="kw">let </span>q = a.wrapping_div(<span class="kw-2">&amp;</span>b);
+        <span class="macro">assert_eq!</span>(q, UInt::ZERO);
+        a.limbs[a.limbs.len() - <span class="number">1</span>] = Limb(<span class="number">1 </span>&lt;&lt; HI_BIT - <span class="number">7</span>);
+        b.limbs[b.limbs.len() - <span class="number">1</span>] = Limb(<span class="number">0x82 </span>&lt;&lt; HI_BIT - <span class="number">7</span>);
+        <span class="kw">let </span>q = a.wrapping_div(<span class="kw-2">&amp;</span>b);
+        <span class="macro">assert_eq!</span>(q, UInt::ZERO);
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">div_zero</span>() {
-        <span class="kw">let</span> (<span class="kw">_</span>, <span class="kw">_</span>, <span class="ident">is_some</span>) <span class="op">=</span> <span class="ident">U256::ONE</span>.<span class="ident">ct_div_rem</span>(<span class="kw-2">&amp;</span><span class="ident">U256::ZERO</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">is_some</span>, <span class="number">0</span>);
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>div_zero() {
+        <span class="kw">let </span>(<span class="kw">_</span>, <span class="kw">_</span>, is_some) = U256::ONE.ct_div_rem(<span class="kw-2">&amp;</span>U256::ZERO);
+        <span class="macro">assert_eq!</span>(is_some, <span class="number">0</span>);
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">div_one</span>() {
-        <span class="kw">let</span> (<span class="ident">q</span>, <span class="ident">r</span>, <span class="ident">is_some</span>) <span class="op">=</span> <span class="ident">U256::from</span>(<span class="number">10u8</span>).<span class="ident">ct_div_rem</span>(<span class="kw-2">&amp;</span><span class="ident">U256::ONE</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">is_some</span>, <span class="number">1</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">q</span>, <span class="ident">U256::from</span>(<span class="number">10u8</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">r</span>, <span class="ident">U256::ZERO</span>);
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>div_one() {
+        <span class="kw">let </span>(q, r, is_some) = U256::from(<span class="number">10u8</span>).ct_div_rem(<span class="kw-2">&amp;</span>U256::ONE);
+        <span class="macro">assert_eq!</span>(is_some, <span class="number">1</span>);
+        <span class="macro">assert_eq!</span>(q, U256::from(<span class="number">10u8</span>));
+        <span class="macro">assert_eq!</span>(r, U256::ZERO);
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">reduce_one</span>() {
-        <span class="kw">let</span> (<span class="ident">r</span>, <span class="ident">is_some</span>) <span class="op">=</span> <span class="ident">U256::from</span>(<span class="number">10u8</span>).<span class="ident">ct_reduce</span>(<span class="kw-2">&amp;</span><span class="ident">U256::ONE</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">is_some</span>, <span class="number">1</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">r</span>, <span class="ident">U256::ZERO</span>);
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>reduce_one() {
+        <span class="kw">let </span>(r, is_some) = U256::from(<span class="number">10u8</span>).ct_reduce(<span class="kw-2">&amp;</span>U256::ONE);
+        <span class="macro">assert_eq!</span>(is_some, <span class="number">1</span>);
+        <span class="macro">assert_eq!</span>(r, U256::ZERO);
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">reduce_zero</span>() {
-        <span class="kw">let</span> (<span class="kw">_</span>, <span class="ident">is_some</span>) <span class="op">=</span> <span class="ident">U256::from</span>(<span class="number">10u8</span>).<span class="ident">ct_reduce</span>(<span class="kw-2">&amp;</span><span class="ident">U256::ZERO</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">is_some</span>, <span class="number">0</span>);
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>reduce_zero() {
+        <span class="kw">let </span>(<span class="kw">_</span>, is_some) = U256::from(<span class="number">10u8</span>).ct_reduce(<span class="kw-2">&amp;</span>U256::ZERO);
+        <span class="macro">assert_eq!</span>(is_some, <span class="number">0</span>);
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">reduce_tests</span>() {
-        <span class="kw">let</span> (<span class="ident">r</span>, <span class="ident">is_some</span>) <span class="op">=</span> <span class="ident">U256::from</span>(<span class="number">10u8</span>).<span class="ident">ct_reduce</span>(<span class="kw-2">&amp;</span><span class="ident">U256::from</span>(<span class="number">2u8</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">is_some</span>, <span class="number">1</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">r</span>, <span class="ident">U256::ZERO</span>);
-        <span class="kw">let</span> (<span class="ident">r</span>, <span class="ident">is_some</span>) <span class="op">=</span> <span class="ident">U256::from</span>(<span class="number">10u8</span>).<span class="ident">ct_reduce</span>(<span class="kw-2">&amp;</span><span class="ident">U256::from</span>(<span class="number">3u8</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">is_some</span>, <span class="number">1</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">r</span>, <span class="ident">U256::ONE</span>);
-        <span class="kw">let</span> (<span class="ident">r</span>, <span class="ident">is_some</span>) <span class="op">=</span> <span class="ident">U256::from</span>(<span class="number">10u8</span>).<span class="ident">ct_reduce</span>(<span class="kw-2">&amp;</span><span class="ident">U256::from</span>(<span class="number">7u8</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">is_some</span>, <span class="number">1</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">r</span>, <span class="ident">U256::from</span>(<span class="number">3u8</span>));
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>reduce_tests() {
+        <span class="kw">let </span>(r, is_some) = U256::from(<span class="number">10u8</span>).ct_reduce(<span class="kw-2">&amp;</span>U256::from(<span class="number">2u8</span>));
+        <span class="macro">assert_eq!</span>(is_some, <span class="number">1</span>);
+        <span class="macro">assert_eq!</span>(r, U256::ZERO);
+        <span class="kw">let </span>(r, is_some) = U256::from(<span class="number">10u8</span>).ct_reduce(<span class="kw-2">&amp;</span>U256::from(<span class="number">3u8</span>));
+        <span class="macro">assert_eq!</span>(is_some, <span class="number">1</span>);
+        <span class="macro">assert_eq!</span>(r, U256::ONE);
+        <span class="kw">let </span>(r, is_some) = U256::from(<span class="number">10u8</span>).ct_reduce(<span class="kw-2">&amp;</span>U256::from(<span class="number">7u8</span>));
+        <span class="macro">assert_eq!</span>(is_some, <span class="number">1</span>);
+        <span class="macro">assert_eq!</span>(r, U256::from(<span class="number">3u8</span>));
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">reduce_max</span>() {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">a</span> <span class="op">=</span> <span class="ident">U256::ZERO</span>;
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">b</span> <span class="op">=</span> <span class="ident">U256::ZERO</span>;
-        <span class="ident">b</span>.<span class="ident">limbs</span>[<span class="ident">b</span>.<span class="ident">limbs</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="number">1</span>] <span class="op">=</span> <span class="ident">Limb</span>(<span class="ident">Inner::MAX</span>);
-        <span class="kw">let</span> <span class="ident">r</span> <span class="op">=</span> <span class="ident">a</span>.<span class="ident">wrapping_rem</span>(<span class="kw-2">&amp;</span><span class="ident">b</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">r</span>, <span class="ident">UInt::ZERO</span>);
-        <span class="ident">a</span>.<span class="ident">limbs</span>[<span class="ident">a</span>.<span class="ident">limbs</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="number">1</span>] <span class="op">=</span> <span class="ident">Limb</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="ident">HI_BIT</span> <span class="op">-</span> <span class="number">7</span>);
-        <span class="ident">b</span>.<span class="ident">limbs</span>[<span class="ident">b</span>.<span class="ident">limbs</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="number">1</span>] <span class="op">=</span> <span class="ident">Limb</span>(<span class="number">0x82</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="ident">HI_BIT</span> <span class="op">-</span> <span class="number">7</span>);
-        <span class="kw">let</span> <span class="ident">r</span> <span class="op">=</span> <span class="ident">a</span>.<span class="ident">wrapping_rem</span>(<span class="kw-2">&amp;</span><span class="ident">b</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">r</span>, <span class="ident">UInt::ZERO</span>);
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>reduce_max() {
+        <span class="kw">let </span><span class="kw-2">mut </span>a = U256::ZERO;
+        <span class="kw">let </span><span class="kw-2">mut </span>b = U256::ZERO;
+        b.limbs[b.limbs.len() - <span class="number">1</span>] = Limb(Inner::MAX);
+        <span class="kw">let </span>r = a.wrapping_rem(<span class="kw-2">&amp;</span>b);
+        <span class="macro">assert_eq!</span>(r, UInt::ZERO);
+        a.limbs[a.limbs.len() - <span class="number">1</span>] = Limb(<span class="number">1 </span>&lt;&lt; HI_BIT - <span class="number">7</span>);
+        b.limbs[b.limbs.len() - <span class="number">1</span>] = Limb(<span class="number">0x82 </span>&lt;&lt; HI_BIT - <span class="number">7</span>);
+        <span class="kw">let </span>r = a.wrapping_rem(<span class="kw-2">&amp;</span>b);
+        <span class="macro">assert_eq!</span>(r, UInt::ZERO);
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="crypto_bigint" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="crypto_bigint" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

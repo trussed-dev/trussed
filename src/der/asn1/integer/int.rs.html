@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/der-0.4.5/src/asn1/integer/int.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>int.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../../storage.js"></script><script defer src="../../../../source-script.js"></script><script defer src="../../../../source-files.js"></script><script defer src="../../../../main.js"></script><noscript><link rel="stylesheet" href="../../../../noscript.css"></noscript><link rel="icon" href="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../../der/index.html"><div class="logo-container"><img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../../der/index.html"><div class="logo-container">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/der-0.4.5/src/asn1/integer/int.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>int.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../../normalize.css"><link rel="stylesheet" href="../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../../ayu.css" disabled><link rel="stylesheet" href="../../../../dark.css" disabled><link rel="stylesheet" href="../../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../../storage.js"></script><script defer src="../../../../source-script.js"></script><script defer src="../../../../source-files.js"></script><script defer src="../../../../main.js"></script><noscript><link rel="stylesheet" href="../../../../noscript.css"></noscript><link rel="icon" href="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../../der/index.html"><div class="logo-container"><img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../../der/index.html"><div class="logo-container">
                     <img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../../der/index.html">
                         <img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
@@ -44,49 +44,49 @@
 <span id="42">42</span>
 <span id="43">43</span>
 <span id="44">44</span>
-</pre><pre class="rust"><code><span class="doccomment">//! Support for encoding negative integers</span>
+</pre><pre class="rust"><code><span class="doccomment">//! Support for encoding negative integers
 
-<span class="kw">use</span> <span class="ident"><span class="kw">super</span>::is_highest_bit_set</span>;
-<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">asn1::Any</span>, <span class="ident">Encodable</span>, <span class="ident">Encoder</span>, <span class="ident">Header</span>, <span class="ident">Length</span>, <span class="prelude-ty">Result</span>, <span class="ident">Tag</span>};
-<span class="kw">use</span> <span class="ident">core::convert::TryFrom</span>;
+</span><span class="kw">use </span><span class="kw">super</span>::is_highest_bit_set;
+<span class="kw">use crate</span>::{asn1::Any, Encodable, Encoder, Header, Length, <span class="prelude-ty">Result</span>, Tag};
+<span class="kw">use </span>core::convert::TryFrom;
 
-<span class="doccomment">/// Decode an unsigned integer of the specified size.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// Returns a byte array of the requested size containing a big endian integer.</span>
-<span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn</span> <span class="ident">decode_array</span><span class="op">&lt;</span><span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span>(<span class="ident">any</span>: <span class="ident">Any</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>[<span class="ident">u8</span>; <span class="ident">N</span>]<span class="op">&gt;</span> {
-    <span class="ident">any</span>.<span class="ident">tag</span>().<span class="ident">assert_eq</span>(<span class="ident">Tag::Integer</span>)<span class="question-mark">?</span>;
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">output</span> <span class="op">=</span> [<span class="number">0xFFu8</span>; <span class="ident">N</span>];
-    <span class="kw">let</span> <span class="ident">offset</span> <span class="op">=</span> <span class="ident">N</span>.<span class="ident">saturating_sub</span>(<span class="ident">any</span>.<span class="ident">as_bytes</span>().<span class="ident">len</span>());
-    <span class="ident">output</span>[<span class="ident">offset</span>..].<span class="ident">copy_from_slice</span>(<span class="ident">any</span>.<span class="ident">as_bytes</span>());
-    <span class="prelude-val">Ok</span>(<span class="ident">output</span>)
+<span class="doccomment">/// Decode an unsigned integer of the specified size.
+///
+/// Returns a byte array of the requested size containing a big endian integer.
+</span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>decode_array&lt;<span class="kw">const </span>N: usize&gt;(any: Any&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;[u8; N]&gt; {
+    any.tag().assert_eq(Tag::Integer)<span class="question-mark">?</span>;
+    <span class="kw">let </span><span class="kw-2">mut </span>output = [<span class="number">0xFFu8</span>; N];
+    <span class="kw">let </span>offset = N.saturating_sub(any.as_bytes().len());
+    output[offset..].copy_from_slice(any.as_bytes());
+    <span class="prelude-val">Ok</span>(output)
 }
 
-<span class="doccomment">/// Encode the given big endian bytes representing an integer as ASN.1 DER.</span>
-<span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn</span> <span class="ident">encode</span>(<span class="ident">encoder</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Encoder</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>, <span class="ident">bytes</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-    <span class="kw">let</span> <span class="ident">bytes</span> <span class="op">=</span> <span class="ident">strip_leading_ones</span>(<span class="kw-2">&amp;</span><span class="ident">bytes</span>);
-    <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="ident">Length::try_from</span>(<span class="ident">bytes</span>.<span class="ident">len</span>())<span class="question-mark">?</span>;
-    <span class="ident">Header::new</span>(<span class="ident">Tag::Integer</span>, <span class="ident">len</span>)<span class="question-mark">?</span>.<span class="ident">encode</span>(<span class="ident">encoder</span>)<span class="question-mark">?</span>;
-    <span class="ident">encoder</span>.<span class="ident">bytes</span>(<span class="ident">bytes</span>)
+<span class="doccomment">/// Encode the given big endian bytes representing an integer as ASN.1 DER.
+</span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>encode(encoder: <span class="kw-2">&amp;mut </span>Encoder&lt;<span class="lifetime">&#39;_</span>&gt;, bytes: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="kw">let </span>bytes = strip_leading_ones(<span class="kw-2">&amp;</span>bytes);
+    <span class="kw">let </span>len = Length::try_from(bytes.len())<span class="question-mark">?</span>;
+    Header::new(Tag::Integer, len)<span class="question-mark">?</span>.encode(encoder)<span class="question-mark">?</span>;
+    encoder.bytes(bytes)
 }
 
-<span class="doccomment">/// Get the encoded length for the given unsigned integer serialized as bytes.</span>
-<span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn</span> <span class="ident">encoded_len</span>(<span class="ident">bytes</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Length</span><span class="op">&gt;</span> {
-    <span class="ident">Length::try_from</span>(<span class="ident">strip_leading_ones</span>(<span class="kw-2">&amp;</span><span class="ident">bytes</span>).<span class="ident">len</span>())
+<span class="doccomment">/// Get the encoded length for the given unsigned integer serialized as bytes.
+</span><span class="attribute">#[inline]
+</span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>encoded_len(bytes: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;Length&gt; {
+    Length::try_from(strip_leading_ones(<span class="kw-2">&amp;</span>bytes).len())
 }
 
-<span class="doccomment">/// Strip the leading all-ones bytes from the given byte slice.</span>
-<span class="kw">fn</span> <span class="ident">strip_leading_ones</span>(<span class="kw-2">mut</span> <span class="ident">bytes</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] {
-    <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>((<span class="ident">byte</span>, <span class="ident">rest</span>)) <span class="op">=</span> <span class="ident">bytes</span>.<span class="ident">split_first</span>() {
-        <span class="kw">if</span> <span class="kw-2">*</span><span class="ident">byte</span> <span class="op">==</span> <span class="number">0xFF</span> <span class="op">&amp;&amp;</span> <span class="ident">is_highest_bit_set</span>(<span class="ident">rest</span>) {
-            <span class="ident">bytes</span> <span class="op">=</span> <span class="ident">rest</span>;
+<span class="doccomment">/// Strip the leading all-ones bytes from the given byte slice.
+</span><span class="kw">fn </span>strip_leading_ones(<span class="kw-2">mut </span>bytes: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="kw-2">&amp;</span>[u8] {
+    <span class="kw">while let </span><span class="prelude-val">Some</span>((byte, rest)) = bytes.split_first() {
+        <span class="kw">if </span><span class="kw-2">*</span>byte == <span class="number">0xFF </span>&amp;&amp; is_highest_bit_set(rest) {
+            bytes = rest;
             <span class="kw">continue</span>;
         }
 
         <span class="kw">break</span>;
     }
 
-    <span class="ident">bytes</span>
+    bytes
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../../../" data-current-crate="der" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../../../" data-current-crate="der" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

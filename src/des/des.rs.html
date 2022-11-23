@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/des-0.7.0/src/des.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>des.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" href="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../des/index.html"><div class="logo-container"><img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../des/index.html"><div class="logo-container">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/des-0.7.0/src/des.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>des.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" href="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../des/index.html"><div class="logo-container"><img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../des/index.html"><div class="logo-container">
                     <img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../des/index.html">
                         <img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
@@ -218,223 +218,223 @@
 <span id="216">216</span>
 <span id="217">217</span>
 <span id="218">218</span>
-</pre><pre class="rust"><code><span class="doccomment">//! Data Encryption Standard (DES) block cipher.</span>
+</pre><pre class="rust"><code><span class="doccomment">//! Data Encryption Standard (DES) block cipher.
 
-<span class="attribute">#![<span class="ident">allow</span>(<span class="ident">clippy::unreadable_literal</span>)]</span>
+</span><span class="attribute">#![allow(clippy::unreadable_literal)]
 
-<span class="kw">use</span> <span class="ident">byteorder</span>::{<span class="ident">ByteOrder</span>, <span class="ident">BE</span>};
-<span class="kw">use</span> <span class="ident">cipher</span>::{
-    <span class="ident">consts</span>::{<span class="ident">U1</span>, <span class="ident">U8</span>},
-    <span class="ident">generic_array::GenericArray</span>,
-    <span class="ident">BlockCipher</span>, <span class="ident">BlockDecrypt</span>, <span class="ident">BlockEncrypt</span>, <span class="ident">NewBlockCipher</span>,
+</span><span class="kw">use </span>byteorder::{ByteOrder, BE};
+<span class="kw">use </span>cipher::{
+    consts::{U1, U8},
+    generic_array::GenericArray,
+    BlockCipher, BlockDecrypt, BlockEncrypt, NewBlockCipher,
 };
 
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::consts</span>::{<span class="ident">SBOXES</span>, <span class="ident">SHIFTS</span>};
+<span class="kw">use </span><span class="kw">crate</span>::consts::{SBOXES, SHIFTS};
 
-<span class="doccomment">/// Data Encryption Standard (DES) block cipher.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Des</span> {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">keys</span>: [<span class="ident">u64</span>; <span class="number">16</span>],
+<span class="doccomment">/// Data Encryption Standard (DES) block cipher.
+</span><span class="attribute">#[derive(Copy, Clone)]
+</span><span class="kw">pub struct </span>Des {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) keys: [u64; <span class="number">16</span>],
 }
 
-<span class="doccomment">/// Swap bits in `a` using a delta swap</span>
-<span class="kw">fn</span> <span class="ident">delta_swap</span>(<span class="ident">a</span>: <span class="ident">u64</span>, <span class="ident">delta</span>: <span class="ident">u64</span>, <span class="ident">mask</span>: <span class="ident">u64</span>) -&gt; <span class="ident">u64</span> {
-    <span class="kw">let</span> <span class="ident">b</span> <span class="op">=</span> (<span class="ident">a</span> <span class="op">^</span> (<span class="ident">a</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">delta</span>)) <span class="op">&amp;</span> <span class="ident">mask</span>;
-    <span class="ident">a</span> <span class="op">^</span> <span class="ident">b</span> <span class="op">^</span> (<span class="ident">b</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="ident">delta</span>)
+<span class="doccomment">/// Swap bits in `a` using a delta swap
+</span><span class="kw">fn </span>delta_swap(a: u64, delta: u64, mask: u64) -&gt; u64 {
+    <span class="kw">let </span>b = (a ^ (a &gt;&gt; delta)) &amp; mask;
+    a ^ b ^ (b &lt;&lt; delta)
 }
 
-<span class="doccomment">/// Swap bits using the PC-1 table</span>
-<span class="kw">fn</span> <span class="ident">pc1</span>(<span class="kw-2">mut</span> <span class="ident">key</span>: <span class="ident">u64</span>) -&gt; <span class="ident">u64</span> {
-    <span class="ident">key</span> <span class="op">=</span> <span class="ident">delta_swap</span>(<span class="ident">key</span>, <span class="number">2</span>, <span class="number">0x3333000033330000</span>);
-    <span class="ident">key</span> <span class="op">=</span> <span class="ident">delta_swap</span>(<span class="ident">key</span>, <span class="number">4</span>, <span class="number">0x0f0f0f0f00000000</span>);
-    <span class="ident">key</span> <span class="op">=</span> <span class="ident">delta_swap</span>(<span class="ident">key</span>, <span class="number">8</span>, <span class="number">0x009a000a00a200a8</span>);
-    <span class="ident">key</span> <span class="op">=</span> <span class="ident">delta_swap</span>(<span class="ident">key</span>, <span class="number">16</span>, <span class="number">0x00006c6c0000cccc</span>);
-    <span class="ident">key</span> <span class="op">=</span> <span class="ident">delta_swap</span>(<span class="ident">key</span>, <span class="number">1</span>, <span class="number">0x1045500500550550</span>);
-    <span class="ident">key</span> <span class="op">=</span> <span class="ident">delta_swap</span>(<span class="ident">key</span>, <span class="number">32</span>, <span class="number">0x00000000f0f0f5fa</span>);
-    <span class="ident">key</span> <span class="op">=</span> <span class="ident">delta_swap</span>(<span class="ident">key</span>, <span class="number">8</span>, <span class="number">0x00550055006a00aa</span>);
-    <span class="ident">key</span> <span class="op">=</span> <span class="ident">delta_swap</span>(<span class="ident">key</span>, <span class="number">2</span>, <span class="number">0x0000333330000300</span>);
-    <span class="ident">key</span> <span class="op">&amp;</span> <span class="number">0xFFFFFFFFFFFFFF00</span>
+<span class="doccomment">/// Swap bits using the PC-1 table
+</span><span class="kw">fn </span>pc1(<span class="kw-2">mut </span>key: u64) -&gt; u64 {
+    key = delta_swap(key, <span class="number">2</span>, <span class="number">0x3333000033330000</span>);
+    key = delta_swap(key, <span class="number">4</span>, <span class="number">0x0f0f0f0f00000000</span>);
+    key = delta_swap(key, <span class="number">8</span>, <span class="number">0x009a000a00a200a8</span>);
+    key = delta_swap(key, <span class="number">16</span>, <span class="number">0x00006c6c0000cccc</span>);
+    key = delta_swap(key, <span class="number">1</span>, <span class="number">0x1045500500550550</span>);
+    key = delta_swap(key, <span class="number">32</span>, <span class="number">0x00000000f0f0f5fa</span>);
+    key = delta_swap(key, <span class="number">8</span>, <span class="number">0x00550055006a00aa</span>);
+    key = delta_swap(key, <span class="number">2</span>, <span class="number">0x0000333330000300</span>);
+    key &amp; <span class="number">0xFFFFFFFFFFFFFF00
+</span>}
+
+<span class="doccomment">/// Swap bits using the PC-2 table
+</span><span class="kw">fn </span>pc2(key: u64) -&gt; u64 {
+    <span class="kw">let </span>key = key.rotate_left(<span class="number">61</span>);
+    <span class="kw">let </span>b1 = (key &amp; <span class="number">0x0021000002000000</span>) &gt;&gt; <span class="number">7</span>;
+    <span class="kw">let </span>b2 = (key &amp; <span class="number">0x0008020010080000</span>) &lt;&lt; <span class="number">1</span>;
+    <span class="kw">let </span>b3 = key &amp; <span class="number">0x0002200000000000</span>;
+    <span class="kw">let </span>b4 = (key &amp; <span class="number">0x0000000000100020</span>) &lt;&lt; <span class="number">19</span>;
+    <span class="kw">let </span>b5 = (key.rotate_left(<span class="number">54</span>) &amp; <span class="number">0x0005312400000011</span>).wrapping_mul(<span class="number">0x0000000094200201</span>)
+        &amp; <span class="number">0xea40100880000000</span>;
+    <span class="kw">let </span>b6 = (key.rotate_left(<span class="number">7</span>) &amp; <span class="number">0x0022110000012001</span>).wrapping_mul(<span class="number">0x0001000000610006</span>)
+        &amp; <span class="number">0x1185004400000000</span>;
+    <span class="kw">let </span>b7 = (key.rotate_left(<span class="number">6</span>) &amp; <span class="number">0x0000520040200002</span>).wrapping_mul(<span class="number">0x00000080000000c1</span>)
+        &amp; <span class="number">0x0028811000200000</span>;
+    <span class="kw">let </span>b8 = (key &amp; <span class="number">0x01000004c0011100</span>).wrapping_mul(<span class="number">0x0000000000004284</span>) &amp; <span class="number">0x0400082244400000</span>;
+    <span class="kw">let </span>b9 = (key.rotate_left(<span class="number">60</span>) &amp; <span class="number">0x0000000000820280</span>).wrapping_mul(<span class="number">0x0000000000089001</span>)
+        &amp; <span class="number">0x0000000110880000</span>;
+    <span class="kw">let </span>b10 = (key.rotate_left(<span class="number">49</span>) &amp; <span class="number">0x0000000000024084</span>).wrapping_mul(<span class="number">0x0000000002040005</span>)
+        &amp; <span class="number">0x000000000a030000</span>;
+    b1 | b2 | b3 | b4 | b5 | b6 | b7 | b8 | b9 | b10
 }
 
-<span class="doccomment">/// Swap bits using the PC-2 table</span>
-<span class="kw">fn</span> <span class="ident">pc2</span>(<span class="ident">key</span>: <span class="ident">u64</span>) -&gt; <span class="ident">u64</span> {
-    <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="ident">key</span>.<span class="ident">rotate_left</span>(<span class="number">61</span>);
-    <span class="kw">let</span> <span class="ident">b1</span> <span class="op">=</span> (<span class="ident">key</span> <span class="op">&amp;</span> <span class="number">0x0021000002000000</span>) <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">7</span>;
-    <span class="kw">let</span> <span class="ident">b2</span> <span class="op">=</span> (<span class="ident">key</span> <span class="op">&amp;</span> <span class="number">0x0008020010080000</span>) <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">1</span>;
-    <span class="kw">let</span> <span class="ident">b3</span> <span class="op">=</span> <span class="ident">key</span> <span class="op">&amp;</span> <span class="number">0x0002200000000000</span>;
-    <span class="kw">let</span> <span class="ident">b4</span> <span class="op">=</span> (<span class="ident">key</span> <span class="op">&amp;</span> <span class="number">0x0000000000100020</span>) <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">19</span>;
-    <span class="kw">let</span> <span class="ident">b5</span> <span class="op">=</span> (<span class="ident">key</span>.<span class="ident">rotate_left</span>(<span class="number">54</span>) <span class="op">&amp;</span> <span class="number">0x0005312400000011</span>).<span class="ident">wrapping_mul</span>(<span class="number">0x0000000094200201</span>)
-        <span class="op">&amp;</span> <span class="number">0xea40100880000000</span>;
-    <span class="kw">let</span> <span class="ident">b6</span> <span class="op">=</span> (<span class="ident">key</span>.<span class="ident">rotate_left</span>(<span class="number">7</span>) <span class="op">&amp;</span> <span class="number">0x0022110000012001</span>).<span class="ident">wrapping_mul</span>(<span class="number">0x0001000000610006</span>)
-        <span class="op">&amp;</span> <span class="number">0x1185004400000000</span>;
-    <span class="kw">let</span> <span class="ident">b7</span> <span class="op">=</span> (<span class="ident">key</span>.<span class="ident">rotate_left</span>(<span class="number">6</span>) <span class="op">&amp;</span> <span class="number">0x0000520040200002</span>).<span class="ident">wrapping_mul</span>(<span class="number">0x00000080000000c1</span>)
-        <span class="op">&amp;</span> <span class="number">0x0028811000200000</span>;
-    <span class="kw">let</span> <span class="ident">b8</span> <span class="op">=</span> (<span class="ident">key</span> <span class="op">&amp;</span> <span class="number">0x01000004c0011100</span>).<span class="ident">wrapping_mul</span>(<span class="number">0x0000000000004284</span>) <span class="op">&amp;</span> <span class="number">0x0400082244400000</span>;
-    <span class="kw">let</span> <span class="ident">b9</span> <span class="op">=</span> (<span class="ident">key</span>.<span class="ident">rotate_left</span>(<span class="number">60</span>) <span class="op">&amp;</span> <span class="number">0x0000000000820280</span>).<span class="ident">wrapping_mul</span>(<span class="number">0x0000000000089001</span>)
-        <span class="op">&amp;</span> <span class="number">0x0000000110880000</span>;
-    <span class="kw">let</span> <span class="ident">b10</span> <span class="op">=</span> (<span class="ident">key</span>.<span class="ident">rotate_left</span>(<span class="number">49</span>) <span class="op">&amp;</span> <span class="number">0x0000000000024084</span>).<span class="ident">wrapping_mul</span>(<span class="number">0x0000000002040005</span>)
-        <span class="op">&amp;</span> <span class="number">0x000000000a030000</span>;
-    <span class="ident">b1</span> <span class="op">|</span> <span class="ident">b2</span> <span class="op">|</span> <span class="ident">b3</span> <span class="op">|</span> <span class="ident">b4</span> <span class="op">|</span> <span class="ident">b5</span> <span class="op">|</span> <span class="ident">b6</span> <span class="op">|</span> <span class="ident">b7</span> <span class="op">|</span> <span class="ident">b8</span> <span class="op">|</span> <span class="ident">b9</span> <span class="op">|</span> <span class="ident">b10</span>
+<span class="doccomment">/// Swap bits using the reverse FP table
+</span><span class="kw">fn </span>fp(<span class="kw-2">mut </span>message: u64) -&gt; u64 {
+    message = delta_swap(message, <span class="number">24</span>, <span class="number">0x000000FF000000FF</span>);
+    message = delta_swap(message, <span class="number">24</span>, <span class="number">0x00000000FF00FF00</span>);
+    message = delta_swap(message, <span class="number">36</span>, <span class="number">0x000000000F0F0F0F</span>);
+    message = delta_swap(message, <span class="number">18</span>, <span class="number">0x0000333300003333</span>);
+    delta_swap(message, <span class="number">9</span>, <span class="number">0x0055005500550055</span>)
 }
 
-<span class="doccomment">/// Swap bits using the reverse FP table</span>
-<span class="kw">fn</span> <span class="ident">fp</span>(<span class="kw-2">mut</span> <span class="ident">message</span>: <span class="ident">u64</span>) -&gt; <span class="ident">u64</span> {
-    <span class="ident">message</span> <span class="op">=</span> <span class="ident">delta_swap</span>(<span class="ident">message</span>, <span class="number">24</span>, <span class="number">0x000000FF000000FF</span>);
-    <span class="ident">message</span> <span class="op">=</span> <span class="ident">delta_swap</span>(<span class="ident">message</span>, <span class="number">24</span>, <span class="number">0x00000000FF00FF00</span>);
-    <span class="ident">message</span> <span class="op">=</span> <span class="ident">delta_swap</span>(<span class="ident">message</span>, <span class="number">36</span>, <span class="number">0x000000000F0F0F0F</span>);
-    <span class="ident">message</span> <span class="op">=</span> <span class="ident">delta_swap</span>(<span class="ident">message</span>, <span class="number">18</span>, <span class="number">0x0000333300003333</span>);
-    <span class="ident">delta_swap</span>(<span class="ident">message</span>, <span class="number">9</span>, <span class="number">0x0055005500550055</span>)
+<span class="doccomment">/// Swap bits using the IP table
+</span><span class="kw">fn </span>ip(<span class="kw-2">mut </span>message: u64) -&gt; u64 {
+    message = delta_swap(message, <span class="number">9</span>, <span class="number">0x0055005500550055</span>);
+    message = delta_swap(message, <span class="number">18</span>, <span class="number">0x0000333300003333</span>);
+    message = delta_swap(message, <span class="number">36</span>, <span class="number">0x000000000F0F0F0F</span>);
+    message = delta_swap(message, <span class="number">24</span>, <span class="number">0x00000000FF00FF00</span>);
+    delta_swap(message, <span class="number">24</span>, <span class="number">0x000000FF000000FF</span>)
 }
 
-<span class="doccomment">/// Swap bits using the IP table</span>
-<span class="kw">fn</span> <span class="ident">ip</span>(<span class="kw-2">mut</span> <span class="ident">message</span>: <span class="ident">u64</span>) -&gt; <span class="ident">u64</span> {
-    <span class="ident">message</span> <span class="op">=</span> <span class="ident">delta_swap</span>(<span class="ident">message</span>, <span class="number">9</span>, <span class="number">0x0055005500550055</span>);
-    <span class="ident">message</span> <span class="op">=</span> <span class="ident">delta_swap</span>(<span class="ident">message</span>, <span class="number">18</span>, <span class="number">0x0000333300003333</span>);
-    <span class="ident">message</span> <span class="op">=</span> <span class="ident">delta_swap</span>(<span class="ident">message</span>, <span class="number">36</span>, <span class="number">0x000000000F0F0F0F</span>);
-    <span class="ident">message</span> <span class="op">=</span> <span class="ident">delta_swap</span>(<span class="ident">message</span>, <span class="number">24</span>, <span class="number">0x00000000FF00FF00</span>);
-    <span class="ident">delta_swap</span>(<span class="ident">message</span>, <span class="number">24</span>, <span class="number">0x000000FF000000FF</span>)
+<span class="doccomment">/// Swap bits using the E table
+</span><span class="kw">fn </span>e(block: u64) -&gt; u64 {
+    <span class="kw">const </span>BLOCK_LEN: usize = <span class="number">32</span>;
+    <span class="kw">const </span>RESULT_LEN: usize = <span class="number">48</span>;
+
+    <span class="kw">let </span>b1 = (block &lt;&lt; (BLOCK_LEN - <span class="number">1</span>)) &amp; <span class="number">0x8000000000000000</span>;
+    <span class="kw">let </span>b2 = (block &gt;&gt; <span class="number">1</span>) &amp; <span class="number">0x7C00000000000000</span>;
+    <span class="kw">let </span>b3 = (block &gt;&gt; <span class="number">3</span>) &amp; <span class="number">0x03F0000000000000</span>;
+    <span class="kw">let </span>b4 = (block &gt;&gt; <span class="number">5</span>) &amp; <span class="number">0x000FC00000000000</span>;
+    <span class="kw">let </span>b5 = (block &gt;&gt; <span class="number">7</span>) &amp; <span class="number">0x00003F0000000000</span>;
+    <span class="kw">let </span>b6 = (block &gt;&gt; <span class="number">9</span>) &amp; <span class="number">0x000000FC00000000</span>;
+    <span class="kw">let </span>b7 = (block &gt;&gt; <span class="number">11</span>) &amp; <span class="number">0x00000003F0000000</span>;
+    <span class="kw">let </span>b8 = (block &gt;&gt; <span class="number">13</span>) &amp; <span class="number">0x000000000FC00000</span>;
+    <span class="kw">let </span>b9 = (block &gt;&gt; <span class="number">15</span>) &amp; <span class="number">0x00000000003E0000</span>;
+    <span class="kw">let </span>b10 = (block &gt;&gt; (RESULT_LEN - <span class="number">1</span>)) &amp; <span class="number">0x0000000000010000</span>;
+    b1 | b2 | b3 | b4 | b5 | b6 | b7 | b8 | b9 | b10
 }
 
-<span class="doccomment">/// Swap bits using the E table</span>
-<span class="kw">fn</span> <span class="ident">e</span>(<span class="ident">block</span>: <span class="ident">u64</span>) -&gt; <span class="ident">u64</span> {
-    <span class="kw">const</span> <span class="ident">BLOCK_LEN</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">32</span>;
-    <span class="kw">const</span> <span class="ident">RESULT_LEN</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">48</span>;
-
-    <span class="kw">let</span> <span class="ident">b1</span> <span class="op">=</span> (<span class="ident">block</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">BLOCK_LEN</span> <span class="op">-</span> <span class="number">1</span>)) <span class="op">&amp;</span> <span class="number">0x8000000000000000</span>;
-    <span class="kw">let</span> <span class="ident">b2</span> <span class="op">=</span> (<span class="ident">block</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">1</span>) <span class="op">&amp;</span> <span class="number">0x7C00000000000000</span>;
-    <span class="kw">let</span> <span class="ident">b3</span> <span class="op">=</span> (<span class="ident">block</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">3</span>) <span class="op">&amp;</span> <span class="number">0x03F0000000000000</span>;
-    <span class="kw">let</span> <span class="ident">b4</span> <span class="op">=</span> (<span class="ident">block</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">5</span>) <span class="op">&amp;</span> <span class="number">0x000FC00000000000</span>;
-    <span class="kw">let</span> <span class="ident">b5</span> <span class="op">=</span> (<span class="ident">block</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">7</span>) <span class="op">&amp;</span> <span class="number">0x00003F0000000000</span>;
-    <span class="kw">let</span> <span class="ident">b6</span> <span class="op">=</span> (<span class="ident">block</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">9</span>) <span class="op">&amp;</span> <span class="number">0x000000FC00000000</span>;
-    <span class="kw">let</span> <span class="ident">b7</span> <span class="op">=</span> (<span class="ident">block</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">11</span>) <span class="op">&amp;</span> <span class="number">0x00000003F0000000</span>;
-    <span class="kw">let</span> <span class="ident">b8</span> <span class="op">=</span> (<span class="ident">block</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">13</span>) <span class="op">&amp;</span> <span class="number">0x000000000FC00000</span>;
-    <span class="kw">let</span> <span class="ident">b9</span> <span class="op">=</span> (<span class="ident">block</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">15</span>) <span class="op">&amp;</span> <span class="number">0x00000000003E0000</span>;
-    <span class="kw">let</span> <span class="ident">b10</span> <span class="op">=</span> (<span class="ident">block</span> <span class="op">&gt;</span><span class="op">&gt;</span> (<span class="ident">RESULT_LEN</span> <span class="op">-</span> <span class="number">1</span>)) <span class="op">&amp;</span> <span class="number">0x0000000000010000</span>;
-    <span class="ident">b1</span> <span class="op">|</span> <span class="ident">b2</span> <span class="op">|</span> <span class="ident">b3</span> <span class="op">|</span> <span class="ident">b4</span> <span class="op">|</span> <span class="ident">b5</span> <span class="op">|</span> <span class="ident">b6</span> <span class="op">|</span> <span class="ident">b7</span> <span class="op">|</span> <span class="ident">b8</span> <span class="op">|</span> <span class="ident">b9</span> <span class="op">|</span> <span class="ident">b10</span>
+<span class="doccomment">/// Swap bits using the P table
+</span><span class="kw">fn </span>p(block: u64) -&gt; u64 {
+    <span class="kw">let </span>block = block.rotate_left(<span class="number">44</span>);
+    <span class="kw">let </span>b1 = (block &amp; <span class="number">0x0000000000200000</span>) &lt;&lt; <span class="number">32</span>;
+    <span class="kw">let </span>b2 = (block &amp; <span class="number">0x0000000000480000</span>) &lt;&lt; <span class="number">13</span>;
+    <span class="kw">let </span>b3 = (block &amp; <span class="number">0x0000088000000000</span>) &lt;&lt; <span class="number">12</span>;
+    <span class="kw">let </span>b4 = (block &amp; <span class="number">0x0000002020120000</span>) &lt;&lt; <span class="number">25</span>;
+    <span class="kw">let </span>b5 = (block &amp; <span class="number">0x0000000442000000</span>) &lt;&lt; <span class="number">14</span>;
+    <span class="kw">let </span>b6 = (block &amp; <span class="number">0x0000000001800000</span>) &lt;&lt; <span class="number">37</span>;
+    <span class="kw">let </span>b7 = (block &amp; <span class="number">0x0000000004000000</span>) &lt;&lt; <span class="number">24</span>;
+    <span class="kw">let </span>b8 = (block &amp; <span class="number">0x0000020280015000</span>).wrapping_mul(<span class="number">0x0000020080800083</span>) &amp; <span class="number">0x02000a6400000000</span>;
+    <span class="kw">let </span>b9 = (block.rotate_left(<span class="number">29</span>) &amp; <span class="number">0x01001400000000aa</span>).wrapping_mul(<span class="number">0x0000210210008081</span>)
+        &amp; <span class="number">0x0902c01200000000</span>;
+    <span class="kw">let </span>b10 = (block &amp; <span class="number">0x0000000910040000</span>).wrapping_mul(<span class="number">0x0000000c04000020</span>) &amp; <span class="number">0x8410010000000000</span>;
+    b1 | b2 | b3 | b4 | b5 | b6 | b7 | b8 | b9 | b10
 }
 
-<span class="doccomment">/// Swap bits using the P table</span>
-<span class="kw">fn</span> <span class="ident">p</span>(<span class="ident">block</span>: <span class="ident">u64</span>) -&gt; <span class="ident">u64</span> {
-    <span class="kw">let</span> <span class="ident">block</span> <span class="op">=</span> <span class="ident">block</span>.<span class="ident">rotate_left</span>(<span class="number">44</span>);
-    <span class="kw">let</span> <span class="ident">b1</span> <span class="op">=</span> (<span class="ident">block</span> <span class="op">&amp;</span> <span class="number">0x0000000000200000</span>) <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">32</span>;
-    <span class="kw">let</span> <span class="ident">b2</span> <span class="op">=</span> (<span class="ident">block</span> <span class="op">&amp;</span> <span class="number">0x0000000000480000</span>) <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">13</span>;
-    <span class="kw">let</span> <span class="ident">b3</span> <span class="op">=</span> (<span class="ident">block</span> <span class="op">&amp;</span> <span class="number">0x0000088000000000</span>) <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">12</span>;
-    <span class="kw">let</span> <span class="ident">b4</span> <span class="op">=</span> (<span class="ident">block</span> <span class="op">&amp;</span> <span class="number">0x0000002020120000</span>) <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">25</span>;
-    <span class="kw">let</span> <span class="ident">b5</span> <span class="op">=</span> (<span class="ident">block</span> <span class="op">&amp;</span> <span class="number">0x0000000442000000</span>) <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">14</span>;
-    <span class="kw">let</span> <span class="ident">b6</span> <span class="op">=</span> (<span class="ident">block</span> <span class="op">&amp;</span> <span class="number">0x0000000001800000</span>) <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">37</span>;
-    <span class="kw">let</span> <span class="ident">b7</span> <span class="op">=</span> (<span class="ident">block</span> <span class="op">&amp;</span> <span class="number">0x0000000004000000</span>) <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">24</span>;
-    <span class="kw">let</span> <span class="ident">b8</span> <span class="op">=</span> (<span class="ident">block</span> <span class="op">&amp;</span> <span class="number">0x0000020280015000</span>).<span class="ident">wrapping_mul</span>(<span class="number">0x0000020080800083</span>) <span class="op">&amp;</span> <span class="number">0x02000a6400000000</span>;
-    <span class="kw">let</span> <span class="ident">b9</span> <span class="op">=</span> (<span class="ident">block</span>.<span class="ident">rotate_left</span>(<span class="number">29</span>) <span class="op">&amp;</span> <span class="number">0x01001400000000aa</span>).<span class="ident">wrapping_mul</span>(<span class="number">0x0000210210008081</span>)
-        <span class="op">&amp;</span> <span class="number">0x0902c01200000000</span>;
-    <span class="kw">let</span> <span class="ident">b10</span> <span class="op">=</span> (<span class="ident">block</span> <span class="op">&amp;</span> <span class="number">0x0000000910040000</span>).<span class="ident">wrapping_mul</span>(<span class="number">0x0000000c04000020</span>) <span class="op">&amp;</span> <span class="number">0x8410010000000000</span>;
-    <span class="ident">b1</span> <span class="op">|</span> <span class="ident">b2</span> <span class="op">|</span> <span class="ident">b3</span> <span class="op">|</span> <span class="ident">b4</span> <span class="op">|</span> <span class="ident">b5</span> <span class="op">|</span> <span class="ident">b6</span> <span class="op">|</span> <span class="ident">b7</span> <span class="op">|</span> <span class="ident">b8</span> <span class="op">|</span> <span class="ident">b9</span> <span class="op">|</span> <span class="ident">b10</span>
-}
+<span class="doccomment">/// Generate the 16 subkeys
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>gen_keys(key: u64) -&gt; [u64; <span class="number">16</span>] {
+    <span class="kw">let </span><span class="kw-2">mut </span>keys: [u64; <span class="number">16</span>] = [<span class="number">0</span>; <span class="number">16</span>];
+    <span class="kw">let </span>key = pc1(key);
 
-<span class="doccomment">/// Generate the 16 subkeys</span>
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">gen_keys</span>(<span class="ident">key</span>: <span class="ident">u64</span>) -&gt; [<span class="ident">u64</span>; <span class="number">16</span>] {
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">keys</span>: [<span class="ident">u64</span>; <span class="number">16</span>] <span class="op">=</span> [<span class="number">0</span>; <span class="number">16</span>];
-    <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="ident">pc1</span>(<span class="ident">key</span>);
+    <span class="comment">// The most significant bit is bit zero, and there are only 56 bits in
+    // the key after applying PC1, so we need to remove the eight least
+    // significant bits from the key.
+    </span><span class="kw">let </span>key = key &gt;&gt; <span class="number">8</span>;
 
-    <span class="comment">// The most significant bit is bit zero, and there are only 56 bits in</span>
-    <span class="comment">// the key after applying PC1, so we need to remove the eight least</span>
-    <span class="comment">// significant bits from the key.</span>
-    <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="ident">key</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">8</span>;
+    <span class="kw">let </span><span class="kw-2">mut </span>c = key &gt;&gt; <span class="number">28</span>;
+    <span class="kw">let </span><span class="kw-2">mut </span>d = key &amp; <span class="number">0x0FFFFFFF</span>;
+    <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..<span class="number">16 </span>{
+        c = rotate(c, SHIFTS[i]);
+        d = rotate(d, SHIFTS[i]);
 
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">c</span> <span class="op">=</span> <span class="ident">key</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">28</span>;
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">d</span> <span class="op">=</span> <span class="ident">key</span> <span class="op">&amp;</span> <span class="number">0x0FFFFFFF</span>;
-    <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="number">16</span> {
-        <span class="ident">c</span> <span class="op">=</span> <span class="ident">rotate</span>(<span class="ident">c</span>, <span class="ident">SHIFTS</span>[<span class="ident">i</span>]);
-        <span class="ident">d</span> <span class="op">=</span> <span class="ident">rotate</span>(<span class="ident">d</span>, <span class="ident">SHIFTS</span>[<span class="ident">i</span>]);
-
-        <span class="comment">// We need the `&lt;&lt; 8` because the most significant bit is bit zero,</span>
-        <span class="comment">// so we need to shift our 56 bit value 8 bits to the left.</span>
-        <span class="ident">keys</span>[<span class="ident">i</span>] <span class="op">=</span> <span class="ident">pc2</span>(((<span class="ident">c</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">28</span>) <span class="op">|</span> <span class="ident">d</span>) <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">8</span>);
+        <span class="comment">// We need the `&lt;&lt; 8` because the most significant bit is bit zero,
+        // so we need to shift our 56 bit value 8 bits to the left.
+        </span>keys[i] = pc2(((c &lt;&lt; <span class="number">28</span>) | d) &lt;&lt; <span class="number">8</span>);
     }
 
-    <span class="ident">keys</span>
+    keys
 }
 
-<span class="doccomment">/// Performs a left rotate on a 28 bit number</span>
-<span class="kw">fn</span> <span class="ident">rotate</span>(<span class="kw-2">mut</span> <span class="ident">val</span>: <span class="ident">u64</span>, <span class="ident">shift</span>: <span class="ident">u8</span>) -&gt; <span class="ident">u64</span> {
-    <span class="kw">let</span> <span class="ident">top_bits</span> <span class="op">=</span> <span class="ident">val</span> <span class="op">&gt;</span><span class="op">&gt;</span> (<span class="number">28</span> <span class="op">-</span> <span class="ident">shift</span>);
-    <span class="ident">val</span> <span class="op">&lt;</span><span class="op">&lt;</span><span class="op">=</span> <span class="ident">shift</span>;
+<span class="doccomment">/// Performs a left rotate on a 28 bit number
+</span><span class="kw">fn </span>rotate(<span class="kw-2">mut </span>val: u64, shift: u8) -&gt; u64 {
+    <span class="kw">let </span>top_bits = val &gt;&gt; (<span class="number">28 </span>- shift);
+    val &lt;&lt;= shift;
 
-    (<span class="ident">val</span> <span class="op">|</span> <span class="ident">top_bits</span>) <span class="op">&amp;</span> <span class="number">0x0FFFFFFF</span>
+    (val | top_bits) &amp; <span class="number">0x0FFFFFFF
+</span>}
+
+<span class="kw">fn </span>round(input: u64, key: u64) -&gt; u64 {
+    <span class="kw">let </span>l = input &amp; (<span class="number">0xFFFF_FFFF </span>&lt;&lt; <span class="number">32</span>);
+    <span class="kw">let </span>r = input &lt;&lt; <span class="number">32</span>;
+
+    r | ((f(r, key) ^ l) &gt;&gt; <span class="number">32</span>)
 }
 
-<span class="kw">fn</span> <span class="ident">round</span>(<span class="ident">input</span>: <span class="ident">u64</span>, <span class="ident">key</span>: <span class="ident">u64</span>) -&gt; <span class="ident">u64</span> {
-    <span class="kw">let</span> <span class="ident">l</span> <span class="op">=</span> <span class="ident">input</span> <span class="op">&amp;</span> (<span class="number">0xFFFF_FFFF</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">32</span>);
-    <span class="kw">let</span> <span class="ident">r</span> <span class="op">=</span> <span class="ident">input</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">32</span>;
-
-    <span class="ident">r</span> <span class="op">|</span> ((<span class="ident">f</span>(<span class="ident">r</span>, <span class="ident">key</span>) <span class="op">^</span> <span class="ident">l</span>) <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">32</span>)
+<span class="kw">fn </span>f(input: u64, key: u64) -&gt; u64 {
+    <span class="kw">let </span><span class="kw-2">mut </span>val = e(input <span class="kw">as </span>u64);
+    val ^= key;
+    val = apply_sboxes(val);
+    p(val)
 }
 
-<span class="kw">fn</span> <span class="ident">f</span>(<span class="ident">input</span>: <span class="ident">u64</span>, <span class="ident">key</span>: <span class="ident">u64</span>) -&gt; <span class="ident">u64</span> {
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">val</span> <span class="op">=</span> <span class="ident">e</span>(<span class="ident">input</span> <span class="kw">as</span> <span class="ident">u64</span>);
-    <span class="ident">val</span> <span class="op">^</span><span class="op">=</span> <span class="ident">key</span>;
-    <span class="ident">val</span> <span class="op">=</span> <span class="ident">apply_sboxes</span>(<span class="ident">val</span>);
-    <span class="ident">p</span>(<span class="ident">val</span>)
-}
+<span class="doccomment">/// Applies all eight sboxes to the input
+</span><span class="kw">fn </span>apply_sboxes(input: u64) -&gt; u64 {
+    <span class="kw">let </span><span class="kw-2">mut </span>output: u64 = <span class="number">0</span>;
 
-<span class="doccomment">/// Applies all eight sboxes to the input</span>
-<span class="kw">fn</span> <span class="ident">apply_sboxes</span>(<span class="ident">input</span>: <span class="ident">u64</span>) -&gt; <span class="ident">u64</span> {
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">output</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">0</span>;
-
-    <span class="kw">for</span> (<span class="ident">i</span>, <span class="ident">sbox</span>) <span class="kw">in</span> <span class="ident">SBOXES</span>.<span class="ident">iter</span>().<span class="ident">enumerate</span>() {
-        <span class="kw">let</span> <span class="ident">val</span> <span class="op">=</span> (<span class="ident">input</span> <span class="op">&gt;</span><span class="op">&gt;</span> (<span class="number">58</span> <span class="op">-</span> (<span class="ident">i</span> <span class="op">*</span> <span class="number">6</span>))) <span class="op">&amp;</span> <span class="number">0x3F</span>;
-        <span class="ident">output</span> <span class="op">|</span><span class="op">=</span> <span class="ident">u64::from</span>(<span class="ident">sbox</span>[<span class="ident">val</span> <span class="kw">as</span> <span class="ident">usize</span>]) <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="number">60</span> <span class="op">-</span> (<span class="ident">i</span> <span class="op">*</span> <span class="number">4</span>));
+    <span class="kw">for </span>(i, sbox) <span class="kw">in </span>SBOXES.iter().enumerate() {
+        <span class="kw">let </span>val = (input &gt;&gt; (<span class="number">58 </span>- (i * <span class="number">6</span>))) &amp; <span class="number">0x3F</span>;
+        output |= u64::from(sbox[val <span class="kw">as </span>usize]) &lt;&lt; (<span class="number">60 </span>- (i * <span class="number">4</span>));
     }
 
-    <span class="ident">output</span>
+    output
 }
 
-<span class="kw">impl</span> <span class="ident">Des</span> {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">encrypt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">data</span>: <span class="ident">u64</span>) -&gt; <span class="ident">u64</span> {
-        <span class="ident">data</span> <span class="op">=</span> <span class="ident">ip</span>(<span class="ident">data</span>);
-        <span class="kw">for</span> <span class="ident">key</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">keys</span> {
-            <span class="ident">data</span> <span class="op">=</span> <span class="ident">round</span>(<span class="ident">data</span>, <span class="kw-2">*</span><span class="ident">key</span>);
+<span class="kw">impl </span>Des {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>encrypt(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut </span>data: u64) -&gt; u64 {
+        data = ip(data);
+        <span class="kw">for </span>key <span class="kw">in </span><span class="kw-2">&amp;</span><span class="self">self</span>.keys {
+            data = round(data, <span class="kw-2">*</span>key);
         }
-        <span class="ident">fp</span>((<span class="ident">data</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">32</span>) <span class="op">|</span> (<span class="ident">data</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">32</span>))
+        fp((data &lt;&lt; <span class="number">32</span>) | (data &gt;&gt; <span class="number">32</span>))
     }
 
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">decrypt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">data</span>: <span class="ident">u64</span>) -&gt; <span class="ident">u64</span> {
-        <span class="ident">data</span> <span class="op">=</span> <span class="ident">ip</span>(<span class="ident">data</span>);
-        <span class="kw">for</span> <span class="ident">key</span> <span class="kw">in</span> <span class="self">self</span>.<span class="ident">keys</span>.<span class="ident">iter</span>().<span class="ident">rev</span>() {
-            <span class="ident">data</span> <span class="op">=</span> <span class="ident">round</span>(<span class="ident">data</span>, <span class="kw-2">*</span><span class="ident">key</span>);
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>decrypt(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut </span>data: u64) -&gt; u64 {
+        data = ip(data);
+        <span class="kw">for </span>key <span class="kw">in </span><span class="self">self</span>.keys.iter().rev() {
+            data = round(data, <span class="kw-2">*</span>key);
         }
-        <span class="ident">fp</span>((<span class="ident">data</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">32</span>) <span class="op">|</span> (<span class="ident">data</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">32</span>))
+        fp((data &lt;&lt; <span class="number">32</span>) | (data &gt;&gt; <span class="number">32</span>))
     }
 }
 
-<span class="kw">impl</span> <span class="ident">NewBlockCipher</span> <span class="kw">for</span> <span class="ident">Des</span> {
-    <span class="kw">type</span> <span class="ident">KeySize</span> <span class="op">=</span> <span class="ident">U8</span>;
+<span class="kw">impl </span>NewBlockCipher <span class="kw">for </span>Des {
+    <span class="kw">type </span>KeySize = U8;
 
-    <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="ident">GenericArray</span><span class="op">&lt;</span><span class="ident">u8</span>, <span class="ident">U8</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">Des</span> {
-            <span class="ident">keys</span>: <span class="ident">gen_keys</span>(<span class="ident">BE::read_u64</span>(<span class="ident">key</span>)),
+    <span class="kw">fn </span>new(key: <span class="kw-2">&amp;</span>GenericArray&lt;u8, U8&gt;) -&gt; <span class="self">Self </span>{
+        Des {
+            keys: gen_keys(BE::read_u64(key)),
         }
     }
 }
 
-<span class="kw">impl</span> <span class="ident">BlockCipher</span> <span class="kw">for</span> <span class="ident">Des</span> {
-    <span class="kw">type</span> <span class="ident">BlockSize</span> <span class="op">=</span> <span class="ident">U8</span>;
-    <span class="kw">type</span> <span class="ident">ParBlocks</span> <span class="op">=</span> <span class="ident">U1</span>;
+<span class="kw">impl </span>BlockCipher <span class="kw">for </span>Des {
+    <span class="kw">type </span>BlockSize = U8;
+    <span class="kw">type </span>ParBlocks = U1;
 }
 
-<span class="kw">impl</span> <span class="ident">BlockEncrypt</span> <span class="kw">for</span> <span class="ident">Des</span> {
-    <span class="kw">fn</span> <span class="ident">encrypt_block</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">block</span>: <span class="kw-2">&amp;mut</span> <span class="ident">GenericArray</span><span class="op">&lt;</span><span class="ident">u8</span>, <span class="ident">U8</span><span class="op">&gt;</span>) {
-        <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="ident">BE::read_u64</span>(<span class="ident">block</span>);
-        <span class="ident">BE::write_u64</span>(<span class="ident">block</span>, <span class="self">self</span>.<span class="ident">encrypt</span>(<span class="ident">data</span>));
+<span class="kw">impl </span>BlockEncrypt <span class="kw">for </span>Des {
+    <span class="kw">fn </span>encrypt_block(<span class="kw-2">&amp;</span><span class="self">self</span>, block: <span class="kw-2">&amp;mut </span>GenericArray&lt;u8, U8&gt;) {
+        <span class="kw">let </span>data = BE::read_u64(block);
+        BE::write_u64(block, <span class="self">self</span>.encrypt(data));
     }
 }
 
-<span class="kw">impl</span> <span class="ident">BlockDecrypt</span> <span class="kw">for</span> <span class="ident">Des</span> {
-    <span class="kw">fn</span> <span class="ident">decrypt_block</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">block</span>: <span class="kw-2">&amp;mut</span> <span class="ident">GenericArray</span><span class="op">&lt;</span><span class="ident">u8</span>, <span class="ident">U8</span><span class="op">&gt;</span>) {
-        <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="ident">BE::read_u64</span>(<span class="ident">block</span>);
-        <span class="ident">BE::write_u64</span>(<span class="ident">block</span>, <span class="self">self</span>.<span class="ident">decrypt</span>(<span class="ident">data</span>));
+<span class="kw">impl </span>BlockDecrypt <span class="kw">for </span>Des {
+    <span class="kw">fn </span>decrypt_block(<span class="kw-2">&amp;</span><span class="self">self</span>, block: <span class="kw-2">&amp;mut </span>GenericArray&lt;u8, U8&gt;) {
+        <span class="kw">let </span>data = BE::read_u64(block);
+        BE::write_u64(block, <span class="self">self</span>.decrypt(data));
     }
 }
 
-<span class="macro">opaque_debug::implement!</span>(<span class="ident">Des</span>);
+<span class="macro">opaque_debug::implement!</span>(Des);
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="des" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="des" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

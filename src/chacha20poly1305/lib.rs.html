@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/chacha20poly1305-0.8.2/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" href="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../chacha20poly1305/index.html"><div class="logo-container"><img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../chacha20poly1305/index.html"><div class="logo-container">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/chacha20poly1305-0.8.2/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" href="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../chacha20poly1305/index.html"><div class="logo-container"><img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../chacha20poly1305/index.html"><div class="logo-container">
                     <img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../chacha20poly1305/index.html">
                         <img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
@@ -325,330 +325,330 @@
 <span id="323">323</span>
 <span id="324">324</span>
 <span id="325">325</span>
-</pre><pre class="rust"><code><span class="doccomment">//! [`ChaCha20Poly1305`] ([RFC 8439][1]) is an</span>
-<span class="doccomment">//! [Authenticated Encryption with Associated Data (AEAD)][2]</span>
-<span class="doccomment">//! cipher amenable to fast, constant-time implementations in software, based on</span>
-<span class="doccomment">//! the [ChaCha20][3] stream cipher and [Poly1305][4] universal hash function.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! This crate contains pure Rust implementations of [`ChaCha20Poly1305`]</span>
-<span class="doccomment">//! (with optional AVX2 acceleration) as well as the following variants thereof:</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! - [`XChaCha20Poly1305`] - ChaCha20Poly1305 variant with an extended 192-bit (24-byte) nonce.</span>
-<span class="doccomment">//! - [`ChaCha8Poly1305`] / [`ChaCha12Poly1305`] - non-standard, reduced-round variants</span>
-<span class="doccomment">//!   (gated under the `reduced-round` Cargo feature). See the [Too Much Crypto][5]</span>
-<span class="doccomment">//!   paper for background and rationale on when these constructions could be used.</span>
-<span class="doccomment">//!   When in doubt, prefer [`ChaCha20Poly1305`].</span>
-<span class="doccomment">//! - [`XChaCha8Poly1305`] / [`XChaCha12Poly1305`] - same as above,</span>
-<span class="doccomment">//!   but with an extended 192-bit (24-byte) nonce.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ## Security Notes</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! This crate has received one [security audit by NCC Group][6], with no significant</span>
-<span class="doccomment">//! findings. We would like to thank [MobileCoin][7] for funding the audit.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! All implementations contained in the crate are designed to execute in</span>
-<span class="doccomment">//! constant time, either by relying on hardware intrinsics (i.e. AVX2 on</span>
-<span class="doccomment">//! x86/x86_64), or using a portable implementation which is only constant time</span>
-<span class="doccomment">//! on processors which implement constant-time multiplication.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! It is not suitable for use on processors with a variable-time multiplication</span>
-<span class="doccomment">//! operation (e.g. short circuit on multiply-by-zero / multiply-by-one, such as</span>
-<span class="doccomment">//! certain 32-bit PowerPC CPUs and some non-ARM microcontrollers).</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! # Usage</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ```</span>
-<span class="doccomment">//! use chacha20poly1305::{ChaCha20Poly1305, Key, Nonce}; // Or `XChaCha20Poly1305`</span>
-<span class="doccomment">//! use chacha20poly1305::aead::{Aead, NewAead};</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! let key = Key::from_slice(b&quot;an example very very secret key.&quot;); // 32-bytes</span>
-<span class="doccomment">//! let cipher = ChaCha20Poly1305::new(key);</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! let nonce = Nonce::from_slice(b&quot;unique nonce&quot;); // 12-bytes; unique per message</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! let ciphertext = cipher.encrypt(nonce, b&quot;plaintext message&quot;.as_ref())</span>
-<span class="doccomment">//!     .expect(&quot;encryption failure!&quot;);  // NOTE: handle this error to avoid panics!</span>
-<span class="doccomment">//! let plaintext = cipher.decrypt(nonce, ciphertext.as_ref())</span>
-<span class="doccomment">//!     .expect(&quot;decryption failure!&quot;);  // NOTE: handle this error to avoid panics!</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! assert_eq!(&amp;plaintext, b&quot;plaintext message&quot;);</span>
-<span class="doccomment">//! ```</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ## In-place Usage (eliminates `alloc` requirement)</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! This crate has an optional `alloc` feature which can be disabled in e.g.</span>
-<span class="doccomment">//! microcontroller environments that don&#39;t have a heap.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! The [`AeadInPlace::encrypt_in_place`] and [`AeadInPlace::decrypt_in_place`]</span>
-<span class="doccomment">//! methods accept any type that impls the [`aead::Buffer`] trait which</span>
-<span class="doccomment">//! contains the plaintext for encryption or ciphertext for decryption.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! Note that if you enable the `heapless` feature of this crate,</span>
-<span class="doccomment">//! you will receive an impl of [`aead::Buffer`] for `heapless::Vec`</span>
-<span class="doccomment">//! (re-exported from the [`aead`] crate as [`aead::heapless::Vec`]),</span>
-<span class="doccomment">//! which can then be passed as the `buffer` parameter to the in-place encrypt</span>
-<span class="doccomment">//! and decrypt methods:</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ```</span>
-<span class="doccomment">//! # #[cfg(feature = &quot;heapless&quot;)]</span>
-<span class="doccomment">//! # {</span>
-<span class="doccomment">//! use chacha20poly1305::{ChaCha20Poly1305, Key, Nonce}; // Or `XChaCha20Poly1305`</span>
-<span class="doccomment">//! use chacha20poly1305::aead::{AeadInPlace, NewAead};</span>
-<span class="doccomment">//! use chacha20poly1305::aead::heapless::Vec;</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! let key = Key::from_slice(b&quot;an example very very secret key.&quot;);</span>
-<span class="doccomment">//! let cipher = ChaCha20Poly1305::new(key);</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! let nonce = Nonce::from_slice(b&quot;unique nonce&quot;); // 128-bits; unique per message</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! let mut buffer: Vec&lt;u8, 128&gt; = Vec::new();</span>
-<span class="doccomment">//! buffer.extend_from_slice(b&quot;plaintext message&quot;);</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! // Encrypt `buffer` in-place, replacing the plaintext contents with ciphertext</span>
-<span class="doccomment">//! cipher.encrypt_in_place(nonce, b&quot;&quot;, &amp;mut buffer).expect(&quot;encryption failure!&quot;);</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! // `buffer` now contains the message ciphertext</span>
-<span class="doccomment">//! assert_ne!(&amp;buffer, b&quot;plaintext message&quot;);</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! // Decrypt `buffer` in-place, replacing its ciphertext context with the original plaintext</span>
-<span class="doccomment">//! cipher.decrypt_in_place(nonce, b&quot;&quot;, &amp;mut buffer).expect(&quot;decryption failure!&quot;);</span>
-<span class="doccomment">//! assert_eq!(&amp;buffer, b&quot;plaintext message&quot;);</span>
-<span class="doccomment">//! # }</span>
-<span class="doccomment">//! ```</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ## [`XChaCha20Poly1305`]</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ChaCha20Poly1305 variant with an extended 192-bit (24-byte) nonce.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! The `xchacha20` Cargo feature must be enabled in order to use this</span>
-<span class="doccomment">//! (which it is by default).</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! The construction is an adaptation of the same techniques used by</span>
-<span class="doccomment">//! XSalsa20 as described in the paper &quot;Extending the Salsa20 Nonce&quot;</span>
-<span class="doccomment">//! to the 96-bit nonce variant of ChaCha20, which derive a</span>
-<span class="doccomment">//! separate subkey/nonce for each extended nonce:</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! &lt;https://cr.yp.to/snuffle/xsalsa-20081128.pdf&gt;</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! No authoritative specification exists for XChaCha20Poly1305, however the</span>
-<span class="doccomment">//! construction has &quot;rough consensus and running code&quot; in the form of</span>
-<span class="doccomment">//! several interoperable libraries and protocols (e.g. libsodium, WireGuard)</span>
-<span class="doccomment">//! and is documented in an (expired) IETF draft, which also applies the</span>
-<span class="doccomment">//! proof from the XSalsa20 paper to the construction in order to demonstrate</span>
-<span class="doccomment">//! that XChaCha20 is secure if ChaCha20 is secure (see Section 3.1):</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! &lt;https://tools.ietf.org/html/draft-arciszewski-xchacha-03&gt;</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! It is worth noting that NaCl/libsodium&#39;s default &quot;secretbox&quot; algorithm is</span>
-<span class="doccomment">//! XSalsa20Poly1305, not XChaCha20Poly1305, and thus not compatible with</span>
-<span class="doccomment">//! this library. If you are interested in that construction, please see the</span>
-<span class="doccomment">//! `xsalsa20poly1305` crate:</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! &lt;https://docs.rs/xsalsa20poly1305/&gt;</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! # Usage</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ```</span>
-<span class="doccomment">//! use chacha20poly1305::{XChaCha20Poly1305, Key, XNonce};</span>
-<span class="doccomment">//! use chacha20poly1305::aead::{Aead, NewAead};</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! let key = Key::from_slice(b&quot;an example very very secret key.&quot;); // 32-bytes</span>
-<span class="doccomment">//! let aead = XChaCha20Poly1305::new(key);</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! let nonce = XNonce::from_slice(b&quot;extra long unique nonce!&quot;); // 24-bytes; unique</span>
-<span class="doccomment">//! let ciphertext = aead.encrypt(nonce, b&quot;plaintext message&quot;.as_ref()).expect(&quot;encryption failure!&quot;);</span>
-<span class="doccomment">//! let plaintext = aead.decrypt(nonce, ciphertext.as_ref()).expect(&quot;decryption failure!&quot;);</span>
-<span class="doccomment">//! assert_eq!(&amp;plaintext, b&quot;plaintext message&quot;);</span>
-<span class="doccomment">//! ```</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! [1]: https://tools.ietf.org/html/rfc8439</span>
-<span class="doccomment">//! [2]: https://en.wikipedia.org/wiki/Authenticated_encryption</span>
-<span class="doccomment">//! [3]: https://github.com/RustCrypto/stream-ciphers/tree/master/chacha20</span>
-<span class="doccomment">//! [4]: https://github.com/RustCrypto/universal-hashes/tree/master/poly1305</span>
-<span class="doccomment">//! [5]: https://eprint.iacr.org/2019/1492.pdf</span>
-<span class="doccomment">//! [6]: https://research.nccgroup.com/2020/02/26/public-report-rustcrypto-aes-gcm-and-chacha20poly1305-implementation-review/</span>
-<span class="doccomment">//! [7]: https://www.mobilecoin.com/</span>
+</pre><pre class="rust"><code><span class="doccomment">//! [`ChaCha20Poly1305`] ([RFC 8439][1]) is an
+//! [Authenticated Encryption with Associated Data (AEAD)][2]
+//! cipher amenable to fast, constant-time implementations in software, based on
+//! the [ChaCha20][3] stream cipher and [Poly1305][4] universal hash function.
+//!
+//! This crate contains pure Rust implementations of [`ChaCha20Poly1305`]
+//! (with optional AVX2 acceleration) as well as the following variants thereof:
+//!
+//! - [`XChaCha20Poly1305`] - ChaCha20Poly1305 variant with an extended 192-bit (24-byte) nonce.
+//! - [`ChaCha8Poly1305`] / [`ChaCha12Poly1305`] - non-standard, reduced-round variants
+//!   (gated under the `reduced-round` Cargo feature). See the [Too Much Crypto][5]
+//!   paper for background and rationale on when these constructions could be used.
+//!   When in doubt, prefer [`ChaCha20Poly1305`].
+//! - [`XChaCha8Poly1305`] / [`XChaCha12Poly1305`] - same as above,
+//!   but with an extended 192-bit (24-byte) nonce.
+//!
+//! ## Security Notes
+//!
+//! This crate has received one [security audit by NCC Group][6], with no significant
+//! findings. We would like to thank [MobileCoin][7] for funding the audit.
+//!
+//! All implementations contained in the crate are designed to execute in
+//! constant time, either by relying on hardware intrinsics (i.e. AVX2 on
+//! x86/x86_64), or using a portable implementation which is only constant time
+//! on processors which implement constant-time multiplication.
+//!
+//! It is not suitable for use on processors with a variable-time multiplication
+//! operation (e.g. short circuit on multiply-by-zero / multiply-by-one, such as
+//! certain 32-bit PowerPC CPUs and some non-ARM microcontrollers).
+//!
+//! # Usage
+//!
+//! ```
+//! use chacha20poly1305::{ChaCha20Poly1305, Key, Nonce}; // Or `XChaCha20Poly1305`
+//! use chacha20poly1305::aead::{Aead, NewAead};
+//!
+//! let key = Key::from_slice(b&quot;an example very very secret key.&quot;); // 32-bytes
+//! let cipher = ChaCha20Poly1305::new(key);
+//!
+//! let nonce = Nonce::from_slice(b&quot;unique nonce&quot;); // 12-bytes; unique per message
+//!
+//! let ciphertext = cipher.encrypt(nonce, b&quot;plaintext message&quot;.as_ref())
+//!     .expect(&quot;encryption failure!&quot;);  // NOTE: handle this error to avoid panics!
+//! let plaintext = cipher.decrypt(nonce, ciphertext.as_ref())
+//!     .expect(&quot;decryption failure!&quot;);  // NOTE: handle this error to avoid panics!
+//!
+//! assert_eq!(&amp;plaintext, b&quot;plaintext message&quot;);
+//! ```
+//!
+//! ## In-place Usage (eliminates `alloc` requirement)
+//!
+//! This crate has an optional `alloc` feature which can be disabled in e.g.
+//! microcontroller environments that don&#39;t have a heap.
+//!
+//! The [`AeadInPlace::encrypt_in_place`] and [`AeadInPlace::decrypt_in_place`]
+//! methods accept any type that impls the [`aead::Buffer`] trait which
+//! contains the plaintext for encryption or ciphertext for decryption.
+//!
+//! Note that if you enable the `heapless` feature of this crate,
+//! you will receive an impl of [`aead::Buffer`] for `heapless::Vec`
+//! (re-exported from the [`aead`] crate as [`aead::heapless::Vec`]),
+//! which can then be passed as the `buffer` parameter to the in-place encrypt
+//! and decrypt methods:
+//!
+//! ```
+//! # #[cfg(feature = &quot;heapless&quot;)]
+//! # {
+//! use chacha20poly1305::{ChaCha20Poly1305, Key, Nonce}; // Or `XChaCha20Poly1305`
+//! use chacha20poly1305::aead::{AeadInPlace, NewAead};
+//! use chacha20poly1305::aead::heapless::Vec;
+//!
+//! let key = Key::from_slice(b&quot;an example very very secret key.&quot;);
+//! let cipher = ChaCha20Poly1305::new(key);
+//!
+//! let nonce = Nonce::from_slice(b&quot;unique nonce&quot;); // 128-bits; unique per message
+//!
+//! let mut buffer: Vec&lt;u8, 128&gt; = Vec::new();
+//! buffer.extend_from_slice(b&quot;plaintext message&quot;);
+//!
+//! // Encrypt `buffer` in-place, replacing the plaintext contents with ciphertext
+//! cipher.encrypt_in_place(nonce, b&quot;&quot;, &amp;mut buffer).expect(&quot;encryption failure!&quot;);
+//!
+//! // `buffer` now contains the message ciphertext
+//! assert_ne!(&amp;buffer, b&quot;plaintext message&quot;);
+//!
+//! // Decrypt `buffer` in-place, replacing its ciphertext context with the original plaintext
+//! cipher.decrypt_in_place(nonce, b&quot;&quot;, &amp;mut buffer).expect(&quot;decryption failure!&quot;);
+//! assert_eq!(&amp;buffer, b&quot;plaintext message&quot;);
+//! # }
+//! ```
+//!
+//! ## [`XChaCha20Poly1305`]
+//!
+//! ChaCha20Poly1305 variant with an extended 192-bit (24-byte) nonce.
+//!
+//! The `xchacha20` Cargo feature must be enabled in order to use this
+//! (which it is by default).
+//!
+//! The construction is an adaptation of the same techniques used by
+//! XSalsa20 as described in the paper &quot;Extending the Salsa20 Nonce&quot;
+//! to the 96-bit nonce variant of ChaCha20, which derive a
+//! separate subkey/nonce for each extended nonce:
+//!
+//! &lt;https://cr.yp.to/snuffle/xsalsa-20081128.pdf&gt;
+//!
+//! No authoritative specification exists for XChaCha20Poly1305, however the
+//! construction has &quot;rough consensus and running code&quot; in the form of
+//! several interoperable libraries and protocols (e.g. libsodium, WireGuard)
+//! and is documented in an (expired) IETF draft, which also applies the
+//! proof from the XSalsa20 paper to the construction in order to demonstrate
+//! that XChaCha20 is secure if ChaCha20 is secure (see Section 3.1):
+//!
+//! &lt;https://tools.ietf.org/html/draft-arciszewski-xchacha-03&gt;
+//!
+//! It is worth noting that NaCl/libsodium&#39;s default &quot;secretbox&quot; algorithm is
+//! XSalsa20Poly1305, not XChaCha20Poly1305, and thus not compatible with
+//! this library. If you are interested in that construction, please see the
+//! `xsalsa20poly1305` crate:
+//!
+//! &lt;https://docs.rs/xsalsa20poly1305/&gt;
+//!
+//! # Usage
+//!
+//! ```
+//! use chacha20poly1305::{XChaCha20Poly1305, Key, XNonce};
+//! use chacha20poly1305::aead::{Aead, NewAead};
+//!
+//! let key = Key::from_slice(b&quot;an example very very secret key.&quot;); // 32-bytes
+//! let aead = XChaCha20Poly1305::new(key);
+//!
+//! let nonce = XNonce::from_slice(b&quot;extra long unique nonce!&quot;); // 24-bytes; unique
+//! let ciphertext = aead.encrypt(nonce, b&quot;plaintext message&quot;.as_ref()).expect(&quot;encryption failure!&quot;);
+//! let plaintext = aead.decrypt(nonce, ciphertext.as_ref()).expect(&quot;decryption failure!&quot;);
+//! assert_eq!(&amp;plaintext, b&quot;plaintext message&quot;);
+//! ```
+//!
+//! [1]: https://tools.ietf.org/html/rfc8439
+//! [2]: https://en.wikipedia.org/wiki/Authenticated_encryption
+//! [3]: https://github.com/RustCrypto/stream-ciphers/tree/master/chacha20
+//! [4]: https://github.com/RustCrypto/universal-hashes/tree/master/poly1305
+//! [5]: https://eprint.iacr.org/2019/1492.pdf
+//! [6]: https://research.nccgroup.com/2020/02/26/public-report-rustcrypto-aes-gcm-and-chacha20poly1305-implementation-review/
+//! [7]: https://www.mobilecoin.com/
 
-<span class="attribute">#![<span class="ident">no_std</span>]</span>
-<span class="attribute">#![<span class="ident">cfg_attr</span>(<span class="ident">docsrs</span>, <span class="ident">feature</span>(<span class="ident">doc_cfg</span>))]</span>
-<span class="attribute">#![<span class="ident">doc</span>(
-    <span class="ident">html_logo_url</span> <span class="op">=</span> <span class="string">&quot;https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg&quot;</span>,
-    <span class="ident">html_favicon_url</span> <span class="op">=</span> <span class="string">&quot;https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg&quot;</span>
-)]</span>
-<span class="attribute">#![<span class="ident">warn</span>(<span class="ident">missing_docs</span>, <span class="ident">rust_2018_idioms</span>)]</span>
+</span><span class="attribute">#![no_std]
+#![cfg_attr(docsrs, feature(doc_cfg))]
+#![doc(
+    html_logo_url = <span class="string">&quot;https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg&quot;</span>,
+    html_favicon_url = <span class="string">&quot;https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg&quot;
+</span>)]
+#![warn(missing_docs, rust_2018_idioms)]
 
-<span class="kw">mod</span> <span class="ident">cipher</span>;
+</span><span class="kw">mod </span>cipher;
 
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">aead</span>;
+<span class="kw">pub use </span>aead;
 
-<span class="kw">use</span> <span class="ident"><span class="self">self</span>::cipher::Cipher</span>;
-<span class="kw">use</span> <span class="ident">::cipher</span>::{<span class="ident">NewCipher</span>, <span class="ident">StreamCipher</span>, <span class="ident">StreamCipherSeek</span>};
-<span class="kw">use</span> <span class="ident">aead</span>::{
-    <span class="ident">consts</span>::{<span class="ident">U0</span>, <span class="ident">U12</span>, <span class="ident">U16</span>, <span class="ident">U32</span>},
-    <span class="ident">generic_array</span>::{<span class="ident">ArrayLength</span>, <span class="ident">GenericArray</span>},
-    <span class="ident">AeadCore</span>, <span class="ident">AeadInPlace</span>, <span class="ident">Error</span>, <span class="ident">NewAead</span>,
+<span class="kw">use </span><span class="self">self</span>::cipher::Cipher;
+<span class="kw">use </span>::cipher::{NewCipher, StreamCipher, StreamCipherSeek};
+<span class="kw">use </span>aead::{
+    consts::{U0, U12, U16, U32},
+    generic_array::{ArrayLength, GenericArray},
+    AeadCore, AeadInPlace, Error, NewAead,
 };
-<span class="kw">use</span> <span class="ident">core::marker::PhantomData</span>;
-<span class="kw">use</span> <span class="ident">zeroize::Zeroize</span>;
+<span class="kw">use </span>core::marker::PhantomData;
+<span class="kw">use </span>zeroize::Zeroize;
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;xchacha20&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident">aead::consts::U24</span>;
+<span class="attribute">#[cfg(feature = <span class="string">&quot;xchacha20&quot;</span>)]
+</span><span class="kw">use </span>aead::consts::U24;
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;chacha20&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident">chacha20::ChaCha20</span>;
+<span class="attribute">#[cfg(feature = <span class="string">&quot;chacha20&quot;</span>)]
+</span><span class="kw">use </span>chacha20::ChaCha20;
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;xchacha20&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident">chacha20::XChaCha20</span>;
+<span class="attribute">#[cfg(feature = <span class="string">&quot;xchacha20&quot;</span>)]
+</span><span class="kw">use </span>chacha20::XChaCha20;
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;chacha20-reduced-round&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident">chacha20</span>::{<span class="ident">ChaCha12</span>, <span class="ident">ChaCha8</span>};
+<span class="attribute">#[cfg(feature = <span class="string">&quot;chacha20-reduced-round&quot;</span>)]
+</span><span class="kw">use </span>chacha20::{ChaCha12, ChaCha8};
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;xchacha20-reduced-round&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident">chacha20</span>::{<span class="ident">XChaCha12</span>, <span class="ident">XChaCha8</span>};
+<span class="attribute">#[cfg(feature = <span class="string">&quot;xchacha20-reduced-round&quot;</span>)]
+</span><span class="kw">use </span>chacha20::{XChaCha12, XChaCha8};
 
-<span class="doccomment">/// Key type (256-bits/32-bytes).</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// Implemented as an alias for [`GenericArray`].</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// All [`ChaChaPoly1305`] variants (including `XChaCha20Poly1305`) use this</span>
-<span class="doccomment">/// key type.</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">Key</span> <span class="op">=</span> <span class="ident">GenericArray</span><span class="op">&lt;</span><span class="ident">u8</span>, <span class="ident">U32</span><span class="op">&gt;</span>;
+<span class="doccomment">/// Key type (256-bits/32-bytes).
+///
+/// Implemented as an alias for [`GenericArray`].
+///
+/// All [`ChaChaPoly1305`] variants (including `XChaCha20Poly1305`) use this
+/// key type.
+</span><span class="kw">pub type </span>Key = GenericArray&lt;u8, U32&gt;;
 
-<span class="doccomment">/// Nonce type (96-bits/12-bytes).</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// Implemented as an alias for [`GenericArray`].</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">Nonce</span> <span class="op">=</span> <span class="ident">GenericArray</span><span class="op">&lt;</span><span class="ident">u8</span>, <span class="ident">U12</span><span class="op">&gt;</span>;
+<span class="doccomment">/// Nonce type (96-bits/12-bytes).
+///
+/// Implemented as an alias for [`GenericArray`].
+</span><span class="kw">pub type </span>Nonce = GenericArray&lt;u8, U12&gt;;
 
-<span class="doccomment">/// XNonce type (192-bits/24-bytes).</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// Implemented as an alias for [`GenericArray`].</span>
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;xchacha20&quot;</span>)]</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">XNonce</span> <span class="op">=</span> <span class="ident">GenericArray</span><span class="op">&lt;</span><span class="ident">u8</span>, <span class="ident">U24</span><span class="op">&gt;</span>;
+<span class="doccomment">/// XNonce type (192-bits/24-bytes).
+///
+/// Implemented as an alias for [`GenericArray`].
+</span><span class="attribute">#[cfg(feature = <span class="string">&quot;xchacha20&quot;</span>)]
+</span><span class="kw">pub type </span>XNonce = GenericArray&lt;u8, U24&gt;;
 
-<span class="doccomment">/// Poly1305 tag.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// Implemented as an alias for [`GenericArray`].</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">Tag</span> <span class="op">=</span> <span class="ident">GenericArray</span><span class="op">&lt;</span><span class="ident">u8</span>, <span class="ident">U16</span><span class="op">&gt;</span>;
+<span class="doccomment">/// Poly1305 tag.
+///
+/// Implemented as an alias for [`GenericArray`].
+</span><span class="kw">pub type </span>Tag = GenericArray&lt;u8, U16&gt;;
 
-<span class="doccomment">/// ChaCha20Poly1305 Authenticated Encryption with Additional Data (AEAD).</span>
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;chacha20&quot;</span>)]</span>
-<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">docsrs</span>, <span class="ident">doc</span>(<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;chacha20&quot;</span>)))]</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">ChaCha20Poly1305</span> <span class="op">=</span> <span class="ident">ChaChaPoly1305</span><span class="op">&lt;</span><span class="ident">ChaCha20</span>, <span class="ident">U12</span><span class="op">&gt;</span>;
+<span class="doccomment">/// ChaCha20Poly1305 Authenticated Encryption with Additional Data (AEAD).
+</span><span class="attribute">#[cfg(feature = <span class="string">&quot;chacha20&quot;</span>)]
+#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;chacha20&quot;</span>)))]
+</span><span class="kw">pub type </span>ChaCha20Poly1305 = ChaChaPoly1305&lt;ChaCha20, U12&gt;;
 
-<span class="doccomment">/// XChaCha20Poly1305 Authenticated Encryption with Additional Data (AEAD).</span>
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;xchacha20&quot;</span>)]</span>
-<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">docsrs</span>, <span class="ident">doc</span>(<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;xchacha20&quot;</span>)))]</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">XChaCha20Poly1305</span> <span class="op">=</span> <span class="ident">ChaChaPoly1305</span><span class="op">&lt;</span><span class="ident">XChaCha20</span>, <span class="ident">U24</span><span class="op">&gt;</span>;
+<span class="doccomment">/// XChaCha20Poly1305 Authenticated Encryption with Additional Data (AEAD).
+</span><span class="attribute">#[cfg(feature = <span class="string">&quot;xchacha20&quot;</span>)]
+#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;xchacha20&quot;</span>)))]
+</span><span class="kw">pub type </span>XChaCha20Poly1305 = ChaChaPoly1305&lt;XChaCha20, U24&gt;;
 
-<span class="doccomment">/// ChaCha8Poly1305 (reduced round variant) Authenticated Encryption with Additional Data (AEAD).</span>
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;chacha20-reduced-round&quot;</span>)]</span>
-<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">docsrs</span>, <span class="ident">doc</span>(<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;reduced-round&quot;</span>)))]</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">ChaCha8Poly1305</span> <span class="op">=</span> <span class="ident">ChaChaPoly1305</span><span class="op">&lt;</span><span class="ident">ChaCha8</span>, <span class="ident">U12</span><span class="op">&gt;</span>;
+<span class="doccomment">/// ChaCha8Poly1305 (reduced round variant) Authenticated Encryption with Additional Data (AEAD).
+</span><span class="attribute">#[cfg(feature = <span class="string">&quot;chacha20-reduced-round&quot;</span>)]
+#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;reduced-round&quot;</span>)))]
+</span><span class="kw">pub type </span>ChaCha8Poly1305 = ChaChaPoly1305&lt;ChaCha8, U12&gt;;
 
-<span class="doccomment">/// XChaCha8Poly1305 (reduced round variant) Authenticated Encryption with Additional Data (AEAD).</span>
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;xchacha20-reduced-round&quot;</span>)]</span>
-<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">docsrs</span>, <span class="ident">doc</span>(<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;xchacha20-reduced-round&quot;</span>)))]</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">XChaCha8Poly1305</span> <span class="op">=</span> <span class="ident">ChaChaPoly1305</span><span class="op">&lt;</span><span class="ident">XChaCha8</span>, <span class="ident">U24</span><span class="op">&gt;</span>;
+<span class="doccomment">/// XChaCha8Poly1305 (reduced round variant) Authenticated Encryption with Additional Data (AEAD).
+</span><span class="attribute">#[cfg(feature = <span class="string">&quot;xchacha20-reduced-round&quot;</span>)]
+#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;xchacha20-reduced-round&quot;</span>)))]
+</span><span class="kw">pub type </span>XChaCha8Poly1305 = ChaChaPoly1305&lt;XChaCha8, U24&gt;;
 
-<span class="doccomment">/// ChaCha12Poly1305 (reduced round variant) Authenticated Encryption with Additional Data (AEAD).</span>
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;chacha20-reduced-round&quot;</span>)]</span>
-<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">docsrs</span>, <span class="ident">doc</span>(<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;reduced-round&quot;</span>)))]</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">ChaCha12Poly1305</span> <span class="op">=</span> <span class="ident">ChaChaPoly1305</span><span class="op">&lt;</span><span class="ident">ChaCha12</span>, <span class="ident">U12</span><span class="op">&gt;</span>;
+<span class="doccomment">/// ChaCha12Poly1305 (reduced round variant) Authenticated Encryption with Additional Data (AEAD).
+</span><span class="attribute">#[cfg(feature = <span class="string">&quot;chacha20-reduced-round&quot;</span>)]
+#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;reduced-round&quot;</span>)))]
+</span><span class="kw">pub type </span>ChaCha12Poly1305 = ChaChaPoly1305&lt;ChaCha12, U12&gt;;
 
-<span class="doccomment">/// XChaCha12Poly1305 (reduced round variant) Authenticated Encryption with Additional Data (AEAD).</span>
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;xchacha20-reduced-round&quot;</span>)]</span>
-<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">docsrs</span>, <span class="ident">doc</span>(<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;xchacha20-reduced-round&quot;</span>)))]</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">XChaCha12Poly1305</span> <span class="op">=</span> <span class="ident">ChaChaPoly1305</span><span class="op">&lt;</span><span class="ident">XChaCha12</span>, <span class="ident">U24</span><span class="op">&gt;</span>;
+<span class="doccomment">/// XChaCha12Poly1305 (reduced round variant) Authenticated Encryption with Additional Data (AEAD).
+</span><span class="attribute">#[cfg(feature = <span class="string">&quot;xchacha20-reduced-round&quot;</span>)]
+#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;xchacha20-reduced-round&quot;</span>)))]
+</span><span class="kw">pub type </span>XChaCha12Poly1305 = ChaChaPoly1305&lt;XChaCha12, U24&gt;;
 
-<span class="doccomment">/// Generic ChaCha+Poly1305 Authenticated Encryption with Additional Data (AEAD) construction.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// See the [toplevel documentation](index.html) for a usage example.</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ChaChaPoly1305</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">N</span>: <span class="ident">ArrayLength</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">U12</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">NewCipher</span><span class="op">&lt;</span><span class="ident">KeySize</span> <span class="op">=</span> <span class="ident">U32</span>, <span class="ident">NonceSize</span> <span class="op">=</span> <span class="ident">N</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">StreamCipher</span> <span class="op">+</span> <span class="ident">StreamCipherSeek</span>,
+<span class="doccomment">/// Generic ChaCha+Poly1305 Authenticated Encryption with Additional Data (AEAD) construction.
+///
+/// See the [toplevel documentation](index.html) for a usage example.
+</span><span class="kw">pub struct </span>ChaChaPoly1305&lt;C, N: ArrayLength&lt;u8&gt; = U12&gt;
+<span class="kw">where
+    </span>C: NewCipher&lt;KeySize = U32, NonceSize = N&gt; + StreamCipher + StreamCipherSeek,
 {
-    <span class="doccomment">/// Secret key</span>
-    <span class="ident">key</span>: <span class="ident">GenericArray</span><span class="op">&lt;</span><span class="ident">u8</span>, <span class="ident">U32</span><span class="op">&gt;</span>,
+    <span class="doccomment">/// Secret key
+    </span>key: GenericArray&lt;u8, U32&gt;,
 
-    <span class="doccomment">/// ChaCha stream cipher</span>
-    <span class="ident">stream_cipher</span>: <span class="ident">PhantomData</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>,
+    <span class="doccomment">/// ChaCha stream cipher
+    </span>stream_cipher: PhantomData&lt;C&gt;,
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">N</span><span class="op">&gt;</span> <span class="ident">NewAead</span> <span class="kw">for</span> <span class="ident">ChaChaPoly1305</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">N</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">NewCipher</span><span class="op">&lt;</span><span class="ident">KeySize</span> <span class="op">=</span> <span class="ident">U32</span>, <span class="ident">NonceSize</span> <span class="op">=</span> <span class="ident">N</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">StreamCipher</span> <span class="op">+</span> <span class="ident">StreamCipherSeek</span>,
-    <span class="ident">N</span>: <span class="ident">ArrayLength</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
+<span class="kw">impl</span>&lt;C, N&gt; NewAead <span class="kw">for </span>ChaChaPoly1305&lt;C, N&gt;
+<span class="kw">where
+    </span>C: NewCipher&lt;KeySize = U32, NonceSize = N&gt; + StreamCipher + StreamCipherSeek,
+    N: ArrayLength&lt;u8&gt;,
 {
-    <span class="kw">type</span> <span class="ident">KeySize</span> <span class="op">=</span> <span class="ident">U32</span>;
+    <span class="kw">type </span>KeySize = U32;
 
-    <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="ident">Key</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">Self</span> {
-            <span class="ident">key</span>: <span class="kw-2">*</span><span class="ident">key</span>,
-            <span class="ident">stream_cipher</span>: <span class="ident">PhantomData</span>,
+    <span class="kw">fn </span>new(key: <span class="kw-2">&amp;</span>Key) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            key: <span class="kw-2">*</span>key,
+            stream_cipher: PhantomData,
         }
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">N</span><span class="op">&gt;</span> <span class="ident">AeadCore</span> <span class="kw">for</span> <span class="ident">ChaChaPoly1305</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">N</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">NewCipher</span><span class="op">&lt;</span><span class="ident">KeySize</span> <span class="op">=</span> <span class="ident">U32</span>, <span class="ident">NonceSize</span> <span class="op">=</span> <span class="ident">N</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">StreamCipher</span> <span class="op">+</span> <span class="ident">StreamCipherSeek</span>,
-    <span class="ident">N</span>: <span class="ident">ArrayLength</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
+<span class="kw">impl</span>&lt;C, N&gt; AeadCore <span class="kw">for </span>ChaChaPoly1305&lt;C, N&gt;
+<span class="kw">where
+    </span>C: NewCipher&lt;KeySize = U32, NonceSize = N&gt; + StreamCipher + StreamCipherSeek,
+    N: ArrayLength&lt;u8&gt;,
 {
-    <span class="kw">type</span> <span class="ident">NonceSize</span> <span class="op">=</span> <span class="ident">N</span>;
-    <span class="kw">type</span> <span class="ident">TagSize</span> <span class="op">=</span> <span class="ident">U16</span>;
-    <span class="kw">type</span> <span class="ident">CiphertextOverhead</span> <span class="op">=</span> <span class="ident">U0</span>;
+    <span class="kw">type </span>NonceSize = N;
+    <span class="kw">type </span>TagSize = U16;
+    <span class="kw">type </span>CiphertextOverhead = U0;
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">N</span><span class="op">&gt;</span> <span class="ident">AeadInPlace</span> <span class="kw">for</span> <span class="ident">ChaChaPoly1305</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">N</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">NewCipher</span><span class="op">&lt;</span><span class="ident">KeySize</span> <span class="op">=</span> <span class="ident">U32</span>, <span class="ident">NonceSize</span> <span class="op">=</span> <span class="ident">N</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">StreamCipher</span> <span class="op">+</span> <span class="ident">StreamCipherSeek</span>,
-    <span class="ident">N</span>: <span class="ident">ArrayLength</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
+<span class="kw">impl</span>&lt;C, N&gt; AeadInPlace <span class="kw">for </span>ChaChaPoly1305&lt;C, N&gt;
+<span class="kw">where
+    </span>C: NewCipher&lt;KeySize = U32, NonceSize = N&gt; + StreamCipher + StreamCipherSeek,
+    N: ArrayLength&lt;u8&gt;,
 {
-    <span class="kw">fn</span> <span class="ident">encrypt_in_place_detached</span>(
+    <span class="kw">fn </span>encrypt_in_place_detached(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">nonce</span>: <span class="kw-2">&amp;</span><span class="ident">aead::Nonce</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>,
-        <span class="ident">associated_data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
-        <span class="ident">buffer</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">u8</span>],
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Tag</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="ident">Cipher::new</span>(<span class="ident">C::new</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">key</span>, <span class="ident">nonce</span>)).<span class="ident">encrypt_in_place_detached</span>(<span class="ident">associated_data</span>, <span class="ident">buffer</span>)
+        nonce: <span class="kw-2">&amp;</span>aead::Nonce&lt;<span class="self">Self</span>&gt;,
+        associated_data: <span class="kw-2">&amp;</span>[u8],
+        buffer: <span class="kw-2">&amp;mut </span>[u8],
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Tag, Error&gt; {
+        Cipher::new(C::new(<span class="kw-2">&amp;</span><span class="self">self</span>.key, nonce)).encrypt_in_place_detached(associated_data, buffer)
     }
 
-    <span class="kw">fn</span> <span class="ident">decrypt_in_place_detached</span>(
+    <span class="kw">fn </span>decrypt_in_place_detached(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">nonce</span>: <span class="kw-2">&amp;</span><span class="ident">aead::Nonce</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>,
-        <span class="ident">associated_data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
-        <span class="ident">buffer</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">u8</span>],
-        <span class="ident">tag</span>: <span class="kw-2">&amp;</span><span class="ident">Tag</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="ident">Cipher::new</span>(<span class="ident">C::new</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">key</span>, <span class="ident">nonce</span>)).<span class="ident">decrypt_in_place_detached</span>(
-            <span class="ident">associated_data</span>,
-            <span class="ident">buffer</span>,
-            <span class="ident">tag</span>,
+        nonce: <span class="kw-2">&amp;</span>aead::Nonce&lt;<span class="self">Self</span>&gt;,
+        associated_data: <span class="kw-2">&amp;</span>[u8],
+        buffer: <span class="kw-2">&amp;mut </span>[u8],
+        tag: <span class="kw-2">&amp;</span>Tag,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
+        Cipher::new(C::new(<span class="kw-2">&amp;</span><span class="self">self</span>.key, nonce)).decrypt_in_place_detached(
+            associated_data,
+            buffer,
+            tag,
         )
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">N</span><span class="op">&gt;</span> <span class="ident">Clone</span> <span class="kw">for</span> <span class="ident">ChaChaPoly1305</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">N</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">NewCipher</span><span class="op">&lt;</span><span class="ident">KeySize</span> <span class="op">=</span> <span class="ident">U32</span>, <span class="ident">NonceSize</span> <span class="op">=</span> <span class="ident">N</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">StreamCipher</span> <span class="op">+</span> <span class="ident">StreamCipherSeek</span>,
-    <span class="ident">N</span>: <span class="ident">ArrayLength</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
+<span class="kw">impl</span>&lt;C, N&gt; Clone <span class="kw">for </span>ChaChaPoly1305&lt;C, N&gt;
+<span class="kw">where
+    </span>C: NewCipher&lt;KeySize = U32, NonceSize = N&gt; + StreamCipher + StreamCipherSeek,
+    N: ArrayLength&lt;u8&gt;,
 {
-    <span class="kw">fn</span> <span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">Self</span> {
-            <span class="ident">key</span>: <span class="self">self</span>.<span class="ident">key</span>,
-            <span class="ident">stream_cipher</span>: <span class="ident">PhantomData</span>,
+    <span class="kw">fn </span>clone(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            key: <span class="self">self</span>.key,
+            stream_cipher: PhantomData,
         }
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">N</span><span class="op">&gt;</span> <span class="ident">Drop</span> <span class="kw">for</span> <span class="ident">ChaChaPoly1305</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">N</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">NewCipher</span><span class="op">&lt;</span><span class="ident">KeySize</span> <span class="op">=</span> <span class="ident">U32</span>, <span class="ident">NonceSize</span> <span class="op">=</span> <span class="ident">N</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">StreamCipher</span> <span class="op">+</span> <span class="ident">StreamCipherSeek</span>,
-    <span class="ident">N</span>: <span class="ident">ArrayLength</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
+<span class="kw">impl</span>&lt;C, N&gt; Drop <span class="kw">for </span>ChaChaPoly1305&lt;C, N&gt;
+<span class="kw">where
+    </span>C: NewCipher&lt;KeySize = U32, NonceSize = N&gt; + StreamCipher + StreamCipherSeek,
+    N: ArrayLength&lt;u8&gt;,
 {
-    <span class="kw">fn</span> <span class="ident">drop</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
-        <span class="self">self</span>.<span class="ident">key</span>.<span class="ident">as_mut_slice</span>().<span class="ident">zeroize</span>();
+    <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="self">self</span>.key.as_mut_slice().zeroize();
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="chacha20poly1305" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="chacha20poly1305" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

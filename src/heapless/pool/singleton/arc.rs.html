@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/heapless-0.7.16/src/pool/singleton/arc.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>arc.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../../storage.js"></script><script defer src="../../../../source-script.js"></script><script defer src="../../../../source-files.js"></script><script defer src="../../../../main.js"></script><noscript><link rel="stylesheet" href="../../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../../heapless/index.html"><div class="logo-container"><img class="rust-logo" src="../../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../../heapless/index.html"><div class="logo-container"><img class="rust-logo" src="../../../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../../heapless/index.html"><img class="rust-logo" src="../../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/heapless-0.7.16/src/pool/singleton/arc.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>arc.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../../normalize.css"><link rel="stylesheet" href="../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../../ayu.css" disabled><link rel="stylesheet" href="../../../../dark.css" disabled><link rel="stylesheet" href="../../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../../storage.js"></script><script defer src="../../../../source-script.js"></script><script defer src="../../../../source-files.js"></script><script defer src="../../../../main.js"></script><noscript><link rel="stylesheet" href="../../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../../heapless/index.html"><div class="logo-container"><img class="rust-logo" src="../../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../../heapless/index.html"><div class="logo-container"><img class="rust-logo" src="../../../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../../heapless/index.html"><img class="rust-logo" src="../../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -390,397 +390,397 @@
 <span id="390">390</span>
 <span id="391">391</span>
 <span id="392">392</span>
-</pre><pre class="rust"><code><span class="doccomment">//! Like [`std::sync::Arc`](https://doc.rust-lang.org/std/sync/struct.Arc.html) but backed by a</span>
-<span class="doccomment">//! memory [`Pool`](trait.Pool.html) rather than `#[global_allocator]`</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! Note that the same limitations that apply to [&quot;Box&quot; pool] also apply to the &quot;Arc&quot; pool.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! [&quot;Box&quot; pool]: ../../index.html</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! # Examples</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ``` ignore</span>
-<span class="doccomment">//! use heapless::{arc_pool, Arc};</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! pub struct BigStruct { // &lt;- does NOT implement Clone</span>
-<span class="doccomment">//!     data: [u8; 128],</span>
-<span class="doccomment">//!     // ..</span>
-<span class="doccomment">//! }</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! // declare a memory pool</span>
-<span class="doccomment">//! arc_pool!(P: BigStruct);</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! #[cortex_m_rt::entry]</span>
-<span class="doccomment">//! fn main() -&gt; ! {</span>
-<span class="doccomment">//!     static mut MEMORY: [u8; 1024] = [0; 1024];</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//!     // give some static memory to the pool</span>
-<span class="doccomment">//!     P::grow(MEMORY);</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//!     let x: Arc&lt;P&gt; = P::alloc(BigStruct::new()).ok().expect(&quot;OOM&quot;);</span>
-<span class="doccomment">//!     //         ^ NOTE: this is the Pool type, not the data type</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//!     // cloning is cheap; it increases the refcount</span>
-<span class="doccomment">//!     let y = x.clone();</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//!     // same data address</span>
-<span class="doccomment">//!     assert_eq!(&amp;*x as *const _, &amp;*y as *const _);</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//!     // auto-deref</span>
-<span class="doccomment">//!     let data: &amp;[u8] = &amp;x.data;</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//!     // decrease refcount</span>
-<span class="doccomment">//!     drop(x);</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//!     // refcount decreased to 0; memory is returned to the pool</span>
-<span class="doccomment">//!     drop(y);</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//!     // ..</span>
-<span class="doccomment">//! }</span>
-<span class="doccomment">//! ```</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! The `grow_exact` API is also available on the &quot;Arc pool&quot;. It requires using</span>
-<span class="doccomment">//! `Node&lt;ArcInner&lt;Type&gt;&gt;` as the array element type. Example below:</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ``` ignore</span>
-<span class="doccomment">//! use heapless::pool::{singleton::arc::ArcInner, Node};</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! pub struct BigStruct { /* .. */ }</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! arc_pool!(P: BigStruct);</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! #[cortex_m_rt::entry]</span>
-<span class="doccomment">//! fn main() -&gt; ! {</span>
-<span class="doccomment">//!     static mut MEMORY: MaybeUninit&lt;[Node&lt;ArcInner&lt;BigStruct&gt;&gt;; 2]&gt; = MaybeUninit::uninit();</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//!     P::grow_exact(MEMORY);</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//!     // 2 allocations are guaranteed to work</span>
-<span class="doccomment">//!     let x = P::alloc(BigStruct::new()).ok().expect(&quot;OOM&quot;);</span>
-<span class="doccomment">//!     let y = P::alloc(BigStruct::new()).ok().expect(&quot;OOM&quot;);</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//!     // ..</span>
-<span class="doccomment">//! }</span>
-<span class="doccomment">//! ```</span>
+</pre><pre class="rust"><code><span class="doccomment">//! Like [`std::sync::Arc`](https://doc.rust-lang.org/std/sync/struct.Arc.html) but backed by a
+//! memory [`Pool`](trait.Pool.html) rather than `#[global_allocator]`
+//!
+//! Note that the same limitations that apply to [&quot;Box&quot; pool] also apply to the &quot;Arc&quot; pool.
+//!
+//! [&quot;Box&quot; pool]: ../../index.html
+//!
+//! # Examples
+//!
+//! ``` ignore
+//! use heapless::{arc_pool, Arc};
+//!
+//! pub struct BigStruct { // &lt;- does NOT implement Clone
+//!     data: [u8; 128],
+//!     // ..
+//! }
+//!
+//! // declare a memory pool
+//! arc_pool!(P: BigStruct);
+//!
+//!
+//! #[cortex_m_rt::entry]
+//! fn main() -&gt; ! {
+//!     static mut MEMORY: [u8; 1024] = [0; 1024];
+//!
+//!     // give some static memory to the pool
+//!     P::grow(MEMORY);
+//!
+//!     let x: Arc&lt;P&gt; = P::alloc(BigStruct::new()).ok().expect(&quot;OOM&quot;);
+//!     //         ^ NOTE: this is the Pool type, not the data type
+//!
+//!     // cloning is cheap; it increases the refcount
+//!     let y = x.clone();
+//!
+//!     // same data address
+//!     assert_eq!(&amp;*x as *const _, &amp;*y as *const _);
+//!
+//!     // auto-deref
+//!     let data: &amp;[u8] = &amp;x.data;
+//!
+//!     // decrease refcount
+//!     drop(x);
+//!
+//!     // refcount decreased to 0; memory is returned to the pool
+//!     drop(y);
+//!
+//!     // ..
+//! }
+//! ```
+//!
+//! The `grow_exact` API is also available on the &quot;Arc pool&quot;. It requires using
+//! `Node&lt;ArcInner&lt;Type&gt;&gt;` as the array element type. Example below:
+//!
+//! ``` ignore
+//! use heapless::pool::{singleton::arc::ArcInner, Node};
+//!
+//! pub struct BigStruct { /* .. */ }
+//!
+//! arc_pool!(P: BigStruct);
+//!
+//! #[cortex_m_rt::entry]
+//! fn main() -&gt; ! {
+//!     static mut MEMORY: MaybeUninit&lt;[Node&lt;ArcInner&lt;BigStruct&gt;&gt;; 2]&gt; = MaybeUninit::uninit();
+//!
+//!     P::grow_exact(MEMORY);
+//!
+//!     // 2 allocations are guaranteed to work
+//!     let x = P::alloc(BigStruct::new()).ok().expect(&quot;OOM&quot;);
+//!     let y = P::alloc(BigStruct::new()).ok().expect(&quot;OOM&quot;);
+//!
+//!     // ..
+//! }
+//! ```
 
-<span class="kw">use</span> <span class="ident">core</span>::{
-    <span class="ident">cmp</span>, <span class="ident">fmt</span>,
-    <span class="ident">hash</span>::{<span class="ident">Hash</span>, <span class="ident">Hasher</span>},
-    <span class="ident">marker::PhantomData</span>,
-    <span class="ident">ops::Deref</span>,
-    <span class="ident">ptr</span>,
-    <span class="ident">sync::atomic</span>,
+</span><span class="kw">use </span>core::{
+    cmp, fmt,
+    hash::{Hash, Hasher},
+    marker::PhantomData,
+    ops::Deref,
+    ptr,
+    sync::atomic,
 };
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">cas_atomic_polyfill</span>)]</span>
-<span class="kw">use</span> <span class="ident">atomic_polyfill</span>::{<span class="ident">AtomicUsize</span>, <span class="ident">Ordering</span>};
+<span class="attribute">#[cfg(cas_atomic_polyfill)]
+</span><span class="kw">use </span>atomic_polyfill::{AtomicUsize, Ordering};
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">cas_atomic_polyfill</span>))]</span>
-<span class="kw">use</span> <span class="ident">core::sync::atomic</span>::{<span class="ident">AtomicUsize</span>, <span class="ident">Ordering</span>};
+<span class="attribute">#[cfg(not(cas_atomic_polyfill))]
+</span><span class="kw">use </span>core::sync::atomic::{AtomicUsize, Ordering};
 
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::pool</span>::{<span class="self">self</span>, <span class="ident">stack::Ptr</span>, <span class="ident">Node</span>};
+<span class="kw">use </span><span class="kw">crate</span>::pool::{<span class="self">self</span>, stack::Ptr, Node};
 
-<span class="doccomment">/// Instantiates a pool of Arc pointers as a global singleton</span>
-<span class="comment">// NOTE(any(test)) makes testing easier (no need to enable Cargo features for testing)</span>
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(
-    <span class="ident">armv6m</span>,
-    <span class="ident">armv7a</span>,
-    <span class="ident">armv7r</span>,
-    <span class="ident">armv7m</span>,
-    <span class="ident">armv8m_main</span>,
-    <span class="ident">all</span>(
-        <span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>),
-        <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;x86-sync-pool&quot;</span>
-    ),
-    <span class="ident">test</span>
-))]</span>
-<span class="attribute">#[<span class="ident">macro_export</span>]</span>
-<span class="macro">macro_rules!</span> <span class="ident">arc_pool</span> {
-    ($(<span class="attribute">#[$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">attr</span>:<span class="ident">tt</span>)<span class="kw-2">*</span>]</span>)<span class="op">*</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ident</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span>:<span class="ident">ty</span>) =&gt; {
-        <span class="kw">pub</span> <span class="kw">struct</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ident</span>;
+<span class="doccomment">/// Instantiates a pool of Arc pointers as a global singleton
+</span><span class="comment">// NOTE(any(test)) makes testing easier (no need to enable Cargo features for testing)
+</span><span class="attribute">#[cfg(any(
+    armv6m,
+    armv7a,
+    armv7r,
+    armv7m,
+    armv8m_main,
+    all(
+        any(target_arch = <span class="string">&quot;x86_64&quot;</span>, target_arch = <span class="string">&quot;x86&quot;</span>),
+        feature = <span class="string">&quot;x86-sync-pool&quot;
+    </span>),
+    test
+))]
+#[macro_export]
+</span><span class="macro">macro_rules! </span>arc_pool {
+    ($(<span class="attribute">#[$(<span class="macro-nonterminal">$attr</span>:tt)<span class="kw-2">*</span>]</span>)* <span class="macro-nonterminal">$ident</span>:ident: <span class="macro-nonterminal">$ty</span>:ty) =&gt; {
+        <span class="kw">pub struct </span><span class="macro-nonterminal">$ident</span>;
 
-        <span class="kw">impl</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::pool::singleton::arc::Pool</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ident</span> {
-            <span class="kw">type</span> <span class="ident">Data</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span>;
+        <span class="kw">impl </span><span class="macro-nonterminal">$crate::pool::singleton::arc::Pool </span><span class="kw">for </span><span class="macro-nonterminal">$ident </span>{
+            <span class="kw">type </span>Data = <span class="macro-nonterminal">$ty</span>;
 
-            <span class="kw">fn</span> <span class="ident">ptr</span>() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::pool::Pool</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::pool::singleton::arc::ArcInner</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-                $(<span class="attribute">#[$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">attr</span>)<span class="kw-2">*</span>]</span>)<span class="op">*</span>
-                <span class="kw">static</span> <span class="ident">POOL</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::pool::Pool</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::pool::singleton::arc::ArcInner</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span>
-                    <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::pool::Pool::new</span>();
+            <span class="kw">fn </span>ptr() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="macro-nonterminal">$crate::pool::Pool</span>&lt;<span class="macro-nonterminal">$crate::pool::singleton::arc::ArcInner</span>&lt;<span class="macro-nonterminal">$ty</span>&gt;&gt; {
+                $(<span class="attribute">#[$(<span class="macro-nonterminal">$attr</span>)<span class="kw-2">*</span>]</span>)*
+                <span class="kw">static </span>POOL: <span class="macro-nonterminal">$crate::pool::Pool</span>&lt;<span class="macro-nonterminal">$crate::pool::singleton::arc::ArcInner</span>&lt;<span class="macro-nonterminal">$ty</span>&gt;&gt; =
+                    <span class="macro-nonterminal">$crate::pool::Pool::new</span>();
 
-                <span class="kw-2">&amp;</span><span class="ident">POOL</span>
+                <span class="kw-2">&amp;</span>POOL
             }
         }
 
-        <span class="kw">impl</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ident</span> {
-            <span class="doccomment">/// Allocates a new `Arc` and writes `data` to it</span>
-            <span class="doccomment">///</span>
-            <span class="doccomment">/// Returns an `Err`or if the backing memory pool is empty</span>
-            <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">alloc</span>(<span class="ident">data</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::Arc</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span><span class="op">&gt;</span>
-            <span class="kw">where</span>
-                <span class="self">Self</span>: <span class="ident">Sized</span>,
+        <span class="kw">impl </span><span class="macro-nonterminal">$ident </span>{
+            <span class="doccomment">/// Allocates a new `Arc` and writes `data` to it
+            ///
+            /// Returns an `Err`or if the backing memory pool is empty
+            </span><span class="kw">pub fn </span>alloc(data: <span class="macro-nonterminal">$ty</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="macro-nonterminal">$crate::Arc</span>&lt;<span class="self">Self</span>&gt;, <span class="macro-nonterminal">$ty</span>&gt;
+            <span class="kw">where
+                </span><span class="self">Self</span>: Sized,
             {
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::Arc::new</span>(<span class="ident">data</span>)
+                <span class="macro-nonterminal">$crate::Arc::new</span>(data)
             }
 
-            <span class="doccomment">/// Increases the capacity of the pool</span>
-            <span class="doccomment">///</span>
-            <span class="doccomment">/// This method might *not* fully utilize the given memory block due to alignment requirements</span>
-            <span class="doccomment">///</span>
-            <span class="doccomment">/// This method returns the number of *new* blocks that can be allocated.</span>
-            <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">grow</span>(<span class="ident">memory</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="kw-2">mut</span> [<span class="ident">u8</span>]) -&gt; <span class="ident">usize</span> {
-                <span class="op">&lt;</span><span class="self">Self</span> <span class="kw">as</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::pool::singleton::arc::Pool</span><span class="op">&gt;</span><span class="ident">::ptr</span>().<span class="ident">grow</span>(<span class="ident">memory</span>)
+            <span class="doccomment">/// Increases the capacity of the pool
+            ///
+            /// This method might *not* fully utilize the given memory block due to alignment requirements
+            ///
+            /// This method returns the number of *new* blocks that can be allocated.
+            </span><span class="kw">pub fn </span>grow(memory: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw-2">mut </span>[u8]) -&gt; usize {
+                &lt;<span class="self">Self </span><span class="kw">as </span><span class="macro-nonterminal">$crate::pool::singleton::arc::Pool</span>&gt;::ptr().grow(memory)
             }
 
-            <span class="doccomment">/// Increases the capacity of the pool</span>
-            <span class="doccomment">///</span>
-            <span class="doccomment">/// Unlike `grow`, this method fully utilizes the given memory block</span>
-            <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">grow_exact</span><span class="op">&lt;</span><span class="ident">A</span><span class="op">&gt;</span>(<span class="ident">memory</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="kw-2">mut</span> <span class="ident">MaybeUninit</span><span class="op">&lt;</span><span class="ident">A</span><span class="op">&gt;</span>) -&gt; <span class="ident">usize</span>
-            <span class="kw">where</span>
-                <span class="ident">A</span>: <span class="ident">AsMut</span><span class="op">&lt;</span>[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::pool::Node</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::pool::singleton::arc::ArcInner</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span><span class="op">&gt;</span><span class="op">&gt;</span>]<span class="op">&gt;</span>,
+            <span class="doccomment">/// Increases the capacity of the pool
+            ///
+            /// Unlike `grow`, this method fully utilizes the given memory block
+            </span><span class="kw">pub fn </span>grow_exact&lt;A&gt;(memory: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw-2">mut </span>MaybeUninit&lt;A&gt;) -&gt; usize
+            <span class="kw">where
+                </span>A: AsMut&lt;[<span class="macro-nonterminal">$crate::pool::Node</span>&lt;<span class="macro-nonterminal">$crate::pool::singleton::arc::ArcInner</span>&lt;<span class="macro-nonterminal">$ty</span>&gt;&gt;]&gt;,
             {
-                <span class="op">&lt;</span><span class="self">Self</span> <span class="kw">as</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::pool::singleton::arc::Pool</span><span class="op">&gt;</span><span class="ident">::ptr</span>().<span class="ident">grow_exact</span>(<span class="ident">memory</span>)
+                &lt;<span class="self">Self </span><span class="kw">as </span><span class="macro-nonterminal">$crate::pool::singleton::arc::Pool</span>&gt;::ptr().grow_exact(memory)
             }
         }
     };
 }
 
-<span class="doccomment">/// Pool of Arc pointers</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Pool</span> {
-    <span class="doccomment">/// The data behind the Arc pointer</span>
-    <span class="kw">type</span> <span class="ident">Data</span>: <span class="lifetime">&#39;static</span>;
+<span class="doccomment">/// Pool of Arc pointers
+</span><span class="kw">pub trait </span>Pool {
+    <span class="doccomment">/// The data behind the Arc pointer
+    </span><span class="kw">type </span>Data: <span class="lifetime">&#39;static</span>;
 
-    <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">ptr</span>() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">pool::Pool</span><span class="op">&lt;</span><span class="ident">ArcInner</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Data</span><span class="op">&gt;</span><span class="op">&gt;</span>;
+    <span class="attribute">#[doc(hidden)]
+    </span><span class="kw">fn </span>ptr() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>pool::Pool&lt;ArcInner&lt;<span class="self">Self</span>::Data&gt;&gt;;
 }
 
-<span class="comment">// mostly a verbatim copy of liballoc(/src/sync.rs) as of v1.54.0 minus the `Weak` API</span>
-<span class="comment">// anything that diverges has been marked with `XXX`</span>
+<span class="comment">// mostly a verbatim copy of liballoc(/src/sync.rs) as of v1.54.0 minus the `Weak` API
+// anything that diverges has been marked with `XXX`
 
-<span class="doccomment">/// `std::sync::Arc` but backed by a memory [`Pool`] rather than `#[global_allocator]`</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// [`Pool`]: trait.Pool.html</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// An example and more details can be found in the [module level documentation](index.html).</span>
-<span class="comment">// XXX `Pool::Data` is not `?Sized` -- `Unsize` coercions cannot be implemented on stable</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">P</span>: <span class="ident">Pool</span>,
+</span><span class="doccomment">/// `std::sync::Arc` but backed by a memory [`Pool`] rather than `#[global_allocator]`
+///
+/// [`Pool`]: trait.Pool.html
+///
+/// An example and more details can be found in the [module level documentation](index.html).
+</span><span class="comment">// XXX `Pool::Data` is not `?Sized` -- `Unsize` coercions cannot be implemented on stable
+</span><span class="kw">pub struct </span>Arc&lt;P&gt;
+<span class="kw">where
+    </span>P: Pool,
 {
-    <span class="ident">phantom</span>: <span class="ident">PhantomData</span><span class="op">&lt;</span><span class="ident">ArcInner</span><span class="op">&lt;</span><span class="ident">P::Data</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="ident">ptr</span>: <span class="ident">Ptr</span><span class="op">&lt;</span><span class="ident">Node</span><span class="op">&lt;</span><span class="ident">ArcInner</span><span class="op">&lt;</span><span class="ident">P::Data</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="ident">pool</span>: <span class="ident">PhantomData</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>,
+    phantom: PhantomData&lt;ArcInner&lt;P::Data&gt;&gt;,
+    ptr: Ptr&lt;Node&lt;ArcInner&lt;P::Data&gt;&gt;&gt;,
+    pool: PhantomData&lt;P&gt;,
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">P</span>: <span class="ident">Pool</span>,
+<span class="kw">impl</span>&lt;P&gt; Arc&lt;P&gt;
+<span class="kw">where
+    </span>P: Pool,
 {
-    <span class="doccomment">/// Constructs a new `Arc`</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// Returns an `Err`or if the backing memory pool is empty</span>
-    <span class="comment">// XXX original API is &quot;infallible&quot;</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">data</span>: <span class="ident">P::Data</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">P::Data</span><span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">node</span>) <span class="op">=</span> <span class="ident">P::ptr</span>().<span class="ident">stack</span>.<span class="ident">try_pop</span>() {
-            <span class="kw">unsafe</span> {
-                <span class="ident">ptr::write</span>(
-                    <span class="ident">node</span>.<span class="ident">as_ref</span>().<span class="ident">data</span>.<span class="ident">get</span>(),
-                    <span class="ident">ArcInner</span> {
-                        <span class="ident">strong</span>: <span class="ident">AtomicUsize::new</span>(<span class="number">1</span>),
-                        <span class="ident">data</span>,
+    <span class="doccomment">/// Constructs a new `Arc`
+    ///
+    /// Returns an `Err`or if the backing memory pool is empty
+    </span><span class="comment">// XXX original API is &quot;infallible&quot;
+    </span><span class="kw">pub fn </span>new(data: P::Data) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, P::Data&gt; {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(node) = P::ptr().stack.try_pop() {
+            <span class="kw">unsafe </span>{
+                ptr::write(
+                    node.as_ref().data.get(),
+                    ArcInner {
+                        strong: AtomicUsize::new(<span class="number">1</span>),
+                        data,
                     },
                 )
             }
 
-            <span class="prelude-val">Ok</span>(<span class="self">Self</span> {
-                <span class="ident">phantom</span>: <span class="ident">PhantomData</span>,
-                <span class="ident">pool</span>: <span class="ident">PhantomData</span>,
-                <span class="ident">ptr</span>: <span class="ident">node</span>,
+            <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
+                phantom: PhantomData,
+                pool: PhantomData,
+                ptr: node,
             })
-        } <span class="kw">else</span> {
-            <span class="prelude-val">Err</span>(<span class="ident">data</span>)
+        } <span class="kw">else </span>{
+            <span class="prelude-val">Err</span>(data)
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">inner</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">ArcInner</span><span class="op">&lt;</span><span class="ident">P::Data</span><span class="op">&gt;</span> {
-        <span class="kw">unsafe</span> { <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="self">self</span>.<span class="ident">ptr</span>.<span class="ident">as_ref</span>().<span class="ident">data</span>.<span class="ident">get</span>() }
+    <span class="kw">fn </span>inner(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>ArcInner&lt;P::Data&gt; {
+        <span class="kw">unsafe </span>{ <span class="kw-2">&amp;*</span><span class="self">self</span>.ptr.as_ref().data.get() }
     }
 
-    <span class="kw">fn</span> <span class="ident">from_inner</span>(<span class="ident">ptr</span>: <span class="ident">Ptr</span><span class="op">&lt;</span><span class="ident">Node</span><span class="op">&lt;</span><span class="ident">ArcInner</span><span class="op">&lt;</span><span class="ident">P::Data</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">Self</span> {
-            <span class="ident">phantom</span>: <span class="ident">PhantomData</span>,
-            <span class="ident">pool</span>: <span class="ident">PhantomData</span>,
-            <span class="ident">ptr</span>,
+    <span class="kw">fn </span>from_inner(ptr: Ptr&lt;Node&lt;ArcInner&lt;P::Data&gt;&gt;&gt;) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            phantom: PhantomData,
+            pool: PhantomData,
+            ptr,
         }
     }
 
-    <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">get_mut_unchecked</span>(<span class="ident">this</span>: <span class="kw-2">&amp;mut</span> <span class="self">Self</span>) -&gt; <span class="kw-2">&amp;mut</span> <span class="ident">P::Data</span> {
-        <span class="kw-2">&amp;mut</span> (<span class="kw-2">*</span><span class="ident">this</span>.<span class="ident">ptr</span>.<span class="ident">as_ref</span>().<span class="ident">data</span>.<span class="ident">get</span>()).<span class="ident">data</span>
-        <span class="comment">// &amp;mut (*this.ptr.as_ptr()).data</span>
-    }
+    <span class="kw">unsafe fn </span>get_mut_unchecked(this: <span class="kw-2">&amp;mut </span><span class="self">Self</span>) -&gt; <span class="kw-2">&amp;mut </span>P::Data {
+        <span class="kw-2">&amp;mut </span>(<span class="kw-2">*</span>this.ptr.as_ref().data.get()).data
+        <span class="comment">// &amp;mut (*this.ptr.as_ptr()).data
+    </span>}
 
-    <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">never</span>)]</span>
-    <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">drop_slow</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
-        <span class="comment">// run `P::Data`&#39;s destructor</span>
-        <span class="ident">ptr::drop_in_place</span>(<span class="ident"><span class="self">Self</span>::get_mut_unchecked</span>(<span class="self">self</span>));
+    <span class="attribute">#[inline(never)]
+    </span><span class="kw">unsafe fn </span>drop_slow(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="comment">// run `P::Data`&#39;s destructor
+        </span>ptr::drop_in_place(<span class="self">Self</span>::get_mut_unchecked(<span class="self">self</span>));
 
-        <span class="comment">// XXX memory pool instead of `#[global_allocator]`</span>
-        <span class="comment">// return memory to pool</span>
-        <span class="ident">P::ptr</span>().<span class="ident">stack</span>.<span class="ident">push</span>(<span class="self">self</span>.<span class="ident">ptr</span>);
-    }
-}
-
-<span class="kw">const</span> <span class="ident">MAX_REFCOUNT</span>: <span class="ident">usize</span> <span class="op">=</span> (<span class="ident">isize::MAX</span>) <span class="kw">as</span> <span class="ident">usize</span>;
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">P::Data</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">P</span>: <span class="ident">Pool</span>,
-{
-    <span class="kw">fn</span> <span class="ident">as_ref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">P::Data</span> {
-        <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="kw-2">*</span><span class="self">self</span>
+        <span class="comment">// XXX memory pool instead of `#[global_allocator]`
+        // return memory to pool
+        </span>P::ptr().stack.push(<span class="self">self</span>.ptr);
     }
 }
 
-<span class="comment">// XXX no `Borrow` implementation due to &#39;conflicting implementations of trait&#39; error</span>
+<span class="kw">const </span>MAX_REFCOUNT: usize = (isize::MAX) <span class="kw">as </span>usize;
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> <span class="ident">Clone</span> <span class="kw">for</span> <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">P</span>: <span class="ident">Pool</span>,
+<span class="kw">impl</span>&lt;P&gt; AsRef&lt;P::Data&gt; <span class="kw">for </span>Arc&lt;P&gt;
+<span class="kw">where
+    </span>P: Pool,
 {
-    <span class="kw">fn</span> <span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="ident">old_size</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">inner</span>().<span class="ident">strong</span>.<span class="ident">fetch_add</span>(<span class="number">1</span>, <span class="ident">Ordering::Relaxed</span>);
+    <span class="kw">fn </span>as_ref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>P::Data {
+        <span class="kw-2">&amp;**</span><span class="self">self
+    </span>}
+}
 
-        <span class="kw">if</span> <span class="ident">old_size</span> <span class="op">&gt;</span> <span class="ident">MAX_REFCOUNT</span> {
-            <span class="comment">// XXX original code calls `intrinsics::abort` which is unstable API</span>
-            <span class="macro">panic!</span>();
+<span class="comment">// XXX no `Borrow` implementation due to &#39;conflicting implementations of trait&#39; error
+
+</span><span class="kw">impl</span>&lt;P&gt; Clone <span class="kw">for </span>Arc&lt;P&gt;
+<span class="kw">where
+    </span>P: Pool,
+{
+    <span class="kw">fn </span>clone(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>old_size = <span class="self">self</span>.inner().strong.fetch_add(<span class="number">1</span>, Ordering::Relaxed);
+
+        <span class="kw">if </span>old_size &gt; MAX_REFCOUNT {
+            <span class="comment">// XXX original code calls `intrinsics::abort` which is unstable API
+            </span><span class="macro">panic!</span>();
         }
 
-        <span class="ident"><span class="self">Self</span>::from_inner</span>(<span class="self">self</span>.<span class="ident">ptr</span>)
+        <span class="self">Self</span>::from_inner(<span class="self">self</span>.ptr)
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> <span class="ident">fmt::Debug</span> <span class="kw">for</span> <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">P</span>: <span class="ident">Pool</span>,
-    <span class="ident">P::Data</span>: <span class="ident">fmt::Debug</span>,
+<span class="kw">impl</span>&lt;P&gt; fmt::Debug <span class="kw">for </span>Arc&lt;P&gt;
+<span class="kw">where
+    </span>P: Pool,
+    P::Data: fmt::Debug,
 {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">fmt::Result</span> {
-        <span class="ident">fmt::Debug::fmt</span>(<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="kw-2">*</span><span class="self">self</span>, <span class="ident">f</span>)
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+        fmt::Debug::fmt(<span class="kw-2">&amp;**</span><span class="self">self</span>, f)
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> <span class="ident">Deref</span> <span class="kw">for</span> <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">P</span>: <span class="ident">Pool</span>,
+<span class="kw">impl</span>&lt;P&gt; Deref <span class="kw">for </span>Arc&lt;P&gt;
+<span class="kw">where
+    </span>P: Pool,
 {
-    <span class="kw">type</span> <span class="ident">Target</span> <span class="op">=</span> <span class="ident">P::Data</span>;
+    <span class="kw">type </span>Target = P::Data;
 
-    <span class="kw">fn</span> <span class="ident">deref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">P::Data</span> {
-        <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">inner</span>().<span class="ident">data</span>
+    <span class="kw">fn </span>deref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>P::Data {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.inner().data
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> <span class="ident">fmt::Display</span> <span class="kw">for</span> <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">P</span>: <span class="ident">Pool</span>,
-    <span class="ident">P::Data</span>: <span class="ident">fmt::Display</span>,
+<span class="kw">impl</span>&lt;P&gt; fmt::Display <span class="kw">for </span>Arc&lt;P&gt;
+<span class="kw">where
+    </span>P: Pool,
+    P::Data: fmt::Display,
 {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">fmt::Result</span> {
-        <span class="ident">fmt::Display::fmt</span>(<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="kw-2">*</span><span class="self">self</span>, <span class="ident">f</span>)
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+        fmt::Display::fmt(<span class="kw-2">&amp;**</span><span class="self">self</span>, f)
     }
 }
 
-<span class="comment">// XXX original uses `#[may_dangle]` which is an unstable language feature</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> <span class="ident">Drop</span> <span class="kw">for</span> <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">P</span>: <span class="ident">Pool</span>,
+<span class="comment">// XXX original uses `#[may_dangle]` which is an unstable language feature
+</span><span class="kw">impl</span>&lt;P&gt; Drop <span class="kw">for </span>Arc&lt;P&gt;
+<span class="kw">where
+    </span>P: Pool,
 {
-    <span class="kw">fn</span> <span class="ident">drop</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">inner</span>().<span class="ident">strong</span>.<span class="ident">fetch_sub</span>(<span class="number">1</span>, <span class="ident">Ordering::Release</span>) <span class="op">!</span><span class="op">=</span> <span class="number">1</span> {
+    <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="kw">if </span><span class="self">self</span>.inner().strong.fetch_sub(<span class="number">1</span>, Ordering::Release) != <span class="number">1 </span>{
             <span class="kw">return</span>;
         }
 
-        <span class="ident">atomic::fence</span>(<span class="ident">Ordering::Acquire</span>);
+        atomic::fence(Ordering::Acquire);
 
-        <span class="kw">unsafe</span> {
-            <span class="self">self</span>.<span class="ident">drop_slow</span>();
+        <span class="kw">unsafe </span>{
+            <span class="self">self</span>.drop_slow();
         }
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> <span class="ident">Eq</span> <span class="kw">for</span> <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">P</span>: <span class="ident">Pool</span>,
-    <span class="ident">P::Data</span>: <span class="ident">Eq</span>,
+<span class="kw">impl</span>&lt;P&gt; Eq <span class="kw">for </span>Arc&lt;P&gt;
+<span class="kw">where
+    </span>P: Pool,
+    P::Data: Eq,
 {
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> <span class="ident">Hash</span> <span class="kw">for</span> <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">P</span>: <span class="ident">Pool</span>,
-    <span class="ident">P::Data</span>: <span class="ident">Hash</span>,
+<span class="kw">impl</span>&lt;P&gt; Hash <span class="kw">for </span>Arc&lt;P&gt;
+<span class="kw">where
+    </span>P: Pool,
+    P::Data: Hash,
 {
-    <span class="kw">fn</span> <span class="ident">hash</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">state</span>: <span class="kw-2">&amp;mut</span> <span class="ident">H</span>)
-    <span class="kw">where</span>
-        <span class="ident">H</span>: <span class="ident">Hasher</span>,
+    <span class="kw">fn </span>hash&lt;H&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, state: <span class="kw-2">&amp;mut </span>H)
+    <span class="kw">where
+        </span>H: Hasher,
     {
-        (<span class="kw-2">*</span><span class="kw-2">*</span><span class="self">self</span>).<span class="ident">hash</span>(<span class="ident">state</span>)
+        (<span class="kw-2">**</span><span class="self">self</span>).hash(state)
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> <span class="ident">Ord</span> <span class="kw">for</span> <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">P</span>: <span class="ident">Pool</span>,
-    <span class="ident">P::Data</span>: <span class="ident">Ord</span>,
+<span class="kw">impl</span>&lt;P&gt; Ord <span class="kw">for </span>Arc&lt;P&gt;
+<span class="kw">where
+    </span>P: Pool,
+    P::Data: Ord,
 {
-    <span class="kw">fn</span> <span class="ident">cmp</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="ident">cmp::Ordering</span> {
-        (<span class="kw-2">*</span><span class="kw-2">*</span><span class="self">self</span>).<span class="ident">cmp</span>(<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">other</span>)
+    <span class="kw">fn </span>cmp(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; cmp::Ordering {
+        (<span class="kw-2">**</span><span class="self">self</span>).cmp(<span class="kw-2">&amp;**</span>other)
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> <span class="ident">PartialEq</span> <span class="kw">for</span> <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">P</span>: <span class="ident">Pool</span>,
-    <span class="ident">P::Data</span>: <span class="ident">PartialEq</span>,
+<span class="kw">impl</span>&lt;P&gt; PartialEq <span class="kw">for </span>Arc&lt;P&gt;
+<span class="kw">where
+    </span>P: Pool,
+    P::Data: PartialEq,
 {
-    <span class="kw">fn</span> <span class="ident">eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="ident">bool</span> {
-        <span class="comment">// XXX missing pointer equality specialization, which uses an unstable language feature</span>
-        (<span class="kw-2">*</span><span class="kw-2">*</span><span class="self">self</span>).<span class="ident">eq</span>(<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">other</span>)
+    <span class="kw">fn </span>eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; bool {
+        <span class="comment">// XXX missing pointer equality specialization, which uses an unstable language feature
+        </span>(<span class="kw-2">**</span><span class="self">self</span>).eq(<span class="kw-2">&amp;**</span>other)
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> <span class="ident">PartialOrd</span> <span class="kw">for</span> <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">P</span>: <span class="ident">Pool</span>,
-    <span class="ident">P::Data</span>: <span class="ident">PartialOrd</span>,
+<span class="kw">impl</span>&lt;P&gt; PartialOrd <span class="kw">for </span>Arc&lt;P&gt;
+<span class="kw">where
+    </span>P: Pool,
+    P::Data: PartialOrd,
 {
-    <span class="kw">fn</span> <span class="ident">partial_cmp</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">cmp::Ordering</span><span class="op">&gt;</span> {
-        (<span class="kw-2">*</span><span class="kw-2">*</span><span class="self">self</span>).<span class="ident">partial_cmp</span>(<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">other</span>)
+    <span class="kw">fn </span>partial_cmp(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;cmp::Ordering&gt; {
+        (<span class="kw-2">**</span><span class="self">self</span>).partial_cmp(<span class="kw-2">&amp;**</span>other)
     }
 }
 
-<span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> <span class="ident">Send</span> <span class="kw">for</span> <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">P</span>: <span class="ident">Pool</span>,
-    <span class="ident">P::Data</span>: <span class="ident">Sync</span> <span class="op">+</span> <span class="ident">Send</span>,
+<span class="kw">unsafe impl</span>&lt;P&gt; Send <span class="kw">for </span>Arc&lt;P&gt;
+<span class="kw">where
+    </span>P: Pool,
+    P::Data: Sync + Send,
 {
 }
 
-<span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> <span class="ident">Sync</span> <span class="kw">for</span> <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">P</span>: <span class="ident">Pool</span>,
-    <span class="ident">P::Data</span>: <span class="ident">Sync</span> <span class="op">+</span> <span class="ident">Send</span>,
+<span class="kw">unsafe impl</span>&lt;P&gt; Sync <span class="kw">for </span>Arc&lt;P&gt;
+<span class="kw">where
+    </span>P: Pool,
+    P::Data: Sync + Send,
 {
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> <span class="ident">Unpin</span> <span class="kw">for</span> <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> <span class="kw">where</span> <span class="ident">P</span>: <span class="ident">Pool</span> {}
+<span class="kw">impl</span>&lt;P&gt; Unpin <span class="kw">for </span>Arc&lt;P&gt; <span class="kw">where </span>P: Pool {}
 
-<span class="doccomment">/// Unfortunate implementation detail required to use the `grow_exact` API</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ArcInner</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="ident">data</span>: <span class="ident">T</span>,
-    <span class="ident">strong</span>: <span class="ident">AtomicUsize</span>,
-    <span class="comment">// XXX `Weak` API not implemented</span>
-    <span class="comment">// weak: AtomicUsize,</span>
-}
+<span class="doccomment">/// Unfortunate implementation detail required to use the `grow_exact` API
+</span><span class="kw">pub struct </span>ArcInner&lt;T&gt; {
+    data: T,
+    strong: AtomicUsize,
+    <span class="comment">// XXX `Weak` API not implemented
+    // weak: AtomicUsize,
+</span>}
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../../../" data-current-crate="heapless" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../../../" data-current-crate="heapless" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

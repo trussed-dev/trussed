@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/serde_cbor-0.11.2/src/ser.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>ser.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../serde_cbor/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../serde_cbor/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../serde_cbor/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/serde_cbor-0.11.2/src/ser.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>ser.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../serde_cbor/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../serde_cbor/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../serde_cbor/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -741,748 +741,748 @@
 <span id="741">741</span>
 <span id="742">742</span>
 <span id="743">743</span>
-</pre><pre class="rust"><code><span class="doccomment">//! Serialize a Rust data structure to CBOR data.</span>
+</pre><pre class="rust"><code><span class="doccomment">//! Serialize a Rust data structure to CBOR data.
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;alloc&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident">alloc::vec::Vec</span>;
+</span><span class="attribute">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+</span><span class="kw">use </span>alloc::vec::Vec;
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)]</span>
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::write::IoWrite</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::write</span>::{<span class="ident">SliceWrite</span>, <span class="ident">Write</span>};
+<span class="attribute">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+</span><span class="kw">pub use </span><span class="kw">crate</span>::write::IoWrite;
+<span class="kw">pub use </span><span class="kw">crate</span>::write::{SliceWrite, Write};
 
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::error</span>::{<span class="ident">Error</span>, <span class="prelude-ty">Result</span>};
-<span class="kw">use</span> <span class="ident">half::f16</span>;
-<span class="kw">use</span> <span class="ident">serde::ser</span>::{<span class="self">self</span>, <span class="ident">Serialize</span>};
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident">std::io</span>;
+<span class="kw">use </span><span class="kw">crate</span>::error::{Error, <span class="prelude-ty">Result</span>};
+<span class="kw">use </span>half::f16;
+<span class="kw">use </span>serde::ser::{<span class="self">self</span>, Serialize};
+<span class="attribute">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+</span><span class="kw">use </span>std::io;
 
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::tags</span>::{<span class="ident">get_tag</span>, <span class="ident">CBOR_NEWTYPE_NAME</span>};
+<span class="kw">use </span><span class="kw">crate</span>::tags::{get_tag, CBOR_NEWTYPE_NAME};
 
-<span class="doccomment">/// Serializes a value to a vector.</span>
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;alloc&quot;</span>))]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">to_vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">value</span>: <span class="kw-2">&amp;</span><span class="ident">T</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">ser::Serialize</span>,
+<span class="doccomment">/// Serializes a value to a vector.
+</span><span class="attribute">#[cfg(any(feature = <span class="string">&quot;std&quot;</span>, feature = <span class="string">&quot;alloc&quot;</span>))]
+</span><span class="kw">pub fn </span>to_vec&lt;T&gt;(value: <span class="kw-2">&amp;</span>T) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;u8&gt;&gt;
+<span class="kw">where
+    </span>T: ser::Serialize,
 {
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">vec</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
-    <span class="ident">value</span>.<span class="ident">serialize</span>(<span class="kw-2">&amp;mut</span> <span class="ident">Serializer::new</span>(<span class="kw-2">&amp;mut</span> <span class="ident">vec</span>))<span class="question-mark">?</span>;
-    <span class="prelude-val">Ok</span>(<span class="ident">vec</span>)
+    <span class="kw">let </span><span class="kw-2">mut </span>vec = Vec::new();
+    value.serialize(<span class="kw-2">&amp;mut </span>Serializer::new(<span class="kw-2">&amp;mut </span>vec))<span class="question-mark">?</span>;
+    <span class="prelude-val">Ok</span>(vec)
 }
 
-<span class="doccomment">/// Serializes a value to a vector in packed format.</span>
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">to_vec_packed</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">value</span>: <span class="kw-2">&amp;</span><span class="ident">T</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">ser::Serialize</span>,
+<span class="doccomment">/// Serializes a value to a vector in packed format.
+</span><span class="attribute">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+</span><span class="kw">pub fn </span>to_vec_packed&lt;T&gt;(value: <span class="kw-2">&amp;</span>T) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;u8&gt;&gt;
+<span class="kw">where
+    </span>T: ser::Serialize,
 {
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">vec</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
-    <span class="ident">value</span>.<span class="ident">serialize</span>(<span class="kw-2">&amp;mut</span> <span class="ident">Serializer::new</span>(<span class="kw-2">&amp;mut</span> <span class="ident">IoWrite::new</span>(<span class="kw-2">&amp;mut</span> <span class="ident">vec</span>)).<span class="ident">packed_format</span>())<span class="question-mark">?</span>;
-    <span class="prelude-val">Ok</span>(<span class="ident">vec</span>)
+    <span class="kw">let </span><span class="kw-2">mut </span>vec = Vec::new();
+    value.serialize(<span class="kw-2">&amp;mut </span>Serializer::new(<span class="kw-2">&amp;mut </span>IoWrite::new(<span class="kw-2">&amp;mut </span>vec)).packed_format())<span class="question-mark">?</span>;
+    <span class="prelude-val">Ok</span>(vec)
 }
 
-<span class="doccomment">/// Serializes a value to a writer.</span>
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">to_writer</span><span class="op">&lt;</span><span class="ident">W</span>, <span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">writer</span>: <span class="ident">W</span>, <span class="ident">value</span>: <span class="kw-2">&amp;</span><span class="ident">T</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">W</span>: <span class="ident">io::Write</span>,
-    <span class="ident">T</span>: <span class="ident">ser::Serialize</span>,
+<span class="doccomment">/// Serializes a value to a writer.
+</span><span class="attribute">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+</span><span class="kw">pub fn </span>to_writer&lt;W, T&gt;(writer: W, value: <span class="kw-2">&amp;</span>T) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt;
+<span class="kw">where
+    </span>W: io::Write,
+    T: ser::Serialize,
 {
-    <span class="ident">value</span>.<span class="ident">serialize</span>(<span class="kw-2">&amp;mut</span> <span class="ident">Serializer::new</span>(<span class="kw-2">&amp;mut</span> <span class="ident">IoWrite::new</span>(<span class="ident">writer</span>)))
+    value.serialize(<span class="kw-2">&amp;mut </span>Serializer::new(<span class="kw-2">&amp;mut </span>IoWrite::new(writer)))
 }
 
-<span class="doccomment">/// A structure for serializing Rust values to CBOR.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Serializer</span><span class="op">&lt;</span><span class="ident">W</span><span class="op">&gt;</span> {
-    <span class="ident">writer</span>: <span class="ident">W</span>,
-    <span class="ident">packed</span>: <span class="ident">bool</span>,
-    <span class="ident">enum_as_map</span>: <span class="ident">bool</span>,
+<span class="doccomment">/// A structure for serializing Rust values to CBOR.
+</span><span class="attribute">#[derive(Debug)]
+</span><span class="kw">pub struct </span>Serializer&lt;W&gt; {
+    writer: W,
+    packed: bool,
+    enum_as_map: bool,
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">W</span><span class="op">&gt;</span> <span class="ident">Serializer</span><span class="op">&lt;</span><span class="ident">W</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">W</span>: <span class="ident">Write</span>,
+<span class="kw">impl</span>&lt;W&gt; Serializer&lt;W&gt;
+<span class="kw">where
+    </span>W: Write,
 {
-    <span class="doccomment">/// Creates a new CBOR serializer.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// `to_vec` and `to_writer` should normally be used instead of this method.</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">writer</span>: <span class="ident">W</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">Serializer</span> {
-            <span class="ident">writer</span>,
-            <span class="ident">packed</span>: <span class="bool-val">false</span>,
-            <span class="ident">enum_as_map</span>: <span class="bool-val">true</span>,
+    <span class="doccomment">/// Creates a new CBOR serializer.
+    ///
+    /// `to_vec` and `to_writer` should normally be used instead of this method.
+    </span><span class="attribute">#[inline]
+    </span><span class="kw">pub fn </span>new(writer: W) -&gt; <span class="self">Self </span>{
+        Serializer {
+            writer,
+            packed: <span class="bool-val">false</span>,
+            enum_as_map: <span class="bool-val">true</span>,
         }
     }
 
-    <span class="doccomment">/// Choose concise/packed format for serializer.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// In the packed format enum variant names and field names</span>
-    <span class="doccomment">/// are replaced with numeric indizes to conserve space.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">packed_format</span>(<span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">self</span>.<span class="ident">packed</span> <span class="op">=</span> <span class="bool-val">true</span>;
-        <span class="self">self</span>
+    <span class="doccomment">/// Choose concise/packed format for serializer.
+    ///
+    /// In the packed format enum variant names and field names
+    /// are replaced with numeric indizes to conserve space.
+    </span><span class="kw">pub fn </span>packed_format(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.packed = <span class="bool-val">true</span>;
+        <span class="self">self
+    </span>}
+
+    <span class="doccomment">/// Enable old enum format used by `serde_cbor` versions &lt;= v0.9.
+    ///
+    /// The `legacy_enums` option determines how enums are encoded.
+    ///
+    /// This makes no difference when encoding and decoding enums using
+    /// this crate, but it shows up when decoding to a `Value` or decoding
+    /// in other languages.
+    ///
+    /// # Examples
+    ///
+    /// Given the following enum
+    ///
+    /// ```rust
+    /// enum Enum {
+    ///     Unit,
+    ///     NewType(i32),
+    ///     Tuple(String, bool),
+    ///     Struct{ x: i32, y: i32 },
+    /// }
+    /// ```
+    /// we will give the `Value` with the same encoding for each case using
+    /// JSON notation.
+    ///
+    /// ## Default encodings
+    ///
+    /// * `Enum::Unit` encodes as `&quot;Unit&quot;`
+    /// * `Enum::NewType(10)` encodes as `{&quot;NewType&quot;: 10}`
+    /// * `Enum::Tuple(&quot;x&quot;, true)` encodes as `{&quot;Tuple&quot;: [&quot;x&quot;, true]}`
+    ///
+    /// ## Legacy encodings
+    ///
+    /// * `Enum::Unit` encodes as `&quot;Unit&quot;`
+    /// * `Enum::NewType(10)` encodes as `[&quot;NewType&quot;, 10]`
+    /// * `Enum::Tuple(&quot;x&quot;, true)` encodes as `[&quot;Tuple&quot;, &quot;x&quot;, true]`
+    /// * `Enum::Struct{ x: 5, y: -5 }` encodes as `[&quot;Struct&quot;, {&quot;x&quot;: 5, &quot;y&quot;: -5}]`
+    </span><span class="kw">pub fn </span>legacy_enums(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.enum_as_map = <span class="bool-val">false</span>;
+        <span class="self">self
+    </span>}
+
+    <span class="doccomment">/// Writes a CBOR self-describe tag to the stream.
+    ///
+    /// Tagging allows a decoder to distinguish different file formats based on their content
+    /// without further information.
+    </span><span class="attribute">#[inline]
+    </span><span class="kw">pub fn </span>self_describe(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>buf = [<span class="number">6 </span>&lt;&lt; <span class="number">5 </span>| <span class="number">25</span>, <span class="number">0</span>, <span class="number">0</span>];
+        (<span class="kw-2">&amp;mut </span>buf[<span class="number">1</span>..]).copy_from_slice(<span class="kw-2">&amp;</span><span class="number">55799u16</span>.to_be_bytes());
+        <span class="self">self</span>.writer.write_all(<span class="kw-2">&amp;</span>buf).map_err(|e| e.into())
     }
 
-    <span class="doccomment">/// Enable old enum format used by `serde_cbor` versions &lt;= v0.9.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// The `legacy_enums` option determines how enums are encoded.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// This makes no difference when encoding and decoding enums using</span>
-    <span class="doccomment">/// this crate, but it shows up when decoding to a `Value` or decoding</span>
-    <span class="doccomment">/// in other languages.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// # Examples</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// Given the following enum</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// ```rust</span>
-    <span class="doccomment">/// enum Enum {</span>
-    <span class="doccomment">///     Unit,</span>
-    <span class="doccomment">///     NewType(i32),</span>
-    <span class="doccomment">///     Tuple(String, bool),</span>
-    <span class="doccomment">///     Struct{ x: i32, y: i32 },</span>
-    <span class="doccomment">/// }</span>
-    <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// we will give the `Value` with the same encoding for each case using</span>
-    <span class="doccomment">/// JSON notation.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// ## Default encodings</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// * `Enum::Unit` encodes as `&quot;Unit&quot;`</span>
-    <span class="doccomment">/// * `Enum::NewType(10)` encodes as `{&quot;NewType&quot;: 10}`</span>
-    <span class="doccomment">/// * `Enum::Tuple(&quot;x&quot;, true)` encodes as `{&quot;Tuple&quot;: [&quot;x&quot;, true]}`</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// ## Legacy encodings</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// * `Enum::Unit` encodes as `&quot;Unit&quot;`</span>
-    <span class="doccomment">/// * `Enum::NewType(10)` encodes as `[&quot;NewType&quot;, 10]`</span>
-    <span class="doccomment">/// * `Enum::Tuple(&quot;x&quot;, true)` encodes as `[&quot;Tuple&quot;, &quot;x&quot;, true]`</span>
-    <span class="doccomment">/// * `Enum::Struct{ x: 5, y: -5 }` encodes as `[&quot;Struct&quot;, {&quot;x&quot;: 5, &quot;y&quot;: -5}]`</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">legacy_enums</span>(<span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">self</span>.<span class="ident">enum_as_map</span> <span class="op">=</span> <span class="bool-val">false</span>;
-        <span class="self">self</span>
+    <span class="doccomment">/// Unwrap the `Writer` from the `Serializer`.
+    </span><span class="attribute">#[inline]
+    </span><span class="kw">pub fn </span>into_inner(<span class="self">self</span>) -&gt; W {
+        <span class="self">self</span>.writer
     }
 
-    <span class="doccomment">/// Writes a CBOR self-describe tag to the stream.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// Tagging allows a decoder to distinguish different file formats based on their content</span>
-    <span class="doccomment">/// without further information.</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">self_describe</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> [<span class="number">6</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">5</span> <span class="op">|</span> <span class="number">25</span>, <span class="number">0</span>, <span class="number">0</span>];
-        (<span class="kw-2">&amp;mut</span> <span class="ident">buf</span>[<span class="number">1</span>..]).<span class="ident">copy_from_slice</span>(<span class="kw-2">&amp;</span><span class="number">55799u16</span>.<span class="ident">to_be_bytes</span>());
-        <span class="self">self</span>.<span class="ident">writer</span>.<span class="ident">write_all</span>(<span class="kw-2">&amp;</span><span class="ident">buf</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">into</span>())
-    }
-
-    <span class="doccomment">/// Unwrap the `Writer` from the `Serializer`.</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_inner</span>(<span class="self">self</span>) -&gt; <span class="ident">W</span> {
-        <span class="self">self</span>.<span class="ident">writer</span>
-    }
-
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">write_u8</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">major</span>: <span class="ident">u8</span>, <span class="ident">value</span>: <span class="ident">u8</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="ident">value</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">0x17</span> {
-            <span class="self">self</span>.<span class="ident">writer</span>.<span class="ident">write_all</span>(<span class="kw-2">&amp;</span>[<span class="ident">major</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">5</span> <span class="op">|</span> <span class="ident">value</span>])
-        } <span class="kw">else</span> {
-            <span class="kw">let</span> <span class="ident">buf</span> <span class="op">=</span> [<span class="ident">major</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">5</span> <span class="op">|</span> <span class="number">24</span>, <span class="ident">value</span>];
-            <span class="self">self</span>.<span class="ident">writer</span>.<span class="ident">write_all</span>(<span class="kw-2">&amp;</span><span class="ident">buf</span>)
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>write_u8(<span class="kw-2">&amp;mut </span><span class="self">self</span>, major: u8, value: u8) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">if </span>value &lt;= <span class="number">0x17 </span>{
+            <span class="self">self</span>.writer.write_all(<span class="kw-2">&amp;</span>[major &lt;&lt; <span class="number">5 </span>| value])
+        } <span class="kw">else </span>{
+            <span class="kw">let </span>buf = [major &lt;&lt; <span class="number">5 </span>| <span class="number">24</span>, value];
+            <span class="self">self</span>.writer.write_all(<span class="kw-2">&amp;</span>buf)
         }
-        .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">into</span>())
+        .map_err(|e| e.into())
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">write_u16</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">major</span>: <span class="ident">u8</span>, <span class="ident">value</span>: <span class="ident">u16</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="ident">value</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">u16::from</span>(<span class="ident">u8::max_value</span>()) {
-            <span class="self">self</span>.<span class="ident">write_u8</span>(<span class="ident">major</span>, <span class="ident">value</span> <span class="kw">as</span> <span class="ident">u8</span>)
-        } <span class="kw">else</span> {
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> [<span class="ident">major</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">5</span> <span class="op">|</span> <span class="number">25</span>, <span class="number">0</span>, <span class="number">0</span>];
-            (<span class="kw-2">&amp;mut</span> <span class="ident">buf</span>[<span class="number">1</span>..]).<span class="ident">copy_from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">value</span>.<span class="ident">to_be_bytes</span>());
-            <span class="self">self</span>.<span class="ident">writer</span>.<span class="ident">write_all</span>(<span class="kw-2">&amp;</span><span class="ident">buf</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">into</span>())
-        }
-    }
-
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">write_u32</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">major</span>: <span class="ident">u8</span>, <span class="ident">value</span>: <span class="ident">u32</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="ident">value</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">u32::from</span>(<span class="ident">u16::max_value</span>()) {
-            <span class="self">self</span>.<span class="ident">write_u16</span>(<span class="ident">major</span>, <span class="ident">value</span> <span class="kw">as</span> <span class="ident">u16</span>)
-        } <span class="kw">else</span> {
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> [<span class="ident">major</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">5</span> <span class="op">|</span> <span class="number">26</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>];
-            (<span class="kw-2">&amp;mut</span> <span class="ident">buf</span>[<span class="number">1</span>..]).<span class="ident">copy_from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">value</span>.<span class="ident">to_be_bytes</span>());
-            <span class="self">self</span>.<span class="ident">writer</span>.<span class="ident">write_all</span>(<span class="kw-2">&amp;</span><span class="ident">buf</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">into</span>())
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>write_u16(<span class="kw-2">&amp;mut </span><span class="self">self</span>, major: u8, value: u16) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">if </span>value &lt;= u16::from(u8::max_value()) {
+            <span class="self">self</span>.write_u8(major, value <span class="kw">as </span>u8)
+        } <span class="kw">else </span>{
+            <span class="kw">let </span><span class="kw-2">mut </span>buf = [major &lt;&lt; <span class="number">5 </span>| <span class="number">25</span>, <span class="number">0</span>, <span class="number">0</span>];
+            (<span class="kw-2">&amp;mut </span>buf[<span class="number">1</span>..]).copy_from_slice(<span class="kw-2">&amp;</span>value.to_be_bytes());
+            <span class="self">self</span>.writer.write_all(<span class="kw-2">&amp;</span>buf).map_err(|e| e.into())
         }
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">write_u64</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">major</span>: <span class="ident">u8</span>, <span class="ident">value</span>: <span class="ident">u64</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="ident">value</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">u64::from</span>(<span class="ident">u32::max_value</span>()) {
-            <span class="self">self</span>.<span class="ident">write_u32</span>(<span class="ident">major</span>, <span class="ident">value</span> <span class="kw">as</span> <span class="ident">u32</span>)
-        } <span class="kw">else</span> {
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> [<span class="ident">major</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">5</span> <span class="op">|</span> <span class="number">27</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>];
-            (<span class="kw-2">&amp;mut</span> <span class="ident">buf</span>[<span class="number">1</span>..]).<span class="ident">copy_from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">value</span>.<span class="ident">to_be_bytes</span>());
-            <span class="self">self</span>.<span class="ident">writer</span>.<span class="ident">write_all</span>(<span class="kw-2">&amp;</span><span class="ident">buf</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">into</span>())
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>write_u32(<span class="kw-2">&amp;mut </span><span class="self">self</span>, major: u8, value: u32) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">if </span>value &lt;= u32::from(u16::max_value()) {
+            <span class="self">self</span>.write_u16(major, value <span class="kw">as </span>u16)
+        } <span class="kw">else </span>{
+            <span class="kw">let </span><span class="kw-2">mut </span>buf = [major &lt;&lt; <span class="number">5 </span>| <span class="number">26</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>];
+            (<span class="kw-2">&amp;mut </span>buf[<span class="number">1</span>..]).copy_from_slice(<span class="kw-2">&amp;</span>value.to_be_bytes());
+            <span class="self">self</span>.writer.write_all(<span class="kw-2">&amp;</span>buf).map_err(|e| e.into())
         }
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">serialize_collection</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(
-        <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="self">self</span>,
-        <span class="ident">major</span>: <span class="ident">u8</span>,
-        <span class="ident">len</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">CollectionSerializer</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">W</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">needs_eof</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">len</span> {
-            <span class="prelude-val">Some</span>(<span class="ident">len</span>) =&gt; {
-                <span class="self">self</span>.<span class="ident">write_u64</span>(<span class="ident">major</span>, <span class="ident">len</span> <span class="kw">as</span> <span class="ident">u64</span>)<span class="question-mark">?</span>;
-                <span class="bool-val">false</span>
-            }
-            <span class="prelude-val">None</span> =&gt; {
-                <span class="self">self</span>.<span class="ident">writer</span>
-                    .<span class="ident">write_all</span>(<span class="kw-2">&amp;</span>[<span class="ident">major</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">5</span> <span class="op">|</span> <span class="number">31</span>])
-                    .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">into</span>())<span class="question-mark">?</span>;
-                <span class="bool-val">true</span>
-            }
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>write_u64(<span class="kw-2">&amp;mut </span><span class="self">self</span>, major: u8, value: u64) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">if </span>value &lt;= u64::from(u32::max_value()) {
+            <span class="self">self</span>.write_u32(major, value <span class="kw">as </span>u32)
+        } <span class="kw">else </span>{
+            <span class="kw">let </span><span class="kw-2">mut </span>buf = [major &lt;&lt; <span class="number">5 </span>| <span class="number">27</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>];
+            (<span class="kw-2">&amp;mut </span>buf[<span class="number">1</span>..]).copy_from_slice(<span class="kw-2">&amp;</span>value.to_be_bytes());
+            <span class="self">self</span>.writer.write_all(<span class="kw-2">&amp;</span>buf).map_err(|e| e.into())
+        }
+    }
+
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>serialize_collection&lt;<span class="lifetime">&#39;a</span>&gt;(
+        <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="self">self</span>,
+        major: u8,
+        len: <span class="prelude-ty">Option</span>&lt;usize&gt;,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;CollectionSerializer&lt;<span class="lifetime">&#39;a</span>, W&gt;&gt; {
+        <span class="kw">let </span>needs_eof = <span class="kw">match </span>len {
+            <span class="prelude-val">Some</span>(len) =&gt; {
+                <span class="self">self</span>.write_u64(major, len <span class="kw">as </span>u64)<span class="question-mark">?</span>;
+                <span class="bool-val">false
+            </span>}
+            <span class="prelude-val">None </span>=&gt; {
+                <span class="self">self</span>.writer
+                    .write_all(<span class="kw-2">&amp;</span>[major &lt;&lt; <span class="number">5 </span>| <span class="number">31</span>])
+                    .map_err(|e| e.into())<span class="question-mark">?</span>;
+                <span class="bool-val">true
+            </span>}
         };
 
-        <span class="prelude-val">Ok</span>(<span class="ident">CollectionSerializer</span> {
-            <span class="ident">ser</span>: <span class="self">self</span>,
-            <span class="ident">needs_eof</span>,
+        <span class="prelude-val">Ok</span>(CollectionSerializer {
+            ser: <span class="self">self</span>,
+            needs_eof,
         })
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">W</span><span class="op">&gt;</span> <span class="ident">ser::Serializer</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="ident">Serializer</span><span class="op">&lt;</span><span class="ident">W</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">W</span>: <span class="ident">Write</span>,
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, W&gt; ser::Serializer <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>Serializer&lt;W&gt;
+<span class="kw">where
+    </span>W: Write,
 {
-    <span class="kw">type</span> <span class="prelude-val">Ok</span> <span class="op">=</span> ();
-    <span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">Error</span>;
+    <span class="kw">type </span><span class="prelude-val">Ok </span>= ();
+    <span class="kw">type </span>Error = Error;
 
-    <span class="kw">type</span> <span class="ident">SerializeSeq</span> <span class="op">=</span> <span class="ident">CollectionSerializer</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">W</span><span class="op">&gt;</span>;
-    <span class="kw">type</span> <span class="ident">SerializeTuple</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="ident">Serializer</span><span class="op">&lt;</span><span class="ident">W</span><span class="op">&gt;</span>;
-    <span class="kw">type</span> <span class="ident">SerializeTupleStruct</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="ident">Serializer</span><span class="op">&lt;</span><span class="ident">W</span><span class="op">&gt;</span>;
-    <span class="kw">type</span> <span class="ident">SerializeTupleVariant</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="ident">Serializer</span><span class="op">&lt;</span><span class="ident">W</span><span class="op">&gt;</span>;
-    <span class="kw">type</span> <span class="ident">SerializeMap</span> <span class="op">=</span> <span class="ident">CollectionSerializer</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">W</span><span class="op">&gt;</span>;
-    <span class="kw">type</span> <span class="ident">SerializeStruct</span> <span class="op">=</span> <span class="ident">StructSerializer</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">W</span><span class="op">&gt;</span>;
-    <span class="kw">type</span> <span class="ident">SerializeStructVariant</span> <span class="op">=</span> <span class="ident">StructSerializer</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">W</span><span class="op">&gt;</span>;
+    <span class="kw">type </span>SerializeSeq = CollectionSerializer&lt;<span class="lifetime">&#39;a</span>, W&gt;;
+    <span class="kw">type </span>SerializeTuple = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>Serializer&lt;W&gt;;
+    <span class="kw">type </span>SerializeTupleStruct = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>Serializer&lt;W&gt;;
+    <span class="kw">type </span>SerializeTupleVariant = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>Serializer&lt;W&gt;;
+    <span class="kw">type </span>SerializeMap = CollectionSerializer&lt;<span class="lifetime">&#39;a</span>, W&gt;;
+    <span class="kw">type </span>SerializeStruct = StructSerializer&lt;<span class="lifetime">&#39;a</span>, W&gt;;
+    <span class="kw">type </span>SerializeStructVariant = StructSerializer&lt;<span class="lifetime">&#39;a</span>, W&gt;;
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">serialize_bool</span>(<span class="self">self</span>, <span class="ident">value</span>: <span class="ident">bool</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">value</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">value</span> { <span class="number">0xf5</span> } <span class="kw">else</span> { <span class="number">0xf4</span> };
-        <span class="self">self</span>.<span class="ident">writer</span>.<span class="ident">write_all</span>(<span class="kw-2">&amp;</span>[<span class="ident">value</span>]).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">into</span>())
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>serialize_bool(<span class="self">self</span>, value: bool) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">let </span>value = <span class="kw">if </span>value { <span class="number">0xf5 </span>} <span class="kw">else </span>{ <span class="number">0xf4 </span>};
+        <span class="self">self</span>.writer.write_all(<span class="kw-2">&amp;</span>[value]).map_err(|e| e.into())
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">serialize_i8</span>(<span class="self">self</span>, <span class="ident">value</span>: <span class="ident">i8</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="ident">value</span> <span class="op">&lt;</span> <span class="number">0</span> {
-            <span class="self">self</span>.<span class="ident">write_u8</span>(<span class="number">1</span>, <span class="op">-</span>(<span class="ident">value</span> <span class="op">+</span> <span class="number">1</span>) <span class="kw">as</span> <span class="ident">u8</span>)
-        } <span class="kw">else</span> {
-            <span class="self">self</span>.<span class="ident">write_u8</span>(<span class="number">0</span>, <span class="ident">value</span> <span class="kw">as</span> <span class="ident">u8</span>)
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>serialize_i8(<span class="self">self</span>, value: i8) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">if </span>value &lt; <span class="number">0 </span>{
+            <span class="self">self</span>.write_u8(<span class="number">1</span>, -(value + <span class="number">1</span>) <span class="kw">as </span>u8)
+        } <span class="kw">else </span>{
+            <span class="self">self</span>.write_u8(<span class="number">0</span>, value <span class="kw">as </span>u8)
         }
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">serialize_i16</span>(<span class="self">self</span>, <span class="ident">value</span>: <span class="ident">i16</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="ident">value</span> <span class="op">&lt;</span> <span class="number">0</span> {
-            <span class="self">self</span>.<span class="ident">write_u16</span>(<span class="number">1</span>, <span class="op">-</span>(<span class="ident">value</span> <span class="op">+</span> <span class="number">1</span>) <span class="kw">as</span> <span class="ident">u16</span>)
-        } <span class="kw">else</span> {
-            <span class="self">self</span>.<span class="ident">write_u16</span>(<span class="number">0</span>, <span class="ident">value</span> <span class="kw">as</span> <span class="ident">u16</span>)
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>serialize_i16(<span class="self">self</span>, value: i16) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">if </span>value &lt; <span class="number">0 </span>{
+            <span class="self">self</span>.write_u16(<span class="number">1</span>, -(value + <span class="number">1</span>) <span class="kw">as </span>u16)
+        } <span class="kw">else </span>{
+            <span class="self">self</span>.write_u16(<span class="number">0</span>, value <span class="kw">as </span>u16)
         }
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">serialize_i32</span>(<span class="self">self</span>, <span class="ident">value</span>: <span class="ident">i32</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="ident">value</span> <span class="op">&lt;</span> <span class="number">0</span> {
-            <span class="self">self</span>.<span class="ident">write_u32</span>(<span class="number">1</span>, <span class="op">-</span>(<span class="ident">value</span> <span class="op">+</span> <span class="number">1</span>) <span class="kw">as</span> <span class="ident">u32</span>)
-        } <span class="kw">else</span> {
-            <span class="self">self</span>.<span class="ident">write_u32</span>(<span class="number">0</span>, <span class="ident">value</span> <span class="kw">as</span> <span class="ident">u32</span>)
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>serialize_i32(<span class="self">self</span>, value: i32) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">if </span>value &lt; <span class="number">0 </span>{
+            <span class="self">self</span>.write_u32(<span class="number">1</span>, -(value + <span class="number">1</span>) <span class="kw">as </span>u32)
+        } <span class="kw">else </span>{
+            <span class="self">self</span>.write_u32(<span class="number">0</span>, value <span class="kw">as </span>u32)
         }
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">serialize_i64</span>(<span class="self">self</span>, <span class="ident">value</span>: <span class="ident">i64</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="ident">value</span> <span class="op">&lt;</span> <span class="number">0</span> {
-            <span class="self">self</span>.<span class="ident">write_u64</span>(<span class="number">1</span>, <span class="op">-</span>(<span class="ident">value</span> <span class="op">+</span> <span class="number">1</span>) <span class="kw">as</span> <span class="ident">u64</span>)
-        } <span class="kw">else</span> {
-            <span class="self">self</span>.<span class="ident">write_u64</span>(<span class="number">0</span>, <span class="ident">value</span> <span class="kw">as</span> <span class="ident">u64</span>)
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>serialize_i64(<span class="self">self</span>, value: i64) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">if </span>value &lt; <span class="number">0 </span>{
+            <span class="self">self</span>.write_u64(<span class="number">1</span>, -(value + <span class="number">1</span>) <span class="kw">as </span>u64)
+        } <span class="kw">else </span>{
+            <span class="self">self</span>.write_u64(<span class="number">0</span>, value <span class="kw">as </span>u64)
         }
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">serialize_i128</span>(<span class="self">self</span>, <span class="ident">value</span>: <span class="ident">i128</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="ident">value</span> <span class="op">&lt;</span> <span class="number">0</span> {
-            <span class="kw">if</span> <span class="op">-</span>(<span class="ident">value</span> <span class="op">+</span> <span class="number">1</span>) <span class="op">&gt;</span> <span class="ident">i128::from</span>(<span class="ident">u64::max_value</span>()) {
-                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::message</span>(<span class="string">&quot;The number can&#39;t be stored in CBOR&quot;</span>));
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>serialize_i128(<span class="self">self</span>, value: i128) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">if </span>value &lt; <span class="number">0 </span>{
+            <span class="kw">if </span>-(value + <span class="number">1</span>) &gt; i128::from(u64::max_value()) {
+                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::message(<span class="string">&quot;The number can&#39;t be stored in CBOR&quot;</span>));
             }
-            <span class="self">self</span>.<span class="ident">write_u64</span>(<span class="number">1</span>, <span class="op">-</span>(<span class="ident">value</span> <span class="op">+</span> <span class="number">1</span>) <span class="kw">as</span> <span class="ident">u64</span>)
-        } <span class="kw">else</span> {
-            <span class="kw">if</span> <span class="ident">value</span> <span class="op">&gt;</span> <span class="ident">i128::from</span>(<span class="ident">u64::max_value</span>()) {
-                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::message</span>(<span class="string">&quot;The number can&#39;t be stored in CBOR&quot;</span>));
+            <span class="self">self</span>.write_u64(<span class="number">1</span>, -(value + <span class="number">1</span>) <span class="kw">as </span>u64)
+        } <span class="kw">else </span>{
+            <span class="kw">if </span>value &gt; i128::from(u64::max_value()) {
+                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::message(<span class="string">&quot;The number can&#39;t be stored in CBOR&quot;</span>));
             }
-            <span class="self">self</span>.<span class="ident">write_u64</span>(<span class="number">0</span>, <span class="ident">value</span> <span class="kw">as</span> <span class="ident">u64</span>)
+            <span class="self">self</span>.write_u64(<span class="number">0</span>, value <span class="kw">as </span>u64)
         }
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">serialize_u8</span>(<span class="self">self</span>, <span class="ident">value</span>: <span class="ident">u8</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">write_u8</span>(<span class="number">0</span>, <span class="ident">value</span>)
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>serialize_u8(<span class="self">self</span>, value: u8) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="self">self</span>.write_u8(<span class="number">0</span>, value)
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">serialize_u16</span>(<span class="self">self</span>, <span class="ident">value</span>: <span class="ident">u16</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">write_u16</span>(<span class="number">0</span>, <span class="ident">value</span>)
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>serialize_u16(<span class="self">self</span>, value: u16) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="self">self</span>.write_u16(<span class="number">0</span>, value)
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">serialize_u32</span>(<span class="self">self</span>, <span class="ident">value</span>: <span class="ident">u32</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">write_u32</span>(<span class="number">0</span>, <span class="ident">value</span>)
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>serialize_u32(<span class="self">self</span>, value: u32) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="self">self</span>.write_u32(<span class="number">0</span>, value)
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">serialize_u64</span>(<span class="self">self</span>, <span class="ident">value</span>: <span class="ident">u64</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">write_u64</span>(<span class="number">0</span>, <span class="ident">value</span>)
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>serialize_u64(<span class="self">self</span>, value: u64) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="self">self</span>.write_u64(<span class="number">0</span>, value)
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">serialize_u128</span>(<span class="self">self</span>, <span class="ident">value</span>: <span class="ident">u128</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="ident">value</span> <span class="op">&gt;</span> <span class="ident">u128::from</span>(<span class="ident">u64::max_value</span>()) {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::message</span>(<span class="string">&quot;The number can&#39;t be stored in CBOR&quot;</span>));
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>serialize_u128(<span class="self">self</span>, value: u128) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">if </span>value &gt; u128::from(u64::max_value()) {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::message(<span class="string">&quot;The number can&#39;t be stored in CBOR&quot;</span>));
         }
-        <span class="self">self</span>.<span class="ident">write_u64</span>(<span class="number">0</span>, <span class="ident">value</span> <span class="kw">as</span> <span class="ident">u64</span>)
+        <span class="self">self</span>.write_u64(<span class="number">0</span>, value <span class="kw">as </span>u64)
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::float_cmp</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">serialize_f32</span>(<span class="self">self</span>, <span class="ident">value</span>: <span class="ident">f32</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="ident">value</span>.<span class="ident">is_infinite</span>() {
-            <span class="kw">if</span> <span class="ident">value</span>.<span class="ident">is_sign_positive</span>() {
-                <span class="self">self</span>.<span class="ident">writer</span>.<span class="ident">write_all</span>(<span class="kw-2">&amp;</span>[<span class="number">0xf9</span>, <span class="number">0x7c</span>, <span class="number">0x00</span>])
-            } <span class="kw">else</span> {
-                <span class="self">self</span>.<span class="ident">writer</span>.<span class="ident">write_all</span>(<span class="kw-2">&amp;</span>[<span class="number">0xf9</span>, <span class="number">0xfc</span>, <span class="number">0x00</span>])
+    <span class="attribute">#[inline]
+    #[allow(clippy::float_cmp)]
+    </span><span class="kw">fn </span>serialize_f32(<span class="self">self</span>, value: f32) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">if </span>value.is_infinite() {
+            <span class="kw">if </span>value.is_sign_positive() {
+                <span class="self">self</span>.writer.write_all(<span class="kw-2">&amp;</span>[<span class="number">0xf9</span>, <span class="number">0x7c</span>, <span class="number">0x00</span>])
+            } <span class="kw">else </span>{
+                <span class="self">self</span>.writer.write_all(<span class="kw-2">&amp;</span>[<span class="number">0xf9</span>, <span class="number">0xfc</span>, <span class="number">0x00</span>])
             }
-        } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">value</span>.<span class="ident">is_nan</span>() {
-            <span class="self">self</span>.<span class="ident">writer</span>.<span class="ident">write_all</span>(<span class="kw-2">&amp;</span>[<span class="number">0xf9</span>, <span class="number">0x7e</span>, <span class="number">0x00</span>])
-        } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">f32::from</span>(<span class="ident">f16::from_f32</span>(<span class="ident">value</span>)) <span class="op">==</span> <span class="ident">value</span> {
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> [<span class="number">0xf9</span>, <span class="number">0</span>, <span class="number">0</span>];
-            (<span class="kw-2">&amp;mut</span> <span class="ident">buf</span>[<span class="number">1</span>..]).<span class="ident">copy_from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">f16::from_f32</span>(<span class="ident">value</span>).<span class="ident">to_bits</span>().<span class="ident">to_be_bytes</span>());
-            <span class="self">self</span>.<span class="ident">writer</span>.<span class="ident">write_all</span>(<span class="kw-2">&amp;</span><span class="ident">buf</span>)
-        } <span class="kw">else</span> {
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> [<span class="number">0xfa</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>];
-            (<span class="kw-2">&amp;mut</span> <span class="ident">buf</span>[<span class="number">1</span>..]).<span class="ident">copy_from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">value</span>.<span class="ident">to_bits</span>().<span class="ident">to_be_bytes</span>());
-            <span class="self">self</span>.<span class="ident">writer</span>.<span class="ident">write_all</span>(<span class="kw-2">&amp;</span><span class="ident">buf</span>)
+        } <span class="kw">else if </span>value.is_nan() {
+            <span class="self">self</span>.writer.write_all(<span class="kw-2">&amp;</span>[<span class="number">0xf9</span>, <span class="number">0x7e</span>, <span class="number">0x00</span>])
+        } <span class="kw">else if </span>f32::from(f16::from_f32(value)) == value {
+            <span class="kw">let </span><span class="kw-2">mut </span>buf = [<span class="number">0xf9</span>, <span class="number">0</span>, <span class="number">0</span>];
+            (<span class="kw-2">&amp;mut </span>buf[<span class="number">1</span>..]).copy_from_slice(<span class="kw-2">&amp;</span>f16::from_f32(value).to_bits().to_be_bytes());
+            <span class="self">self</span>.writer.write_all(<span class="kw-2">&amp;</span>buf)
+        } <span class="kw">else </span>{
+            <span class="kw">let </span><span class="kw-2">mut </span>buf = [<span class="number">0xfa</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>];
+            (<span class="kw-2">&amp;mut </span>buf[<span class="number">1</span>..]).copy_from_slice(<span class="kw-2">&amp;</span>value.to_bits().to_be_bytes());
+            <span class="self">self</span>.writer.write_all(<span class="kw-2">&amp;</span>buf)
         }
-        .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">into</span>())
+        .map_err(|e| e.into())
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::float_cmp</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">serialize_f64</span>(<span class="self">self</span>, <span class="ident">value</span>: <span class="ident">f64</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="op">!</span><span class="ident">value</span>.<span class="ident">is_finite</span>() <span class="op">|</span><span class="op">|</span> <span class="ident">f64::from</span>(<span class="ident">value</span> <span class="kw">as</span> <span class="ident">f32</span>) <span class="op">==</span> <span class="ident">value</span> {
-            <span class="self">self</span>.<span class="ident">serialize_f32</span>(<span class="ident">value</span> <span class="kw">as</span> <span class="ident">f32</span>)
-        } <span class="kw">else</span> {
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> [<span class="number">0xfb</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>];
-            (<span class="kw-2">&amp;mut</span> <span class="ident">buf</span>[<span class="number">1</span>..]).<span class="ident">copy_from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">value</span>.<span class="ident">to_bits</span>().<span class="ident">to_be_bytes</span>());
-            <span class="self">self</span>.<span class="ident">writer</span>.<span class="ident">write_all</span>(<span class="kw-2">&amp;</span><span class="ident">buf</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">into</span>())
+    <span class="attribute">#[inline]
+    #[allow(clippy::float_cmp)]
+    </span><span class="kw">fn </span>serialize_f64(<span class="self">self</span>, value: f64) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">if </span>!value.is_finite() || f64::from(value <span class="kw">as </span>f32) == value {
+            <span class="self">self</span>.serialize_f32(value <span class="kw">as </span>f32)
+        } <span class="kw">else </span>{
+            <span class="kw">let </span><span class="kw-2">mut </span>buf = [<span class="number">0xfb</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>];
+            (<span class="kw-2">&amp;mut </span>buf[<span class="number">1</span>..]).copy_from_slice(<span class="kw-2">&amp;</span>value.to_bits().to_be_bytes());
+            <span class="self">self</span>.writer.write_all(<span class="kw-2">&amp;</span>buf).map_err(|e| e.into())
         }
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">serialize_char</span>(<span class="self">self</span>, <span class="ident">value</span>: <span class="ident">char</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="comment">// A char encoded as UTF-8 takes 4 bytes at most.</span>
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> [<span class="number">0</span>; <span class="number">4</span>];
-        <span class="self">self</span>.<span class="ident">serialize_str</span>(<span class="ident">value</span>.<span class="ident">encode_utf8</span>(<span class="kw-2">&amp;mut</span> <span class="ident">buf</span>))
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>serialize_char(<span class="self">self</span>, value: char) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="comment">// A char encoded as UTF-8 takes 4 bytes at most.
+        </span><span class="kw">let </span><span class="kw-2">mut </span>buf = [<span class="number">0</span>; <span class="number">4</span>];
+        <span class="self">self</span>.serialize_str(value.encode_utf8(<span class="kw-2">&amp;mut </span>buf))
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">serialize_str</span>(<span class="self">self</span>, <span class="ident">value</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">write_u64</span>(<span class="number">3</span>, <span class="ident">value</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u64</span>)<span class="question-mark">?</span>;
-        <span class="self">self</span>.<span class="ident">writer</span>
-            .<span class="ident">write_all</span>(<span class="ident">value</span>.<span class="ident">as_bytes</span>())
-            .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">into</span>())
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>serialize_str(<span class="self">self</span>, value: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="self">self</span>.write_u64(<span class="number">3</span>, value.len() <span class="kw">as </span>u64)<span class="question-mark">?</span>;
+        <span class="self">self</span>.writer
+            .write_all(value.as_bytes())
+            .map_err(|e| e.into())
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">serialize_bytes</span>(<span class="self">self</span>, <span class="ident">value</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">write_u64</span>(<span class="number">2</span>, <span class="ident">value</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u64</span>)<span class="question-mark">?</span>;
-        <span class="self">self</span>.<span class="ident">writer</span>.<span class="ident">write_all</span>(<span class="ident">value</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">into</span>())
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>serialize_bytes(<span class="self">self</span>, value: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="self">self</span>.write_u64(<span class="number">2</span>, value.len() <span class="kw">as </span>u64)<span class="question-mark">?</span>;
+        <span class="self">self</span>.writer.write_all(value).map_err(|e| e.into())
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">serialize_unit</span>(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">serialize_none</span>()
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>serialize_unit(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="self">self</span>.serialize_none()
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">serialize_some</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">value</span>: <span class="kw-2">&amp;</span><span class="ident">T</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>
-    <span class="kw">where</span>
-        <span class="ident">T</span>: <span class="question-mark">?</span><span class="ident">Sized</span> <span class="op">+</span> <span class="ident">ser::Serialize</span>,
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>serialize_some&lt;T&gt;(<span class="self">self</span>, value: <span class="kw-2">&amp;</span>T) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt;
+    <span class="kw">where
+        </span>T: <span class="question-mark">?</span>Sized + ser::Serialize,
     {
-        <span class="ident">value</span>.<span class="ident">serialize</span>(<span class="self">self</span>)
+        value.serialize(<span class="self">self</span>)
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">serialize_none</span>(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">writer</span>.<span class="ident">write_all</span>(<span class="kw-2">&amp;</span>[<span class="number">0xf6</span>]).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">into</span>())
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>serialize_none(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="self">self</span>.writer.write_all(<span class="kw-2">&amp;</span>[<span class="number">0xf6</span>]).map_err(|e| e.into())
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">serialize_unit_struct</span>(<span class="self">self</span>, <span class="ident">_name</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">serialize_unit</span>()
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>serialize_unit_struct(<span class="self">self</span>, _name: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="self">self</span>.serialize_unit()
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">serialize_unit_variant</span>(
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>serialize_unit_variant(
         <span class="self">self</span>,
-        <span class="ident">_name</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>,
-        <span class="ident">variant_index</span>: <span class="ident">u32</span>,
-        <span class="ident">variant</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">packed</span> {
-            <span class="self">self</span>.<span class="ident">serialize_u32</span>(<span class="ident">variant_index</span>)
-        } <span class="kw">else</span> {
-            <span class="self">self</span>.<span class="ident">serialize_str</span>(<span class="ident">variant</span>)
+        _name: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str,
+        variant_index: u32,
+        variant: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">if </span><span class="self">self</span>.packed {
+            <span class="self">self</span>.serialize_u32(variant_index)
+        } <span class="kw">else </span>{
+            <span class="self">self</span>.serialize_str(variant)
         }
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">serialize_newtype_struct</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>, <span class="ident">value</span>: <span class="kw-2">&amp;</span><span class="ident">T</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>
-    <span class="kw">where</span>
-        <span class="ident">T</span>: <span class="question-mark">?</span><span class="ident">Sized</span> <span class="op">+</span> <span class="ident">ser::Serialize</span>,
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>serialize_newtype_struct&lt;T&gt;(<span class="self">self</span>, name: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str, value: <span class="kw-2">&amp;</span>T) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt;
+    <span class="kw">where
+        </span>T: <span class="question-mark">?</span>Sized + ser::Serialize,
     {
-        <span class="kw">if</span> <span class="ident">name</span> <span class="op">==</span> <span class="ident">CBOR_NEWTYPE_NAME</span> {
-            <span class="kw">for</span> <span class="ident">tag</span> <span class="kw">in</span> <span class="ident">get_tag</span>().<span class="ident">into_iter</span>() {
-                <span class="self">self</span>.<span class="ident">write_u64</span>(<span class="number">6</span>, <span class="ident">tag</span>)<span class="question-mark">?</span>;
+        <span class="kw">if </span>name == CBOR_NEWTYPE_NAME {
+            <span class="kw">for </span>tag <span class="kw">in </span>get_tag().into_iter() {
+                <span class="self">self</span>.write_u64(<span class="number">6</span>, tag)<span class="question-mark">?</span>;
             }
         }
-        <span class="ident">value</span>.<span class="ident">serialize</span>(<span class="self">self</span>)
+        value.serialize(<span class="self">self</span>)
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">serialize_newtype_variant</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>serialize_newtype_variant&lt;T&gt;(
         <span class="self">self</span>,
-        <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>,
-        <span class="ident">variant_index</span>: <span class="ident">u32</span>,
-        <span class="ident">variant</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>,
-        <span class="ident">value</span>: <span class="kw-2">&amp;</span><span class="ident">T</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>
-    <span class="kw">where</span>
-        <span class="ident">T</span>: <span class="question-mark">?</span><span class="ident">Sized</span> <span class="op">+</span> <span class="ident">ser::Serialize</span>,
+        name: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str,
+        variant_index: u32,
+        variant: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str,
+        value: <span class="kw-2">&amp;</span>T,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt;
+    <span class="kw">where
+        </span>T: <span class="question-mark">?</span>Sized + ser::Serialize,
     {
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">enum_as_map</span> {
-            <span class="self">self</span>.<span class="ident">write_u64</span>(<span class="number">5</span>, <span class="number">1u64</span>)<span class="question-mark">?</span>;
-            <span class="ident">variant</span>.<span class="ident">serialize</span>(<span class="kw-2">&amp;mut</span> <span class="kw-2">*</span><span class="self">self</span>)<span class="question-mark">?</span>;
-        } <span class="kw">else</span> {
-            <span class="self">self</span>.<span class="ident">writer</span>.<span class="ident">write_all</span>(<span class="kw-2">&amp;</span>[<span class="number">4</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">5</span> <span class="op">|</span> <span class="number">2</span>]).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">into</span>())<span class="question-mark">?</span>;
-            <span class="self">self</span>.<span class="ident">serialize_unit_variant</span>(<span class="ident">name</span>, <span class="ident">variant_index</span>, <span class="ident">variant</span>)<span class="question-mark">?</span>;
+        <span class="kw">if </span><span class="self">self</span>.enum_as_map {
+            <span class="self">self</span>.write_u64(<span class="number">5</span>, <span class="number">1u64</span>)<span class="question-mark">?</span>;
+            variant.serialize(<span class="kw-2">&amp;mut *</span><span class="self">self</span>)<span class="question-mark">?</span>;
+        } <span class="kw">else </span>{
+            <span class="self">self</span>.writer.write_all(<span class="kw-2">&amp;</span>[<span class="number">4 </span>&lt;&lt; <span class="number">5 </span>| <span class="number">2</span>]).map_err(|e| e.into())<span class="question-mark">?</span>;
+            <span class="self">self</span>.serialize_unit_variant(name, variant_index, variant)<span class="question-mark">?</span>;
         }
-        <span class="ident">value</span>.<span class="ident">serialize</span>(<span class="self">self</span>)
+        value.serialize(<span class="self">self</span>)
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">serialize_seq</span>(<span class="self">self</span>, <span class="ident">len</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">CollectionSerializer</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">W</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">serialize_collection</span>(<span class="number">4</span>, <span class="ident">len</span>)
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>serialize_seq(<span class="self">self</span>, len: <span class="prelude-ty">Option</span>&lt;usize&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;CollectionSerializer&lt;<span class="lifetime">&#39;a</span>, W&gt;&gt; {
+        <span class="self">self</span>.serialize_collection(<span class="number">4</span>, len)
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">serialize_tuple</span>(<span class="self">self</span>, <span class="ident">len</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="ident">Serializer</span><span class="op">&lt;</span><span class="ident">W</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">write_u64</span>(<span class="number">4</span>, <span class="ident">len</span> <span class="kw">as</span> <span class="ident">u64</span>)<span class="question-mark">?</span>;
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>serialize_tuple(<span class="self">self</span>, len: usize) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>Serializer&lt;W&gt;&gt; {
+        <span class="self">self</span>.write_u64(<span class="number">4</span>, len <span class="kw">as </span>u64)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="self">self</span>)
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">serialize_tuple_struct</span>(
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>serialize_tuple_struct(
         <span class="self">self</span>,
-        <span class="ident">_name</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>,
-        <span class="ident">len</span>: <span class="ident">usize</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="ident">Serializer</span><span class="op">&lt;</span><span class="ident">W</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">serialize_tuple</span>(<span class="ident">len</span>)
+        _name: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str,
+        len: usize,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>Serializer&lt;W&gt;&gt; {
+        <span class="self">self</span>.serialize_tuple(len)
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">serialize_tuple_variant</span>(
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>serialize_tuple_variant(
         <span class="self">self</span>,
-        <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>,
-        <span class="ident">variant_index</span>: <span class="ident">u32</span>,
-        <span class="ident">variant</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>,
-        <span class="ident">len</span>: <span class="ident">usize</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="ident">Serializer</span><span class="op">&lt;</span><span class="ident">W</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">enum_as_map</span> {
-            <span class="self">self</span>.<span class="ident">write_u64</span>(<span class="number">5</span>, <span class="number">1u64</span>)<span class="question-mark">?</span>;
-            <span class="ident">variant</span>.<span class="ident">serialize</span>(<span class="kw-2">&amp;mut</span> <span class="kw-2">*</span><span class="self">self</span>)<span class="question-mark">?</span>;
-            <span class="self">self</span>.<span class="ident">serialize_tuple</span>(<span class="ident">len</span>)
-        } <span class="kw">else</span> {
-            <span class="self">self</span>.<span class="ident">write_u64</span>(<span class="number">4</span>, (<span class="ident">len</span> <span class="op">+</span> <span class="number">1</span>) <span class="kw">as</span> <span class="ident">u64</span>)<span class="question-mark">?</span>;
-            <span class="self">self</span>.<span class="ident">serialize_unit_variant</span>(<span class="ident">name</span>, <span class="ident">variant_index</span>, <span class="ident">variant</span>)<span class="question-mark">?</span>;
+        name: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str,
+        variant_index: u32,
+        variant: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str,
+        len: usize,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>Serializer&lt;W&gt;&gt; {
+        <span class="kw">if </span><span class="self">self</span>.enum_as_map {
+            <span class="self">self</span>.write_u64(<span class="number">5</span>, <span class="number">1u64</span>)<span class="question-mark">?</span>;
+            variant.serialize(<span class="kw-2">&amp;mut *</span><span class="self">self</span>)<span class="question-mark">?</span>;
+            <span class="self">self</span>.serialize_tuple(len)
+        } <span class="kw">else </span>{
+            <span class="self">self</span>.write_u64(<span class="number">4</span>, (len + <span class="number">1</span>) <span class="kw">as </span>u64)<span class="question-mark">?</span>;
+            <span class="self">self</span>.serialize_unit_variant(name, variant_index, variant)<span class="question-mark">?</span>;
             <span class="prelude-val">Ok</span>(<span class="self">self</span>)
         }
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">serialize_map</span>(<span class="self">self</span>, <span class="ident">len</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">CollectionSerializer</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">W</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">serialize_collection</span>(<span class="number">5</span>, <span class="ident">len</span>)
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>serialize_map(<span class="self">self</span>, len: <span class="prelude-ty">Option</span>&lt;usize&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;CollectionSerializer&lt;<span class="lifetime">&#39;a</span>, W&gt;&gt; {
+        <span class="self">self</span>.serialize_collection(<span class="number">5</span>, len)
     }
 
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>))]</span>
-    <span class="kw">fn</span> <span class="ident">collect_str</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">value</span>: <span class="kw-2">&amp;</span><span class="ident">T</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>
-    <span class="kw">where</span>
-        <span class="ident">T</span>: <span class="ident">core::fmt::Display</span>,
+    <span class="attribute">#[cfg(not(feature = <span class="string">&quot;std&quot;</span>))]
+    </span><span class="kw">fn </span>collect_str&lt;T: <span class="question-mark">?</span>Sized&gt;(<span class="self">self</span>, value: <span class="kw-2">&amp;</span>T) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt;
+    <span class="kw">where
+        </span>T: core::fmt::Display,
     {
-        <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::write::FmtWrite</span>;
-        <span class="kw">use</span> <span class="ident">core::fmt::Write</span>;
+        <span class="kw">use </span><span class="kw">crate</span>::write::FmtWrite;
+        <span class="kw">use </span>core::fmt::Write;
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">w</span> <span class="op">=</span> <span class="ident">FmtWrite::new</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">writer</span>);
-        <span class="macro">write!</span>(<span class="ident">w</span>, <span class="string">&quot;{}&quot;</span>, <span class="ident">value</span>)<span class="question-mark">?</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>w = FmtWrite::new(<span class="kw-2">&amp;mut </span><span class="self">self</span>.writer);
+        <span class="macro">write!</span>(w, <span class="string">&quot;{}&quot;</span>, value)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">serialize_struct</span>(<span class="self">self</span>, <span class="ident">_name</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>, <span class="ident">len</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">StructSerializer</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">W</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">write_u64</span>(<span class="number">5</span>, <span class="ident">len</span> <span class="kw">as</span> <span class="ident">u64</span>)<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(<span class="ident">StructSerializer</span> { <span class="ident">ser</span>: <span class="self">self</span>, <span class="ident">idx</span>: <span class="number">0</span> })
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>serialize_struct(<span class="self">self</span>, _name: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str, len: usize) -&gt; <span class="prelude-ty">Result</span>&lt;StructSerializer&lt;<span class="lifetime">&#39;a</span>, W&gt;&gt; {
+        <span class="self">self</span>.write_u64(<span class="number">5</span>, len <span class="kw">as </span>u64)<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(StructSerializer { ser: <span class="self">self</span>, idx: <span class="number">0 </span>})
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">serialize_struct_variant</span>(
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>serialize_struct_variant(
         <span class="self">self</span>,
-        <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>,
-        <span class="ident">variant_index</span>: <span class="ident">u32</span>,
-        <span class="ident">variant</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>,
-        <span class="ident">len</span>: <span class="ident">usize</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">StructSerializer</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">W</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">enum_as_map</span> {
-            <span class="self">self</span>.<span class="ident">write_u64</span>(<span class="number">5</span>, <span class="number">1u64</span>)<span class="question-mark">?</span>;
-        } <span class="kw">else</span> {
-            <span class="self">self</span>.<span class="ident">writer</span>.<span class="ident">write_all</span>(<span class="kw-2">&amp;</span>[<span class="number">4</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">5</span> <span class="op">|</span> <span class="number">2</span>]).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">into</span>())<span class="question-mark">?</span>;
+        name: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str,
+        variant_index: u32,
+        variant: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str,
+        len: usize,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;StructSerializer&lt;<span class="lifetime">&#39;a</span>, W&gt;&gt; {
+        <span class="kw">if </span><span class="self">self</span>.enum_as_map {
+            <span class="self">self</span>.write_u64(<span class="number">5</span>, <span class="number">1u64</span>)<span class="question-mark">?</span>;
+        } <span class="kw">else </span>{
+            <span class="self">self</span>.writer.write_all(<span class="kw-2">&amp;</span>[<span class="number">4 </span>&lt;&lt; <span class="number">5 </span>| <span class="number">2</span>]).map_err(|e| e.into())<span class="question-mark">?</span>;
         }
-        <span class="self">self</span>.<span class="ident">serialize_unit_variant</span>(<span class="ident">name</span>, <span class="ident">variant_index</span>, <span class="ident">variant</span>)<span class="question-mark">?</span>;
-        <span class="self">self</span>.<span class="ident">serialize_struct</span>(<span class="ident">name</span>, <span class="ident">len</span>)
+        <span class="self">self</span>.serialize_unit_variant(name, variant_index, variant)<span class="question-mark">?</span>;
+        <span class="self">self</span>.serialize_struct(name, len)
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">is_human_readable</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
-        <span class="bool-val">false</span>
-    }
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>is_human_readable(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+        <span class="bool-val">false
+    </span>}
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">W</span><span class="op">&gt;</span> <span class="ident">ser::SerializeTuple</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="ident">Serializer</span><span class="op">&lt;</span><span class="ident">W</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">W</span>: <span class="ident">Write</span>,
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, W&gt; ser::SerializeTuple <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>Serializer&lt;W&gt;
+<span class="kw">where
+    </span>W: Write,
 {
-    <span class="kw">type</span> <span class="prelude-val">Ok</span> <span class="op">=</span> ();
-    <span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">Error</span>;
+    <span class="kw">type </span><span class="prelude-val">Ok </span>= ();
+    <span class="kw">type </span>Error = Error;
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">serialize_element</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">value</span>: <span class="kw-2">&amp;</span><span class="ident">T</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>
-    <span class="kw">where</span>
-        <span class="ident">T</span>: <span class="question-mark">?</span><span class="ident">Sized</span> <span class="op">+</span> <span class="ident">ser::Serialize</span>,
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>serialize_element&lt;T&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: <span class="kw-2">&amp;</span>T) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt;
+    <span class="kw">where
+        </span>T: <span class="question-mark">?</span>Sized + ser::Serialize,
     {
-        <span class="ident">value</span>.<span class="ident">serialize</span>(<span class="kw-2">&amp;mut</span> <span class="kw-2">*</span><span class="kw-2">*</span><span class="self">self</span>)
+        value.serialize(<span class="kw-2">&amp;mut **</span><span class="self">self</span>)
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">end</span>(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>end(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="prelude-val">Ok</span>(())
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">W</span><span class="op">&gt;</span> <span class="ident">ser::SerializeTupleStruct</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="ident">Serializer</span><span class="op">&lt;</span><span class="ident">W</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">W</span>: <span class="ident">Write</span>,
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, W&gt; ser::SerializeTupleStruct <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>Serializer&lt;W&gt;
+<span class="kw">where
+    </span>W: Write,
 {
-    <span class="kw">type</span> <span class="prelude-val">Ok</span> <span class="op">=</span> ();
-    <span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">Error</span>;
+    <span class="kw">type </span><span class="prelude-val">Ok </span>= ();
+    <span class="kw">type </span>Error = Error;
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">serialize_field</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">value</span>: <span class="kw-2">&amp;</span><span class="ident">T</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>
-    <span class="kw">where</span>
-        <span class="ident">T</span>: <span class="question-mark">?</span><span class="ident">Sized</span> <span class="op">+</span> <span class="ident">ser::Serialize</span>,
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>serialize_field&lt;T&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: <span class="kw-2">&amp;</span>T) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt;
+    <span class="kw">where
+        </span>T: <span class="question-mark">?</span>Sized + ser::Serialize,
     {
-        <span class="ident">value</span>.<span class="ident">serialize</span>(<span class="kw-2">&amp;mut</span> <span class="kw-2">*</span><span class="kw-2">*</span><span class="self">self</span>)
+        value.serialize(<span class="kw-2">&amp;mut **</span><span class="self">self</span>)
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">end</span>(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>end(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="prelude-val">Ok</span>(())
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">W</span><span class="op">&gt;</span> <span class="ident">ser::SerializeTupleVariant</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="ident">Serializer</span><span class="op">&lt;</span><span class="ident">W</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">W</span>: <span class="ident">Write</span>,
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, W&gt; ser::SerializeTupleVariant <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>Serializer&lt;W&gt;
+<span class="kw">where
+    </span>W: Write,
 {
-    <span class="kw">type</span> <span class="prelude-val">Ok</span> <span class="op">=</span> ();
-    <span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">Error</span>;
+    <span class="kw">type </span><span class="prelude-val">Ok </span>= ();
+    <span class="kw">type </span>Error = Error;
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">serialize_field</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">value</span>: <span class="kw-2">&amp;</span><span class="ident">T</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>
-    <span class="kw">where</span>
-        <span class="ident">T</span>: <span class="question-mark">?</span><span class="ident">Sized</span> <span class="op">+</span> <span class="ident">ser::Serialize</span>,
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>serialize_field&lt;T&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: <span class="kw-2">&amp;</span>T) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt;
+    <span class="kw">where
+        </span>T: <span class="question-mark">?</span>Sized + ser::Serialize,
     {
-        <span class="ident">value</span>.<span class="ident">serialize</span>(<span class="kw-2">&amp;mut</span> <span class="kw-2">*</span><span class="kw-2">*</span><span class="self">self</span>)
+        value.serialize(<span class="kw-2">&amp;mut **</span><span class="self">self</span>)
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">end</span>(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>end(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="prelude-val">Ok</span>(())
     }
 }
 
-<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">StructSerializer</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">W</span><span class="op">&gt;</span> {
-    <span class="ident">ser</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="ident">Serializer</span><span class="op">&lt;</span><span class="ident">W</span><span class="op">&gt;</span>,
-    <span class="ident">idx</span>: <span class="ident">u32</span>,
+<span class="attribute">#[doc(hidden)]
+</span><span class="kw">pub struct </span>StructSerializer&lt;<span class="lifetime">&#39;a</span>, W&gt; {
+    ser: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>Serializer&lt;W&gt;,
+    idx: u32,
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">W</span><span class="op">&gt;</span> <span class="ident">StructSerializer</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">W</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">W</span>: <span class="ident">Write</span>,
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, W&gt; StructSerializer&lt;<span class="lifetime">&#39;a</span>, W&gt;
+<span class="kw">where
+    </span>W: Write,
 {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">serialize_field_inner</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>, <span class="ident">value</span>: <span class="kw-2">&amp;</span><span class="ident">T</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>
-    <span class="kw">where</span>
-        <span class="ident">T</span>: <span class="question-mark">?</span><span class="ident">Sized</span> <span class="op">+</span> <span class="ident">ser::Serialize</span>,
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>serialize_field_inner&lt;T&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str, value: <span class="kw-2">&amp;</span>T) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt;
+    <span class="kw">where
+        </span>T: <span class="question-mark">?</span>Sized + ser::Serialize,
     {
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">ser</span>.<span class="ident">packed</span> {
-            <span class="self">self</span>.<span class="ident">idx</span>.<span class="ident">serialize</span>(<span class="kw-2">&amp;mut</span> <span class="kw-2">*</span><span class="self">self</span>.<span class="ident">ser</span>)<span class="question-mark">?</span>;
-        } <span class="kw">else</span> {
-            <span class="ident">key</span>.<span class="ident">serialize</span>(<span class="kw-2">&amp;mut</span> <span class="kw-2">*</span><span class="self">self</span>.<span class="ident">ser</span>)<span class="question-mark">?</span>;
+        <span class="kw">if </span><span class="self">self</span>.ser.packed {
+            <span class="self">self</span>.idx.serialize(<span class="kw-2">&amp;mut *</span><span class="self">self</span>.ser)<span class="question-mark">?</span>;
+        } <span class="kw">else </span>{
+            key.serialize(<span class="kw-2">&amp;mut *</span><span class="self">self</span>.ser)<span class="question-mark">?</span>;
         }
-        <span class="ident">value</span>.<span class="ident">serialize</span>(<span class="kw-2">&amp;mut</span> <span class="kw-2">*</span><span class="self">self</span>.<span class="ident">ser</span>)<span class="question-mark">?</span>;
-        <span class="self">self</span>.<span class="ident">idx</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+        value.serialize(<span class="kw-2">&amp;mut *</span><span class="self">self</span>.ser)<span class="question-mark">?</span>;
+        <span class="self">self</span>.idx += <span class="number">1</span>;
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">skip_field_inner</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">idx</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>skip_field_inner(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="self">self</span>.idx += <span class="number">1</span>;
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">end_inner</span>(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>end_inner(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="prelude-val">Ok</span>(())
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">W</span><span class="op">&gt;</span> <span class="ident">ser::SerializeStruct</span> <span class="kw">for</span> <span class="ident">StructSerializer</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">W</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">W</span>: <span class="ident">Write</span>,
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, W&gt; ser::SerializeStruct <span class="kw">for </span>StructSerializer&lt;<span class="lifetime">&#39;a</span>, W&gt;
+<span class="kw">where
+    </span>W: Write,
 {
-    <span class="kw">type</span> <span class="prelude-val">Ok</span> <span class="op">=</span> ();
-    <span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">Error</span>;
+    <span class="kw">type </span><span class="prelude-val">Ok </span>= ();
+    <span class="kw">type </span>Error = Error;
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">serialize_field</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>, <span class="ident">value</span>: <span class="kw-2">&amp;</span><span class="ident">T</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>
-    <span class="kw">where</span>
-        <span class="ident">T</span>: <span class="question-mark">?</span><span class="ident">Sized</span> <span class="op">+</span> <span class="ident">ser::Serialize</span>,
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>serialize_field&lt;T&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str, value: <span class="kw-2">&amp;</span>T) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt;
+    <span class="kw">where
+        </span>T: <span class="question-mark">?</span>Sized + ser::Serialize,
     {
-        <span class="self">self</span>.<span class="ident">serialize_field_inner</span>(<span class="ident">key</span>, <span class="ident">value</span>)
+        <span class="self">self</span>.serialize_field_inner(key, value)
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">skip_field</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">skip_field_inner</span>(<span class="ident">key</span>)
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>skip_field(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="self">self</span>.skip_field_inner(key)
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">end</span>(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">end_inner</span>()
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>end(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="self">self</span>.end_inner()
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">W</span><span class="op">&gt;</span> <span class="ident">ser::SerializeStructVariant</span> <span class="kw">for</span> <span class="ident">StructSerializer</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">W</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">W</span>: <span class="ident">Write</span>,
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, W&gt; ser::SerializeStructVariant <span class="kw">for </span>StructSerializer&lt;<span class="lifetime">&#39;a</span>, W&gt;
+<span class="kw">where
+    </span>W: Write,
 {
-    <span class="kw">type</span> <span class="prelude-val">Ok</span> <span class="op">=</span> ();
-    <span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">Error</span>;
+    <span class="kw">type </span><span class="prelude-val">Ok </span>= ();
+    <span class="kw">type </span>Error = Error;
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">serialize_field</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>, <span class="ident">value</span>: <span class="kw-2">&amp;</span><span class="ident">T</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>
-    <span class="kw">where</span>
-        <span class="ident">T</span>: <span class="question-mark">?</span><span class="ident">Sized</span> <span class="op">+</span> <span class="ident">ser::Serialize</span>,
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>serialize_field&lt;T&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str, value: <span class="kw-2">&amp;</span>T) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt;
+    <span class="kw">where
+        </span>T: <span class="question-mark">?</span>Sized + ser::Serialize,
     {
-        <span class="self">self</span>.<span class="ident">serialize_field_inner</span>(<span class="ident">key</span>, <span class="ident">value</span>)
+        <span class="self">self</span>.serialize_field_inner(key, value)
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">skip_field</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">skip_field_inner</span>(<span class="ident">key</span>)
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>skip_field(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="self">self</span>.skip_field_inner(key)
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">end</span>(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">end_inner</span>()
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>end(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="self">self</span>.end_inner()
     }
 }
 
-<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">CollectionSerializer</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">W</span><span class="op">&gt;</span> {
-    <span class="ident">ser</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="ident">Serializer</span><span class="op">&lt;</span><span class="ident">W</span><span class="op">&gt;</span>,
-    <span class="ident">needs_eof</span>: <span class="ident">bool</span>,
+<span class="attribute">#[doc(hidden)]
+</span><span class="kw">pub struct </span>CollectionSerializer&lt;<span class="lifetime">&#39;a</span>, W&gt; {
+    ser: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>Serializer&lt;W&gt;,
+    needs_eof: bool,
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">W</span><span class="op">&gt;</span> <span class="ident">CollectionSerializer</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">W</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">W</span>: <span class="ident">Write</span>,
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, W&gt; CollectionSerializer&lt;<span class="lifetime">&#39;a</span>, W&gt;
+<span class="kw">where
+    </span>W: Write,
 {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">end_inner</span>(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">needs_eof</span> {
-            <span class="self">self</span>.<span class="ident">ser</span>.<span class="ident">writer</span>.<span class="ident">write_all</span>(<span class="kw-2">&amp;</span>[<span class="number">0xff</span>]).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">into</span>())
-        } <span class="kw">else</span> {
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>end_inner(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">if </span><span class="self">self</span>.needs_eof {
+            <span class="self">self</span>.ser.writer.write_all(<span class="kw-2">&amp;</span>[<span class="number">0xff</span>]).map_err(|e| e.into())
+        } <span class="kw">else </span>{
             <span class="prelude-val">Ok</span>(())
         }
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">W</span><span class="op">&gt;</span> <span class="ident">ser::SerializeSeq</span> <span class="kw">for</span> <span class="ident">CollectionSerializer</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">W</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">W</span>: <span class="ident">Write</span>,
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, W&gt; ser::SerializeSeq <span class="kw">for </span>CollectionSerializer&lt;<span class="lifetime">&#39;a</span>, W&gt;
+<span class="kw">where
+    </span>W: Write,
 {
-    <span class="kw">type</span> <span class="prelude-val">Ok</span> <span class="op">=</span> ();
-    <span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">Error</span>;
+    <span class="kw">type </span><span class="prelude-val">Ok </span>= ();
+    <span class="kw">type </span>Error = Error;
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">serialize_element</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">value</span>: <span class="kw-2">&amp;</span><span class="ident">T</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>
-    <span class="kw">where</span>
-        <span class="ident">T</span>: <span class="question-mark">?</span><span class="ident">Sized</span> <span class="op">+</span> <span class="ident">ser::Serialize</span>,
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>serialize_element&lt;T&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: <span class="kw-2">&amp;</span>T) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt;
+    <span class="kw">where
+        </span>T: <span class="question-mark">?</span>Sized + ser::Serialize,
     {
-        <span class="ident">value</span>.<span class="ident">serialize</span>(<span class="kw-2">&amp;mut</span> <span class="kw-2">*</span><span class="self">self</span>.<span class="ident">ser</span>)
+        value.serialize(<span class="kw-2">&amp;mut *</span><span class="self">self</span>.ser)
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">end</span>(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">end_inner</span>()
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>end(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="self">self</span>.end_inner()
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">W</span><span class="op">&gt;</span> <span class="ident">ser::SerializeMap</span> <span class="kw">for</span> <span class="ident">CollectionSerializer</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">W</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">W</span>: <span class="ident">Write</span>,
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, W&gt; ser::SerializeMap <span class="kw">for </span>CollectionSerializer&lt;<span class="lifetime">&#39;a</span>, W&gt;
+<span class="kw">where
+    </span>W: Write,
 {
-    <span class="kw">type</span> <span class="prelude-val">Ok</span> <span class="op">=</span> ();
-    <span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">Error</span>;
+    <span class="kw">type </span><span class="prelude-val">Ok </span>= ();
+    <span class="kw">type </span>Error = Error;
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">serialize_key</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="ident">T</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>
-    <span class="kw">where</span>
-        <span class="ident">T</span>: <span class="question-mark">?</span><span class="ident">Sized</span> <span class="op">+</span> <span class="ident">ser::Serialize</span>,
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>serialize_key&lt;T&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: <span class="kw-2">&amp;</span>T) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt;
+    <span class="kw">where
+        </span>T: <span class="question-mark">?</span>Sized + ser::Serialize,
     {
-        <span class="ident">key</span>.<span class="ident">serialize</span>(<span class="kw-2">&amp;mut</span> <span class="kw-2">*</span><span class="self">self</span>.<span class="ident">ser</span>)
+        key.serialize(<span class="kw-2">&amp;mut *</span><span class="self">self</span>.ser)
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">serialize_value</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">value</span>: <span class="kw-2">&amp;</span><span class="ident">T</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>
-    <span class="kw">where</span>
-        <span class="ident">T</span>: <span class="question-mark">?</span><span class="ident">Sized</span> <span class="op">+</span> <span class="ident">ser::Serialize</span>,
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>serialize_value&lt;T&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: <span class="kw-2">&amp;</span>T) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt;
+    <span class="kw">where
+        </span>T: <span class="question-mark">?</span>Sized + ser::Serialize,
     {
-        <span class="ident">value</span>.<span class="ident">serialize</span>(<span class="kw-2">&amp;mut</span> <span class="kw-2">*</span><span class="self">self</span>.<span class="ident">ser</span>)
+        value.serialize(<span class="kw-2">&amp;mut *</span><span class="self">self</span>.ser)
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">end</span>(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">end_inner</span>()
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>end(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="self">self</span>.end_inner()
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="serde_cbor" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="serde_cbor" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

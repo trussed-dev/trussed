@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/store/counterstore.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>counterstore.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../trussed/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../trussed/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../trussed/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/store/counterstore.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>counterstore.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../trussed/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../trussed/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../trussed/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -90,97 +90,97 @@
 <span id="90">90</span>
 <span id="91">91</span>
 <span id="92">92</span>
-</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">chacha20::ChaCha8Rng</span>;
-<span class="kw">use</span> <span class="ident">littlefs2::path::PathBuf</span>;
+</pre><pre class="rust"><code><span class="kw">use </span>chacha20::ChaCha8Rng;
+<span class="kw">use </span>littlefs2::path::PathBuf;
 
-<span class="kw">use</span> <span class="kw">crate</span>::{
-    <span class="ident">error</span>::{<span class="ident">Error</span>, <span class="prelude-ty">Result</span>},
-    <span class="ident">store</span>::{<span class="self">self</span>, <span class="ident">Store</span>},
-    <span class="ident">types</span>::{<span class="ident">ClientId</span>, <span class="ident">CounterId</span>, <span class="ident">Location</span>},
+<span class="kw">use crate</span>::{
+    error::{Error, <span class="prelude-ty">Result</span>},
+    store::{<span class="self">self</span>, Store},
+    types::{ClientId, CounterId, Location},
 };
 
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ClientCounterstore</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">S</span>: <span class="ident">Store</span>,
+<span class="kw">pub struct </span>ClientCounterstore&lt;S&gt;
+<span class="kw">where
+    </span>S: Store,
 {
-    <span class="ident">client_id</span>: <span class="ident">ClientId</span>,
-    <span class="ident">rng</span>: <span class="ident">ChaCha8Rng</span>,
-    <span class="ident">store</span>: <span class="ident">S</span>,
+    client_id: ClientId,
+    rng: ChaCha8Rng,
+    store: S,
 }
 
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">Counter</span> <span class="op">=</span> <span class="ident">u128</span>;
+<span class="kw">pub type </span>Counter = u128;
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Store</span><span class="op">&gt;</span> <span class="ident">ClientCounterstore</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">client_id</span>: <span class="ident">ClientId</span>, <span class="ident">rng</span>: <span class="ident">ChaCha8Rng</span>, <span class="ident">store</span>: <span class="ident">S</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">Self</span> {
-            <span class="ident">client_id</span>,
-            <span class="ident">rng</span>,
-            <span class="ident">store</span>,
+<span class="kw">impl</span>&lt;S: Store&gt; ClientCounterstore&lt;S&gt; {
+    <span class="kw">pub fn </span>new(client_id: ClientId, rng: ChaCha8Rng, store: S) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            client_id,
+            rng,
+            store,
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">counter_path</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">id</span>: <span class="ident">CounterId</span>) -&gt; <span class="ident">PathBuf</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">PathBuf::new</span>();
-        <span class="ident">path</span>.<span class="ident">push</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">client_id</span>);
-        <span class="ident">path</span>.<span class="ident">push</span>(<span class="kw-2">&amp;</span><span class="ident">PathBuf::from</span>(<span class="string">&quot;ctr&quot;</span>));
-        <span class="ident">path</span>.<span class="ident">push</span>(<span class="kw-2">&amp;</span><span class="ident">PathBuf::from</span>(<span class="ident">id</span>.<span class="ident">hex</span>().<span class="ident">as_slice</span>()));
-        <span class="ident">path</span>
+    <span class="kw">fn </span>counter_path(<span class="kw-2">&amp;</span><span class="self">self</span>, id: CounterId) -&gt; PathBuf {
+        <span class="kw">let </span><span class="kw-2">mut </span>path = PathBuf::new();
+        path.push(<span class="kw-2">&amp;</span><span class="self">self</span>.client_id);
+        path.push(<span class="kw-2">&amp;</span>PathBuf::from(<span class="string">&quot;ctr&quot;</span>));
+        path.push(<span class="kw-2">&amp;</span>PathBuf::from(id.hex().as_slice()));
+        path
     }
 
-    <span class="kw">fn</span> <span class="ident">read_counter</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">location</span>: <span class="ident">Location</span>, <span class="ident">id</span>: <span class="ident">CounterId</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Counter</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">counter_path</span>(<span class="ident">id</span>);
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">bytes</span>: <span class="ident"><span class="kw">crate</span>::Bytes</span><span class="op">&lt;</span><span class="number">16</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">store::read</span>(<span class="self">self</span>.<span class="ident">store</span>, <span class="ident">location</span>, <span class="kw-2">&amp;</span><span class="ident">path</span>)<span class="question-mark">?</span>;
-        <span class="ident">bytes</span>.<span class="ident">resize_default</span>(<span class="number">16</span>).<span class="ident">ok</span>();
-        <span class="prelude-val">Ok</span>(<span class="ident">u128::from_le_bytes</span>(<span class="ident">bytes</span>.<span class="ident">as_slice</span>().<span class="ident">try_into</span>().<span class="ident">unwrap</span>()))
+    <span class="kw">fn </span>read_counter(<span class="kw-2">&amp;mut </span><span class="self">self</span>, location: Location, id: CounterId) -&gt; <span class="prelude-ty">Result</span>&lt;Counter&gt; {
+        <span class="kw">let </span>path = <span class="self">self</span>.counter_path(id);
+        <span class="kw">let </span><span class="kw-2">mut </span>bytes: <span class="kw">crate</span>::Bytes&lt;<span class="number">16</span>&gt; = store::read(<span class="self">self</span>.store, location, <span class="kw-2">&amp;</span>path)<span class="question-mark">?</span>;
+        bytes.resize_default(<span class="number">16</span>).ok();
+        <span class="prelude-val">Ok</span>(u128::from_le_bytes(bytes.as_slice().try_into().unwrap()))
     }
 
-    <span class="kw">fn</span> <span class="ident">write_counter</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">location</span>: <span class="ident">Location</span>, <span class="ident">id</span>: <span class="ident">CounterId</span>, <span class="ident">value</span>: <span class="ident">u128</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">counter_path</span>(<span class="ident">id</span>);
-        <span class="ident">store::store</span>(<span class="self">self</span>.<span class="ident">store</span>, <span class="ident">location</span>, <span class="kw-2">&amp;</span><span class="ident">path</span>, <span class="kw-2">&amp;</span><span class="ident">value</span>.<span class="ident">to_le_bytes</span>())
+    <span class="kw">fn </span>write_counter(<span class="kw-2">&amp;mut </span><span class="self">self</span>, location: Location, id: CounterId, value: u128) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">let </span>path = <span class="self">self</span>.counter_path(id);
+        store::store(<span class="self">self</span>.store, location, <span class="kw-2">&amp;</span>path, <span class="kw-2">&amp;</span>value.to_le_bytes())
     }
 
-    <span class="kw">fn</span> <span class="ident">increment_location</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">location</span>: <span class="ident">Location</span>, <span class="ident">id</span>: <span class="ident">CounterId</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Counter</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">counter</span>: <span class="ident">u128</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">read_counter</span>(<span class="ident">location</span>, <span class="ident">id</span>)<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">next_counter</span> <span class="op">=</span> <span class="ident">counter</span> <span class="op">+</span> <span class="number">1</span>;
-        <span class="self">self</span>.<span class="ident">write_counter</span>(<span class="ident">location</span>, <span class="ident">id</span>, <span class="ident">next_counter</span>)<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(<span class="ident">counter</span>)
+    <span class="kw">fn </span>increment_location(<span class="kw-2">&amp;mut </span><span class="self">self</span>, location: Location, id: CounterId) -&gt; <span class="prelude-ty">Result</span>&lt;Counter&gt; {
+        <span class="kw">let </span>counter: u128 = <span class="self">self</span>.read_counter(location, id)<span class="question-mark">?</span>;
+        <span class="kw">let </span>next_counter = counter + <span class="number">1</span>;
+        <span class="self">self</span>.write_counter(location, id, next_counter)<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(counter)
     }
 }
 
-<span class="doccomment">/// Trait intended for use by mechanism implementations.</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Counterstore</span> {
-    <span class="kw">const</span> <span class="ident">DEFAULT_START_AT</span>: <span class="ident">u128</span> <span class="op">=</span> <span class="number">0</span>;
-    <span class="kw">fn</span> <span class="ident">create_starting_at</span>(
-        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
-        <span class="ident">location</span>: <span class="ident">Location</span>,
-        <span class="ident">starting_at</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Counter</span><span class="op">&gt;</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">CounterId</span><span class="op">&gt;</span>;
-    <span class="kw">fn</span> <span class="ident">create</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">location</span>: <span class="ident">Location</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">CounterId</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">create_starting_at</span>(<span class="ident">location</span>, <span class="ident"><span class="self">Self</span>::DEFAULT_START_AT</span>)
+<span class="doccomment">/// Trait intended for use by mechanism implementations.
+</span><span class="kw">pub trait </span>Counterstore {
+    <span class="kw">const </span>DEFAULT_START_AT: u128 = <span class="number">0</span>;
+    <span class="kw">fn </span>create_starting_at(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        location: Location,
+        starting_at: <span class="kw">impl </span>Into&lt;Counter&gt;,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;CounterId&gt;;
+    <span class="kw">fn </span>create(<span class="kw-2">&amp;mut </span><span class="self">self</span>, location: Location) -&gt; <span class="prelude-ty">Result</span>&lt;CounterId&gt; {
+        <span class="self">self</span>.create_starting_at(location, <span class="self">Self</span>::DEFAULT_START_AT)
     }
-    <span class="kw">fn</span> <span class="ident">increment</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">id</span>: <span class="ident">CounterId</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">u128</span><span class="op">&gt;</span>;
+    <span class="kw">fn </span>increment(<span class="kw-2">&amp;mut </span><span class="self">self</span>, id: CounterId) -&gt; <span class="prelude-ty">Result</span>&lt;u128&gt;;
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Store</span><span class="op">&gt;</span> <span class="ident">Counterstore</span> <span class="kw">for</span> <span class="ident">ClientCounterstore</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">create_starting_at</span>(
-        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
-        <span class="ident">location</span>: <span class="ident">Location</span>,
-        <span class="ident">starting_at</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Counter</span><span class="op">&gt;</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">CounterId</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="ident">CounterId::new</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">rng</span>);
-        <span class="self">self</span>.<span class="ident">write_counter</span>(<span class="ident">location</span>, <span class="ident">id</span>, <span class="ident">starting_at</span>.<span class="ident">into</span>())<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(<span class="ident">id</span>)
+<span class="kw">impl</span>&lt;S: Store&gt; Counterstore <span class="kw">for </span>ClientCounterstore&lt;S&gt; {
+    <span class="kw">fn </span>create_starting_at(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        location: Location,
+        starting_at: <span class="kw">impl </span>Into&lt;Counter&gt;,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;CounterId&gt; {
+        <span class="kw">let </span>id = CounterId::new(<span class="kw-2">&amp;mut </span><span class="self">self</span>.rng);
+        <span class="self">self</span>.write_counter(location, id, starting_at.into())<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(id)
     }
 
-    <span class="kw">fn</span> <span class="ident">increment</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">id</span>: <span class="ident">CounterId</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">u128</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">locations</span> <span class="op">=</span> [<span class="ident">Location::Internal</span>, <span class="ident">Location::External</span>, <span class="ident">Location::Volatile</span>];
+    <span class="kw">fn </span>increment(<span class="kw-2">&amp;mut </span><span class="self">self</span>, id: CounterId) -&gt; <span class="prelude-ty">Result</span>&lt;u128&gt; {
+        <span class="kw">let </span>locations = [Location::Internal, Location::External, Location::Volatile];
 
-        <span class="ident">locations</span>
-            .<span class="ident">iter</span>()
-            .<span class="ident">filter_map</span>(<span class="op">|</span><span class="kw-2">&amp;</span><span class="ident">location</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">increment_location</span>(<span class="ident">location</span>, <span class="ident">id</span>).<span class="ident">ok</span>())
-            .<span class="ident">next</span>()
-            .<span class="ident">ok_or</span>(<span class="ident">Error::NoSuchKey</span>)
+        locations
+            .iter()
+            .filter_map(|<span class="kw-2">&amp;</span>location| <span class="self">self</span>.increment_location(location, id).ok())
+            .next()
+            .ok_or(Error::NoSuchKey)
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="trussed" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="trussed" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

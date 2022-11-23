@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/serde_cbor-0.11.2/src/read.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>read.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../serde_cbor/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../serde_cbor/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../serde_cbor/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/serde_cbor-0.11.2/src/read.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>read.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../serde_cbor/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../serde_cbor/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../serde_cbor/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -635,642 +635,642 @@
 <span id="635">635</span>
 <span id="636">636</span>
 <span id="637">637</span>
-</pre><pre class="rust"><code><span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;alloc&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident">alloc</span>::{<span class="ident">vec</span>, <span class="ident">vec::Vec</span>};
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident">core::cmp</span>;
-<span class="kw">use</span> <span class="ident">core::mem</span>;
+</pre><pre class="rust"><code><span class="attribute">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+</span><span class="kw">use </span>alloc::{vec, vec::Vec};
+<span class="attribute">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+</span><span class="kw">use </span>core::cmp;
+<span class="kw">use </span>core::mem;
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident">std::io</span>::{<span class="self">self</span>, <span class="ident">Read</span> <span class="kw">as</span> <span class="ident">StdRead</span>};
+<span class="attribute">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+</span><span class="kw">use </span>std::io::{<span class="self">self</span>, Read <span class="kw">as </span>StdRead};
 
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::error</span>::{<span class="ident">Error</span>, <span class="ident">ErrorCode</span>, <span class="prelude-ty">Result</span>};
+<span class="kw">use </span><span class="kw">crate</span>::error::{Error, ErrorCode, <span class="prelude-ty">Result</span>};
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;unsealed_read_write&quot;</span>))]</span>
-<span class="doccomment">/// Trait used by the deserializer for iterating over input.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// This trait is sealed by default, enabling the `unsealed_read_write` feature removes this bound</span>
-<span class="doccomment">/// to allow objects outside of this crate to implement this trait.</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Read</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span>: <span class="ident">private::Sealed</span> {
-    <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
-    <span class="doccomment">/// Read n bytes from the input.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// Implementations that can are asked to return a slice with a Long lifetime that outlives the</span>
-    <span class="doccomment">/// decoder, but others (eg. ones that need to allocate the data into a temporary buffer) can</span>
-    <span class="doccomment">/// return it with a Short lifetime that just lives for the time of read&#39;s mutable borrow of</span>
-    <span class="doccomment">/// the reader.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// This may, as a side effect, clear the reader&#39;s scratch buffer (as the provided</span>
-    <span class="doccomment">/// implementation does).</span>
+<span class="attribute">#[cfg(not(feature = <span class="string">&quot;unsealed_read_write&quot;</span>))]
+</span><span class="doccomment">/// Trait used by the deserializer for iterating over input.
+///
+/// This trait is sealed by default, enabling the `unsealed_read_write` feature removes this bound
+/// to allow objects outside of this crate to implement this trait.
+</span><span class="kw">pub trait </span>Read&lt;<span class="lifetime">&#39;de</span>&gt;: private::Sealed {
+    <span class="attribute">#[doc(hidden)]
+    </span><span class="doccomment">/// Read n bytes from the input.
+    ///
+    /// Implementations that can are asked to return a slice with a Long lifetime that outlives the
+    /// decoder, but others (eg. ones that need to allocate the data into a temporary buffer) can
+    /// return it with a Short lifetime that just lives for the time of read&#39;s mutable borrow of
+    /// the reader.
+    ///
+    /// This may, as a side effect, clear the reader&#39;s scratch buffer (as the provided
+    /// implementation does).
 
-    <span class="comment">// A more appropriate lifetime setup for this (that would allow the Deserializer::convert_str</span>
-    <span class="comment">// to stay a function) would be something like `fn read&lt;&#39;a, &#39;r: &#39;a&gt;(&amp;&#39;a mut &#39;r immut self, ...) -&gt; ...</span>
-    <span class="comment">// EitherLifetime&lt;&#39;r, &#39;de&gt;&gt;`, which borrows self mutably for the duration of the function and</span>
-    <span class="comment">// downgrates that reference to an immutable one that outlives the result (protecting the</span>
-    <span class="comment">// scratch buffer from changes), but alas, that can&#39;t be expressed (yet?).</span>
-    <span class="kw">fn</span> <span class="ident">read</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">n</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">EitherLifetime</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;de</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">clear_buffer</span>();
-        <span class="self">self</span>.<span class="ident">read_to_buffer</span>(<span class="ident">n</span>)<span class="question-mark">?</span>;
+    </span><span class="comment">// A more appropriate lifetime setup for this (that would allow the Deserializer::convert_str
+    // to stay a function) would be something like `fn read&lt;&#39;a, &#39;r: &#39;a&gt;(&amp;&#39;a mut &#39;r immut self, ...) -&gt; ...
+    // EitherLifetime&lt;&#39;r, &#39;de&gt;&gt;`, which borrows self mutably for the duration of the function and
+    // downgrates that reference to an immutable one that outlives the result (protecting the
+    // scratch buffer from changes), but alas, that can&#39;t be expressed (yet?).
+    </span><span class="kw">fn </span>read&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="self">self</span>, n: usize) -&gt; <span class="prelude-ty">Result</span>&lt;EitherLifetime&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;de</span>&gt;&gt; {
+        <span class="self">self</span>.clear_buffer();
+        <span class="self">self</span>.read_to_buffer(n)<span class="question-mark">?</span>;
 
-        <span class="prelude-val">Ok</span>(<span class="self">self</span>.<span class="ident">take_buffer</span>())
+        <span class="prelude-val">Ok</span>(<span class="self">self</span>.take_buffer())
     }
 
-    <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">next</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>;
+    <span class="attribute">#[doc(hidden)]
+    </span><span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;u8&gt;&gt;;
 
-    <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">peek</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>;
+    <span class="attribute">#[doc(hidden)]
+    </span><span class="kw">fn </span>peek(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;u8&gt;&gt;;
 
-    <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">clear_buffer</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>);
+    <span class="attribute">#[doc(hidden)]
+    </span><span class="kw">fn </span>clear_buffer(<span class="kw-2">&amp;mut </span><span class="self">self</span>);
 
-    <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">read_to_buffer</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">n</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
+    <span class="attribute">#[doc(hidden)]
+    </span><span class="kw">fn </span>read_to_buffer(<span class="kw-2">&amp;mut </span><span class="self">self</span>, n: usize) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt;;
 
-    <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">take_buffer</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">EitherLifetime</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;de</span><span class="op">&gt;</span>;
+    <span class="attribute">#[doc(hidden)]
+    </span><span class="kw">fn </span>take_buffer&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="self">self</span>) -&gt; EitherLifetime&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;de</span>&gt;;
 
-    <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">read_into</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">buf</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
+    <span class="attribute">#[doc(hidden)]
+    </span><span class="kw">fn </span>read_into(<span class="kw-2">&amp;mut </span><span class="self">self</span>, buf: <span class="kw-2">&amp;mut </span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt;;
 
-    <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">discard</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>);
+    <span class="attribute">#[doc(hidden)]
+    </span><span class="kw">fn </span>discard(<span class="kw-2">&amp;mut </span><span class="self">self</span>);
 
-    <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">offset</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u64</span>;
+    <span class="attribute">#[doc(hidden)]
+    </span><span class="kw">fn </span>offset(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u64;
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;unsealed_read_write&quot;</span>)]</span>
-<span class="doccomment">/// Trait used by the deserializer for iterating over input.</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Read</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Read n bytes from the input.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// Implementations that can are asked to return a slice with a Long lifetime that outlives the</span>
-    <span class="doccomment">/// decoder, but others (eg. ones that need to allocate the data into a temporary buffer) can</span>
-    <span class="doccomment">/// return it with a Short lifetime that just lives for the time of read&#39;s mutable borrow of</span>
-    <span class="doccomment">/// the reader.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// This may, as a side effect, clear the reader&#39;s scratch buffer (as the provided</span>
-    <span class="doccomment">/// implementation does).</span>
+<span class="attribute">#[cfg(feature = <span class="string">&quot;unsealed_read_write&quot;</span>)]
+</span><span class="doccomment">/// Trait used by the deserializer for iterating over input.
+</span><span class="kw">pub trait </span>Read&lt;<span class="lifetime">&#39;de</span>&gt; {
+    <span class="doccomment">/// Read n bytes from the input.
+    ///
+    /// Implementations that can are asked to return a slice with a Long lifetime that outlives the
+    /// decoder, but others (eg. ones that need to allocate the data into a temporary buffer) can
+    /// return it with a Short lifetime that just lives for the time of read&#39;s mutable borrow of
+    /// the reader.
+    ///
+    /// This may, as a side effect, clear the reader&#39;s scratch buffer (as the provided
+    /// implementation does).
 
-    <span class="comment">// A more appropriate lifetime setup for this (that would allow the Deserializer::convert_str</span>
-    <span class="comment">// to stay a function) would be something like `fn read&lt;&#39;a, &#39;r: &#39;a&gt;(&amp;&#39;a mut &#39;r immut self, ...) -&gt; ...</span>
-    <span class="comment">// EitherLifetime&lt;&#39;r, &#39;de&gt;&gt;`, which borrows self mutably for the duration of the function and</span>
-    <span class="comment">// downgrates that reference to an immutable one that outlives the result (protecting the</span>
-    <span class="comment">// scratch buffer from changes), but alas, that can&#39;t be expressed (yet?).</span>
-    <span class="kw">fn</span> <span class="ident">read</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">n</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">EitherLifetime</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;de</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">clear_buffer</span>();
-        <span class="self">self</span>.<span class="ident">read_to_buffer</span>(<span class="ident">n</span>)<span class="question-mark">?</span>;
+    </span><span class="comment">// A more appropriate lifetime setup for this (that would allow the Deserializer::convert_str
+    // to stay a function) would be something like `fn read&lt;&#39;a, &#39;r: &#39;a&gt;(&amp;&#39;a mut &#39;r immut self, ...) -&gt; ...
+    // EitherLifetime&lt;&#39;r, &#39;de&gt;&gt;`, which borrows self mutably for the duration of the function and
+    // downgrates that reference to an immutable one that outlives the result (protecting the
+    // scratch buffer from changes), but alas, that can&#39;t be expressed (yet?).
+    </span><span class="kw">fn </span>read&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="self">self</span>, n: usize) -&gt; <span class="prelude-ty">Result</span>&lt;EitherLifetime&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;de</span>&gt;&gt; {
+        <span class="self">self</span>.clear_buffer();
+        <span class="self">self</span>.read_to_buffer(n)<span class="question-mark">?</span>;
 
-        <span class="prelude-val">Ok</span>(<span class="self">self</span>.<span class="ident">take_buffer</span>())
+        <span class="prelude-val">Ok</span>(<span class="self">self</span>.take_buffer())
     }
 
-    <span class="doccomment">/// Read the next byte from the input, if any.</span>
-    <span class="kw">fn</span> <span class="ident">next</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>;
+    <span class="doccomment">/// Read the next byte from the input, if any.
+    </span><span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;u8&gt;&gt;;
 
-    <span class="doccomment">/// Peek at the next byte of the input, if any. This does not advance the reader, so the result</span>
-    <span class="doccomment">/// of this function will remain the same until a read or clear occurs.</span>
-    <span class="kw">fn</span> <span class="ident">peek</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>;
+    <span class="doccomment">/// Peek at the next byte of the input, if any. This does not advance the reader, so the result
+    /// of this function will remain the same until a read or clear occurs.
+    </span><span class="kw">fn </span>peek(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;u8&gt;&gt;;
 
-    <span class="doccomment">/// Clear the underlying scratch buffer</span>
-    <span class="kw">fn</span> <span class="ident">clear_buffer</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>);
+    <span class="doccomment">/// Clear the underlying scratch buffer
+    </span><span class="kw">fn </span>clear_buffer(<span class="kw-2">&amp;mut </span><span class="self">self</span>);
 
-    <span class="doccomment">/// Append n bytes from the reader to the reader&#39;s scratch buffer (without clearing it)</span>
-    <span class="kw">fn</span> <span class="ident">read_to_buffer</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">n</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
+    <span class="doccomment">/// Append n bytes from the reader to the reader&#39;s scratch buffer (without clearing it)
+    </span><span class="kw">fn </span>read_to_buffer(<span class="kw-2">&amp;mut </span><span class="self">self</span>, n: usize) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt;;
 
-    <span class="doccomment">/// Read out everything accumulated in the reader&#39;s scratch buffer. This may, as a side effect,</span>
-    <span class="doccomment">/// clear it.</span>
-    <span class="kw">fn</span> <span class="ident">take_buffer</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">EitherLifetime</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;de</span><span class="op">&gt;</span>;
+    <span class="doccomment">/// Read out everything accumulated in the reader&#39;s scratch buffer. This may, as a side effect,
+    /// clear it.
+    </span><span class="kw">fn </span>take_buffer&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="self">self</span>) -&gt; EitherLifetime&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;de</span>&gt;;
 
-    <span class="doccomment">/// Read from the input until `buf` is full or end of input is encountered.</span>
-    <span class="kw">fn</span> <span class="ident">read_into</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">buf</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
+    <span class="doccomment">/// Read from the input until `buf` is full or end of input is encountered.
+    </span><span class="kw">fn </span>read_into(<span class="kw-2">&amp;mut </span><span class="self">self</span>, buf: <span class="kw-2">&amp;mut </span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt;;
 
-    <span class="doccomment">/// Discard any data read by `peek`.</span>
-    <span class="kw">fn</span> <span class="ident">discard</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>);
+    <span class="doccomment">/// Discard any data read by `peek`.
+    </span><span class="kw">fn </span>discard(<span class="kw-2">&amp;mut </span><span class="self">self</span>);
 
-    <span class="doccomment">/// Returns the offset from the start of the reader.</span>
-    <span class="kw">fn</span> <span class="ident">offset</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u64</span>;
+    <span class="doccomment">/// Returns the offset from the start of the reader.
+    </span><span class="kw">fn </span>offset(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u64;
 }
 
-<span class="doccomment">/// Represents a reader that can return its current position</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Offset</span> {
-    <span class="kw">fn</span> <span class="ident">byte_offset</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">usize</span>;
+<span class="doccomment">/// Represents a reader that can return its current position
+</span><span class="kw">pub trait </span>Offset {
+    <span class="kw">fn </span>byte_offset(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize;
 }
 
-<span class="doccomment">/// Represents a buffer with one of two lifetimes.</span>
-<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">EitherLifetime</span><span class="op">&lt;</span><span class="lifetime">&#39;short</span>, <span class="lifetime">&#39;long</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// The short lifetime</span>
-    <span class="ident">Short</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;short</span> [<span class="ident">u8</span>]),
-    <span class="doccomment">/// The long lifetime</span>
-    <span class="ident">Long</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;long</span> [<span class="ident">u8</span>]),
+<span class="doccomment">/// Represents a buffer with one of two lifetimes.
+</span><span class="kw">pub enum </span>EitherLifetime&lt;<span class="lifetime">&#39;short</span>, <span class="lifetime">&#39;long</span>&gt; {
+    <span class="doccomment">/// The short lifetime
+    </span>Short(<span class="kw-2">&amp;</span><span class="lifetime">&#39;short </span>[u8]),
+    <span class="doccomment">/// The long lifetime
+    </span>Long(<span class="kw-2">&amp;</span><span class="lifetime">&#39;long </span>[u8]),
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;unsealed_read_write&quot;</span>))]</span>
-<span class="kw">mod</span> <span class="ident">private</span> {
-    <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Sealed</span> {}
+<span class="attribute">#[cfg(not(feature = <span class="string">&quot;unsealed_read_write&quot;</span>))]
+</span><span class="kw">mod </span>private {
+    <span class="kw">pub trait </span>Sealed {}
 }
 
-<span class="doccomment">/// CBOR input source that reads from a std::io input stream.</span>
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)]</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">IoRead</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">R</span>: <span class="ident">io::Read</span>,
+<span class="doccomment">/// CBOR input source that reads from a std::io input stream.
+</span><span class="attribute">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+#[derive(Debug)]
+</span><span class="kw">pub struct </span>IoRead&lt;R&gt;
+<span class="kw">where
+    </span>R: io::Read,
 {
-    <span class="ident">reader</span>: <span class="ident">OffsetReader</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span>,
-    <span class="ident">scratch</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
-    <span class="ident">ch</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
+    reader: OffsetReader&lt;R&gt;,
+    scratch: Vec&lt;u8&gt;,
+    ch: <span class="prelude-ty">Option</span>&lt;u8&gt;,
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)]</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span> <span class="ident">IoRead</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">R</span>: <span class="ident">io::Read</span>,
+<span class="attribute">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+</span><span class="kw">impl</span>&lt;R&gt; IoRead&lt;R&gt;
+<span class="kw">where
+    </span>R: io::Read,
 {
-    <span class="doccomment">/// Creates a new CBOR input source to read from a std::io input stream.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">reader</span>: <span class="ident">R</span>) -&gt; <span class="ident">IoRead</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span> {
-        <span class="ident">IoRead</span> {
-            <span class="ident">reader</span>: <span class="ident">OffsetReader</span> { <span class="ident">reader</span>, <span class="ident">offset</span>: <span class="number">0</span> },
-            <span class="ident">scratch</span>: <span class="macro">vec!</span>[],
-            <span class="ident">ch</span>: <span class="prelude-val">None</span>,
+    <span class="doccomment">/// Creates a new CBOR input source to read from a std::io input stream.
+    </span><span class="kw">pub fn </span>new(reader: R) -&gt; IoRead&lt;R&gt; {
+        IoRead {
+            reader: OffsetReader { reader, offset: <span class="number">0 </span>},
+            scratch: <span class="macro">vec!</span>[],
+            ch: <span class="prelude-val">None</span>,
         }
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">next_inner</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> [<span class="number">0</span>; <span class="number">1</span>];
-        <span class="kw">loop</span> {
-            <span class="kw">match</span> <span class="self">self</span>.<span class="ident">reader</span>.<span class="ident">read</span>(<span class="kw-2">&amp;mut</span> <span class="ident">buf</span>) {
-                <span class="prelude-val">Ok</span>(<span class="number">0</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
-                <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">buf</span>[<span class="number">0</span>])),
-                <span class="prelude-val">Err</span>(<span class="kw-2">ref</span> <span class="ident">e</span>) <span class="kw">if</span> <span class="ident">e</span>.<span class="ident">kind</span>() <span class="op">==</span> <span class="ident">io::ErrorKind::Interrupted</span> =&gt; {}
-                <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::io</span>(<span class="ident">e</span>)),
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>next_inner(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;u8&gt;&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>buf = [<span class="number">0</span>; <span class="number">1</span>];
+        <span class="kw">loop </span>{
+            <span class="kw">match </span><span class="self">self</span>.reader.read(<span class="kw-2">&amp;mut </span>buf) {
+                <span class="prelude-val">Ok</span>(<span class="number">0</span>) =&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
+                <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(buf[<span class="number">0</span>])),
+                <span class="prelude-val">Err</span>(<span class="kw-2">ref </span>e) <span class="kw">if </span>e.kind() == io::ErrorKind::Interrupted =&gt; {}
+                <span class="prelude-val">Err</span>(e) =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(Error::io(e)),
             }
         }
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>, <span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;unsealed_read_write&quot;</span>)))]</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span> <span class="ident">private::Sealed</span> <span class="kw">for</span> <span class="ident">IoRead</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span> <span class="kw">where</span> <span class="ident">R</span>: <span class="ident">io::Read</span> {}
+<span class="attribute">#[cfg(all(feature = <span class="string">&quot;std&quot;</span>, not(feature = <span class="string">&quot;unsealed_read_write&quot;</span>)))]
+</span><span class="kw">impl</span>&lt;R&gt; private::Sealed <span class="kw">for </span>IoRead&lt;R&gt; <span class="kw">where </span>R: io::Read {}
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)]</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span>, <span class="ident">R</span><span class="op">&gt;</span> <span class="ident">Read</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">IoRead</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">R</span>: <span class="ident">io::Read</span>,
+<span class="attribute">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;de</span>, R&gt; Read&lt;<span class="lifetime">&#39;de</span>&gt; <span class="kw">for </span>IoRead&lt;R&gt;
+<span class="kw">where
+    </span>R: io::Read,
 {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">next</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="kw">match</span> <span class="self">self</span>.<span class="ident">ch</span>.<span class="ident">take</span>() {
-            <span class="prelude-val">Some</span>(<span class="ident">ch</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">ch</span>)),
-            <span class="prelude-val">None</span> =&gt; <span class="self">self</span>.<span class="ident">next_inner</span>(),
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;u8&gt;&gt; {
+        <span class="kw">match </span><span class="self">self</span>.ch.take() {
+            <span class="prelude-val">Some</span>(ch) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(ch)),
+            <span class="prelude-val">None </span>=&gt; <span class="self">self</span>.next_inner(),
         }
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">peek</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="kw">match</span> <span class="self">self</span>.<span class="ident">ch</span> {
-            <span class="prelude-val">Some</span>(<span class="ident">ch</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">ch</span>)),
-            <span class="prelude-val">None</span> =&gt; {
-                <span class="self">self</span>.<span class="ident">ch</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">next_inner</span>()<span class="question-mark">?</span>;
-                <span class="prelude-val">Ok</span>(<span class="self">self</span>.<span class="ident">ch</span>)
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>peek(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;u8&gt;&gt; {
+        <span class="kw">match </span><span class="self">self</span>.ch {
+            <span class="prelude-val">Some</span>(ch) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(ch)),
+            <span class="prelude-val">None </span>=&gt; {
+                <span class="self">self</span>.ch = <span class="self">self</span>.next_inner()<span class="question-mark">?</span>;
+                <span class="prelude-val">Ok</span>(<span class="self">self</span>.ch)
             }
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">read_to_buffer</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">n</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="comment">// defend against malicious input pretending to be huge strings by limiting growth</span>
-        <span class="self">self</span>.<span class="ident">scratch</span>.<span class="ident">reserve</span>(<span class="ident">cmp::min</span>(<span class="ident">n</span>, <span class="number">16</span> <span class="op">*</span> <span class="number">1024</span>));
+    <span class="kw">fn </span>read_to_buffer(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw-2">mut </span>n: usize) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="comment">// defend against malicious input pretending to be huge strings by limiting growth
+        </span><span class="self">self</span>.scratch.reserve(cmp::min(n, <span class="number">16 </span>* <span class="number">1024</span>));
 
-        <span class="kw">if</span> <span class="ident">n</span> <span class="op">==</span> <span class="number">0</span> {
-            <span class="kw">return</span> <span class="prelude-val">Ok</span>(());
+        <span class="kw">if </span>n == <span class="number">0 </span>{
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(());
         }
 
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">ch</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">ch</span>.<span class="ident">take</span>() {
-            <span class="self">self</span>.<span class="ident">scratch</span>.<span class="ident">push</span>(<span class="ident">ch</span>);
-            <span class="ident">n</span> <span class="op">-</span><span class="op">=</span> <span class="number">1</span>;
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(ch) = <span class="self">self</span>.ch.take() {
+            <span class="self">self</span>.scratch.push(ch);
+            n -= <span class="number">1</span>;
         }
 
-        <span class="comment">// n == 0 is OK here and needs no further special treatment</span>
+        <span class="comment">// n == 0 is OK here and needs no further special treatment
 
-        <span class="kw">let</span> <span class="ident">transfer_result</span> <span class="op">=</span> {
-            <span class="comment">// Prepare for take() (which consumes its reader) by creating a reference adaptor</span>
-            <span class="comment">// that&#39;ll only live in this block</span>
-            <span class="kw">let</span> <span class="ident">reference</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">reader</span>.<span class="ident">by_ref</span>();
-            <span class="comment">// Append the first n bytes of the reader to the scratch vector (or up to</span>
-            <span class="comment">// an error or EOF indicated by a shorter read)</span>
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">taken</span> <span class="op">=</span> <span class="ident">reference</span>.<span class="ident">take</span>(<span class="ident">n</span> <span class="kw">as</span> <span class="ident">u64</span>);
-            <span class="ident">taken</span>.<span class="ident">read_to_end</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">scratch</span>)
+        </span><span class="kw">let </span>transfer_result = {
+            <span class="comment">// Prepare for take() (which consumes its reader) by creating a reference adaptor
+            // that&#39;ll only live in this block
+            </span><span class="kw">let </span>reference = <span class="self">self</span>.reader.by_ref();
+            <span class="comment">// Append the first n bytes of the reader to the scratch vector (or up to
+            // an error or EOF indicated by a shorter read)
+            </span><span class="kw">let </span><span class="kw-2">mut </span>taken = reference.take(n <span class="kw">as </span>u64);
+            taken.read_to_end(<span class="kw-2">&amp;mut </span><span class="self">self</span>.scratch)
         };
 
-        <span class="kw">match</span> <span class="ident">transfer_result</span> {
-            <span class="prelude-val">Ok</span>(<span class="ident">r</span>) <span class="kw">if</span> <span class="ident">r</span> <span class="op">==</span> <span class="ident">n</span> =&gt; <span class="prelude-val">Ok</span>(()),
-            <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">Err</span>(<span class="ident">Error::syntax</span>(
-                <span class="ident">ErrorCode::EofWhileParsingValue</span>,
-                <span class="self">self</span>.<span class="ident">offset</span>(),
+        <span class="kw">match </span>transfer_result {
+            <span class="prelude-val">Ok</span>(r) <span class="kw">if </span>r == n =&gt; <span class="prelude-val">Ok</span>(()),
+            <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">Err</span>(Error::syntax(
+                ErrorCode::EofWhileParsingValue,
+                <span class="self">self</span>.offset(),
             )),
-            <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; <span class="prelude-val">Err</span>(<span class="ident">Error::io</span>(<span class="ident">e</span>)),
+            <span class="prelude-val">Err</span>(e) =&gt; <span class="prelude-val">Err</span>(Error::io(e)),
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">clear_buffer</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
-        <span class="self">self</span>.<span class="ident">scratch</span>.<span class="ident">clear</span>();
+    <span class="kw">fn </span>clear_buffer(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="self">self</span>.scratch.clear();
     }
 
-    <span class="kw">fn</span> <span class="ident">take_buffer</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">EitherLifetime</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;de</span><span class="op">&gt;</span> {
-        <span class="ident">EitherLifetime::Short</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">scratch</span>)
+    <span class="kw">fn </span>take_buffer&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="self">self</span>) -&gt; EitherLifetime&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;de</span>&gt; {
+        EitherLifetime::Short(<span class="kw-2">&amp;</span><span class="self">self</span>.scratch)
     }
 
-    <span class="kw">fn</span> <span class="ident">read_into</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">buf</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">reader</span>.<span class="ident">read_exact</span>(<span class="ident">buf</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> {
-            <span class="kw">if</span> <span class="ident">e</span>.<span class="ident">kind</span>() <span class="op">==</span> <span class="ident">io::ErrorKind::UnexpectedEof</span> {
-                <span class="ident">Error::syntax</span>(<span class="ident">ErrorCode::EofWhileParsingValue</span>, <span class="self">self</span>.<span class="ident">offset</span>())
-            } <span class="kw">else</span> {
-                <span class="ident">Error::io</span>(<span class="ident">e</span>)
+    <span class="kw">fn </span>read_into(<span class="kw-2">&amp;mut </span><span class="self">self</span>, buf: <span class="kw-2">&amp;mut </span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="self">self</span>.reader.read_exact(buf).map_err(|e| {
+            <span class="kw">if </span>e.kind() == io::ErrorKind::UnexpectedEof {
+                Error::syntax(ErrorCode::EofWhileParsingValue, <span class="self">self</span>.offset())
+            } <span class="kw">else </span>{
+                Error::io(e)
             }
         })
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">discard</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
-        <span class="self">self</span>.<span class="ident">ch</span> <span class="op">=</span> <span class="prelude-val">None</span>;
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>discard(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="self">self</span>.ch = <span class="prelude-val">None</span>;
     }
 
-    <span class="kw">fn</span> <span class="ident">offset</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u64</span> {
-        <span class="self">self</span>.<span class="ident">reader</span>.<span class="ident">offset</span>
+    <span class="kw">fn </span>offset(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u64 {
+        <span class="self">self</span>.reader.offset
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)]</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span> <span class="ident">Offset</span> <span class="kw">for</span> <span class="ident">IoRead</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">R</span>: <span class="ident">std::io::Read</span>,
+<span class="attribute">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+</span><span class="kw">impl</span>&lt;R&gt; Offset <span class="kw">for </span>IoRead&lt;R&gt;
+<span class="kw">where
+    </span>R: std::io::Read,
 {
-    <span class="kw">fn</span> <span class="ident">byte_offset</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">usize</span> {
-        <span class="self">self</span>.<span class="ident">offset</span>() <span class="kw">as</span> <span class="ident">usize</span>
+    <span class="kw">fn </span>byte_offset(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
+        <span class="self">self</span>.offset() <span class="kw">as </span>usize
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)]</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
-<span class="kw">struct</span> <span class="ident">OffsetReader</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span> {
-    <span class="ident">reader</span>: <span class="ident">R</span>,
-    <span class="ident">offset</span>: <span class="ident">u64</span>,
+<span class="attribute">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+#[derive(Debug)]
+</span><span class="kw">struct </span>OffsetReader&lt;R&gt; {
+    reader: R,
+    offset: u64,
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)]</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span> <span class="ident">io::Read</span> <span class="kw">for</span> <span class="ident">OffsetReader</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">R</span>: <span class="ident">io::Read</span>,
+<span class="attribute">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+</span><span class="kw">impl</span>&lt;R&gt; io::Read <span class="kw">for </span>OffsetReader&lt;R&gt;
+<span class="kw">where
+    </span>R: io::Read,
 {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">read</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">buf</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">u8</span>]) -&gt; <span class="ident">io::Result</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">r</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">reader</span>.<span class="ident">read</span>(<span class="ident">buf</span>);
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">count</span>) <span class="op">=</span> <span class="ident">r</span> {
-            <span class="self">self</span>.<span class="ident">offset</span> <span class="op">+</span><span class="op">=</span> <span class="ident">count</span> <span class="kw">as</span> <span class="ident">u64</span>;
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, buf: <span class="kw-2">&amp;mut </span>[u8]) -&gt; io::Result&lt;usize&gt; {
+        <span class="kw">let </span>r = <span class="self">self</span>.reader.read(buf);
+        <span class="kw">if let </span><span class="prelude-val">Ok</span>(count) = r {
+            <span class="self">self</span>.offset += count <span class="kw">as </span>u64;
         }
-        <span class="ident">r</span>
+        r
     }
 }
 
-<span class="doccomment">/// A CBOR input source that reads from a slice of bytes.</span>
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;alloc&quot;</span>))]</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SliceRead</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-    <span class="ident">slice</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>],
-    <span class="ident">scratch</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
-    <span class="ident">index</span>: <span class="ident">usize</span>,
+<span class="doccomment">/// A CBOR input source that reads from a slice of bytes.
+</span><span class="attribute">#[cfg(any(feature = <span class="string">&quot;std&quot;</span>, feature = <span class="string">&quot;alloc&quot;</span>))]
+#[derive(Debug)]
+</span><span class="kw">pub struct </span>SliceRead&lt;<span class="lifetime">&#39;a</span>&gt; {
+    slice: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+    scratch: Vec&lt;u8&gt;,
+    index: usize,
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;alloc&quot;</span>))]</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">SliceRead</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Creates a CBOR input source to read from a slice of bytes.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">slice</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>]) -&gt; <span class="ident">SliceRead</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-        <span class="ident">SliceRead</span> {
-            <span class="ident">slice</span>,
-            <span class="ident">scratch</span>: <span class="macro">vec!</span>[],
-            <span class="ident">index</span>: <span class="number">0</span>,
+<span class="attribute">#[cfg(any(feature = <span class="string">&quot;std&quot;</span>, feature = <span class="string">&quot;alloc&quot;</span>))]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; SliceRead&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="doccomment">/// Creates a CBOR input source to read from a slice of bytes.
+    </span><span class="kw">pub fn </span>new(slice: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; SliceRead&lt;<span class="lifetime">&#39;a</span>&gt; {
+        SliceRead {
+            slice,
+            scratch: <span class="macro">vec!</span>[],
+            index: <span class="number">0</span>,
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">end</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">n</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
-        <span class="kw">match</span> <span class="self">self</span>.<span class="ident">index</span>.<span class="ident">checked_add</span>(<span class="ident">n</span>) {
-            <span class="prelude-val">Some</span>(<span class="ident">end</span>) <span class="kw">if</span> <span class="ident">end</span> <span class="op">&lt;</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">slice</span>.<span class="ident">len</span>() =&gt; <span class="prelude-val">Ok</span>(<span class="ident">end</span>),
-            <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">Error::syntax</span>(
-                <span class="ident">ErrorCode::EofWhileParsingValue</span>,
-                <span class="self">self</span>.<span class="ident">slice</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u64</span>,
+    <span class="kw">fn </span>end(<span class="kw-2">&amp;</span><span class="self">self</span>, n: usize) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+        <span class="kw">match </span><span class="self">self</span>.index.checked_add(n) {
+            <span class="prelude-val">Some</span>(end) <span class="kw">if </span>end &lt;= <span class="self">self</span>.slice.len() =&gt; <span class="prelude-val">Ok</span>(end),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(Error::syntax(
+                ErrorCode::EofWhileParsingValue,
+                <span class="self">self</span>.slice.len() <span class="kw">as </span>u64,
             )),
         }
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;alloc&quot;</span>))]</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Offset</span> <span class="kw">for</span> <span class="ident">SliceRead</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">byte_offset</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">usize</span> {
-        <span class="self">self</span>.<span class="ident">index</span>
+<span class="attribute">#[cfg(any(feature = <span class="string">&quot;std&quot;</span>, feature = <span class="string">&quot;alloc&quot;</span>))]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Offset <span class="kw">for </span>SliceRead&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>byte_offset(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
+        <span class="self">self</span>.index
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(
-    <span class="ident">any</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;alloc&quot;</span>),
-    <span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;unsealed_read_write&quot;</span>)
-))]</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">private::Sealed</span> <span class="kw">for</span> <span class="ident">SliceRead</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {}
+<span class="attribute">#[cfg(all(
+    any(feature = <span class="string">&quot;std&quot;</span>, feature = <span class="string">&quot;alloc&quot;</span>),
+    not(feature = <span class="string">&quot;unsealed_read_write&quot;</span>)
+))]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; private::Sealed <span class="kw">for </span>SliceRead&lt;<span class="lifetime">&#39;a</span>&gt; {}
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;alloc&quot;</span>))]</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Read</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">SliceRead</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">next</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="prelude-val">Ok</span>(<span class="kw">if</span> <span class="self">self</span>.<span class="ident">index</span> <span class="op">&lt;</span> <span class="self">self</span>.<span class="ident">slice</span>.<span class="ident">len</span>() {
-            <span class="kw">let</span> <span class="ident">ch</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">slice</span>[<span class="self">self</span>.<span class="ident">index</span>];
-            <span class="self">self</span>.<span class="ident">index</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
-            <span class="prelude-val">Some</span>(<span class="ident">ch</span>)
-        } <span class="kw">else</span> {
-            <span class="prelude-val">None</span>
-        })
+<span class="attribute">#[cfg(any(feature = <span class="string">&quot;std&quot;</span>, feature = <span class="string">&quot;alloc&quot;</span>))]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Read&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>SliceRead&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;u8&gt;&gt; {
+        <span class="prelude-val">Ok</span>(<span class="kw">if </span><span class="self">self</span>.index &lt; <span class="self">self</span>.slice.len() {
+            <span class="kw">let </span>ch = <span class="self">self</span>.slice[<span class="self">self</span>.index];
+            <span class="self">self</span>.index += <span class="number">1</span>;
+            <span class="prelude-val">Some</span>(ch)
+        } <span class="kw">else </span>{
+            <span class="prelude-val">None
+        </span>})
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">peek</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="prelude-val">Ok</span>(<span class="kw">if</span> <span class="self">self</span>.<span class="ident">index</span> <span class="op">&lt;</span> <span class="self">self</span>.<span class="ident">slice</span>.<span class="ident">len</span>() {
-            <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">slice</span>[<span class="self">self</span>.<span class="ident">index</span>])
-        } <span class="kw">else</span> {
-            <span class="prelude-val">None</span>
-        })
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>peek(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;u8&gt;&gt; {
+        <span class="prelude-val">Ok</span>(<span class="kw">if </span><span class="self">self</span>.index &lt; <span class="self">self</span>.slice.len() {
+            <span class="prelude-val">Some</span>(<span class="self">self</span>.slice[<span class="self">self</span>.index])
+        } <span class="kw">else </span>{
+            <span class="prelude-val">None
+        </span>})
     }
 
-    <span class="kw">fn</span> <span class="ident">clear_buffer</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
-        <span class="self">self</span>.<span class="ident">scratch</span>.<span class="ident">clear</span>();
+    <span class="kw">fn </span>clear_buffer(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="self">self</span>.scratch.clear();
     }
 
-    <span class="kw">fn</span> <span class="ident">read_to_buffer</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">n</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">end</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">end</span>(<span class="ident">n</span>)<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">slice</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">slice</span>[<span class="self">self</span>.<span class="ident">index</span>..<span class="ident">end</span>];
-        <span class="self">self</span>.<span class="ident">scratch</span>.<span class="ident">extend_from_slice</span>(<span class="ident">slice</span>);
-        <span class="self">self</span>.<span class="ident">index</span> <span class="op">=</span> <span class="ident">end</span>;
+    <span class="kw">fn </span>read_to_buffer(<span class="kw-2">&amp;mut </span><span class="self">self</span>, n: usize) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">let </span>end = <span class="self">self</span>.end(n)<span class="question-mark">?</span>;
+        <span class="kw">let </span>slice = <span class="kw-2">&amp;</span><span class="self">self</span>.slice[<span class="self">self</span>.index..end];
+        <span class="self">self</span>.scratch.extend_from_slice(slice);
+        <span class="self">self</span>.index = end;
 
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">read</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">n</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">EitherLifetime</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span>, <span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">end</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">end</span>(<span class="ident">n</span>)<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">slice</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">slice</span>[<span class="self">self</span>.<span class="ident">index</span>..<span class="ident">end</span>];
-        <span class="self">self</span>.<span class="ident">index</span> <span class="op">=</span> <span class="ident">end</span>;
-        <span class="prelude-val">Ok</span>(<span class="ident">EitherLifetime::Long</span>(<span class="ident">slice</span>))
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>read&lt;<span class="lifetime">&#39;b</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span><span class="kw-2">mut </span><span class="self">self</span>, n: usize) -&gt; <span class="prelude-ty">Result</span>&lt;EitherLifetime&lt;<span class="lifetime">&#39;b</span>, <span class="lifetime">&#39;a</span>&gt;&gt; {
+        <span class="kw">let </span>end = <span class="self">self</span>.end(n)<span class="question-mark">?</span>;
+        <span class="kw">let </span>slice = <span class="kw-2">&amp;</span><span class="self">self</span>.slice[<span class="self">self</span>.index..end];
+        <span class="self">self</span>.index = end;
+        <span class="prelude-val">Ok</span>(EitherLifetime::Long(slice))
     }
 
-    <span class="kw">fn</span> <span class="ident">take_buffer</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">EitherLifetime</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span>, <span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-        <span class="ident">EitherLifetime::Short</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">scratch</span>)
+    <span class="kw">fn </span>take_buffer&lt;<span class="lifetime">&#39;b</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span><span class="kw-2">mut </span><span class="self">self</span>) -&gt; EitherLifetime&lt;<span class="lifetime">&#39;b</span>, <span class="lifetime">&#39;a</span>&gt; {
+        EitherLifetime::Short(<span class="kw-2">&amp;</span><span class="self">self</span>.scratch)
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">read_into</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">buf</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">end</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">end</span>(<span class="ident">buf</span>.<span class="ident">len</span>())<span class="question-mark">?</span>;
-        <span class="ident">buf</span>.<span class="ident">copy_from_slice</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">slice</span>[<span class="self">self</span>.<span class="ident">index</span>..<span class="ident">end</span>]);
-        <span class="self">self</span>.<span class="ident">index</span> <span class="op">=</span> <span class="ident">end</span>;
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>read_into(<span class="kw-2">&amp;mut </span><span class="self">self</span>, buf: <span class="kw-2">&amp;mut </span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">let </span>end = <span class="self">self</span>.end(buf.len())<span class="question-mark">?</span>;
+        buf.copy_from_slice(<span class="kw-2">&amp;</span><span class="self">self</span>.slice[<span class="self">self</span>.index..end]);
+        <span class="self">self</span>.index = end;
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">discard</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
-        <span class="self">self</span>.<span class="ident">index</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>discard(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="self">self</span>.index += <span class="number">1</span>;
     }
 
-    <span class="kw">fn</span> <span class="ident">offset</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u64</span> {
-        <span class="self">self</span>.<span class="ident">index</span> <span class="kw">as</span> <span class="ident">u64</span>
+    <span class="kw">fn </span>offset(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u64 {
+        <span class="self">self</span>.index <span class="kw">as </span>u64
     }
 }
 
-<span class="doccomment">/// A CBOR input source that reads from a slice of bytes using a fixed size scratch buffer.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// [`SliceRead`](struct.SliceRead.html) and [`MutSliceRead`](struct.MutSliceRead.html) are usually</span>
-<span class="doccomment">/// preferred over this, as they can handle indefinite length items.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SliceReadFixed</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span><span class="op">&gt;</span> {
-    <span class="ident">slice</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>],
-    <span class="ident">scratch</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="kw-2">mut</span> [<span class="ident">u8</span>],
-    <span class="ident">index</span>: <span class="ident">usize</span>,
-    <span class="ident">scratch_index</span>: <span class="ident">usize</span>,
+<span class="doccomment">/// A CBOR input source that reads from a slice of bytes using a fixed size scratch buffer.
+///
+/// [`SliceRead`](struct.SliceRead.html) and [`MutSliceRead`](struct.MutSliceRead.html) are usually
+/// preferred over this, as they can handle indefinite length items.
+</span><span class="attribute">#[derive(Debug)]
+</span><span class="kw">pub struct </span>SliceReadFixed&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>&gt; {
+    slice: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+    scratch: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span><span class="kw-2">mut </span>[u8],
+    index: usize,
+    scratch_index: usize,
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span><span class="op">&gt;</span> <span class="ident">SliceReadFixed</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Creates a CBOR input source to read from a slice of bytes, backed by a scratch buffer.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">slice</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>], <span class="ident">scratch</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="kw-2">mut</span> [<span class="ident">u8</span>]) -&gt; <span class="ident">SliceReadFixed</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span><span class="op">&gt;</span> {
-        <span class="ident">SliceReadFixed</span> {
-            <span class="ident">slice</span>,
-            <span class="ident">scratch</span>,
-            <span class="ident">index</span>: <span class="number">0</span>,
-            <span class="ident">scratch_index</span>: <span class="number">0</span>,
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>&gt; SliceReadFixed&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>&gt; {
+    <span class="doccomment">/// Creates a CBOR input source to read from a slice of bytes, backed by a scratch buffer.
+    </span><span class="kw">pub fn </span>new(slice: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8], scratch: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span><span class="kw-2">mut </span>[u8]) -&gt; SliceReadFixed&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>&gt; {
+        SliceReadFixed {
+            slice,
+            scratch,
+            index: <span class="number">0</span>,
+            scratch_index: <span class="number">0</span>,
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">end</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">n</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
-        <span class="kw">match</span> <span class="self">self</span>.<span class="ident">index</span>.<span class="ident">checked_add</span>(<span class="ident">n</span>) {
-            <span class="prelude-val">Some</span>(<span class="ident">end</span>) <span class="kw">if</span> <span class="ident">end</span> <span class="op">&lt;</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">slice</span>.<span class="ident">len</span>() =&gt; <span class="prelude-val">Ok</span>(<span class="ident">end</span>),
-            <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">Error::syntax</span>(
-                <span class="ident">ErrorCode::EofWhileParsingValue</span>,
-                <span class="self">self</span>.<span class="ident">slice</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u64</span>,
+    <span class="kw">fn </span>end(<span class="kw-2">&amp;</span><span class="self">self</span>, n: usize) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+        <span class="kw">match </span><span class="self">self</span>.index.checked_add(n) {
+            <span class="prelude-val">Some</span>(end) <span class="kw">if </span>end &lt;= <span class="self">self</span>.slice.len() =&gt; <span class="prelude-val">Ok</span>(end),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(Error::syntax(
+                ErrorCode::EofWhileParsingValue,
+                <span class="self">self</span>.slice.len() <span class="kw">as </span>u64,
             )),
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">scratch_end</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">n</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
-        <span class="kw">match</span> <span class="self">self</span>.<span class="ident">scratch_index</span>.<span class="ident">checked_add</span>(<span class="ident">n</span>) {
-            <span class="prelude-val">Some</span>(<span class="ident">end</span>) <span class="kw">if</span> <span class="ident">end</span> <span class="op">&lt;</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">scratch</span>.<span class="ident">len</span>() =&gt; <span class="prelude-val">Ok</span>(<span class="ident">end</span>),
-            <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">Error::scratch_too_small</span>(<span class="self">self</span>.<span class="ident">index</span> <span class="kw">as</span> <span class="ident">u64</span>)),
+    <span class="kw">fn </span>scratch_end(<span class="kw-2">&amp;</span><span class="self">self</span>, n: usize) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+        <span class="kw">match </span><span class="self">self</span>.scratch_index.checked_add(n) {
+            <span class="prelude-val">Some</span>(end) <span class="kw">if </span>end &lt;= <span class="self">self</span>.scratch.len() =&gt; <span class="prelude-val">Ok</span>(end),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(Error::scratch_too_small(<span class="self">self</span>.index <span class="kw">as </span>u64)),
         }
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;unsealed_read_write&quot;</span>))]</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span><span class="op">&gt;</span> <span class="ident">private::Sealed</span> <span class="kw">for</span> <span class="ident">SliceReadFixed</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span><span class="op">&gt;</span> {}
+<span class="attribute">#[cfg(not(feature = <span class="string">&quot;unsealed_read_write&quot;</span>))]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>&gt; private::Sealed <span class="kw">for </span>SliceReadFixed&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>&gt; {}
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span><span class="op">&gt;</span> <span class="ident">Read</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">SliceReadFixed</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span><span class="op">&gt;</span> {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">next</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="prelude-val">Ok</span>(<span class="kw">if</span> <span class="self">self</span>.<span class="ident">index</span> <span class="op">&lt;</span> <span class="self">self</span>.<span class="ident">slice</span>.<span class="ident">len</span>() {
-            <span class="kw">let</span> <span class="ident">ch</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">slice</span>[<span class="self">self</span>.<span class="ident">index</span>];
-            <span class="self">self</span>.<span class="ident">index</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
-            <span class="prelude-val">Some</span>(<span class="ident">ch</span>)
-        } <span class="kw">else</span> {
-            <span class="prelude-val">None</span>
-        })
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>&gt; Read&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>SliceReadFixed&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>&gt; {
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;u8&gt;&gt; {
+        <span class="prelude-val">Ok</span>(<span class="kw">if </span><span class="self">self</span>.index &lt; <span class="self">self</span>.slice.len() {
+            <span class="kw">let </span>ch = <span class="self">self</span>.slice[<span class="self">self</span>.index];
+            <span class="self">self</span>.index += <span class="number">1</span>;
+            <span class="prelude-val">Some</span>(ch)
+        } <span class="kw">else </span>{
+            <span class="prelude-val">None
+        </span>})
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">peek</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="prelude-val">Ok</span>(<span class="kw">if</span> <span class="self">self</span>.<span class="ident">index</span> <span class="op">&lt;</span> <span class="self">self</span>.<span class="ident">slice</span>.<span class="ident">len</span>() {
-            <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">slice</span>[<span class="self">self</span>.<span class="ident">index</span>])
-        } <span class="kw">else</span> {
-            <span class="prelude-val">None</span>
-        })
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>peek(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;u8&gt;&gt; {
+        <span class="prelude-val">Ok</span>(<span class="kw">if </span><span class="self">self</span>.index &lt; <span class="self">self</span>.slice.len() {
+            <span class="prelude-val">Some</span>(<span class="self">self</span>.slice[<span class="self">self</span>.index])
+        } <span class="kw">else </span>{
+            <span class="prelude-val">None
+        </span>})
     }
 
-    <span class="kw">fn</span> <span class="ident">clear_buffer</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
-        <span class="self">self</span>.<span class="ident">scratch_index</span> <span class="op">=</span> <span class="number">0</span>;
+    <span class="kw">fn </span>clear_buffer(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="self">self</span>.scratch_index = <span class="number">0</span>;
     }
 
-    <span class="kw">fn</span> <span class="ident">read_to_buffer</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">n</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">end</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">end</span>(<span class="ident">n</span>)<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">scratch_end</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">scratch_end</span>(<span class="ident">n</span>)<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">slice</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">slice</span>[<span class="self">self</span>.<span class="ident">index</span>..<span class="ident">end</span>];
-        <span class="self">self</span>.<span class="ident">scratch</span>[<span class="self">self</span>.<span class="ident">scratch_index</span>..<span class="ident">scratch_end</span>].<span class="ident">copy_from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">slice</span>);
-        <span class="self">self</span>.<span class="ident">index</span> <span class="op">=</span> <span class="ident">end</span>;
-        <span class="self">self</span>.<span class="ident">scratch_index</span> <span class="op">=</span> <span class="ident">scratch_end</span>;
+    <span class="kw">fn </span>read_to_buffer(<span class="kw-2">&amp;mut </span><span class="self">self</span>, n: usize) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">let </span>end = <span class="self">self</span>.end(n)<span class="question-mark">?</span>;
+        <span class="kw">let </span>scratch_end = <span class="self">self</span>.scratch_end(n)<span class="question-mark">?</span>;
+        <span class="kw">let </span>slice = <span class="kw-2">&amp;</span><span class="self">self</span>.slice[<span class="self">self</span>.index..end];
+        <span class="self">self</span>.scratch[<span class="self">self</span>.scratch_index..scratch_end].copy_from_slice(<span class="kw-2">&amp;</span>slice);
+        <span class="self">self</span>.index = end;
+        <span class="self">self</span>.scratch_index = scratch_end;
 
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn</span> <span class="ident">read</span><span class="op">&lt;</span><span class="lifetime">&#39;c</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;c</span> <span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">n</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">EitherLifetime</span><span class="op">&lt;</span><span class="lifetime">&#39;c</span>, <span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">end</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">end</span>(<span class="ident">n</span>)<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">slice</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">slice</span>[<span class="self">self</span>.<span class="ident">index</span>..<span class="ident">end</span>];
-        <span class="self">self</span>.<span class="ident">index</span> <span class="op">=</span> <span class="ident">end</span>;
-        <span class="prelude-val">Ok</span>(<span class="ident">EitherLifetime::Long</span>(<span class="ident">slice</span>))
+    <span class="kw">fn </span>read&lt;<span class="lifetime">&#39;c</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;c </span><span class="kw-2">mut </span><span class="self">self</span>, n: usize) -&gt; <span class="prelude-ty">Result</span>&lt;EitherLifetime&lt;<span class="lifetime">&#39;c</span>, <span class="lifetime">&#39;a</span>&gt;&gt; {
+        <span class="kw">let </span>end = <span class="self">self</span>.end(n)<span class="question-mark">?</span>;
+        <span class="kw">let </span>slice = <span class="kw-2">&amp;</span><span class="self">self</span>.slice[<span class="self">self</span>.index..end];
+        <span class="self">self</span>.index = end;
+        <span class="prelude-val">Ok</span>(EitherLifetime::Long(slice))
     }
 
-    <span class="kw">fn</span> <span class="ident">take_buffer</span><span class="op">&lt;</span><span class="lifetime">&#39;c</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;c</span> <span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">EitherLifetime</span><span class="op">&lt;</span><span class="lifetime">&#39;c</span>, <span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-        <span class="ident">EitherLifetime::Short</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">scratch</span>[<span class="number">0</span>..<span class="self">self</span>.<span class="ident">scratch_index</span>])
+    <span class="kw">fn </span>take_buffer&lt;<span class="lifetime">&#39;c</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;c </span><span class="kw-2">mut </span><span class="self">self</span>) -&gt; EitherLifetime&lt;<span class="lifetime">&#39;c</span>, <span class="lifetime">&#39;a</span>&gt; {
+        EitherLifetime::Short(<span class="kw-2">&amp;</span><span class="self">self</span>.scratch[<span class="number">0</span>..<span class="self">self</span>.scratch_index])
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">read_into</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">buf</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">end</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">end</span>(<span class="ident">buf</span>.<span class="ident">len</span>())<span class="question-mark">?</span>;
-        <span class="ident">buf</span>.<span class="ident">copy_from_slice</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">slice</span>[<span class="self">self</span>.<span class="ident">index</span>..<span class="ident">end</span>]);
-        <span class="self">self</span>.<span class="ident">index</span> <span class="op">=</span> <span class="ident">end</span>;
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>read_into(<span class="kw-2">&amp;mut </span><span class="self">self</span>, buf: <span class="kw-2">&amp;mut </span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">let </span>end = <span class="self">self</span>.end(buf.len())<span class="question-mark">?</span>;
+        buf.copy_from_slice(<span class="kw-2">&amp;</span><span class="self">self</span>.slice[<span class="self">self</span>.index..end]);
+        <span class="self">self</span>.index = end;
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">discard</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
-        <span class="self">self</span>.<span class="ident">index</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>discard(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="self">self</span>.index += <span class="number">1</span>;
     }
 
-    <span class="kw">fn</span> <span class="ident">offset</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u64</span> {
-        <span class="self">self</span>.<span class="ident">index</span> <span class="kw">as</span> <span class="ident">u64</span>
-    }
-}
-
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;alloc&quot;</span>))]</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span><span class="op">&gt;</span> <span class="ident">Offset</span> <span class="kw">for</span> <span class="ident">SliceReadFixed</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span><span class="op">&gt;</span> {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">byte_offset</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">usize</span> {
-        <span class="self">self</span>.<span class="ident">index</span>
+    <span class="kw">fn </span>offset(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u64 {
+        <span class="self">self</span>.index <span class="kw">as </span>u64
     }
 }
 
-<span class="doccomment">/// A CBOR input source that reads from a slice of bytes, and can move data around internally to</span>
-<span class="doccomment">/// reassemble indefinite strings without the need of an allocated scratch buffer.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">MutSliceRead</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// A complete view of the reader&#39;s data. It is promised that bytes before buffer_end are not</span>
-    <span class="doccomment">/// mutated any more.</span>
-    <span class="ident">slice</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> [<span class="ident">u8</span>],
-    <span class="doccomment">/// Read cursor position in slice</span>
-    <span class="ident">index</span>: <span class="ident">usize</span>,
-    <span class="doccomment">/// Number of bytes already discarded from the slice</span>
-    <span class="ident">before</span>: <span class="ident">usize</span>,
-    <span class="doccomment">/// End of the buffer area that contains all bytes read_into_buffer. This is always &lt;= index.</span>
-    <span class="ident">buffer_end</span>: <span class="ident">usize</span>,
+<span class="attribute">#[cfg(any(feature = <span class="string">&quot;std&quot;</span>, feature = <span class="string">&quot;alloc&quot;</span>))]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>&gt; Offset <span class="kw">for </span>SliceReadFixed&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>&gt; {
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>byte_offset(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
+        <span class="self">self</span>.index
+    }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">MutSliceRead</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Creates a CBOR input source to read from a slice of bytes.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">slice</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> [<span class="ident">u8</span>]) -&gt; <span class="ident">MutSliceRead</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-        <span class="ident">MutSliceRead</span> {
-            <span class="ident">slice</span>,
-            <span class="ident">index</span>: <span class="number">0</span>,
-            <span class="ident">before</span>: <span class="number">0</span>,
-            <span class="ident">buffer_end</span>: <span class="number">0</span>,
+<span class="doccomment">/// A CBOR input source that reads from a slice of bytes, and can move data around internally to
+/// reassemble indefinite strings without the need of an allocated scratch buffer.
+</span><span class="attribute">#[derive(Debug)]
+</span><span class="kw">pub struct </span>MutSliceRead&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="doccomment">/// A complete view of the reader&#39;s data. It is promised that bytes before buffer_end are not
+    /// mutated any more.
+    </span>slice: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>[u8],
+    <span class="doccomment">/// Read cursor position in slice
+    </span>index: usize,
+    <span class="doccomment">/// Number of bytes already discarded from the slice
+    </span>before: usize,
+    <span class="doccomment">/// End of the buffer area that contains all bytes read_into_buffer. This is always &lt;= index.
+    </span>buffer_end: usize,
+}
+
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; MutSliceRead&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="doccomment">/// Creates a CBOR input source to read from a slice of bytes.
+    </span><span class="kw">pub fn </span>new(slice: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>[u8]) -&gt; MutSliceRead&lt;<span class="lifetime">&#39;a</span>&gt; {
+        MutSliceRead {
+            slice,
+            index: <span class="number">0</span>,
+            before: <span class="number">0</span>,
+            buffer_end: <span class="number">0</span>,
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">end</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">n</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
-        <span class="kw">match</span> <span class="self">self</span>.<span class="ident">index</span>.<span class="ident">checked_add</span>(<span class="ident">n</span>) {
-            <span class="prelude-val">Some</span>(<span class="ident">end</span>) <span class="kw">if</span> <span class="ident">end</span> <span class="op">&lt;</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">slice</span>.<span class="ident">len</span>() =&gt; <span class="prelude-val">Ok</span>(<span class="ident">end</span>),
-            <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">Error::syntax</span>(
-                <span class="ident">ErrorCode::EofWhileParsingValue</span>,
-                <span class="self">self</span>.<span class="ident">slice</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u64</span>,
+    <span class="kw">fn </span>end(<span class="kw-2">&amp;</span><span class="self">self</span>, n: usize) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+        <span class="kw">match </span><span class="self">self</span>.index.checked_add(n) {
+            <span class="prelude-val">Some</span>(end) <span class="kw">if </span>end &lt;= <span class="self">self</span>.slice.len() =&gt; <span class="prelude-val">Ok</span>(end),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(Error::syntax(
+                ErrorCode::EofWhileParsingValue,
+                <span class="self">self</span>.slice.len() <span class="kw">as </span>u64,
             )),
         }
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;unsealed_read_write&quot;</span>))]</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">private::Sealed</span> <span class="kw">for</span> <span class="ident">MutSliceRead</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {}
+<span class="attribute">#[cfg(not(feature = <span class="string">&quot;unsealed_read_write&quot;</span>))]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; private::Sealed <span class="kw">for </span>MutSliceRead&lt;<span class="lifetime">&#39;a</span>&gt; {}
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Read</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">MutSliceRead</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">next</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="comment">// This is duplicated from SliceRead, can that be eased?</span>
-        <span class="prelude-val">Ok</span>(<span class="kw">if</span> <span class="self">self</span>.<span class="ident">index</span> <span class="op">&lt;</span> <span class="self">self</span>.<span class="ident">slice</span>.<span class="ident">len</span>() {
-            <span class="kw">let</span> <span class="ident">ch</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">slice</span>[<span class="self">self</span>.<span class="ident">index</span>];
-            <span class="self">self</span>.<span class="ident">index</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
-            <span class="prelude-val">Some</span>(<span class="ident">ch</span>)
-        } <span class="kw">else</span> {
-            <span class="prelude-val">None</span>
-        })
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Read&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>MutSliceRead&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;u8&gt;&gt; {
+        <span class="comment">// This is duplicated from SliceRead, can that be eased?
+        </span><span class="prelude-val">Ok</span>(<span class="kw">if </span><span class="self">self</span>.index &lt; <span class="self">self</span>.slice.len() {
+            <span class="kw">let </span>ch = <span class="self">self</span>.slice[<span class="self">self</span>.index];
+            <span class="self">self</span>.index += <span class="number">1</span>;
+            <span class="prelude-val">Some</span>(ch)
+        } <span class="kw">else </span>{
+            <span class="prelude-val">None
+        </span>})
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">peek</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="comment">// This is duplicated from SliceRead, can that be eased?</span>
-        <span class="prelude-val">Ok</span>(<span class="kw">if</span> <span class="self">self</span>.<span class="ident">index</span> <span class="op">&lt;</span> <span class="self">self</span>.<span class="ident">slice</span>.<span class="ident">len</span>() {
-            <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">slice</span>[<span class="self">self</span>.<span class="ident">index</span>])
-        } <span class="kw">else</span> {
-            <span class="prelude-val">None</span>
-        })
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>peek(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;u8&gt;&gt; {
+        <span class="comment">// This is duplicated from SliceRead, can that be eased?
+        </span><span class="prelude-val">Ok</span>(<span class="kw">if </span><span class="self">self</span>.index &lt; <span class="self">self</span>.slice.len() {
+            <span class="prelude-val">Some</span>(<span class="self">self</span>.slice[<span class="self">self</span>.index])
+        } <span class="kw">else </span>{
+            <span class="prelude-val">None
+        </span>})
     }
 
-    <span class="kw">fn</span> <span class="ident">clear_buffer</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
-        <span class="self">self</span>.<span class="ident">slice</span> <span class="op">=</span> <span class="kw-2">&amp;mut</span> <span class="ident">mem::replace</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">slice</span>, <span class="kw-2">&amp;mut</span> [])[<span class="self">self</span>.<span class="ident">index</span>..];
-        <span class="self">self</span>.<span class="ident">before</span> <span class="op">+</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">index</span>;
-        <span class="self">self</span>.<span class="ident">index</span> <span class="op">=</span> <span class="number">0</span>;
-        <span class="self">self</span>.<span class="ident">buffer_end</span> <span class="op">=</span> <span class="number">0</span>;
+    <span class="kw">fn </span>clear_buffer(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="self">self</span>.slice = <span class="kw-2">&amp;mut </span>mem::replace(<span class="kw-2">&amp;mut </span><span class="self">self</span>.slice, <span class="kw-2">&amp;mut </span>[])[<span class="self">self</span>.index..];
+        <span class="self">self</span>.before += <span class="self">self</span>.index;
+        <span class="self">self</span>.index = <span class="number">0</span>;
+        <span class="self">self</span>.buffer_end = <span class="number">0</span>;
     }
 
-    <span class="kw">fn</span> <span class="ident">read_to_buffer</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">n</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">end</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">end</span>(<span class="ident">n</span>)<span class="question-mark">?</span>;
+    <span class="kw">fn </span>read_to_buffer(<span class="kw-2">&amp;mut </span><span class="self">self</span>, n: usize) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">let </span>end = <span class="self">self</span>.end(n)<span class="question-mark">?</span>;
         <span class="macro">debug_assert!</span>(
-            <span class="self">self</span>.<span class="ident">buffer_end</span> <span class="op">&lt;</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">index</span>,
-            <span class="string">&quot;MutSliceRead invariant violated: scratch buffer exceeds index&quot;</span>
-        );
-        <span class="self">self</span>.<span class="ident">slice</span>[<span class="self">self</span>.<span class="ident">buffer_end</span>..<span class="ident">end</span>].<span class="ident">rotate_left</span>(<span class="self">self</span>.<span class="ident">index</span> <span class="op">-</span> <span class="self">self</span>.<span class="ident">buffer_end</span>);
-        <span class="self">self</span>.<span class="ident">buffer_end</span> <span class="op">+</span><span class="op">=</span> <span class="ident">n</span>;
-        <span class="self">self</span>.<span class="ident">index</span> <span class="op">=</span> <span class="ident">end</span>;
+            <span class="self">self</span>.buffer_end &lt;= <span class="self">self</span>.index,
+            <span class="string">&quot;MutSliceRead invariant violated: scratch buffer exceeds index&quot;
+        </span>);
+        <span class="self">self</span>.slice[<span class="self">self</span>.buffer_end..end].rotate_left(<span class="self">self</span>.index - <span class="self">self</span>.buffer_end);
+        <span class="self">self</span>.buffer_end += n;
+        <span class="self">self</span>.index = end;
 
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn</span> <span class="ident">take_buffer</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">EitherLifetime</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span>, <span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> (<span class="ident">left</span>, <span class="ident">right</span>) <span class="op">=</span> <span class="ident">mem::replace</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">slice</span>, <span class="kw-2">&amp;mut</span> []).<span class="ident">split_at_mut</span>(<span class="self">self</span>.<span class="ident">index</span>);
-        <span class="self">self</span>.<span class="ident">slice</span> <span class="op">=</span> <span class="ident">right</span>;
-        <span class="self">self</span>.<span class="ident">before</span> <span class="op">+</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">index</span>;
-        <span class="self">self</span>.<span class="ident">index</span> <span class="op">=</span> <span class="number">0</span>;
+    <span class="kw">fn </span>take_buffer&lt;<span class="lifetime">&#39;b</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span><span class="kw-2">mut </span><span class="self">self</span>) -&gt; EitherLifetime&lt;<span class="lifetime">&#39;b</span>, <span class="lifetime">&#39;a</span>&gt; {
+        <span class="kw">let </span>(left, right) = mem::replace(<span class="kw-2">&amp;mut </span><span class="self">self</span>.slice, <span class="kw-2">&amp;mut </span>[]).split_at_mut(<span class="self">self</span>.index);
+        <span class="self">self</span>.slice = right;
+        <span class="self">self</span>.before += <span class="self">self</span>.index;
+        <span class="self">self</span>.index = <span class="number">0</span>;
 
-        <span class="kw">let</span> <span class="ident">left</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">left</span>[..<span class="self">self</span>.<span class="ident">buffer_end</span>];
-        <span class="self">self</span>.<span class="ident">buffer_end</span> <span class="op">=</span> <span class="number">0</span>;
+        <span class="kw">let </span>left = <span class="kw-2">&amp;</span>left[..<span class="self">self</span>.buffer_end];
+        <span class="self">self</span>.buffer_end = <span class="number">0</span>;
 
-        <span class="ident">EitherLifetime::Long</span>(<span class="ident">left</span>)
+        EitherLifetime::Long(left)
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">read_into</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">buf</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="comment">// This is duplicated from SliceRead, can that be eased?</span>
-        <span class="kw">let</span> <span class="ident">end</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">end</span>(<span class="ident">buf</span>.<span class="ident">len</span>())<span class="question-mark">?</span>;
-        <span class="ident">buf</span>.<span class="ident">copy_from_slice</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">slice</span>[<span class="self">self</span>.<span class="ident">index</span>..<span class="ident">end</span>]);
-        <span class="self">self</span>.<span class="ident">index</span> <span class="op">=</span> <span class="ident">end</span>;
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>read_into(<span class="kw-2">&amp;mut </span><span class="self">self</span>, buf: <span class="kw-2">&amp;mut </span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="comment">// This is duplicated from SliceRead, can that be eased?
+        </span><span class="kw">let </span>end = <span class="self">self</span>.end(buf.len())<span class="question-mark">?</span>;
+        buf.copy_from_slice(<span class="kw-2">&amp;</span><span class="self">self</span>.slice[<span class="self">self</span>.index..end]);
+        <span class="self">self</span>.index = end;
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">discard</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
-        <span class="self">self</span>.<span class="ident">index</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>discard(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="self">self</span>.index += <span class="number">1</span>;
     }
 
-    <span class="kw">fn</span> <span class="ident">offset</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u64</span> {
-        (<span class="self">self</span>.<span class="ident">before</span> <span class="op">+</span> <span class="self">self</span>.<span class="ident">index</span>) <span class="kw">as</span> <span class="ident">u64</span>
+    <span class="kw">fn </span>offset(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u64 {
+        (<span class="self">self</span>.before + <span class="self">self</span>.index) <span class="kw">as </span>u64
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="serde_cbor" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="serde_cbor" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

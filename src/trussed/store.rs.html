@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/store.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>store.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../trussed/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../trussed/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../trussed/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/store.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>store.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../trussed/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../trussed/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../trussed/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -656,501 +656,501 @@
 <span id="656">656</span>
 <span id="657">657</span>
 <span id="658">658</span>
-</pre><pre class="rust"><code><span class="doccomment">//! `store` presents a combined interface to three littlefs2 filesystems:</span>
-<span class="doccomment">//! internal flash, external flash, volatile/RAM.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! It covers two usecases:</span>
-<span class="doccomment">//! - cryptographic key storage (for trussed itself)</span>
-<span class="doccomment">//! - somewhat namespaced key-value storage for client apps</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! The cryptographic keys are stored with a random filename (which is used as</span>
-<span class="doccomment">//! &quot;handle&quot; for the key).</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! The key-value storage has keys aka filenames choosable by the client.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! The guiding example for client apps is `fido-authenticator`, which stores:</span>
-<span class="doccomment">//! - it basic state and config, and</span>
-<span class="doccomment">//! - the metadata for its resident keys as a serialized struct</span>
-<span class="doccomment">//! Both include references to cryptographic keys (via their handle)</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! Currently, the backend (internal/external/volatile) is determined via an</span>
-<span class="doccomment">//! enum parameter, which is translated to the corresponding generic type.</span>
-<span class="doccomment">//! I think it would be nice to &quot;mount&quot; the three in a unified filesystem,</span>
-<span class="doccomment">//! e.g. internal under `/`, external under `/mnt` (it&#39;s not available when</span>
-<span class="doccomment">//! powered via NFC), volatile under `/tmp`.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! If this is done, it would be great to abstract over the three backends,</span>
-<span class="doccomment">//! and just take some array with associated &quot;mount points&quot;. But KISS it ofc...</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! This store needs to enforce namespacing by apps, ensuring they can&#39;t escape</span>
-<span class="doccomment">//! by loading some file `../../&lt;other app&gt;/keys/...` or similar.</span>
-<span class="doccomment">//! This is orthogonal to the three backends split, I&#39;m not quite sure yet how</span>
-<span class="doccomment">//! to expose this and how to map this to paths.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! Here&#39;s my current thinking:</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! /</span>
-<span class="doccomment">//! |-- data/</span>
-<span class="doccomment">//!     |-- &lt;app id&gt;/</span>
-<span class="doccomment">//!         |--dir.1/</span>
-<span class="doccomment">//!            +-- file.1</span>
-<span class="doccomment">//!            +-- file.2</span>
-<span class="doccomment">//!         |-- dir.2</span>
-<span class="doccomment">//!            +-- file.1</span>
-<span class="doccomment">//!            +-- file.2</span>
-<span class="doccomment">//!         +-- file.1</span>
-<span class="doccomment">//!         +-- file.2</span>
-<span class="doccomment">//! |-- keys/</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! NOTE !!! ==&gt; ideally can filter out CredentialProtectionPolicy in ReadDirFiles (via attribute)</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! (fido)</span>
-<span class="doccomment">//!     :   |-- data/              &lt;-- the KeyValue portion</span>
-<span class="doccomment">//!         :   |-- rk/</span>
-<span class="doccomment">//!                 |-- &lt;rp hash&gt;/</span>
-<span class="doccomment">//!                     + rk.1</span>
-<span class="doccomment">//!                     + rk.2</span>
-<span class="doccomment">//!                     :</span>
-<span class="doccomment">//!                 |-- &lt;rp hash&gt;/</span>
-<span class="doccomment">//!             + config</span>
-<span class="doccomment">//!             +</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! Why? This:</span>
-<span class="doccomment">//! - typical use-case is one RK per RP (I&#39;d assume!)</span>
-<span class="doccomment">//! - allows easy lookup in this case!</span>
-<span class="doccomment">//! - allows easy &quot;count RKs&quot; (possibly filtered) for GetAssertion</span>
-<span class="doccomment">//! - allows easy &quot;count RPs&quot; (for CredMgmt)</span>
-<span class="doccomment">//! - CON: this is already two directories deep (not just &quot;one namespace&#39;)</span>
-<span class="doccomment">//! - Alternative: subdirectory &lt;==&gt; RP hash, everything else in flat files</span>
-<span class="doccomment">//! - In any case need to &quot;list dirs excluding . and ..&quot; or similar</span>
+</pre><pre class="rust"><code><span class="doccomment">//! `store` presents a combined interface to three littlefs2 filesystems:
+//! internal flash, external flash, volatile/RAM.
+//!
+//! It covers two usecases:
+//! - cryptographic key storage (for trussed itself)
+//! - somewhat namespaced key-value storage for client apps
+//!
+//! The cryptographic keys are stored with a random filename (which is used as
+//! &quot;handle&quot; for the key).
+//!
+//! The key-value storage has keys aka filenames choosable by the client.
+//!
+//! The guiding example for client apps is `fido-authenticator`, which stores:
+//! - it basic state and config, and
+//! - the metadata for its resident keys as a serialized struct
+//! Both include references to cryptographic keys (via their handle)
+//!
+//! Currently, the backend (internal/external/volatile) is determined via an
+//! enum parameter, which is translated to the corresponding generic type.
+//! I think it would be nice to &quot;mount&quot; the three in a unified filesystem,
+//! e.g. internal under `/`, external under `/mnt` (it&#39;s not available when
+//! powered via NFC), volatile under `/tmp`.
+//!
+//! If this is done, it would be great to abstract over the three backends,
+//! and just take some array with associated &quot;mount points&quot;. But KISS it ofc...
+//!
+//! This store needs to enforce namespacing by apps, ensuring they can&#39;t escape
+//! by loading some file `../../&lt;other app&gt;/keys/...` or similar.
+//! This is orthogonal to the three backends split, I&#39;m not quite sure yet how
+//! to expose this and how to map this to paths.
+//!
+//!
+//! Here&#39;s my current thinking:
+//!
+//! /
+//! |-- data/
+//!     |-- &lt;app id&gt;/
+//!         |--dir.1/
+//!            +-- file.1
+//!            +-- file.2
+//!         |-- dir.2
+//!            +-- file.1
+//!            +-- file.2
+//!         +-- file.1
+//!         +-- file.2
+//! |-- keys/
+//!
+//! NOTE !!! ==&gt; ideally can filter out CredentialProtectionPolicy in ReadDirFiles (via attribute)
+//!
+//! (fido)
+//!     :   |-- data/              &lt;-- the KeyValue portion
+//!         :   |-- rk/
+//!                 |-- &lt;rp hash&gt;/
+//!                     + rk.1
+//!                     + rk.2
+//!                     :
+//!                 |-- &lt;rp hash&gt;/
+//!             + config
+//!             +
+//!
+//! Why? This:
+//! - typical use-case is one RK per RP (I&#39;d assume!)
+//! - allows easy lookup in this case!
+//! - allows easy &quot;count RKs&quot; (possibly filtered) for GetAssertion
+//! - allows easy &quot;count RPs&quot; (for CredMgmt)
+//! - CON: this is already two directories deep (not just &quot;one namespace&#39;)
+//! - Alternative: subdirectory &lt;==&gt; RP hash, everything else in flat files
+//! - In any case need to &quot;list dirs excluding . and ..&quot; or similar
 
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::error::Error</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::types</span>::<span class="kw-2">*</span>;
-<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused_imports</span>)]</span>
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;semihosting&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident">cortex_m_semihosting::hprintln</span>;
-<span class="kw">use</span> <span class="ident">littlefs2::path::Path</span>;
+</span><span class="kw">use </span><span class="kw">crate</span>::error::Error;
+<span class="kw">use </span><span class="kw">crate</span>::types::<span class="kw-2">*</span>;
+<span class="attribute">#[allow(unused_imports)]
+#[cfg(feature = <span class="string">&quot;semihosting&quot;</span>)]
+</span><span class="kw">use </span>cortex_m_semihosting::hprintln;
+<span class="kw">use </span>littlefs2::path::Path;
 
-<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">certstore</span>;
-<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">counterstore</span>;
-<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">filestore</span>;
-<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">keystore</span>;
+<span class="kw">pub mod </span>certstore;
+<span class="kw">pub mod </span>counterstore;
+<span class="kw">pub mod </span>filestore;
+<span class="kw">pub mod </span>keystore;
 
-<span class="comment">// pub type FileContents = Bytes&lt;MAX_FILE_SIZE&gt;;</span>
+<span class="comment">// pub type FileContents = Bytes&lt;MAX_FILE_SIZE&gt;;
 
-<span class="comment">// pub mod our {</span>
-<span class="comment">//     type Result = ();</span>
-<span class="comment">// }</span>
+// pub mod our {
+//     type Result = ();
+// }
 
-<span class="comment">// pub trait KeyValue: Store + Copy {</span>
-<span class="comment">//     fn set(</span>
-<span class="comment">//         // &quot;root&quot; or an actual client. Maybe map to `/root` and `/home/&lt;client&gt;`?</span>
-<span class="comment">//         client: ClientId,</span>
-<span class="comment">//         // this needs to be piped via RPC, the idea is to allow a file &quot;config&quot;</span>
-<span class="comment">//         // with no namespace, and e.g. a namespace &quot;rk&quot; that can easily be iterated over.</span>
-<span class="comment">//         namespace: Option&lt;PathComponent&gt;,</span>
-<span class="comment">//         // intention of attributes is to allow for easy (client-specified) filtering</span>
-<span class="comment">//         // without reading and transmitting the contents of each file (it would be neat</span>
-<span class="comment">//         // for the RPC call to pass a closure-filter, but I doubt would work currently).</span>
-<span class="comment">//         // For instance, `fido-authenticator` can use &quot;hashed RP ID&quot; under its `rk` namespace.</span>
-<span class="comment">//         attribute: Option&lt;Attribute&gt;,</span>
+// pub trait KeyValue: Store + Copy {
+//     fn set(
+//         // &quot;root&quot; or an actual client. Maybe map to `/root` and `/home/&lt;client&gt;`?
+//         client: ClientId,
+//         // this needs to be piped via RPC, the idea is to allow a file &quot;config&quot;
+//         // with no namespace, and e.g. a namespace &quot;rk&quot; that can easily be iterated over.
+//         namespace: Option&lt;PathComponent&gt;,
+//         // intention of attributes is to allow for easy (client-specified) filtering
+//         // without reading and transmitting the contents of each file (it would be neat
+//         // for the RPC call to pass a closure-filter, but I doubt would work currently).
+//         // For instance, `fido-authenticator` can use &quot;hashed RP ID&quot; under its `rk` namespace.
+//         attribute: Option&lt;Attribute&gt;,
 
-<span class="comment">//         // the data</span>
-<span class="comment">//         data: FileContents,</span>
-<span class="comment">//     ) -&gt; our::Result&lt;()&gt;;</span>
+//         // the data
+//         data: FileContents,
+//     ) -&gt; our::Result&lt;()&gt;;
 
-<span class="comment">//     fn get(</span>
-<span class="comment">//         client: ClientId,</span>
-<span class="comment">//         namespace: Option&lt;PathComponent&gt;,</span>
-<span class="comment">//         attribute: Option&lt;Attribute&gt;,</span>
-<span class="comment">//     ) -&gt; our::Result&lt;FileContents&gt;;</span>
-<span class="comment">// }</span>
+//     fn get(
+//         client: ClientId,
+//         namespace: Option&lt;PathComponent&gt;,
+//         attribute: Option&lt;Attribute&gt;,
+//     ) -&gt; our::Result&lt;FileContents&gt;;
+// }
 
-<span class="comment">// pub trait CryptoKey: Store + Copy {</span>
-<span class="comment">// }</span>
+// pub trait CryptoKey: Store + Copy {
+// }
 
-<span class="comment">// This is a &quot;trick&quot; I learned from japaric&#39;s rewrite of the littlefs</span>
-<span class="comment">// API, using a trait and a macro (that the caller implements with the specific</span>
-<span class="comment">// LfsStorage-bound types) to remove lifetimes and generic parameters from Store.</span>
-<span class="comment">//</span>
-<span class="comment">// This makes everything using it *much* more ergonomic.</span>
-<span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">trait</span> <span class="ident">Store</span>: <span class="ident">Copy</span> {
-    <span class="kw">type</span> <span class="ident">I</span>: <span class="lifetime">&#39;static</span> <span class="op">+</span> <span class="ident">LfsStorage</span>;
-    <span class="kw">type</span> <span class="ident">E</span>: <span class="lifetime">&#39;static</span> <span class="op">+</span> <span class="ident">LfsStorage</span>;
-    <span class="kw">type</span> <span class="ident">V</span>: <span class="lifetime">&#39;static</span> <span class="op">+</span> <span class="ident">LfsStorage</span>;
-    <span class="kw">fn</span> <span class="ident">ifs</span>(<span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">Fs</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::I</span><span class="op">&gt;</span>;
-    <span class="kw">fn</span> <span class="ident">efs</span>(<span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">Fs</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::E</span><span class="op">&gt;</span>;
-    <span class="kw">fn</span> <span class="ident">vfs</span>(<span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">Fs</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::V</span><span class="op">&gt;</span>;
+// This is a &quot;trick&quot; I learned from japaric&#39;s rewrite of the littlefs
+// API, using a trait and a macro (that the caller implements with the specific
+// LfsStorage-bound types) to remove lifetimes and generic parameters from Store.
+//
+// This makes everything using it *much* more ergonomic.
+</span><span class="kw">pub unsafe trait </span>Store: Copy {
+    <span class="kw">type </span>I: <span class="lifetime">&#39;static </span>+ LfsStorage;
+    <span class="kw">type </span>E: <span class="lifetime">&#39;static </span>+ LfsStorage;
+    <span class="kw">type </span>V: <span class="lifetime">&#39;static </span>+ LfsStorage;
+    <span class="kw">fn </span>ifs(<span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Fs&lt;<span class="self">Self</span>::I&gt;;
+    <span class="kw">fn </span>efs(<span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Fs&lt;<span class="self">Self</span>::E&gt;;
+    <span class="kw">fn </span>vfs(<span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Fs&lt;<span class="self">Self</span>::V&gt;;
 }
 
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Fs</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="lifetime">&#39;static</span> <span class="op">+</span> <span class="ident">LfsStorage</span><span class="op">&gt;</span> {
-    <span class="ident">fs</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">Filesystem</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">S</span><span class="op">&gt;</span>,
+<span class="kw">pub struct </span>Fs&lt;S: <span class="lifetime">&#39;static </span>+ LfsStorage&gt; {
+    fs: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Filesystem&lt;<span class="lifetime">&#39;static</span>, S&gt;,
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="lifetime">&#39;static</span> <span class="op">+</span> <span class="ident">LfsStorage</span><span class="op">&gt;</span> <span class="ident">core::ops::Deref</span> <span class="kw">for</span> <span class="ident">Fs</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span> {
-    <span class="kw">type</span> <span class="ident">Target</span> <span class="op">=</span> <span class="ident">Filesystem</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">S</span><span class="op">&gt;</span>;
-    <span class="kw">fn</span> <span class="ident">deref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::Target</span> {
-        <span class="self">self</span>.<span class="ident">fs</span>
+<span class="kw">impl</span>&lt;S: <span class="lifetime">&#39;static </span>+ LfsStorage&gt; core::ops::Deref <span class="kw">for </span>Fs&lt;S&gt; {
+    <span class="kw">type </span>Target = Filesystem&lt;<span class="lifetime">&#39;static</span>, S&gt;;
+    <span class="kw">fn </span>deref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="self">Self</span>::Target {
+        <span class="self">self</span>.fs
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="lifetime">&#39;static</span> <span class="op">+</span> <span class="ident">LfsStorage</span><span class="op">&gt;</span> <span class="ident">Fs</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">fs</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">Filesystem</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">S</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">Self</span> { <span class="ident">fs</span> }
+<span class="kw">impl</span>&lt;S: <span class="lifetime">&#39;static </span>+ LfsStorage&gt; Fs&lt;S&gt; {
+    <span class="kw">pub fn </span>new(fs: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Filesystem&lt;<span class="lifetime">&#39;static</span>, S&gt;) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{ fs }
     }
 }
 
-<span class="attribute">#[<span class="ident">macro_export</span>]</span>
-<span class="macro">macro_rules!</span> <span class="ident">store</span> {
+<span class="attribute">#[macro_export]
+</span><span class="macro">macro_rules! </span>store {
     (
-    <span class="macro-nonterminal">$</span><span class="macro-nonterminal">store</span>:<span class="ident">ident</span>,
-    <span class="ident">Internal</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">Ifs</span>:<span class="ident">ty</span>,
-    <span class="ident">External</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">Efs</span>:<span class="ident">ty</span>,
-    <span class="ident">Volatile</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">Vfs</span>:<span class="ident">ty</span>
+    <span class="macro-nonterminal">$store</span>:ident,
+    Internal: <span class="macro-nonterminal">$Ifs</span>:ty,
+    External: <span class="macro-nonterminal">$Efs</span>:ty,
+    Volatile: <span class="macro-nonterminal">$Vfs</span>:ty
 ) =&gt; {
-        <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Copy</span>)]</span>
-        <span class="kw">pub</span> <span class="kw">struct</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">store</span> {
-            <span class="comment">// __: $crate::store::NotSendOrSync,</span>
-            <span class="ident">__</span>: <span class="ident">core::marker::PhantomData</span><span class="op">&lt;</span><span class="kw-2">*mut</span> ()<span class="op">&gt;</span>,
+        <span class="attribute">#[derive(Clone, Copy)]
+        </span><span class="kw">pub struct </span><span class="macro-nonterminal">$store </span>{
+            <span class="comment">// __: $crate::store::NotSendOrSync,
+            </span>__: core::marker::PhantomData&lt;<span class="kw-2">*mut </span>()&gt;,
         }
 
-        <span class="kw">unsafe</span> <span class="kw">impl</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::store::Store</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">store</span> {
-            <span class="kw">type</span> <span class="ident">I</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">Ifs</span>;
-            <span class="kw">type</span> <span class="ident">E</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">Efs</span>;
-            <span class="kw">type</span> <span class="ident">V</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">Vfs</span>;
+        <span class="kw">unsafe impl </span><span class="macro-nonterminal">$crate::store::Store </span><span class="kw">for </span><span class="macro-nonterminal">$store </span>{
+            <span class="kw">type </span>I = <span class="macro-nonterminal">$Ifs</span>;
+            <span class="kw">type </span>E = <span class="macro-nonterminal">$Efs</span>;
+            <span class="kw">type </span>V = <span class="macro-nonterminal">$Vfs</span>;
 
-            <span class="kw">fn</span> <span class="ident">ifs</span>(<span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::store::Fs</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">Ifs</span><span class="op">&gt;</span> {
-                <span class="kw">unsafe</span> { <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident"><span class="self">Self</span>::ifs_ptr</span>() }
+            <span class="kw">fn </span>ifs(<span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="macro-nonterminal">$crate::store::Fs</span>&lt;<span class="macro-nonterminal">$Ifs</span>&gt; {
+                <span class="kw">unsafe </span>{ <span class="kw-2">&amp;*</span><span class="self">Self</span>::ifs_ptr() }
             }
-            <span class="kw">fn</span> <span class="ident">efs</span>(<span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::store::Fs</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">Efs</span><span class="op">&gt;</span> {
-                <span class="kw">unsafe</span> { <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident"><span class="self">Self</span>::efs_ptr</span>() }
+            <span class="kw">fn </span>efs(<span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="macro-nonterminal">$crate::store::Fs</span>&lt;<span class="macro-nonterminal">$Efs</span>&gt; {
+                <span class="kw">unsafe </span>{ <span class="kw-2">&amp;*</span><span class="self">Self</span>::efs_ptr() }
             }
-            <span class="kw">fn</span> <span class="ident">vfs</span>(<span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::store::Fs</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">Vfs</span><span class="op">&gt;</span> {
-                <span class="kw">unsafe</span> { <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident"><span class="self">Self</span>::vfs_ptr</span>() }
+            <span class="kw">fn </span>vfs(<span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="macro-nonterminal">$crate::store::Fs</span>&lt;<span class="macro-nonterminal">$Vfs</span>&gt; {
+                <span class="kw">unsafe </span>{ <span class="kw-2">&amp;*</span><span class="self">Self</span>::vfs_ptr() }
             }
         }
 
-        <span class="kw">impl</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">store</span> {
-            <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">dead_code</span>)]</span>
-            <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">allocate</span>(
-                <span class="ident">internal_fs</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">Ifs</span>,
-                <span class="ident">external_fs</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">Efs</span>,
-                <span class="ident">volatile_fs</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">Vfs</span>,
+        <span class="kw">impl </span><span class="macro-nonterminal">$store </span>{
+            <span class="attribute">#[allow(dead_code)]
+            </span><span class="kw">pub fn </span>allocate(
+                internal_fs: <span class="macro-nonterminal">$Ifs</span>,
+                external_fs: <span class="macro-nonterminal">$Efs</span>,
+                volatile_fs: <span class="macro-nonterminal">$Vfs</span>,
             ) -&gt; (
-                <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="kw-2">mut</span> <span class="ident">littlefs2::fs::Allocation</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">Ifs</span><span class="op">&gt;</span>,
-                <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="kw-2">mut</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">Ifs</span>,
-                <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="kw-2">mut</span> <span class="ident">littlefs2::fs::Allocation</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">Efs</span><span class="op">&gt;</span>,
-                <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="kw-2">mut</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">Efs</span>,
-                <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="kw-2">mut</span> <span class="ident">littlefs2::fs::Allocation</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">Vfs</span><span class="op">&gt;</span>,
-                <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="kw-2">mut</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">Vfs</span>,
+                <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw-2">mut </span>littlefs2::fs::Allocation&lt;<span class="macro-nonterminal">$Ifs</span>&gt;,
+                <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw-2">mut </span><span class="macro-nonterminal">$Ifs</span>,
+                <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw-2">mut </span>littlefs2::fs::Allocation&lt;<span class="macro-nonterminal">$Efs</span>&gt;,
+                <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw-2">mut </span><span class="macro-nonterminal">$Efs</span>,
+                <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw-2">mut </span>littlefs2::fs::Allocation&lt;<span class="macro-nonterminal">$Vfs</span>&gt;,
+                <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw-2">mut </span><span class="macro-nonterminal">$Vfs</span>,
             ) {
-                <span class="comment">// static mut INTERNAL_STORAGE: $Ifs = i_ctor();//&lt;$Ifs&gt;::new();</span>
+                <span class="comment">// static mut INTERNAL_STORAGE: $Ifs = i_ctor();//&lt;$Ifs&gt;::new();
 
-                <span class="kw">static</span> <span class="kw-2">mut</span> <span class="ident">INTERNAL_STORAGE</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">Ifs</span><span class="op">&gt;</span> <span class="op">=</span> <span class="prelude-val">None</span>;
-                <span class="kw">unsafe</span> {
-                    <span class="ident">INTERNAL_STORAGE</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">internal_fs</span>);
+                </span><span class="kw">static </span><span class="kw-2">mut </span>INTERNAL_STORAGE: <span class="prelude-ty">Option</span>&lt;<span class="macro-nonterminal">$Ifs</span>&gt; = <span class="prelude-val">None</span>;
+                <span class="kw">unsafe </span>{
+                    INTERNAL_STORAGE = <span class="prelude-val">Some</span>(internal_fs);
                 }
-                <span class="kw">static</span> <span class="kw-2">mut</span> <span class="ident">INTERNAL_FS_ALLOC</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">littlefs2::fs::Allocation</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">Ifs</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="prelude-val">None</span>;
-                <span class="kw">unsafe</span> {
-                    <span class="ident">INTERNAL_FS_ALLOC</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">littlefs2::fs::Filesystem::allocate</span>());
-                }
-
-                <span class="comment">// static mut EXTERNAL_STORAGE: $Efs = &lt;$Efs&gt;::new();</span>
-                <span class="kw">static</span> <span class="kw-2">mut</span> <span class="ident">EXTERNAL_STORAGE</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">Efs</span><span class="op">&gt;</span> <span class="op">=</span> <span class="prelude-val">None</span>;
-                <span class="kw">unsafe</span> {
-                    <span class="ident">EXTERNAL_STORAGE</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">external_fs</span>);
-                }
-                <span class="kw">static</span> <span class="kw-2">mut</span> <span class="ident">EXTERNAL_FS_ALLOC</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">littlefs2::fs::Allocation</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">Efs</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="prelude-val">None</span>;
-                <span class="kw">unsafe</span> {
-                    <span class="ident">EXTERNAL_FS_ALLOC</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">littlefs2::fs::Filesystem::allocate</span>());
+                <span class="kw">static </span><span class="kw-2">mut </span>INTERNAL_FS_ALLOC: <span class="prelude-ty">Option</span>&lt;littlefs2::fs::Allocation&lt;<span class="macro-nonterminal">$Ifs</span>&gt;&gt; = <span class="prelude-val">None</span>;
+                <span class="kw">unsafe </span>{
+                    INTERNAL_FS_ALLOC = <span class="prelude-val">Some</span>(littlefs2::fs::Filesystem::allocate());
                 }
 
-                <span class="comment">// static mut VOLATILE_STORAGE: $Vfs = &lt;$Vfs&gt;::new();</span>
-                <span class="kw">static</span> <span class="kw-2">mut</span> <span class="ident">VOLATILE_STORAGE</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">Vfs</span><span class="op">&gt;</span> <span class="op">=</span> <span class="prelude-val">None</span>;
-                <span class="kw">unsafe</span> {
-                    <span class="ident">VOLATILE_STORAGE</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">volatile_fs</span>);
+                <span class="comment">// static mut EXTERNAL_STORAGE: $Efs = &lt;$Efs&gt;::new();
+                </span><span class="kw">static </span><span class="kw-2">mut </span>EXTERNAL_STORAGE: <span class="prelude-ty">Option</span>&lt;<span class="macro-nonterminal">$Efs</span>&gt; = <span class="prelude-val">None</span>;
+                <span class="kw">unsafe </span>{
+                    EXTERNAL_STORAGE = <span class="prelude-val">Some</span>(external_fs);
                 }
-                <span class="kw">static</span> <span class="kw-2">mut</span> <span class="ident">VOLATILE_FS_ALLOC</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">littlefs2::fs::Allocation</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">Vfs</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="prelude-val">None</span>;
-                <span class="kw">unsafe</span> {
-                    <span class="ident">VOLATILE_FS_ALLOC</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">littlefs2::fs::Filesystem::allocate</span>());
+                <span class="kw">static </span><span class="kw-2">mut </span>EXTERNAL_FS_ALLOC: <span class="prelude-ty">Option</span>&lt;littlefs2::fs::Allocation&lt;<span class="macro-nonterminal">$Efs</span>&gt;&gt; = <span class="prelude-val">None</span>;
+                <span class="kw">unsafe </span>{
+                    EXTERNAL_FS_ALLOC = <span class="prelude-val">Some</span>(littlefs2::fs::Filesystem::allocate());
+                }
+
+                <span class="comment">// static mut VOLATILE_STORAGE: $Vfs = &lt;$Vfs&gt;::new();
+                </span><span class="kw">static </span><span class="kw-2">mut </span>VOLATILE_STORAGE: <span class="prelude-ty">Option</span>&lt;<span class="macro-nonterminal">$Vfs</span>&gt; = <span class="prelude-val">None</span>;
+                <span class="kw">unsafe </span>{
+                    VOLATILE_STORAGE = <span class="prelude-val">Some</span>(volatile_fs);
+                }
+                <span class="kw">static </span><span class="kw-2">mut </span>VOLATILE_FS_ALLOC: <span class="prelude-ty">Option</span>&lt;littlefs2::fs::Allocation&lt;<span class="macro-nonterminal">$Vfs</span>&gt;&gt; = <span class="prelude-val">None</span>;
+                <span class="kw">unsafe </span>{
+                    VOLATILE_FS_ALLOC = <span class="prelude-val">Some</span>(littlefs2::fs::Filesystem::allocate());
                 }
 
                 (
-                    <span class="kw">unsafe</span> { <span class="ident">INTERNAL_FS_ALLOC</span>.<span class="ident">as_mut</span>().<span class="ident">unwrap</span>() },
-                    <span class="kw">unsafe</span> { <span class="ident">INTERNAL_STORAGE</span>.<span class="ident">as_mut</span>().<span class="ident">unwrap</span>() },
-                    <span class="kw">unsafe</span> { <span class="ident">EXTERNAL_FS_ALLOC</span>.<span class="ident">as_mut</span>().<span class="ident">unwrap</span>() },
-                    <span class="kw">unsafe</span> { <span class="ident">EXTERNAL_STORAGE</span>.<span class="ident">as_mut</span>().<span class="ident">unwrap</span>() },
-                    <span class="kw">unsafe</span> { <span class="ident">VOLATILE_FS_ALLOC</span>.<span class="ident">as_mut</span>().<span class="ident">unwrap</span>() },
-                    <span class="kw">unsafe</span> { <span class="ident">VOLATILE_STORAGE</span>.<span class="ident">as_mut</span>().<span class="ident">unwrap</span>() },
+                    <span class="kw">unsafe </span>{ INTERNAL_FS_ALLOC.as_mut().unwrap() },
+                    <span class="kw">unsafe </span>{ INTERNAL_STORAGE.as_mut().unwrap() },
+                    <span class="kw">unsafe </span>{ EXTERNAL_FS_ALLOC.as_mut().unwrap() },
+                    <span class="kw">unsafe </span>{ EXTERNAL_STORAGE.as_mut().unwrap() },
+                    <span class="kw">unsafe </span>{ VOLATILE_FS_ALLOC.as_mut().unwrap() },
+                    <span class="kw">unsafe </span>{ VOLATILE_STORAGE.as_mut().unwrap() },
                 )
             }
 
-            <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">dead_code</span>)]</span>
-            <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">init</span>(
-                <span class="ident">internal_fs</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">Ifs</span>,
-                <span class="ident">external_fs</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">Efs</span>,
-                <span class="ident">volatile_fs</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">Vfs</span>,
-                <span class="ident">format</span>: <span class="ident">bool</span>,
-            ) -&gt; <span class="self">Self</span> {
-                <span class="kw">let</span> (<span class="ident">ifs_alloc</span>, <span class="ident">ifs_storage</span>, <span class="ident">efs_alloc</span>, <span class="ident">efs_storage</span>, <span class="ident">vfs_alloc</span>, <span class="ident">vfs_storage</span>) <span class="op">=</span>
-                    <span class="ident"><span class="self">Self</span>::allocate</span>(<span class="ident">internal_fs</span>, <span class="ident">external_fs</span>, <span class="ident">volatile_fs</span>);
-                <span class="kw">let</span> <span class="ident">store</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::claim</span>().<span class="ident">unwrap</span>();
-                <span class="ident">store</span>
-                    .<span class="ident">mount</span>(
-                        <span class="ident">ifs_alloc</span>,
-                        <span class="ident">ifs_storage</span>,
-                        <span class="ident">efs_alloc</span>,
-                        <span class="ident">efs_storage</span>,
-                        <span class="ident">vfs_alloc</span>,
-                        <span class="ident">vfs_storage</span>,
-                        <span class="ident">format</span>,
+            <span class="attribute">#[allow(dead_code)]
+            </span><span class="kw">pub fn </span>init(
+                internal_fs: <span class="macro-nonterminal">$Ifs</span>,
+                external_fs: <span class="macro-nonterminal">$Efs</span>,
+                volatile_fs: <span class="macro-nonterminal">$Vfs</span>,
+                format: bool,
+            ) -&gt; <span class="self">Self </span>{
+                <span class="kw">let </span>(ifs_alloc, ifs_storage, efs_alloc, efs_storage, vfs_alloc, vfs_storage) =
+                    <span class="self">Self</span>::allocate(internal_fs, external_fs, volatile_fs);
+                <span class="kw">let </span>store = <span class="self">Self</span>::claim().unwrap();
+                store
+                    .mount(
+                        ifs_alloc,
+                        ifs_storage,
+                        efs_alloc,
+                        efs_storage,
+                        vfs_alloc,
+                        vfs_storage,
+                        format,
                     )
-                    .<span class="ident">unwrap</span>();
+                    .unwrap();
 
-                <span class="ident">store</span>
+                store
             }
 
-            <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">dead_code</span>)]</span>
-            <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">init_raw</span>(
-                <span class="ident">ifs</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">littlefs2::fs::Filesystem</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">Ifs</span><span class="op">&gt;</span>,
-                <span class="ident">efs</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">littlefs2::fs::Filesystem</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">Efs</span><span class="op">&gt;</span>,
-                <span class="ident">vfs</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">littlefs2::fs::Filesystem</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">Vfs</span><span class="op">&gt;</span>,
-            ) -&gt; <span class="self">Self</span> {
-                <span class="kw">let</span> <span class="ident">store_ifs</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::store::Fs::new</span>(<span class="ident">ifs</span>);
-                <span class="kw">let</span> <span class="ident">store_efs</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::store::Fs::new</span>(<span class="ident">efs</span>);
-                <span class="kw">let</span> <span class="ident">store_vfs</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::store::Fs::new</span>(<span class="ident">vfs</span>);
-                <span class="kw">unsafe</span> {
-                    <span class="ident"><span class="self">Self</span>::ifs_ptr</span>().<span class="ident">write</span>(<span class="ident">store_ifs</span>);
-                    <span class="ident"><span class="self">Self</span>::efs_ptr</span>().<span class="ident">write</span>(<span class="ident">store_efs</span>);
-                    <span class="ident"><span class="self">Self</span>::vfs_ptr</span>().<span class="ident">write</span>(<span class="ident">store_vfs</span>);
+            <span class="attribute">#[allow(dead_code)]
+            </span><span class="kw">pub fn </span>init_raw(
+                ifs: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>littlefs2::fs::Filesystem&lt;<span class="macro-nonterminal">$Ifs</span>&gt;,
+                efs: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>littlefs2::fs::Filesystem&lt;<span class="macro-nonterminal">$Efs</span>&gt;,
+                vfs: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>littlefs2::fs::Filesystem&lt;<span class="macro-nonterminal">$Vfs</span>&gt;,
+            ) -&gt; <span class="self">Self </span>{
+                <span class="kw">let </span>store_ifs = <span class="macro-nonterminal">$crate::store::Fs::new</span>(ifs);
+                <span class="kw">let </span>store_efs = <span class="macro-nonterminal">$crate::store::Fs::new</span>(efs);
+                <span class="kw">let </span>store_vfs = <span class="macro-nonterminal">$crate::store::Fs::new</span>(vfs);
+                <span class="kw">unsafe </span>{
+                    <span class="self">Self</span>::ifs_ptr().write(store_ifs);
+                    <span class="self">Self</span>::efs_ptr().write(store_efs);
+                    <span class="self">Self</span>::vfs_ptr().write(store_vfs);
                 }
-                <span class="ident"><span class="self">Self</span>::claim</span>().<span class="ident">unwrap</span>()
+                <span class="self">Self</span>::claim().unwrap()
             }
 
-            <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">dead_code</span>)]</span>
-            <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">attach</span>(<span class="ident">internal_fs</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">Ifs</span>, <span class="ident">external_fs</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">Efs</span>, <span class="ident">volatile_fs</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">Vfs</span>) -&gt; <span class="self">Self</span> {
-                <span class="ident"><span class="self">Self</span>::init</span>(<span class="ident">internal_fs</span>, <span class="ident">external_fs</span>, <span class="ident">volatile_fs</span>, <span class="bool-val">false</span>)
+            <span class="attribute">#[allow(dead_code)]
+            </span><span class="kw">pub fn </span>attach(internal_fs: <span class="macro-nonterminal">$Ifs</span>, external_fs: <span class="macro-nonterminal">$Efs</span>, volatile_fs: <span class="macro-nonterminal">$Vfs</span>) -&gt; <span class="self">Self </span>{
+                <span class="self">Self</span>::init(internal_fs, external_fs, volatile_fs, <span class="bool-val">false</span>)
             }
 
-            <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">dead_code</span>)]</span>
-            <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">format</span>(<span class="ident">internal_fs</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">Ifs</span>, <span class="ident">external_fs</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">Efs</span>, <span class="ident">volatile_fs</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">Vfs</span>) -&gt; <span class="self">Self</span> {
-                <span class="ident"><span class="self">Self</span>::init</span>(<span class="ident">internal_fs</span>, <span class="ident">external_fs</span>, <span class="ident">volatile_fs</span>, <span class="bool-val">true</span>)
+            <span class="attribute">#[allow(dead_code)]
+            </span><span class="kw">pub fn </span>format(internal_fs: <span class="macro-nonterminal">$Ifs</span>, external_fs: <span class="macro-nonterminal">$Efs</span>, volatile_fs: <span class="macro-nonterminal">$Vfs</span>) -&gt; <span class="self">Self </span>{
+                <span class="self">Self</span>::init(internal_fs, external_fs, volatile_fs, <span class="bool-val">true</span>)
             }
 
-            <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">claim</span>() -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">store</span><span class="op">&gt;</span> {
-                <span class="kw">use</span> <span class="ident">core::sync::atomic</span>::{<span class="ident">AtomicBool</span>, <span class="ident">Ordering</span>};
-                <span class="comment">// use $crate::store::NotSendOrSync;</span>
+            <span class="kw">pub fn </span>claim() -&gt; <span class="prelude-ty">Option</span>&lt;<span class="macro-nonterminal">$store</span>&gt; {
+                <span class="kw">use </span>core::sync::atomic::{AtomicBool, Ordering};
+                <span class="comment">// use $crate::store::NotSendOrSync;
 
-                <span class="kw">static</span> <span class="ident">CLAIMED</span>: <span class="ident">AtomicBool</span> <span class="op">=</span> <span class="ident">AtomicBool::new</span>(<span class="bool-val">false</span>);
+                </span><span class="kw">static </span>CLAIMED: AtomicBool = AtomicBool::new(<span class="bool-val">false</span>);
 
-                <span class="kw">if</span> <span class="ident">CLAIMED</span>
-                    .<span class="ident">compare_exchange_weak</span>(<span class="bool-val">false</span>, <span class="bool-val">true</span>, <span class="ident">Ordering::AcqRel</span>, <span class="ident">Ordering::Acquire</span>)
-                    .<span class="ident">is_ok</span>()
+                <span class="kw">if </span>CLAIMED
+                    .compare_exchange_weak(<span class="bool-val">false</span>, <span class="bool-val">true</span>, Ordering::AcqRel, Ordering::Acquire)
+                    .is_ok()
                 {
-                    <span class="comment">// Some(Self { __: unsafe { $crate::store::NotSendOrSync::new() } })</span>
-                    <span class="prelude-val">Some</span>(<span class="self">Self</span> {
-                        <span class="ident">__</span>: <span class="ident">core::marker::PhantomData</span>,
+                    <span class="comment">// Some(Self { __: unsafe { $crate::store::NotSendOrSync::new() } })
+                    </span><span class="prelude-val">Some</span>(<span class="self">Self </span>{
+                        __: core::marker::PhantomData,
                     })
-                } <span class="kw">else</span> {
-                    <span class="prelude-val">None</span>
-                }
+                } <span class="kw">else </span>{
+                    <span class="prelude-val">None
+                </span>}
             }
 
-            <span class="kw">fn</span> <span class="ident">ifs_ptr</span>() -&gt; <span class="kw-2">*mut</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::store::Fs</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">Ifs</span><span class="op">&gt;</span> {
-                <span class="kw">use</span> <span class="ident">core::mem::MaybeUninit</span>;
-                <span class="kw">use</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::store::Fs</span>;
-                <span class="kw">static</span> <span class="kw-2">mut</span> <span class="ident">IFS</span>: <span class="ident">MaybeUninit</span><span class="op">&lt;</span><span class="ident">Fs</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">Ifs</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">MaybeUninit::uninit</span>();
-                <span class="kw">unsafe</span> { <span class="ident">IFS</span>.<span class="ident">as_mut_ptr</span>() }
+            <span class="kw">fn </span>ifs_ptr() -&gt; <span class="kw-2">*mut </span><span class="macro-nonterminal">$crate::store::Fs</span>&lt;<span class="macro-nonterminal">$Ifs</span>&gt; {
+                <span class="kw">use </span>core::mem::MaybeUninit;
+                <span class="kw">use </span><span class="macro-nonterminal">$crate::store::Fs</span>;
+                <span class="kw">static </span><span class="kw-2">mut </span>IFS: MaybeUninit&lt;Fs&lt;<span class="macro-nonterminal">$Ifs</span>&gt;&gt; = MaybeUninit::uninit();
+                <span class="kw">unsafe </span>{ IFS.as_mut_ptr() }
             }
 
-            <span class="kw">fn</span> <span class="ident">efs_ptr</span>() -&gt; <span class="kw-2">*mut</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::store::Fs</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">Efs</span><span class="op">&gt;</span> {
-                <span class="kw">use</span> <span class="ident">core::mem::MaybeUninit</span>;
-                <span class="kw">use</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::store::Fs</span>;
-                <span class="kw">static</span> <span class="kw-2">mut</span> <span class="ident">EFS</span>: <span class="ident">MaybeUninit</span><span class="op">&lt;</span><span class="ident">Fs</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">Efs</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">MaybeUninit::uninit</span>();
-                <span class="kw">unsafe</span> { <span class="ident">EFS</span>.<span class="ident">as_mut_ptr</span>() }
+            <span class="kw">fn </span>efs_ptr() -&gt; <span class="kw-2">*mut </span><span class="macro-nonterminal">$crate::store::Fs</span>&lt;<span class="macro-nonterminal">$Efs</span>&gt; {
+                <span class="kw">use </span>core::mem::MaybeUninit;
+                <span class="kw">use </span><span class="macro-nonterminal">$crate::store::Fs</span>;
+                <span class="kw">static </span><span class="kw-2">mut </span>EFS: MaybeUninit&lt;Fs&lt;<span class="macro-nonterminal">$Efs</span>&gt;&gt; = MaybeUninit::uninit();
+                <span class="kw">unsafe </span>{ EFS.as_mut_ptr() }
             }
 
-            <span class="kw">fn</span> <span class="ident">vfs_ptr</span>() -&gt; <span class="kw-2">*mut</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::store::Fs</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">Vfs</span><span class="op">&gt;</span> {
-                <span class="kw">use</span> <span class="ident">core::mem::MaybeUninit</span>;
-                <span class="kw">use</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::store::Fs</span>;
-                <span class="kw">static</span> <span class="kw-2">mut</span> <span class="ident">VFS</span>: <span class="ident">MaybeUninit</span><span class="op">&lt;</span><span class="ident">Fs</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">Vfs</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">MaybeUninit::uninit</span>();
-                <span class="kw">unsafe</span> { <span class="ident">VFS</span>.<span class="ident">as_mut_ptr</span>() }
+            <span class="kw">fn </span>vfs_ptr() -&gt; <span class="kw-2">*mut </span><span class="macro-nonterminal">$crate::store::Fs</span>&lt;<span class="macro-nonterminal">$Vfs</span>&gt; {
+                <span class="kw">use </span>core::mem::MaybeUninit;
+                <span class="kw">use </span><span class="macro-nonterminal">$crate::store::Fs</span>;
+                <span class="kw">static </span><span class="kw-2">mut </span>VFS: MaybeUninit&lt;Fs&lt;<span class="macro-nonterminal">$Vfs</span>&gt;&gt; = MaybeUninit::uninit();
+                <span class="kw">unsafe </span>{ VFS.as_mut_ptr() }
             }
 
-            <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">mount</span>(
+            <span class="kw">pub fn </span>mount(
                 <span class="kw-2">&amp;</span><span class="self">self</span>,
 
-                <span class="ident">ifs_alloc</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="kw-2">mut</span> <span class="ident">littlefs2::fs::Allocation</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">Ifs</span><span class="op">&gt;</span>,
-                <span class="ident">ifs_storage</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="kw-2">mut</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">Ifs</span>,
-                <span class="ident">efs_alloc</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="kw-2">mut</span> <span class="ident">littlefs2::fs::Allocation</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">Efs</span><span class="op">&gt;</span>,
-                <span class="ident">efs_storage</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="kw-2">mut</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">Efs</span>,
-                <span class="ident">vfs_alloc</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="kw-2">mut</span> <span class="ident">littlefs2::fs::Allocation</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">Vfs</span><span class="op">&gt;</span>,
-                <span class="ident">vfs_storage</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="kw-2">mut</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">Vfs</span>,
+                ifs_alloc: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw-2">mut </span>littlefs2::fs::Allocation&lt;<span class="macro-nonterminal">$Ifs</span>&gt;,
+                ifs_storage: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw-2">mut </span><span class="macro-nonterminal">$Ifs</span>,
+                efs_alloc: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw-2">mut </span>littlefs2::fs::Allocation&lt;<span class="macro-nonterminal">$Efs</span>&gt;,
+                efs_storage: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw-2">mut </span><span class="macro-nonterminal">$Efs</span>,
+                vfs_alloc: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw-2">mut </span>littlefs2::fs::Allocation&lt;<span class="macro-nonterminal">$Vfs</span>&gt;,
+                vfs_storage: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw-2">mut </span><span class="macro-nonterminal">$Vfs</span>,
 
-                <span class="comment">// statics: (</span>
-                <span class="comment">//     &amp;&#39;static mut littlefs2::fs::Allocation&lt;$Ifs&gt;,</span>
-                <span class="comment">//     &amp;&#39;static mut $Ifs,</span>
-                <span class="comment">//     &amp;&#39;static mut littlefs2::fs::Allocation&lt;$Efs&gt;,</span>
-                <span class="comment">//     &amp;&#39;static mut $Efs,</span>
-                <span class="comment">//     &amp;&#39;static mut littlefs2::fs::Allocation&lt;$Vfs&gt;,</span>
-                <span class="comment">//     &amp;&#39;static mut $Vfs,</span>
-                <span class="comment">// ),</span>
-                <span class="comment">// TODO: flag per backend?</span>
-                <span class="ident">format</span>: <span class="ident">bool</span>,
-            ) -&gt; <span class="ident">littlefs2::io::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-                <span class="kw">use</span> <span class="ident">core::mem::MaybeUninit</span>;
-                <span class="kw">use</span> <span class="ident">littlefs2::fs</span>::{<span class="ident">Allocation</span>, <span class="ident">Filesystem</span>};
+                <span class="comment">// statics: (
+                //     &amp;&#39;static mut littlefs2::fs::Allocation&lt;$Ifs&gt;,
+                //     &amp;&#39;static mut $Ifs,
+                //     &amp;&#39;static mut littlefs2::fs::Allocation&lt;$Efs&gt;,
+                //     &amp;&#39;static mut $Efs,
+                //     &amp;&#39;static mut littlefs2::fs::Allocation&lt;$Vfs&gt;,
+                //     &amp;&#39;static mut $Vfs,
+                // ),
+                // TODO: flag per backend?
+                </span>format: bool,
+            ) -&gt; littlefs2::io::Result&lt;()&gt; {
+                <span class="kw">use </span>core::mem::MaybeUninit;
+                <span class="kw">use </span>littlefs2::fs::{Allocation, Filesystem};
 
-                <span class="kw">static</span> <span class="kw-2">mut</span> <span class="ident">IFS_ALLOC</span>: <span class="ident">MaybeUninit</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="kw-2">mut</span> <span class="ident">Allocation</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">Ifs</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span>
-                    <span class="ident">MaybeUninit::uninit</span>();
-                <span class="kw">static</span> <span class="kw-2">mut</span> <span class="ident">IFS_STORAGE</span>: <span class="ident">MaybeUninit</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="kw-2">mut</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">Ifs</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">MaybeUninit::uninit</span>();
-                <span class="kw">static</span> <span class="kw-2">mut</span> <span class="ident">IFS</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Filesystem</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">Ifs</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="prelude-val">None</span>;
+                <span class="kw">static </span><span class="kw-2">mut </span>IFS_ALLOC: MaybeUninit&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw-2">mut </span>Allocation&lt;<span class="macro-nonterminal">$Ifs</span>&gt;&gt; =
+                    MaybeUninit::uninit();
+                <span class="kw">static </span><span class="kw-2">mut </span>IFS_STORAGE: MaybeUninit&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw-2">mut </span><span class="macro-nonterminal">$Ifs</span>&gt; = MaybeUninit::uninit();
+                <span class="kw">static </span><span class="kw-2">mut </span>IFS: <span class="prelude-ty">Option</span>&lt;Filesystem&lt;<span class="lifetime">&#39;static</span>, <span class="macro-nonterminal">$Ifs</span>&gt;&gt; = <span class="prelude-val">None</span>;
 
-                <span class="kw">static</span> <span class="kw-2">mut</span> <span class="ident">EFS_ALLOC</span>: <span class="ident">MaybeUninit</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="kw-2">mut</span> <span class="ident">Allocation</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">Efs</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span>
-                    <span class="ident">MaybeUninit::uninit</span>();
-                <span class="kw">static</span> <span class="kw-2">mut</span> <span class="ident">EFS_STORAGE</span>: <span class="ident">MaybeUninit</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="kw-2">mut</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">Efs</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">MaybeUninit::uninit</span>();
-                <span class="kw">static</span> <span class="kw-2">mut</span> <span class="ident">EFS</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Filesystem</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">Efs</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="prelude-val">None</span>;
+                <span class="kw">static </span><span class="kw-2">mut </span>EFS_ALLOC: MaybeUninit&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw-2">mut </span>Allocation&lt;<span class="macro-nonterminal">$Efs</span>&gt;&gt; =
+                    MaybeUninit::uninit();
+                <span class="kw">static </span><span class="kw-2">mut </span>EFS_STORAGE: MaybeUninit&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw-2">mut </span><span class="macro-nonterminal">$Efs</span>&gt; = MaybeUninit::uninit();
+                <span class="kw">static </span><span class="kw-2">mut </span>EFS: <span class="prelude-ty">Option</span>&lt;Filesystem&lt;<span class="lifetime">&#39;static</span>, <span class="macro-nonterminal">$Efs</span>&gt;&gt; = <span class="prelude-val">None</span>;
 
-                <span class="kw">static</span> <span class="kw-2">mut</span> <span class="ident">VFS_ALLOC</span>: <span class="ident">MaybeUninit</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="kw-2">mut</span> <span class="ident">Allocation</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">Vfs</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span>
-                    <span class="ident">MaybeUninit::uninit</span>();
-                <span class="kw">static</span> <span class="kw-2">mut</span> <span class="ident">VFS_STORAGE</span>: <span class="ident">MaybeUninit</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="kw-2">mut</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">Vfs</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">MaybeUninit::uninit</span>();
-                <span class="kw">static</span> <span class="kw-2">mut</span> <span class="ident">VFS</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Filesystem</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">Vfs</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="prelude-val">None</span>;
+                <span class="kw">static </span><span class="kw-2">mut </span>VFS_ALLOC: MaybeUninit&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw-2">mut </span>Allocation&lt;<span class="macro-nonterminal">$Vfs</span>&gt;&gt; =
+                    MaybeUninit::uninit();
+                <span class="kw">static </span><span class="kw-2">mut </span>VFS_STORAGE: MaybeUninit&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw-2">mut </span><span class="macro-nonterminal">$Vfs</span>&gt; = MaybeUninit::uninit();
+                <span class="kw">static </span><span class="kw-2">mut </span>VFS: <span class="prelude-ty">Option</span>&lt;Filesystem&lt;<span class="lifetime">&#39;static</span>, <span class="macro-nonterminal">$Vfs</span>&gt;&gt; = <span class="prelude-val">None</span>;
 
-                <span class="comment">// let (ifs_alloc, ifs_storage, efs_alloc, efs_storage, vfs_alloc, vfs_storage) = statics;</span>
+                <span class="comment">// let (ifs_alloc, ifs_storage, efs_alloc, efs_storage, vfs_alloc, vfs_storage) = statics;
 
-                <span class="kw">unsafe</span> {
-                    <span class="comment">// always need to format RAM</span>
-                    <span class="ident">Filesystem::format</span>(<span class="ident">vfs_storage</span>).<span class="ident">expect</span>(<span class="string">&quot;can format&quot;</span>);
-                    <span class="comment">// this is currently a RAM fs too...</span>
-                    <span class="ident">Filesystem::format</span>(<span class="ident">efs_storage</span>).<span class="ident">expect</span>(<span class="string">&quot;can format&quot;</span>);
+                </span><span class="kw">unsafe </span>{
+                    <span class="comment">// always need to format RAM
+                    </span>Filesystem::format(vfs_storage).expect(<span class="string">&quot;can format&quot;</span>);
+                    <span class="comment">// this is currently a RAM fs too...
+                    </span>Filesystem::format(efs_storage).expect(<span class="string">&quot;can format&quot;</span>);
 
-                    <span class="kw">if</span> <span class="ident">format</span> {
-                        <span class="ident">Filesystem::format</span>(<span class="ident">ifs_storage</span>).<span class="ident">expect</span>(<span class="string">&quot;can format&quot;</span>);
+                    <span class="kw">if </span>format {
+                        Filesystem::format(ifs_storage).expect(<span class="string">&quot;can format&quot;</span>);
                     }
 
-                    <span class="ident">IFS_ALLOC</span>.<span class="ident">as_mut_ptr</span>().<span class="ident">write</span>(<span class="ident">ifs_alloc</span>);
-                    <span class="ident">IFS_STORAGE</span>.<span class="ident">as_mut_ptr</span>().<span class="ident">write</span>(<span class="ident">ifs_storage</span>);
-                    <span class="ident">IFS</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">Filesystem::mount</span>(
-                        <span class="kw-2">&amp;mut</span> <span class="kw-2">*</span><span class="ident">IFS_ALLOC</span>.<span class="ident">as_mut_ptr</span>(),
-                        <span class="kw-2">&amp;mut</span> <span class="kw-2">*</span><span class="ident">IFS_STORAGE</span>.<span class="ident">as_mut_ptr</span>(),
+                    IFS_ALLOC.as_mut_ptr().write(ifs_alloc);
+                    IFS_STORAGE.as_mut_ptr().write(ifs_storage);
+                    IFS = <span class="prelude-val">Some</span>(Filesystem::mount(
+                        <span class="kw-2">&amp;mut *</span>IFS_ALLOC.as_mut_ptr(),
+                        <span class="kw-2">&amp;mut *</span>IFS_STORAGE.as_mut_ptr(),
                     )<span class="question-mark">?</span>);
-                    <span class="kw">let</span> <span class="ident">ifs</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::store::Fs::new</span>(<span class="ident">IFS</span>.<span class="ident">as_ref</span>().<span class="ident">unwrap</span>());
-                    <span class="ident"><span class="self">Self</span>::ifs_ptr</span>().<span class="ident">write</span>(<span class="ident">ifs</span>);
+                    <span class="kw">let </span>ifs = <span class="macro-nonterminal">$crate::store::Fs::new</span>(IFS.as_ref().unwrap());
+                    <span class="self">Self</span>::ifs_ptr().write(ifs);
 
-                    <span class="ident">EFS_ALLOC</span>.<span class="ident">as_mut_ptr</span>().<span class="ident">write</span>(<span class="ident">efs_alloc</span>);
-                    <span class="ident">EFS_STORAGE</span>.<span class="ident">as_mut_ptr</span>().<span class="ident">write</span>(<span class="ident">efs_storage</span>);
-                    <span class="ident">EFS</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">Filesystem::mount</span>(
-                        <span class="kw-2">&amp;mut</span> <span class="kw-2">*</span><span class="ident">EFS_ALLOC</span>.<span class="ident">as_mut_ptr</span>(),
-                        <span class="kw-2">&amp;mut</span> <span class="kw-2">*</span><span class="ident">EFS_STORAGE</span>.<span class="ident">as_mut_ptr</span>(),
+                    EFS_ALLOC.as_mut_ptr().write(efs_alloc);
+                    EFS_STORAGE.as_mut_ptr().write(efs_storage);
+                    EFS = <span class="prelude-val">Some</span>(Filesystem::mount(
+                        <span class="kw-2">&amp;mut *</span>EFS_ALLOC.as_mut_ptr(),
+                        <span class="kw-2">&amp;mut *</span>EFS_STORAGE.as_mut_ptr(),
                     )<span class="question-mark">?</span>);
-                    <span class="kw">let</span> <span class="ident">efs</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::store::Fs::new</span>(<span class="ident">EFS</span>.<span class="ident">as_ref</span>().<span class="ident">unwrap</span>());
-                    <span class="ident"><span class="self">Self</span>::efs_ptr</span>().<span class="ident">write</span>(<span class="ident">efs</span>);
+                    <span class="kw">let </span>efs = <span class="macro-nonterminal">$crate::store::Fs::new</span>(EFS.as_ref().unwrap());
+                    <span class="self">Self</span>::efs_ptr().write(efs);
 
-                    <span class="ident">VFS_ALLOC</span>.<span class="ident">as_mut_ptr</span>().<span class="ident">write</span>(<span class="ident">vfs_alloc</span>);
-                    <span class="ident">VFS_STORAGE</span>.<span class="ident">as_mut_ptr</span>().<span class="ident">write</span>(<span class="ident">vfs_storage</span>);
-                    <span class="ident">VFS</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">Filesystem::mount</span>(
-                        <span class="kw-2">&amp;mut</span> <span class="kw-2">*</span><span class="ident">VFS_ALLOC</span>.<span class="ident">as_mut_ptr</span>(),
-                        <span class="kw-2">&amp;mut</span> <span class="kw-2">*</span><span class="ident">VFS_STORAGE</span>.<span class="ident">as_mut_ptr</span>(),
+                    VFS_ALLOC.as_mut_ptr().write(vfs_alloc);
+                    VFS_STORAGE.as_mut_ptr().write(vfs_storage);
+                    VFS = <span class="prelude-val">Some</span>(Filesystem::mount(
+                        <span class="kw-2">&amp;mut *</span>VFS_ALLOC.as_mut_ptr(),
+                        <span class="kw-2">&amp;mut *</span>VFS_STORAGE.as_mut_ptr(),
                     )<span class="question-mark">?</span>);
-                    <span class="kw">let</span> <span class="ident">vfs</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::store::Fs::new</span>(<span class="ident">VFS</span>.<span class="ident">as_ref</span>().<span class="ident">unwrap</span>());
-                    <span class="ident"><span class="self">Self</span>::vfs_ptr</span>().<span class="ident">write</span>(<span class="ident">vfs</span>);
+                    <span class="kw">let </span>vfs = <span class="macro-nonterminal">$crate::store::Fs::new</span>(VFS.as_ref().unwrap());
+                    <span class="self">Self</span>::vfs_ptr().write(vfs);
 
                     <span class="prelude-val">Ok</span>(())
                 }
             }
 
-            <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">dead_code</span>)]</span>
-            <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">attach_else_format</span>(
-                <span class="ident">internal_fs</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">Ifs</span>,
-                <span class="ident">external_fs</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">Efs</span>,
-                <span class="ident">volatile_fs</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">Vfs</span>,
-            ) -&gt; <span class="self">Self</span> {
-                <span class="comment">// This unfortunately repeates the code of `allocate`.</span>
-                <span class="comment">// It seems Rust&#39;s borrowing rules go against this.</span>
-                <span class="kw">use</span> <span class="ident">littlefs2::fs</span>::{<span class="ident">Allocation</span>, <span class="ident">Filesystem</span>};
+            <span class="attribute">#[allow(dead_code)]
+            </span><span class="kw">pub fn </span>attach_else_format(
+                internal_fs: <span class="macro-nonterminal">$Ifs</span>,
+                external_fs: <span class="macro-nonterminal">$Efs</span>,
+                volatile_fs: <span class="macro-nonterminal">$Vfs</span>,
+            ) -&gt; <span class="self">Self </span>{
+                <span class="comment">// This unfortunately repeates the code of `allocate`.
+                // It seems Rust&#39;s borrowing rules go against this.
+                </span><span class="kw">use </span>littlefs2::fs::{Allocation, Filesystem};
 
-                <span class="kw">static</span> <span class="kw-2">mut</span> <span class="ident">INTERNAL_STORAGE</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">Ifs</span><span class="op">&gt;</span> <span class="op">=</span> <span class="prelude-val">None</span>;
-                <span class="kw">unsafe</span> {
-                    <span class="ident">INTERNAL_STORAGE</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">internal_fs</span>);
+                <span class="kw">static </span><span class="kw-2">mut </span>INTERNAL_STORAGE: <span class="prelude-ty">Option</span>&lt;<span class="macro-nonterminal">$Ifs</span>&gt; = <span class="prelude-val">None</span>;
+                <span class="kw">unsafe </span>{
+                    INTERNAL_STORAGE = <span class="prelude-val">Some</span>(internal_fs);
                 }
-                <span class="kw">static</span> <span class="kw-2">mut</span> <span class="ident">INTERNAL_FS_ALLOC</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Allocation</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">Ifs</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="prelude-val">None</span>;
-                <span class="kw">unsafe</span> {
-                    <span class="ident">INTERNAL_FS_ALLOC</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">Filesystem::allocate</span>());
-                }
-
-                <span class="comment">// static mut EXTERNAL_STORAGE: $Efs = &lt;$Efs&gt;::new();</span>
-                <span class="kw">static</span> <span class="kw-2">mut</span> <span class="ident">EXTERNAL_STORAGE</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">Efs</span><span class="op">&gt;</span> <span class="op">=</span> <span class="prelude-val">None</span>;
-                <span class="kw">unsafe</span> {
-                    <span class="ident">EXTERNAL_STORAGE</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">external_fs</span>);
-                }
-                <span class="kw">static</span> <span class="kw-2">mut</span> <span class="ident">EXTERNAL_FS_ALLOC</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Allocation</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">Efs</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="prelude-val">None</span>;
-                <span class="kw">unsafe</span> {
-                    <span class="ident">EXTERNAL_FS_ALLOC</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">Filesystem::allocate</span>());
+                <span class="kw">static </span><span class="kw-2">mut </span>INTERNAL_FS_ALLOC: <span class="prelude-ty">Option</span>&lt;Allocation&lt;<span class="macro-nonterminal">$Ifs</span>&gt;&gt; = <span class="prelude-val">None</span>;
+                <span class="kw">unsafe </span>{
+                    INTERNAL_FS_ALLOC = <span class="prelude-val">Some</span>(Filesystem::allocate());
                 }
 
-                <span class="comment">// static mut VOLATILE_STORAGE: $Vfs = &lt;$Vfs&gt;::new();</span>
-                <span class="kw">static</span> <span class="kw-2">mut</span> <span class="ident">VOLATILE_STORAGE</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">Vfs</span><span class="op">&gt;</span> <span class="op">=</span> <span class="prelude-val">None</span>;
-                <span class="kw">unsafe</span> {
-                    <span class="ident">VOLATILE_STORAGE</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">volatile_fs</span>);
+                <span class="comment">// static mut EXTERNAL_STORAGE: $Efs = &lt;$Efs&gt;::new();
+                </span><span class="kw">static </span><span class="kw-2">mut </span>EXTERNAL_STORAGE: <span class="prelude-ty">Option</span>&lt;<span class="macro-nonterminal">$Efs</span>&gt; = <span class="prelude-val">None</span>;
+                <span class="kw">unsafe </span>{
+                    EXTERNAL_STORAGE = <span class="prelude-val">Some</span>(external_fs);
                 }
-                <span class="kw">static</span> <span class="kw-2">mut</span> <span class="ident">VOLATILE_FS_ALLOC</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Allocation</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">Vfs</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="prelude-val">None</span>;
-                <span class="kw">unsafe</span> {
-                    <span class="ident">VOLATILE_FS_ALLOC</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">Filesystem::allocate</span>());
+                <span class="kw">static </span><span class="kw-2">mut </span>EXTERNAL_FS_ALLOC: <span class="prelude-ty">Option</span>&lt;Allocation&lt;<span class="macro-nonterminal">$Efs</span>&gt;&gt; = <span class="prelude-val">None</span>;
+                <span class="kw">unsafe </span>{
+                    EXTERNAL_FS_ALLOC = <span class="prelude-val">Some</span>(Filesystem::allocate());
                 }
 
-                <span class="kw">let</span> <span class="ident">store</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::claim</span>().<span class="ident">unwrap</span>();
-                <span class="kw">if</span> <span class="ident">store</span>
-                    .<span class="ident">mount</span>(
-                        <span class="kw">unsafe</span> { <span class="ident">INTERNAL_FS_ALLOC</span>.<span class="ident">as_mut</span>().<span class="ident">unwrap</span>() },
-                        <span class="kw">unsafe</span> { <span class="ident">INTERNAL_STORAGE</span>.<span class="ident">as_mut</span>().<span class="ident">unwrap</span>() },
-                        <span class="kw">unsafe</span> { <span class="ident">EXTERNAL_FS_ALLOC</span>.<span class="ident">as_mut</span>().<span class="ident">unwrap</span>() },
-                        <span class="kw">unsafe</span> { <span class="ident">EXTERNAL_STORAGE</span>.<span class="ident">as_mut</span>().<span class="ident">unwrap</span>() },
-                        <span class="kw">unsafe</span> { <span class="ident">VOLATILE_FS_ALLOC</span>.<span class="ident">as_mut</span>().<span class="ident">unwrap</span>() },
-                        <span class="kw">unsafe</span> { <span class="ident">VOLATILE_STORAGE</span>.<span class="ident">as_mut</span>().<span class="ident">unwrap</span>() },
+                <span class="comment">// static mut VOLATILE_STORAGE: $Vfs = &lt;$Vfs&gt;::new();
+                </span><span class="kw">static </span><span class="kw-2">mut </span>VOLATILE_STORAGE: <span class="prelude-ty">Option</span>&lt;<span class="macro-nonterminal">$Vfs</span>&gt; = <span class="prelude-val">None</span>;
+                <span class="kw">unsafe </span>{
+                    VOLATILE_STORAGE = <span class="prelude-val">Some</span>(volatile_fs);
+                }
+                <span class="kw">static </span><span class="kw-2">mut </span>VOLATILE_FS_ALLOC: <span class="prelude-ty">Option</span>&lt;Allocation&lt;<span class="macro-nonterminal">$Vfs</span>&gt;&gt; = <span class="prelude-val">None</span>;
+                <span class="kw">unsafe </span>{
+                    VOLATILE_FS_ALLOC = <span class="prelude-val">Some</span>(Filesystem::allocate());
+                }
+
+                <span class="kw">let </span>store = <span class="self">Self</span>::claim().unwrap();
+                <span class="kw">if </span>store
+                    .mount(
+                        <span class="kw">unsafe </span>{ INTERNAL_FS_ALLOC.as_mut().unwrap() },
+                        <span class="kw">unsafe </span>{ INTERNAL_STORAGE.as_mut().unwrap() },
+                        <span class="kw">unsafe </span>{ EXTERNAL_FS_ALLOC.as_mut().unwrap() },
+                        <span class="kw">unsafe </span>{ EXTERNAL_STORAGE.as_mut().unwrap() },
+                        <span class="kw">unsafe </span>{ VOLATILE_FS_ALLOC.as_mut().unwrap() },
+                        <span class="kw">unsafe </span>{ VOLATILE_STORAGE.as_mut().unwrap() },
                         <span class="bool-val">false</span>,
                     )
-                    .<span class="ident">is_err</span>()
+                    .is_err()
                 {
-                    <span class="ident">store</span>
-                        .<span class="ident">mount</span>(
-                            <span class="kw">unsafe</span> { <span class="ident">INTERNAL_FS_ALLOC</span>.<span class="ident">as_mut</span>().<span class="ident">unwrap</span>() },
-                            <span class="kw">unsafe</span> { <span class="ident">INTERNAL_STORAGE</span>.<span class="ident">as_mut</span>().<span class="ident">unwrap</span>() },
-                            <span class="kw">unsafe</span> { <span class="ident">EXTERNAL_FS_ALLOC</span>.<span class="ident">as_mut</span>().<span class="ident">unwrap</span>() },
-                            <span class="kw">unsafe</span> { <span class="ident">EXTERNAL_STORAGE</span>.<span class="ident">as_mut</span>().<span class="ident">unwrap</span>() },
-                            <span class="kw">unsafe</span> { <span class="ident">VOLATILE_FS_ALLOC</span>.<span class="ident">as_mut</span>().<span class="ident">unwrap</span>() },
-                            <span class="kw">unsafe</span> { <span class="ident">VOLATILE_STORAGE</span>.<span class="ident">as_mut</span>().<span class="ident">unwrap</span>() },
+                    store
+                        .mount(
+                            <span class="kw">unsafe </span>{ INTERNAL_FS_ALLOC.as_mut().unwrap() },
+                            <span class="kw">unsafe </span>{ INTERNAL_STORAGE.as_mut().unwrap() },
+                            <span class="kw">unsafe </span>{ EXTERNAL_FS_ALLOC.as_mut().unwrap() },
+                            <span class="kw">unsafe </span>{ EXTERNAL_STORAGE.as_mut().unwrap() },
+                            <span class="kw">unsafe </span>{ VOLATILE_FS_ALLOC.as_mut().unwrap() },
+                            <span class="kw">unsafe </span>{ VOLATILE_STORAGE.as_mut().unwrap() },
                             <span class="bool-val">true</span>,
                         )
-                        .<span class="ident">unwrap</span>();
+                        .unwrap();
                 }
 
-                <span class="ident">store</span>
+                store
             }
         }
     };
 }
 
-<span class="comment">// TODO: replace this with &quot;fs.create_dir_all(path.parent())&quot;</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_directories</span><span class="op">&lt;</span><span class="lifetime">&#39;s</span>, <span class="ident">S</span>: <span class="ident">LfsStorage</span><span class="op">&gt;</span>(
-    <span class="ident">fs</span>: <span class="kw-2">&amp;</span><span class="ident">Filesystem</span><span class="op">&lt;</span><span class="lifetime">&#39;s</span>, <span class="ident">S</span><span class="op">&gt;</span>,
-    <span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>,
-) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
-    <span class="comment">// hprintln!(&quot;preparing {:?}&quot;, core::str::from_utf8(path).unwrap()).ok();</span>
-    <span class="kw">let</span> <span class="ident">path_bytes</span> <span class="op">=</span> <span class="ident">path</span>.<span class="ident">as_ref</span>().<span class="ident">as_bytes</span>();
+<span class="comment">// TODO: replace this with &quot;fs.create_dir_all(path.parent())&quot;
+</span><span class="kw">pub fn </span>create_directories&lt;<span class="lifetime">&#39;s</span>, S: LfsStorage&gt;(
+    fs: <span class="kw-2">&amp;</span>Filesystem&lt;<span class="lifetime">&#39;s</span>, S&gt;,
+    path: <span class="kw-2">&amp;</span>Path,
+) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
+    <span class="comment">// hprintln!(&quot;preparing {:?}&quot;, core::str::from_utf8(path).unwrap()).ok();
+    </span><span class="kw">let </span>path_bytes = path.as_ref().as_bytes();
 
-    <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">path_bytes</span>.<span class="ident">len</span>() {
-        <span class="kw">if</span> <span class="ident">path_bytes</span>[<span class="ident">i</span>] <span class="op">==</span> <span class="string">b&#39;/&#39;</span> {
-            <span class="kw">let</span> <span class="ident">dir_bytes</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">path_bytes</span>[..<span class="ident">i</span>];
-            <span class="kw">let</span> <span class="ident">dir</span> <span class="op">=</span> <span class="ident">PathBuf::from</span>(<span class="ident">dir_bytes</span>);
-            <span class="comment">// let dir_str = core::str::from_utf8(dir).unwrap();</span>
-            <span class="comment">// hprintln!(&quot;create dir {:?}&quot;, dir_str).ok();</span>
-            <span class="comment">// fs.create_dir(dir).map_err(|_| Error::FilesystemWriteFailure)?;</span>
-            <span class="kw">match</span> <span class="ident">fs</span>.<span class="ident">create_dir</span>(<span class="kw-2">&amp;</span><span class="ident">dir</span>) {
-                <span class="prelude-val">Err</span>(<span class="ident">littlefs2::io::Error::EntryAlreadyExisted</span>) =&gt; {}
+    <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..path_bytes.len() {
+        <span class="kw">if </span>path_bytes[i] == <span class="string">b&#39;/&#39; </span>{
+            <span class="kw">let </span>dir_bytes = <span class="kw-2">&amp;</span>path_bytes[..i];
+            <span class="kw">let </span>dir = PathBuf::from(dir_bytes);
+            <span class="comment">// let dir_str = core::str::from_utf8(dir).unwrap();
+            // hprintln!(&quot;create dir {:?}&quot;, dir_str).ok();
+            // fs.create_dir(dir).map_err(|_| Error::FilesystemWriteFailure)?;
+            </span><span class="kw">match </span>fs.create_dir(<span class="kw-2">&amp;</span>dir) {
+                <span class="prelude-val">Err</span>(littlefs2::io::Error::EntryAlreadyExisted) =&gt; {}
                 <span class="prelude-val">Ok</span>(()) =&gt; {}
-                <span class="ident">error</span> =&gt; {
-                    <span class="macro">panic!</span>(<span class="string">&quot;{:?}&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">error</span>);
+                error =&gt; {
+                    <span class="macro">panic!</span>(<span class="string">&quot;{:?}&quot;</span>, <span class="kw-2">&amp;</span>error);
                 }
             }
         }
@@ -1158,161 +1158,161 @@
     <span class="prelude-val">Ok</span>(())
 }
 
-<span class="doccomment">/// Reads contents from path in location of store.</span>
-<span class="attribute">#[<span class="ident">inline</span>(<span class="ident">never</span>)]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">read</span><span class="op">&lt;</span><span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span>(
-    <span class="ident">store</span>: <span class="kw">impl</span> <span class="ident">Store</span>,
-    <span class="ident">location</span>: <span class="ident">Location</span>,
-    <span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>,
-) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Bytes</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
-    <span class="macro">debug_now!</span>(<span class="string">&quot;reading {}&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">path</span>);
-    <span class="kw">match</span> <span class="ident">location</span> {
-        <span class="ident">Location::Internal</span> =&gt; <span class="ident">store</span>.<span class="ident">ifs</span>().<span class="ident">read</span>(<span class="ident">path</span>),
-        <span class="ident">Location::External</span> =&gt; <span class="ident">store</span>.<span class="ident">efs</span>().<span class="ident">read</span>(<span class="ident">path</span>),
-        <span class="ident">Location::Volatile</span> =&gt; <span class="ident">store</span>.<span class="ident">vfs</span>().<span class="ident">read</span>(<span class="ident">path</span>),
+<span class="doccomment">/// Reads contents from path in location of store.
+</span><span class="attribute">#[inline(never)]
+</span><span class="kw">pub fn </span>read&lt;<span class="kw">const </span>N: usize&gt;(
+    store: <span class="kw">impl </span>Store,
+    location: Location,
+    path: <span class="kw-2">&amp;</span>Path,
+) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&lt;N&gt;, Error&gt; {
+    <span class="macro">debug_now!</span>(<span class="string">&quot;reading {}&quot;</span>, <span class="kw-2">&amp;</span>path);
+    <span class="kw">match </span>location {
+        Location::Internal =&gt; store.ifs().read(path),
+        Location::External =&gt; store.efs().read(path),
+        Location::Volatile =&gt; store.vfs().read(path),
     }
-    .<span class="ident">map</span>(<span class="ident">Bytes::from</span>)
-    .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error::FilesystemReadFailure</span>)
+    .map(Bytes::from)
+    .map_err(|<span class="kw">_</span>| Error::FilesystemReadFailure)
 }
 
-<span class="doccomment">/// Writes contents to path in location of store.</span>
-<span class="attribute">#[<span class="ident">inline</span>(<span class="ident">never</span>)]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write</span>(
-    <span class="ident">store</span>: <span class="kw">impl</span> <span class="ident">Store</span>,
-    <span class="ident">location</span>: <span class="ident">Location</span>,
-    <span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>,
-    <span class="ident">contents</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
-) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
-    <span class="macro">debug_now!</span>(<span class="string">&quot;writing {}&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">path</span>);
-    <span class="kw">match</span> <span class="ident">location</span> {
-        <span class="ident">Location::Internal</span> =&gt; <span class="ident">store</span>.<span class="ident">ifs</span>().<span class="ident">write</span>(<span class="ident">path</span>, <span class="ident">contents</span>),
-        <span class="ident">Location::External</span> =&gt; <span class="ident">store</span>.<span class="ident">efs</span>().<span class="ident">write</span>(<span class="ident">path</span>, <span class="ident">contents</span>),
-        <span class="ident">Location::Volatile</span> =&gt; <span class="ident">store</span>.<span class="ident">vfs</span>().<span class="ident">write</span>(<span class="ident">path</span>, <span class="ident">contents</span>),
+<span class="doccomment">/// Writes contents to path in location of store.
+</span><span class="attribute">#[inline(never)]
+</span><span class="kw">pub fn </span>write(
+    store: <span class="kw">impl </span>Store,
+    location: Location,
+    path: <span class="kw-2">&amp;</span>Path,
+    contents: <span class="kw-2">&amp;</span>[u8],
+) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
+    <span class="macro">debug_now!</span>(<span class="string">&quot;writing {}&quot;</span>, <span class="kw-2">&amp;</span>path);
+    <span class="kw">match </span>location {
+        Location::Internal =&gt; store.ifs().write(path, contents),
+        Location::External =&gt; store.efs().write(path, contents),
+        Location::Volatile =&gt; store.vfs().write(path, contents),
     }
-    .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error::FilesystemWriteFailure</span>)
+    .map_err(|<span class="kw">_</span>| Error::FilesystemWriteFailure)
 }
 
-<span class="doccomment">/// Creates parent directory if necessary, then writes.</span>
-<span class="attribute">#[<span class="ident">inline</span>(<span class="ident">never</span>)]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">store</span>(
-    <span class="ident">store</span>: <span class="kw">impl</span> <span class="ident">Store</span>,
-    <span class="ident">location</span>: <span class="ident">Location</span>,
-    <span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>,
-    <span class="ident">contents</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
-) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
-    <span class="macro">debug_now!</span>(<span class="string">&quot;storing {}&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">path</span>);
-    <span class="kw">match</span> <span class="ident">location</span> {
-        <span class="ident">Location::Internal</span> =&gt; <span class="ident">create_directories</span>(<span class="ident">store</span>.<span class="ident">ifs</span>(), <span class="ident">path</span>)<span class="question-mark">?</span>,
-        <span class="ident">Location::External</span> =&gt; <span class="ident">create_directories</span>(<span class="ident">store</span>.<span class="ident">efs</span>(), <span class="ident">path</span>)<span class="question-mark">?</span>,
-        <span class="ident">Location::Volatile</span> =&gt; <span class="ident">create_directories</span>(<span class="ident">store</span>.<span class="ident">vfs</span>(), <span class="ident">path</span>)<span class="question-mark">?</span>,
+<span class="doccomment">/// Creates parent directory if necessary, then writes.
+</span><span class="attribute">#[inline(never)]
+</span><span class="kw">pub fn </span>store(
+    store: <span class="kw">impl </span>Store,
+    location: Location,
+    path: <span class="kw-2">&amp;</span>Path,
+    contents: <span class="kw-2">&amp;</span>[u8],
+) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
+    <span class="macro">debug_now!</span>(<span class="string">&quot;storing {}&quot;</span>, <span class="kw-2">&amp;</span>path);
+    <span class="kw">match </span>location {
+        Location::Internal =&gt; create_directories(store.ifs(), path)<span class="question-mark">?</span>,
+        Location::External =&gt; create_directories(store.efs(), path)<span class="question-mark">?</span>,
+        Location::Volatile =&gt; create_directories(store.vfs(), path)<span class="question-mark">?</span>,
     }
-    <span class="ident">write</span>(<span class="ident">store</span>, <span class="ident">location</span>, <span class="ident">path</span>, <span class="ident">contents</span>)
+    write(store, location, path, contents)
 }
 
-<span class="attribute">#[<span class="ident">inline</span>(<span class="ident">never</span>)]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">delete</span>(<span class="ident">store</span>: <span class="kw">impl</span> <span class="ident">Store</span>, <span class="ident">location</span>: <span class="ident">Location</span>, <span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>) -&gt; <span class="ident">bool</span> {
-    <span class="macro">debug_now!</span>(<span class="string">&quot;deleting {}&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">path</span>);
-    <span class="kw">let</span> <span class="ident">outcome</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">location</span> {
-        <span class="ident">Location::Internal</span> =&gt; <span class="ident">store</span>.<span class="ident">ifs</span>().<span class="ident">remove</span>(<span class="ident">path</span>),
-        <span class="ident">Location::External</span> =&gt; <span class="ident">store</span>.<span class="ident">efs</span>().<span class="ident">remove</span>(<span class="ident">path</span>),
-        <span class="ident">Location::Volatile</span> =&gt; <span class="ident">store</span>.<span class="ident">vfs</span>().<span class="ident">remove</span>(<span class="ident">path</span>),
+<span class="attribute">#[inline(never)]
+</span><span class="kw">pub fn </span>delete(store: <span class="kw">impl </span>Store, location: Location, path: <span class="kw-2">&amp;</span>Path) -&gt; bool {
+    <span class="macro">debug_now!</span>(<span class="string">&quot;deleting {}&quot;</span>, <span class="kw-2">&amp;</span>path);
+    <span class="kw">let </span>outcome = <span class="kw">match </span>location {
+        Location::Internal =&gt; store.ifs().remove(path),
+        Location::External =&gt; store.efs().remove(path),
+        Location::Volatile =&gt; store.vfs().remove(path),
     };
-    <span class="ident">outcome</span>.<span class="ident">is_ok</span>()
+    outcome.is_ok()
 }
 
-<span class="attribute">#[<span class="ident">inline</span>(<span class="ident">never</span>)]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">exists</span>(<span class="ident">store</span>: <span class="kw">impl</span> <span class="ident">Store</span>, <span class="ident">location</span>: <span class="ident">Location</span>, <span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>) -&gt; <span class="ident">bool</span> {
-    <span class="macro">debug_now!</span>(<span class="string">&quot;checking existence of {}&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">path</span>);
-    <span class="kw">match</span> <span class="ident">location</span> {
-        <span class="ident">Location::Internal</span> =&gt; <span class="ident">path</span>.<span class="ident">exists</span>(<span class="ident">store</span>.<span class="ident">ifs</span>()),
-        <span class="ident">Location::External</span> =&gt; <span class="ident">path</span>.<span class="ident">exists</span>(<span class="ident">store</span>.<span class="ident">efs</span>()),
-        <span class="ident">Location::Volatile</span> =&gt; <span class="ident">path</span>.<span class="ident">exists</span>(<span class="ident">store</span>.<span class="ident">vfs</span>()),
+<span class="attribute">#[inline(never)]
+</span><span class="kw">pub fn </span>exists(store: <span class="kw">impl </span>Store, location: Location, path: <span class="kw-2">&amp;</span>Path) -&gt; bool {
+    <span class="macro">debug_now!</span>(<span class="string">&quot;checking existence of {}&quot;</span>, <span class="kw-2">&amp;</span>path);
+    <span class="kw">match </span>location {
+        Location::Internal =&gt; path.exists(store.ifs()),
+        Location::External =&gt; path.exists(store.efs()),
+        Location::Volatile =&gt; path.exists(store.vfs()),
     }
 }
 
-<span class="attribute">#[<span class="ident">inline</span>(<span class="ident">never</span>)]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">metadata</span>(
-    <span class="ident">store</span>: <span class="kw">impl</span> <span class="ident">Store</span>,
-    <span class="ident">location</span>: <span class="ident">Location</span>,
-    <span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>,
-) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Metadata</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
-    <span class="macro">debug_now!</span>(<span class="string">&quot;checking existence of {}&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">path</span>);
-    <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">location</span> {
-        <span class="ident">Location::Internal</span> =&gt; <span class="ident">store</span>.<span class="ident">ifs</span>().<span class="ident">metadata</span>(<span class="ident">path</span>),
-        <span class="ident">Location::External</span> =&gt; <span class="ident">store</span>.<span class="ident">efs</span>().<span class="ident">metadata</span>(<span class="ident">path</span>),
-        <span class="ident">Location::Volatile</span> =&gt; <span class="ident">store</span>.<span class="ident">vfs</span>().<span class="ident">metadata</span>(<span class="ident">path</span>),
+<span class="attribute">#[inline(never)]
+</span><span class="kw">pub fn </span>metadata(
+    store: <span class="kw">impl </span>Store,
+    location: Location,
+    path: <span class="kw-2">&amp;</span>Path,
+) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Metadata&gt;, Error&gt; {
+    <span class="macro">debug_now!</span>(<span class="string">&quot;checking existence of {}&quot;</span>, <span class="kw-2">&amp;</span>path);
+    <span class="kw">let </span>result = <span class="kw">match </span>location {
+        Location::Internal =&gt; store.ifs().metadata(path),
+        Location::External =&gt; store.efs().metadata(path),
+        Location::Volatile =&gt; store.vfs().metadata(path),
     };
-    <span class="kw">match</span> <span class="ident">result</span> {
-        <span class="prelude-val">Ok</span>(<span class="ident">metadata</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">metadata</span>)),
-        <span class="prelude-val">Err</span>(<span class="ident">littlefs2::io::Error::NoSuchEntry</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
-        <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">Err</span>(<span class="ident">Error::FilesystemReadFailure</span>),
+    <span class="kw">match </span>result {
+        <span class="prelude-val">Ok</span>(metadata) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(metadata)),
+        <span class="prelude-val">Err</span>(littlefs2::io::Error::NoSuchEntry) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
+        <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">Err</span>(Error::FilesystemReadFailure),
     }
 }
 
-<span class="attribute">#[<span class="ident">inline</span>(<span class="ident">never</span>)]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">remove_dir</span>(<span class="ident">store</span>: <span class="kw">impl</span> <span class="ident">Store</span>, <span class="ident">location</span>: <span class="ident">Location</span>, <span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>) -&gt; <span class="ident">bool</span> {
-    <span class="macro">debug_now!</span>(<span class="string">&quot;remove_dir&#39;ing {}&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">path</span>);
-    <span class="kw">let</span> <span class="ident">outcome</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">location</span> {
-        <span class="ident">Location::Internal</span> =&gt; <span class="ident">store</span>.<span class="ident">ifs</span>().<span class="ident">remove_dir</span>(<span class="ident">path</span>),
-        <span class="ident">Location::External</span> =&gt; <span class="ident">store</span>.<span class="ident">efs</span>().<span class="ident">remove_dir</span>(<span class="ident">path</span>),
-        <span class="ident">Location::Volatile</span> =&gt; <span class="ident">store</span>.<span class="ident">vfs</span>().<span class="ident">remove_dir</span>(<span class="ident">path</span>),
+<span class="attribute">#[inline(never)]
+</span><span class="kw">pub fn </span>remove_dir(store: <span class="kw">impl </span>Store, location: Location, path: <span class="kw-2">&amp;</span>Path) -&gt; bool {
+    <span class="macro">debug_now!</span>(<span class="string">&quot;remove_dir&#39;ing {}&quot;</span>, <span class="kw-2">&amp;</span>path);
+    <span class="kw">let </span>outcome = <span class="kw">match </span>location {
+        Location::Internal =&gt; store.ifs().remove_dir(path),
+        Location::External =&gt; store.efs().remove_dir(path),
+        Location::Volatile =&gt; store.vfs().remove_dir(path),
     };
-    <span class="ident">outcome</span>.<span class="ident">is_ok</span>()
+    outcome.is_ok()
 }
 
-<span class="attribute">#[<span class="ident">inline</span>(<span class="ident">never</span>)]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">remove_dir_all_where</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>(
-    <span class="ident">store</span>: <span class="kw">impl</span> <span class="ident">Store</span>,
-    <span class="ident">location</span>: <span class="ident">Location</span>,
-    <span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>,
-    <span class="ident">predicate</span>: <span class="ident">P</span>,
-) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span>, <span class="ident">Error</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">P</span>: <span class="ident">Fn</span>(<span class="kw-2">&amp;</span><span class="ident">DirEntry</span>) -&gt; <span class="ident">bool</span>,
+<span class="attribute">#[inline(never)]
+</span><span class="kw">pub fn </span>remove_dir_all_where&lt;P&gt;(
+    store: <span class="kw">impl </span>Store,
+    location: Location,
+    path: <span class="kw-2">&amp;</span>Path,
+    predicate: P,
+) -&gt; <span class="prelude-ty">Result</span>&lt;usize, Error&gt;
+<span class="kw">where
+    </span>P: Fn(<span class="kw-2">&amp;</span>DirEntry) -&gt; bool,
 {
-    <span class="macro">debug_now!</span>(<span class="string">&quot;remove_dir&#39;ing {}&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">path</span>);
-    <span class="kw">let</span> <span class="ident">outcome</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">location</span> {
-        <span class="ident">Location::Internal</span> =&gt; <span class="ident">store</span>.<span class="ident">ifs</span>().<span class="ident">remove_dir_all_where</span>(<span class="ident">path</span>, <span class="kw-2">&amp;</span><span class="ident">predicate</span>),
-        <span class="ident">Location::External</span> =&gt; <span class="ident">store</span>.<span class="ident">efs</span>().<span class="ident">remove_dir_all_where</span>(<span class="ident">path</span>, <span class="kw-2">&amp;</span><span class="ident">predicate</span>),
-        <span class="ident">Location::Volatile</span> =&gt; <span class="ident">store</span>.<span class="ident">vfs</span>().<span class="ident">remove_dir_all_where</span>(<span class="ident">path</span>, <span class="kw-2">&amp;</span><span class="ident">predicate</span>),
+    <span class="macro">debug_now!</span>(<span class="string">&quot;remove_dir&#39;ing {}&quot;</span>, <span class="kw-2">&amp;</span>path);
+    <span class="kw">let </span>outcome = <span class="kw">match </span>location {
+        Location::Internal =&gt; store.ifs().remove_dir_all_where(path, <span class="kw-2">&amp;</span>predicate),
+        Location::External =&gt; store.efs().remove_dir_all_where(path, <span class="kw-2">&amp;</span>predicate),
+        Location::Volatile =&gt; store.vfs().remove_dir_all_where(path, <span class="kw-2">&amp;</span>predicate),
     };
-    <span class="ident">outcome</span>.<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error::FilesystemWriteFailure</span>)
+    outcome.map_err(|<span class="kw">_</span>| Error::FilesystemWriteFailure)
 }
 
-<span class="comment">// pub fn delete_volatile(store: impl Store, handle: &amp;ObjectHandle) -&gt; bool {</span>
-<span class="comment">//     let secrecies = [</span>
-<span class="comment">//         Secrecy::Secret,</span>
-<span class="comment">//         Secrecy::Public,</span>
-<span class="comment">//     ];</span>
+<span class="comment">// pub fn delete_volatile(store: impl Store, handle: &amp;ObjectHandle) -&gt; bool {
+//     let secrecies = [
+//         Secrecy::Secret,
+//         Secrecy::Public,
+//     ];
 
-<span class="comment">//     let success = secrecies.iter().any(|secrecy| {</span>
-<span class="comment">//         let path = self.key_path(*secrecy, handle);</span>
-<span class="comment">//         store::delete(store, Location::Volatile, &amp;path)</span>
-<span class="comment">//     });</span>
+//     let success = secrecies.iter().any(|secrecy| {
+//         let path = self.key_path(*secrecy, handle);
+//         store::delete(store, Location::Volatile, &amp;path)
+//     });
 
-<span class="comment">//     success</span>
-<span class="comment">// }</span>
+//     success
+// }
 
-<span class="comment">// pub fn delete_anywhere(store: impl Store, handle: &amp;ObjectHandle) -&gt; bool {</span>
-<span class="comment">//     let secrecies = [</span>
-<span class="comment">//         Secrecy::Secret,</span>
-<span class="comment">//         Secrecy::Public,</span>
-<span class="comment">//     ];</span>
+// pub fn delete_anywhere(store: impl Store, handle: &amp;ObjectHandle) -&gt; bool {
+//     let secrecies = [
+//         Secrecy::Secret,
+//         Secrecy::Public,
+//     ];
 
-<span class="comment">//     let locations = [</span>
-<span class="comment">//         Location::Internal,</span>
-<span class="comment">//         Location::External,</span>
-<span class="comment">//         Location::Volatile,</span>
-<span class="comment">//     ];</span>
+//     let locations = [
+//         Location::Internal,
+//         Location::External,
+//         Location::Volatile,
+//     ];
 
-<span class="comment">//     let success = secrecies.iter().any(|secrecy| {</span>
-<span class="comment">//         let path = self.key_path(*secrecy, handle);</span>
-<span class="comment">//         locations.iter().any(|location| {</span>
-<span class="comment">//             store::delete(store, *location, &amp;path)</span>
-<span class="comment">//         })</span>
-<span class="comment">//     });</span>
+//     let success = secrecies.iter().any(|secrecy| {
+//         let path = self.key_path(*secrecy, handle);
+//         locations.iter().any(|location| {
+//             store::delete(store, *location, &amp;path)
+//         })
+//     });
 
-<span class="comment">//     success</span>
-<span class="comment">// }</span>
-</code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="trussed" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+//     success
+// }
+</span></code></pre></div>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="trussed" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

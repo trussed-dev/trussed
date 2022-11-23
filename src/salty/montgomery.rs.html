@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/salty-0.2.0/src/montgomery.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>montgomery.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../salty/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../salty/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../salty/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/salty-0.2.0/src/montgomery.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>montgomery.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../salty/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../salty/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../salty/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -318,325 +318,325 @@
 <span id="318">318</span>
 <span id="319">319</span>
 <span id="320">320</span>
-</pre><pre class="rust"><code><span class="doccomment">//! 99.9% cribbed from curve25519-dalek</span>
+</pre><pre class="rust"><code><span class="doccomment">//! 99.9% cribbed from curve25519-dalek
 
-<span class="kw">use</span> <span class="ident">core</span>::{
-    <span class="comment">// cmp::PartialEq,</span>
-    <span class="ident">ops</span>::{
-        <span class="comment">// Add,</span>
-        <span class="comment">// Neg,</span>
-        <span class="ident">Mul</span>,
-        <span class="ident">MulAssign</span>,
+</span><span class="kw">use </span>core::{
+    <span class="comment">// cmp::PartialEq,
+    </span>ops::{
+        <span class="comment">// Add,
+        // Neg,
+        </span>Mul,
+        MulAssign,
     }
 };
 
-<span class="kw">use</span> <span class="ident">subtle::Choice</span>;
-<span class="kw">use</span> <span class="ident">subtle::ConditionallySelectable</span>;
-<span class="kw">use</span> <span class="ident">subtle::ConstantTimeEq</span>;
-<span class="comment">// use zeroize::Zeroize;</span>
+<span class="kw">use </span>subtle::Choice;
+<span class="kw">use </span>subtle::ConditionallySelectable;
+<span class="kw">use </span>subtle::ConstantTimeEq;
+<span class="comment">// use zeroize::Zeroize;
 
-<span class="kw">use</span> <span class="kw">crate</span>::{
-    <span class="ident">Error</span>,
+</span><span class="kw">use crate</span>::{
+    Error,
     <span class="prelude-ty">Result</span>,
-    <span class="comment">// constants::COMPRESSED_Y_LENGTH,</span>
-    <span class="ident">edwards</span>::{<span class="ident">CompressedY</span> <span class="kw">as</span> <span class="ident">CompressedEdwardsY</span>, <span class="ident">EdwardsPoint</span> <span class="kw">as</span> <span class="ident">EdwardsPoint</span>},
-    <span class="ident">field</span>::{
-        <span class="ident">FieldImplementation</span> <span class="kw">as</span> <span class="kw">_</span>,
-        <span class="ident">FieldElement</span>,
+    <span class="comment">// constants::COMPRESSED_Y_LENGTH,
+    </span>edwards::{CompressedY <span class="kw">as </span>CompressedEdwardsY, EdwardsPoint <span class="kw">as </span>EdwardsPoint},
+    field::{
+        FieldImplementation <span class="kw">as _</span>,
+        FieldElement,
     },
-    <span class="ident">scalar::Scalar</span>,
+    scalar::Scalar,
 };
 
-<span class="comment">// #[derive(Clone,Copy,Debug,Default)]</span>
-<span class="doccomment">/// Holds the \\(u\\)-coordinate of a point on the Montgomery form of</span>
-<span class="doccomment">/// Curve25519 or its twist.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>,<span class="ident">Copy</span>,<span class="ident">Debug</span>,<span class="ident">Default</span><span class="comment">/*,Hash*/</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">MontgomeryPoint</span>(<span class="kw">pub</span> <span class="ident">FieldElement</span>);
+<span class="comment">// #[derive(Clone,Copy,Debug,Default)]
+</span><span class="doccomment">/// Holds the \\(u\\)-coordinate of a point on the Montgomery form of
+/// Curve25519 or its twist.
+</span><span class="attribute">#[derive(Clone,Copy,Debug,Default<span class="comment">/*,Hash*/</span>)]
+</span><span class="kw">pub struct </span>MontgomeryPoint(<span class="kw">pub </span>FieldElement);
 
-<span class="kw">impl</span> <span class="ident">ConstantTimeEq</span> <span class="kw">for</span> <span class="ident">MontgomeryPoint</span> {
-    <span class="kw">fn</span> <span class="ident">ct_eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="ident">MontgomeryPoint</span>) -&gt; <span class="ident">Choice</span> {
-        <span class="comment">// let self_fe = FieldElement::from_bytes(&amp;self.0);</span>
-        <span class="comment">// let other_fe = FieldElement::from_bytes(&amp;other.0);</span>
+<span class="kw">impl </span>ConstantTimeEq <span class="kw">for </span>MontgomeryPoint {
+    <span class="kw">fn </span>ct_eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span>MontgomeryPoint) -&gt; Choice {
+        <span class="comment">// let self_fe = FieldElement::from_bytes(&amp;self.0);
+        // let other_fe = FieldElement::from_bytes(&amp;other.0);
 
-        <span class="comment">// self_fe.ct_eq(&amp;other_fe)</span>
-        <span class="self">self</span>.<span class="number">0</span>.<span class="ident">ct_eq</span>(<span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="number">0</span>)
+        // self_fe.ct_eq(&amp;other_fe)
+        </span><span class="self">self</span>.<span class="number">0</span>.ct_eq(<span class="kw-2">&amp;</span>other.<span class="number">0</span>)
     }
 }
 
-<span class="comment">// impl Default for MontgomeryPoint {</span>
-<span class="comment">//     fn default() -&gt; MontgomeryPoint {</span>
-<span class="comment">//         MontgomeryPoint([0u8; 32])</span>
-<span class="comment">//     }</span>
-<span class="comment">// }</span>
+<span class="comment">// impl Default for MontgomeryPoint {
+//     fn default() -&gt; MontgomeryPoint {
+//         MontgomeryPoint([0u8; 32])
+//     }
+// }
 
-<span class="kw">impl</span> <span class="ident">PartialEq</span> <span class="kw">for</span> <span class="ident">MontgomeryPoint</span> {
-    <span class="kw">fn</span> <span class="ident">eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="ident">MontgomeryPoint</span>) -&gt; <span class="ident">bool</span> {
-        <span class="self">self</span>.<span class="ident">ct_eq</span>(<span class="ident">other</span>).<span class="ident">unwrap_u8</span>() <span class="op">==</span> <span class="number">1u8</span>
-        <span class="comment">// self.0 == other.0</span>
-    }
+</span><span class="kw">impl </span>PartialEq <span class="kw">for </span>MontgomeryPoint {
+    <span class="kw">fn </span>eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span>MontgomeryPoint) -&gt; bool {
+        <span class="self">self</span>.ct_eq(other).unwrap_u8() == <span class="number">1u8
+        </span><span class="comment">// self.0 == other.0
+    </span>}
 }
 
-<span class="kw">impl</span> <span class="ident">Eq</span> <span class="kw">for</span> <span class="ident">MontgomeryPoint</span> {}
+<span class="kw">impl </span>Eq <span class="kw">for </span>MontgomeryPoint {}
 
-<span class="comment">// impl Zeroize for MontgomeryPoint {</span>
-<span class="comment">//     fn zeroize(&amp;mut self) {</span>
-<span class="comment">//         self.0.zeroize();</span>
-<span class="comment">//     }</span>
-<span class="comment">// }</span>
+<span class="comment">// impl Zeroize for MontgomeryPoint {
+//     fn zeroize(&amp;mut self) {
+//         self.0.zeroize();
+//     }
+// }
 
-<span class="kw">impl</span> <span class="ident">MontgomeryPoint</span> {
-    <span class="comment">// /// View this `MontgomeryPoint` as an array of bytes.</span>
-    <span class="comment">// pub fn as_bytes(&amp;self) -&gt; &amp;[u8; 32] {</span>
-    <span class="comment">//     &amp;self.0.to_bytes()</span>
-    <span class="comment">// }</span>
+</span><span class="kw">impl </span>MontgomeryPoint {
+    <span class="comment">// /// View this `MontgomeryPoint` as an array of bytes.
+    // pub fn as_bytes(&amp;self) -&gt; &amp;[u8; 32] {
+    //     &amp;self.0.to_bytes()
+    // }
 
-    <span class="doccomment">/// Convert this `MontgomeryPoint` to an array of bytes.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">to_bytes</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; [<span class="ident">u8</span>; <span class="number">32</span>] {
-        <span class="self">self</span>.<span class="number">0</span>.<span class="ident">to_bytes</span>()
+    </span><span class="doccomment">/// Convert this `MontgomeryPoint` to an array of bytes.
+    </span><span class="kw">pub fn </span>to_bytes(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; [u8; <span class="number">32</span>] {
+        <span class="self">self</span>.<span class="number">0</span>.to_bytes()
     }
 
-    <span class="doccomment">/// Attempt to convert to an `EdwardsPoint`, using the supplied</span>
-    <span class="doccomment">/// choice of sign for the `EdwardsPoint`.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// # Inputs</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// * `sign`: a `u8` donating the desired sign of the resulting</span>
-    <span class="doccomment">///   `EdwardsPoint`.  `0` denotes positive and `1` negative.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// # Return</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// * `Some(EdwardsPoint)` if `self` is the \\(u\\)-coordinate of a</span>
-    <span class="doccomment">/// point on (the Montgomery form of) Curve25519;</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// * `None` if `self` is the \\(u\\)-coordinate of a point on the</span>
-    <span class="doccomment">/// twist of (the Montgomery form of) Curve25519;</span>
-    <span class="doccomment">///</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">to_edwards</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">sign</span>: <span class="ident">u8</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">EdwardsPoint</span><span class="op">&gt;</span> {
-        <span class="comment">// To decompress the Montgomery u coordinate to an</span>
-        <span class="comment">// `EdwardsPoint`, we apply the birational map to obtain the</span>
-        <span class="comment">// Edwards y coordinate, then do Edwards decompression.</span>
-        <span class="comment">//</span>
-        <span class="comment">// The birational map is y = (u-1)/(u+1).</span>
-        <span class="comment">//</span>
-        <span class="comment">// The exceptional points are the zeros of the denominator,</span>
-        <span class="comment">// i.e., u = -1.</span>
-        <span class="comment">//</span>
-        <span class="comment">// But when u = -1, v^2 = u*(u^2+486662*u+1) = 486660.</span>
-        <span class="comment">//</span>
-        <span class="comment">// Since this is nonsquare mod p, u = -1 corresponds to a point</span>
-        <span class="comment">// on the twist, not the curve, so we can reject it early.</span>
+    <span class="doccomment">/// Attempt to convert to an `EdwardsPoint`, using the supplied
+    /// choice of sign for the `EdwardsPoint`.
+    ///
+    /// # Inputs
+    ///
+    /// * `sign`: a `u8` donating the desired sign of the resulting
+    ///   `EdwardsPoint`.  `0` denotes positive and `1` negative.
+    ///
+    /// # Return
+    ///
+    /// * `Some(EdwardsPoint)` if `self` is the \\(u\\)-coordinate of a
+    /// point on (the Montgomery form of) Curve25519;
+    ///
+    /// * `None` if `self` is the \\(u\\)-coordinate of a point on the
+    /// twist of (the Montgomery form of) Curve25519;
+    ///
+    </span><span class="kw">pub fn </span>to_edwards(<span class="kw-2">&amp;</span><span class="self">self</span>, sign: u8) -&gt; <span class="prelude-ty">Result</span>&lt;EdwardsPoint&gt; {
+        <span class="comment">// To decompress the Montgomery u coordinate to an
+        // `EdwardsPoint`, we apply the birational map to obtain the
+        // Edwards y coordinate, then do Edwards decompression.
+        //
+        // The birational map is y = (u-1)/(u+1).
+        //
+        // The exceptional points are the zeros of the denominator,
+        // i.e., u = -1.
+        //
+        // But when u = -1, v^2 = u*(u^2+486662*u+1) = 486660.
+        //
+        // Since this is nonsquare mod p, u = -1 corresponds to a point
+        // on the twist, not the curve, so we can reject it early.
 
-        <span class="kw">let</span> <span class="ident">u</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>;
-        <span class="kw">let</span> <span class="ident">one</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">FieldElement::ONE</span>;
+        </span><span class="kw">let </span>u = <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>;
+        <span class="kw">let </span>one = <span class="kw-2">&amp;</span>FieldElement::ONE;
 
-        <span class="kw">if</span> <span class="ident">u</span> <span class="op">+</span> <span class="ident">one</span> <span class="op">==</span> <span class="ident">FieldElement::ZERO</span> {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::WrongTwist</span>);
+        <span class="kw">if </span>u + one == FieldElement::ZERO {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::WrongTwist);
         }
 
-        <span class="kw">let</span> <span class="ident">y</span> <span class="op">=</span> <span class="kw-2">&amp;</span>(<span class="ident">u</span> <span class="op">-</span> <span class="ident">one</span>) <span class="op">*</span> <span class="kw-2">&amp;</span>(<span class="ident">u</span> <span class="op">+</span> <span class="ident">one</span>).<span class="ident">inverse</span>();
+        <span class="kw">let </span>y = <span class="kw-2">&amp;</span>(u - one) * <span class="kw-2">&amp;</span>(u + one).inverse();
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">y_bytes</span> <span class="op">=</span> <span class="ident">y</span>.<span class="ident">to_bytes</span>();
-        <span class="ident">y_bytes</span>[<span class="number">31</span>] <span class="op">^</span><span class="op">=</span> <span class="ident">sign</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">7</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>y_bytes = y.to_bytes();
+        y_bytes[<span class="number">31</span>] ^= sign &lt;&lt; <span class="number">7</span>;
 
-        <span class="ident">CompressedEdwardsY</span>(<span class="ident">y_bytes</span>).<span class="ident">decompressed</span>()
+        CompressedEdwardsY(y_bytes).decompressed()
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">basepoint</span>() -&gt; <span class="self">Self</span> {
-        <span class="self">Self</span>(<span class="ident">FieldElement::MONTGOMERY_BASEPOINT_U</span>)
+    <span class="kw">pub fn </span>basepoint() -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>(FieldElement::MONTGOMERY_BASEPOINT_U)
     }
 
 }
 
-<span class="doccomment">/// A `ProjectivePoint` holds a point on the projective line</span>
-<span class="doccomment">/// \\( \mathbb P(\mathbb F\_p) \\), which we identify with the Kummer</span>
-<span class="doccomment">/// line of the Montgomery curve.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Debug</span>)]</span>
-<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">non_snake_case</span>)]</span>
-<span class="kw">struct</span> <span class="ident">ProjectivePoint</span> {
-    <span class="kw">pub</span> <span class="ident">U</span>: <span class="ident">FieldElement</span>,
-    <span class="kw">pub</span> <span class="ident">W</span>: <span class="ident">FieldElement</span>,
+<span class="doccomment">/// A `ProjectivePoint` holds a point on the projective line
+/// \\( \mathbb P(\mathbb F\_p) \\), which we identify with the Kummer
+/// line of the Montgomery curve.
+</span><span class="attribute">#[derive(Copy, Clone, Debug)]
+#[allow(non_snake_case)]
+</span><span class="kw">struct </span>ProjectivePoint {
+    <span class="kw">pub </span>U: FieldElement,
+    <span class="kw">pub </span>W: FieldElement,
 }
 
-<span class="comment">// impl Identity for ProjectivePoint {</span>
-<span class="kw">impl</span> <span class="ident">ProjectivePoint</span> {
+<span class="comment">// impl Identity for ProjectivePoint {
+</span><span class="kw">impl </span>ProjectivePoint {
 
-    <span class="kw">fn</span> <span class="ident">neutral_element</span>() -&gt; <span class="ident">ProjectivePoint</span> {
-        <span class="ident">ProjectivePoint</span> {
-            <span class="ident">U</span>: <span class="ident">FieldElement::ONE</span>,
-            <span class="ident">W</span>: <span class="ident">FieldElement::ZERO</span>,
-        }
-    }
-}
-
-<span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">ProjectivePoint</span> {
-    <span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="ident">ProjectivePoint</span> {
-        <span class="ident">ProjectivePoint::neutral_element</span>()
-    }
-}
-
-<span class="kw">impl</span> <span class="ident">ConditionallySelectable</span> <span class="kw">for</span> <span class="ident">ProjectivePoint</span> {
-    <span class="kw">fn</span> <span class="ident">conditional_select</span>(
-        <span class="ident">a</span>: <span class="kw-2">&amp;</span><span class="ident">ProjectivePoint</span>,
-        <span class="ident">b</span>: <span class="kw-2">&amp;</span><span class="ident">ProjectivePoint</span>,
-        <span class="ident">choice</span>: <span class="ident">Choice</span>,
-    ) -&gt; <span class="ident">ProjectivePoint</span> {
-        <span class="ident">ProjectivePoint</span> {
-            <span class="ident">U</span>: <span class="ident">FieldElement::conditional_select</span>(<span class="kw-2">&amp;</span><span class="ident">a</span>.<span class="ident">U</span>, <span class="kw-2">&amp;</span><span class="ident">b</span>.<span class="ident">U</span>, <span class="ident">choice</span>),
-            <span class="ident">W</span>: <span class="ident">FieldElement::conditional_select</span>(<span class="kw-2">&amp;</span><span class="ident">a</span>.<span class="ident">W</span>, <span class="kw-2">&amp;</span><span class="ident">b</span>.<span class="ident">W</span>, <span class="ident">choice</span>),
+    <span class="kw">fn </span>neutral_element() -&gt; ProjectivePoint {
+        ProjectivePoint {
+            U: FieldElement::ONE,
+            W: FieldElement::ZERO,
         }
     }
 }
 
-<span class="kw">impl</span> <span class="ident">ProjectivePoint</span> {
-    <span class="doccomment">/// Dehomogenize this point to affine coordinates.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// # Return</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// * \\( u = U / W \\) if \\( W \neq 0 \\);</span>
-    <span class="doccomment">/// * \\( 0 \\) if \\( W \eq 0 \\);</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">to_affine</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">MontgomeryPoint</span> {
-        <span class="kw">let</span> <span class="ident">u</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">U</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">W</span>.<span class="ident">inverse</span>();
-        <span class="ident">MontgomeryPoint</span>(<span class="ident">u</span>)
+<span class="kw">impl </span>Default <span class="kw">for </span>ProjectivePoint {
+    <span class="kw">fn </span>default() -&gt; ProjectivePoint {
+        ProjectivePoint::neutral_element()
     }
 }
 
-<span class="doccomment">/// Perform the double-and-add step of the Montgomery ladder.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// Given projective points</span>
-<span class="doccomment">/// \\( (U\_P : W\_P) = u(P) \\),</span>
-<span class="doccomment">/// \\( (U\_Q : W\_Q) = u(Q) \\),</span>
-<span class="doccomment">/// and the affine difference</span>
-<span class="doccomment">/// \\(      u\_{P-Q} = u(P-Q) \\), set</span>
-<span class="doccomment">/// $$</span>
-<span class="doccomment">///     (U\_P : W\_P) \gets u([2]P)</span>
-<span class="doccomment">/// $$</span>
-<span class="doccomment">/// and</span>
-<span class="doccomment">/// $$</span>
-<span class="doccomment">///     (U\_Q : W\_Q) \gets u(P + Q).</span>
-<span class="doccomment">/// $$</span>
-<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">non_snake_case</span>)]</span>
-<span class="kw">fn</span> <span class="ident">differential_add_and_double</span>(
-    <span class="ident">P</span>: <span class="kw-2">&amp;mut</span> <span class="ident">ProjectivePoint</span>,
-    <span class="ident">Q</span>: <span class="kw-2">&amp;mut</span> <span class="ident">ProjectivePoint</span>,
-    <span class="ident">affine_PmQ</span>: <span class="kw-2">&amp;</span><span class="ident">FieldElement</span>,
+<span class="kw">impl </span>ConditionallySelectable <span class="kw">for </span>ProjectivePoint {
+    <span class="kw">fn </span>conditional_select(
+        a: <span class="kw-2">&amp;</span>ProjectivePoint,
+        b: <span class="kw-2">&amp;</span>ProjectivePoint,
+        choice: Choice,
+    ) -&gt; ProjectivePoint {
+        ProjectivePoint {
+            U: FieldElement::conditional_select(<span class="kw-2">&amp;</span>a.U, <span class="kw-2">&amp;</span>b.U, choice),
+            W: FieldElement::conditional_select(<span class="kw-2">&amp;</span>a.W, <span class="kw-2">&amp;</span>b.W, choice),
+        }
+    }
+}
+
+<span class="kw">impl </span>ProjectivePoint {
+    <span class="doccomment">/// Dehomogenize this point to affine coordinates.
+    ///
+    /// # Return
+    ///
+    /// * \\( u = U / W \\) if \\( W \neq 0 \\);
+    /// * \\( 0 \\) if \\( W \eq 0 \\);
+    </span><span class="kw">pub fn </span>to_affine(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MontgomeryPoint {
+        <span class="kw">let </span>u = <span class="kw-2">&amp;</span><span class="self">self</span>.U * <span class="kw-2">&amp;</span><span class="self">self</span>.W.inverse();
+        MontgomeryPoint(u)
+    }
+}
+
+<span class="doccomment">/// Perform the double-and-add step of the Montgomery ladder.
+///
+/// Given projective points
+/// \\( (U\_P : W\_P) = u(P) \\),
+/// \\( (U\_Q : W\_Q) = u(Q) \\),
+/// and the affine difference
+/// \\(      u\_{P-Q} = u(P-Q) \\), set
+/// $$
+///     (U\_P : W\_P) \gets u([2]P)
+/// $$
+/// and
+/// $$
+///     (U\_Q : W\_Q) \gets u(P + Q).
+/// $$
+</span><span class="attribute">#[allow(non_snake_case)]
+</span><span class="kw">fn </span>differential_add_and_double(
+    P: <span class="kw-2">&amp;mut </span>ProjectivePoint,
+    Q: <span class="kw-2">&amp;mut </span>ProjectivePoint,
+    affine_PmQ: <span class="kw-2">&amp;</span>FieldElement,
 ) {
-    <span class="kw">let</span> <span class="ident">t0</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">P</span>.<span class="ident">U</span> <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">P</span>.<span class="ident">W</span>;
-    <span class="kw">let</span> <span class="ident">t1</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">P</span>.<span class="ident">U</span> <span class="op">-</span> <span class="kw-2">&amp;</span><span class="ident">P</span>.<span class="ident">W</span>;
-    <span class="kw">let</span> <span class="ident">t2</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">Q</span>.<span class="ident">U</span> <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">Q</span>.<span class="ident">W</span>;
-    <span class="kw">let</span> <span class="ident">t3</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">Q</span>.<span class="ident">U</span> <span class="op">-</span> <span class="kw-2">&amp;</span><span class="ident">Q</span>.<span class="ident">W</span>;
+    <span class="kw">let </span>t0 = <span class="kw-2">&amp;</span>P.U + <span class="kw-2">&amp;</span>P.W;
+    <span class="kw">let </span>t1 = <span class="kw-2">&amp;</span>P.U - <span class="kw-2">&amp;</span>P.W;
+    <span class="kw">let </span>t2 = <span class="kw-2">&amp;</span>Q.U + <span class="kw-2">&amp;</span>Q.W;
+    <span class="kw">let </span>t3 = <span class="kw-2">&amp;</span>Q.U - <span class="kw-2">&amp;</span>Q.W;
 
-    <span class="kw">let</span> <span class="ident">t4</span> <span class="op">=</span> <span class="ident">t0</span>.<span class="ident">squared</span>();   <span class="comment">// (U_P + W_P)^2 = U_P^2 + 2 U_P W_P + W_P^2</span>
-    <span class="kw">let</span> <span class="ident">t5</span> <span class="op">=</span> <span class="ident">t1</span>.<span class="ident">squared</span>();   <span class="comment">// (U_P - W_P)^2 = U_P^2 - 2 U_P W_P + W_P^2</span>
+    <span class="kw">let </span>t4 = t0.squared();   <span class="comment">// (U_P + W_P)^2 = U_P^2 + 2 U_P W_P + W_P^2
+    </span><span class="kw">let </span>t5 = t1.squared();   <span class="comment">// (U_P - W_P)^2 = U_P^2 - 2 U_P W_P + W_P^2
 
-    <span class="kw">let</span> <span class="ident">t6</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">t4</span> <span class="op">-</span> <span class="kw-2">&amp;</span><span class="ident">t5</span>;     <span class="comment">// 4 U_P W_P</span>
+    </span><span class="kw">let </span>t6 = <span class="kw-2">&amp;</span>t4 - <span class="kw-2">&amp;</span>t5;     <span class="comment">// 4 U_P W_P
 
-    <span class="kw">let</span> <span class="ident">t7</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">t0</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">t3</span>;     <span class="comment">// (U_P + W_P) (U_Q - W_Q) = U_P U_Q + W_P U_Q - U_P W_Q - W_P W_Q</span>
-    <span class="kw">let</span> <span class="ident">t8</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">t1</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">t2</span>;     <span class="comment">// (U_P - W_P) (U_Q + W_Q) = U_P U_Q - W_P U_Q + U_P W_Q - W_P W_Q</span>
+    </span><span class="kw">let </span>t7 = <span class="kw-2">&amp;</span>t0 * <span class="kw-2">&amp;</span>t3;     <span class="comment">// (U_P + W_P) (U_Q - W_Q) = U_P U_Q + W_P U_Q - U_P W_Q - W_P W_Q
+    </span><span class="kw">let </span>t8 = <span class="kw-2">&amp;</span>t1 * <span class="kw-2">&amp;</span>t2;     <span class="comment">// (U_P - W_P) (U_Q + W_Q) = U_P U_Q - W_P U_Q + U_P W_Q - W_P W_Q
 
-    <span class="kw">let</span> <span class="ident">t9</span>  <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">t7</span> <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">t8</span>;    <span class="comment">// 2 (U_P U_Q - W_P W_Q)</span>
-    <span class="kw">let</span> <span class="ident">t10</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">t7</span> <span class="op">-</span> <span class="kw-2">&amp;</span><span class="ident">t8</span>;    <span class="comment">// 2 (W_P U_Q - U_P W_Q)</span>
+    </span><span class="kw">let </span>t9  = <span class="kw-2">&amp;</span>t7 + <span class="kw-2">&amp;</span>t8;    <span class="comment">// 2 (U_P U_Q - W_P W_Q)
+    </span><span class="kw">let </span>t10 = <span class="kw-2">&amp;</span>t7 - <span class="kw-2">&amp;</span>t8;    <span class="comment">// 2 (W_P U_Q - U_P W_Q)
 
-    <span class="kw">let</span> <span class="ident">t11</span> <span class="op">=</span>  <span class="ident">t9</span>.<span class="ident">squared</span>(); <span class="comment">// 4 (U_P U_Q - W_P W_Q)^2</span>
-    <span class="kw">let</span> <span class="ident">t12</span> <span class="op">=</span> <span class="ident">t10</span>.<span class="ident">squared</span>(); <span class="comment">// 4 (W_P U_Q - U_P W_Q)^2</span>
+    </span><span class="kw">let </span>t11 =  t9.squared(); <span class="comment">// 4 (U_P U_Q - W_P W_Q)^2
+    </span><span class="kw">let </span>t12 = t10.squared(); <span class="comment">// 4 (W_P U_Q - U_P W_Q)^2
 
-    <span class="kw">let</span> <span class="ident">t13</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">FieldElement::APLUS2_OVER_FOUR</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">t6</span>; <span class="comment">// (A + 2) U_P U_Q</span>
+    </span><span class="kw">let </span>t13 = <span class="kw-2">&amp;</span>FieldElement::APLUS2_OVER_FOUR * <span class="kw-2">&amp;</span>t6; <span class="comment">// (A + 2) U_P U_Q
 
-    <span class="kw">let</span> <span class="ident">t14</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">t4</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">t5</span>;    <span class="comment">// ((U_P + W_P)(U_P - W_P))^2 = (U_P^2 - W_P^2)^2</span>
-    <span class="kw">let</span> <span class="ident">t15</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">t13</span> <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">t5</span>;   <span class="comment">// (U_P - W_P)^2 + (A + 2) U_P W_P</span>
+    </span><span class="kw">let </span>t14 = <span class="kw-2">&amp;</span>t4 * <span class="kw-2">&amp;</span>t5;    <span class="comment">// ((U_P + W_P)(U_P - W_P))^2 = (U_P^2 - W_P^2)^2
+    </span><span class="kw">let </span>t15 = <span class="kw-2">&amp;</span>t13 + <span class="kw-2">&amp;</span>t5;   <span class="comment">// (U_P - W_P)^2 + (A + 2) U_P W_P
 
-    <span class="kw">let</span> <span class="ident">t16</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">t6</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">t15</span>;   <span class="comment">// 4 (U_P W_P) ((U_P - W_P)^2 + (A + 2) U_P W_P)</span>
+    </span><span class="kw">let </span>t16 = <span class="kw-2">&amp;</span>t6 * <span class="kw-2">&amp;</span>t15;   <span class="comment">// 4 (U_P W_P) ((U_P - W_P)^2 + (A + 2) U_P W_P)
 
-    <span class="kw">let</span> <span class="ident">t17</span> <span class="op">=</span> <span class="ident">affine_PmQ</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">t12</span>; <span class="comment">// U_D * 4 (W_P U_Q - U_P W_Q)^2</span>
-    <span class="kw">let</span> <span class="ident">t18</span> <span class="op">=</span> <span class="ident">t11</span>;               <span class="comment">// W_D * 4 (U_P U_Q - W_P W_Q)^2</span>
+    </span><span class="kw">let </span>t17 = affine_PmQ * <span class="kw-2">&amp;</span>t12; <span class="comment">// U_D * 4 (W_P U_Q - U_P W_Q)^2
+    </span><span class="kw">let </span>t18 = t11;               <span class="comment">// W_D * 4 (U_P U_Q - W_P W_Q)^2
 
-    <span class="ident">P</span>.<span class="ident">U</span> <span class="op">=</span> <span class="ident">t14</span>;  <span class="comment">// U_{P&#39;} = (U_P + W_P)^2 (U_P - W_P)^2</span>
-    <span class="ident">P</span>.<span class="ident">W</span> <span class="op">=</span> <span class="ident">t16</span>;  <span class="comment">// W_{P&#39;} = (4 U_P W_P) ((U_P - W_P)^2 + ((A + 2)/4) 4 U_P W_P)</span>
-    <span class="ident">Q</span>.<span class="ident">U</span> <span class="op">=</span> <span class="ident">t18</span>;  <span class="comment">// U_{Q&#39;} = W_D * 4 (U_P U_Q - W_P W_Q)^2</span>
-    <span class="ident">Q</span>.<span class="ident">W</span> <span class="op">=</span> <span class="ident">t17</span>;  <span class="comment">// W_{Q&#39;} = U_D * 4 (W_P U_Q - U_P W_Q)^2</span>
-}
+    </span>P.U = t14;  <span class="comment">// U_{P&#39;} = (U_P + W_P)^2 (U_P - W_P)^2
+    </span>P.W = t16;  <span class="comment">// W_{P&#39;} = (4 U_P W_P) ((U_P - W_P)^2 + ((A + 2)/4) 4 U_P W_P)
+    </span>Q.U = t18;  <span class="comment">// U_{Q&#39;} = W_D * 4 (U_P U_Q - W_P W_Q)^2
+    </span>Q.W = t17;  <span class="comment">// W_{Q&#39;} = U_D * 4 (W_P U_Q - U_P W_Q)^2
+</span>}
 
-<span class="doccomment">/// Multiply this `MontgomeryPoint` by a `Scalar`.</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span><span class="op">&gt;</span> <span class="ident">Mul</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="ident">Scalar</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">MontgomeryPoint</span> {
-    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">MontgomeryPoint</span>;
+<span class="doccomment">/// Multiply this `MontgomeryPoint` by a `Scalar`.
+</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>&gt; Mul&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span>Scalar&gt; <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>MontgomeryPoint {
+    <span class="kw">type </span>Output = MontgomeryPoint;
 
-    <span class="doccomment">/// Given `self` \\( = u\_0(P) \\), and a `Scalar` \\(n\\), return \\( u\_0([n]P) \\).</span>
-    <span class="kw">fn</span> <span class="ident">mul</span>(<span class="self">self</span>, <span class="ident">scalar</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="ident">Scalar</span>) -&gt; <span class="ident">MontgomeryPoint</span> {
-        <span class="comment">// Algorithm 8 of Costello-Smith 2017</span>
-        <span class="kw">let</span> <span class="ident">affine_u</span> <span class="op">=</span> <span class="self">self</span>.<span class="number">0</span>;
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">x0</span> <span class="op">=</span> <span class="ident">ProjectivePoint::neutral_element</span>();
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">x1</span> <span class="op">=</span> <span class="ident">ProjectivePoint</span> {
-            <span class="ident">U</span>: <span class="ident">affine_u</span>,
-            <span class="ident">W</span>: <span class="ident">FieldElement::ONE</span>,
+    <span class="doccomment">/// Given `self` \\( = u\_0(P) \\), and a `Scalar` \\(n\\), return \\( u\_0([n]P) \\).
+    </span><span class="kw">fn </span>mul(<span class="self">self</span>, scalar: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span>Scalar) -&gt; MontgomeryPoint {
+        <span class="comment">// Algorithm 8 of Costello-Smith 2017
+        </span><span class="kw">let </span>affine_u = <span class="self">self</span>.<span class="number">0</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>x0 = ProjectivePoint::neutral_element();
+        <span class="kw">let </span><span class="kw-2">mut </span>x1 = ProjectivePoint {
+            U: affine_u,
+            W: FieldElement::ONE,
         };
 
-        <span class="kw">let</span> <span class="ident">bits</span>: [<span class="ident">i8</span>; <span class="number">256</span>] <span class="op">=</span> <span class="ident">scalar</span>.<span class="ident">bits</span>();
+        <span class="kw">let </span>bits: [i8; <span class="number">256</span>] = scalar.bits();
 
-        <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> (<span class="number">0</span>..<span class="number">255</span>).<span class="ident">rev</span>() {
-            <span class="kw">let</span> <span class="ident">choice</span>: <span class="ident">u8</span> <span class="op">=</span> (<span class="ident">bits</span>[<span class="ident">i</span> <span class="op">+</span> <span class="number">1</span>] <span class="op">^</span> <span class="ident">bits</span>[<span class="ident">i</span>]) <span class="kw">as</span> <span class="ident">u8</span>;
-            <span class="macro">debug_assert!</span>(<span class="ident">choice</span> <span class="op">==</span> <span class="number">0</span> <span class="op">|</span><span class="op">|</span> <span class="ident">choice</span> <span class="op">==</span> <span class="number">1</span>);
+        <span class="kw">for </span>i <span class="kw">in </span>(<span class="number">0</span>..<span class="number">255</span>).rev() {
+            <span class="kw">let </span>choice: u8 = (bits[i + <span class="number">1</span>] ^ bits[i]) <span class="kw">as </span>u8;
+            <span class="macro">debug_assert!</span>(choice == <span class="number">0 </span>|| choice == <span class="number">1</span>);
 
-            <span class="ident">ProjectivePoint::conditional_swap</span>(<span class="kw-2">&amp;mut</span> <span class="ident">x0</span>, <span class="kw-2">&amp;mut</span> <span class="ident">x1</span>, <span class="ident">choice</span>.<span class="ident">into</span>());
-            <span class="ident">differential_add_and_double</span>(<span class="kw-2">&amp;mut</span> <span class="ident">x0</span>, <span class="kw-2">&amp;mut</span> <span class="ident">x1</span>, <span class="kw-2">&amp;</span><span class="ident">affine_u</span>);
+            ProjectivePoint::conditional_swap(<span class="kw-2">&amp;mut </span>x0, <span class="kw-2">&amp;mut </span>x1, choice.into());
+            differential_add_and_double(<span class="kw-2">&amp;mut </span>x0, <span class="kw-2">&amp;mut </span>x1, <span class="kw-2">&amp;</span>affine_u);
         }
-        <span class="ident">ProjectivePoint::conditional_swap</span>(<span class="kw-2">&amp;mut</span> <span class="ident">x0</span>, <span class="kw-2">&amp;mut</span> <span class="ident">x1</span>, <span class="ident">Choice::from</span>(<span class="ident">bits</span>[<span class="number">0</span>] <span class="kw">as</span> <span class="ident">u8</span>));
+        ProjectivePoint::conditional_swap(<span class="kw-2">&amp;mut </span>x0, <span class="kw-2">&amp;mut </span>x1, Choice::from(bits[<span class="number">0</span>] <span class="kw">as </span>u8));
 
-        <span class="ident">x0</span>.<span class="ident">to_affine</span>()
+        x0.to_affine()
     }
 
-    <span class="comment">///// Given `self` \\( = u\_0(P) \\), and a `Scalar` \\(n\\), return \\( u\_0([n]P) \\).</span>
-    <span class="comment">//fn mul(self, scalar: &amp;&#39;b Scalar) -&gt; MontgomeryPoint {</span>
-    <span class="comment">//    // Algorithm 8 of Costello-Smith 2017</span>
-    <span class="comment">//    let affine_u = self.0;</span>
-    <span class="comment">//    let mut x0 = ProjectivePoint::neutral_element();</span>
-    <span class="comment">//    let mut x1 = ProjectivePoint {</span>
-    <span class="comment">//        U: affine_u,</span>
-    <span class="comment">//        W: FieldElement::ONE,</span>
-    <span class="comment">//    };</span>
+    <span class="comment">///// Given `self` \\( = u\_0(P) \\), and a `Scalar` \\(n\\), return \\( u\_0([n]P) \\).
+    //fn mul(self, scalar: &amp;&#39;b Scalar) -&gt; MontgomeryPoint {
+    //    // Algorithm 8 of Costello-Smith 2017
+    //    let affine_u = self.0;
+    //    let mut x0 = ProjectivePoint::neutral_element();
+    //    let mut x1 = ProjectivePoint {
+    //        U: affine_u,
+    //        W: FieldElement::ONE,
+    //    };
 
-    <span class="comment">//    // TODO(really!!): check if the bits wanted here do actually correspond</span>
-    <span class="comment">//    // with the construction copy-pasted out of edwards.rs</span>
-    <span class="comment">//    //</span>
-    <span class="comment">//    let bits: [i8; 256] = scalar.bits();</span>
+    //    // TODO(really!!): check if the bits wanted here do actually correspond
+    //    // with the construction copy-pasted out of edwards.rs
+    //    //
+    //    let bits: [i8; 256] = scalar.bits();
 
-    <span class="comment">//    for i in (0..255).rev() {</span>
-    <span class="comment">//        let choice = (((scalar.0[i / 8] &gt;&gt; (i &amp; 7)) &amp; 1) as u8).into();</span>
-    <span class="comment">//        ProjectivePoint::conditional_swap(&amp;mut x0, &amp;mut x1, choice);</span>
-    <span class="comment">//        differential_add_and_double(&amp;mut x0, &amp;mut x1, &amp;affine_u);</span>
-    <span class="comment">//    }</span>
-    <span class="comment">//    ProjectivePoint::conditional_swap(&amp;mut x0, &amp;mut x1, Choice::from((scalar.0[0] &amp; 1) as u8));</span>
+    //    for i in (0..255).rev() {
+    //        let choice = (((scalar.0[i / 8] &gt;&gt; (i &amp; 7)) &amp; 1) as u8).into();
+    //        ProjectivePoint::conditional_swap(&amp;mut x0, &amp;mut x1, choice);
+    //        differential_add_and_double(&amp;mut x0, &amp;mut x1, &amp;affine_u);
+    //    }
+    //    ProjectivePoint::conditional_swap(&amp;mut x0, &amp;mut x1, Choice::from((scalar.0[0] &amp; 1) as u8));
 
-    <span class="comment">//    x0.to_affine()</span>
-    <span class="comment">//}</span>
-}
+    //    x0.to_affine()
+    //}
+</span>}
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span><span class="op">&gt;</span> <span class="ident">MulAssign</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="ident">Scalar</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">MontgomeryPoint</span> {
-    <span class="kw">fn</span> <span class="ident">mul_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">scalar</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="ident">Scalar</span>) {
-        <span class="kw-2">*</span><span class="self">self</span> <span class="op">=</span> (<span class="self">self</span> <span class="kw">as</span> <span class="kw-2">&amp;</span><span class="ident">MontgomeryPoint</span>) <span class="op">*</span> <span class="ident">scalar</span>;
-    }
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span><span class="op">&gt;</span> <span class="ident">Mul</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="ident">MontgomeryPoint</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Scalar</span> {
-    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">MontgomeryPoint</span>;
-
-    <span class="kw">fn</span> <span class="ident">mul</span>(<span class="self">self</span>, <span class="ident">point</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="ident">MontgomeryPoint</span>) -&gt; <span class="ident">MontgomeryPoint</span> {
-        <span class="ident">point</span> <span class="op">*</span> <span class="self">self</span>
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;b</span>&gt; MulAssign&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span>Scalar&gt; <span class="kw">for </span>MontgomeryPoint {
+    <span class="kw">fn </span>mul_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, scalar: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span>Scalar) {
+        <span class="kw-2">*</span><span class="self">self </span>= (<span class="self">self </span><span class="kw">as </span><span class="kw-2">&amp;</span>MontgomeryPoint) * scalar;
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
-<span class="kw">mod</span> <span class="ident">test</span> {
-    <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>&gt; Mul&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span>MontgomeryPoint&gt; <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Scalar {
+    <span class="kw">type </span>Output = MontgomeryPoint;
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">to_edwards</span>() {
-        <span class="kw">let</span> <span class="ident">edwards_basepoint</span> <span class="op">=</span> <span class="ident"><span class="kw">crate</span>::edwards::EdwardsPoint::basepoint</span>();
-        <span class="kw">let</span> <span class="ident">montgomery_basepoint</span> <span class="op">=</span> <span class="ident">MontgomeryPoint::basepoint</span>();
+    <span class="kw">fn </span>mul(<span class="self">self</span>, point: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span>MontgomeryPoint) -&gt; MontgomeryPoint {
+        point * <span class="self">self
+    </span>}
+}
 
-        <span class="macro">assert_eq!</span>(<span class="ident">edwards_basepoint</span>, <span class="ident">montgomery_basepoint</span>.<span class="ident">to_edwards</span>(<span class="number">0</span>).<span class="ident">unwrap</span>());
+<span class="attribute">#[cfg(test)]
+</span><span class="kw">mod </span>test {
+    <span class="kw">use super</span>::<span class="kw-2">*</span>;
 
-        <span class="kw">let</span> <span class="ident">scalar</span> <span class="op">=</span> <span class="ident">Scalar::from</span>(<span class="number">123456</span>);
-        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span><span class="ident">scalar</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">edwards_basepoint</span>, (<span class="kw-2">&amp;</span><span class="ident">scalar</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">montgomery_basepoint</span>).<span class="ident">to_edwards</span>(<span class="number">1</span>).<span class="ident">unwrap</span>());
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>to_edwards() {
+        <span class="kw">let </span>edwards_basepoint = <span class="kw">crate</span>::edwards::EdwardsPoint::basepoint();
+        <span class="kw">let </span>montgomery_basepoint = MontgomeryPoint::basepoint();
+
+        <span class="macro">assert_eq!</span>(edwards_basepoint, montgomery_basepoint.to_edwards(<span class="number">0</span>).unwrap());
+
+        <span class="kw">let </span>scalar = Scalar::from(<span class="number">123456</span>);
+        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>scalar * <span class="kw-2">&amp;</span>edwards_basepoint, (<span class="kw-2">&amp;</span>scalar * <span class="kw-2">&amp;</span>montgomery_basepoint).to_edwards(<span class="number">1</span>).unwrap());
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="salty" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="salty" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

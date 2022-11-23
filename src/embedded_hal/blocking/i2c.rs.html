@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/embedded-hal-0.2.7/src/blocking/i2c.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>i2c.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../embedded_hal/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../embedded_hal/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../embedded_hal/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/embedded-hal-0.2.7/src/blocking/i2c.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>i2c.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../embedded_hal/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../embedded_hal/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../embedded_hal/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -295,302 +295,302 @@
 <span id="295">295</span>
 <span id="296">296</span>
 <span id="297">297</span>
-</pre><pre class="rust"><code><span class="doccomment">//! Blocking I2C API</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! This API supports 7-bit and 10-bit addresses. Traits feature an `AddressMode`</span>
-<span class="doccomment">//! marker type parameter. Two implementation of the `AddressMode` exist:</span>
-<span class="doccomment">//! `SevenBitAddress` and `TenBitAddress`.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! Through this marker types it is possible to implement each address mode for</span>
-<span class="doccomment">//! the traits independently in `embedded-hal` implementations and device drivers</span>
-<span class="doccomment">//! can depend only on the mode that they support.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! Additionally, the I2C 10-bit address mode has been developed to be fully</span>
-<span class="doccomment">//! backwards compatible with the 7-bit address mode. This allows for a</span>
-<span class="doccomment">//! software-emulated 10-bit addressing implementation if the address mode</span>
-<span class="doccomment">//! is not supported by the hardware.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! Since 7-bit addressing is the mode of the majority of I2C devices,</span>
-<span class="doccomment">//! `SevenBitAddress` has been set as default mode and thus can be omitted if desired.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ## Examples</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ### `embedded-hal` implementation for an MCU</span>
-<span class="doccomment">//! Here is an example of an embedded-hal implementation of the `Write` trait</span>
-<span class="doccomment">//! for both modes:</span>
-<span class="doccomment">//! ```</span>
-<span class="doccomment">//! # use embedded_hal::blocking::i2c::{SevenBitAddress, TenBitAddress, Write};</span>
-<span class="doccomment">//! /// I2C0 hardware peripheral which supports both 7-bit and 10-bit addressing.</span>
-<span class="doccomment">//! pub struct I2c0;</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! impl Write&lt;SevenBitAddress&gt; for I2c0</span>
-<span class="doccomment">//! {</span>
-<span class="doccomment">//! #   type Error = ();</span>
-<span class="doccomment">//! #</span>
-<span class="doccomment">//!     fn write(&amp;mut self, addr: u8, output: &amp;[u8]) -&gt; Result&lt;(), Self::Error&gt; {</span>
-<span class="doccomment">//!         // ...</span>
-<span class="doccomment">//! #       Ok(())</span>
-<span class="doccomment">//!     }</span>
-<span class="doccomment">//! }</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! impl Write&lt;TenBitAddress&gt; for I2c0</span>
-<span class="doccomment">//! {</span>
-<span class="doccomment">//! #   type Error = ();</span>
-<span class="doccomment">//! #</span>
-<span class="doccomment">//!     fn write(&amp;mut self, addr: u16, output: &amp;[u8]) -&gt; Result&lt;(), Self::Error&gt; {</span>
-<span class="doccomment">//!         // ...</span>
-<span class="doccomment">//! #       Ok(())</span>
-<span class="doccomment">//!     }</span>
-<span class="doccomment">//! }</span>
-<span class="doccomment">//! ```</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ### Device driver compatible only with 7-bit addresses</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! For demonstration purposes the address mode parameter has been omitted in this example.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ```</span>
-<span class="doccomment">//! # use embedded_hal::blocking::i2c::WriteRead;</span>
-<span class="doccomment">//! const ADDR: u8  = 0x15;</span>
-<span class="doccomment">//! # const TEMP_REGISTER: u8 = 0x1;</span>
-<span class="doccomment">//! pub struct TemperatureSensorDriver&lt;I2C&gt; {</span>
-<span class="doccomment">//!     i2c: I2C,</span>
-<span class="doccomment">//! }</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! impl&lt;I2C, E&gt; TemperatureSensorDriver&lt;I2C&gt;</span>
-<span class="doccomment">//! where</span>
-<span class="doccomment">//!     I2C: WriteRead&lt;Error = E&gt;,</span>
-<span class="doccomment">//! {</span>
-<span class="doccomment">//!     pub fn read_temperature(&amp;mut self) -&gt; Result&lt;u8, E&gt; {</span>
-<span class="doccomment">//!         let mut temp = [0];</span>
-<span class="doccomment">//!         self.i2c</span>
-<span class="doccomment">//!             .write_read(ADDR, &amp;[TEMP_REGISTER], &amp;mut temp)</span>
-<span class="doccomment">//!             .and(Ok(temp[0]))</span>
-<span class="doccomment">//!     }</span>
-<span class="doccomment">//! }</span>
-<span class="doccomment">//! ```</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ### Device driver compatible only with 10-bit addresses</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ```</span>
-<span class="doccomment">//! # use embedded_hal::blocking::i2c::{TenBitAddress, WriteRead};</span>
-<span class="doccomment">//! const ADDR: u16  = 0x158;</span>
-<span class="doccomment">//! # const TEMP_REGISTER: u8 = 0x1;</span>
-<span class="doccomment">//! pub struct TemperatureSensorDriver&lt;I2C&gt; {</span>
-<span class="doccomment">//!     i2c: I2C,</span>
-<span class="doccomment">//! }</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! impl&lt;I2C, E&gt; TemperatureSensorDriver&lt;I2C&gt;</span>
-<span class="doccomment">//! where</span>
-<span class="doccomment">//!     I2C: WriteRead&lt;TenBitAddress, Error = E&gt;,</span>
-<span class="doccomment">//! {</span>
-<span class="doccomment">//!     pub fn read_temperature(&amp;mut self) -&gt; Result&lt;u8, E&gt; {</span>
-<span class="doccomment">//!         let mut temp = [0];</span>
-<span class="doccomment">//!         self.i2c</span>
-<span class="doccomment">//!             .write_read(ADDR, &amp;[TEMP_REGISTER], &amp;mut temp)</span>
-<span class="doccomment">//!             .and(Ok(temp[0]))</span>
-<span class="doccomment">//!     }</span>
-<span class="doccomment">//! }</span>
-<span class="doccomment">//! ```</span>
+</pre><pre class="rust"><code><span class="doccomment">//! Blocking I2C API
+//!
+//! This API supports 7-bit and 10-bit addresses. Traits feature an `AddressMode`
+//! marker type parameter. Two implementation of the `AddressMode` exist:
+//! `SevenBitAddress` and `TenBitAddress`.
+//!
+//! Through this marker types it is possible to implement each address mode for
+//! the traits independently in `embedded-hal` implementations and device drivers
+//! can depend only on the mode that they support.
+//!
+//! Additionally, the I2C 10-bit address mode has been developed to be fully
+//! backwards compatible with the 7-bit address mode. This allows for a
+//! software-emulated 10-bit addressing implementation if the address mode
+//! is not supported by the hardware.
+//!
+//! Since 7-bit addressing is the mode of the majority of I2C devices,
+//! `SevenBitAddress` has been set as default mode and thus can be omitted if desired.
+//!
+//! ## Examples
+//!
+//! ### `embedded-hal` implementation for an MCU
+//! Here is an example of an embedded-hal implementation of the `Write` trait
+//! for both modes:
+//! ```
+//! # use embedded_hal::blocking::i2c::{SevenBitAddress, TenBitAddress, Write};
+//! /// I2C0 hardware peripheral which supports both 7-bit and 10-bit addressing.
+//! pub struct I2c0;
+//!
+//! impl Write&lt;SevenBitAddress&gt; for I2c0
+//! {
+//! #   type Error = ();
+//! #
+//!     fn write(&amp;mut self, addr: u8, output: &amp;[u8]) -&gt; Result&lt;(), Self::Error&gt; {
+//!         // ...
+//! #       Ok(())
+//!     }
+//! }
+//!
+//! impl Write&lt;TenBitAddress&gt; for I2c0
+//! {
+//! #   type Error = ();
+//! #
+//!     fn write(&amp;mut self, addr: u16, output: &amp;[u8]) -&gt; Result&lt;(), Self::Error&gt; {
+//!         // ...
+//! #       Ok(())
+//!     }
+//! }
+//! ```
+//!
+//! ### Device driver compatible only with 7-bit addresses
+//!
+//! For demonstration purposes the address mode parameter has been omitted in this example.
+//!
+//! ```
+//! # use embedded_hal::blocking::i2c::WriteRead;
+//! const ADDR: u8  = 0x15;
+//! # const TEMP_REGISTER: u8 = 0x1;
+//! pub struct TemperatureSensorDriver&lt;I2C&gt; {
+//!     i2c: I2C,
+//! }
+//!
+//! impl&lt;I2C, E&gt; TemperatureSensorDriver&lt;I2C&gt;
+//! where
+//!     I2C: WriteRead&lt;Error = E&gt;,
+//! {
+//!     pub fn read_temperature(&amp;mut self) -&gt; Result&lt;u8, E&gt; {
+//!         let mut temp = [0];
+//!         self.i2c
+//!             .write_read(ADDR, &amp;[TEMP_REGISTER], &amp;mut temp)
+//!             .and(Ok(temp[0]))
+//!     }
+//! }
+//! ```
+//!
+//! ### Device driver compatible only with 10-bit addresses
+//!
+//! ```
+//! # use embedded_hal::blocking::i2c::{TenBitAddress, WriteRead};
+//! const ADDR: u16  = 0x158;
+//! # const TEMP_REGISTER: u8 = 0x1;
+//! pub struct TemperatureSensorDriver&lt;I2C&gt; {
+//!     i2c: I2C,
+//! }
+//!
+//! impl&lt;I2C, E&gt; TemperatureSensorDriver&lt;I2C&gt;
+//! where
+//!     I2C: WriteRead&lt;TenBitAddress, Error = E&gt;,
+//! {
+//!     pub fn read_temperature(&amp;mut self) -&gt; Result&lt;u8, E&gt; {
+//!         let mut temp = [0];
+//!         self.i2c
+//!             .write_read(ADDR, &amp;[TEMP_REGISTER], &amp;mut temp)
+//!             .and(Ok(temp[0]))
+//!     }
+//! }
+//! ```
 
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::private</span>;
+</span><span class="kw">use </span><span class="kw">crate</span>::private;
 
-<span class="kw">impl</span> <span class="ident">private::Sealed</span> <span class="kw">for</span> <span class="ident">SevenBitAddress</span> {}
-<span class="kw">impl</span> <span class="ident">private::Sealed</span> <span class="kw">for</span> <span class="ident">TenBitAddress</span> {}
+<span class="kw">impl </span>private::Sealed <span class="kw">for </span>SevenBitAddress {}
+<span class="kw">impl </span>private::Sealed <span class="kw">for </span>TenBitAddress {}
 
-<span class="doccomment">/// Address mode (7-bit / 10-bit)</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// Note: This trait is sealed and should not be implemented outside of this crate.</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">AddressMode</span>: <span class="ident">private::Sealed</span> {}
+<span class="doccomment">/// Address mode (7-bit / 10-bit)
+///
+/// Note: This trait is sealed and should not be implemented outside of this crate.
+</span><span class="kw">pub trait </span>AddressMode: private::Sealed {}
 
-<span class="doccomment">/// 7-bit address mode type</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">SevenBitAddress</span> <span class="op">=</span> <span class="ident">u8</span>;
+<span class="doccomment">/// 7-bit address mode type
+</span><span class="kw">pub type </span>SevenBitAddress = u8;
 
-<span class="doccomment">/// 10-bit address mode type</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">TenBitAddress</span> <span class="op">=</span> <span class="ident">u16</span>;
+<span class="doccomment">/// 10-bit address mode type
+</span><span class="kw">pub type </span>TenBitAddress = u16;
 
-<span class="kw">impl</span> <span class="ident">AddressMode</span> <span class="kw">for</span> <span class="ident">SevenBitAddress</span> {}
+<span class="kw">impl </span>AddressMode <span class="kw">for </span>SevenBitAddress {}
 
-<span class="kw">impl</span> <span class="ident">AddressMode</span> <span class="kw">for</span> <span class="ident">TenBitAddress</span> {}
+<span class="kw">impl </span>AddressMode <span class="kw">for </span>TenBitAddress {}
 
-<span class="doccomment">/// Blocking read</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Read</span><span class="op">&lt;</span><span class="ident">A</span>: <span class="ident">AddressMode</span> <span class="op">=</span> <span class="ident">SevenBitAddress</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Error type</span>
-    <span class="kw">type</span> <span class="ident">Error</span>;
+<span class="doccomment">/// Blocking read
+</span><span class="kw">pub trait </span>Read&lt;A: AddressMode = SevenBitAddress&gt; {
+    <span class="doccomment">/// Error type
+    </span><span class="kw">type </span>Error;
 
-    <span class="doccomment">/// Reads enough bytes from slave with `address` to fill `buffer`</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// # I2C Events (contract)</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// ``` text</span>
-    <span class="doccomment">/// Master: ST SAD+R        MAK    MAK ...    NMAK SP</span>
-    <span class="doccomment">/// Slave:           SAK B0     B1     ... BN</span>
-    <span class="doccomment">/// ```</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// Where</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// - `ST` = start condition</span>
-    <span class="doccomment">/// - `SAD+R` = slave address followed by bit 1 to indicate reading</span>
-    <span class="doccomment">/// - `SAK` = slave acknowledge</span>
-    <span class="doccomment">/// - `Bi` = ith byte of data</span>
-    <span class="doccomment">/// - `MAK` = master acknowledge</span>
-    <span class="doccomment">/// - `NMAK` = master no acknowledge</span>
-    <span class="doccomment">/// - `SP` = stop condition</span>
-    <span class="kw">fn</span> <span class="ident">read</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">address</span>: <span class="ident">A</span>, <span class="ident">buffer</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span>;
+    <span class="doccomment">/// Reads enough bytes from slave with `address` to fill `buffer`
+    ///
+    /// # I2C Events (contract)
+    ///
+    /// ``` text
+    /// Master: ST SAD+R        MAK    MAK ...    NMAK SP
+    /// Slave:           SAK B0     B1     ... BN
+    /// ```
+    ///
+    /// Where
+    ///
+    /// - `ST` = start condition
+    /// - `SAD+R` = slave address followed by bit 1 to indicate reading
+    /// - `SAK` = slave acknowledge
+    /// - `Bi` = ith byte of data
+    /// - `MAK` = master acknowledge
+    /// - `NMAK` = master no acknowledge
+    /// - `SP` = stop condition
+    </span><span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, address: A, buffer: <span class="kw-2">&amp;mut </span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;(), <span class="self">Self</span>::Error&gt;;
 }
 
-<span class="doccomment">/// Blocking write</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Write</span><span class="op">&lt;</span><span class="ident">A</span>: <span class="ident">AddressMode</span> <span class="op">=</span> <span class="ident">SevenBitAddress</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Error type</span>
-    <span class="kw">type</span> <span class="ident">Error</span>;
+<span class="doccomment">/// Blocking write
+</span><span class="kw">pub trait </span>Write&lt;A: AddressMode = SevenBitAddress&gt; {
+    <span class="doccomment">/// Error type
+    </span><span class="kw">type </span>Error;
 
-    <span class="doccomment">/// Writes bytes to slave with address `address`</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// # I2C Events (contract)</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// ``` text</span>
-    <span class="doccomment">/// Master: ST SAD+W     B0     B1     ... BN     SP</span>
-    <span class="doccomment">/// Slave:           SAK    SAK    SAK ...    SAK</span>
-    <span class="doccomment">/// ```</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// Where</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// - `ST` = start condition</span>
-    <span class="doccomment">/// - `SAD+W` = slave address followed by bit 0 to indicate writing</span>
-    <span class="doccomment">/// - `SAK` = slave acknowledge</span>
-    <span class="doccomment">/// - `Bi` = ith byte of data</span>
-    <span class="doccomment">/// - `SP` = stop condition</span>
-    <span class="kw">fn</span> <span class="ident">write</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">address</span>: <span class="ident">A</span>, <span class="ident">bytes</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span>;
+    <span class="doccomment">/// Writes bytes to slave with address `address`
+    ///
+    /// # I2C Events (contract)
+    ///
+    /// ``` text
+    /// Master: ST SAD+W     B0     B1     ... BN     SP
+    /// Slave:           SAK    SAK    SAK ...    SAK
+    /// ```
+    ///
+    /// Where
+    ///
+    /// - `ST` = start condition
+    /// - `SAD+W` = slave address followed by bit 0 to indicate writing
+    /// - `SAK` = slave acknowledge
+    /// - `Bi` = ith byte of data
+    /// - `SP` = stop condition
+    </span><span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, address: A, bytes: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;(), <span class="self">Self</span>::Error&gt;;
 }
 
-<span class="doccomment">/// Blocking write (iterator version)</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">WriteIter</span><span class="op">&lt;</span><span class="ident">A</span>: <span class="ident">AddressMode</span> <span class="op">=</span> <span class="ident">SevenBitAddress</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Error type</span>
-    <span class="kw">type</span> <span class="ident">Error</span>;
+<span class="doccomment">/// Blocking write (iterator version)
+</span><span class="kw">pub trait </span>WriteIter&lt;A: AddressMode = SevenBitAddress&gt; {
+    <span class="doccomment">/// Error type
+    </span><span class="kw">type </span>Error;
 
-    <span class="doccomment">/// Writes bytes to slave with address `address`</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// # I2C Events (contract)</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// Same as `Write`</span>
-    <span class="kw">fn</span> <span class="ident">write</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">address</span>: <span class="ident">A</span>, <span class="ident">bytes</span>: <span class="ident">B</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span>
-    <span class="kw">where</span>
-        <span class="ident">B</span>: <span class="ident">IntoIterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">u8</span><span class="op">&gt;</span>;
+    <span class="doccomment">/// Writes bytes to slave with address `address`
+    ///
+    /// # I2C Events (contract)
+    ///
+    /// Same as `Write`
+    </span><span class="kw">fn </span>write&lt;B&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, address: A, bytes: B) -&gt; <span class="prelude-ty">Result</span>&lt;(), <span class="self">Self</span>::Error&gt;
+    <span class="kw">where
+        </span>B: IntoIterator&lt;Item = u8&gt;;
 }
 
-<span class="doccomment">/// Blocking write + read</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">WriteRead</span><span class="op">&lt;</span><span class="ident">A</span>: <span class="ident">AddressMode</span> <span class="op">=</span> <span class="ident">SevenBitAddress</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Error type</span>
-    <span class="kw">type</span> <span class="ident">Error</span>;
+<span class="doccomment">/// Blocking write + read
+</span><span class="kw">pub trait </span>WriteRead&lt;A: AddressMode = SevenBitAddress&gt; {
+    <span class="doccomment">/// Error type
+    </span><span class="kw">type </span>Error;
 
-    <span class="doccomment">/// Writes bytes to slave with address `address` and then reads enough bytes to fill `buffer` *in a</span>
-    <span class="doccomment">/// single transaction*</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// # I2C Events (contract)</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// ``` text</span>
-    <span class="doccomment">/// Master: ST SAD+W     O0     O1     ... OM     SR SAD+R        MAK    MAK ...    NMAK SP</span>
-    <span class="doccomment">/// Slave:           SAK    SAK    SAK ...    SAK          SAK I0     I1     ... IN</span>
-    <span class="doccomment">/// ```</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// Where</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// - `ST` = start condition</span>
-    <span class="doccomment">/// - `SAD+W` = slave address followed by bit 0 to indicate writing</span>
-    <span class="doccomment">/// - `SAK` = slave acknowledge</span>
-    <span class="doccomment">/// - `Oi` = ith outgoing byte of data</span>
-    <span class="doccomment">/// - `SR` = repeated start condition</span>
-    <span class="doccomment">/// - `SAD+R` = slave address followed by bit 1 to indicate reading</span>
-    <span class="doccomment">/// - `Ii` = ith incoming byte of data</span>
-    <span class="doccomment">/// - `MAK` = master acknowledge</span>
-    <span class="doccomment">/// - `NMAK` = master no acknowledge</span>
-    <span class="doccomment">/// - `SP` = stop condition</span>
-    <span class="kw">fn</span> <span class="ident">write_read</span>(
-        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
-        <span class="ident">address</span>: <span class="ident">A</span>,
-        <span class="ident">bytes</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
-        <span class="ident">buffer</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">u8</span>],
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span>;
+    <span class="doccomment">/// Writes bytes to slave with address `address` and then reads enough bytes to fill `buffer` *in a
+    /// single transaction*
+    ///
+    /// # I2C Events (contract)
+    ///
+    /// ``` text
+    /// Master: ST SAD+W     O0     O1     ... OM     SR SAD+R        MAK    MAK ...    NMAK SP
+    /// Slave:           SAK    SAK    SAK ...    SAK          SAK I0     I1     ... IN
+    /// ```
+    ///
+    /// Where
+    ///
+    /// - `ST` = start condition
+    /// - `SAD+W` = slave address followed by bit 0 to indicate writing
+    /// - `SAK` = slave acknowledge
+    /// - `Oi` = ith outgoing byte of data
+    /// - `SR` = repeated start condition
+    /// - `SAD+R` = slave address followed by bit 1 to indicate reading
+    /// - `Ii` = ith incoming byte of data
+    /// - `MAK` = master acknowledge
+    /// - `NMAK` = master no acknowledge
+    /// - `SP` = stop condition
+    </span><span class="kw">fn </span>write_read(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        address: A,
+        bytes: <span class="kw-2">&amp;</span>[u8],
+        buffer: <span class="kw-2">&amp;mut </span>[u8],
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;(), <span class="self">Self</span>::Error&gt;;
 }
 
-<span class="doccomment">/// Blocking write (iterator version) + read</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">WriteIterRead</span><span class="op">&lt;</span><span class="ident">A</span>: <span class="ident">AddressMode</span> <span class="op">=</span> <span class="ident">SevenBitAddress</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Error type</span>
-    <span class="kw">type</span> <span class="ident">Error</span>;
+<span class="doccomment">/// Blocking write (iterator version) + read
+</span><span class="kw">pub trait </span>WriteIterRead&lt;A: AddressMode = SevenBitAddress&gt; {
+    <span class="doccomment">/// Error type
+    </span><span class="kw">type </span>Error;
 
-    <span class="doccomment">/// Writes bytes to slave with address `address` and then reads enough bytes to fill `buffer` *in a</span>
-    <span class="doccomment">/// single transaction*</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// # I2C Events (contract)</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// Same as the `WriteRead` trait</span>
-    <span class="kw">fn</span> <span class="ident">write_iter_read</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>(
-        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
-        <span class="ident">address</span>: <span class="ident">A</span>,
-        <span class="ident">bytes</span>: <span class="ident">B</span>,
-        <span class="ident">buffer</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">u8</span>],
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span>
-    <span class="kw">where</span>
-        <span class="ident">B</span>: <span class="ident">IntoIterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">u8</span><span class="op">&gt;</span>;
+    <span class="doccomment">/// Writes bytes to slave with address `address` and then reads enough bytes to fill `buffer` *in a
+    /// single transaction*
+    ///
+    /// # I2C Events (contract)
+    ///
+    /// Same as the `WriteRead` trait
+    </span><span class="kw">fn </span>write_iter_read&lt;B&gt;(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        address: A,
+        bytes: B,
+        buffer: <span class="kw-2">&amp;mut </span>[u8],
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;(), <span class="self">Self</span>::Error&gt;
+    <span class="kw">where
+        </span>B: IntoIterator&lt;Item = u8&gt;;
 }
 
-<span class="doccomment">/// Transactional I2C operation.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// Several operations can be combined as part of a transaction.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">PartialEq</span>)]</span>
-<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Operation</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Read data into the provided buffer</span>
-    <span class="ident">Read</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> [<span class="ident">u8</span>]),
-    <span class="doccomment">/// Write data from the provided buffer</span>
-    <span class="ident">Write</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>]),
+<span class="doccomment">/// Transactional I2C operation.
+///
+/// Several operations can be combined as part of a transaction.
+</span><span class="attribute">#[derive(Debug, PartialEq)]
+</span><span class="kw">pub enum </span>Operation&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="doccomment">/// Read data into the provided buffer
+    </span>Read(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>[u8]),
+    <span class="doccomment">/// Write data from the provided buffer
+    </span>Write(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]),
 }
 
-<span class="doccomment">/// Transactional I2C interface.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// This allows combining operations within an I2C transaction.</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Transactional</span><span class="op">&lt;</span><span class="ident">A</span>: <span class="ident">AddressMode</span> <span class="op">=</span> <span class="ident">SevenBitAddress</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Error type</span>
-    <span class="kw">type</span> <span class="ident">Error</span>;
+<span class="doccomment">/// Transactional I2C interface.
+///
+/// This allows combining operations within an I2C transaction.
+</span><span class="kw">pub trait </span>Transactional&lt;A: AddressMode = SevenBitAddress&gt; {
+    <span class="doccomment">/// Error type
+    </span><span class="kw">type </span>Error;
 
-    <span class="doccomment">/// Execute the provided operations on the I2C bus.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// Transaction contract:</span>
-    <span class="doccomment">/// - Before executing the first operation an ST is sent automatically. This is followed by SAD+R/W as appropriate.</span>
-    <span class="doccomment">/// - Data from adjacent operations of the same type are sent after each other without an SP or SR.</span>
-    <span class="doccomment">/// - Between adjacent operations of a different type an SR and SAD+R/W is sent.</span>
-    <span class="doccomment">/// - After executing the last operation an SP is sent automatically.</span>
-    <span class="doccomment">/// - If the last operation is a `Read` the master does not send an acknowledge for the last byte.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// - `ST` = start condition</span>
-    <span class="doccomment">/// - `SAD+R/W` = slave address followed by bit 1 to indicate reading or 0 to indicate writing</span>
-    <span class="doccomment">/// - `SR` = repeated start condition</span>
-    <span class="doccomment">/// - `SP` = stop condition</span>
-    <span class="kw">fn</span> <span class="ident">exec</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">address</span>: <span class="ident">A</span>, <span class="ident">operations</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">Operation</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>])
-        -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span>;
+    <span class="doccomment">/// Execute the provided operations on the I2C bus.
+    ///
+    /// Transaction contract:
+    /// - Before executing the first operation an ST is sent automatically. This is followed by SAD+R/W as appropriate.
+    /// - Data from adjacent operations of the same type are sent after each other without an SP or SR.
+    /// - Between adjacent operations of a different type an SR and SAD+R/W is sent.
+    /// - After executing the last operation an SP is sent automatically.
+    /// - If the last operation is a `Read` the master does not send an acknowledge for the last byte.
+    ///
+    /// - `ST` = start condition
+    /// - `SAD+R/W` = slave address followed by bit 1 to indicate reading or 0 to indicate writing
+    /// - `SR` = repeated start condition
+    /// - `SP` = stop condition
+    </span><span class="kw">fn </span>exec&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, address: A, operations: <span class="kw-2">&amp;mut </span>[Operation&lt;<span class="lifetime">&#39;a</span>&gt;])
+        -&gt; <span class="prelude-ty">Result</span>&lt;(), <span class="self">Self</span>::Error&gt;;
 }
 
-<span class="doccomment">/// Transactional I2C interface (iterator version).</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// This allows combining operation within an I2C transaction.</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">TransactionalIter</span><span class="op">&lt;</span><span class="ident">A</span>: <span class="ident">AddressMode</span> <span class="op">=</span> <span class="ident">SevenBitAddress</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Error type</span>
-    <span class="kw">type</span> <span class="ident">Error</span>;
+<span class="doccomment">/// Transactional I2C interface (iterator version).
+///
+/// This allows combining operation within an I2C transaction.
+</span><span class="kw">pub trait </span>TransactionalIter&lt;A: AddressMode = SevenBitAddress&gt; {
+    <span class="doccomment">/// Error type
+    </span><span class="kw">type </span>Error;
 
-    <span class="doccomment">/// Execute the provided operations on the I2C bus (iterator version).</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// Transaction contract:</span>
-    <span class="doccomment">/// - Before executing the first operation an ST is sent automatically. This is followed by SAD+R/W as appropriate.</span>
-    <span class="doccomment">/// - Data from adjacent operations of the same type are sent after each other without an SP or SR.</span>
-    <span class="doccomment">/// - Between adjacent operations of a different type an SR and SAD+R/W is sent.</span>
-    <span class="doccomment">/// - After executing the last operation an SP is sent automatically.</span>
-    <span class="doccomment">/// - If the last operation is a `Read` the master does not send an acknowledge for the last byte.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// - `ST` = start condition</span>
-    <span class="doccomment">/// - `SAD+R/W` = slave address followed by bit 1 to indicate reading or 0 to indicate writing</span>
-    <span class="doccomment">/// - `SR` = repeated start condition</span>
-    <span class="doccomment">/// - `SP` = stop condition</span>
-    <span class="kw">fn</span> <span class="ident">exec_iter</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">O</span><span class="op">&gt;</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">address</span>: <span class="ident">A</span>, <span class="ident">operations</span>: <span class="ident">O</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span>
-    <span class="kw">where</span>
-        <span class="ident">O</span>: <span class="ident">IntoIterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">Operation</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span>;
+    <span class="doccomment">/// Execute the provided operations on the I2C bus (iterator version).
+    ///
+    /// Transaction contract:
+    /// - Before executing the first operation an ST is sent automatically. This is followed by SAD+R/W as appropriate.
+    /// - Data from adjacent operations of the same type are sent after each other without an SP or SR.
+    /// - Between adjacent operations of a different type an SR and SAD+R/W is sent.
+    /// - After executing the last operation an SP is sent automatically.
+    /// - If the last operation is a `Read` the master does not send an acknowledge for the last byte.
+    ///
+    /// - `ST` = start condition
+    /// - `SAD+R/W` = slave address followed by bit 1 to indicate reading or 0 to indicate writing
+    /// - `SR` = repeated start condition
+    /// - `SP` = stop condition
+    </span><span class="kw">fn </span>exec_iter&lt;<span class="lifetime">&#39;a</span>, O&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, address: A, operations: O) -&gt; <span class="prelude-ty">Result</span>&lt;(), <span class="self">Self</span>::Error&gt;
+    <span class="kw">where
+        </span>O: IntoIterator&lt;Item = Operation&lt;<span class="lifetime">&#39;a</span>&gt;&gt;;
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="embedded_hal" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="embedded_hal" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

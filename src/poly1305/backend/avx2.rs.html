@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/poly1305-0.7.2/src/backend/avx2.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>avx2.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="icon" href="https://raw.githubusercontent.com/RustCrypto/media/8f1a9894/logo.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../poly1305/index.html"><div class="logo-container"><img src="https://raw.githubusercontent.com/RustCrypto/media/8f1a9894/logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../poly1305/index.html"><div class="logo-container">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/poly1305-0.7.2/src/backend/avx2.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>avx2.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="icon" href="https://raw.githubusercontent.com/RustCrypto/media/8f1a9894/logo.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../poly1305/index.html"><div class="logo-container"><img src="https://raw.githubusercontent.com/RustCrypto/media/8f1a9894/logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../poly1305/index.html"><div class="logo-container">
                     <img src="https://raw.githubusercontent.com/RustCrypto/media/8f1a9894/logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../poly1305/index.html">
                         <img src="https://raw.githubusercontent.com/RustCrypto/media/8f1a9894/logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
@@ -158,163 +158,163 @@
 <span id="156">156</span>
 <span id="157">157</span>
 <span id="158">158</span>
-</pre><pre class="rust"><code><span class="doccomment">//! AVX2 implementation of the Poly1305 state machine.</span>
+</pre><pre class="rust"><code><span class="doccomment">//! AVX2 implementation of the Poly1305 state machine.
 
-<span class="comment">// The State struct and its logic was originally derived from Goll and Gueron&#39;s AVX2 C</span>
-<span class="comment">// code:</span>
-<span class="comment">//     [Vectorization of Poly1305 message authentication code](https://ieeexplore.ieee.org/document/7113463)</span>
-<span class="comment">//</span>
-<span class="comment">// which was sourced from Bhattacharyya and Sarkar&#39;s modified variant:</span>
-<span class="comment">//     [Improved SIMD Implementation of Poly1305](https://eprint.iacr.org/2019/842)</span>
-<span class="comment">//     https://github.com/Sreyosi/Improved-SIMD-Implementation-of-Poly1305</span>
-<span class="comment">//</span>
-<span class="comment">// The logic has been extensively rewritten and documented, and several bugs in the</span>
-<span class="comment">// original C code were fixed.</span>
-<span class="comment">//</span>
-<span class="comment">// Note that State only implements the original Goll-Gueron algorithm, not the</span>
-<span class="comment">// optimisations provided by Bhattacharyya and Sarkar. The latter require the message</span>
-<span class="comment">// length to be known, which is incompatible with the streaming API of UniversalHash.</span>
+</span><span class="comment">// The State struct and its logic was originally derived from Goll and Gueron&#39;s AVX2 C
+// code:
+//     [Vectorization of Poly1305 message authentication code](https://ieeexplore.ieee.org/document/7113463)
+//
+// which was sourced from Bhattacharyya and Sarkar&#39;s modified variant:
+//     [Improved SIMD Implementation of Poly1305](https://eprint.iacr.org/2019/842)
+//     https://github.com/Sreyosi/Improved-SIMD-Implementation-of-Poly1305
+//
+// The logic has been extensively rewritten and documented, and several bugs in the
+// original C code were fixed.
+//
+// Note that State only implements the original Goll-Gueron algorithm, not the
+// optimisations provided by Bhattacharyya and Sarkar. The latter require the message
+// length to be known, which is incompatible with the streaming API of UniversalHash.
 
-<span class="kw">use</span> <span class="ident">core::convert::TryInto</span>;
-<span class="kw">use</span> <span class="ident">universal_hash::generic_array::GenericArray</span>;
+</span><span class="kw">use </span>core::convert::TryInto;
+<span class="kw">use </span>universal_hash::generic_array::GenericArray;
 
-<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">Block</span>, <span class="ident">Key</span>, <span class="ident">Tag</span>};
+<span class="kw">use crate</span>::{Block, Key, Tag};
 
-<span class="kw">mod</span> <span class="ident">helpers</span>;
-<span class="kw">use</span> <span class="ident"><span class="self">self</span>::helpers</span>::<span class="kw-2">*</span>;
+<span class="kw">mod </span>helpers;
+<span class="kw">use </span><span class="self">self</span>::helpers::<span class="kw-2">*</span>;
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>)]</span>
-<span class="kw">struct</span> <span class="ident">Initialized</span> {
-    <span class="ident">p</span>: <span class="ident">Aligned4x130</span>,
-    <span class="ident">m</span>: <span class="ident">SpacedMultiplier4x130</span>,
-    <span class="ident">r4</span>: <span class="ident">PrecomputedMultiplier</span>,
+<span class="attribute">#[derive(Copy, Clone)]
+</span><span class="kw">struct </span>Initialized {
+    p: Aligned4x130,
+    m: SpacedMultiplier4x130,
+    r4: PrecomputedMultiplier,
 }
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>)]</span>
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct</span> <span class="ident">State</span> {
-    <span class="ident">k</span>: <span class="ident">AdditionKey</span>,
-    <span class="ident">r1</span>: <span class="ident">PrecomputedMultiplier</span>,
-    <span class="ident">r2</span>: <span class="ident">PrecomputedMultiplier</span>,
-    <span class="ident">initialized</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Initialized</span><span class="op">&gt;</span>,
-    <span class="ident">cached_blocks</span>: [<span class="ident">Block</span>; <span class="number">4</span>],
-    <span class="ident">num_cached_blocks</span>: <span class="ident">usize</span>,
-    <span class="ident">partial_block</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>,
+<span class="attribute">#[derive(Clone)]
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>State {
+    k: AdditionKey,
+    r1: PrecomputedMultiplier,
+    r2: PrecomputedMultiplier,
+    initialized: <span class="prelude-ty">Option</span>&lt;Initialized&gt;,
+    cached_blocks: [Block; <span class="number">4</span>],
+    num_cached_blocks: usize,
+    partial_block: <span class="prelude-ty">Option</span>&lt;Block&gt;,
 }
 
-<span class="kw">impl</span> <span class="ident">State</span> {
-    <span class="doccomment">/// Initialize Poly1305 [`State`] with the given key</span>
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="ident">Key</span>) -&gt; <span class="self">Self</span> {
-        <span class="comment">// Prepare addition key and polynomial key.</span>
-        <span class="kw">let</span> (<span class="ident">k</span>, <span class="ident">r1</span>) <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">prepare_keys</span>(<span class="ident">key</span>) };
+<span class="kw">impl </span>State {
+    <span class="doccomment">/// Initialize Poly1305 [`State`] with the given key
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(key: <span class="kw-2">&amp;</span>Key) -&gt; <span class="self">Self </span>{
+        <span class="comment">// Prepare addition key and polynomial key.
+        </span><span class="kw">let </span>(k, r1) = <span class="kw">unsafe </span>{ prepare_keys(key) };
 
-        <span class="comment">// Precompute R^2.</span>
-        <span class="kw">let</span> <span class="ident">r2</span> <span class="op">=</span> (<span class="ident">r1</span> <span class="op">*</span> <span class="ident">r1</span>).<span class="ident">reduce</span>();
+        <span class="comment">// Precompute R^2.
+        </span><span class="kw">let </span>r2 = (r1 * r1).reduce();
 
-        <span class="ident">State</span> {
-            <span class="ident">k</span>,
-            <span class="ident">r1</span>,
-            <span class="ident">r2</span>: <span class="ident">r2</span>.<span class="ident">into</span>(),
-            <span class="ident">initialized</span>: <span class="prelude-val">None</span>,
-            <span class="ident">cached_blocks</span>: [<span class="ident">Block::default</span>(); <span class="number">4</span>],
-            <span class="ident">num_cached_blocks</span>: <span class="number">0</span>,
-            <span class="ident">partial_block</span>: <span class="prelude-val">None</span>,
+        State {
+            k,
+            r1,
+            r2: r2.into(),
+            initialized: <span class="prelude-val">None</span>,
+            cached_blocks: [Block::default(); <span class="number">4</span>],
+            num_cached_blocks: <span class="number">0</span>,
+            partial_block: <span class="prelude-val">None</span>,
         }
     }
 
-    <span class="doccomment">/// Reset internal state</span>
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">reset</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
-        <span class="self">self</span>.<span class="ident">initialized</span> <span class="op">=</span> <span class="prelude-val">None</span>;
-        <span class="self">self</span>.<span class="ident">num_cached_blocks</span> <span class="op">=</span> <span class="number">0</span>;
+    <span class="doccomment">/// Reset internal state
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>reset(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="self">self</span>.initialized = <span class="prelude-val">None</span>;
+        <span class="self">self</span>.num_cached_blocks = <span class="number">0</span>;
     }
 
-    <span class="doccomment">/// Compute a Poly1305 block</span>
-    <span class="attribute">#[<span class="ident">target_feature</span>(<span class="ident">enable</span> <span class="op">=</span> <span class="string">&quot;avx2&quot;</span>)]</span>
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">compute_block</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">block</span>: <span class="kw-2">&amp;</span><span class="ident">Block</span>, <span class="ident">partial</span>: <span class="ident">bool</span>) {
-        <span class="comment">// We can cache a single partial block.</span>
-        <span class="kw">if</span> <span class="ident">partial</span> {
-            <span class="macro">assert!</span>(<span class="self">self</span>.<span class="ident">partial_block</span>.<span class="ident">is_none</span>());
-            <span class="self">self</span>.<span class="ident">partial_block</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="kw-2">*</span><span class="ident">block</span>);
+    <span class="doccomment">/// Compute a Poly1305 block
+    </span><span class="attribute">#[target_feature(enable = <span class="string">&quot;avx2&quot;</span>)]
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">unsafe fn </span>compute_block(<span class="kw-2">&amp;mut </span><span class="self">self</span>, block: <span class="kw-2">&amp;</span>Block, partial: bool) {
+        <span class="comment">// We can cache a single partial block.
+        </span><span class="kw">if </span>partial {
+            <span class="macro">assert!</span>(<span class="self">self</span>.partial_block.is_none());
+            <span class="self">self</span>.partial_block = <span class="prelude-val">Some</span>(<span class="kw-2">*</span>block);
             <span class="kw">return</span>;
         }
 
-        <span class="self">self</span>.<span class="ident">cached_blocks</span>[<span class="self">self</span>.<span class="ident">num_cached_blocks</span>].<span class="ident">copy_from_slice</span>(<span class="ident">block</span>);
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">num_cached_blocks</span> <span class="op">&lt;</span> <span class="number">3</span> {
-            <span class="self">self</span>.<span class="ident">num_cached_blocks</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+        <span class="self">self</span>.cached_blocks[<span class="self">self</span>.num_cached_blocks].copy_from_slice(block);
+        <span class="kw">if </span><span class="self">self</span>.num_cached_blocks &lt; <span class="number">3 </span>{
+            <span class="self">self</span>.num_cached_blocks += <span class="number">1</span>;
             <span class="kw">return</span>;
-        } <span class="kw">else</span> {
-            <span class="self">self</span>.<span class="ident">num_cached_blocks</span> <span class="op">=</span> <span class="number">0</span>;
+        } <span class="kw">else </span>{
+            <span class="self">self</span>.num_cached_blocks = <span class="number">0</span>;
         }
 
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">inner</span>) <span class="op">=</span> <span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">initialized</span> {
-            <span class="comment">// P &lt;-- R^4 * P + blocks</span>
-            <span class="ident">inner</span>.<span class="ident">p</span> <span class="op">=</span>
-                (<span class="kw-2">&amp;</span><span class="ident">inner</span>.<span class="ident">p</span> <span class="op">*</span> <span class="ident">inner</span>.<span class="ident">r4</span>).<span class="ident">reduce</span>() <span class="op">+</span> <span class="ident">Aligned4x130::from_blocks</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">cached_blocks</span>);
-        } <span class="kw">else</span> {
-            <span class="comment">// Initialize the polynomial.</span>
-            <span class="kw">let</span> <span class="ident">p</span> <span class="op">=</span> <span class="ident">Aligned4x130::from_blocks</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">cached_blocks</span>);
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(inner) = <span class="kw-2">&amp;mut </span><span class="self">self</span>.initialized {
+            <span class="comment">// P &lt;-- R^4 * P + blocks
+            </span>inner.p =
+                (<span class="kw-2">&amp;</span>inner.p * inner.r4).reduce() + Aligned4x130::from_blocks(<span class="kw-2">&amp;</span><span class="self">self</span>.cached_blocks);
+        } <span class="kw">else </span>{
+            <span class="comment">// Initialize the polynomial.
+            </span><span class="kw">let </span>p = Aligned4x130::from_blocks(<span class="kw-2">&amp;</span><span class="self">self</span>.cached_blocks);
 
-            <span class="comment">// Initialize the multiplier (used to merge down the polynomial during</span>
-            <span class="comment">// finalization).</span>
-            <span class="kw">let</span> (<span class="ident">m</span>, <span class="ident">r4</span>) <span class="op">=</span> <span class="ident">SpacedMultiplier4x130::new</span>(<span class="self">self</span>.<span class="ident">r1</span>, <span class="self">self</span>.<span class="ident">r2</span>);
+            <span class="comment">// Initialize the multiplier (used to merge down the polynomial during
+            // finalization).
+            </span><span class="kw">let </span>(m, r4) = SpacedMultiplier4x130::new(<span class="self">self</span>.r1, <span class="self">self</span>.r2);
 
-            <span class="self">self</span>.<span class="ident">initialized</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">Initialized</span> { <span class="ident">p</span>, <span class="ident">m</span>, <span class="ident">r4</span> })
+            <span class="self">self</span>.initialized = <span class="prelude-val">Some</span>(Initialized { p, m, r4 })
         }
     }
 
-    <span class="doccomment">/// Finalize output producing a [`Tag`]</span>
-    <span class="attribute">#[<span class="ident">target_feature</span>(<span class="ident">enable</span> <span class="op">=</span> <span class="string">&quot;avx2&quot;</span>)]</span>
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">finalize</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="ident">Tag</span> {
-        <span class="macro">assert!</span>(<span class="self">self</span>.<span class="ident">num_cached_blocks</span> <span class="op">&lt;</span> <span class="number">4</span>);
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">data</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">cached_blocks</span>[..];
+    <span class="doccomment">/// Finalize output producing a [`Tag`]
+    </span><span class="attribute">#[target_feature(enable = <span class="string">&quot;avx2&quot;</span>)]
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">unsafe fn </span>finalize(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; Tag {
+        <span class="macro">assert!</span>(<span class="self">self</span>.num_cached_blocks &lt; <span class="number">4</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>data = <span class="kw-2">&amp;</span><span class="self">self</span>.cached_blocks[..];
 
-        <span class="comment">// T ← R◦T</span>
-        <span class="comment">// P = T_0 + T_1 + T_2 + T_3</span>
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">p</span> <span class="op">=</span> <span class="self">self</span>
-            .<span class="ident">initialized</span>
-            .<span class="ident">take</span>()
-            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">inner</span><span class="op">|</span> (<span class="ident">inner</span>.<span class="ident">p</span> <span class="op">*</span> <span class="ident">inner</span>.<span class="ident">m</span>).<span class="ident">sum</span>().<span class="ident">reduce</span>());
+        <span class="comment">// T ← R◦T
+        // P = T_0 + T_1 + T_2 + T_3
+        </span><span class="kw">let </span><span class="kw-2">mut </span>p = <span class="self">self
+            </span>.initialized
+            .take()
+            .map(|inner| (inner.p * inner.m).sum().reduce());
 
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">num_cached_blocks</span> <span class="op">&gt;</span><span class="op">=</span> <span class="number">2</span> {
-            <span class="comment">// Compute 32 byte block (remaining data &lt; 64 bytes)</span>
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">c</span> <span class="op">=</span> <span class="ident">Aligned2x130::from_blocks</span>(<span class="ident">data</span>[..<span class="number">2</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>());
-            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">p</span>) <span class="op">=</span> <span class="ident">p</span> {
-                <span class="ident">c</span> <span class="op">=</span> <span class="ident">c</span> <span class="op">+</span> <span class="ident">p</span>;
+        <span class="kw">if </span><span class="self">self</span>.num_cached_blocks &gt;= <span class="number">2 </span>{
+            <span class="comment">// Compute 32 byte block (remaining data &lt; 64 bytes)
+            </span><span class="kw">let </span><span class="kw-2">mut </span>c = Aligned2x130::from_blocks(data[..<span class="number">2</span>].try_into().unwrap());
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(p) = p {
+                c = c + p;
             }
-            <span class="ident">p</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">c</span>.<span class="ident">mul_and_sum</span>(<span class="self">self</span>.<span class="ident">r1</span>, <span class="self">self</span>.<span class="ident">r2</span>).<span class="ident">reduce</span>());
-            <span class="ident">data</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">data</span>[<span class="number">2</span>..];
-            <span class="self">self</span>.<span class="ident">num_cached_blocks</span> <span class="op">-</span><span class="op">=</span> <span class="number">2</span>;
+            p = <span class="prelude-val">Some</span>(c.mul_and_sum(<span class="self">self</span>.r1, <span class="self">self</span>.r2).reduce());
+            data = <span class="kw-2">&amp;</span>data[<span class="number">2</span>..];
+            <span class="self">self</span>.num_cached_blocks -= <span class="number">2</span>;
         }
 
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">num_cached_blocks</span> <span class="op">==</span> <span class="number">1</span> {
-            <span class="comment">// Compute 16 byte block (remaining data &lt; 32 bytes)</span>
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">c</span> <span class="op">=</span> <span class="ident">Aligned130::from_block</span>(<span class="kw-2">&amp;</span><span class="ident">data</span>[<span class="number">0</span>]);
-            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">p</span>) <span class="op">=</span> <span class="ident">p</span> {
-                <span class="ident">c</span> <span class="op">=</span> <span class="ident">c</span> <span class="op">+</span> <span class="ident">p</span>;
+        <span class="kw">if </span><span class="self">self</span>.num_cached_blocks == <span class="number">1 </span>{
+            <span class="comment">// Compute 16 byte block (remaining data &lt; 32 bytes)
+            </span><span class="kw">let </span><span class="kw-2">mut </span>c = Aligned130::from_block(<span class="kw-2">&amp;</span>data[<span class="number">0</span>]);
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(p) = p {
+                c = c + p;
             }
-            <span class="ident">p</span> <span class="op">=</span> <span class="prelude-val">Some</span>((<span class="ident">c</span> <span class="op">*</span> <span class="self">self</span>.<span class="ident">r1</span>).<span class="ident">reduce</span>());
-            <span class="self">self</span>.<span class="ident">num_cached_blocks</span> <span class="op">-</span><span class="op">=</span> <span class="number">1</span>;
+            p = <span class="prelude-val">Some</span>((c * <span class="self">self</span>.r1).reduce());
+            <span class="self">self</span>.num_cached_blocks -= <span class="number">1</span>;
         }
 
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">block</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">partial_block</span> {
-            <span class="comment">// Compute last block (remaining data &lt; 16 bytes)</span>
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">c</span> <span class="op">=</span> <span class="ident">Aligned130::from_partial_block</span>(<span class="ident">block</span>);
-            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">p</span>) <span class="op">=</span> <span class="ident">p</span> {
-                <span class="ident">c</span> <span class="op">=</span> <span class="ident">c</span> <span class="op">+</span> <span class="ident">p</span>;
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(block) = <span class="kw-2">&amp;</span><span class="self">self</span>.partial_block {
+            <span class="comment">// Compute last block (remaining data &lt; 16 bytes)
+            </span><span class="kw">let </span><span class="kw-2">mut </span>c = Aligned130::from_partial_block(block);
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(p) = p {
+                c = c + p;
             }
-            <span class="ident">p</span> <span class="op">=</span> <span class="prelude-val">Some</span>((<span class="ident">c</span> <span class="op">*</span> <span class="self">self</span>.<span class="ident">r1</span>).<span class="ident">reduce</span>());
+            p = <span class="prelude-val">Some</span>((c * <span class="self">self</span>.r1).reduce());
         }
 
-        <span class="comment">// Compute tag: p + k mod 2^128</span>
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tag</span> <span class="op">=</span> <span class="ident">GenericArray</span>::<span class="op">&lt;</span><span class="ident">u8</span>, <span class="kw">_</span><span class="op">&gt;</span><span class="ident">::default</span>();
-        <span class="kw">let</span> <span class="ident">tag_int</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">p</span>) <span class="op">=</span> <span class="ident">p</span> {
-            <span class="self">self</span>.<span class="ident">k</span> <span class="op">+</span> <span class="ident">p</span>
-        } <span class="kw">else</span> {
-            <span class="self">self</span>.<span class="ident">k</span>.<span class="ident">into</span>()
+        <span class="comment">// Compute tag: p + k mod 2^128
+        </span><span class="kw">let </span><span class="kw-2">mut </span>tag = GenericArray::&lt;u8, <span class="kw">_</span>&gt;::default();
+        <span class="kw">let </span>tag_int = <span class="kw">if let </span><span class="prelude-val">Some</span>(p) = p {
+            <span class="self">self</span>.k + p
+        } <span class="kw">else </span>{
+            <span class="self">self</span>.k.into()
         };
-        <span class="ident">tag_int</span>.<span class="ident">write</span>(<span class="ident">tag</span>.<span class="ident">as_mut_slice</span>());
+        tag_int.write(tag.as_mut_slice());
 
-        <span class="ident">Tag::new</span>(<span class="ident">tag</span>)
+        Tag::new(tag)
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="poly1305" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="poly1305" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

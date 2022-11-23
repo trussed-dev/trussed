@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/signature-1.3.2/src/signer.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>signer.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" href="https://raw.githubusercontent.com/RustCrypto/media/8f1a9894/logo.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../signature/index.html"><div class="logo-container"><img src="https://raw.githubusercontent.com/RustCrypto/media/8f1a9894/logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../signature/index.html"><div class="logo-container">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/signature-1.3.2/src/signer.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>signer.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" href="https://raw.githubusercontent.com/RustCrypto/media/8f1a9894/logo.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../signature/index.html"><div class="logo-container"><img src="https://raw.githubusercontent.com/RustCrypto/media/8f1a9894/logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../signature/index.html"><div class="logo-container">
                     <img src="https://raw.githubusercontent.com/RustCrypto/media/8f1a9894/logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../signature/index.html">
                         <img src="https://raw.githubusercontent.com/RustCrypto/media/8f1a9894/logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
@@ -109,114 +109,114 @@
 <span id="107">107</span>
 <span id="108">108</span>
 <span id="109">109</span>
-</pre><pre class="rust"><code><span class="doccomment">//! Traits for generating digital signatures</span>
+</pre><pre class="rust"><code><span class="doccomment">//! Traits for generating digital signatures
 
-<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">error::Error</span>, <span class="ident">Signature</span>};
+</span><span class="kw">use crate</span>::{error::Error, Signature};
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;digest-preview&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::digest::Digest</span>;
+<span class="attribute">#[cfg(feature = <span class="string">&quot;digest-preview&quot;</span>)]
+</span><span class="kw">use </span><span class="kw">crate</span>::digest::Digest;
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;rand-preview&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::rand_core</span>::{<span class="ident">CryptoRng</span>, <span class="ident">RngCore</span>};
+<span class="attribute">#[cfg(feature = <span class="string">&quot;rand-preview&quot;</span>)]
+</span><span class="kw">use </span><span class="kw">crate</span>::rand_core::{CryptoRng, RngCore};
 
-<span class="doccomment">/// Sign the provided message bytestring using `Self` (e.g. a cryptographic key</span>
-<span class="doccomment">/// or connection to an HSM), returning a digital signature.</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Signer</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Signature</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Sign the given message and return a digital signature</span>
-    <span class="kw">fn</span> <span class="ident">sign</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">msg</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="ident">S</span> {
-        <span class="self">self</span>.<span class="ident">try_sign</span>(<span class="ident">msg</span>).<span class="ident">expect</span>(<span class="string">&quot;signature operation failed&quot;</span>)
+<span class="doccomment">/// Sign the provided message bytestring using `Self` (e.g. a cryptographic key
+/// or connection to an HSM), returning a digital signature.
+</span><span class="kw">pub trait </span>Signer&lt;S: Signature&gt; {
+    <span class="doccomment">/// Sign the given message and return a digital signature
+    </span><span class="kw">fn </span>sign(<span class="kw-2">&amp;</span><span class="self">self</span>, msg: <span class="kw-2">&amp;</span>[u8]) -&gt; S {
+        <span class="self">self</span>.try_sign(msg).expect(<span class="string">&quot;signature operation failed&quot;</span>)
     }
 
-    <span class="doccomment">/// Attempt to sign the given message, returning a digital signature on</span>
-    <span class="doccomment">/// success, or an error if something went wrong.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// The main intended use case for signing errors is when communicating</span>
-    <span class="doccomment">/// with external signers, e.g. cloud KMS, HSMs, or other hardware tokens.</span>
-    <span class="kw">fn</span> <span class="ident">try_sign</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">msg</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">Error</span><span class="op">&gt;</span>;
+    <span class="doccomment">/// Attempt to sign the given message, returning a digital signature on
+    /// success, or an error if something went wrong.
+    ///
+    /// The main intended use case for signing errors is when communicating
+    /// with external signers, e.g. cloud KMS, HSMs, or other hardware tokens.
+    </span><span class="kw">fn </span>try_sign(<span class="kw-2">&amp;</span><span class="self">self</span>, msg: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;S, Error&gt;;
 }
 
-<span class="doccomment">/// Sign the given prehashed message [`Digest`] using `Self`.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// ## Notes</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// This trait is primarily intended for signature algorithms based on the</span>
-<span class="doccomment">/// [Fiat-Shamir heuristic], a method for converting an interactive</span>
-<span class="doccomment">/// challenge/response-based proof-of-knowledge protocol into an offline</span>
-<span class="doccomment">/// digital signature through the use of a random oracle, i.e. a digest</span>
-<span class="doccomment">/// function.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// The security of such protocols critically rests upon the inability of</span>
-<span class="doccomment">/// an attacker to solve for the output of the random oracle, as generally</span>
-<span class="doccomment">/// otherwise such signature algorithms are a system of linear equations and</span>
-<span class="doccomment">/// therefore doing so would allow the attacker to trivially forge signatures.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// To prevent misuse which would potentially allow this to be possible, this</span>
-<span class="doccomment">/// API accepts a [`Digest`] instance, rather than a raw digest value.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// [Fiat-Shamir heuristic]: https://en.wikipedia.org/wiki/Fiat%E2%80%93Shamir_heuristic</span>
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;digest-preview&quot;</span>)]</span>
-<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">docsrs</span>, <span class="ident">doc</span>(<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;digest-preview&quot;</span>)))]</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">DigestSigner</span><span class="op">&lt;</span><span class="ident">D</span>, <span class="ident">S</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">D</span>: <span class="ident">Digest</span>,
-    <span class="ident">S</span>: <span class="ident">Signature</span>,
+<span class="doccomment">/// Sign the given prehashed message [`Digest`] using `Self`.
+///
+/// ## Notes
+///
+/// This trait is primarily intended for signature algorithms based on the
+/// [Fiat-Shamir heuristic], a method for converting an interactive
+/// challenge/response-based proof-of-knowledge protocol into an offline
+/// digital signature through the use of a random oracle, i.e. a digest
+/// function.
+///
+/// The security of such protocols critically rests upon the inability of
+/// an attacker to solve for the output of the random oracle, as generally
+/// otherwise such signature algorithms are a system of linear equations and
+/// therefore doing so would allow the attacker to trivially forge signatures.
+///
+/// To prevent misuse which would potentially allow this to be possible, this
+/// API accepts a [`Digest`] instance, rather than a raw digest value.
+///
+/// [Fiat-Shamir heuristic]: https://en.wikipedia.org/wiki/Fiat%E2%80%93Shamir_heuristic
+</span><span class="attribute">#[cfg(feature = <span class="string">&quot;digest-preview&quot;</span>)]
+#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;digest-preview&quot;</span>)))]
+</span><span class="kw">pub trait </span>DigestSigner&lt;D, S&gt;
+<span class="kw">where
+    </span>D: Digest,
+    S: Signature,
 {
-    <span class="doccomment">/// Sign the given prehashed message [`Digest`], returning a signature.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// Panics in the event of a signing error.</span>
-    <span class="kw">fn</span> <span class="ident">sign_digest</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">digest</span>: <span class="ident">D</span>) -&gt; <span class="ident">S</span> {
-        <span class="self">self</span>.<span class="ident">try_sign_digest</span>(<span class="ident">digest</span>)
-            .<span class="ident">expect</span>(<span class="string">&quot;signature operation failed&quot;</span>)
+    <span class="doccomment">/// Sign the given prehashed message [`Digest`], returning a signature.
+    ///
+    /// Panics in the event of a signing error.
+    </span><span class="kw">fn </span>sign_digest(<span class="kw-2">&amp;</span><span class="self">self</span>, digest: D) -&gt; S {
+        <span class="self">self</span>.try_sign_digest(digest)
+            .expect(<span class="string">&quot;signature operation failed&quot;</span>)
     }
 
-    <span class="doccomment">/// Attempt to sign the given prehashed message [`Digest`], returning a</span>
-    <span class="doccomment">/// digital signature on success, or an error if something went wrong.</span>
-    <span class="kw">fn</span> <span class="ident">try_sign_digest</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">digest</span>: <span class="ident">D</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">Error</span><span class="op">&gt;</span>;
+    <span class="doccomment">/// Attempt to sign the given prehashed message [`Digest`], returning a
+    /// digital signature on success, or an error if something went wrong.
+    </span><span class="kw">fn </span>try_sign_digest(<span class="kw-2">&amp;</span><span class="self">self</span>, digest: D) -&gt; <span class="prelude-ty">Result</span>&lt;S, Error&gt;;
 }
 
-<span class="doccomment">/// Sign the given message using the provided external randomness source.</span>
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;rand-preview&quot;</span>)]</span>
-<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">docsrs</span>, <span class="ident">doc</span>(<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;rand-preview&quot;</span>)))]</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">RandomizedSigner</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Signature</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Sign the given message and return a digital signature</span>
-    <span class="kw">fn</span> <span class="ident">sign_with_rng</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rng</span>: <span class="kw">impl</span> <span class="ident">CryptoRng</span> <span class="op">+</span> <span class="ident">RngCore</span>, <span class="ident">msg</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="ident">S</span> {
-        <span class="self">self</span>.<span class="ident">try_sign_with_rng</span>(<span class="ident">rng</span>, <span class="ident">msg</span>)
-            .<span class="ident">expect</span>(<span class="string">&quot;signature operation failed&quot;</span>)
+<span class="doccomment">/// Sign the given message using the provided external randomness source.
+</span><span class="attribute">#[cfg(feature = <span class="string">&quot;rand-preview&quot;</span>)]
+#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;rand-preview&quot;</span>)))]
+</span><span class="kw">pub trait </span>RandomizedSigner&lt;S: Signature&gt; {
+    <span class="doccomment">/// Sign the given message and return a digital signature
+    </span><span class="kw">fn </span>sign_with_rng(<span class="kw-2">&amp;</span><span class="self">self</span>, rng: <span class="kw">impl </span>CryptoRng + RngCore, msg: <span class="kw-2">&amp;</span>[u8]) -&gt; S {
+        <span class="self">self</span>.try_sign_with_rng(rng, msg)
+            .expect(<span class="string">&quot;signature operation failed&quot;</span>)
     }
 
-    <span class="doccomment">/// Attempt to sign the given message, returning a digital signature on</span>
-    <span class="doccomment">/// success, or an error if something went wrong.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// The main intended use case for signing errors is when communicating</span>
-    <span class="doccomment">/// with external signers, e.g. cloud KMS, HSMs, or other hardware tokens.</span>
-    <span class="kw">fn</span> <span class="ident">try_sign_with_rng</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rng</span>: <span class="kw">impl</span> <span class="ident">CryptoRng</span> <span class="op">+</span> <span class="ident">RngCore</span>, <span class="ident">msg</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">Error</span><span class="op">&gt;</span>;
+    <span class="doccomment">/// Attempt to sign the given message, returning a digital signature on
+    /// success, or an error if something went wrong.
+    ///
+    /// The main intended use case for signing errors is when communicating
+    /// with external signers, e.g. cloud KMS, HSMs, or other hardware tokens.
+    </span><span class="kw">fn </span>try_sign_with_rng(<span class="kw-2">&amp;</span><span class="self">self</span>, rng: <span class="kw">impl </span>CryptoRng + RngCore, msg: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;S, Error&gt;;
 }
 
-<span class="doccomment">/// Combination of [`DigestSigner`] and [`RandomizedSigner`] with support for</span>
-<span class="doccomment">/// computing a signature over a digest which requires entropy from an RNG.</span>
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;digest-preview&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;rand-preview&quot;</span>))]</span>
-<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">docsrs</span>, <span class="ident">doc</span>(<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;digest-preview&quot;</span>)))]</span>
-<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">docsrs</span>, <span class="ident">doc</span>(<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;rand-preview&quot;</span>)))]</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">RandomizedDigestSigner</span><span class="op">&lt;</span><span class="ident">D</span>, <span class="ident">S</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">D</span>: <span class="ident">Digest</span>,
-    <span class="ident">S</span>: <span class="ident">Signature</span>,
+<span class="doccomment">/// Combination of [`DigestSigner`] and [`RandomizedSigner`] with support for
+/// computing a signature over a digest which requires entropy from an RNG.
+</span><span class="attribute">#[cfg(all(feature = <span class="string">&quot;digest-preview&quot;</span>, feature = <span class="string">&quot;rand-preview&quot;</span>))]
+#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;digest-preview&quot;</span>)))]
+#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;rand-preview&quot;</span>)))]
+</span><span class="kw">pub trait </span>RandomizedDigestSigner&lt;D, S&gt;
+<span class="kw">where
+    </span>D: Digest,
+    S: Signature,
 {
-    <span class="doccomment">/// Sign the given prehashed message `Digest`, returning a signature.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// Panics in the event of a signing error.</span>
-    <span class="kw">fn</span> <span class="ident">sign_digest_with_rng</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rng</span>: <span class="kw">impl</span> <span class="ident">CryptoRng</span> <span class="op">+</span> <span class="ident">RngCore</span>, <span class="ident">digest</span>: <span class="ident">D</span>) -&gt; <span class="ident">S</span> {
-        <span class="self">self</span>.<span class="ident">try_sign_digest_with_rng</span>(<span class="ident">rng</span>, <span class="ident">digest</span>)
-            .<span class="ident">expect</span>(<span class="string">&quot;signature operation failed&quot;</span>)
+    <span class="doccomment">/// Sign the given prehashed message `Digest`, returning a signature.
+    ///
+    /// Panics in the event of a signing error.
+    </span><span class="kw">fn </span>sign_digest_with_rng(<span class="kw-2">&amp;</span><span class="self">self</span>, rng: <span class="kw">impl </span>CryptoRng + RngCore, digest: D) -&gt; S {
+        <span class="self">self</span>.try_sign_digest_with_rng(rng, digest)
+            .expect(<span class="string">&quot;signature operation failed&quot;</span>)
     }
 
-    <span class="doccomment">/// Attempt to sign the given prehashed message `Digest`, returning a</span>
-    <span class="doccomment">/// digital signature on success, or an error if something went wrong.</span>
-    <span class="kw">fn</span> <span class="ident">try_sign_digest_with_rng</span>(
+    <span class="doccomment">/// Attempt to sign the given prehashed message `Digest`, returning a
+    /// digital signature on success, or an error if something went wrong.
+    </span><span class="kw">fn </span>try_sign_digest_with_rng(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">rng</span>: <span class="kw">impl</span> <span class="ident">CryptoRng</span> <span class="op">+</span> <span class="ident">RngCore</span>,
-        <span class="ident">digest</span>: <span class="ident">D</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">Error</span><span class="op">&gt;</span>;
+        rng: <span class="kw">impl </span>CryptoRng + RngCore,
+        digest: D,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;S, Error&gt;;
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="signature" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="signature" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

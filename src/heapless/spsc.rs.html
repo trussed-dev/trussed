@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/heapless-0.7.16/src/spsc.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>spsc.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../heapless/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../heapless/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../heapless/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/heapless-0.7.16/src/spsc.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>spsc.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../heapless/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../heapless/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../heapless/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -905,912 +905,912 @@
 <span id="905">905</span>
 <span id="906">906</span>
 <span id="907">907</span>
-</pre><pre class="rust"><code><span class="doccomment">//! Fixed capacity Single Producer Single Consumer (SPSC) queue</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! Implementation based on &lt;https://www.codeproject.com/Articles/43510/Lock-Free-Single-Producer-Single-Consumer-Circular&gt;</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! NOTE: This module is not available on targets that do *not* support atomic loads and are not</span>
-<span class="doccomment">//! supported by [`atomic_polyfill`](https://crates.io/crates/atomic-polyfill). (e.g., MSP430).</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! # Examples</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! - `Queue` can be used as a plain queue</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ```</span>
-<span class="doccomment">//! use heapless::spsc::Queue;</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! let mut rb: Queue&lt;u8, 4&gt; = Queue::new();</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! assert!(rb.enqueue(0).is_ok());</span>
-<span class="doccomment">//! assert!(rb.enqueue(1).is_ok());</span>
-<span class="doccomment">//! assert!(rb.enqueue(2).is_ok());</span>
-<span class="doccomment">//! assert!(rb.enqueue(3).is_err()); // full</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! assert_eq!(rb.dequeue(), Some(0));</span>
-<span class="doccomment">//! ```</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! - `Queue` can be `split` and then be used in Single Producer Single Consumer mode</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ```</span>
-<span class="doccomment">//! use heapless::spsc::Queue;</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! // Notice, type signature needs to be explicit for now.</span>
-<span class="doccomment">//! // (min_const_eval, does not allow for default type assignments)</span>
-<span class="doccomment">//! static mut Q: Queue&lt;Event, 4&gt; = Queue::new();</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! enum Event { A, B }</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! fn main() {</span>
-<span class="doccomment">//!     // NOTE(unsafe) beware of aliasing the `consumer` end point</span>
-<span class="doccomment">//!     let mut consumer = unsafe { Q.split().1 };</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//!     loop {</span>
-<span class="doccomment">//!         // `dequeue` is a lockless operation</span>
-<span class="doccomment">//!         match consumer.dequeue() {</span>
-<span class="doccomment">//!             Some(Event::A) =&gt; { /* .. */ },</span>
-<span class="doccomment">//!             Some(Event::B) =&gt; { /* .. */ },</span>
-<span class="doccomment">//!             None =&gt; { /* sleep */ },</span>
-<span class="doccomment">//!         }</span>
-<span class="doccomment">//! #       break</span>
-<span class="doccomment">//!     }</span>
-<span class="doccomment">//! }</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! // this is a different execution context that can preempt `main`</span>
-<span class="doccomment">//! fn interrupt_handler() {</span>
-<span class="doccomment">//!     // NOTE(unsafe) beware of aliasing the `producer` end point</span>
-<span class="doccomment">//!     let mut producer = unsafe { Q.split().0 };</span>
-<span class="doccomment">//! #   let condition = true;</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//!     // ..</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//!     if condition {</span>
-<span class="doccomment">//!         producer.enqueue(Event::A).ok().unwrap();</span>
-<span class="doccomment">//!     } else {</span>
-<span class="doccomment">//!         producer.enqueue(Event::B).ok().unwrap();</span>
-<span class="doccomment">//!     }</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//!     // ..</span>
-<span class="doccomment">//! }</span>
-<span class="doccomment">//! ```</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! # Benchmarks</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! Measured on a ARM Cortex-M3 core running at 8 MHz and with zero Flash wait cycles</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! `-C opt-level`         |`3`|</span>
-<span class="doccomment">//! -----------------------|---|</span>
-<span class="doccomment">//! `Consumer&lt;u8&gt;::dequeue`| 15|</span>
-<span class="doccomment">//! `Queue&lt;u8&gt;::dequeue`   | 12|</span>
-<span class="doccomment">//! `Producer&lt;u8&gt;::enqueue`| 16|</span>
-<span class="doccomment">//! `Queue&lt;u8&gt;::enqueue`   | 14|</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! - All execution times are in clock cycles. 1 clock cycle = 125 ns.</span>
-<span class="doccomment">//! - Execution time is *dependent* of `mem::size_of::&lt;T&gt;()`. Both operations include one</span>
-<span class="doccomment">//! `memcpy(T)` in their successful path.</span>
-<span class="doccomment">//! - The optimization level is indicated in the first row.</span>
-<span class="doccomment">//! - The numbers reported correspond to the successful path (i.e. `Some` is returned by `dequeue`</span>
-<span class="doccomment">//! and `Ok` is returned by `enqueue`).</span>
+</pre><pre class="rust"><code><span class="doccomment">//! Fixed capacity Single Producer Single Consumer (SPSC) queue
+//!
+//! Implementation based on &lt;https://www.codeproject.com/Articles/43510/Lock-Free-Single-Producer-Single-Consumer-Circular&gt;
+//!
+//! NOTE: This module is not available on targets that do *not* support atomic loads and are not
+//! supported by [`atomic_polyfill`](https://crates.io/crates/atomic-polyfill). (e.g., MSP430).
+//!
+//! # Examples
+//!
+//! - `Queue` can be used as a plain queue
+//!
+//! ```
+//! use heapless::spsc::Queue;
+//!
+//! let mut rb: Queue&lt;u8, 4&gt; = Queue::new();
+//!
+//! assert!(rb.enqueue(0).is_ok());
+//! assert!(rb.enqueue(1).is_ok());
+//! assert!(rb.enqueue(2).is_ok());
+//! assert!(rb.enqueue(3).is_err()); // full
+//!
+//! assert_eq!(rb.dequeue(), Some(0));
+//! ```
+//!
+//! - `Queue` can be `split` and then be used in Single Producer Single Consumer mode
+//!
+//! ```
+//! use heapless::spsc::Queue;
+//!
+//! // Notice, type signature needs to be explicit for now.
+//! // (min_const_eval, does not allow for default type assignments)
+//! static mut Q: Queue&lt;Event, 4&gt; = Queue::new();
+//!
+//! enum Event { A, B }
+//!
+//! fn main() {
+//!     // NOTE(unsafe) beware of aliasing the `consumer` end point
+//!     let mut consumer = unsafe { Q.split().1 };
+//!
+//!     loop {
+//!         // `dequeue` is a lockless operation
+//!         match consumer.dequeue() {
+//!             Some(Event::A) =&gt; { /* .. */ },
+//!             Some(Event::B) =&gt; { /* .. */ },
+//!             None =&gt; { /* sleep */ },
+//!         }
+//! #       break
+//!     }
+//! }
+//!
+//! // this is a different execution context that can preempt `main`
+//! fn interrupt_handler() {
+//!     // NOTE(unsafe) beware of aliasing the `producer` end point
+//!     let mut producer = unsafe { Q.split().0 };
+//! #   let condition = true;
+//!
+//!     // ..
+//!
+//!     if condition {
+//!         producer.enqueue(Event::A).ok().unwrap();
+//!     } else {
+//!         producer.enqueue(Event::B).ok().unwrap();
+//!     }
+//!
+//!     // ..
+//! }
+//! ```
+//!
+//! # Benchmarks
+//!
+//! Measured on a ARM Cortex-M3 core running at 8 MHz and with zero Flash wait cycles
+//!
+//! `-C opt-level`         |`3`|
+//! -----------------------|---|
+//! `Consumer&lt;u8&gt;::dequeue`| 15|
+//! `Queue&lt;u8&gt;::dequeue`   | 12|
+//! `Producer&lt;u8&gt;::enqueue`| 16|
+//! `Queue&lt;u8&gt;::enqueue`   | 14|
+//!
+//! - All execution times are in clock cycles. 1 clock cycle = 125 ns.
+//! - Execution time is *dependent* of `mem::size_of::&lt;T&gt;()`. Both operations include one
+//! `memcpy(T)` in their successful path.
+//! - The optimization level is indicated in the first row.
+//! - The numbers reported correspond to the successful path (i.e. `Some` is returned by `dequeue`
+//! and `Ok` is returned by `enqueue`).
 
-<span class="kw">use</span> <span class="ident">core</span>::{<span class="ident">cell::UnsafeCell</span>, <span class="ident">fmt</span>, <span class="ident">hash</span>, <span class="ident">mem::MaybeUninit</span>, <span class="ident">ptr</span>};
+</span><span class="kw">use </span>core::{cell::UnsafeCell, fmt, hash, mem::MaybeUninit, ptr};
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">full_atomic_polyfill</span>)]</span>
-<span class="kw">use</span> <span class="ident">atomic_polyfill</span>::{<span class="ident">AtomicUsize</span>, <span class="ident">Ordering</span>};
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">full_atomic_polyfill</span>))]</span>
-<span class="kw">use</span> <span class="ident">core::sync::atomic</span>::{<span class="ident">AtomicUsize</span>, <span class="ident">Ordering</span>};
+<span class="attribute">#[cfg(full_atomic_polyfill)]
+</span><span class="kw">use </span>atomic_polyfill::{AtomicUsize, Ordering};
+<span class="attribute">#[cfg(not(full_atomic_polyfill))]
+</span><span class="kw">use </span>core::sync::atomic::{AtomicUsize, Ordering};
 
-<span class="doccomment">/// A statically allocated single producer single consumer queue with a capacity of `N - 1` elements</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// *IMPORTANT*: To get better performance use a value for `N` that is a power of 2 (e.g. `16`, `32`,</span>
-<span class="doccomment">/// etc.).</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Queue</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> {
-    <span class="comment">// this is from where we dequeue items</span>
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">head</span>: <span class="ident">AtomicUsize</span>,
+<span class="doccomment">/// A statically allocated single producer single consumer queue with a capacity of `N - 1` elements
+///
+/// *IMPORTANT*: To get better performance use a value for `N` that is a power of 2 (e.g. `16`, `32`,
+/// etc.).
+</span><span class="kw">pub struct </span>Queue&lt;T, <span class="kw">const </span>N: usize&gt; {
+    <span class="comment">// this is from where we dequeue items
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) head: AtomicUsize,
 
-    <span class="comment">// this is where we enqueue new items</span>
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">tail</span>: <span class="ident">AtomicUsize</span>,
+    <span class="comment">// this is where we enqueue new items
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) tail: AtomicUsize,
 
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">buffer</span>: [<span class="ident">UnsafeCell</span><span class="op">&lt;</span><span class="ident">MaybeUninit</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>; <span class="ident">N</span>],
+    <span class="kw">pub</span>(<span class="kw">crate</span>) buffer: [UnsafeCell&lt;MaybeUninit&lt;T&gt;&gt;; N],
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">Queue</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">N</span><span class="op">&gt;</span> {
-    <span class="kw">const</span> <span class="ident">INIT</span>: <span class="ident">UnsafeCell</span><span class="op">&lt;</span><span class="ident">MaybeUninit</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">UnsafeCell::new</span>(<span class="ident">MaybeUninit::uninit</span>());
+<span class="kw">impl</span>&lt;T, <span class="kw">const </span>N: usize&gt; Queue&lt;T, N&gt; {
+    <span class="kw">const </span>INIT: UnsafeCell&lt;MaybeUninit&lt;T&gt;&gt; = UnsafeCell::new(MaybeUninit::uninit());
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">increment</span>(<span class="ident">val</span>: <span class="ident">usize</span>) -&gt; <span class="ident">usize</span> {
-        (<span class="ident">val</span> <span class="op">+</span> <span class="number">1</span>) <span class="op">%</span> <span class="ident">N</span>
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>increment(val: usize) -&gt; usize {
+        (val + <span class="number">1</span>) % N
     }
 
-    <span class="doccomment">/// Creates an empty queue with a fixed capacity of `N - 1`</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="self">Self</span> {
-        <span class="comment">// Const assert N &gt; 1</span>
-        <span class="ident"><span class="kw">crate</span>::sealed::greater_than_1</span>::<span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span>();
+    <span class="doccomment">/// Creates an empty queue with a fixed capacity of `N - 1`
+    </span><span class="kw">pub const fn </span>new() -&gt; <span class="self">Self </span>{
+        <span class="comment">// Const assert N &gt; 1
+        </span><span class="kw">crate</span>::sealed::greater_than_1::&lt;N&gt;();
 
-        <span class="ident">Queue</span> {
-            <span class="ident">head</span>: <span class="ident">AtomicUsize::new</span>(<span class="number">0</span>),
-            <span class="ident">tail</span>: <span class="ident">AtomicUsize::new</span>(<span class="number">0</span>),
-            <span class="ident">buffer</span>: [<span class="ident"><span class="self">Self</span>::INIT</span>; <span class="ident">N</span>],
+        Queue {
+            head: AtomicUsize::new(<span class="number">0</span>),
+            tail: AtomicUsize::new(<span class="number">0</span>),
+            buffer: [<span class="self">Self</span>::INIT; N],
         }
     }
 
-    <span class="doccomment">/// Returns the maximum number of elements the queue can hold</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">capacity</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">usize</span> {
-        <span class="ident">N</span> <span class="op">-</span> <span class="number">1</span>
+    <span class="doccomment">/// Returns the maximum number of elements the queue can hold
+    </span><span class="attribute">#[inline]
+    </span><span class="kw">pub const fn </span>capacity(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
+        N - <span class="number">1
+    </span>}
+
+    <span class="doccomment">/// Returns the number of elements in the queue
+    </span><span class="attribute">#[inline]
+    </span><span class="kw">pub fn </span>len(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
+        <span class="kw">let </span>current_head = <span class="self">self</span>.head.load(Ordering::Relaxed);
+        <span class="kw">let </span>current_tail = <span class="self">self</span>.tail.load(Ordering::Relaxed);
+
+        current_tail.wrapping_sub(current_head).wrapping_add(N) % N
     }
 
-    <span class="doccomment">/// Returns the number of elements in the queue</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">usize</span> {
-        <span class="kw">let</span> <span class="ident">current_head</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">head</span>.<span class="ident">load</span>(<span class="ident">Ordering::Relaxed</span>);
-        <span class="kw">let</span> <span class="ident">current_tail</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">tail</span>.<span class="ident">load</span>(<span class="ident">Ordering::Relaxed</span>);
-
-        <span class="ident">current_tail</span>.<span class="ident">wrapping_sub</span>(<span class="ident">current_head</span>).<span class="ident">wrapping_add</span>(<span class="ident">N</span>) <span class="op">%</span> <span class="ident">N</span>
+    <span class="doccomment">/// Returns `true` if the queue is empty
+    </span><span class="attribute">#[inline]
+    </span><span class="kw">pub fn </span>is_empty(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+        <span class="self">self</span>.head.load(Ordering::Relaxed) == <span class="self">self</span>.tail.load(Ordering::Relaxed)
     }
 
-    <span class="doccomment">/// Returns `true` if the queue is empty</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_empty</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
-        <span class="self">self</span>.<span class="ident">head</span>.<span class="ident">load</span>(<span class="ident">Ordering::Relaxed</span>) <span class="op">==</span> <span class="self">self</span>.<span class="ident">tail</span>.<span class="ident">load</span>(<span class="ident">Ordering::Relaxed</span>)
+    <span class="doccomment">/// Returns `true` if the queue is full
+    </span><span class="attribute">#[inline]
+    </span><span class="kw">pub fn </span>is_full(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+        <span class="self">Self</span>::increment(<span class="self">self</span>.tail.load(Ordering::Relaxed)) == <span class="self">self</span>.head.load(Ordering::Relaxed)
     }
 
-    <span class="doccomment">/// Returns `true` if the queue is full</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_full</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
-        <span class="ident"><span class="self">Self</span>::increment</span>(<span class="self">self</span>.<span class="ident">tail</span>.<span class="ident">load</span>(<span class="ident">Ordering::Relaxed</span>)) <span class="op">==</span> <span class="self">self</span>.<span class="ident">head</span>.<span class="ident">load</span>(<span class="ident">Ordering::Relaxed</span>)
-    }
-
-    <span class="doccomment">/// Iterates from the front of the queue to the back</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">iter</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Iter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">T</span>, <span class="ident">N</span><span class="op">&gt;</span> {
-        <span class="ident">Iter</span> {
-            <span class="ident">rb</span>: <span class="self">self</span>,
-            <span class="ident">index</span>: <span class="number">0</span>,
-            <span class="ident">len</span>: <span class="self">self</span>.<span class="ident">len</span>(),
+    <span class="doccomment">/// Iterates from the front of the queue to the back
+    </span><span class="kw">pub fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Iter&lt;<span class="lifetime">&#39;_</span>, T, N&gt; {
+        Iter {
+            rb: <span class="self">self</span>,
+            index: <span class="number">0</span>,
+            len: <span class="self">self</span>.len(),
         }
     }
 
-    <span class="doccomment">/// Returns an iterator that allows modifying each value</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">iter_mut</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="ident">IterMut</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">T</span>, <span class="ident">N</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">len</span>();
-        <span class="ident">IterMut</span> {
-            <span class="ident">rb</span>: <span class="self">self</span>,
-            <span class="ident">index</span>: <span class="number">0</span>,
-            <span class="ident">len</span>,
+    <span class="doccomment">/// Returns an iterator that allows modifying each value
+    </span><span class="kw">pub fn </span>iter_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; IterMut&lt;<span class="lifetime">&#39;_</span>, T, N&gt; {
+        <span class="kw">let </span>len = <span class="self">self</span>.len();
+        IterMut {
+            rb: <span class="self">self</span>,
+            index: <span class="number">0</span>,
+            len,
         }
     }
 
-    <span class="doccomment">/// Adds an `item` to the end of the queue</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// Returns back the `item` if the queue is full</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">enqueue</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">val</span>: <span class="ident">T</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="kw">unsafe</span> { <span class="self">self</span>.<span class="ident">inner_enqueue</span>(<span class="ident">val</span>) }
+    <span class="doccomment">/// Adds an `item` to the end of the queue
+    ///
+    /// Returns back the `item` if the queue is full
+    </span><span class="attribute">#[inline]
+    </span><span class="kw">pub fn </span>enqueue(<span class="kw-2">&amp;mut </span><span class="self">self</span>, val: T) -&gt; <span class="prelude-ty">Result</span>&lt;(), T&gt; {
+        <span class="kw">unsafe </span>{ <span class="self">self</span>.inner_enqueue(val) }
     }
 
-    <span class="doccomment">/// Returns the item in the front of the queue, or `None` if the queue is empty</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">dequeue</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="kw">unsafe</span> { <span class="self">self</span>.<span class="ident">inner_dequeue</span>() }
+    <span class="doccomment">/// Returns the item in the front of the queue, or `None` if the queue is empty
+    </span><span class="attribute">#[inline]
+    </span><span class="kw">pub fn </span>dequeue(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;T&gt; {
+        <span class="kw">unsafe </span>{ <span class="self">self</span>.inner_dequeue() }
     }
 
-    <span class="doccomment">/// Returns a reference to the item in the front of the queue without dequeuing, or</span>
-    <span class="doccomment">/// `None` if the queue is empty.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// # Examples</span>
-    <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// use heapless::spsc::Queue;</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// let mut queue: Queue&lt;u8, 235&gt; = Queue::new();</span>
-    <span class="doccomment">/// let (mut producer, mut consumer) = queue.split();</span>
-    <span class="doccomment">/// assert_eq!(None, consumer.peek());</span>
-    <span class="doccomment">/// producer.enqueue(1);</span>
-    <span class="doccomment">/// assert_eq!(Some(&amp;1), consumer.peek());</span>
-    <span class="doccomment">/// assert_eq!(Some(1), consumer.dequeue());</span>
-    <span class="doccomment">/// assert_eq!(None, consumer.peek());</span>
-    <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">peek</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">is_empty</span>() {
-            <span class="kw">let</span> <span class="ident">head</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">head</span>.<span class="ident">load</span>(<span class="ident">Ordering::Relaxed</span>);
-            <span class="prelude-val">Some</span>(<span class="kw">unsafe</span> { <span class="kw-2">&amp;</span><span class="kw-2">*</span>(<span class="self">self</span>.<span class="ident">buffer</span>.<span class="ident">get_unchecked</span>(<span class="ident">head</span>).<span class="ident">get</span>() <span class="kw">as</span> <span class="kw-2">*const</span> <span class="ident">T</span>) })
-        } <span class="kw">else</span> {
-            <span class="prelude-val">None</span>
-        }
+    <span class="doccomment">/// Returns a reference to the item in the front of the queue without dequeuing, or
+    /// `None` if the queue is empty.
+    ///
+    /// # Examples
+    /// ```
+    /// use heapless::spsc::Queue;
+    ///
+    /// let mut queue: Queue&lt;u8, 235&gt; = Queue::new();
+    /// let (mut producer, mut consumer) = queue.split();
+    /// assert_eq!(None, consumer.peek());
+    /// producer.enqueue(1);
+    /// assert_eq!(Some(&amp;1), consumer.peek());
+    /// assert_eq!(Some(1), consumer.dequeue());
+    /// assert_eq!(None, consumer.peek());
+    /// ```
+    </span><span class="kw">pub fn </span>peek(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>T&gt; {
+        <span class="kw">if </span>!<span class="self">self</span>.is_empty() {
+            <span class="kw">let </span>head = <span class="self">self</span>.head.load(Ordering::Relaxed);
+            <span class="prelude-val">Some</span>(<span class="kw">unsafe </span>{ <span class="kw-2">&amp;*</span>(<span class="self">self</span>.buffer.get_unchecked(head).get() <span class="kw">as </span><span class="kw-2">*const </span>T) })
+        } <span class="kw">else </span>{
+            <span class="prelude-val">None
+        </span>}
     }
 
-    <span class="comment">// The memory for enqueueing is &quot;owned&quot; by the tail pointer.</span>
-    <span class="comment">// NOTE: This internal function uses internal mutability to allow the [`Producer`] to enqueue</span>
-    <span class="comment">// items without doing pointer arithmetic and accessing internal fields of this type.</span>
-    <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">inner_enqueue</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">val</span>: <span class="ident">T</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">current_tail</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">tail</span>.<span class="ident">load</span>(<span class="ident">Ordering::Relaxed</span>);
-        <span class="kw">let</span> <span class="ident">next_tail</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::increment</span>(<span class="ident">current_tail</span>);
+    <span class="comment">// The memory for enqueueing is &quot;owned&quot; by the tail pointer.
+    // NOTE: This internal function uses internal mutability to allow the [`Producer`] to enqueue
+    // items without doing pointer arithmetic and accessing internal fields of this type.
+    </span><span class="kw">unsafe fn </span>inner_enqueue(<span class="kw-2">&amp;</span><span class="self">self</span>, val: T) -&gt; <span class="prelude-ty">Result</span>&lt;(), T&gt; {
+        <span class="kw">let </span>current_tail = <span class="self">self</span>.tail.load(Ordering::Relaxed);
+        <span class="kw">let </span>next_tail = <span class="self">Self</span>::increment(current_tail);
 
-        <span class="kw">if</span> <span class="ident">next_tail</span> <span class="op">!</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">head</span>.<span class="ident">load</span>(<span class="ident">Ordering::Acquire</span>) {
-            (<span class="self">self</span>.<span class="ident">buffer</span>.<span class="ident">get_unchecked</span>(<span class="ident">current_tail</span>).<span class="ident">get</span>()).<span class="ident">write</span>(<span class="ident">MaybeUninit::new</span>(<span class="ident">val</span>));
-            <span class="self">self</span>.<span class="ident">tail</span>.<span class="ident">store</span>(<span class="ident">next_tail</span>, <span class="ident">Ordering::Release</span>);
+        <span class="kw">if </span>next_tail != <span class="self">self</span>.head.load(Ordering::Acquire) {
+            (<span class="self">self</span>.buffer.get_unchecked(current_tail).get()).write(MaybeUninit::new(val));
+            <span class="self">self</span>.tail.store(next_tail, Ordering::Release);
 
             <span class="prelude-val">Ok</span>(())
-        } <span class="kw">else</span> {
-            <span class="prelude-val">Err</span>(<span class="ident">val</span>)
+        } <span class="kw">else </span>{
+            <span class="prelude-val">Err</span>(val)
         }
     }
 
-    <span class="comment">// The memory for enqueueing is &quot;owned&quot; by the tail pointer.</span>
-    <span class="comment">// NOTE: This internal function uses internal mutability to allow the [`Producer`] to enqueue</span>
-    <span class="comment">// items without doing pointer arithmetic and accessing internal fields of this type.</span>
-    <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">inner_enqueue_unchecked</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">val</span>: <span class="ident">T</span>) {
-        <span class="kw">let</span> <span class="ident">current_tail</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">tail</span>.<span class="ident">load</span>(<span class="ident">Ordering::Relaxed</span>);
+    <span class="comment">// The memory for enqueueing is &quot;owned&quot; by the tail pointer.
+    // NOTE: This internal function uses internal mutability to allow the [`Producer`] to enqueue
+    // items without doing pointer arithmetic and accessing internal fields of this type.
+    </span><span class="kw">unsafe fn </span>inner_enqueue_unchecked(<span class="kw-2">&amp;</span><span class="self">self</span>, val: T) {
+        <span class="kw">let </span>current_tail = <span class="self">self</span>.tail.load(Ordering::Relaxed);
 
-        (<span class="self">self</span>.<span class="ident">buffer</span>.<span class="ident">get_unchecked</span>(<span class="ident">current_tail</span>).<span class="ident">get</span>()).<span class="ident">write</span>(<span class="ident">MaybeUninit::new</span>(<span class="ident">val</span>));
-        <span class="self">self</span>.<span class="ident">tail</span>
-            .<span class="ident">store</span>(<span class="ident"><span class="self">Self</span>::increment</span>(<span class="ident">current_tail</span>), <span class="ident">Ordering::Release</span>);
+        (<span class="self">self</span>.buffer.get_unchecked(current_tail).get()).write(MaybeUninit::new(val));
+        <span class="self">self</span>.tail
+            .store(<span class="self">Self</span>::increment(current_tail), Ordering::Release);
     }
 
-    <span class="doccomment">/// Adds an `item` to the end of the queue, without checking if it&#39;s full</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// # Unsafety</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// If the queue is full this operation will leak a value (T&#39;s destructor won&#39;t run on</span>
-    <span class="doccomment">/// the value that got overwritten by `item`), *and* will allow the `dequeue` operation</span>
-    <span class="doccomment">/// to create a copy of `item`, which could result in `T`&#39;s destructor running on `item`</span>
-    <span class="doccomment">/// twice.</span>
-    <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">enqueue_unchecked</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">val</span>: <span class="ident">T</span>) {
-        <span class="self">self</span>.<span class="ident">inner_enqueue_unchecked</span>(<span class="ident">val</span>)
+    <span class="doccomment">/// Adds an `item` to the end of the queue, without checking if it&#39;s full
+    ///
+    /// # Unsafety
+    ///
+    /// If the queue is full this operation will leak a value (T&#39;s destructor won&#39;t run on
+    /// the value that got overwritten by `item`), *and* will allow the `dequeue` operation
+    /// to create a copy of `item`, which could result in `T`&#39;s destructor running on `item`
+    /// twice.
+    </span><span class="kw">pub unsafe fn </span>enqueue_unchecked(<span class="kw-2">&amp;mut </span><span class="self">self</span>, val: T) {
+        <span class="self">self</span>.inner_enqueue_unchecked(val)
     }
 
-    <span class="comment">// The memory for dequeuing is &quot;owned&quot; by the head pointer,.</span>
-    <span class="comment">// NOTE: This internal function uses internal mutability to allow the [`Consumer`] to dequeue</span>
-    <span class="comment">// items without doing pointer arithmetic and accessing internal fields of this type.</span>
-    <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">inner_dequeue</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">current_head</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">head</span>.<span class="ident">load</span>(<span class="ident">Ordering::Relaxed</span>);
+    <span class="comment">// The memory for dequeuing is &quot;owned&quot; by the head pointer,.
+    // NOTE: This internal function uses internal mutability to allow the [`Consumer`] to dequeue
+    // items without doing pointer arithmetic and accessing internal fields of this type.
+    </span><span class="kw">unsafe fn </span>inner_dequeue(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;T&gt; {
+        <span class="kw">let </span>current_head = <span class="self">self</span>.head.load(Ordering::Relaxed);
 
-        <span class="kw">if</span> <span class="ident">current_head</span> <span class="op">==</span> <span class="self">self</span>.<span class="ident">tail</span>.<span class="ident">load</span>(<span class="ident">Ordering::Acquire</span>) {
-            <span class="prelude-val">None</span>
-        } <span class="kw">else</span> {
-            <span class="kw">let</span> <span class="ident">v</span> <span class="op">=</span> (<span class="self">self</span>.<span class="ident">buffer</span>.<span class="ident">get_unchecked</span>(<span class="ident">current_head</span>).<span class="ident">get</span>() <span class="kw">as</span> <span class="kw-2">*const</span> <span class="ident">T</span>).<span class="ident">read</span>();
+        <span class="kw">if </span>current_head == <span class="self">self</span>.tail.load(Ordering::Acquire) {
+            <span class="prelude-val">None
+        </span>} <span class="kw">else </span>{
+            <span class="kw">let </span>v = (<span class="self">self</span>.buffer.get_unchecked(current_head).get() <span class="kw">as </span><span class="kw-2">*const </span>T).read();
 
-            <span class="self">self</span>.<span class="ident">head</span>
-                .<span class="ident">store</span>(<span class="ident"><span class="self">Self</span>::increment</span>(<span class="ident">current_head</span>), <span class="ident">Ordering::Release</span>);
+            <span class="self">self</span>.head
+                .store(<span class="self">Self</span>::increment(current_head), Ordering::Release);
 
-            <span class="prelude-val">Some</span>(<span class="ident">v</span>)
+            <span class="prelude-val">Some</span>(v)
         }
     }
 
-    <span class="comment">// The memory for dequeuing is &quot;owned&quot; by the head pointer,.</span>
-    <span class="comment">// NOTE: This internal function uses internal mutability to allow the [`Consumer`] to dequeue</span>
-    <span class="comment">// items without doing pointer arithmetic and accessing internal fields of this type.</span>
-    <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">inner_dequeue_unchecked</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">T</span> {
-        <span class="kw">let</span> <span class="ident">current_head</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">head</span>.<span class="ident">load</span>(<span class="ident">Ordering::Relaxed</span>);
-        <span class="kw">let</span> <span class="ident">v</span> <span class="op">=</span> (<span class="self">self</span>.<span class="ident">buffer</span>.<span class="ident">get_unchecked</span>(<span class="ident">current_head</span>).<span class="ident">get</span>() <span class="kw">as</span> <span class="kw-2">*const</span> <span class="ident">T</span>).<span class="ident">read</span>();
+    <span class="comment">// The memory for dequeuing is &quot;owned&quot; by the head pointer,.
+    // NOTE: This internal function uses internal mutability to allow the [`Consumer`] to dequeue
+    // items without doing pointer arithmetic and accessing internal fields of this type.
+    </span><span class="kw">unsafe fn </span>inner_dequeue_unchecked(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; T {
+        <span class="kw">let </span>current_head = <span class="self">self</span>.head.load(Ordering::Relaxed);
+        <span class="kw">let </span>v = (<span class="self">self</span>.buffer.get_unchecked(current_head).get() <span class="kw">as </span><span class="kw-2">*const </span>T).read();
 
-        <span class="self">self</span>.<span class="ident">head</span>
-            .<span class="ident">store</span>(<span class="ident"><span class="self">Self</span>::increment</span>(<span class="ident">current_head</span>), <span class="ident">Ordering::Release</span>);
+        <span class="self">self</span>.head
+            .store(<span class="self">Self</span>::increment(current_head), Ordering::Release);
 
-        <span class="ident">v</span>
+        v
     }
 
-    <span class="doccomment">/// Returns the item in the front of the queue, without checking if there is something in the</span>
-    <span class="doccomment">/// queue</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// # Unsafety</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// If the queue is empty this operation will return uninitialized memory.</span>
-    <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">dequeue_unchecked</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="ident">T</span> {
-        <span class="self">self</span>.<span class="ident">inner_dequeue_unchecked</span>()
+    <span class="doccomment">/// Returns the item in the front of the queue, without checking if there is something in the
+    /// queue
+    ///
+    /// # Unsafety
+    ///
+    /// If the queue is empty this operation will return uninitialized memory.
+    </span><span class="kw">pub unsafe fn </span>dequeue_unchecked(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; T {
+        <span class="self">self</span>.inner_dequeue_unchecked()
     }
 
-    <span class="doccomment">/// Splits a queue into producer and consumer endpoints</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">split</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; (<span class="ident">Producer</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">T</span>, <span class="ident">N</span><span class="op">&gt;</span>, <span class="ident">Consumer</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">T</span>, <span class="ident">N</span><span class="op">&gt;</span>) {
-        (<span class="ident">Producer</span> { <span class="ident">rb</span>: <span class="self">self</span> }, <span class="ident">Consumer</span> { <span class="ident">rb</span>: <span class="self">self</span> })
-    }
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">Queue</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">N</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
-        <span class="ident"><span class="self">Self</span>::new</span>()
+    <span class="doccomment">/// Splits a queue into producer and consumer endpoints
+    </span><span class="kw">pub fn </span>split(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; (Producer&lt;<span class="lifetime">&#39;_</span>, T, N&gt;, Consumer&lt;<span class="lifetime">&#39;_</span>, T, N&gt;) {
+        (Producer { rb: <span class="self">self </span>}, Consumer { rb: <span class="self">self </span>})
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">Clone</span> <span class="kw">for</span> <span class="ident">Queue</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">N</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Clone</span>,
+<span class="kw">impl</span>&lt;T, <span class="kw">const </span>N: usize&gt; Default <span class="kw">for </span>Queue&lt;T, N&gt; {
+    <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>::new()
+    }
+}
+
+<span class="kw">impl</span>&lt;T, <span class="kw">const </span>N: usize&gt; Clone <span class="kw">for </span>Queue&lt;T, N&gt;
+<span class="kw">where
+    </span>T: Clone,
 {
-    <span class="kw">fn</span> <span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">new</span>: <span class="ident">Queue</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">N</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Queue::new</span>();
+    <span class="kw">fn </span>clone(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span><span class="kw-2">mut </span>new: Queue&lt;T, N&gt; = Queue::new();
 
-        <span class="kw">for</span> <span class="ident">s</span> <span class="kw">in</span> <span class="self">self</span>.<span class="ident">iter</span>() {
-            <span class="kw">unsafe</span> {
-                <span class="comment">// NOTE(unsafe) new.capacity() == self.capacity() &gt;= self.len()</span>
-                <span class="comment">// no overflow possible</span>
-                <span class="ident">new</span>.<span class="ident">enqueue_unchecked</span>(<span class="ident">s</span>.<span class="ident">clone</span>());
+        <span class="kw">for </span>s <span class="kw">in </span><span class="self">self</span>.iter() {
+            <span class="kw">unsafe </span>{
+                <span class="comment">// NOTE(unsafe) new.capacity() == self.capacity() &gt;= self.len()
+                // no overflow possible
+                </span>new.enqueue_unchecked(s.clone());
             }
         }
 
-        <span class="ident">new</span>
+        new
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span>, <span class="kw">const</span> <span class="ident">N2</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">PartialEq</span><span class="op">&lt;</span><span class="ident">Queue</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">N2</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Queue</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">N</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">PartialEq</span>,
+<span class="kw">impl</span>&lt;T, <span class="kw">const </span>N: usize, <span class="kw">const </span>N2: usize&gt; PartialEq&lt;Queue&lt;T, N2&gt;&gt; <span class="kw">for </span>Queue&lt;T, N&gt;
+<span class="kw">where
+    </span>T: PartialEq,
 {
-    <span class="kw">fn</span> <span class="ident">eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="ident">Queue</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">N2</span><span class="op">&gt;</span>) -&gt; <span class="ident">bool</span> {
-        <span class="self">self</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="ident">other</span>.<span class="ident">len</span>() <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">iter</span>().<span class="ident">zip</span>(<span class="ident">other</span>.<span class="ident">iter</span>()).<span class="ident">all</span>(<span class="op">|</span>(<span class="ident">v1</span>, <span class="ident">v2</span>)<span class="op">|</span> <span class="ident">v1</span> <span class="op">==</span> <span class="ident">v2</span>)
+    <span class="kw">fn </span>eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span>Queue&lt;T, N2&gt;) -&gt; bool {
+        <span class="self">self</span>.len() == other.len() &amp;&amp; <span class="self">self</span>.iter().zip(other.iter()).all(|(v1, v2)| v1 == v2)
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">Eq</span> <span class="kw">for</span> <span class="ident">Queue</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">N</span><span class="op">&gt;</span> <span class="kw">where</span> <span class="ident">T</span>: <span class="ident">Eq</span> {}
+<span class="kw">impl</span>&lt;T, <span class="kw">const </span>N: usize&gt; Eq <span class="kw">for </span>Queue&lt;T, N&gt; <span class="kw">where </span>T: Eq {}
 
-<span class="doccomment">/// An iterator over the items of a queue</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Iter</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> {
-    <span class="ident">rb</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Queue</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">N</span><span class="op">&gt;</span>,
-    <span class="ident">index</span>: <span class="ident">usize</span>,
-    <span class="ident">len</span>: <span class="ident">usize</span>,
+<span class="doccomment">/// An iterator over the items of a queue
+</span><span class="kw">pub struct </span>Iter&lt;<span class="lifetime">&#39;a</span>, T, <span class="kw">const </span>N: usize&gt; {
+    rb: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Queue&lt;T, N&gt;,
+    index: usize,
+    len: usize,
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">Clone</span> <span class="kw">for</span> <span class="ident">Iter</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>, <span class="ident">N</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">Self</span> {
-            <span class="ident">rb</span>: <span class="self">self</span>.<span class="ident">rb</span>,
-            <span class="ident">index</span>: <span class="self">self</span>.<span class="ident">index</span>,
-            <span class="ident">len</span>: <span class="self">self</span>.<span class="ident">len</span>,
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T, <span class="kw">const </span>N: usize&gt; Clone <span class="kw">for </span>Iter&lt;<span class="lifetime">&#39;a</span>, T, N&gt; {
+    <span class="kw">fn </span>clone(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            rb: <span class="self">self</span>.rb,
+            index: <span class="self">self</span>.index,
+            len: <span class="self">self</span>.len,
         }
     }
 }
 
-<span class="doccomment">/// A mutable iterator over the items of a queue</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">IterMut</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> {
-    <span class="ident">rb</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="ident">Queue</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">N</span><span class="op">&gt;</span>,
-    <span class="ident">index</span>: <span class="ident">usize</span>,
-    <span class="ident">len</span>: <span class="ident">usize</span>,
+<span class="doccomment">/// A mutable iterator over the items of a queue
+</span><span class="kw">pub struct </span>IterMut&lt;<span class="lifetime">&#39;a</span>, T, <span class="kw">const </span>N: usize&gt; {
+    rb: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>Queue&lt;T, N&gt;,
+    index: usize,
+    len: usize,
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">Iterator</span> <span class="kw">for</span> <span class="ident">Iter</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>, <span class="ident">N</span><span class="op">&gt;</span> {
-    <span class="kw">type</span> <span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">T</span>;
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T, <span class="kw">const </span>N: usize&gt; Iterator <span class="kw">for </span>Iter&lt;<span class="lifetime">&#39;a</span>, T, N&gt; {
+    <span class="kw">type </span>Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>T;
 
-    <span class="kw">fn</span> <span class="ident">next</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Item</span><span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">index</span> <span class="op">&lt;</span> <span class="self">self</span>.<span class="ident">len</span> {
-            <span class="kw">let</span> <span class="ident">head</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">rb</span>.<span class="ident">head</span>.<span class="ident">load</span>(<span class="ident">Ordering::Relaxed</span>);
+    <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
+        <span class="kw">if </span><span class="self">self</span>.index &lt; <span class="self">self</span>.len {
+            <span class="kw">let </span>head = <span class="self">self</span>.rb.head.load(Ordering::Relaxed);
 
-            <span class="kw">let</span> <span class="ident">i</span> <span class="op">=</span> (<span class="ident">head</span> <span class="op">+</span> <span class="self">self</span>.<span class="ident">index</span>) <span class="op">%</span> <span class="ident">N</span>;
-            <span class="self">self</span>.<span class="ident">index</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+            <span class="kw">let </span>i = (head + <span class="self">self</span>.index) % N;
+            <span class="self">self</span>.index += <span class="number">1</span>;
 
-            <span class="prelude-val">Some</span>(<span class="kw">unsafe</span> { <span class="kw-2">&amp;</span><span class="kw-2">*</span>(<span class="self">self</span>.<span class="ident">rb</span>.<span class="ident">buffer</span>.<span class="ident">get_unchecked</span>(<span class="ident">i</span>).<span class="ident">get</span>() <span class="kw">as</span> <span class="kw-2">*const</span> <span class="ident">T</span>) })
-        } <span class="kw">else</span> {
-            <span class="prelude-val">None</span>
-        }
+            <span class="prelude-val">Some</span>(<span class="kw">unsafe </span>{ <span class="kw-2">&amp;*</span>(<span class="self">self</span>.rb.buffer.get_unchecked(i).get() <span class="kw">as </span><span class="kw-2">*const </span>T) })
+        } <span class="kw">else </span>{
+            <span class="prelude-val">None
+        </span>}
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">Iterator</span> <span class="kw">for</span> <span class="ident">IterMut</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>, <span class="ident">N</span><span class="op">&gt;</span> {
-    <span class="kw">type</span> <span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="ident">T</span>;
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T, <span class="kw">const </span>N: usize&gt; Iterator <span class="kw">for </span>IterMut&lt;<span class="lifetime">&#39;a</span>, T, N&gt; {
+    <span class="kw">type </span>Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>T;
 
-    <span class="kw">fn</span> <span class="ident">next</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Item</span><span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">index</span> <span class="op">&lt;</span> <span class="self">self</span>.<span class="ident">len</span> {
-            <span class="kw">let</span> <span class="ident">head</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">rb</span>.<span class="ident">head</span>.<span class="ident">load</span>(<span class="ident">Ordering::Relaxed</span>);
+    <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
+        <span class="kw">if </span><span class="self">self</span>.index &lt; <span class="self">self</span>.len {
+            <span class="kw">let </span>head = <span class="self">self</span>.rb.head.load(Ordering::Relaxed);
 
-            <span class="kw">let</span> <span class="ident">i</span> <span class="op">=</span> (<span class="ident">head</span> <span class="op">+</span> <span class="self">self</span>.<span class="ident">index</span>) <span class="op">%</span> <span class="ident">N</span>;
-            <span class="self">self</span>.<span class="ident">index</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+            <span class="kw">let </span>i = (head + <span class="self">self</span>.index) % N;
+            <span class="self">self</span>.index += <span class="number">1</span>;
 
-            <span class="prelude-val">Some</span>(<span class="kw">unsafe</span> { <span class="kw-2">&amp;mut</span> <span class="kw-2">*</span>(<span class="self">self</span>.<span class="ident">rb</span>.<span class="ident">buffer</span>.<span class="ident">get_unchecked</span>(<span class="ident">i</span>).<span class="ident">get</span>() <span class="kw">as</span> <span class="kw-2">*mut</span> <span class="ident">T</span>) })
-        } <span class="kw">else</span> {
-            <span class="prelude-val">None</span>
-        }
+            <span class="prelude-val">Some</span>(<span class="kw">unsafe </span>{ <span class="kw-2">&amp;mut *</span>(<span class="self">self</span>.rb.buffer.get_unchecked(i).get() <span class="kw">as </span><span class="kw-2">*mut </span>T) })
+        } <span class="kw">else </span>{
+            <span class="prelude-val">None
+        </span>}
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">DoubleEndedIterator</span> <span class="kw">for</span> <span class="ident">Iter</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>, <span class="ident">N</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">next_back</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Item</span><span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">index</span> <span class="op">&lt;</span> <span class="self">self</span>.<span class="ident">len</span> {
-            <span class="kw">let</span> <span class="ident">head</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">rb</span>.<span class="ident">head</span>.<span class="ident">load</span>(<span class="ident">Ordering::Relaxed</span>);
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T, <span class="kw">const </span>N: usize&gt; DoubleEndedIterator <span class="kw">for </span>Iter&lt;<span class="lifetime">&#39;a</span>, T, N&gt; {
+    <span class="kw">fn </span>next_back(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
+        <span class="kw">if </span><span class="self">self</span>.index &lt; <span class="self">self</span>.len {
+            <span class="kw">let </span>head = <span class="self">self</span>.rb.head.load(Ordering::Relaxed);
 
-            <span class="comment">// self.len &gt; 0, since it&#39;s larger than self.index &gt; 0</span>
-            <span class="kw">let</span> <span class="ident">i</span> <span class="op">=</span> (<span class="ident">head</span> <span class="op">+</span> <span class="self">self</span>.<span class="ident">len</span> <span class="op">-</span> <span class="number">1</span>) <span class="op">%</span> <span class="ident">N</span>;
-            <span class="self">self</span>.<span class="ident">len</span> <span class="op">-</span><span class="op">=</span> <span class="number">1</span>;
-            <span class="prelude-val">Some</span>(<span class="kw">unsafe</span> { <span class="kw-2">&amp;</span><span class="kw-2">*</span>(<span class="self">self</span>.<span class="ident">rb</span>.<span class="ident">buffer</span>.<span class="ident">get_unchecked</span>(<span class="ident">i</span>).<span class="ident">get</span>() <span class="kw">as</span> <span class="kw-2">*const</span> <span class="ident">T</span>) })
-        } <span class="kw">else</span> {
-            <span class="prelude-val">None</span>
-        }
+            <span class="comment">// self.len &gt; 0, since it&#39;s larger than self.index &gt; 0
+            </span><span class="kw">let </span>i = (head + <span class="self">self</span>.len - <span class="number">1</span>) % N;
+            <span class="self">self</span>.len -= <span class="number">1</span>;
+            <span class="prelude-val">Some</span>(<span class="kw">unsafe </span>{ <span class="kw-2">&amp;*</span>(<span class="self">self</span>.rb.buffer.get_unchecked(i).get() <span class="kw">as </span><span class="kw-2">*const </span>T) })
+        } <span class="kw">else </span>{
+            <span class="prelude-val">None
+        </span>}
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">DoubleEndedIterator</span> <span class="kw">for</span> <span class="ident">IterMut</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>, <span class="ident">N</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">next_back</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Item</span><span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">index</span> <span class="op">&lt;</span> <span class="self">self</span>.<span class="ident">len</span> {
-            <span class="kw">let</span> <span class="ident">head</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">rb</span>.<span class="ident">head</span>.<span class="ident">load</span>(<span class="ident">Ordering::Relaxed</span>);
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T, <span class="kw">const </span>N: usize&gt; DoubleEndedIterator <span class="kw">for </span>IterMut&lt;<span class="lifetime">&#39;a</span>, T, N&gt; {
+    <span class="kw">fn </span>next_back(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
+        <span class="kw">if </span><span class="self">self</span>.index &lt; <span class="self">self</span>.len {
+            <span class="kw">let </span>head = <span class="self">self</span>.rb.head.load(Ordering::Relaxed);
 
-            <span class="comment">// self.len &gt; 0, since it&#39;s larger than self.index &gt; 0</span>
-            <span class="kw">let</span> <span class="ident">i</span> <span class="op">=</span> (<span class="ident">head</span> <span class="op">+</span> <span class="self">self</span>.<span class="ident">len</span> <span class="op">-</span> <span class="number">1</span>) <span class="op">%</span> <span class="ident">N</span>;
-            <span class="self">self</span>.<span class="ident">len</span> <span class="op">-</span><span class="op">=</span> <span class="number">1</span>;
-            <span class="prelude-val">Some</span>(<span class="kw">unsafe</span> { <span class="kw-2">&amp;mut</span> <span class="kw-2">*</span>(<span class="self">self</span>.<span class="ident">rb</span>.<span class="ident">buffer</span>.<span class="ident">get_unchecked</span>(<span class="ident">i</span>).<span class="ident">get</span>() <span class="kw">as</span> <span class="kw-2">*mut</span> <span class="ident">T</span>) })
-        } <span class="kw">else</span> {
-            <span class="prelude-val">None</span>
-        }
+            <span class="comment">// self.len &gt; 0, since it&#39;s larger than self.index &gt; 0
+            </span><span class="kw">let </span>i = (head + <span class="self">self</span>.len - <span class="number">1</span>) % N;
+            <span class="self">self</span>.len -= <span class="number">1</span>;
+            <span class="prelude-val">Some</span>(<span class="kw">unsafe </span>{ <span class="kw-2">&amp;mut *</span>(<span class="self">self</span>.rb.buffer.get_unchecked(i).get() <span class="kw">as </span><span class="kw-2">*mut </span>T) })
+        } <span class="kw">else </span>{
+            <span class="prelude-val">None
+        </span>}
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">Drop</span> <span class="kw">for</span> <span class="ident">Queue</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">N</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">drop</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
-        <span class="kw">for</span> <span class="ident">item</span> <span class="kw">in</span> <span class="self">self</span> {
-            <span class="kw">unsafe</span> {
-                <span class="ident">ptr::drop_in_place</span>(<span class="ident">item</span>);
+<span class="kw">impl</span>&lt;T, <span class="kw">const </span>N: usize&gt; Drop <span class="kw">for </span>Queue&lt;T, N&gt; {
+    <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="kw">for </span>item <span class="kw">in </span><span class="self">self </span>{
+            <span class="kw">unsafe </span>{
+                ptr::drop_in_place(item);
             }
         }
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">fmt::Debug</span> <span class="kw">for</span> <span class="ident">Queue</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">N</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">fmt::Debug</span>,
+<span class="kw">impl</span>&lt;T, <span class="kw">const </span>N: usize&gt; fmt::Debug <span class="kw">for </span>Queue&lt;T, N&gt;
+<span class="kw">where
+    </span>T: fmt::Debug,
 {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">fmt::Result</span> {
-        <span class="ident">f</span>.<span class="ident">debug_list</span>().<span class="ident">entries</span>(<span class="self">self</span>.<span class="ident">iter</span>()).<span class="ident">finish</span>()
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+        f.debug_list().entries(<span class="self">self</span>.iter()).finish()
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">hash::Hash</span> <span class="kw">for</span> <span class="ident">Queue</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">N</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">hash::Hash</span>,
+<span class="kw">impl</span>&lt;T, <span class="kw">const </span>N: usize&gt; hash::Hash <span class="kw">for </span>Queue&lt;T, N&gt;
+<span class="kw">where
+    </span>T: hash::Hash,
 {
-    <span class="kw">fn</span> <span class="ident">hash</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">hash::Hasher</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">state</span>: <span class="kw-2">&amp;mut</span> <span class="ident">H</span>) {
-        <span class="comment">// iterate over self in order</span>
-        <span class="kw">for</span> <span class="ident">t</span> <span class="kw">in</span> <span class="self">self</span>.<span class="ident">iter</span>() {
-            <span class="ident">hash::Hash::hash</span>(<span class="ident">t</span>, <span class="ident">state</span>);
+    <span class="kw">fn </span>hash&lt;H: hash::Hasher&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, state: <span class="kw-2">&amp;mut </span>H) {
+        <span class="comment">// iterate over self in order
+        </span><span class="kw">for </span>t <span class="kw">in </span><span class="self">self</span>.iter() {
+            hash::Hash::hash(t, state);
         }
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">hash32::Hash</span> <span class="kw">for</span> <span class="ident">Queue</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">N</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">hash32::Hash</span>,
+<span class="kw">impl</span>&lt;T, <span class="kw">const </span>N: usize&gt; hash32::Hash <span class="kw">for </span>Queue&lt;T, N&gt;
+<span class="kw">where
+    </span>T: hash32::Hash,
 {
-    <span class="kw">fn</span> <span class="ident">hash</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">hash32::Hasher</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">state</span>: <span class="kw-2">&amp;mut</span> <span class="ident">H</span>) {
-        <span class="comment">// iterate over self in order</span>
-        <span class="kw">for</span> <span class="ident">t</span> <span class="kw">in</span> <span class="self">self</span>.<span class="ident">iter</span>() {
-            <span class="ident">hash32::Hash::hash</span>(<span class="ident">t</span>, <span class="ident">state</span>);
+    <span class="kw">fn </span>hash&lt;H: hash32::Hasher&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, state: <span class="kw-2">&amp;mut </span>H) {
+        <span class="comment">// iterate over self in order
+        </span><span class="kw">for </span>t <span class="kw">in </span><span class="self">self</span>.iter() {
+            hash32::Hash::hash(t, state);
         }
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">IntoIterator</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Queue</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">N</span><span class="op">&gt;</span> {
-    <span class="kw">type</span> <span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">T</span>;
-    <span class="kw">type</span> <span class="ident">IntoIter</span> <span class="op">=</span> <span class="ident">Iter</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>, <span class="ident">N</span><span class="op">&gt;</span>;
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T, <span class="kw">const </span>N: usize&gt; IntoIterator <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Queue&lt;T, N&gt; {
+    <span class="kw">type </span>Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>T;
+    <span class="kw">type </span>IntoIter = Iter&lt;<span class="lifetime">&#39;a</span>, T, N&gt;;
 
-    <span class="kw">fn</span> <span class="ident">into_iter</span>(<span class="self">self</span>) -&gt; <span class="ident"><span class="self">Self</span>::IntoIter</span> {
-        <span class="self">self</span>.<span class="ident">iter</span>()
+    <span class="kw">fn </span>into_iter(<span class="self">self</span>) -&gt; <span class="self">Self</span>::IntoIter {
+        <span class="self">self</span>.iter()
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">IntoIterator</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="ident">Queue</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">N</span><span class="op">&gt;</span> {
-    <span class="kw">type</span> <span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="ident">T</span>;
-    <span class="kw">type</span> <span class="ident">IntoIter</span> <span class="op">=</span> <span class="ident">IterMut</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>, <span class="ident">N</span><span class="op">&gt;</span>;
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T, <span class="kw">const </span>N: usize&gt; IntoIterator <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>Queue&lt;T, N&gt; {
+    <span class="kw">type </span>Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>T;
+    <span class="kw">type </span>IntoIter = IterMut&lt;<span class="lifetime">&#39;a</span>, T, N&gt;;
 
-    <span class="kw">fn</span> <span class="ident">into_iter</span>(<span class="self">self</span>) -&gt; <span class="ident"><span class="self">Self</span>::IntoIter</span> {
-        <span class="self">self</span>.<span class="ident">iter_mut</span>()
+    <span class="kw">fn </span>into_iter(<span class="self">self</span>) -&gt; <span class="self">Self</span>::IntoIter {
+        <span class="self">self</span>.iter_mut()
     }
 }
 
-<span class="doccomment">/// A queue &quot;consumer&quot;; it can dequeue items from the queue</span>
-<span class="doccomment">/// NOTE the consumer semantically owns the `head` pointer of the queue</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Consumer</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> {
-    <span class="ident">rb</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Queue</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">N</span><span class="op">&gt;</span>,
+<span class="doccomment">/// A queue &quot;consumer&quot;; it can dequeue items from the queue
+/// NOTE the consumer semantically owns the `head` pointer of the queue
+</span><span class="kw">pub struct </span>Consumer&lt;<span class="lifetime">&#39;a</span>, T, <span class="kw">const </span>N: usize&gt; {
+    rb: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Queue&lt;T, N&gt;,
 }
 
-<span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">Send</span> <span class="kw">for</span> <span class="ident">Consumer</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>, <span class="ident">N</span><span class="op">&gt;</span> <span class="kw">where</span> <span class="ident">T</span>: <span class="ident">Send</span> {}
+<span class="kw">unsafe impl</span>&lt;<span class="lifetime">&#39;a</span>, T, <span class="kw">const </span>N: usize&gt; Send <span class="kw">for </span>Consumer&lt;<span class="lifetime">&#39;a</span>, T, N&gt; <span class="kw">where </span>T: Send {}
 
-<span class="doccomment">/// A queue &quot;producer&quot;; it can enqueue items into the queue</span>
-<span class="doccomment">/// NOTE the producer semantically owns the `tail` pointer of the queue</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Producer</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> {
-    <span class="ident">rb</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Queue</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">N</span><span class="op">&gt;</span>,
+<span class="doccomment">/// A queue &quot;producer&quot;; it can enqueue items into the queue
+/// NOTE the producer semantically owns the `tail` pointer of the queue
+</span><span class="kw">pub struct </span>Producer&lt;<span class="lifetime">&#39;a</span>, T, <span class="kw">const </span>N: usize&gt; {
+    rb: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Queue&lt;T, N&gt;,
 }
 
-<span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">Send</span> <span class="kw">for</span> <span class="ident">Producer</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>, <span class="ident">N</span><span class="op">&gt;</span> <span class="kw">where</span> <span class="ident">T</span>: <span class="ident">Send</span> {}
+<span class="kw">unsafe impl</span>&lt;<span class="lifetime">&#39;a</span>, T, <span class="kw">const </span>N: usize&gt; Send <span class="kw">for </span>Producer&lt;<span class="lifetime">&#39;a</span>, T, N&gt; <span class="kw">where </span>T: Send {}
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">Consumer</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>, <span class="ident">N</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Returns the item in the front of the queue, or `None` if the queue is empty</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">dequeue</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="kw">unsafe</span> { <span class="self">self</span>.<span class="ident">rb</span>.<span class="ident">inner_dequeue</span>() }
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T, <span class="kw">const </span>N: usize&gt; Consumer&lt;<span class="lifetime">&#39;a</span>, T, N&gt; {
+    <span class="doccomment">/// Returns the item in the front of the queue, or `None` if the queue is empty
+    </span><span class="attribute">#[inline]
+    </span><span class="kw">pub fn </span>dequeue(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;T&gt; {
+        <span class="kw">unsafe </span>{ <span class="self">self</span>.rb.inner_dequeue() }
     }
 
-    <span class="doccomment">/// Returns the item in the front of the queue, without checking if there are elements in the</span>
-    <span class="doccomment">/// queue</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// See [`Queue::dequeue_unchecked`] for safety</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">dequeue_unchecked</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="ident">T</span> {
-        <span class="self">self</span>.<span class="ident">rb</span>.<span class="ident">inner_dequeue_unchecked</span>()
+    <span class="doccomment">/// Returns the item in the front of the queue, without checking if there are elements in the
+    /// queue
+    ///
+    /// See [`Queue::dequeue_unchecked`] for safety
+    </span><span class="attribute">#[inline]
+    </span><span class="kw">pub unsafe fn </span>dequeue_unchecked(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; T {
+        <span class="self">self</span>.rb.inner_dequeue_unchecked()
     }
 
-    <span class="doccomment">/// Returns if there are any items to dequeue. When this returns `true`, at least the</span>
-    <span class="doccomment">/// first subsequent dequeue will succeed</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">ready</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
-        <span class="op">!</span><span class="self">self</span>.<span class="ident">rb</span>.<span class="ident">is_empty</span>()
+    <span class="doccomment">/// Returns if there are any items to dequeue. When this returns `true`, at least the
+    /// first subsequent dequeue will succeed
+    </span><span class="attribute">#[inline]
+    </span><span class="kw">pub fn </span>ready(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+        !<span class="self">self</span>.rb.is_empty()
     }
 
-    <span class="doccomment">/// Returns the number of elements in the queue</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">usize</span> {
-        <span class="self">self</span>.<span class="ident">rb</span>.<span class="ident">len</span>()
+    <span class="doccomment">/// Returns the number of elements in the queue
+    </span><span class="attribute">#[inline]
+    </span><span class="kw">pub fn </span>len(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
+        <span class="self">self</span>.rb.len()
     }
 
-    <span class="doccomment">/// Returns the maximum number of elements the queue can hold</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">capacity</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">usize</span> {
-        <span class="self">self</span>.<span class="ident">rb</span>.<span class="ident">capacity</span>()
+    <span class="doccomment">/// Returns the maximum number of elements the queue can hold
+    </span><span class="attribute">#[inline]
+    </span><span class="kw">pub fn </span>capacity(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
+        <span class="self">self</span>.rb.capacity()
     }
 
-    <span class="doccomment">/// Returns the item in the front of the queue without dequeuing, or `None` if the queue is</span>
-    <span class="doccomment">/// empty</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// # Examples</span>
-    <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// use heapless::spsc::Queue;</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// let mut queue: Queue&lt;u8, 235&gt; = Queue::new();</span>
-    <span class="doccomment">/// let (mut producer, mut consumer) = queue.split();</span>
-    <span class="doccomment">/// assert_eq!(None, consumer.peek());</span>
-    <span class="doccomment">/// producer.enqueue(1);</span>
-    <span class="doccomment">/// assert_eq!(Some(&amp;1), consumer.peek());</span>
-    <span class="doccomment">/// assert_eq!(Some(1), consumer.dequeue());</span>
-    <span class="doccomment">/// assert_eq!(None, consumer.peek());</span>
-    <span class="doccomment">/// ```</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">peek</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">rb</span>.<span class="ident">peek</span>()
-    }
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">Producer</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>, <span class="ident">N</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Adds an `item` to the end of the queue, returns back the `item` if the queue is full</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">enqueue</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">val</span>: <span class="ident">T</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="kw">unsafe</span> { <span class="self">self</span>.<span class="ident">rb</span>.<span class="ident">inner_enqueue</span>(<span class="ident">val</span>) }
-    }
-
-    <span class="doccomment">/// Adds an `item` to the end of the queue, without checking if the queue is full</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// See [`Queue::enqueue_unchecked`] for safety</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">enqueue_unchecked</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">val</span>: <span class="ident">T</span>) {
-        <span class="self">self</span>.<span class="ident">rb</span>.<span class="ident">inner_enqueue_unchecked</span>(<span class="ident">val</span>)
-    }
-
-    <span class="doccomment">/// Returns if there is any space to enqueue a new item. When this returns true, at</span>
-    <span class="doccomment">/// least the first subsequent enqueue will succeed.</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">ready</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
-        <span class="op">!</span><span class="self">self</span>.<span class="ident">rb</span>.<span class="ident">is_full</span>()
-    }
-
-    <span class="doccomment">/// Returns the number of elements in the queue</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">usize</span> {
-        <span class="self">self</span>.<span class="ident">rb</span>.<span class="ident">len</span>()
-    }
-
-    <span class="doccomment">/// Returns the maximum number of elements the queue can hold</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">capacity</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">usize</span> {
-        <span class="self">self</span>.<span class="ident">rb</span>.<span class="ident">capacity</span>()
+    <span class="doccomment">/// Returns the item in the front of the queue without dequeuing, or `None` if the queue is
+    /// empty
+    ///
+    /// # Examples
+    /// ```
+    /// use heapless::spsc::Queue;
+    ///
+    /// let mut queue: Queue&lt;u8, 235&gt; = Queue::new();
+    /// let (mut producer, mut consumer) = queue.split();
+    /// assert_eq!(None, consumer.peek());
+    /// producer.enqueue(1);
+    /// assert_eq!(Some(&amp;1), consumer.peek());
+    /// assert_eq!(Some(1), consumer.dequeue());
+    /// assert_eq!(None, consumer.peek());
+    /// ```
+    </span><span class="attribute">#[inline]
+    </span><span class="kw">pub fn </span>peek(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>T&gt; {
+        <span class="self">self</span>.rb.peek()
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
-<span class="kw">mod</span> <span class="ident">tests</span> {
-    <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::spsc::Queue</span>;
-    <span class="kw">use</span> <span class="ident">hash32::Hasher</span>;
-
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">full</span>() {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rb</span>: <span class="ident">Queue</span><span class="op">&lt;</span><span class="ident">i32</span>, <span class="number">3</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Queue::new</span>();
-
-        <span class="macro">assert_eq!</span>(<span class="ident">rb</span>.<span class="ident">is_full</span>(), <span class="bool-val">false</span>);
-
-        <span class="ident">rb</span>.<span class="ident">enqueue</span>(<span class="number">1</span>).<span class="ident">unwrap</span>();
-        <span class="macro">assert_eq!</span>(<span class="ident">rb</span>.<span class="ident">is_full</span>(), <span class="bool-val">false</span>);
-
-        <span class="ident">rb</span>.<span class="ident">enqueue</span>(<span class="number">2</span>).<span class="ident">unwrap</span>();
-        <span class="macro">assert_eq!</span>(<span class="ident">rb</span>.<span class="ident">is_full</span>(), <span class="bool-val">true</span>);
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T, <span class="kw">const </span>N: usize&gt; Producer&lt;<span class="lifetime">&#39;a</span>, T, N&gt; {
+    <span class="doccomment">/// Adds an `item` to the end of the queue, returns back the `item` if the queue is full
+    </span><span class="attribute">#[inline]
+    </span><span class="kw">pub fn </span>enqueue(<span class="kw-2">&amp;mut </span><span class="self">self</span>, val: T) -&gt; <span class="prelude-ty">Result</span>&lt;(), T&gt; {
+        <span class="kw">unsafe </span>{ <span class="self">self</span>.rb.inner_enqueue(val) }
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">empty</span>() {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rb</span>: <span class="ident">Queue</span><span class="op">&lt;</span><span class="ident">i32</span>, <span class="number">3</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Queue::new</span>();
-
-        <span class="macro">assert_eq!</span>(<span class="ident">rb</span>.<span class="ident">is_empty</span>(), <span class="bool-val">true</span>);
-
-        <span class="ident">rb</span>.<span class="ident">enqueue</span>(<span class="number">1</span>).<span class="ident">unwrap</span>();
-        <span class="macro">assert_eq!</span>(<span class="ident">rb</span>.<span class="ident">is_empty</span>(), <span class="bool-val">false</span>);
-
-        <span class="ident">rb</span>.<span class="ident">enqueue</span>(<span class="number">2</span>).<span class="ident">unwrap</span>();
-        <span class="macro">assert_eq!</span>(<span class="ident">rb</span>.<span class="ident">is_empty</span>(), <span class="bool-val">false</span>);
+    <span class="doccomment">/// Adds an `item` to the end of the queue, without checking if the queue is full
+    ///
+    /// See [`Queue::enqueue_unchecked`] for safety
+    </span><span class="attribute">#[inline]
+    </span><span class="kw">pub unsafe fn </span>enqueue_unchecked(<span class="kw-2">&amp;mut </span><span class="self">self</span>, val: T) {
+        <span class="self">self</span>.rb.inner_enqueue_unchecked(val)
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">miri</span>, <span class="ident">ignore</span>)]</span> <span class="comment">// too slow</span>
-    <span class="kw">fn</span> <span class="ident">len</span>() {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rb</span>: <span class="ident">Queue</span><span class="op">&lt;</span><span class="ident">i32</span>, <span class="number">3</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Queue::new</span>();
+    <span class="doccomment">/// Returns if there is any space to enqueue a new item. When this returns true, at
+    /// least the first subsequent enqueue will succeed.
+    </span><span class="attribute">#[inline]
+    </span><span class="kw">pub fn </span>ready(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+        !<span class="self">self</span>.rb.is_full()
+    }
 
-        <span class="macro">assert_eq!</span>(<span class="ident">rb</span>.<span class="ident">len</span>(), <span class="number">0</span>);
+    <span class="doccomment">/// Returns the number of elements in the queue
+    </span><span class="attribute">#[inline]
+    </span><span class="kw">pub fn </span>len(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
+        <span class="self">self</span>.rb.len()
+    }
 
-        <span class="ident">rb</span>.<span class="ident">enqueue</span>(<span class="number">1</span>).<span class="ident">unwrap</span>();
-        <span class="macro">assert_eq!</span>(<span class="ident">rb</span>.<span class="ident">len</span>(), <span class="number">1</span>);
+    <span class="doccomment">/// Returns the maximum number of elements the queue can hold
+    </span><span class="attribute">#[inline]
+    </span><span class="kw">pub fn </span>capacity(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
+        <span class="self">self</span>.rb.capacity()
+    }
+}
 
-        <span class="ident">rb</span>.<span class="ident">enqueue</span>(<span class="number">2</span>).<span class="ident">unwrap</span>();
-        <span class="macro">assert_eq!</span>(<span class="ident">rb</span>.<span class="ident">len</span>(), <span class="number">2</span>);
+<span class="attribute">#[cfg(test)]
+</span><span class="kw">mod </span>tests {
+    <span class="kw">use </span><span class="kw">crate</span>::spsc::Queue;
+    <span class="kw">use </span>hash32::Hasher;
 
-        <span class="kw">for</span> <span class="kw">_</span> <span class="kw">in</span> <span class="number">0</span>..<span class="number">1_000_000</span> {
-            <span class="kw">let</span> <span class="ident">v</span> <span class="op">=</span> <span class="ident">rb</span>.<span class="ident">dequeue</span>().<span class="ident">unwrap</span>();
-            <span class="macro">println!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">v</span>);
-            <span class="ident">rb</span>.<span class="ident">enqueue</span>(<span class="ident">v</span>).<span class="ident">unwrap</span>();
-            <span class="macro">assert_eq!</span>(<span class="ident">rb</span>.<span class="ident">len</span>(), <span class="number">2</span>);
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>full() {
+        <span class="kw">let </span><span class="kw-2">mut </span>rb: Queue&lt;i32, <span class="number">3</span>&gt; = Queue::new();
+
+        <span class="macro">assert_eq!</span>(rb.is_full(), <span class="bool-val">false</span>);
+
+        rb.enqueue(<span class="number">1</span>).unwrap();
+        <span class="macro">assert_eq!</span>(rb.is_full(), <span class="bool-val">false</span>);
+
+        rb.enqueue(<span class="number">2</span>).unwrap();
+        <span class="macro">assert_eq!</span>(rb.is_full(), <span class="bool-val">true</span>);
+    }
+
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>empty() {
+        <span class="kw">let </span><span class="kw-2">mut </span>rb: Queue&lt;i32, <span class="number">3</span>&gt; = Queue::new();
+
+        <span class="macro">assert_eq!</span>(rb.is_empty(), <span class="bool-val">true</span>);
+
+        rb.enqueue(<span class="number">1</span>).unwrap();
+        <span class="macro">assert_eq!</span>(rb.is_empty(), <span class="bool-val">false</span>);
+
+        rb.enqueue(<span class="number">2</span>).unwrap();
+        <span class="macro">assert_eq!</span>(rb.is_empty(), <span class="bool-val">false</span>);
+    }
+
+    <span class="attribute">#[test]
+    #[cfg_attr(miri, ignore)] </span><span class="comment">// too slow
+    </span><span class="kw">fn </span>len() {
+        <span class="kw">let </span><span class="kw-2">mut </span>rb: Queue&lt;i32, <span class="number">3</span>&gt; = Queue::new();
+
+        <span class="macro">assert_eq!</span>(rb.len(), <span class="number">0</span>);
+
+        rb.enqueue(<span class="number">1</span>).unwrap();
+        <span class="macro">assert_eq!</span>(rb.len(), <span class="number">1</span>);
+
+        rb.enqueue(<span class="number">2</span>).unwrap();
+        <span class="macro">assert_eq!</span>(rb.len(), <span class="number">2</span>);
+
+        <span class="kw">for _ in </span><span class="number">0</span>..<span class="number">1_000_000 </span>{
+            <span class="kw">let </span>v = rb.dequeue().unwrap();
+            <span class="macro">println!</span>(<span class="string">&quot;{}&quot;</span>, v);
+            rb.enqueue(v).unwrap();
+            <span class="macro">assert_eq!</span>(rb.len(), <span class="number">2</span>);
         }
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">miri</span>, <span class="ident">ignore</span>)]</span> <span class="comment">// too slow</span>
-    <span class="kw">fn</span> <span class="ident">try_overflow</span>() {
-        <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">23</span>;
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rb</span>: <span class="ident">Queue</span><span class="op">&lt;</span><span class="ident">i32</span>, <span class="ident">N</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Queue::new</span>();
+    <span class="attribute">#[test]
+    #[cfg_attr(miri, ignore)] </span><span class="comment">// too slow
+    </span><span class="kw">fn </span>try_overflow() {
+        <span class="kw">const </span>N: usize = <span class="number">23</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>rb: Queue&lt;i32, N&gt; = Queue::new();
 
-        <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">N</span> <span class="kw">as</span> <span class="ident">i32</span> <span class="op">-</span> <span class="number">1</span> {
-            <span class="ident">rb</span>.<span class="ident">enqueue</span>(<span class="ident">i</span>).<span class="ident">unwrap</span>();
+        <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..N <span class="kw">as </span>i32 - <span class="number">1 </span>{
+            rb.enqueue(i).unwrap();
         }
 
-        <span class="kw">for</span> <span class="kw">_</span> <span class="kw">in</span> <span class="number">0</span>..<span class="number">1_000_000</span> {
-            <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">N</span> <span class="kw">as</span> <span class="ident">i32</span> <span class="op">-</span> <span class="number">1</span> {
-                <span class="kw">let</span> <span class="ident">d</span> <span class="op">=</span> <span class="ident">rb</span>.<span class="ident">dequeue</span>().<span class="ident">unwrap</span>();
-                <span class="macro">assert_eq!</span>(<span class="ident">d</span>, <span class="ident">i</span>);
-                <span class="ident">rb</span>.<span class="ident">enqueue</span>(<span class="ident">i</span>).<span class="ident">unwrap</span>();
+        <span class="kw">for _ in </span><span class="number">0</span>..<span class="number">1_000_000 </span>{
+            <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..N <span class="kw">as </span>i32 - <span class="number">1 </span>{
+                <span class="kw">let </span>d = rb.dequeue().unwrap();
+                <span class="macro">assert_eq!</span>(d, i);
+                rb.enqueue(i).unwrap();
             }
         }
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">sanity</span>() {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rb</span>: <span class="ident">Queue</span><span class="op">&lt;</span><span class="ident">i32</span>, <span class="number">10</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Queue::new</span>();
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>sanity() {
+        <span class="kw">let </span><span class="kw-2">mut </span>rb: Queue&lt;i32, <span class="number">10</span>&gt; = Queue::new();
 
-        <span class="kw">let</span> (<span class="kw-2">mut</span> <span class="ident">p</span>, <span class="kw-2">mut</span> <span class="ident">c</span>) <span class="op">=</span> <span class="ident">rb</span>.<span class="ident">split</span>();
+        <span class="kw">let </span>(<span class="kw-2">mut </span>p, <span class="kw-2">mut </span>c) = rb.split();
 
-        <span class="macro">assert_eq!</span>(<span class="ident">p</span>.<span class="ident">ready</span>(), <span class="bool-val">true</span>);
+        <span class="macro">assert_eq!</span>(p.ready(), <span class="bool-val">true</span>);
 
-        <span class="macro">assert_eq!</span>(<span class="ident">c</span>.<span class="ident">ready</span>(), <span class="bool-val">false</span>);
+        <span class="macro">assert_eq!</span>(c.ready(), <span class="bool-val">false</span>);
 
-        <span class="macro">assert_eq!</span>(<span class="ident">c</span>.<span class="ident">dequeue</span>(), <span class="prelude-val">None</span>);
+        <span class="macro">assert_eq!</span>(c.dequeue(), <span class="prelude-val">None</span>);
 
-        <span class="ident">p</span>.<span class="ident">enqueue</span>(<span class="number">0</span>).<span class="ident">unwrap</span>();
+        p.enqueue(<span class="number">0</span>).unwrap();
 
-        <span class="macro">assert_eq!</span>(<span class="ident">c</span>.<span class="ident">dequeue</span>(), <span class="prelude-val">Some</span>(<span class="number">0</span>));
+        <span class="macro">assert_eq!</span>(c.dequeue(), <span class="prelude-val">Some</span>(<span class="number">0</span>));
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">static_new</span>() {
-        <span class="kw">static</span> <span class="kw-2">mut</span> <span class="ident">_Q</span>: <span class="ident">Queue</span><span class="op">&lt;</span><span class="ident">i32</span>, <span class="number">4</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Queue::new</span>();
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>static_new() {
+        <span class="kw">static </span><span class="kw-2">mut </span>_Q: Queue&lt;i32, <span class="number">4</span>&gt; = Queue::new();
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">drop</span>() {
-        <span class="kw">struct</span> <span class="ident">Droppable</span>;
-        <span class="kw">impl</span> <span class="ident">Droppable</span> {
-            <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="self">Self</span> {
-                <span class="kw">unsafe</span> {
-                    <span class="ident">COUNT</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>drop() {
+        <span class="kw">struct </span>Droppable;
+        <span class="kw">impl </span>Droppable {
+            <span class="kw">fn </span>new() -&gt; <span class="self">Self </span>{
+                <span class="kw">unsafe </span>{
+                    COUNT += <span class="number">1</span>;
                 }
-                <span class="ident">Droppable</span>
+                Droppable
             }
         }
 
-        <span class="kw">impl</span> <span class="ident">Drop</span> <span class="kw">for</span> <span class="ident">Droppable</span> {
-            <span class="kw">fn</span> <span class="ident">drop</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
-                <span class="kw">unsafe</span> {
-                    <span class="ident">COUNT</span> <span class="op">-</span><span class="op">=</span> <span class="number">1</span>;
+        <span class="kw">impl </span>Drop <span class="kw">for </span>Droppable {
+            <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+                <span class="kw">unsafe </span>{
+                    COUNT -= <span class="number">1</span>;
                 }
             }
         }
 
-        <span class="kw">static</span> <span class="kw-2">mut</span> <span class="ident">COUNT</span>: <span class="ident">i32</span> <span class="op">=</span> <span class="number">0</span>;
+        <span class="kw">static </span><span class="kw-2">mut </span>COUNT: i32 = <span class="number">0</span>;
 
         {
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">v</span>: <span class="ident">Queue</span><span class="op">&lt;</span><span class="ident">Droppable</span>, <span class="number">4</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Queue::new</span>();
-            <span class="ident">v</span>.<span class="ident">enqueue</span>(<span class="ident">Droppable::new</span>()).<span class="ident">ok</span>().<span class="ident">unwrap</span>();
-            <span class="ident">v</span>.<span class="ident">enqueue</span>(<span class="ident">Droppable::new</span>()).<span class="ident">ok</span>().<span class="ident">unwrap</span>();
-            <span class="ident">v</span>.<span class="ident">dequeue</span>().<span class="ident">unwrap</span>();
+            <span class="kw">let </span><span class="kw-2">mut </span>v: Queue&lt;Droppable, <span class="number">4</span>&gt; = Queue::new();
+            v.enqueue(Droppable::new()).ok().unwrap();
+            v.enqueue(Droppable::new()).ok().unwrap();
+            v.dequeue().unwrap();
         }
 
-        <span class="macro">assert_eq!</span>(<span class="kw">unsafe</span> { <span class="ident">COUNT</span> }, <span class="number">0</span>);
+        <span class="macro">assert_eq!</span>(<span class="kw">unsafe </span>{ COUNT }, <span class="number">0</span>);
 
         {
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">v</span>: <span class="ident">Queue</span><span class="op">&lt;</span><span class="ident">Droppable</span>, <span class="number">4</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Queue::new</span>();
-            <span class="ident">v</span>.<span class="ident">enqueue</span>(<span class="ident">Droppable::new</span>()).<span class="ident">ok</span>().<span class="ident">unwrap</span>();
-            <span class="ident">v</span>.<span class="ident">enqueue</span>(<span class="ident">Droppable::new</span>()).<span class="ident">ok</span>().<span class="ident">unwrap</span>();
+            <span class="kw">let </span><span class="kw-2">mut </span>v: Queue&lt;Droppable, <span class="number">4</span>&gt; = Queue::new();
+            v.enqueue(Droppable::new()).ok().unwrap();
+            v.enqueue(Droppable::new()).ok().unwrap();
         }
 
-        <span class="macro">assert_eq!</span>(<span class="kw">unsafe</span> { <span class="ident">COUNT</span> }, <span class="number">0</span>);
+        <span class="macro">assert_eq!</span>(<span class="kw">unsafe </span>{ COUNT }, <span class="number">0</span>);
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">iter</span>() {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rb</span>: <span class="ident">Queue</span><span class="op">&lt;</span><span class="ident">i32</span>, <span class="number">4</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Queue::new</span>();
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>iter() {
+        <span class="kw">let </span><span class="kw-2">mut </span>rb: Queue&lt;i32, <span class="number">4</span>&gt; = Queue::new();
 
-        <span class="ident">rb</span>.<span class="ident">enqueue</span>(<span class="number">0</span>).<span class="ident">unwrap</span>();
-        <span class="ident">rb</span>.<span class="ident">dequeue</span>().<span class="ident">unwrap</span>();
-        <span class="ident">rb</span>.<span class="ident">enqueue</span>(<span class="number">1</span>).<span class="ident">unwrap</span>();
-        <span class="ident">rb</span>.<span class="ident">enqueue</span>(<span class="number">2</span>).<span class="ident">unwrap</span>();
-        <span class="ident">rb</span>.<span class="ident">enqueue</span>(<span class="number">3</span>).<span class="ident">unwrap</span>();
+        rb.enqueue(<span class="number">0</span>).unwrap();
+        rb.dequeue().unwrap();
+        rb.enqueue(<span class="number">1</span>).unwrap();
+        rb.enqueue(<span class="number">2</span>).unwrap();
+        rb.enqueue(<span class="number">3</span>).unwrap();
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">items</span> <span class="op">=</span> <span class="ident">rb</span>.<span class="ident">iter</span>();
+        <span class="kw">let </span><span class="kw-2">mut </span>items = rb.iter();
 
-        <span class="comment">// assert_eq!(items.next(), Some(&amp;0));</span>
-        <span class="macro">assert_eq!</span>(<span class="ident">items</span>.<span class="ident">next</span>(), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="number">1</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">items</span>.<span class="ident">next</span>(), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="number">2</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">items</span>.<span class="ident">next</span>(), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="number">3</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">items</span>.<span class="ident">next</span>(), <span class="prelude-val">None</span>);
+        <span class="comment">// assert_eq!(items.next(), Some(&amp;0));
+        </span><span class="macro">assert_eq!</span>(items.next(), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="number">1</span>));
+        <span class="macro">assert_eq!</span>(items.next(), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="number">2</span>));
+        <span class="macro">assert_eq!</span>(items.next(), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="number">3</span>));
+        <span class="macro">assert_eq!</span>(items.next(), <span class="prelude-val">None</span>);
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">iter_double_ended</span>() {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rb</span>: <span class="ident">Queue</span><span class="op">&lt;</span><span class="ident">i32</span>, <span class="number">4</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Queue::new</span>();
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>iter_double_ended() {
+        <span class="kw">let </span><span class="kw-2">mut </span>rb: Queue&lt;i32, <span class="number">4</span>&gt; = Queue::new();
 
-        <span class="ident">rb</span>.<span class="ident">enqueue</span>(<span class="number">0</span>).<span class="ident">unwrap</span>();
-        <span class="ident">rb</span>.<span class="ident">enqueue</span>(<span class="number">1</span>).<span class="ident">unwrap</span>();
-        <span class="ident">rb</span>.<span class="ident">enqueue</span>(<span class="number">2</span>).<span class="ident">unwrap</span>();
+        rb.enqueue(<span class="number">0</span>).unwrap();
+        rb.enqueue(<span class="number">1</span>).unwrap();
+        rb.enqueue(<span class="number">2</span>).unwrap();
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">items</span> <span class="op">=</span> <span class="ident">rb</span>.<span class="ident">iter</span>();
+        <span class="kw">let </span><span class="kw-2">mut </span>items = rb.iter();
 
-        <span class="macro">assert_eq!</span>(<span class="ident">items</span>.<span class="ident">next</span>(), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="number">0</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">items</span>.<span class="ident">next_back</span>(), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="number">2</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">items</span>.<span class="ident">next</span>(), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="number">1</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">items</span>.<span class="ident">next</span>(), <span class="prelude-val">None</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">items</span>.<span class="ident">next_back</span>(), <span class="prelude-val">None</span>);
+        <span class="macro">assert_eq!</span>(items.next(), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="number">0</span>));
+        <span class="macro">assert_eq!</span>(items.next_back(), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="number">2</span>));
+        <span class="macro">assert_eq!</span>(items.next(), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="number">1</span>));
+        <span class="macro">assert_eq!</span>(items.next(), <span class="prelude-val">None</span>);
+        <span class="macro">assert_eq!</span>(items.next_back(), <span class="prelude-val">None</span>);
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">iter_mut</span>() {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rb</span>: <span class="ident">Queue</span><span class="op">&lt;</span><span class="ident">i32</span>, <span class="number">4</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Queue::new</span>();
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>iter_mut() {
+        <span class="kw">let </span><span class="kw-2">mut </span>rb: Queue&lt;i32, <span class="number">4</span>&gt; = Queue::new();
 
-        <span class="ident">rb</span>.<span class="ident">enqueue</span>(<span class="number">0</span>).<span class="ident">unwrap</span>();
-        <span class="ident">rb</span>.<span class="ident">enqueue</span>(<span class="number">1</span>).<span class="ident">unwrap</span>();
-        <span class="ident">rb</span>.<span class="ident">enqueue</span>(<span class="number">2</span>).<span class="ident">unwrap</span>();
+        rb.enqueue(<span class="number">0</span>).unwrap();
+        rb.enqueue(<span class="number">1</span>).unwrap();
+        rb.enqueue(<span class="number">2</span>).unwrap();
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">items</span> <span class="op">=</span> <span class="ident">rb</span>.<span class="ident">iter_mut</span>();
+        <span class="kw">let </span><span class="kw-2">mut </span>items = rb.iter_mut();
 
-        <span class="macro">assert_eq!</span>(<span class="ident">items</span>.<span class="ident">next</span>(), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;mut</span> <span class="number">0</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">items</span>.<span class="ident">next</span>(), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;mut</span> <span class="number">1</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">items</span>.<span class="ident">next</span>(), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;mut</span> <span class="number">2</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">items</span>.<span class="ident">next</span>(), <span class="prelude-val">None</span>);
+        <span class="macro">assert_eq!</span>(items.next(), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;mut </span><span class="number">0</span>));
+        <span class="macro">assert_eq!</span>(items.next(), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;mut </span><span class="number">1</span>));
+        <span class="macro">assert_eq!</span>(items.next(), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;mut </span><span class="number">2</span>));
+        <span class="macro">assert_eq!</span>(items.next(), <span class="prelude-val">None</span>);
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">iter_mut_double_ended</span>() {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rb</span>: <span class="ident">Queue</span><span class="op">&lt;</span><span class="ident">i32</span>, <span class="number">4</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Queue::new</span>();
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>iter_mut_double_ended() {
+        <span class="kw">let </span><span class="kw-2">mut </span>rb: Queue&lt;i32, <span class="number">4</span>&gt; = Queue::new();
 
-        <span class="ident">rb</span>.<span class="ident">enqueue</span>(<span class="number">0</span>).<span class="ident">unwrap</span>();
-        <span class="ident">rb</span>.<span class="ident">enqueue</span>(<span class="number">1</span>).<span class="ident">unwrap</span>();
-        <span class="ident">rb</span>.<span class="ident">enqueue</span>(<span class="number">2</span>).<span class="ident">unwrap</span>();
+        rb.enqueue(<span class="number">0</span>).unwrap();
+        rb.enqueue(<span class="number">1</span>).unwrap();
+        rb.enqueue(<span class="number">2</span>).unwrap();
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">items</span> <span class="op">=</span> <span class="ident">rb</span>.<span class="ident">iter_mut</span>();
+        <span class="kw">let </span><span class="kw-2">mut </span>items = rb.iter_mut();
 
-        <span class="macro">assert_eq!</span>(<span class="ident">items</span>.<span class="ident">next</span>(), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;mut</span> <span class="number">0</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">items</span>.<span class="ident">next_back</span>(), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;mut</span> <span class="number">2</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">items</span>.<span class="ident">next</span>(), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;mut</span> <span class="number">1</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">items</span>.<span class="ident">next</span>(), <span class="prelude-val">None</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">items</span>.<span class="ident">next_back</span>(), <span class="prelude-val">None</span>);
+        <span class="macro">assert_eq!</span>(items.next(), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;mut </span><span class="number">0</span>));
+        <span class="macro">assert_eq!</span>(items.next_back(), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;mut </span><span class="number">2</span>));
+        <span class="macro">assert_eq!</span>(items.next(), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;mut </span><span class="number">1</span>));
+        <span class="macro">assert_eq!</span>(items.next(), <span class="prelude-val">None</span>);
+        <span class="macro">assert_eq!</span>(items.next_back(), <span class="prelude-val">None</span>);
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">wrap_around</span>() {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rb</span>: <span class="ident">Queue</span><span class="op">&lt;</span><span class="ident">i32</span>, <span class="number">4</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Queue::new</span>();
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>wrap_around() {
+        <span class="kw">let </span><span class="kw-2">mut </span>rb: Queue&lt;i32, <span class="number">4</span>&gt; = Queue::new();
 
-        <span class="ident">rb</span>.<span class="ident">enqueue</span>(<span class="number">0</span>).<span class="ident">unwrap</span>();
-        <span class="ident">rb</span>.<span class="ident">enqueue</span>(<span class="number">1</span>).<span class="ident">unwrap</span>();
-        <span class="ident">rb</span>.<span class="ident">enqueue</span>(<span class="number">2</span>).<span class="ident">unwrap</span>();
-        <span class="ident">rb</span>.<span class="ident">dequeue</span>().<span class="ident">unwrap</span>();
-        <span class="ident">rb</span>.<span class="ident">dequeue</span>().<span class="ident">unwrap</span>();
-        <span class="ident">rb</span>.<span class="ident">dequeue</span>().<span class="ident">unwrap</span>();
-        <span class="ident">rb</span>.<span class="ident">enqueue</span>(<span class="number">3</span>).<span class="ident">unwrap</span>();
-        <span class="ident">rb</span>.<span class="ident">enqueue</span>(<span class="number">4</span>).<span class="ident">unwrap</span>();
+        rb.enqueue(<span class="number">0</span>).unwrap();
+        rb.enqueue(<span class="number">1</span>).unwrap();
+        rb.enqueue(<span class="number">2</span>).unwrap();
+        rb.dequeue().unwrap();
+        rb.dequeue().unwrap();
+        rb.dequeue().unwrap();
+        rb.enqueue(<span class="number">3</span>).unwrap();
+        rb.enqueue(<span class="number">4</span>).unwrap();
 
-        <span class="macro">assert_eq!</span>(<span class="ident">rb</span>.<span class="ident">len</span>(), <span class="number">2</span>);
+        <span class="macro">assert_eq!</span>(rb.len(), <span class="number">2</span>);
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">ready_flag</span>() {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rb</span>: <span class="ident">Queue</span><span class="op">&lt;</span><span class="ident">i32</span>, <span class="number">3</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Queue::new</span>();
-        <span class="kw">let</span> (<span class="kw-2">mut</span> <span class="ident">p</span>, <span class="kw-2">mut</span> <span class="ident">c</span>) <span class="op">=</span> <span class="ident">rb</span>.<span class="ident">split</span>();
-        <span class="macro">assert_eq!</span>(<span class="ident">c</span>.<span class="ident">ready</span>(), <span class="bool-val">false</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">p</span>.<span class="ident">ready</span>(), <span class="bool-val">true</span>);
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>ready_flag() {
+        <span class="kw">let </span><span class="kw-2">mut </span>rb: Queue&lt;i32, <span class="number">3</span>&gt; = Queue::new();
+        <span class="kw">let </span>(<span class="kw-2">mut </span>p, <span class="kw-2">mut </span>c) = rb.split();
+        <span class="macro">assert_eq!</span>(c.ready(), <span class="bool-val">false</span>);
+        <span class="macro">assert_eq!</span>(p.ready(), <span class="bool-val">true</span>);
 
-        <span class="ident">p</span>.<span class="ident">enqueue</span>(<span class="number">0</span>).<span class="ident">unwrap</span>();
+        p.enqueue(<span class="number">0</span>).unwrap();
 
-        <span class="macro">assert_eq!</span>(<span class="ident">c</span>.<span class="ident">ready</span>(), <span class="bool-val">true</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">p</span>.<span class="ident">ready</span>(), <span class="bool-val">true</span>);
+        <span class="macro">assert_eq!</span>(c.ready(), <span class="bool-val">true</span>);
+        <span class="macro">assert_eq!</span>(p.ready(), <span class="bool-val">true</span>);
 
-        <span class="ident">p</span>.<span class="ident">enqueue</span>(<span class="number">1</span>).<span class="ident">unwrap</span>();
+        p.enqueue(<span class="number">1</span>).unwrap();
 
-        <span class="macro">assert_eq!</span>(<span class="ident">c</span>.<span class="ident">ready</span>(), <span class="bool-val">true</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">p</span>.<span class="ident">ready</span>(), <span class="bool-val">false</span>);
+        <span class="macro">assert_eq!</span>(c.ready(), <span class="bool-val">true</span>);
+        <span class="macro">assert_eq!</span>(p.ready(), <span class="bool-val">false</span>);
 
-        <span class="ident">c</span>.<span class="ident">dequeue</span>().<span class="ident">unwrap</span>();
+        c.dequeue().unwrap();
 
-        <span class="macro">assert_eq!</span>(<span class="ident">c</span>.<span class="ident">ready</span>(), <span class="bool-val">true</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">p</span>.<span class="ident">ready</span>(), <span class="bool-val">true</span>);
+        <span class="macro">assert_eq!</span>(c.ready(), <span class="bool-val">true</span>);
+        <span class="macro">assert_eq!</span>(p.ready(), <span class="bool-val">true</span>);
 
-        <span class="ident">c</span>.<span class="ident">dequeue</span>().<span class="ident">unwrap</span>();
+        c.dequeue().unwrap();
 
-        <span class="macro">assert_eq!</span>(<span class="ident">c</span>.<span class="ident">ready</span>(), <span class="bool-val">false</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">p</span>.<span class="ident">ready</span>(), <span class="bool-val">true</span>);
+        <span class="macro">assert_eq!</span>(c.ready(), <span class="bool-val">false</span>);
+        <span class="macro">assert_eq!</span>(p.ready(), <span class="bool-val">true</span>);
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">clone</span>() {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rb1</span>: <span class="ident">Queue</span><span class="op">&lt;</span><span class="ident">i32</span>, <span class="number">4</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Queue::new</span>();
-        <span class="ident">rb1</span>.<span class="ident">enqueue</span>(<span class="number">0</span>).<span class="ident">unwrap</span>();
-        <span class="ident">rb1</span>.<span class="ident">enqueue</span>(<span class="number">0</span>).<span class="ident">unwrap</span>();
-        <span class="ident">rb1</span>.<span class="ident">dequeue</span>().<span class="ident">unwrap</span>();
-        <span class="ident">rb1</span>.<span class="ident">enqueue</span>(<span class="number">0</span>).<span class="ident">unwrap</span>();
-        <span class="kw">let</span> <span class="ident">rb2</span> <span class="op">=</span> <span class="ident">rb1</span>.<span class="ident">clone</span>();
-        <span class="macro">assert_eq!</span>(<span class="ident">rb1</span>.<span class="ident">capacity</span>(), <span class="ident">rb2</span>.<span class="ident">capacity</span>());
-        <span class="macro">assert_eq!</span>(<span class="ident">rb1</span>.<span class="ident">len</span>(), <span class="ident">rb2</span>.<span class="ident">len</span>());
-        <span class="macro">assert!</span>(<span class="ident">rb1</span>.<span class="ident">iter</span>().<span class="ident">zip</span>(<span class="ident">rb2</span>.<span class="ident">iter</span>()).<span class="ident">all</span>(<span class="op">|</span>(<span class="ident">v1</span>, <span class="ident">v2</span>)<span class="op">|</span> <span class="ident">v1</span> <span class="op">==</span> <span class="ident">v2</span>));
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>clone() {
+        <span class="kw">let </span><span class="kw-2">mut </span>rb1: Queue&lt;i32, <span class="number">4</span>&gt; = Queue::new();
+        rb1.enqueue(<span class="number">0</span>).unwrap();
+        rb1.enqueue(<span class="number">0</span>).unwrap();
+        rb1.dequeue().unwrap();
+        rb1.enqueue(<span class="number">0</span>).unwrap();
+        <span class="kw">let </span>rb2 = rb1.clone();
+        <span class="macro">assert_eq!</span>(rb1.capacity(), rb2.capacity());
+        <span class="macro">assert_eq!</span>(rb1.len(), rb2.len());
+        <span class="macro">assert!</span>(rb1.iter().zip(rb2.iter()).all(|(v1, v2)| v1 == v2));
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">eq</span>() {
-        <span class="comment">// generate two queues with same content</span>
-        <span class="comment">// but different buffer alignment</span>
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rb1</span>: <span class="ident">Queue</span><span class="op">&lt;</span><span class="ident">i32</span>, <span class="number">4</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Queue::new</span>();
-        <span class="ident">rb1</span>.<span class="ident">enqueue</span>(<span class="number">0</span>).<span class="ident">unwrap</span>();
-        <span class="ident">rb1</span>.<span class="ident">enqueue</span>(<span class="number">0</span>).<span class="ident">unwrap</span>();
-        <span class="ident">rb1</span>.<span class="ident">dequeue</span>().<span class="ident">unwrap</span>();
-        <span class="ident">rb1</span>.<span class="ident">enqueue</span>(<span class="number">0</span>).<span class="ident">unwrap</span>();
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rb2</span>: <span class="ident">Queue</span><span class="op">&lt;</span><span class="ident">i32</span>, <span class="number">4</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Queue::new</span>();
-        <span class="ident">rb2</span>.<span class="ident">enqueue</span>(<span class="number">0</span>).<span class="ident">unwrap</span>();
-        <span class="ident">rb2</span>.<span class="ident">enqueue</span>(<span class="number">0</span>).<span class="ident">unwrap</span>();
-        <span class="macro">assert!</span>(<span class="ident">rb1</span> <span class="op">==</span> <span class="ident">rb2</span>);
-        <span class="comment">// test for symmetry</span>
-        <span class="macro">assert!</span>(<span class="ident">rb2</span> <span class="op">==</span> <span class="ident">rb1</span>);
-        <span class="comment">// test for changes in content</span>
-        <span class="ident">rb1</span>.<span class="ident">enqueue</span>(<span class="number">0</span>).<span class="ident">unwrap</span>();
-        <span class="macro">assert!</span>(<span class="ident">rb1</span> <span class="op">!</span><span class="op">=</span> <span class="ident">rb2</span>);
-        <span class="ident">rb2</span>.<span class="ident">enqueue</span>(<span class="number">1</span>).<span class="ident">unwrap</span>();
-        <span class="macro">assert!</span>(<span class="ident">rb1</span> <span class="op">!</span><span class="op">=</span> <span class="ident">rb2</span>);
-        <span class="comment">// test for refexive relation</span>
-        <span class="macro">assert!</span>(<span class="ident">rb1</span> <span class="op">==</span> <span class="ident">rb1</span>);
-        <span class="macro">assert!</span>(<span class="ident">rb2</span> <span class="op">==</span> <span class="ident">rb2</span>);
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>eq() {
+        <span class="comment">// generate two queues with same content
+        // but different buffer alignment
+        </span><span class="kw">let </span><span class="kw-2">mut </span>rb1: Queue&lt;i32, <span class="number">4</span>&gt; = Queue::new();
+        rb1.enqueue(<span class="number">0</span>).unwrap();
+        rb1.enqueue(<span class="number">0</span>).unwrap();
+        rb1.dequeue().unwrap();
+        rb1.enqueue(<span class="number">0</span>).unwrap();
+        <span class="kw">let </span><span class="kw-2">mut </span>rb2: Queue&lt;i32, <span class="number">4</span>&gt; = Queue::new();
+        rb2.enqueue(<span class="number">0</span>).unwrap();
+        rb2.enqueue(<span class="number">0</span>).unwrap();
+        <span class="macro">assert!</span>(rb1 == rb2);
+        <span class="comment">// test for symmetry
+        </span><span class="macro">assert!</span>(rb2 == rb1);
+        <span class="comment">// test for changes in content
+        </span>rb1.enqueue(<span class="number">0</span>).unwrap();
+        <span class="macro">assert!</span>(rb1 != rb2);
+        rb2.enqueue(<span class="number">1</span>).unwrap();
+        <span class="macro">assert!</span>(rb1 != rb2);
+        <span class="comment">// test for refexive relation
+        </span><span class="macro">assert!</span>(rb1 == rb1);
+        <span class="macro">assert!</span>(rb2 == rb2);
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">hash_equality</span>() {
-        <span class="comment">// generate two queues with same content</span>
-        <span class="comment">// but different buffer alignment</span>
-        <span class="kw">let</span> <span class="ident">rb1</span> <span class="op">=</span> {
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rb1</span>: <span class="ident">Queue</span><span class="op">&lt;</span><span class="ident">i32</span>, <span class="number">4</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Queue::new</span>();
-            <span class="ident">rb1</span>.<span class="ident">enqueue</span>(<span class="number">0</span>).<span class="ident">unwrap</span>();
-            <span class="ident">rb1</span>.<span class="ident">enqueue</span>(<span class="number">0</span>).<span class="ident">unwrap</span>();
-            <span class="ident">rb1</span>.<span class="ident">dequeue</span>().<span class="ident">unwrap</span>();
-            <span class="ident">rb1</span>.<span class="ident">enqueue</span>(<span class="number">0</span>).<span class="ident">unwrap</span>();
-            <span class="ident">rb1</span>
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>hash_equality() {
+        <span class="comment">// generate two queues with same content
+        // but different buffer alignment
+        </span><span class="kw">let </span>rb1 = {
+            <span class="kw">let </span><span class="kw-2">mut </span>rb1: Queue&lt;i32, <span class="number">4</span>&gt; = Queue::new();
+            rb1.enqueue(<span class="number">0</span>).unwrap();
+            rb1.enqueue(<span class="number">0</span>).unwrap();
+            rb1.dequeue().unwrap();
+            rb1.enqueue(<span class="number">0</span>).unwrap();
+            rb1
         };
-        <span class="kw">let</span> <span class="ident">rb2</span> <span class="op">=</span> {
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rb2</span>: <span class="ident">Queue</span><span class="op">&lt;</span><span class="ident">i32</span>, <span class="number">4</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Queue::new</span>();
-            <span class="ident">rb2</span>.<span class="ident">enqueue</span>(<span class="number">0</span>).<span class="ident">unwrap</span>();
-            <span class="ident">rb2</span>.<span class="ident">enqueue</span>(<span class="number">0</span>).<span class="ident">unwrap</span>();
-            <span class="ident">rb2</span>
+        <span class="kw">let </span>rb2 = {
+            <span class="kw">let </span><span class="kw-2">mut </span>rb2: Queue&lt;i32, <span class="number">4</span>&gt; = Queue::new();
+            rb2.enqueue(<span class="number">0</span>).unwrap();
+            rb2.enqueue(<span class="number">0</span>).unwrap();
+            rb2
         };
-        <span class="kw">let</span> <span class="ident">hash1</span> <span class="op">=</span> {
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">hasher1</span> <span class="op">=</span> <span class="ident">hash32::FnvHasher::default</span>();
-            <span class="ident">hash32::Hash::hash</span>(<span class="kw-2">&amp;</span><span class="ident">rb1</span>, <span class="kw-2">&amp;mut</span> <span class="ident">hasher1</span>);
-            <span class="kw">let</span> <span class="ident">hash1</span> <span class="op">=</span> <span class="ident">hasher1</span>.<span class="ident">finish</span>();
-            <span class="ident">hash1</span>
+        <span class="kw">let </span>hash1 = {
+            <span class="kw">let </span><span class="kw-2">mut </span>hasher1 = hash32::FnvHasher::default();
+            hash32::Hash::hash(<span class="kw-2">&amp;</span>rb1, <span class="kw-2">&amp;mut </span>hasher1);
+            <span class="kw">let </span>hash1 = hasher1.finish();
+            hash1
         };
-        <span class="kw">let</span> <span class="ident">hash2</span> <span class="op">=</span> {
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">hasher2</span> <span class="op">=</span> <span class="ident">hash32::FnvHasher::default</span>();
-            <span class="ident">hash32::Hash::hash</span>(<span class="kw-2">&amp;</span><span class="ident">rb2</span>, <span class="kw-2">&amp;mut</span> <span class="ident">hasher2</span>);
-            <span class="kw">let</span> <span class="ident">hash2</span> <span class="op">=</span> <span class="ident">hasher2</span>.<span class="ident">finish</span>();
-            <span class="ident">hash2</span>
+        <span class="kw">let </span>hash2 = {
+            <span class="kw">let </span><span class="kw-2">mut </span>hasher2 = hash32::FnvHasher::default();
+            hash32::Hash::hash(<span class="kw-2">&amp;</span>rb2, <span class="kw-2">&amp;mut </span>hasher2);
+            <span class="kw">let </span>hash2 = hasher2.finish();
+            hash2
         };
-        <span class="macro">assert_eq!</span>(<span class="ident">hash1</span>, <span class="ident">hash2</span>);
+        <span class="macro">assert_eq!</span>(hash1, hash2);
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="heapless" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="heapless" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

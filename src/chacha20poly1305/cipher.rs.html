@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/chacha20poly1305-0.8.2/src/cipher.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>cipher.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" href="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../chacha20poly1305/index.html"><div class="logo-container"><img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../chacha20poly1305/index.html"><div class="logo-container">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/chacha20poly1305-0.8.2/src/cipher.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>cipher.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" href="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../chacha20poly1305/index.html"><div class="logo-container"><img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../chacha20poly1305/index.html"><div class="logo-container">
                     <img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../chacha20poly1305/index.html">
                         <img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
@@ -109,114 +109,114 @@
 <span id="107">107</span>
 <span id="108">108</span>
 <span id="109">109</span>
-</pre><pre class="rust"><code><span class="doccomment">//! Core AEAD cipher implementation for (X)ChaCha20Poly1305.</span>
+</pre><pre class="rust"><code><span class="doccomment">//! Core AEAD cipher implementation for (X)ChaCha20Poly1305.
 
-<span class="kw">use</span> <span class="ident">::cipher</span>::{<span class="ident">StreamCipher</span>, <span class="ident">StreamCipherSeek</span>};
-<span class="kw">use</span> <span class="ident">aead::generic_array::GenericArray</span>;
-<span class="kw">use</span> <span class="ident">aead::Error</span>;
-<span class="kw">use</span> <span class="ident">core::convert::TryInto</span>;
-<span class="kw">use</span> <span class="ident">poly1305</span>::{
-    <span class="ident">universal_hash</span>::{<span class="ident">NewUniversalHash</span>, <span class="ident">UniversalHash</span>},
-    <span class="ident">Poly1305</span>,
+</span><span class="kw">use </span>::cipher::{StreamCipher, StreamCipherSeek};
+<span class="kw">use </span>aead::generic_array::GenericArray;
+<span class="kw">use </span>aead::Error;
+<span class="kw">use </span>core::convert::TryInto;
+<span class="kw">use </span>poly1305::{
+    universal_hash::{NewUniversalHash, UniversalHash},
+    Poly1305,
 };
-<span class="kw">use</span> <span class="ident">zeroize::Zeroize</span>;
+<span class="kw">use </span>zeroize::Zeroize;
 
-<span class="kw">use</span> <span class="ident"><span class="kw">super</span>::Tag</span>;
+<span class="kw">use </span><span class="kw">super</span>::Tag;
 
-<span class="doccomment">/// Size of a ChaCha20 block in bytes</span>
-<span class="kw">const</span> <span class="ident">BLOCK_SIZE</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">64</span>;
+<span class="doccomment">/// Size of a ChaCha20 block in bytes
+</span><span class="kw">const </span>BLOCK_SIZE: usize = <span class="number">64</span>;
 
-<span class="doccomment">/// Maximum number of blocks that can be encrypted with ChaCha20 before the</span>
-<span class="doccomment">/// counter overflows.</span>
-<span class="kw">const</span> <span class="ident">MAX_BLOCKS</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="ident">core::u32::MAX</span> <span class="kw">as</span> <span class="ident">usize</span>;
+<span class="doccomment">/// Maximum number of blocks that can be encrypted with ChaCha20 before the
+/// counter overflows.
+</span><span class="kw">const </span>MAX_BLOCKS: usize = core::u32::MAX <span class="kw">as </span>usize;
 
-<span class="doccomment">/// ChaCha20Poly1305 instantiated with a particular nonce</span>
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct</span> <span class="ident">Cipher</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">StreamCipher</span> <span class="op">+</span> <span class="ident">StreamCipherSeek</span>,
+<span class="doccomment">/// ChaCha20Poly1305 instantiated with a particular nonce
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>Cipher&lt;C&gt;
+<span class="kw">where
+    </span>C: StreamCipher + StreamCipherSeek,
 {
-    <span class="ident">cipher</span>: <span class="ident">C</span>,
-    <span class="ident">mac</span>: <span class="ident">Poly1305</span>,
+    cipher: C,
+    mac: Poly1305,
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> <span class="ident">Cipher</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">StreamCipher</span> <span class="op">+</span> <span class="ident">StreamCipherSeek</span>,
+<span class="kw">impl</span>&lt;C&gt; Cipher&lt;C&gt;
+<span class="kw">where
+    </span>C: StreamCipher + StreamCipherSeek,
 {
-    <span class="doccomment">/// Instantiate the underlying cipher with a particular nonce</span>
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">new</span>(<span class="kw-2">mut</span> <span class="ident">cipher</span>: <span class="ident">C</span>) -&gt; <span class="self">Self</span> {
-        <span class="comment">// Derive Poly1305 key from the first 32-bytes of the ChaCha20 keystream</span>
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">mac_key</span> <span class="op">=</span> <span class="ident">poly1305::Key::default</span>();
-        <span class="ident">cipher</span>.<span class="ident">apply_keystream</span>(<span class="kw-2">&amp;mut</span> <span class="kw-2">*</span><span class="ident">mac_key</span>);
-        <span class="kw">let</span> <span class="ident">mac</span> <span class="op">=</span> <span class="ident">Poly1305::new</span>(<span class="ident">GenericArray::from_slice</span>(<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">mac_key</span>));
-        <span class="ident">mac_key</span>.<span class="ident">zeroize</span>();
+    <span class="doccomment">/// Instantiate the underlying cipher with a particular nonce
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(<span class="kw-2">mut </span>cipher: C) -&gt; <span class="self">Self </span>{
+        <span class="comment">// Derive Poly1305 key from the first 32-bytes of the ChaCha20 keystream
+        </span><span class="kw">let </span><span class="kw-2">mut </span>mac_key = poly1305::Key::default();
+        cipher.apply_keystream(<span class="kw-2">&amp;mut *</span>mac_key);
+        <span class="kw">let </span>mac = Poly1305::new(GenericArray::from_slice(<span class="kw-2">&amp;*</span>mac_key));
+        mac_key.zeroize();
 
-        <span class="comment">// Set ChaCha20 counter to 1</span>
-        <span class="ident">cipher</span>.<span class="ident">seek</span>(<span class="ident">BLOCK_SIZE</span> <span class="kw">as</span> <span class="ident">u64</span>);
+        <span class="comment">// Set ChaCha20 counter to 1
+        </span>cipher.seek(BLOCK_SIZE <span class="kw">as </span>u64);
 
-        <span class="self">Self</span> { <span class="ident">cipher</span>, <span class="ident">mac</span> }
+        <span class="self">Self </span>{ cipher, mac }
     }
 
-    <span class="doccomment">/// Encrypt the given message in-place, returning the authentication tag</span>
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">encrypt_in_place_detached</span>(
-        <span class="kw-2">mut</span> <span class="self">self</span>,
-        <span class="ident">associated_data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
-        <span class="ident">buffer</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">u8</span>],
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Tag</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="ident">buffer</span>.<span class="ident">len</span>() <span class="op">/</span> <span class="ident">BLOCK_SIZE</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">MAX_BLOCKS</span> {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>);
+    <span class="doccomment">/// Encrypt the given message in-place, returning the authentication tag
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>encrypt_in_place_detached(
+        <span class="kw-2">mut </span><span class="self">self</span>,
+        associated_data: <span class="kw-2">&amp;</span>[u8],
+        buffer: <span class="kw-2">&amp;mut </span>[u8],
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Tag, Error&gt; {
+        <span class="kw">if </span>buffer.len() / BLOCK_SIZE &gt;= MAX_BLOCKS {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error);
         }
 
-        <span class="self">self</span>.<span class="ident">mac</span>.<span class="ident">update_padded</span>(<span class="ident">associated_data</span>);
+        <span class="self">self</span>.mac.update_padded(associated_data);
 
-        <span class="comment">// TODO(tarcieri): interleave encryption with Poly1305</span>
-        <span class="comment">// See: &lt;https://github.com/RustCrypto/AEADs/issues/74&gt;</span>
-        <span class="self">self</span>.<span class="ident">cipher</span>.<span class="ident">apply_keystream</span>(<span class="ident">buffer</span>);
-        <span class="self">self</span>.<span class="ident">mac</span>.<span class="ident">update_padded</span>(<span class="ident">buffer</span>);
+        <span class="comment">// TODO(tarcieri): interleave encryption with Poly1305
+        // See: &lt;https://github.com/RustCrypto/AEADs/issues/74&gt;
+        </span><span class="self">self</span>.cipher.apply_keystream(buffer);
+        <span class="self">self</span>.mac.update_padded(buffer);
 
-        <span class="self">self</span>.<span class="ident">authenticate_lengths</span>(<span class="ident">associated_data</span>, <span class="ident">buffer</span>)<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(<span class="self">self</span>.<span class="ident">mac</span>.<span class="ident">finalize</span>().<span class="ident">into_bytes</span>())
+        <span class="self">self</span>.authenticate_lengths(associated_data, buffer)<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(<span class="self">self</span>.mac.finalize().into_bytes())
     }
 
-    <span class="doccomment">/// Decrypt the given message, first authenticating ciphertext integrity</span>
-    <span class="doccomment">/// and returning an error if it&#39;s been tampered with.</span>
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">decrypt_in_place_detached</span>(
-        <span class="kw-2">mut</span> <span class="self">self</span>,
-        <span class="ident">associated_data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
-        <span class="ident">buffer</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">u8</span>],
-        <span class="ident">tag</span>: <span class="kw-2">&amp;</span><span class="ident">Tag</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="ident">buffer</span>.<span class="ident">len</span>() <span class="op">/</span> <span class="ident">BLOCK_SIZE</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">MAX_BLOCKS</span> {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>);
+    <span class="doccomment">/// Decrypt the given message, first authenticating ciphertext integrity
+    /// and returning an error if it&#39;s been tampered with.
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>decrypt_in_place_detached(
+        <span class="kw-2">mut </span><span class="self">self</span>,
+        associated_data: <span class="kw-2">&amp;</span>[u8],
+        buffer: <span class="kw-2">&amp;mut </span>[u8],
+        tag: <span class="kw-2">&amp;</span>Tag,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
+        <span class="kw">if </span>buffer.len() / BLOCK_SIZE &gt;= MAX_BLOCKS {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error);
         }
 
-        <span class="self">self</span>.<span class="ident">mac</span>.<span class="ident">update_padded</span>(<span class="ident">associated_data</span>);
-        <span class="self">self</span>.<span class="ident">mac</span>.<span class="ident">update_padded</span>(<span class="ident">buffer</span>);
-        <span class="self">self</span>.<span class="ident">authenticate_lengths</span>(<span class="ident">associated_data</span>, <span class="ident">buffer</span>)<span class="question-mark">?</span>;
+        <span class="self">self</span>.mac.update_padded(associated_data);
+        <span class="self">self</span>.mac.update_padded(buffer);
+        <span class="self">self</span>.authenticate_lengths(associated_data, buffer)<span class="question-mark">?</span>;
 
-        <span class="comment">// This performs a constant-time comparison using the `subtle` crate</span>
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">mac</span>.<span class="ident">verify</span>(<span class="ident">tag</span>).<span class="ident">is_ok</span>() {
-            <span class="comment">// TODO(tarcieri): interleave decryption with Poly1305</span>
-            <span class="comment">// See: &lt;https://github.com/RustCrypto/AEADs/issues/74&gt;</span>
-            <span class="self">self</span>.<span class="ident">cipher</span>.<span class="ident">apply_keystream</span>(<span class="ident">buffer</span>);
+        <span class="comment">// This performs a constant-time comparison using the `subtle` crate
+        </span><span class="kw">if </span><span class="self">self</span>.mac.verify(tag).is_ok() {
+            <span class="comment">// TODO(tarcieri): interleave decryption with Poly1305
+            // See: &lt;https://github.com/RustCrypto/AEADs/issues/74&gt;
+            </span><span class="self">self</span>.cipher.apply_keystream(buffer);
             <span class="prelude-val">Ok</span>(())
-        } <span class="kw">else</span> {
-            <span class="prelude-val">Err</span>(<span class="ident">Error</span>)
+        } <span class="kw">else </span>{
+            <span class="prelude-val">Err</span>(Error)
         }
     }
 
-    <span class="doccomment">/// Authenticate the lengths of the associated data and message</span>
-    <span class="kw">fn</span> <span class="ident">authenticate_lengths</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">associated_data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">buffer</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">associated_data_len</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="ident">associated_data</span>.<span class="ident">len</span>().<span class="ident">try_into</span>().<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error</span>)<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">buffer_len</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="ident">buffer</span>.<span class="ident">len</span>().<span class="ident">try_into</span>().<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error</span>)<span class="question-mark">?</span>;
+    <span class="doccomment">/// Authenticate the lengths of the associated data and message
+    </span><span class="kw">fn </span>authenticate_lengths(<span class="kw-2">&amp;mut </span><span class="self">self</span>, associated_data: <span class="kw-2">&amp;</span>[u8], buffer: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
+        <span class="kw">let </span>associated_data_len: u64 = associated_data.len().try_into().map_err(|<span class="kw">_</span>| Error)<span class="question-mark">?</span>;
+        <span class="kw">let </span>buffer_len: u64 = buffer.len().try_into().map_err(|<span class="kw">_</span>| Error)<span class="question-mark">?</span>;
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">block</span> <span class="op">=</span> <span class="ident">GenericArray::default</span>();
-        <span class="ident">block</span>[..<span class="number">8</span>].<span class="ident">copy_from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">associated_data_len</span>.<span class="ident">to_le_bytes</span>());
-        <span class="ident">block</span>[<span class="number">8</span>..].<span class="ident">copy_from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">buffer_len</span>.<span class="ident">to_le_bytes</span>());
-        <span class="self">self</span>.<span class="ident">mac</span>.<span class="ident">update</span>(<span class="kw-2">&amp;</span><span class="ident">block</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>block = GenericArray::default();
+        block[..<span class="number">8</span>].copy_from_slice(<span class="kw-2">&amp;</span>associated_data_len.to_le_bytes());
+        block[<span class="number">8</span>..].copy_from_slice(<span class="kw-2">&amp;</span>buffer_len.to_le_bytes());
+        <span class="self">self</span>.mac.update(<span class="kw-2">&amp;</span>block);
 
         <span class="prelude-val">Ok</span>(())
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="chacha20poly1305" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="chacha20poly1305" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/half-1.8.2/src/slice.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>slice.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../half/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../half/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../half/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/half-1.8.2/src/slice.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>slice.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../half/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../half/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../half/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -950,957 +950,957 @@
 <span id="950">950</span>
 <span id="951">951</span>
 <span id="952">952</span>
-</pre><pre class="rust"><code><span class="doccomment">//! Contains utility functions and traits to convert between slices of [`u16`] bits and [`f16`] or</span>
-<span class="doccomment">//! [`bf16`] numbers.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! The utility [`HalfBitsSliceExt`] sealed extension trait is implemented for `[u16]` slices,</span>
-<span class="doccomment">//! while the utility [`HalfFloatSliceExt`] sealed extension trait is implemented for both `[f16]`</span>
-<span class="doccomment">//! and `[bf16]` slices. These traits provide efficient conversions and reinterpret casting of</span>
-<span class="doccomment">//! larger buffers of floating point values, and are automatically included in the</span>
-<span class="doccomment">//! [`prelude`][crate::prelude] module.</span>
+</pre><pre class="rust"><code><span class="doccomment">//! Contains utility functions and traits to convert between slices of [`u16`] bits and [`f16`] or
+//! [`bf16`] numbers.
+//!
+//! The utility [`HalfBitsSliceExt`] sealed extension trait is implemented for `[u16]` slices,
+//! while the utility [`HalfFloatSliceExt`] sealed extension trait is implemented for both `[f16]`
+//! and `[bf16]` slices. These traits provide efficient conversions and reinterpret casting of
+//! larger buffers of floating point values, and are automatically included in the
+//! [`prelude`][crate::prelude] module.
 
-<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">bf16</span>, <span class="ident">binary16::convert</span>, <span class="ident">f16</span>};
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;alloc&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident">alloc::vec::Vec</span>;
-<span class="kw">use</span> <span class="ident">core::slice</span>;
+</span><span class="kw">use crate</span>::{bf16, binary16::convert, f16};
+<span class="attribute">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+</span><span class="kw">use </span>alloc::vec::Vec;
+<span class="kw">use </span>core::slice;
 
-<span class="doccomment">/// Extensions to `[f16]` and `[bf16]` slices to support conversion and reinterpret operations.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// This trait is sealed and cannot be implemented outside of this crate.</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">HalfFloatSliceExt</span>: <span class="ident">private::SealedHalfFloatSlice</span> {
-    <span class="doccomment">/// Reinterprets a slice of [`f16`] or [`bf16`] numbers as a slice of [`u16`] bits.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// This is a zero-copy operation. The reinterpreted slice has the same lifetime and memory</span>
-    <span class="doccomment">/// location as `self`.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// # Examples</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// ```rust</span>
-    <span class="doccomment">/// # use half::prelude::*;</span>
-    <span class="doccomment">/// let float_buffer = [f16::from_f32(1.), f16::from_f32(2.), f16::from_f32(3.)];</span>
-    <span class="doccomment">/// let int_buffer = float_buffer.reinterpret_cast();</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// assert_eq!(int_buffer, [float_buffer[0].to_bits(), float_buffer[1].to_bits(), float_buffer[2].to_bits()]);</span>
-    <span class="doccomment">/// ```</span>
-    <span class="kw">fn</span> <span class="ident">reinterpret_cast</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[<span class="ident">u16</span>];
+<span class="doccomment">/// Extensions to `[f16]` and `[bf16]` slices to support conversion and reinterpret operations.
+///
+/// This trait is sealed and cannot be implemented outside of this crate.
+</span><span class="kw">pub trait </span>HalfFloatSliceExt: private::SealedHalfFloatSlice {
+    <span class="doccomment">/// Reinterprets a slice of [`f16`] or [`bf16`] numbers as a slice of [`u16`] bits.
+    ///
+    /// This is a zero-copy operation. The reinterpreted slice has the same lifetime and memory
+    /// location as `self`.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use half::prelude::*;
+    /// let float_buffer = [f16::from_f32(1.), f16::from_f32(2.), f16::from_f32(3.)];
+    /// let int_buffer = float_buffer.reinterpret_cast();
+    ///
+    /// assert_eq!(int_buffer, [float_buffer[0].to_bits(), float_buffer[1].to_bits(), float_buffer[2].to_bits()]);
+    /// ```
+    </span><span class="kw">fn </span>reinterpret_cast(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[u16];
 
-    <span class="doccomment">/// Reinterprets a mutable slice of [`f16`] or [`bf16`] numbers as a mutable slice of [`u16`].</span>
-    <span class="doccomment">/// bits</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// This is a zero-copy operation. The transmuted slice has the same lifetime as the original,</span>
-    <span class="doccomment">/// which prevents mutating `self` as long as the returned `&amp;mut [u16]` is borrowed.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// # Examples</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// ```rust</span>
-    <span class="doccomment">/// # use half::prelude::*;</span>
-    <span class="doccomment">/// let mut float_buffer = [f16::from_f32(1.), f16::from_f32(2.), f16::from_f32(3.)];</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// {</span>
-    <span class="doccomment">///     let int_buffer = float_buffer.reinterpret_cast_mut();</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">///     assert_eq!(int_buffer, [f16::from_f32(1.).to_bits(), f16::from_f32(2.).to_bits(), f16::from_f32(3.).to_bits()]);</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">///     // Mutating the u16 slice will mutating the original</span>
-    <span class="doccomment">///     int_buffer[0] = 0;</span>
-    <span class="doccomment">/// }</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// // Note that we need to drop int_buffer before using float_buffer again or we will get a borrow error.</span>
-    <span class="doccomment">/// assert_eq!(float_buffer, [f16::from_f32(0.), f16::from_f32(2.), f16::from_f32(3.)]);</span>
-    <span class="doccomment">/// ```</span>
-    <span class="kw">fn</span> <span class="ident">reinterpret_cast_mut</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut</span> [<span class="ident">u16</span>];
+    <span class="doccomment">/// Reinterprets a mutable slice of [`f16`] or [`bf16`] numbers as a mutable slice of [`u16`].
+    /// bits
+    ///
+    /// This is a zero-copy operation. The transmuted slice has the same lifetime as the original,
+    /// which prevents mutating `self` as long as the returned `&amp;mut [u16]` is borrowed.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use half::prelude::*;
+    /// let mut float_buffer = [f16::from_f32(1.), f16::from_f32(2.), f16::from_f32(3.)];
+    ///
+    /// {
+    ///     let int_buffer = float_buffer.reinterpret_cast_mut();
+    ///
+    ///     assert_eq!(int_buffer, [f16::from_f32(1.).to_bits(), f16::from_f32(2.).to_bits(), f16::from_f32(3.).to_bits()]);
+    ///
+    ///     // Mutating the u16 slice will mutating the original
+    ///     int_buffer[0] = 0;
+    /// }
+    ///
+    /// // Note that we need to drop int_buffer before using float_buffer again or we will get a borrow error.
+    /// assert_eq!(float_buffer, [f16::from_f32(0.), f16::from_f32(2.), f16::from_f32(3.)]);
+    /// ```
+    </span><span class="kw">fn </span>reinterpret_cast_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>[u16];
 
-    <span class="doccomment">/// Converts all of the elements of a `[f32]` slice into [`f16`] or [`bf16`] values in `self`.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// The length of `src` must be the same as `self`.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// The conversion operation is vectorized over the slice, meaning the conversion may be more</span>
-    <span class="doccomment">/// efficient than converting individual elements on some hardware that supports SIMD</span>
-    <span class="doccomment">/// conversions. See [crate documentation](crate) for more information on hardware conversion</span>
-    <span class="doccomment">/// support.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// # Panics</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// This function will panic if the two slices have different lengths.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// # Examples</span>
-    <span class="doccomment">/// ```rust</span>
-    <span class="doccomment">/// # use half::prelude::*;</span>
-    <span class="doccomment">/// // Initialize an empty buffer</span>
-    <span class="doccomment">/// let mut buffer = [0u16; 4];</span>
-    <span class="doccomment">/// let buffer = buffer.reinterpret_cast_mut::&lt;f16&gt;();</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// let float_values = [1., 2., 3., 4.];</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// // Now convert</span>
-    <span class="doccomment">/// buffer.convert_from_f32_slice(&amp;float_values);</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// assert_eq!(buffer, [f16::from_f32(1.), f16::from_f32(2.), f16::from_f32(3.), f16::from_f32(4.)]);</span>
-    <span class="doccomment">/// ```</span>
-    <span class="kw">fn</span> <span class="ident">convert_from_f32_slice</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">src</span>: <span class="kw-2">&amp;</span>[<span class="ident">f32</span>]);
+    <span class="doccomment">/// Converts all of the elements of a `[f32]` slice into [`f16`] or [`bf16`] values in `self`.
+    ///
+    /// The length of `src` must be the same as `self`.
+    ///
+    /// The conversion operation is vectorized over the slice, meaning the conversion may be more
+    /// efficient than converting individual elements on some hardware that supports SIMD
+    /// conversions. See [crate documentation](crate) for more information on hardware conversion
+    /// support.
+    ///
+    /// # Panics
+    ///
+    /// This function will panic if the two slices have different lengths.
+    ///
+    /// # Examples
+    /// ```rust
+    /// # use half::prelude::*;
+    /// // Initialize an empty buffer
+    /// let mut buffer = [0u16; 4];
+    /// let buffer = buffer.reinterpret_cast_mut::&lt;f16&gt;();
+    ///
+    /// let float_values = [1., 2., 3., 4.];
+    ///
+    /// // Now convert
+    /// buffer.convert_from_f32_slice(&amp;float_values);
+    ///
+    /// assert_eq!(buffer, [f16::from_f32(1.), f16::from_f32(2.), f16::from_f32(3.), f16::from_f32(4.)]);
+    /// ```
+    </span><span class="kw">fn </span>convert_from_f32_slice(<span class="kw-2">&amp;mut </span><span class="self">self</span>, src: <span class="kw-2">&amp;</span>[f32]);
 
-    <span class="doccomment">/// Converts all of the elements of a `[f64]` slice into [`f16`] or [`bf16`] values in `self`.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// The length of `src` must be the same as `self`.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// The conversion operation is vectorized over the slice, meaning the conversion may be more</span>
-    <span class="doccomment">/// efficient than converting individual elements on some hardware that supports SIMD</span>
-    <span class="doccomment">/// conversions. See [crate documentation](crate) for more information on hardware conversion</span>
-    <span class="doccomment">/// support.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// # Panics</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// This function will panic if the two slices have different lengths.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// # Examples</span>
-    <span class="doccomment">/// ```rust</span>
-    <span class="doccomment">/// # use half::prelude::*;</span>
-    <span class="doccomment">/// // Initialize an empty buffer</span>
-    <span class="doccomment">/// let mut buffer = [0u16; 4];</span>
-    <span class="doccomment">/// let buffer = buffer.reinterpret_cast_mut::&lt;f16&gt;();</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// let float_values = [1., 2., 3., 4.];</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// // Now convert</span>
-    <span class="doccomment">/// buffer.convert_from_f64_slice(&amp;float_values);</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// assert_eq!(buffer, [f16::from_f64(1.), f16::from_f64(2.), f16::from_f64(3.), f16::from_f64(4.)]);</span>
-    <span class="doccomment">/// ```</span>
-    <span class="kw">fn</span> <span class="ident">convert_from_f64_slice</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">src</span>: <span class="kw-2">&amp;</span>[<span class="ident">f64</span>]);
+    <span class="doccomment">/// Converts all of the elements of a `[f64]` slice into [`f16`] or [`bf16`] values in `self`.
+    ///
+    /// The length of `src` must be the same as `self`.
+    ///
+    /// The conversion operation is vectorized over the slice, meaning the conversion may be more
+    /// efficient than converting individual elements on some hardware that supports SIMD
+    /// conversions. See [crate documentation](crate) for more information on hardware conversion
+    /// support.
+    ///
+    /// # Panics
+    ///
+    /// This function will panic if the two slices have different lengths.
+    ///
+    /// # Examples
+    /// ```rust
+    /// # use half::prelude::*;
+    /// // Initialize an empty buffer
+    /// let mut buffer = [0u16; 4];
+    /// let buffer = buffer.reinterpret_cast_mut::&lt;f16&gt;();
+    ///
+    /// let float_values = [1., 2., 3., 4.];
+    ///
+    /// // Now convert
+    /// buffer.convert_from_f64_slice(&amp;float_values);
+    ///
+    /// assert_eq!(buffer, [f16::from_f64(1.), f16::from_f64(2.), f16::from_f64(3.), f16::from_f64(4.)]);
+    /// ```
+    </span><span class="kw">fn </span>convert_from_f64_slice(<span class="kw-2">&amp;mut </span><span class="self">self</span>, src: <span class="kw-2">&amp;</span>[f64]);
 
-    <span class="doccomment">/// Converts all of the [`f16`] or [`bf16`] elements of `self` into [`f32`] values in `dst`.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// The length of `src` must be the same as `self`.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// The conversion operation is vectorized over the slice, meaning the conversion may be more</span>
-    <span class="doccomment">/// efficient than converting individual elements on some hardware that supports SIMD</span>
-    <span class="doccomment">/// conversions. See [crate documentation](crate) for more information on hardware conversion</span>
-    <span class="doccomment">/// support.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// # Panics</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// This function will panic if the two slices have different lengths.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// # Examples</span>
-    <span class="doccomment">/// ```rust</span>
-    <span class="doccomment">/// # use half::prelude::*;</span>
-    <span class="doccomment">/// // Initialize an empty buffer</span>
-    <span class="doccomment">/// let mut buffer = [0f32; 4];</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// let half_values = [f16::from_f32(1.), f16::from_f32(2.), f16::from_f32(3.), f16::from_f32(4.)];</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// // Now convert</span>
-    <span class="doccomment">/// half_values.convert_to_f32_slice(&amp;mut buffer);</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// assert_eq!(buffer, [1., 2., 3., 4.]);</span>
-    <span class="doccomment">/// ```</span>
-    <span class="kw">fn</span> <span class="ident">convert_to_f32_slice</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">dst</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">f32</span>]);
+    <span class="doccomment">/// Converts all of the [`f16`] or [`bf16`] elements of `self` into [`f32`] values in `dst`.
+    ///
+    /// The length of `src` must be the same as `self`.
+    ///
+    /// The conversion operation is vectorized over the slice, meaning the conversion may be more
+    /// efficient than converting individual elements on some hardware that supports SIMD
+    /// conversions. See [crate documentation](crate) for more information on hardware conversion
+    /// support.
+    ///
+    /// # Panics
+    ///
+    /// This function will panic if the two slices have different lengths.
+    ///
+    /// # Examples
+    /// ```rust
+    /// # use half::prelude::*;
+    /// // Initialize an empty buffer
+    /// let mut buffer = [0f32; 4];
+    ///
+    /// let half_values = [f16::from_f32(1.), f16::from_f32(2.), f16::from_f32(3.), f16::from_f32(4.)];
+    ///
+    /// // Now convert
+    /// half_values.convert_to_f32_slice(&amp;mut buffer);
+    ///
+    /// assert_eq!(buffer, [1., 2., 3., 4.]);
+    /// ```
+    </span><span class="kw">fn </span>convert_to_f32_slice(<span class="kw-2">&amp;</span><span class="self">self</span>, dst: <span class="kw-2">&amp;mut </span>[f32]);
 
-    <span class="doccomment">/// Converts all of the [`f16`] or [`bf16`] elements of `self` into [`f64`] values in `dst`.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// The length of `src` must be the same as `self`.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// The conversion operation is vectorized over the slice, meaning the conversion may be more</span>
-    <span class="doccomment">/// efficient than converting individual elements on some hardware that supports SIMD</span>
-    <span class="doccomment">/// conversions. See [crate documentation](crate) for more information on hardware conversion</span>
-    <span class="doccomment">/// support.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// # Panics</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// This function will panic if the two slices have different lengths.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// # Examples</span>
-    <span class="doccomment">/// ```rust</span>
-    <span class="doccomment">/// # use half::prelude::*;</span>
-    <span class="doccomment">/// // Initialize an empty buffer</span>
-    <span class="doccomment">/// let mut buffer = [0f64; 4];</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// let half_values = [f16::from_f64(1.), f16::from_f64(2.), f16::from_f64(3.), f16::from_f64(4.)];</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// // Now convert</span>
-    <span class="doccomment">/// half_values.convert_to_f64_slice(&amp;mut buffer);</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// assert_eq!(buffer, [1., 2., 3., 4.]);</span>
-    <span class="doccomment">/// ```</span>
-    <span class="kw">fn</span> <span class="ident">convert_to_f64_slice</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">dst</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">f64</span>]);
+    <span class="doccomment">/// Converts all of the [`f16`] or [`bf16`] elements of `self` into [`f64`] values in `dst`.
+    ///
+    /// The length of `src` must be the same as `self`.
+    ///
+    /// The conversion operation is vectorized over the slice, meaning the conversion may be more
+    /// efficient than converting individual elements on some hardware that supports SIMD
+    /// conversions. See [crate documentation](crate) for more information on hardware conversion
+    /// support.
+    ///
+    /// # Panics
+    ///
+    /// This function will panic if the two slices have different lengths.
+    ///
+    /// # Examples
+    /// ```rust
+    /// # use half::prelude::*;
+    /// // Initialize an empty buffer
+    /// let mut buffer = [0f64; 4];
+    ///
+    /// let half_values = [f16::from_f64(1.), f16::from_f64(2.), f16::from_f64(3.), f16::from_f64(4.)];
+    ///
+    /// // Now convert
+    /// half_values.convert_to_f64_slice(&amp;mut buffer);
+    ///
+    /// assert_eq!(buffer, [1., 2., 3., 4.]);
+    /// ```
+    </span><span class="kw">fn </span>convert_to_f64_slice(<span class="kw-2">&amp;</span><span class="self">self</span>, dst: <span class="kw-2">&amp;mut </span>[f64]);
 
-    <span class="comment">// Because trait is sealed, we can get away with different interfaces between features.</span>
+    <span class="comment">// Because trait is sealed, we can get away with different interfaces between features.
 
-    <span class="doccomment">/// Converts all of the [`f16`] or [`bf16`] elements of `self` into [`f32`] values in a new</span>
-    <span class="doccomment">/// vector</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// The conversion operation is vectorized over the slice, meaning the conversion may be more</span>
-    <span class="doccomment">/// efficient than converting individual elements on some hardware that supports SIMD</span>
-    <span class="doccomment">/// conversions. See [crate documentation](crate) for more information on hardware conversion</span>
-    <span class="doccomment">/// support.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// This method is only available with the `std` or `alloc` feature.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// # Examples</span>
-    <span class="doccomment">/// ```rust</span>
-    <span class="doccomment">/// # use half::prelude::*;</span>
-    <span class="doccomment">/// let half_values = [f16::from_f32(1.), f16::from_f32(2.), f16::from_f32(3.), f16::from_f32(4.)];</span>
-    <span class="doccomment">/// let vec = half_values.to_f32_vec();</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// assert_eq!(vec, vec![1., 2., 3., 4.]);</span>
-    <span class="doccomment">/// ```</span>
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;alloc&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>))]</span>
-    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">docsrs</span>, <span class="ident">doc</span>(<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;alloc&quot;</span>)))]</span>
-    <span class="kw">fn</span> <span class="ident">to_f32_vec</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">f32</span><span class="op">&gt;</span>;
+    </span><span class="doccomment">/// Converts all of the [`f16`] or [`bf16`] elements of `self` into [`f32`] values in a new
+    /// vector
+    ///
+    /// The conversion operation is vectorized over the slice, meaning the conversion may be more
+    /// efficient than converting individual elements on some hardware that supports SIMD
+    /// conversions. See [crate documentation](crate) for more information on hardware conversion
+    /// support.
+    ///
+    /// This method is only available with the `std` or `alloc` feature.
+    ///
+    /// # Examples
+    /// ```rust
+    /// # use half::prelude::*;
+    /// let half_values = [f16::from_f32(1.), f16::from_f32(2.), f16::from_f32(3.), f16::from_f32(4.)];
+    /// let vec = half_values.to_f32_vec();
+    ///
+    /// assert_eq!(vec, vec![1., 2., 3., 4.]);
+    /// ```
+    </span><span class="attribute">#[cfg(any(feature = <span class="string">&quot;alloc&quot;</span>, feature = <span class="string">&quot;std&quot;</span>))]
+    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;alloc&quot;</span>)))]
+    </span><span class="kw">fn </span>to_f32_vec(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Vec&lt;f32&gt;;
 
-    <span class="doccomment">/// Converts all of the [`f16`] or [`bf16`] elements of `self` into [`f64`] values in a new</span>
-    <span class="doccomment">/// vector.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// The conversion operation is vectorized over the slice, meaning the conversion may be more</span>
-    <span class="doccomment">/// efficient than converting individual elements on some hardware that supports SIMD</span>
-    <span class="doccomment">/// conversions. See [crate documentation](crate) for more information on hardware conversion</span>
-    <span class="doccomment">/// support.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// This method is only available with the `std` or `alloc` feature.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// # Examples</span>
-    <span class="doccomment">/// ```rust</span>
-    <span class="doccomment">/// # use half::prelude::*;</span>
-    <span class="doccomment">/// let half_values = [f16::from_f64(1.), f16::from_f64(2.), f16::from_f64(3.), f16::from_f64(4.)];</span>
-    <span class="doccomment">/// let vec = half_values.to_f64_vec();</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// assert_eq!(vec, vec![1., 2., 3., 4.]);</span>
-    <span class="doccomment">/// ```</span>
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;alloc&quot;</span>)]</span>
-    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">docsrs</span>, <span class="ident">doc</span>(<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;alloc&quot;</span>)))]</span>
-    <span class="kw">fn</span> <span class="ident">to_f64_vec</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span>;
+    <span class="doccomment">/// Converts all of the [`f16`] or [`bf16`] elements of `self` into [`f64`] values in a new
+    /// vector.
+    ///
+    /// The conversion operation is vectorized over the slice, meaning the conversion may be more
+    /// efficient than converting individual elements on some hardware that supports SIMD
+    /// conversions. See [crate documentation](crate) for more information on hardware conversion
+    /// support.
+    ///
+    /// This method is only available with the `std` or `alloc` feature.
+    ///
+    /// # Examples
+    /// ```rust
+    /// # use half::prelude::*;
+    /// let half_values = [f16::from_f64(1.), f16::from_f64(2.), f16::from_f64(3.), f16::from_f64(4.)];
+    /// let vec = half_values.to_f64_vec();
+    ///
+    /// assert_eq!(vec, vec![1., 2., 3., 4.]);
+    /// ```
+    </span><span class="attribute">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;alloc&quot;</span>)))]
+    </span><span class="kw">fn </span>to_f64_vec(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Vec&lt;f64&gt;;
 }
 
-<span class="doccomment">/// Extensions to `[u16]` slices to support reinterpret operations.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// This trait is sealed and cannot be implemented outside of this crate.</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">HalfBitsSliceExt</span>: <span class="ident">private::SealedHalfBitsSlice</span> {
-    <span class="doccomment">/// Reinterprets a slice of [`u16`] bits as a slice of [`f16`] or [`bf16`] numbers.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// `H` is the type to cast to, and must be either the [`f16`] or [`bf16`] type.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// This is a zero-copy operation. The reinterpreted slice has the same lifetime and memory</span>
-    <span class="doccomment">/// location as `self`.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// # Examples</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// ```rust</span>
-    <span class="doccomment">/// # use half::prelude::*;</span>
-    <span class="doccomment">/// let int_buffer = [f16::from_f32(1.).to_bits(), f16::from_f32(2.).to_bits(), f16::from_f32(3.).to_bits()];</span>
-    <span class="doccomment">/// let float_buffer: &amp;[f16] = int_buffer.reinterpret_cast();</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// assert_eq!(float_buffer, [f16::from_f32(1.), f16::from_f32(2.), f16::from_f32(3.)]);</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// // You may have to specify the cast type directly if the compiler can&#39;t infer the type.</span>
-    <span class="doccomment">/// // The following is also valid in Rust.</span>
-    <span class="doccomment">/// let typed_buffer = int_buffer.reinterpret_cast::&lt;f16&gt;();</span>
-    <span class="doccomment">/// ```</span>
-    <span class="kw">fn</span> <span class="ident">reinterpret_cast</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[<span class="ident">H</span>]
-    <span class="kw">where</span>
-        <span class="ident">H</span>: <span class="ident"><span class="kw">crate</span>::private::SealedHalf</span>;
+<span class="doccomment">/// Extensions to `[u16]` slices to support reinterpret operations.
+///
+/// This trait is sealed and cannot be implemented outside of this crate.
+</span><span class="kw">pub trait </span>HalfBitsSliceExt: private::SealedHalfBitsSlice {
+    <span class="doccomment">/// Reinterprets a slice of [`u16`] bits as a slice of [`f16`] or [`bf16`] numbers.
+    ///
+    /// `H` is the type to cast to, and must be either the [`f16`] or [`bf16`] type.
+    ///
+    /// This is a zero-copy operation. The reinterpreted slice has the same lifetime and memory
+    /// location as `self`.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use half::prelude::*;
+    /// let int_buffer = [f16::from_f32(1.).to_bits(), f16::from_f32(2.).to_bits(), f16::from_f32(3.).to_bits()];
+    /// let float_buffer: &amp;[f16] = int_buffer.reinterpret_cast();
+    ///
+    /// assert_eq!(float_buffer, [f16::from_f32(1.), f16::from_f32(2.), f16::from_f32(3.)]);
+    ///
+    /// // You may have to specify the cast type directly if the compiler can&#39;t infer the type.
+    /// // The following is also valid in Rust.
+    /// let typed_buffer = int_buffer.reinterpret_cast::&lt;f16&gt;();
+    /// ```
+    </span><span class="kw">fn </span>reinterpret_cast&lt;H&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[H]
+    <span class="kw">where
+        </span>H: <span class="kw">crate</span>::private::SealedHalf;
 
-    <span class="doccomment">/// Reinterprets a mutable slice of [`u16`] bits as a mutable slice of [`f16`] or [`bf16`]</span>
-    <span class="doccomment">/// numbers.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// `H` is the type to cast to, and must be either the [`f16`] or [`bf16`] type.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// This is a zero-copy operation. The transmuted slice has the same lifetime as the original,</span>
-    <span class="doccomment">/// which prevents mutating `self` as long as the returned `&amp;mut [f16]` is borrowed.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// # Examples</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// ```rust</span>
-    <span class="doccomment">/// # use half::prelude::*;</span>
-    <span class="doccomment">/// let mut int_buffer = [f16::from_f32(1.).to_bits(), f16::from_f32(2.).to_bits(), f16::from_f32(3.).to_bits()];</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// {</span>
-    <span class="doccomment">///     let float_buffer: &amp;mut [f16] = int_buffer.reinterpret_cast_mut();</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">///     assert_eq!(float_buffer, [f16::from_f32(1.), f16::from_f32(2.), f16::from_f32(3.)]);</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">///     // Mutating the f16 slice will mutating the original</span>
-    <span class="doccomment">///     float_buffer[0] = f16::from_f32(0.);</span>
-    <span class="doccomment">/// }</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// // Note that we need to drop float_buffer before using int_buffer again or we will get a borrow error.</span>
-    <span class="doccomment">/// assert_eq!(int_buffer, [f16::from_f32(0.).to_bits(), f16::from_f32(2.).to_bits(), f16::from_f32(3.).to_bits()]);</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// // You may have to specify the cast type directly if the compiler can&#39;t infer the type.</span>
-    <span class="doccomment">/// // The following is also valid in Rust.</span>
-    <span class="doccomment">/// let typed_buffer = int_buffer.reinterpret_cast_mut::&lt;f16&gt;();</span>
-    <span class="doccomment">/// ```</span>
-    <span class="kw">fn</span> <span class="ident">reinterpret_cast_mut</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut</span> [<span class="ident">H</span>]
-    <span class="kw">where</span>
-        <span class="ident">H</span>: <span class="ident"><span class="kw">crate</span>::private::SealedHalf</span>;
+    <span class="doccomment">/// Reinterprets a mutable slice of [`u16`] bits as a mutable slice of [`f16`] or [`bf16`]
+    /// numbers.
+    ///
+    /// `H` is the type to cast to, and must be either the [`f16`] or [`bf16`] type.
+    ///
+    /// This is a zero-copy operation. The transmuted slice has the same lifetime as the original,
+    /// which prevents mutating `self` as long as the returned `&amp;mut [f16]` is borrowed.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use half::prelude::*;
+    /// let mut int_buffer = [f16::from_f32(1.).to_bits(), f16::from_f32(2.).to_bits(), f16::from_f32(3.).to_bits()];
+    ///
+    /// {
+    ///     let float_buffer: &amp;mut [f16] = int_buffer.reinterpret_cast_mut();
+    ///
+    ///     assert_eq!(float_buffer, [f16::from_f32(1.), f16::from_f32(2.), f16::from_f32(3.)]);
+    ///
+    ///     // Mutating the f16 slice will mutating the original
+    ///     float_buffer[0] = f16::from_f32(0.);
+    /// }
+    ///
+    /// // Note that we need to drop float_buffer before using int_buffer again or we will get a borrow error.
+    /// assert_eq!(int_buffer, [f16::from_f32(0.).to_bits(), f16::from_f32(2.).to_bits(), f16::from_f32(3.).to_bits()]);
+    ///
+    /// // You may have to specify the cast type directly if the compiler can&#39;t infer the type.
+    /// // The following is also valid in Rust.
+    /// let typed_buffer = int_buffer.reinterpret_cast_mut::&lt;f16&gt;();
+    /// ```
+    </span><span class="kw">fn </span>reinterpret_cast_mut&lt;H&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>[H]
+    <span class="kw">where
+        </span>H: <span class="kw">crate</span>::private::SealedHalf;
 }
 
-<span class="kw">mod</span> <span class="ident">private</span> {
-    <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">bf16</span>, <span class="ident">f16</span>};
+<span class="kw">mod </span>private {
+    <span class="kw">use crate</span>::{bf16, f16};
 
-    <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">SealedHalfFloatSlice</span> {}
-    <span class="kw">impl</span> <span class="ident">SealedHalfFloatSlice</span> <span class="kw">for</span> [<span class="ident">f16</span>] {}
-    <span class="kw">impl</span> <span class="ident">SealedHalfFloatSlice</span> <span class="kw">for</span> [<span class="ident">bf16</span>] {}
+    <span class="kw">pub trait </span>SealedHalfFloatSlice {}
+    <span class="kw">impl </span>SealedHalfFloatSlice <span class="kw">for </span>[f16] {}
+    <span class="kw">impl </span>SealedHalfFloatSlice <span class="kw">for </span>[bf16] {}
 
-    <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">SealedHalfBitsSlice</span> {}
-    <span class="kw">impl</span> <span class="ident">SealedHalfBitsSlice</span> <span class="kw">for</span> [<span class="ident">u16</span>] {}
+    <span class="kw">pub trait </span>SealedHalfBitsSlice {}
+    <span class="kw">impl </span>SealedHalfBitsSlice <span class="kw">for </span>[u16] {}
 }
 
-<span class="kw">impl</span> <span class="ident">HalfFloatSliceExt</span> <span class="kw">for</span> [<span class="ident">f16</span>] {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">reinterpret_cast</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[<span class="ident">u16</span>] {
-        <span class="kw">let</span> <span class="ident">pointer</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw-2">*const</span> <span class="ident">u16</span>;
-        <span class="kw">let</span> <span class="ident">length</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">len</span>();
-        <span class="comment">// SAFETY: We are reconstructing full length of original slice, using its same lifetime,</span>
-        <span class="comment">// and the size of elements are identical</span>
-        <span class="kw">unsafe</span> { <span class="ident">slice::from_raw_parts</span>(<span class="ident">pointer</span>, <span class="ident">length</span>) }
+<span class="kw">impl </span>HalfFloatSliceExt <span class="kw">for </span>[f16] {
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>reinterpret_cast(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[u16] {
+        <span class="kw">let </span>pointer = <span class="self">self</span>.as_ptr() <span class="kw">as </span><span class="kw-2">*const </span>u16;
+        <span class="kw">let </span>length = <span class="self">self</span>.len();
+        <span class="comment">// SAFETY: We are reconstructing full length of original slice, using its same lifetime,
+        // and the size of elements are identical
+        </span><span class="kw">unsafe </span>{ slice::from_raw_parts(pointer, length) }
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">reinterpret_cast_mut</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut</span> [<span class="ident">u16</span>] {
-        <span class="kw">let</span> <span class="ident">pointer</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw-2">*mut</span> <span class="ident">u16</span>;
-        <span class="kw">let</span> <span class="ident">length</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">len</span>();
-        <span class="comment">// SAFETY: We are reconstructing full length of original slice, using its same lifetime,</span>
-        <span class="comment">// and the size of elements are identical</span>
-        <span class="kw">unsafe</span> { <span class="ident">slice::from_raw_parts_mut</span>(<span class="ident">pointer</span>, <span class="ident">length</span>) }
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>reinterpret_cast_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>[u16] {
+        <span class="kw">let </span>pointer = <span class="self">self</span>.as_ptr() <span class="kw">as </span><span class="kw-2">*mut </span>u16;
+        <span class="kw">let </span>length = <span class="self">self</span>.len();
+        <span class="comment">// SAFETY: We are reconstructing full length of original slice, using its same lifetime,
+        // and the size of elements are identical
+        </span><span class="kw">unsafe </span>{ slice::from_raw_parts_mut(pointer, length) }
     }
 
-    <span class="kw">fn</span> <span class="ident">convert_from_f32_slice</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">src</span>: <span class="kw-2">&amp;</span>[<span class="ident">f32</span>]) {
+    <span class="kw">fn </span>convert_from_f32_slice(<span class="kw-2">&amp;mut </span><span class="self">self</span>, src: <span class="kw-2">&amp;</span>[f32]) {
         <span class="macro">assert_eq!</span>(
-            <span class="self">self</span>.<span class="ident">len</span>(),
-            <span class="ident">src</span>.<span class="ident">len</span>(),
-            <span class="string">&quot;destination and source slices have different lengths&quot;</span>
-        );
+            <span class="self">self</span>.len(),
+            src.len(),
+            <span class="string">&quot;destination and source slices have different lengths&quot;
+        </span>);
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">chunks</span> <span class="op">=</span> <span class="ident">src</span>.<span class="ident">chunks_exact</span>(<span class="number">4</span>);
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">chunk_count</span> <span class="op">=</span> <span class="number">0usize</span>; <span class="comment">// Not using .enumerate() because we need this value for remainder</span>
-        <span class="kw">for</span> <span class="ident">chunk</span> <span class="kw">in</span> <span class="kw-2">&amp;mut</span> <span class="ident">chunks</span> {
-            <span class="kw">let</span> <span class="ident">vec</span> <span class="op">=</span> <span class="ident">convert::f32x4_to_f16x4</span>(<span class="ident">chunk</span>);
-            <span class="kw">let</span> <span class="ident">dst_idx</span> <span class="op">=</span> <span class="ident">chunk_count</span> <span class="op">*</span> <span class="number">4</span>;
-            <span class="self">self</span>[<span class="ident">dst_idx</span>..<span class="ident">dst_idx</span> <span class="op">+</span> <span class="number">4</span>].<span class="ident">copy_from_slice</span>(<span class="ident">vec</span>.<span class="ident">reinterpret_cast</span>());
-            <span class="ident">chunk_count</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>chunks = src.chunks_exact(<span class="number">4</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>chunk_count = <span class="number">0usize</span>; <span class="comment">// Not using .enumerate() because we need this value for remainder
+        </span><span class="kw">for </span>chunk <span class="kw">in </span><span class="kw-2">&amp;mut </span>chunks {
+            <span class="kw">let </span>vec = convert::f32x4_to_f16x4(chunk);
+            <span class="kw">let </span>dst_idx = chunk_count * <span class="number">4</span>;
+            <span class="self">self</span>[dst_idx..dst_idx + <span class="number">4</span>].copy_from_slice(vec.reinterpret_cast());
+            chunk_count += <span class="number">1</span>;
         }
 
-        <span class="comment">// Process remainder</span>
-        <span class="kw">if</span> <span class="op">!</span><span class="ident">chunks</span>.<span class="ident">remainder</span>().<span class="ident">is_empty</span>() {
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> [<span class="number">0f32</span>; <span class="number">4</span>];
-            <span class="ident">buf</span>[..<span class="ident">chunks</span>.<span class="ident">remainder</span>().<span class="ident">len</span>()].<span class="ident">copy_from_slice</span>(<span class="ident">chunks</span>.<span class="ident">remainder</span>());
-            <span class="kw">let</span> <span class="ident">vec</span> <span class="op">=</span> <span class="ident">convert::f32x4_to_f16x4</span>(<span class="kw-2">&amp;</span><span class="ident">buf</span>);
-            <span class="kw">let</span> <span class="ident">dst_idx</span> <span class="op">=</span> <span class="ident">chunk_count</span> <span class="op">*</span> <span class="number">4</span>;
-            <span class="self">self</span>[<span class="ident">dst_idx</span>..<span class="ident">dst_idx</span> <span class="op">+</span> <span class="ident">chunks</span>.<span class="ident">remainder</span>().<span class="ident">len</span>()]
-                .<span class="ident">copy_from_slice</span>(<span class="ident">vec</span>[..<span class="ident">chunks</span>.<span class="ident">remainder</span>().<span class="ident">len</span>()].<span class="ident">reinterpret_cast</span>());
+        <span class="comment">// Process remainder
+        </span><span class="kw">if </span>!chunks.remainder().is_empty() {
+            <span class="kw">let </span><span class="kw-2">mut </span>buf = [<span class="number">0f32</span>; <span class="number">4</span>];
+            buf[..chunks.remainder().len()].copy_from_slice(chunks.remainder());
+            <span class="kw">let </span>vec = convert::f32x4_to_f16x4(<span class="kw-2">&amp;</span>buf);
+            <span class="kw">let </span>dst_idx = chunk_count * <span class="number">4</span>;
+            <span class="self">self</span>[dst_idx..dst_idx + chunks.remainder().len()]
+                .copy_from_slice(vec[..chunks.remainder().len()].reinterpret_cast());
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">convert_from_f64_slice</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">src</span>: <span class="kw-2">&amp;</span>[<span class="ident">f64</span>]) {
+    <span class="kw">fn </span>convert_from_f64_slice(<span class="kw-2">&amp;mut </span><span class="self">self</span>, src: <span class="kw-2">&amp;</span>[f64]) {
         <span class="macro">assert_eq!</span>(
-            <span class="self">self</span>.<span class="ident">len</span>(),
-            <span class="ident">src</span>.<span class="ident">len</span>(),
-            <span class="string">&quot;destination and source slices have different lengths&quot;</span>
-        );
+            <span class="self">self</span>.len(),
+            src.len(),
+            <span class="string">&quot;destination and source slices have different lengths&quot;
+        </span>);
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">chunks</span> <span class="op">=</span> <span class="ident">src</span>.<span class="ident">chunks_exact</span>(<span class="number">4</span>);
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">chunk_count</span> <span class="op">=</span> <span class="number">0usize</span>; <span class="comment">// Not using .enumerate() because we need this value for remainder</span>
-        <span class="kw">for</span> <span class="ident">chunk</span> <span class="kw">in</span> <span class="kw-2">&amp;mut</span> <span class="ident">chunks</span> {
-            <span class="kw">let</span> <span class="ident">vec</span> <span class="op">=</span> <span class="ident">convert::f64x4_to_f16x4</span>(<span class="ident">chunk</span>);
-            <span class="kw">let</span> <span class="ident">dst_idx</span> <span class="op">=</span> <span class="ident">chunk_count</span> <span class="op">*</span> <span class="number">4</span>;
-            <span class="self">self</span>[<span class="ident">dst_idx</span>..<span class="ident">dst_idx</span> <span class="op">+</span> <span class="number">4</span>].<span class="ident">copy_from_slice</span>(<span class="ident">vec</span>.<span class="ident">reinterpret_cast</span>());
-            <span class="ident">chunk_count</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>chunks = src.chunks_exact(<span class="number">4</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>chunk_count = <span class="number">0usize</span>; <span class="comment">// Not using .enumerate() because we need this value for remainder
+        </span><span class="kw">for </span>chunk <span class="kw">in </span><span class="kw-2">&amp;mut </span>chunks {
+            <span class="kw">let </span>vec = convert::f64x4_to_f16x4(chunk);
+            <span class="kw">let </span>dst_idx = chunk_count * <span class="number">4</span>;
+            <span class="self">self</span>[dst_idx..dst_idx + <span class="number">4</span>].copy_from_slice(vec.reinterpret_cast());
+            chunk_count += <span class="number">1</span>;
         }
 
-        <span class="comment">// Process remainder</span>
-        <span class="kw">if</span> <span class="op">!</span><span class="ident">chunks</span>.<span class="ident">remainder</span>().<span class="ident">is_empty</span>() {
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> [<span class="number">0f64</span>; <span class="number">4</span>];
-            <span class="ident">buf</span>[..<span class="ident">chunks</span>.<span class="ident">remainder</span>().<span class="ident">len</span>()].<span class="ident">copy_from_slice</span>(<span class="ident">chunks</span>.<span class="ident">remainder</span>());
-            <span class="kw">let</span> <span class="ident">vec</span> <span class="op">=</span> <span class="ident">convert::f64x4_to_f16x4</span>(<span class="kw-2">&amp;</span><span class="ident">buf</span>);
-            <span class="kw">let</span> <span class="ident">dst_idx</span> <span class="op">=</span> <span class="ident">chunk_count</span> <span class="op">*</span> <span class="number">4</span>;
-            <span class="self">self</span>[<span class="ident">dst_idx</span>..<span class="ident">dst_idx</span> <span class="op">+</span> <span class="ident">chunks</span>.<span class="ident">remainder</span>().<span class="ident">len</span>()]
-                .<span class="ident">copy_from_slice</span>(<span class="ident">vec</span>[..<span class="ident">chunks</span>.<span class="ident">remainder</span>().<span class="ident">len</span>()].<span class="ident">reinterpret_cast</span>());
+        <span class="comment">// Process remainder
+        </span><span class="kw">if </span>!chunks.remainder().is_empty() {
+            <span class="kw">let </span><span class="kw-2">mut </span>buf = [<span class="number">0f64</span>; <span class="number">4</span>];
+            buf[..chunks.remainder().len()].copy_from_slice(chunks.remainder());
+            <span class="kw">let </span>vec = convert::f64x4_to_f16x4(<span class="kw-2">&amp;</span>buf);
+            <span class="kw">let </span>dst_idx = chunk_count * <span class="number">4</span>;
+            <span class="self">self</span>[dst_idx..dst_idx + chunks.remainder().len()]
+                .copy_from_slice(vec[..chunks.remainder().len()].reinterpret_cast());
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">convert_to_f32_slice</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">dst</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">f32</span>]) {
+    <span class="kw">fn </span>convert_to_f32_slice(<span class="kw-2">&amp;</span><span class="self">self</span>, dst: <span class="kw-2">&amp;mut </span>[f32]) {
         <span class="macro">assert_eq!</span>(
-            <span class="self">self</span>.<span class="ident">len</span>(),
-            <span class="ident">dst</span>.<span class="ident">len</span>(),
-            <span class="string">&quot;destination and source slices have different lengths&quot;</span>
-        );
+            <span class="self">self</span>.len(),
+            dst.len(),
+            <span class="string">&quot;destination and source slices have different lengths&quot;
+        </span>);
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">chunks</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">chunks_exact</span>(<span class="number">4</span>);
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">chunk_count</span> <span class="op">=</span> <span class="number">0usize</span>; <span class="comment">// Not using .enumerate() because we need this value for remainder</span>
-        <span class="kw">for</span> <span class="ident">chunk</span> <span class="kw">in</span> <span class="kw-2">&amp;mut</span> <span class="ident">chunks</span> {
-            <span class="kw">let</span> <span class="ident">vec</span> <span class="op">=</span> <span class="ident">convert::f16x4_to_f32x4</span>(<span class="ident">chunk</span>.<span class="ident">reinterpret_cast</span>());
-            <span class="kw">let</span> <span class="ident">dst_idx</span> <span class="op">=</span> <span class="ident">chunk_count</span> <span class="op">*</span> <span class="number">4</span>;
-            <span class="ident">dst</span>[<span class="ident">dst_idx</span>..<span class="ident">dst_idx</span> <span class="op">+</span> <span class="number">4</span>].<span class="ident">copy_from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">vec</span>);
-            <span class="ident">chunk_count</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>chunks = <span class="self">self</span>.chunks_exact(<span class="number">4</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>chunk_count = <span class="number">0usize</span>; <span class="comment">// Not using .enumerate() because we need this value for remainder
+        </span><span class="kw">for </span>chunk <span class="kw">in </span><span class="kw-2">&amp;mut </span>chunks {
+            <span class="kw">let </span>vec = convert::f16x4_to_f32x4(chunk.reinterpret_cast());
+            <span class="kw">let </span>dst_idx = chunk_count * <span class="number">4</span>;
+            dst[dst_idx..dst_idx + <span class="number">4</span>].copy_from_slice(<span class="kw-2">&amp;</span>vec);
+            chunk_count += <span class="number">1</span>;
         }
 
-        <span class="comment">// Process remainder</span>
-        <span class="kw">if</span> <span class="op">!</span><span class="ident">chunks</span>.<span class="ident">remainder</span>().<span class="ident">is_empty</span>() {
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> [<span class="number">0u16</span>; <span class="number">4</span>];
-            <span class="ident">buf</span>[..<span class="ident">chunks</span>.<span class="ident">remainder</span>().<span class="ident">len</span>()].<span class="ident">copy_from_slice</span>(<span class="ident">chunks</span>.<span class="ident">remainder</span>().<span class="ident">reinterpret_cast</span>());
-            <span class="kw">let</span> <span class="ident">vec</span> <span class="op">=</span> <span class="ident">convert::f16x4_to_f32x4</span>(<span class="kw-2">&amp;</span><span class="ident">buf</span>);
-            <span class="kw">let</span> <span class="ident">dst_idx</span> <span class="op">=</span> <span class="ident">chunk_count</span> <span class="op">*</span> <span class="number">4</span>;
-            <span class="ident">dst</span>[<span class="ident">dst_idx</span>..<span class="ident">dst_idx</span> <span class="op">+</span> <span class="ident">chunks</span>.<span class="ident">remainder</span>().<span class="ident">len</span>()]
-                .<span class="ident">copy_from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">vec</span>[..<span class="ident">chunks</span>.<span class="ident">remainder</span>().<span class="ident">len</span>()]);
+        <span class="comment">// Process remainder
+        </span><span class="kw">if </span>!chunks.remainder().is_empty() {
+            <span class="kw">let </span><span class="kw-2">mut </span>buf = [<span class="number">0u16</span>; <span class="number">4</span>];
+            buf[..chunks.remainder().len()].copy_from_slice(chunks.remainder().reinterpret_cast());
+            <span class="kw">let </span>vec = convert::f16x4_to_f32x4(<span class="kw-2">&amp;</span>buf);
+            <span class="kw">let </span>dst_idx = chunk_count * <span class="number">4</span>;
+            dst[dst_idx..dst_idx + chunks.remainder().len()]
+                .copy_from_slice(<span class="kw-2">&amp;</span>vec[..chunks.remainder().len()]);
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">convert_to_f64_slice</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">dst</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">f64</span>]) {
+    <span class="kw">fn </span>convert_to_f64_slice(<span class="kw-2">&amp;</span><span class="self">self</span>, dst: <span class="kw-2">&amp;mut </span>[f64]) {
         <span class="macro">assert_eq!</span>(
-            <span class="self">self</span>.<span class="ident">len</span>(),
-            <span class="ident">dst</span>.<span class="ident">len</span>(),
-            <span class="string">&quot;destination and source slices have different lengths&quot;</span>
-        );
+            <span class="self">self</span>.len(),
+            dst.len(),
+            <span class="string">&quot;destination and source slices have different lengths&quot;
+        </span>);
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">chunks</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">chunks_exact</span>(<span class="number">4</span>);
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">chunk_count</span> <span class="op">=</span> <span class="number">0usize</span>; <span class="comment">// Not using .enumerate() because we need this value for remainder</span>
-        <span class="kw">for</span> <span class="ident">chunk</span> <span class="kw">in</span> <span class="kw-2">&amp;mut</span> <span class="ident">chunks</span> {
-            <span class="kw">let</span> <span class="ident">vec</span> <span class="op">=</span> <span class="ident">convert::f16x4_to_f64x4</span>(<span class="ident">chunk</span>.<span class="ident">reinterpret_cast</span>());
-            <span class="kw">let</span> <span class="ident">dst_idx</span> <span class="op">=</span> <span class="ident">chunk_count</span> <span class="op">*</span> <span class="number">4</span>;
-            <span class="ident">dst</span>[<span class="ident">dst_idx</span>..<span class="ident">dst_idx</span> <span class="op">+</span> <span class="number">4</span>].<span class="ident">copy_from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">vec</span>);
-            <span class="ident">chunk_count</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>chunks = <span class="self">self</span>.chunks_exact(<span class="number">4</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>chunk_count = <span class="number">0usize</span>; <span class="comment">// Not using .enumerate() because we need this value for remainder
+        </span><span class="kw">for </span>chunk <span class="kw">in </span><span class="kw-2">&amp;mut </span>chunks {
+            <span class="kw">let </span>vec = convert::f16x4_to_f64x4(chunk.reinterpret_cast());
+            <span class="kw">let </span>dst_idx = chunk_count * <span class="number">4</span>;
+            dst[dst_idx..dst_idx + <span class="number">4</span>].copy_from_slice(<span class="kw-2">&amp;</span>vec);
+            chunk_count += <span class="number">1</span>;
         }
 
-        <span class="comment">// Process remainder</span>
-        <span class="kw">if</span> <span class="op">!</span><span class="ident">chunks</span>.<span class="ident">remainder</span>().<span class="ident">is_empty</span>() {
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> [<span class="number">0u16</span>; <span class="number">4</span>];
-            <span class="ident">buf</span>[..<span class="ident">chunks</span>.<span class="ident">remainder</span>().<span class="ident">len</span>()].<span class="ident">copy_from_slice</span>(<span class="ident">chunks</span>.<span class="ident">remainder</span>().<span class="ident">reinterpret_cast</span>());
-            <span class="kw">let</span> <span class="ident">vec</span> <span class="op">=</span> <span class="ident">convert::f16x4_to_f64x4</span>(<span class="kw-2">&amp;</span><span class="ident">buf</span>);
-            <span class="kw">let</span> <span class="ident">dst_idx</span> <span class="op">=</span> <span class="ident">chunk_count</span> <span class="op">*</span> <span class="number">4</span>;
-            <span class="ident">dst</span>[<span class="ident">dst_idx</span>..<span class="ident">dst_idx</span> <span class="op">+</span> <span class="ident">chunks</span>.<span class="ident">remainder</span>().<span class="ident">len</span>()]
-                .<span class="ident">copy_from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">vec</span>[..<span class="ident">chunks</span>.<span class="ident">remainder</span>().<span class="ident">len</span>()]);
-        }
-    }
-
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;alloc&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>))]</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">to_f32_vec</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">f32</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">vec</span> <span class="op">=</span> <span class="ident">Vec::with_capacity</span>(<span class="self">self</span>.<span class="ident">len</span>());
-        <span class="comment">// SAFETY: convert will initialize every value in the vector without reading them,</span>
-        <span class="comment">// so this is safe to do instead of double initialize from resize, and we&#39;re setting it to</span>
-        <span class="comment">// same value as capacity.</span>
-        <span class="kw">unsafe</span> { <span class="ident">vec</span>.<span class="ident">set_len</span>(<span class="self">self</span>.<span class="ident">len</span>()) };
-        <span class="self">self</span>.<span class="ident">convert_to_f32_slice</span>(<span class="kw-2">&amp;mut</span> <span class="ident">vec</span>);
-        <span class="ident">vec</span>
-    }
-
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;alloc&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>))]</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">to_f64_vec</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">vec</span> <span class="op">=</span> <span class="ident">Vec::with_capacity</span>(<span class="self">self</span>.<span class="ident">len</span>());
-        <span class="comment">// SAFETY: convert will initialize every value in the vector without reading them,</span>
-        <span class="comment">// so this is safe to do instead of double initialize from resize, and we&#39;re setting it to</span>
-        <span class="comment">// same value as capacity.</span>
-        <span class="kw">unsafe</span> { <span class="ident">vec</span>.<span class="ident">set_len</span>(<span class="self">self</span>.<span class="ident">len</span>()) };
-        <span class="self">self</span>.<span class="ident">convert_to_f64_slice</span>(<span class="kw-2">&amp;mut</span> <span class="ident">vec</span>);
-        <span class="ident">vec</span>
-    }
-}
-
-<span class="kw">impl</span> <span class="ident">HalfFloatSliceExt</span> <span class="kw">for</span> [<span class="ident">bf16</span>] {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">reinterpret_cast</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[<span class="ident">u16</span>] {
-        <span class="kw">let</span> <span class="ident">pointer</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw-2">*const</span> <span class="ident">u16</span>;
-        <span class="kw">let</span> <span class="ident">length</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">len</span>();
-        <span class="comment">// SAFETY: We are reconstructing full length of original slice, using its same lifetime,</span>
-        <span class="comment">// and the size of elements are identical</span>
-        <span class="kw">unsafe</span> { <span class="ident">slice::from_raw_parts</span>(<span class="ident">pointer</span>, <span class="ident">length</span>) }
-    }
-
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">reinterpret_cast_mut</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut</span> [<span class="ident">u16</span>] {
-        <span class="kw">let</span> <span class="ident">pointer</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw-2">*mut</span> <span class="ident">u16</span>;
-        <span class="kw">let</span> <span class="ident">length</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">len</span>();
-        <span class="comment">// SAFETY: We are reconstructing full length of original slice, using its same lifetime,</span>
-        <span class="comment">// and the size of elements are identical</span>
-        <span class="kw">unsafe</span> { <span class="ident">slice::from_raw_parts_mut</span>(<span class="ident">pointer</span>, <span class="ident">length</span>) }
-    }
-
-    <span class="kw">fn</span> <span class="ident">convert_from_f32_slice</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">src</span>: <span class="kw-2">&amp;</span>[<span class="ident">f32</span>]) {
-        <span class="macro">assert_eq!</span>(
-            <span class="self">self</span>.<span class="ident">len</span>(),
-            <span class="ident">src</span>.<span class="ident">len</span>(),
-            <span class="string">&quot;destination and source slices have different lengths&quot;</span>
-        );
-
-        <span class="comment">// Just use regular loop here until there&#39;s any bf16 SIMD support.</span>
-        <span class="kw">for</span> (<span class="ident">i</span>, <span class="ident">f</span>) <span class="kw">in</span> <span class="ident">src</span>.<span class="ident">iter</span>().<span class="ident">enumerate</span>() {
-            <span class="self">self</span>[<span class="ident">i</span>] <span class="op">=</span> <span class="ident">bf16::from_f32</span>(<span class="kw-2">*</span><span class="ident">f</span>);
+        <span class="comment">// Process remainder
+        </span><span class="kw">if </span>!chunks.remainder().is_empty() {
+            <span class="kw">let </span><span class="kw-2">mut </span>buf = [<span class="number">0u16</span>; <span class="number">4</span>];
+            buf[..chunks.remainder().len()].copy_from_slice(chunks.remainder().reinterpret_cast());
+            <span class="kw">let </span>vec = convert::f16x4_to_f64x4(<span class="kw-2">&amp;</span>buf);
+            <span class="kw">let </span>dst_idx = chunk_count * <span class="number">4</span>;
+            dst[dst_idx..dst_idx + chunks.remainder().len()]
+                .copy_from_slice(<span class="kw-2">&amp;</span>vec[..chunks.remainder().len()]);
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">convert_from_f64_slice</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">src</span>: <span class="kw-2">&amp;</span>[<span class="ident">f64</span>]) {
-        <span class="macro">assert_eq!</span>(
-            <span class="self">self</span>.<span class="ident">len</span>(),
-            <span class="ident">src</span>.<span class="ident">len</span>(),
-            <span class="string">&quot;destination and source slices have different lengths&quot;</span>
-        );
-
-        <span class="comment">// Just use regular loop here until there&#39;s any bf16 SIMD support.</span>
-        <span class="kw">for</span> (<span class="ident">i</span>, <span class="ident">f</span>) <span class="kw">in</span> <span class="ident">src</span>.<span class="ident">iter</span>().<span class="ident">enumerate</span>() {
-            <span class="self">self</span>[<span class="ident">i</span>] <span class="op">=</span> <span class="ident">bf16::from_f64</span>(<span class="kw-2">*</span><span class="ident">f</span>);
-        }
+    <span class="attribute">#[cfg(any(feature = <span class="string">&quot;alloc&quot;</span>, feature = <span class="string">&quot;std&quot;</span>))]
+    #[inline]
+    </span><span class="kw">fn </span>to_f32_vec(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Vec&lt;f32&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>vec = Vec::with_capacity(<span class="self">self</span>.len());
+        <span class="comment">// SAFETY: convert will initialize every value in the vector without reading them,
+        // so this is safe to do instead of double initialize from resize, and we&#39;re setting it to
+        // same value as capacity.
+        </span><span class="kw">unsafe </span>{ vec.set_len(<span class="self">self</span>.len()) };
+        <span class="self">self</span>.convert_to_f32_slice(<span class="kw-2">&amp;mut </span>vec);
+        vec
     }
 
-    <span class="kw">fn</span> <span class="ident">convert_to_f32_slice</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">dst</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">f32</span>]) {
-        <span class="macro">assert_eq!</span>(
-            <span class="self">self</span>.<span class="ident">len</span>(),
-            <span class="ident">dst</span>.<span class="ident">len</span>(),
-            <span class="string">&quot;destination and source slices have different lengths&quot;</span>
-        );
-
-        <span class="comment">// Just use regular loop here until there&#39;s any bf16 SIMD support.</span>
-        <span class="kw">for</span> (<span class="ident">i</span>, <span class="ident">f</span>) <span class="kw">in</span> <span class="self">self</span>.<span class="ident">iter</span>().<span class="ident">enumerate</span>() {
-            <span class="ident">dst</span>[<span class="ident">i</span>] <span class="op">=</span> <span class="ident">f</span>.<span class="ident">to_f32</span>();
-        }
-    }
-
-    <span class="kw">fn</span> <span class="ident">convert_to_f64_slice</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">dst</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">f64</span>]) {
-        <span class="macro">assert_eq!</span>(
-            <span class="self">self</span>.<span class="ident">len</span>(),
-            <span class="ident">dst</span>.<span class="ident">len</span>(),
-            <span class="string">&quot;destination and source slices have different lengths&quot;</span>
-        );
-
-        <span class="comment">// Just use regular loop here until there&#39;s any bf16 SIMD support.</span>
-        <span class="kw">for</span> (<span class="ident">i</span>, <span class="ident">f</span>) <span class="kw">in</span> <span class="self">self</span>.<span class="ident">iter</span>().<span class="ident">enumerate</span>() {
-            <span class="ident">dst</span>[<span class="ident">i</span>] <span class="op">=</span> <span class="ident">f</span>.<span class="ident">to_f64</span>();
-        }
-    }
-
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;alloc&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>))]</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">to_f32_vec</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">f32</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">vec</span> <span class="op">=</span> <span class="ident">Vec::with_capacity</span>(<span class="self">self</span>.<span class="ident">len</span>());
-        <span class="comment">// SAFETY: convert will initialize every value in the vector without reading them,</span>
-        <span class="comment">// so this is safe to do instead of double initialize from resize, and we&#39;re setting it to</span>
-        <span class="comment">// same value as capacity.</span>
-        <span class="kw">unsafe</span> { <span class="ident">vec</span>.<span class="ident">set_len</span>(<span class="self">self</span>.<span class="ident">len</span>()) };
-        <span class="self">self</span>.<span class="ident">convert_to_f32_slice</span>(<span class="kw-2">&amp;mut</span> <span class="ident">vec</span>);
-        <span class="ident">vec</span>
-    }
-
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;alloc&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>))]</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">to_f64_vec</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">vec</span> <span class="op">=</span> <span class="ident">Vec::with_capacity</span>(<span class="self">self</span>.<span class="ident">len</span>());
-        <span class="comment">// SAFETY: convert will initialize every value in the vector without reading them,</span>
-        <span class="comment">// so this is safe to do instead of double initialize from resize, and we&#39;re setting it to</span>
-        <span class="comment">// same value as capacity.</span>
-        <span class="kw">unsafe</span> { <span class="ident">vec</span>.<span class="ident">set_len</span>(<span class="self">self</span>.<span class="ident">len</span>()) };
-        <span class="self">self</span>.<span class="ident">convert_to_f64_slice</span>(<span class="kw-2">&amp;mut</span> <span class="ident">vec</span>);
-        <span class="ident">vec</span>
+    <span class="attribute">#[cfg(any(feature = <span class="string">&quot;alloc&quot;</span>, feature = <span class="string">&quot;std&quot;</span>))]
+    #[inline]
+    </span><span class="kw">fn </span>to_f64_vec(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Vec&lt;f64&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>vec = Vec::with_capacity(<span class="self">self</span>.len());
+        <span class="comment">// SAFETY: convert will initialize every value in the vector without reading them,
+        // so this is safe to do instead of double initialize from resize, and we&#39;re setting it to
+        // same value as capacity.
+        </span><span class="kw">unsafe </span>{ vec.set_len(<span class="self">self</span>.len()) };
+        <span class="self">self</span>.convert_to_f64_slice(<span class="kw-2">&amp;mut </span>vec);
+        vec
     }
 }
 
-<span class="kw">impl</span> <span class="ident">HalfBitsSliceExt</span> <span class="kw">for</span> [<span class="ident">u16</span>] {
-    <span class="comment">// Since we sealed all the traits involved, these are safe.</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">reinterpret_cast</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[<span class="ident">H</span>]
-    <span class="kw">where</span>
-        <span class="ident">H</span>: <span class="ident"><span class="kw">crate</span>::private::SealedHalf</span>,
+<span class="kw">impl </span>HalfFloatSliceExt <span class="kw">for </span>[bf16] {
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>reinterpret_cast(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[u16] {
+        <span class="kw">let </span>pointer = <span class="self">self</span>.as_ptr() <span class="kw">as </span><span class="kw-2">*const </span>u16;
+        <span class="kw">let </span>length = <span class="self">self</span>.len();
+        <span class="comment">// SAFETY: We are reconstructing full length of original slice, using its same lifetime,
+        // and the size of elements are identical
+        </span><span class="kw">unsafe </span>{ slice::from_raw_parts(pointer, length) }
+    }
+
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>reinterpret_cast_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>[u16] {
+        <span class="kw">let </span>pointer = <span class="self">self</span>.as_ptr() <span class="kw">as </span><span class="kw-2">*mut </span>u16;
+        <span class="kw">let </span>length = <span class="self">self</span>.len();
+        <span class="comment">// SAFETY: We are reconstructing full length of original slice, using its same lifetime,
+        // and the size of elements are identical
+        </span><span class="kw">unsafe </span>{ slice::from_raw_parts_mut(pointer, length) }
+    }
+
+    <span class="kw">fn </span>convert_from_f32_slice(<span class="kw-2">&amp;mut </span><span class="self">self</span>, src: <span class="kw-2">&amp;</span>[f32]) {
+        <span class="macro">assert_eq!</span>(
+            <span class="self">self</span>.len(),
+            src.len(),
+            <span class="string">&quot;destination and source slices have different lengths&quot;
+        </span>);
+
+        <span class="comment">// Just use regular loop here until there&#39;s any bf16 SIMD support.
+        </span><span class="kw">for </span>(i, f) <span class="kw">in </span>src.iter().enumerate() {
+            <span class="self">self</span>[i] = bf16::from_f32(<span class="kw-2">*</span>f);
+        }
+    }
+
+    <span class="kw">fn </span>convert_from_f64_slice(<span class="kw-2">&amp;mut </span><span class="self">self</span>, src: <span class="kw-2">&amp;</span>[f64]) {
+        <span class="macro">assert_eq!</span>(
+            <span class="self">self</span>.len(),
+            src.len(),
+            <span class="string">&quot;destination and source slices have different lengths&quot;
+        </span>);
+
+        <span class="comment">// Just use regular loop here until there&#39;s any bf16 SIMD support.
+        </span><span class="kw">for </span>(i, f) <span class="kw">in </span>src.iter().enumerate() {
+            <span class="self">self</span>[i] = bf16::from_f64(<span class="kw-2">*</span>f);
+        }
+    }
+
+    <span class="kw">fn </span>convert_to_f32_slice(<span class="kw-2">&amp;</span><span class="self">self</span>, dst: <span class="kw-2">&amp;mut </span>[f32]) {
+        <span class="macro">assert_eq!</span>(
+            <span class="self">self</span>.len(),
+            dst.len(),
+            <span class="string">&quot;destination and source slices have different lengths&quot;
+        </span>);
+
+        <span class="comment">// Just use regular loop here until there&#39;s any bf16 SIMD support.
+        </span><span class="kw">for </span>(i, f) <span class="kw">in </span><span class="self">self</span>.iter().enumerate() {
+            dst[i] = f.to_f32();
+        }
+    }
+
+    <span class="kw">fn </span>convert_to_f64_slice(<span class="kw-2">&amp;</span><span class="self">self</span>, dst: <span class="kw-2">&amp;mut </span>[f64]) {
+        <span class="macro">assert_eq!</span>(
+            <span class="self">self</span>.len(),
+            dst.len(),
+            <span class="string">&quot;destination and source slices have different lengths&quot;
+        </span>);
+
+        <span class="comment">// Just use regular loop here until there&#39;s any bf16 SIMD support.
+        </span><span class="kw">for </span>(i, f) <span class="kw">in </span><span class="self">self</span>.iter().enumerate() {
+            dst[i] = f.to_f64();
+        }
+    }
+
+    <span class="attribute">#[cfg(any(feature = <span class="string">&quot;alloc&quot;</span>, feature = <span class="string">&quot;std&quot;</span>))]
+    #[inline]
+    </span><span class="kw">fn </span>to_f32_vec(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Vec&lt;f32&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>vec = Vec::with_capacity(<span class="self">self</span>.len());
+        <span class="comment">// SAFETY: convert will initialize every value in the vector without reading them,
+        // so this is safe to do instead of double initialize from resize, and we&#39;re setting it to
+        // same value as capacity.
+        </span><span class="kw">unsafe </span>{ vec.set_len(<span class="self">self</span>.len()) };
+        <span class="self">self</span>.convert_to_f32_slice(<span class="kw-2">&amp;mut </span>vec);
+        vec
+    }
+
+    <span class="attribute">#[cfg(any(feature = <span class="string">&quot;alloc&quot;</span>, feature = <span class="string">&quot;std&quot;</span>))]
+    #[inline]
+    </span><span class="kw">fn </span>to_f64_vec(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Vec&lt;f64&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>vec = Vec::with_capacity(<span class="self">self</span>.len());
+        <span class="comment">// SAFETY: convert will initialize every value in the vector without reading them,
+        // so this is safe to do instead of double initialize from resize, and we&#39;re setting it to
+        // same value as capacity.
+        </span><span class="kw">unsafe </span>{ vec.set_len(<span class="self">self</span>.len()) };
+        <span class="self">self</span>.convert_to_f64_slice(<span class="kw-2">&amp;mut </span>vec);
+        vec
+    }
+}
+
+<span class="kw">impl </span>HalfBitsSliceExt <span class="kw">for </span>[u16] {
+    <span class="comment">// Since we sealed all the traits involved, these are safe.
+    </span><span class="attribute">#[inline]
+    </span><span class="kw">fn </span>reinterpret_cast&lt;H&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[H]
+    <span class="kw">where
+        </span>H: <span class="kw">crate</span>::private::SealedHalf,
     {
-        <span class="kw">let</span> <span class="ident">pointer</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw-2">*const</span> <span class="ident">H</span>;
-        <span class="kw">let</span> <span class="ident">length</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">len</span>();
-        <span class="comment">// SAFETY: We are reconstructing full length of original slice, using its same lifetime,</span>
-        <span class="comment">// and the size of elements are identical</span>
-        <span class="kw">unsafe</span> { <span class="ident">slice::from_raw_parts</span>(<span class="ident">pointer</span>, <span class="ident">length</span>) }
+        <span class="kw">let </span>pointer = <span class="self">self</span>.as_ptr() <span class="kw">as </span><span class="kw-2">*const </span>H;
+        <span class="kw">let </span>length = <span class="self">self</span>.len();
+        <span class="comment">// SAFETY: We are reconstructing full length of original slice, using its same lifetime,
+        // and the size of elements are identical
+        </span><span class="kw">unsafe </span>{ slice::from_raw_parts(pointer, length) }
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">reinterpret_cast_mut</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut</span> [<span class="ident">H</span>]
-    <span class="kw">where</span>
-        <span class="ident">H</span>: <span class="ident"><span class="kw">crate</span>::private::SealedHalf</span>,
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>reinterpret_cast_mut&lt;H&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>[H]
+    <span class="kw">where
+        </span>H: <span class="kw">crate</span>::private::SealedHalf,
     {
-        <span class="kw">let</span> <span class="ident">pointer</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">as_mut_ptr</span>() <span class="kw">as</span> <span class="kw-2">*mut</span> <span class="ident">H</span>;
-        <span class="kw">let</span> <span class="ident">length</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">len</span>();
-        <span class="comment">// SAFETY: We are reconstructing full length of original slice, using its same lifetime,</span>
-        <span class="comment">// and the size of elements are identical</span>
-        <span class="kw">unsafe</span> { <span class="ident">slice::from_raw_parts_mut</span>(<span class="ident">pointer</span>, <span class="ident">length</span>) }
+        <span class="kw">let </span>pointer = <span class="self">self</span>.as_mut_ptr() <span class="kw">as </span><span class="kw-2">*mut </span>H;
+        <span class="kw">let </span>length = <span class="self">self</span>.len();
+        <span class="comment">// SAFETY: We are reconstructing full length of original slice, using its same lifetime,
+        // and the size of elements are identical
+        </span><span class="kw">unsafe </span>{ slice::from_raw_parts_mut(pointer, length) }
     }
 }
 
-<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
-<span class="attribute">#[<span class="ident">deprecated</span>(
-    <span class="ident">since</span> <span class="op">=</span> <span class="string">&quot;1.4.0&quot;</span>,
-    <span class="ident">note</span> <span class="op">=</span> <span class="string">&quot;use `HalfBitsSliceExt::reinterpret_cast_mut` instead&quot;</span>
-)]</span>
-<span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_bits_mut</span>(<span class="ident">bits</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">u16</span>]) -&gt; <span class="kw-2">&amp;mut</span> [<span class="ident">f16</span>] {
-    <span class="ident">bits</span>.<span class="ident">reinterpret_cast_mut</span>()
+<span class="attribute">#[doc(hidden)]
+#[deprecated(
+    since = <span class="string">&quot;1.4.0&quot;</span>,
+    note = <span class="string">&quot;use `HalfBitsSliceExt::reinterpret_cast_mut` instead&quot;
+</span>)]
+#[inline]
+</span><span class="kw">pub fn </span>from_bits_mut(bits: <span class="kw-2">&amp;mut </span>[u16]) -&gt; <span class="kw-2">&amp;mut </span>[f16] {
+    bits.reinterpret_cast_mut()
 }
 
-<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
-<span class="attribute">#[<span class="ident">deprecated</span>(
-    <span class="ident">since</span> <span class="op">=</span> <span class="string">&quot;1.4.0&quot;</span>,
-    <span class="ident">note</span> <span class="op">=</span> <span class="string">&quot;use `HalfFloatSliceExt::reinterpret_cast_mut` instead&quot;</span>
-)]</span>
-<span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">to_bits_mut</span>(<span class="ident">bits</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">f16</span>]) -&gt; <span class="kw-2">&amp;mut</span> [<span class="ident">u16</span>] {
-    <span class="ident">bits</span>.<span class="ident">reinterpret_cast_mut</span>()
+<span class="attribute">#[doc(hidden)]
+#[deprecated(
+    since = <span class="string">&quot;1.4.0&quot;</span>,
+    note = <span class="string">&quot;use `HalfFloatSliceExt::reinterpret_cast_mut` instead&quot;
+</span>)]
+#[inline]
+</span><span class="kw">pub fn </span>to_bits_mut(bits: <span class="kw-2">&amp;mut </span>[f16]) -&gt; <span class="kw-2">&amp;mut </span>[u16] {
+    bits.reinterpret_cast_mut()
 }
 
-<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
-<span class="attribute">#[<span class="ident">deprecated</span>(
-    <span class="ident">since</span> <span class="op">=</span> <span class="string">&quot;1.4.0&quot;</span>,
-    <span class="ident">note</span> <span class="op">=</span> <span class="string">&quot;use `HalfBitsSliceExt::reinterpret_cast` instead&quot;</span>
-)]</span>
-<span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_bits</span>(<span class="ident">bits</span>: <span class="kw-2">&amp;</span>[<span class="ident">u16</span>]) -&gt; <span class="kw-2">&amp;</span>[<span class="ident">f16</span>] {
-    <span class="ident">bits</span>.<span class="ident">reinterpret_cast</span>()
+<span class="attribute">#[doc(hidden)]
+#[deprecated(
+    since = <span class="string">&quot;1.4.0&quot;</span>,
+    note = <span class="string">&quot;use `HalfBitsSliceExt::reinterpret_cast` instead&quot;
+</span>)]
+#[inline]
+</span><span class="kw">pub fn </span>from_bits(bits: <span class="kw-2">&amp;</span>[u16]) -&gt; <span class="kw-2">&amp;</span>[f16] {
+    bits.reinterpret_cast()
 }
 
-<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
-<span class="attribute">#[<span class="ident">deprecated</span>(
-    <span class="ident">since</span> <span class="op">=</span> <span class="string">&quot;1.4.0&quot;</span>,
-    <span class="ident">note</span> <span class="op">=</span> <span class="string">&quot;use `HalfFloatSliceExt::reinterpret_cast` instead&quot;</span>
-)]</span>
-<span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">to_bits</span>(<span class="ident">bits</span>: <span class="kw-2">&amp;</span>[<span class="ident">f16</span>]) -&gt; <span class="kw-2">&amp;</span>[<span class="ident">u16</span>] {
-    <span class="ident">bits</span>.<span class="ident">reinterpret_cast</span>()
+<span class="attribute">#[doc(hidden)]
+#[deprecated(
+    since = <span class="string">&quot;1.4.0&quot;</span>,
+    note = <span class="string">&quot;use `HalfFloatSliceExt::reinterpret_cast` instead&quot;
+</span>)]
+#[inline]
+</span><span class="kw">pub fn </span>to_bits(bits: <span class="kw-2">&amp;</span>[f16]) -&gt; <span class="kw-2">&amp;</span>[u16] {
+    bits.reinterpret_cast()
 }
 
-<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::float_cmp</span>)]</span>
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
-<span class="kw">mod</span> <span class="ident">test</span> {
-    <span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">HalfBitsSliceExt</span>, <span class="ident">HalfFloatSliceExt</span>};
-    <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">bf16</span>, <span class="ident">f16</span>};
+<span class="attribute">#[allow(clippy::float_cmp)]
+#[cfg(test)]
+</span><span class="kw">mod </span>test {
+    <span class="kw">use super</span>::{HalfBitsSliceExt, HalfFloatSliceExt};
+    <span class="kw">use crate</span>::{bf16, f16};
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">test_slice_conversions_f16</span>() {
-        <span class="kw">let</span> <span class="ident">bits</span> <span class="op">=</span> <span class="kw-2">&amp;</span>[
-            <span class="ident">f16::E</span>.<span class="ident">to_bits</span>(),
-            <span class="ident">f16::PI</span>.<span class="ident">to_bits</span>(),
-            <span class="ident">f16::EPSILON</span>.<span class="ident">to_bits</span>(),
-            <span class="ident">f16::FRAC_1_SQRT_2</span>.<span class="ident">to_bits</span>(),
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>test_slice_conversions_f16() {
+        <span class="kw">let </span>bits = <span class="kw-2">&amp;</span>[
+            f16::E.to_bits(),
+            f16::PI.to_bits(),
+            f16::EPSILON.to_bits(),
+            f16::FRAC_1_SQRT_2.to_bits(),
         ];
-        <span class="kw">let</span> <span class="ident">numbers</span> <span class="op">=</span> <span class="kw-2">&amp;</span>[<span class="ident">f16::E</span>, <span class="ident">f16::PI</span>, <span class="ident">f16::EPSILON</span>, <span class="ident">f16::FRAC_1_SQRT_2</span>];
+        <span class="kw">let </span>numbers = <span class="kw-2">&amp;</span>[f16::E, f16::PI, f16::EPSILON, f16::FRAC_1_SQRT_2];
 
-        <span class="comment">// Convert from bits to numbers</span>
-        <span class="kw">let</span> <span class="ident">from_bits</span> <span class="op">=</span> <span class="ident">bits</span>.<span class="ident">reinterpret_cast</span>::<span class="op">&lt;</span><span class="ident">f16</span><span class="op">&gt;</span>();
-        <span class="macro">assert_eq!</span>(<span class="ident">from_bits</span>, <span class="ident">numbers</span>);
+        <span class="comment">// Convert from bits to numbers
+        </span><span class="kw">let </span>from_bits = bits.reinterpret_cast::&lt;f16&gt;();
+        <span class="macro">assert_eq!</span>(from_bits, numbers);
 
-        <span class="comment">// Convert from numbers back to bits</span>
-        <span class="kw">let</span> <span class="ident">to_bits</span> <span class="op">=</span> <span class="ident">from_bits</span>.<span class="ident">reinterpret_cast</span>();
-        <span class="macro">assert_eq!</span>(<span class="ident">to_bits</span>, <span class="ident">bits</span>);
+        <span class="comment">// Convert from numbers back to bits
+        </span><span class="kw">let </span>to_bits = from_bits.reinterpret_cast();
+        <span class="macro">assert_eq!</span>(to_bits, bits);
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">test_mutablility_f16</span>() {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">bits_array</span> <span class="op">=</span> [<span class="ident">f16::PI</span>.<span class="ident">to_bits</span>()];
-        <span class="kw">let</span> <span class="ident">bits</span> <span class="op">=</span> <span class="kw-2">&amp;mut</span> <span class="ident">bits_array</span>[..];
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>test_mutablility_f16() {
+        <span class="kw">let </span><span class="kw-2">mut </span>bits_array = [f16::PI.to_bits()];
+        <span class="kw">let </span>bits = <span class="kw-2">&amp;mut </span>bits_array[..];
 
         {
-            <span class="comment">// would not compile without these braces</span>
-            <span class="kw">let</span> <span class="ident">numbers</span> <span class="op">=</span> <span class="ident">bits</span>.<span class="ident">reinterpret_cast_mut</span>();
-            <span class="ident">numbers</span>[<span class="number">0</span>] <span class="op">=</span> <span class="ident">f16::E</span>;
+            <span class="comment">// would not compile without these braces
+            </span><span class="kw">let </span>numbers = bits.reinterpret_cast_mut();
+            numbers[<span class="number">0</span>] = f16::E;
         }
 
-        <span class="macro">assert_eq!</span>(<span class="ident">bits</span>, <span class="kw-2">&amp;</span>[<span class="ident">f16::E</span>.<span class="ident">to_bits</span>()]);
+        <span class="macro">assert_eq!</span>(bits, <span class="kw-2">&amp;</span>[f16::E.to_bits()]);
 
-        <span class="ident">bits</span>[<span class="number">0</span>] <span class="op">=</span> <span class="ident">f16::LN_2</span>.<span class="ident">to_bits</span>();
-        <span class="macro">assert_eq!</span>(<span class="ident">bits</span>, <span class="kw-2">&amp;</span>[<span class="ident">f16::LN_2</span>.<span class="ident">to_bits</span>()]);
+        bits[<span class="number">0</span>] = f16::LN_2.to_bits();
+        <span class="macro">assert_eq!</span>(bits, <span class="kw-2">&amp;</span>[f16::LN_2.to_bits()]);
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">test_slice_conversions_bf16</span>() {
-        <span class="kw">let</span> <span class="ident">bits</span> <span class="op">=</span> <span class="kw-2">&amp;</span>[
-            <span class="ident">bf16::E</span>.<span class="ident">to_bits</span>(),
-            <span class="ident">bf16::PI</span>.<span class="ident">to_bits</span>(),
-            <span class="ident">bf16::EPSILON</span>.<span class="ident">to_bits</span>(),
-            <span class="ident">bf16::FRAC_1_SQRT_2</span>.<span class="ident">to_bits</span>(),
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>test_slice_conversions_bf16() {
+        <span class="kw">let </span>bits = <span class="kw-2">&amp;</span>[
+            bf16::E.to_bits(),
+            bf16::PI.to_bits(),
+            bf16::EPSILON.to_bits(),
+            bf16::FRAC_1_SQRT_2.to_bits(),
         ];
-        <span class="kw">let</span> <span class="ident">numbers</span> <span class="op">=</span> <span class="kw-2">&amp;</span>[<span class="ident">bf16::E</span>, <span class="ident">bf16::PI</span>, <span class="ident">bf16::EPSILON</span>, <span class="ident">bf16::FRAC_1_SQRT_2</span>];
+        <span class="kw">let </span>numbers = <span class="kw-2">&amp;</span>[bf16::E, bf16::PI, bf16::EPSILON, bf16::FRAC_1_SQRT_2];
 
-        <span class="comment">// Convert from bits to numbers</span>
-        <span class="kw">let</span> <span class="ident">from_bits</span> <span class="op">=</span> <span class="ident">bits</span>.<span class="ident">reinterpret_cast</span>::<span class="op">&lt;</span><span class="ident">bf16</span><span class="op">&gt;</span>();
-        <span class="macro">assert_eq!</span>(<span class="ident">from_bits</span>, <span class="ident">numbers</span>);
+        <span class="comment">// Convert from bits to numbers
+        </span><span class="kw">let </span>from_bits = bits.reinterpret_cast::&lt;bf16&gt;();
+        <span class="macro">assert_eq!</span>(from_bits, numbers);
 
-        <span class="comment">// Convert from numbers back to bits</span>
-        <span class="kw">let</span> <span class="ident">to_bits</span> <span class="op">=</span> <span class="ident">from_bits</span>.<span class="ident">reinterpret_cast</span>();
-        <span class="macro">assert_eq!</span>(<span class="ident">to_bits</span>, <span class="ident">bits</span>);
+        <span class="comment">// Convert from numbers back to bits
+        </span><span class="kw">let </span>to_bits = from_bits.reinterpret_cast();
+        <span class="macro">assert_eq!</span>(to_bits, bits);
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">test_mutablility_bf16</span>() {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">bits_array</span> <span class="op">=</span> [<span class="ident">bf16::PI</span>.<span class="ident">to_bits</span>()];
-        <span class="kw">let</span> <span class="ident">bits</span> <span class="op">=</span> <span class="kw-2">&amp;mut</span> <span class="ident">bits_array</span>[..];
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>test_mutablility_bf16() {
+        <span class="kw">let </span><span class="kw-2">mut </span>bits_array = [bf16::PI.to_bits()];
+        <span class="kw">let </span>bits = <span class="kw-2">&amp;mut </span>bits_array[..];
 
         {
-            <span class="comment">// would not compile without these braces</span>
-            <span class="kw">let</span> <span class="ident">numbers</span> <span class="op">=</span> <span class="ident">bits</span>.<span class="ident">reinterpret_cast_mut</span>();
-            <span class="ident">numbers</span>[<span class="number">0</span>] <span class="op">=</span> <span class="ident">bf16::E</span>;
+            <span class="comment">// would not compile without these braces
+            </span><span class="kw">let </span>numbers = bits.reinterpret_cast_mut();
+            numbers[<span class="number">0</span>] = bf16::E;
         }
 
-        <span class="macro">assert_eq!</span>(<span class="ident">bits</span>, <span class="kw-2">&amp;</span>[<span class="ident">bf16::E</span>.<span class="ident">to_bits</span>()]);
+        <span class="macro">assert_eq!</span>(bits, <span class="kw-2">&amp;</span>[bf16::E.to_bits()]);
 
-        <span class="ident">bits</span>[<span class="number">0</span>] <span class="op">=</span> <span class="ident">bf16::LN_2</span>.<span class="ident">to_bits</span>();
-        <span class="macro">assert_eq!</span>(<span class="ident">bits</span>, <span class="kw-2">&amp;</span>[<span class="ident">bf16::LN_2</span>.<span class="ident">to_bits</span>()]);
+        bits[<span class="number">0</span>] = bf16::LN_2.to_bits();
+        <span class="macro">assert_eq!</span>(bits, <span class="kw-2">&amp;</span>[bf16::LN_2.to_bits()]);
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">slice_convert_f16_f32</span>() {
-        <span class="comment">// Exact chunks</span>
-        <span class="kw">let</span> <span class="ident">vf32</span> <span class="op">=</span> [<span class="number">1.</span>, <span class="number">2.</span>, <span class="number">3.</span>, <span class="number">4.</span>, <span class="number">5.</span>, <span class="number">6.</span>, <span class="number">7.</span>, <span class="number">8.</span>];
-        <span class="kw">let</span> <span class="ident">vf16</span> <span class="op">=</span> [
-            <span class="ident">f16::from_f32</span>(<span class="number">1.</span>),
-            <span class="ident">f16::from_f32</span>(<span class="number">2.</span>),
-            <span class="ident">f16::from_f32</span>(<span class="number">3.</span>),
-            <span class="ident">f16::from_f32</span>(<span class="number">4.</span>),
-            <span class="ident">f16::from_f32</span>(<span class="number">5.</span>),
-            <span class="ident">f16::from_f32</span>(<span class="number">6.</span>),
-            <span class="ident">f16::from_f32</span>(<span class="number">7.</span>),
-            <span class="ident">f16::from_f32</span>(<span class="number">8.</span>),
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>slice_convert_f16_f32() {
+        <span class="comment">// Exact chunks
+        </span><span class="kw">let </span>vf32 = [<span class="number">1.</span>, <span class="number">2.</span>, <span class="number">3.</span>, <span class="number">4.</span>, <span class="number">5.</span>, <span class="number">6.</span>, <span class="number">7.</span>, <span class="number">8.</span>];
+        <span class="kw">let </span>vf16 = [
+            f16::from_f32(<span class="number">1.</span>),
+            f16::from_f32(<span class="number">2.</span>),
+            f16::from_f32(<span class="number">3.</span>),
+            f16::from_f32(<span class="number">4.</span>),
+            f16::from_f32(<span class="number">5.</span>),
+            f16::from_f32(<span class="number">6.</span>),
+            f16::from_f32(<span class="number">7.</span>),
+            f16::from_f32(<span class="number">8.</span>),
         ];
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf32</span> <span class="op">=</span> <span class="ident">vf32</span>;
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf16</span> <span class="op">=</span> <span class="ident">vf16</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>buf32 = vf32;
+        <span class="kw">let </span><span class="kw-2">mut </span>buf16 = vf16;
 
-        <span class="ident">vf16</span>.<span class="ident">convert_to_f32_slice</span>(<span class="kw-2">&amp;mut</span> <span class="ident">buf32</span>);
-        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span><span class="ident">vf32</span>, <span class="kw-2">&amp;</span><span class="ident">buf32</span>);
+        vf16.convert_to_f32_slice(<span class="kw-2">&amp;mut </span>buf32);
+        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>vf32, <span class="kw-2">&amp;</span>buf32);
 
-        <span class="ident">buf16</span>.<span class="ident">convert_from_f32_slice</span>(<span class="kw-2">&amp;</span><span class="ident">vf32</span>);
-        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span><span class="ident">vf16</span>, <span class="kw-2">&amp;</span><span class="ident">buf16</span>);
+        buf16.convert_from_f32_slice(<span class="kw-2">&amp;</span>vf32);
+        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>vf16, <span class="kw-2">&amp;</span>buf16);
 
-        <span class="comment">// Partial with chunks</span>
-        <span class="kw">let</span> <span class="ident">vf32</span> <span class="op">=</span> [<span class="number">1.</span>, <span class="number">2.</span>, <span class="number">3.</span>, <span class="number">4.</span>, <span class="number">5.</span>, <span class="number">6.</span>, <span class="number">7.</span>, <span class="number">8.</span>, <span class="number">9.</span>];
-        <span class="kw">let</span> <span class="ident">vf16</span> <span class="op">=</span> [
-            <span class="ident">f16::from_f32</span>(<span class="number">1.</span>),
-            <span class="ident">f16::from_f32</span>(<span class="number">2.</span>),
-            <span class="ident">f16::from_f32</span>(<span class="number">3.</span>),
-            <span class="ident">f16::from_f32</span>(<span class="number">4.</span>),
-            <span class="ident">f16::from_f32</span>(<span class="number">5.</span>),
-            <span class="ident">f16::from_f32</span>(<span class="number">6.</span>),
-            <span class="ident">f16::from_f32</span>(<span class="number">7.</span>),
-            <span class="ident">f16::from_f32</span>(<span class="number">8.</span>),
-            <span class="ident">f16::from_f32</span>(<span class="number">9.</span>),
+        <span class="comment">// Partial with chunks
+        </span><span class="kw">let </span>vf32 = [<span class="number">1.</span>, <span class="number">2.</span>, <span class="number">3.</span>, <span class="number">4.</span>, <span class="number">5.</span>, <span class="number">6.</span>, <span class="number">7.</span>, <span class="number">8.</span>, <span class="number">9.</span>];
+        <span class="kw">let </span>vf16 = [
+            f16::from_f32(<span class="number">1.</span>),
+            f16::from_f32(<span class="number">2.</span>),
+            f16::from_f32(<span class="number">3.</span>),
+            f16::from_f32(<span class="number">4.</span>),
+            f16::from_f32(<span class="number">5.</span>),
+            f16::from_f32(<span class="number">6.</span>),
+            f16::from_f32(<span class="number">7.</span>),
+            f16::from_f32(<span class="number">8.</span>),
+            f16::from_f32(<span class="number">9.</span>),
         ];
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf32</span> <span class="op">=</span> <span class="ident">vf32</span>;
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf16</span> <span class="op">=</span> <span class="ident">vf16</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>buf32 = vf32;
+        <span class="kw">let </span><span class="kw-2">mut </span>buf16 = vf16;
 
-        <span class="ident">vf16</span>.<span class="ident">convert_to_f32_slice</span>(<span class="kw-2">&amp;mut</span> <span class="ident">buf32</span>);
-        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span><span class="ident">vf32</span>, <span class="kw-2">&amp;</span><span class="ident">buf32</span>);
+        vf16.convert_to_f32_slice(<span class="kw-2">&amp;mut </span>buf32);
+        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>vf32, <span class="kw-2">&amp;</span>buf32);
 
-        <span class="ident">buf16</span>.<span class="ident">convert_from_f32_slice</span>(<span class="kw-2">&amp;</span><span class="ident">vf32</span>);
-        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span><span class="ident">vf16</span>, <span class="kw-2">&amp;</span><span class="ident">buf16</span>);
+        buf16.convert_from_f32_slice(<span class="kw-2">&amp;</span>vf32);
+        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>vf16, <span class="kw-2">&amp;</span>buf16);
 
-        <span class="comment">// Partial with chunks</span>
-        <span class="kw">let</span> <span class="ident">vf32</span> <span class="op">=</span> [<span class="number">1.</span>, <span class="number">2.</span>];
-        <span class="kw">let</span> <span class="ident">vf16</span> <span class="op">=</span> [<span class="ident">f16::from_f32</span>(<span class="number">1.</span>), <span class="ident">f16::from_f32</span>(<span class="number">2.</span>)];
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf32</span> <span class="op">=</span> <span class="ident">vf32</span>;
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf16</span> <span class="op">=</span> <span class="ident">vf16</span>;
+        <span class="comment">// Partial with chunks
+        </span><span class="kw">let </span>vf32 = [<span class="number">1.</span>, <span class="number">2.</span>];
+        <span class="kw">let </span>vf16 = [f16::from_f32(<span class="number">1.</span>), f16::from_f32(<span class="number">2.</span>)];
+        <span class="kw">let </span><span class="kw-2">mut </span>buf32 = vf32;
+        <span class="kw">let </span><span class="kw-2">mut </span>buf16 = vf16;
 
-        <span class="ident">vf16</span>.<span class="ident">convert_to_f32_slice</span>(<span class="kw-2">&amp;mut</span> <span class="ident">buf32</span>);
-        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span><span class="ident">vf32</span>, <span class="kw-2">&amp;</span><span class="ident">buf32</span>);
+        vf16.convert_to_f32_slice(<span class="kw-2">&amp;mut </span>buf32);
+        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>vf32, <span class="kw-2">&amp;</span>buf32);
 
-        <span class="ident">buf16</span>.<span class="ident">convert_from_f32_slice</span>(<span class="kw-2">&amp;</span><span class="ident">vf32</span>);
-        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span><span class="ident">vf16</span>, <span class="kw-2">&amp;</span><span class="ident">buf16</span>);
+        buf16.convert_from_f32_slice(<span class="kw-2">&amp;</span>vf32);
+        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>vf16, <span class="kw-2">&amp;</span>buf16);
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">slice_convert_bf16_f32</span>() {
-        <span class="comment">// Exact chunks</span>
-        <span class="kw">let</span> <span class="ident">vf32</span> <span class="op">=</span> [<span class="number">1.</span>, <span class="number">2.</span>, <span class="number">3.</span>, <span class="number">4.</span>, <span class="number">5.</span>, <span class="number">6.</span>, <span class="number">7.</span>, <span class="number">8.</span>];
-        <span class="kw">let</span> <span class="ident">vf16</span> <span class="op">=</span> [
-            <span class="ident">bf16::from_f32</span>(<span class="number">1.</span>),
-            <span class="ident">bf16::from_f32</span>(<span class="number">2.</span>),
-            <span class="ident">bf16::from_f32</span>(<span class="number">3.</span>),
-            <span class="ident">bf16::from_f32</span>(<span class="number">4.</span>),
-            <span class="ident">bf16::from_f32</span>(<span class="number">5.</span>),
-            <span class="ident">bf16::from_f32</span>(<span class="number">6.</span>),
-            <span class="ident">bf16::from_f32</span>(<span class="number">7.</span>),
-            <span class="ident">bf16::from_f32</span>(<span class="number">8.</span>),
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>slice_convert_bf16_f32() {
+        <span class="comment">// Exact chunks
+        </span><span class="kw">let </span>vf32 = [<span class="number">1.</span>, <span class="number">2.</span>, <span class="number">3.</span>, <span class="number">4.</span>, <span class="number">5.</span>, <span class="number">6.</span>, <span class="number">7.</span>, <span class="number">8.</span>];
+        <span class="kw">let </span>vf16 = [
+            bf16::from_f32(<span class="number">1.</span>),
+            bf16::from_f32(<span class="number">2.</span>),
+            bf16::from_f32(<span class="number">3.</span>),
+            bf16::from_f32(<span class="number">4.</span>),
+            bf16::from_f32(<span class="number">5.</span>),
+            bf16::from_f32(<span class="number">6.</span>),
+            bf16::from_f32(<span class="number">7.</span>),
+            bf16::from_f32(<span class="number">8.</span>),
         ];
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf32</span> <span class="op">=</span> <span class="ident">vf32</span>;
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf16</span> <span class="op">=</span> <span class="ident">vf16</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>buf32 = vf32;
+        <span class="kw">let </span><span class="kw-2">mut </span>buf16 = vf16;
 
-        <span class="ident">vf16</span>.<span class="ident">convert_to_f32_slice</span>(<span class="kw-2">&amp;mut</span> <span class="ident">buf32</span>);
-        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span><span class="ident">vf32</span>, <span class="kw-2">&amp;</span><span class="ident">buf32</span>);
+        vf16.convert_to_f32_slice(<span class="kw-2">&amp;mut </span>buf32);
+        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>vf32, <span class="kw-2">&amp;</span>buf32);
 
-        <span class="ident">buf16</span>.<span class="ident">convert_from_f32_slice</span>(<span class="kw-2">&amp;</span><span class="ident">vf32</span>);
-        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span><span class="ident">vf16</span>, <span class="kw-2">&amp;</span><span class="ident">buf16</span>);
+        buf16.convert_from_f32_slice(<span class="kw-2">&amp;</span>vf32);
+        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>vf16, <span class="kw-2">&amp;</span>buf16);
 
-        <span class="comment">// Partial with chunks</span>
-        <span class="kw">let</span> <span class="ident">vf32</span> <span class="op">=</span> [<span class="number">1.</span>, <span class="number">2.</span>, <span class="number">3.</span>, <span class="number">4.</span>, <span class="number">5.</span>, <span class="number">6.</span>, <span class="number">7.</span>, <span class="number">8.</span>, <span class="number">9.</span>];
-        <span class="kw">let</span> <span class="ident">vf16</span> <span class="op">=</span> [
-            <span class="ident">bf16::from_f32</span>(<span class="number">1.</span>),
-            <span class="ident">bf16::from_f32</span>(<span class="number">2.</span>),
-            <span class="ident">bf16::from_f32</span>(<span class="number">3.</span>),
-            <span class="ident">bf16::from_f32</span>(<span class="number">4.</span>),
-            <span class="ident">bf16::from_f32</span>(<span class="number">5.</span>),
-            <span class="ident">bf16::from_f32</span>(<span class="number">6.</span>),
-            <span class="ident">bf16::from_f32</span>(<span class="number">7.</span>),
-            <span class="ident">bf16::from_f32</span>(<span class="number">8.</span>),
-            <span class="ident">bf16::from_f32</span>(<span class="number">9.</span>),
+        <span class="comment">// Partial with chunks
+        </span><span class="kw">let </span>vf32 = [<span class="number">1.</span>, <span class="number">2.</span>, <span class="number">3.</span>, <span class="number">4.</span>, <span class="number">5.</span>, <span class="number">6.</span>, <span class="number">7.</span>, <span class="number">8.</span>, <span class="number">9.</span>];
+        <span class="kw">let </span>vf16 = [
+            bf16::from_f32(<span class="number">1.</span>),
+            bf16::from_f32(<span class="number">2.</span>),
+            bf16::from_f32(<span class="number">3.</span>),
+            bf16::from_f32(<span class="number">4.</span>),
+            bf16::from_f32(<span class="number">5.</span>),
+            bf16::from_f32(<span class="number">6.</span>),
+            bf16::from_f32(<span class="number">7.</span>),
+            bf16::from_f32(<span class="number">8.</span>),
+            bf16::from_f32(<span class="number">9.</span>),
         ];
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf32</span> <span class="op">=</span> <span class="ident">vf32</span>;
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf16</span> <span class="op">=</span> <span class="ident">vf16</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>buf32 = vf32;
+        <span class="kw">let </span><span class="kw-2">mut </span>buf16 = vf16;
 
-        <span class="ident">vf16</span>.<span class="ident">convert_to_f32_slice</span>(<span class="kw-2">&amp;mut</span> <span class="ident">buf32</span>);
-        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span><span class="ident">vf32</span>, <span class="kw-2">&amp;</span><span class="ident">buf32</span>);
+        vf16.convert_to_f32_slice(<span class="kw-2">&amp;mut </span>buf32);
+        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>vf32, <span class="kw-2">&amp;</span>buf32);
 
-        <span class="ident">buf16</span>.<span class="ident">convert_from_f32_slice</span>(<span class="kw-2">&amp;</span><span class="ident">vf32</span>);
-        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span><span class="ident">vf16</span>, <span class="kw-2">&amp;</span><span class="ident">buf16</span>);
+        buf16.convert_from_f32_slice(<span class="kw-2">&amp;</span>vf32);
+        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>vf16, <span class="kw-2">&amp;</span>buf16);
 
-        <span class="comment">// Partial with chunks</span>
-        <span class="kw">let</span> <span class="ident">vf32</span> <span class="op">=</span> [<span class="number">1.</span>, <span class="number">2.</span>];
-        <span class="kw">let</span> <span class="ident">vf16</span> <span class="op">=</span> [<span class="ident">bf16::from_f32</span>(<span class="number">1.</span>), <span class="ident">bf16::from_f32</span>(<span class="number">2.</span>)];
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf32</span> <span class="op">=</span> <span class="ident">vf32</span>;
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf16</span> <span class="op">=</span> <span class="ident">vf16</span>;
+        <span class="comment">// Partial with chunks
+        </span><span class="kw">let </span>vf32 = [<span class="number">1.</span>, <span class="number">2.</span>];
+        <span class="kw">let </span>vf16 = [bf16::from_f32(<span class="number">1.</span>), bf16::from_f32(<span class="number">2.</span>)];
+        <span class="kw">let </span><span class="kw-2">mut </span>buf32 = vf32;
+        <span class="kw">let </span><span class="kw-2">mut </span>buf16 = vf16;
 
-        <span class="ident">vf16</span>.<span class="ident">convert_to_f32_slice</span>(<span class="kw-2">&amp;mut</span> <span class="ident">buf32</span>);
-        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span><span class="ident">vf32</span>, <span class="kw-2">&amp;</span><span class="ident">buf32</span>);
+        vf16.convert_to_f32_slice(<span class="kw-2">&amp;mut </span>buf32);
+        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>vf32, <span class="kw-2">&amp;</span>buf32);
 
-        <span class="ident">buf16</span>.<span class="ident">convert_from_f32_slice</span>(<span class="kw-2">&amp;</span><span class="ident">vf32</span>);
-        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span><span class="ident">vf16</span>, <span class="kw-2">&amp;</span><span class="ident">buf16</span>);
+        buf16.convert_from_f32_slice(<span class="kw-2">&amp;</span>vf32);
+        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>vf16, <span class="kw-2">&amp;</span>buf16);
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">slice_convert_f16_f64</span>() {
-        <span class="comment">// Exact chunks</span>
-        <span class="kw">let</span> <span class="ident">vf64</span> <span class="op">=</span> [<span class="number">1.</span>, <span class="number">2.</span>, <span class="number">3.</span>, <span class="number">4.</span>, <span class="number">5.</span>, <span class="number">6.</span>, <span class="number">7.</span>, <span class="number">8.</span>];
-        <span class="kw">let</span> <span class="ident">vf16</span> <span class="op">=</span> [
-            <span class="ident">f16::from_f64</span>(<span class="number">1.</span>),
-            <span class="ident">f16::from_f64</span>(<span class="number">2.</span>),
-            <span class="ident">f16::from_f64</span>(<span class="number">3.</span>),
-            <span class="ident">f16::from_f64</span>(<span class="number">4.</span>),
-            <span class="ident">f16::from_f64</span>(<span class="number">5.</span>),
-            <span class="ident">f16::from_f64</span>(<span class="number">6.</span>),
-            <span class="ident">f16::from_f64</span>(<span class="number">7.</span>),
-            <span class="ident">f16::from_f64</span>(<span class="number">8.</span>),
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>slice_convert_f16_f64() {
+        <span class="comment">// Exact chunks
+        </span><span class="kw">let </span>vf64 = [<span class="number">1.</span>, <span class="number">2.</span>, <span class="number">3.</span>, <span class="number">4.</span>, <span class="number">5.</span>, <span class="number">6.</span>, <span class="number">7.</span>, <span class="number">8.</span>];
+        <span class="kw">let </span>vf16 = [
+            f16::from_f64(<span class="number">1.</span>),
+            f16::from_f64(<span class="number">2.</span>),
+            f16::from_f64(<span class="number">3.</span>),
+            f16::from_f64(<span class="number">4.</span>),
+            f16::from_f64(<span class="number">5.</span>),
+            f16::from_f64(<span class="number">6.</span>),
+            f16::from_f64(<span class="number">7.</span>),
+            f16::from_f64(<span class="number">8.</span>),
         ];
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf64</span> <span class="op">=</span> <span class="ident">vf64</span>;
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf16</span> <span class="op">=</span> <span class="ident">vf16</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>buf64 = vf64;
+        <span class="kw">let </span><span class="kw-2">mut </span>buf16 = vf16;
 
-        <span class="ident">vf16</span>.<span class="ident">convert_to_f64_slice</span>(<span class="kw-2">&amp;mut</span> <span class="ident">buf64</span>);
-        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span><span class="ident">vf64</span>, <span class="kw-2">&amp;</span><span class="ident">buf64</span>);
+        vf16.convert_to_f64_slice(<span class="kw-2">&amp;mut </span>buf64);
+        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>vf64, <span class="kw-2">&amp;</span>buf64);
 
-        <span class="ident">buf16</span>.<span class="ident">convert_from_f64_slice</span>(<span class="kw-2">&amp;</span><span class="ident">vf64</span>);
-        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span><span class="ident">vf16</span>, <span class="kw-2">&amp;</span><span class="ident">buf16</span>);
+        buf16.convert_from_f64_slice(<span class="kw-2">&amp;</span>vf64);
+        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>vf16, <span class="kw-2">&amp;</span>buf16);
 
-        <span class="comment">// Partial with chunks</span>
-        <span class="kw">let</span> <span class="ident">vf64</span> <span class="op">=</span> [<span class="number">1.</span>, <span class="number">2.</span>, <span class="number">3.</span>, <span class="number">4.</span>, <span class="number">5.</span>, <span class="number">6.</span>, <span class="number">7.</span>, <span class="number">8.</span>, <span class="number">9.</span>];
-        <span class="kw">let</span> <span class="ident">vf16</span> <span class="op">=</span> [
-            <span class="ident">f16::from_f64</span>(<span class="number">1.</span>),
-            <span class="ident">f16::from_f64</span>(<span class="number">2.</span>),
-            <span class="ident">f16::from_f64</span>(<span class="number">3.</span>),
-            <span class="ident">f16::from_f64</span>(<span class="number">4.</span>),
-            <span class="ident">f16::from_f64</span>(<span class="number">5.</span>),
-            <span class="ident">f16::from_f64</span>(<span class="number">6.</span>),
-            <span class="ident">f16::from_f64</span>(<span class="number">7.</span>),
-            <span class="ident">f16::from_f64</span>(<span class="number">8.</span>),
-            <span class="ident">f16::from_f64</span>(<span class="number">9.</span>),
+        <span class="comment">// Partial with chunks
+        </span><span class="kw">let </span>vf64 = [<span class="number">1.</span>, <span class="number">2.</span>, <span class="number">3.</span>, <span class="number">4.</span>, <span class="number">5.</span>, <span class="number">6.</span>, <span class="number">7.</span>, <span class="number">8.</span>, <span class="number">9.</span>];
+        <span class="kw">let </span>vf16 = [
+            f16::from_f64(<span class="number">1.</span>),
+            f16::from_f64(<span class="number">2.</span>),
+            f16::from_f64(<span class="number">3.</span>),
+            f16::from_f64(<span class="number">4.</span>),
+            f16::from_f64(<span class="number">5.</span>),
+            f16::from_f64(<span class="number">6.</span>),
+            f16::from_f64(<span class="number">7.</span>),
+            f16::from_f64(<span class="number">8.</span>),
+            f16::from_f64(<span class="number">9.</span>),
         ];
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf64</span> <span class="op">=</span> <span class="ident">vf64</span>;
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf16</span> <span class="op">=</span> <span class="ident">vf16</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>buf64 = vf64;
+        <span class="kw">let </span><span class="kw-2">mut </span>buf16 = vf16;
 
-        <span class="ident">vf16</span>.<span class="ident">convert_to_f64_slice</span>(<span class="kw-2">&amp;mut</span> <span class="ident">buf64</span>);
-        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span><span class="ident">vf64</span>, <span class="kw-2">&amp;</span><span class="ident">buf64</span>);
+        vf16.convert_to_f64_slice(<span class="kw-2">&amp;mut </span>buf64);
+        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>vf64, <span class="kw-2">&amp;</span>buf64);
 
-        <span class="ident">buf16</span>.<span class="ident">convert_from_f64_slice</span>(<span class="kw-2">&amp;</span><span class="ident">vf64</span>);
-        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span><span class="ident">vf16</span>, <span class="kw-2">&amp;</span><span class="ident">buf16</span>);
+        buf16.convert_from_f64_slice(<span class="kw-2">&amp;</span>vf64);
+        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>vf16, <span class="kw-2">&amp;</span>buf16);
 
-        <span class="comment">// Partial with chunks</span>
-        <span class="kw">let</span> <span class="ident">vf64</span> <span class="op">=</span> [<span class="number">1.</span>, <span class="number">2.</span>];
-        <span class="kw">let</span> <span class="ident">vf16</span> <span class="op">=</span> [<span class="ident">f16::from_f64</span>(<span class="number">1.</span>), <span class="ident">f16::from_f64</span>(<span class="number">2.</span>)];
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf64</span> <span class="op">=</span> <span class="ident">vf64</span>;
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf16</span> <span class="op">=</span> <span class="ident">vf16</span>;
+        <span class="comment">// Partial with chunks
+        </span><span class="kw">let </span>vf64 = [<span class="number">1.</span>, <span class="number">2.</span>];
+        <span class="kw">let </span>vf16 = [f16::from_f64(<span class="number">1.</span>), f16::from_f64(<span class="number">2.</span>)];
+        <span class="kw">let </span><span class="kw-2">mut </span>buf64 = vf64;
+        <span class="kw">let </span><span class="kw-2">mut </span>buf16 = vf16;
 
-        <span class="ident">vf16</span>.<span class="ident">convert_to_f64_slice</span>(<span class="kw-2">&amp;mut</span> <span class="ident">buf64</span>);
-        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span><span class="ident">vf64</span>, <span class="kw-2">&amp;</span><span class="ident">buf64</span>);
+        vf16.convert_to_f64_slice(<span class="kw-2">&amp;mut </span>buf64);
+        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>vf64, <span class="kw-2">&amp;</span>buf64);
 
-        <span class="ident">buf16</span>.<span class="ident">convert_from_f64_slice</span>(<span class="kw-2">&amp;</span><span class="ident">vf64</span>);
-        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span><span class="ident">vf16</span>, <span class="kw-2">&amp;</span><span class="ident">buf16</span>);
+        buf16.convert_from_f64_slice(<span class="kw-2">&amp;</span>vf64);
+        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>vf16, <span class="kw-2">&amp;</span>buf16);
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">slice_convert_bf16_f64</span>() {
-        <span class="comment">// Exact chunks</span>
-        <span class="kw">let</span> <span class="ident">vf64</span> <span class="op">=</span> [<span class="number">1.</span>, <span class="number">2.</span>, <span class="number">3.</span>, <span class="number">4.</span>, <span class="number">5.</span>, <span class="number">6.</span>, <span class="number">7.</span>, <span class="number">8.</span>];
-        <span class="kw">let</span> <span class="ident">vf16</span> <span class="op">=</span> [
-            <span class="ident">bf16::from_f64</span>(<span class="number">1.</span>),
-            <span class="ident">bf16::from_f64</span>(<span class="number">2.</span>),
-            <span class="ident">bf16::from_f64</span>(<span class="number">3.</span>),
-            <span class="ident">bf16::from_f64</span>(<span class="number">4.</span>),
-            <span class="ident">bf16::from_f64</span>(<span class="number">5.</span>),
-            <span class="ident">bf16::from_f64</span>(<span class="number">6.</span>),
-            <span class="ident">bf16::from_f64</span>(<span class="number">7.</span>),
-            <span class="ident">bf16::from_f64</span>(<span class="number">8.</span>),
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>slice_convert_bf16_f64() {
+        <span class="comment">// Exact chunks
+        </span><span class="kw">let </span>vf64 = [<span class="number">1.</span>, <span class="number">2.</span>, <span class="number">3.</span>, <span class="number">4.</span>, <span class="number">5.</span>, <span class="number">6.</span>, <span class="number">7.</span>, <span class="number">8.</span>];
+        <span class="kw">let </span>vf16 = [
+            bf16::from_f64(<span class="number">1.</span>),
+            bf16::from_f64(<span class="number">2.</span>),
+            bf16::from_f64(<span class="number">3.</span>),
+            bf16::from_f64(<span class="number">4.</span>),
+            bf16::from_f64(<span class="number">5.</span>),
+            bf16::from_f64(<span class="number">6.</span>),
+            bf16::from_f64(<span class="number">7.</span>),
+            bf16::from_f64(<span class="number">8.</span>),
         ];
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf64</span> <span class="op">=</span> <span class="ident">vf64</span>;
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf16</span> <span class="op">=</span> <span class="ident">vf16</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>buf64 = vf64;
+        <span class="kw">let </span><span class="kw-2">mut </span>buf16 = vf16;
 
-        <span class="ident">vf16</span>.<span class="ident">convert_to_f64_slice</span>(<span class="kw-2">&amp;mut</span> <span class="ident">buf64</span>);
-        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span><span class="ident">vf64</span>, <span class="kw-2">&amp;</span><span class="ident">buf64</span>);
+        vf16.convert_to_f64_slice(<span class="kw-2">&amp;mut </span>buf64);
+        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>vf64, <span class="kw-2">&amp;</span>buf64);
 
-        <span class="ident">buf16</span>.<span class="ident">convert_from_f64_slice</span>(<span class="kw-2">&amp;</span><span class="ident">vf64</span>);
-        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span><span class="ident">vf16</span>, <span class="kw-2">&amp;</span><span class="ident">buf16</span>);
+        buf16.convert_from_f64_slice(<span class="kw-2">&amp;</span>vf64);
+        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>vf16, <span class="kw-2">&amp;</span>buf16);
 
-        <span class="comment">// Partial with chunks</span>
-        <span class="kw">let</span> <span class="ident">vf64</span> <span class="op">=</span> [<span class="number">1.</span>, <span class="number">2.</span>, <span class="number">3.</span>, <span class="number">4.</span>, <span class="number">5.</span>, <span class="number">6.</span>, <span class="number">7.</span>, <span class="number">8.</span>, <span class="number">9.</span>];
-        <span class="kw">let</span> <span class="ident">vf16</span> <span class="op">=</span> [
-            <span class="ident">bf16::from_f64</span>(<span class="number">1.</span>),
-            <span class="ident">bf16::from_f64</span>(<span class="number">2.</span>),
-            <span class="ident">bf16::from_f64</span>(<span class="number">3.</span>),
-            <span class="ident">bf16::from_f64</span>(<span class="number">4.</span>),
-            <span class="ident">bf16::from_f64</span>(<span class="number">5.</span>),
-            <span class="ident">bf16::from_f64</span>(<span class="number">6.</span>),
-            <span class="ident">bf16::from_f64</span>(<span class="number">7.</span>),
-            <span class="ident">bf16::from_f64</span>(<span class="number">8.</span>),
-            <span class="ident">bf16::from_f64</span>(<span class="number">9.</span>),
+        <span class="comment">// Partial with chunks
+        </span><span class="kw">let </span>vf64 = [<span class="number">1.</span>, <span class="number">2.</span>, <span class="number">3.</span>, <span class="number">4.</span>, <span class="number">5.</span>, <span class="number">6.</span>, <span class="number">7.</span>, <span class="number">8.</span>, <span class="number">9.</span>];
+        <span class="kw">let </span>vf16 = [
+            bf16::from_f64(<span class="number">1.</span>),
+            bf16::from_f64(<span class="number">2.</span>),
+            bf16::from_f64(<span class="number">3.</span>),
+            bf16::from_f64(<span class="number">4.</span>),
+            bf16::from_f64(<span class="number">5.</span>),
+            bf16::from_f64(<span class="number">6.</span>),
+            bf16::from_f64(<span class="number">7.</span>),
+            bf16::from_f64(<span class="number">8.</span>),
+            bf16::from_f64(<span class="number">9.</span>),
         ];
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf64</span> <span class="op">=</span> <span class="ident">vf64</span>;
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf16</span> <span class="op">=</span> <span class="ident">vf16</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>buf64 = vf64;
+        <span class="kw">let </span><span class="kw-2">mut </span>buf16 = vf16;
 
-        <span class="ident">vf16</span>.<span class="ident">convert_to_f64_slice</span>(<span class="kw-2">&amp;mut</span> <span class="ident">buf64</span>);
-        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span><span class="ident">vf64</span>, <span class="kw-2">&amp;</span><span class="ident">buf64</span>);
+        vf16.convert_to_f64_slice(<span class="kw-2">&amp;mut </span>buf64);
+        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>vf64, <span class="kw-2">&amp;</span>buf64);
 
-        <span class="ident">buf16</span>.<span class="ident">convert_from_f64_slice</span>(<span class="kw-2">&amp;</span><span class="ident">vf64</span>);
-        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span><span class="ident">vf16</span>, <span class="kw-2">&amp;</span><span class="ident">buf16</span>);
+        buf16.convert_from_f64_slice(<span class="kw-2">&amp;</span>vf64);
+        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>vf16, <span class="kw-2">&amp;</span>buf16);
 
-        <span class="comment">// Partial with chunks</span>
-        <span class="kw">let</span> <span class="ident">vf64</span> <span class="op">=</span> [<span class="number">1.</span>, <span class="number">2.</span>];
-        <span class="kw">let</span> <span class="ident">vf16</span> <span class="op">=</span> [<span class="ident">bf16::from_f64</span>(<span class="number">1.</span>), <span class="ident">bf16::from_f64</span>(<span class="number">2.</span>)];
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf64</span> <span class="op">=</span> <span class="ident">vf64</span>;
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf16</span> <span class="op">=</span> <span class="ident">vf16</span>;
+        <span class="comment">// Partial with chunks
+        </span><span class="kw">let </span>vf64 = [<span class="number">1.</span>, <span class="number">2.</span>];
+        <span class="kw">let </span>vf16 = [bf16::from_f64(<span class="number">1.</span>), bf16::from_f64(<span class="number">2.</span>)];
+        <span class="kw">let </span><span class="kw-2">mut </span>buf64 = vf64;
+        <span class="kw">let </span><span class="kw-2">mut </span>buf16 = vf16;
 
-        <span class="ident">vf16</span>.<span class="ident">convert_to_f64_slice</span>(<span class="kw-2">&amp;mut</span> <span class="ident">buf64</span>);
-        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span><span class="ident">vf64</span>, <span class="kw-2">&amp;</span><span class="ident">buf64</span>);
+        vf16.convert_to_f64_slice(<span class="kw-2">&amp;mut </span>buf64);
+        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>vf64, <span class="kw-2">&amp;</span>buf64);
 
-        <span class="ident">buf16</span>.<span class="ident">convert_from_f64_slice</span>(<span class="kw-2">&amp;</span><span class="ident">vf64</span>);
-        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span><span class="ident">vf16</span>, <span class="kw-2">&amp;</span><span class="ident">buf16</span>);
+        buf16.convert_from_f64_slice(<span class="kw-2">&amp;</span>vf64);
+        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>vf16, <span class="kw-2">&amp;</span>buf16);
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="attribute">#[<span class="ident">should_panic</span>]</span>
-    <span class="kw">fn</span> <span class="ident">convert_from_f32_slice_len_mismatch_panics</span>() {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">slice1</span> <span class="op">=</span> [<span class="ident">f16::ZERO</span>; <span class="number">3</span>];
-        <span class="kw">let</span> <span class="ident">slice2</span> <span class="op">=</span> [<span class="number">0f32</span>; <span class="number">4</span>];
-        <span class="ident">slice1</span>.<span class="ident">convert_from_f32_slice</span>(<span class="kw-2">&amp;</span><span class="ident">slice2</span>);
+    <span class="attribute">#[test]
+    #[should_panic]
+    </span><span class="kw">fn </span>convert_from_f32_slice_len_mismatch_panics() {
+        <span class="kw">let </span><span class="kw-2">mut </span>slice1 = [f16::ZERO; <span class="number">3</span>];
+        <span class="kw">let </span>slice2 = [<span class="number">0f32</span>; <span class="number">4</span>];
+        slice1.convert_from_f32_slice(<span class="kw-2">&amp;</span>slice2);
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="attribute">#[<span class="ident">should_panic</span>]</span>
-    <span class="kw">fn</span> <span class="ident">convert_from_f64_slice_len_mismatch_panics</span>() {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">slice1</span> <span class="op">=</span> [<span class="ident">f16::ZERO</span>; <span class="number">3</span>];
-        <span class="kw">let</span> <span class="ident">slice2</span> <span class="op">=</span> [<span class="number">0f64</span>; <span class="number">4</span>];
-        <span class="ident">slice1</span>.<span class="ident">convert_from_f64_slice</span>(<span class="kw-2">&amp;</span><span class="ident">slice2</span>);
+    <span class="attribute">#[test]
+    #[should_panic]
+    </span><span class="kw">fn </span>convert_from_f64_slice_len_mismatch_panics() {
+        <span class="kw">let </span><span class="kw-2">mut </span>slice1 = [f16::ZERO; <span class="number">3</span>];
+        <span class="kw">let </span>slice2 = [<span class="number">0f64</span>; <span class="number">4</span>];
+        slice1.convert_from_f64_slice(<span class="kw-2">&amp;</span>slice2);
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="attribute">#[<span class="ident">should_panic</span>]</span>
-    <span class="kw">fn</span> <span class="ident">convert_to_f32_slice_len_mismatch_panics</span>() {
-        <span class="kw">let</span> <span class="ident">slice1</span> <span class="op">=</span> [<span class="ident">f16::ZERO</span>; <span class="number">3</span>];
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">slice2</span> <span class="op">=</span> [<span class="number">0f32</span>; <span class="number">4</span>];
-        <span class="ident">slice1</span>.<span class="ident">convert_to_f32_slice</span>(<span class="kw-2">&amp;mut</span> <span class="ident">slice2</span>);
+    <span class="attribute">#[test]
+    #[should_panic]
+    </span><span class="kw">fn </span>convert_to_f32_slice_len_mismatch_panics() {
+        <span class="kw">let </span>slice1 = [f16::ZERO; <span class="number">3</span>];
+        <span class="kw">let </span><span class="kw-2">mut </span>slice2 = [<span class="number">0f32</span>; <span class="number">4</span>];
+        slice1.convert_to_f32_slice(<span class="kw-2">&amp;mut </span>slice2);
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="attribute">#[<span class="ident">should_panic</span>]</span>
-    <span class="kw">fn</span> <span class="ident">convert_to_f64_slice_len_mismatch_panics</span>() {
-        <span class="kw">let</span> <span class="ident">slice1</span> <span class="op">=</span> [<span class="ident">f16::ZERO</span>; <span class="number">3</span>];
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">slice2</span> <span class="op">=</span> [<span class="number">0f64</span>; <span class="number">4</span>];
-        <span class="ident">slice1</span>.<span class="ident">convert_to_f64_slice</span>(<span class="kw-2">&amp;mut</span> <span class="ident">slice2</span>);
+    <span class="attribute">#[test]
+    #[should_panic]
+    </span><span class="kw">fn </span>convert_to_f64_slice_len_mismatch_panics() {
+        <span class="kw">let </span>slice1 = [f16::ZERO; <span class="number">3</span>];
+        <span class="kw">let </span><span class="kw-2">mut </span>slice2 = [<span class="number">0f64</span>; <span class="number">4</span>];
+        slice1.convert_to_f64_slice(<span class="kw-2">&amp;mut </span>slice2);
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="half" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="half" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

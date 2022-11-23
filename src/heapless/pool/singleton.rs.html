@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/heapless-0.7.16/src/pool/singleton.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>singleton.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../heapless/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../heapless/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../heapless/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/heapless-0.7.16/src/pool/singleton.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>singleton.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../heapless/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../heapless/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../heapless/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -435,442 +435,442 @@
 <span id="435">435</span>
 <span id="436">436</span>
 <span id="437">437</span>
-</pre><pre class="rust"><code><span class="doccomment">//! `Pool` as a global singleton</span>
+</pre><pre class="rust"><code><span class="doccomment">//! `Pool` as a global singleton
 
-<span class="kw">use</span> <span class="ident">core</span>::{
-    <span class="ident">any::TypeId</span>,
-    <span class="ident">cmp</span>, <span class="ident">fmt</span>,
-    <span class="ident">hash</span>::{<span class="ident">Hash</span>, <span class="ident">Hasher</span>},
-    <span class="ident">marker::PhantomData</span>,
-    <span class="ident">mem</span>::{<span class="self">self</span>, <span class="ident">MaybeUninit</span>},
-    <span class="ident">ops</span>::{<span class="ident">Deref</span>, <span class="ident">DerefMut</span>},
-    <span class="ident">ptr</span>::{<span class="self">self</span>, <span class="ident">NonNull</span>},
+</span><span class="kw">use </span>core::{
+    any::TypeId,
+    cmp, fmt,
+    hash::{Hash, Hasher},
+    marker::PhantomData,
+    mem::{<span class="self">self</span>, MaybeUninit},
+    ops::{Deref, DerefMut},
+    ptr::{<span class="self">self</span>, NonNull},
 };
 
-<span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">Init</span>, <span class="ident">Node</span>, <span class="ident">Uninit</span>};
+<span class="kw">use super</span>::{Init, Node, Uninit};
 
-<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">arc</span>;
+<span class="kw">pub mod </span>arc;
 
-<span class="doccomment">/// Instantiates a pool as a global singleton</span>
-<span class="comment">// NOTE(any(test)) makes testing easier (no need to enable Cargo features for testing)</span>
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(
-    <span class="ident">armv6m</span>,
-    <span class="ident">armv7a</span>,
-    <span class="ident">armv7r</span>,
-    <span class="ident">armv7m</span>,
-    <span class="ident">armv8m_main</span>,
-    <span class="ident">all</span>(
-        <span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>),
-        <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;x86-sync-pool&quot;</span>
-    ),
-    <span class="ident">test</span>
-))]</span>
-<span class="attribute">#[<span class="ident">macro_export</span>]</span>
-<span class="macro">macro_rules!</span> <span class="ident">pool</span> {
-    ($(<span class="attribute">#[$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">attr</span>:<span class="ident">tt</span>)<span class="kw-2">*</span>]</span>)<span class="op">*</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ident</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span>:<span class="ident">ty</span>) =&gt; {
-        <span class="kw">pub</span> <span class="kw">struct</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ident</span>;
+<span class="doccomment">/// Instantiates a pool as a global singleton
+</span><span class="comment">// NOTE(any(test)) makes testing easier (no need to enable Cargo features for testing)
+</span><span class="attribute">#[cfg(any(
+    armv6m,
+    armv7a,
+    armv7r,
+    armv7m,
+    armv8m_main,
+    all(
+        any(target_arch = <span class="string">&quot;x86_64&quot;</span>, target_arch = <span class="string">&quot;x86&quot;</span>),
+        feature = <span class="string">&quot;x86-sync-pool&quot;
+    </span>),
+    test
+))]
+#[macro_export]
+</span><span class="macro">macro_rules! </span>pool {
+    ($(<span class="attribute">#[$(<span class="macro-nonterminal">$attr</span>:tt)<span class="kw-2">*</span>]</span>)* <span class="macro-nonterminal">$ident</span>:ident: <span class="macro-nonterminal">$ty</span>:ty) =&gt; {
+        <span class="kw">pub struct </span><span class="macro-nonterminal">$ident</span>;
 
-        <span class="kw">impl</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::pool::singleton::Pool</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ident</span> {
-            <span class="kw">type</span> <span class="ident">Data</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span>;
+        <span class="kw">impl </span><span class="macro-nonterminal">$crate::pool::singleton::Pool </span><span class="kw">for </span><span class="macro-nonterminal">$ident </span>{
+            <span class="kw">type </span>Data = <span class="macro-nonterminal">$ty</span>;
 
-            <span class="kw">fn</span> <span class="ident">ptr</span>() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::pool::Pool</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span><span class="op">&gt;</span> {
-                $(<span class="attribute">#[$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">attr</span>)<span class="kw-2">*</span>]</span>)<span class="op">*</span>
-                <span class="kw">static</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::pool::Pool</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span><span class="op">&gt;</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::pool::Pool::new</span>();
+            <span class="kw">fn </span>ptr() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="macro-nonterminal">$crate::pool::Pool</span>&lt;<span class="macro-nonterminal">$ty</span>&gt; {
+                $(<span class="attribute">#[$(<span class="macro-nonterminal">$attr</span>)<span class="kw-2">*</span>]</span>)*
+                <span class="kw">static </span><span class="macro-nonterminal">$ident</span>: <span class="macro-nonterminal">$crate::pool::Pool</span>&lt;<span class="macro-nonterminal">$ty</span>&gt; = <span class="macro-nonterminal">$crate::pool::Pool::new</span>();
 
-                <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">ident</span>
-            }
+                <span class="kw-2">&amp;</span><span class="macro-nonterminal">$ident
+            </span>}
         }
     };
 }
 
-<span class="doccomment">/// A global singleton memory pool</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Pool</span> {
-    <span class="doccomment">/// The type of data that can be allocated on this pool</span>
-    <span class="kw">type</span> <span class="ident">Data</span>: <span class="lifetime">&#39;static</span>;
+<span class="doccomment">/// A global singleton memory pool
+</span><span class="kw">pub trait </span>Pool {
+    <span class="doccomment">/// The type of data that can be allocated on this pool
+    </span><span class="kw">type </span>Data: <span class="lifetime">&#39;static</span>;
 
-    <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">ptr</span>() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident"><span class="kw">super</span>::Pool</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Data</span><span class="op">&gt;</span>;
+    <span class="attribute">#[doc(hidden)]
+    </span><span class="kw">fn </span>ptr() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw">super</span>::Pool&lt;<span class="self">Self</span>::Data&gt;;
 
-    <span class="doccomment">/// Claims a memory block from the pool</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// Returns `None` when the pool is observed as exhausted</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// *NOTE:* This method does *not* have bounded execution time; i.e. it contains a CAS loop</span>
-    <span class="kw">fn</span> <span class="ident">alloc</span>() -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Uninit</span><span class="op">&gt;</span><span class="op">&gt;</span>
-    <span class="kw">where</span>
-        <span class="self">Self</span>: <span class="ident">Sized</span>,
+    <span class="doccomment">/// Claims a memory block from the pool
+    ///
+    /// Returns `None` when the pool is observed as exhausted
+    ///
+    /// *NOTE:* This method does *not* have bounded execution time; i.e. it contains a CAS loop
+    </span><span class="kw">fn </span>alloc() -&gt; <span class="prelude-ty">Option</span>&lt;Box&lt;<span class="self">Self</span>, Uninit&gt;&gt;
+    <span class="kw">where
+        </span><span class="self">Self</span>: Sized,
     {
-        <span class="ident"><span class="self">Self</span>::ptr</span>().<span class="ident">alloc</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">inner</span><span class="op">|</span> <span class="ident">Box</span> {
-            <span class="ident">_pool</span>: <span class="ident">PhantomData</span>,
-            <span class="ident">inner</span>,
+        <span class="self">Self</span>::ptr().alloc().map(|inner| Box {
+            _pool: PhantomData,
+            inner,
         })
     }
 
-    <span class="doccomment">/// Increases the capacity of the pool</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// This method might *not* fully utilize the given memory block due to alignment requirements</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// This method returns the number of *new* blocks that can be allocated.</span>
-    <span class="kw">fn</span> <span class="ident">grow</span>(<span class="ident">memory</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="kw-2">mut</span> [<span class="ident">u8</span>]) -&gt; <span class="ident">usize</span> {
-        <span class="ident"><span class="self">Self</span>::ptr</span>().<span class="ident">grow</span>(<span class="ident">memory</span>)
+    <span class="doccomment">/// Increases the capacity of the pool
+    ///
+    /// This method might *not* fully utilize the given memory block due to alignment requirements
+    ///
+    /// This method returns the number of *new* blocks that can be allocated.
+    </span><span class="kw">fn </span>grow(memory: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw-2">mut </span>[u8]) -&gt; usize {
+        <span class="self">Self</span>::ptr().grow(memory)
     }
 
-    <span class="doccomment">/// Increases the capacity of the pool</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// Unlike [`Pool.grow`](trait.Pool.html#method.grow_exact) this method fully utilizes the given</span>
-    <span class="doccomment">/// memory block</span>
-    <span class="kw">fn</span> <span class="ident">grow_exact</span><span class="op">&lt;</span><span class="ident">A</span><span class="op">&gt;</span>(<span class="ident">memory</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="kw-2">mut</span> <span class="ident">MaybeUninit</span><span class="op">&lt;</span><span class="ident">A</span><span class="op">&gt;</span>) -&gt; <span class="ident">usize</span>
-    <span class="kw">where</span>
-        <span class="ident">A</span>: <span class="ident">AsMut</span><span class="op">&lt;</span>[<span class="ident">Node</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Data</span><span class="op">&gt;</span>]<span class="op">&gt;</span>,
+    <span class="doccomment">/// Increases the capacity of the pool
+    ///
+    /// Unlike [`Pool.grow`](trait.Pool.html#method.grow_exact) this method fully utilizes the given
+    /// memory block
+    </span><span class="kw">fn </span>grow_exact&lt;A&gt;(memory: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw-2">mut </span>MaybeUninit&lt;A&gt;) -&gt; usize
+    <span class="kw">where
+        </span>A: AsMut&lt;[Node&lt;<span class="self">Self</span>::Data&gt;]&gt;,
     {
-        <span class="ident"><span class="self">Self</span>::ptr</span>().<span class="ident">grow_exact</span>(<span class="ident">memory</span>)
+        <span class="self">Self</span>::ptr().grow_exact(memory)
     }
 }
 
-<span class="doccomment">/// A memory block that belongs to the global memory pool, `POOL`</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">POOL</span>, <span class="ident">STATE</span> <span class="op">=</span> <span class="ident">Init</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">POOL</span>: <span class="ident">Pool</span>,
-    <span class="ident">STATE</span>: <span class="lifetime">&#39;static</span>,
+<span class="doccomment">/// A memory block that belongs to the global memory pool, `POOL`
+</span><span class="kw">pub struct </span>Box&lt;POOL, STATE = Init&gt;
+<span class="kw">where
+    </span>POOL: Pool,
+    STATE: <span class="lifetime">&#39;static</span>,
 {
-    <span class="ident">_pool</span>: <span class="ident">PhantomData</span><span class="op">&lt;</span><span class="ident">POOL</span><span class="op">&gt;</span>,
-    <span class="ident">inner</span>: <span class="ident"><span class="kw">super</span>::Box</span><span class="op">&lt;</span><span class="ident">POOL::Data</span>, <span class="ident">STATE</span><span class="op">&gt;</span>,
+    _pool: PhantomData&lt;POOL&gt;,
+    inner: <span class="kw">super</span>::Box&lt;POOL::Data, STATE&gt;,
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">P</span>, <span class="ident">Uninit</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">P</span>: <span class="ident">Pool</span>,
+<span class="kw">impl</span>&lt;P&gt; Box&lt;P, Uninit&gt;
+<span class="kw">where
+    </span>P: Pool,
 {
-    <span class="doccomment">/// Initializes this memory block</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">init</span>(<span class="self">self</span>, <span class="ident">val</span>: <span class="ident">P::Data</span>) -&gt; <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">P</span>, <span class="ident">Init</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">node</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">node</span>;
+    <span class="doccomment">/// Initializes this memory block
+    </span><span class="kw">pub fn </span>init(<span class="self">self</span>, val: P::Data) -&gt; Box&lt;P, Init&gt; {
+        <span class="kw">let </span>node = <span class="self">self</span>.inner.node;
 
-        <span class="ident">mem::forget</span>(<span class="self">self</span>);
+        mem::forget(<span class="self">self</span>);
 
-        <span class="kw">if</span> <span class="ident">mem::size_of</span>::<span class="op">&lt;</span><span class="ident">P::Data</span><span class="op">&gt;</span>() <span class="op">==</span> <span class="number">0</span> {
-            <span class="comment">// no memory operation needed for ZST</span>
-            <span class="comment">// BUT we want to avoid calling `val`s destructor</span>
-            <span class="ident">mem::forget</span>(<span class="ident">val</span>)
-        } <span class="kw">else</span> {
-            <span class="kw">unsafe</span> {
-                <span class="ident">ptr::write</span>(<span class="ident">node</span>.<span class="ident">as_ref</span>().<span class="ident">data</span>.<span class="ident">get</span>(), <span class="ident">val</span>);
+        <span class="kw">if </span>mem::size_of::&lt;P::Data&gt;() == <span class="number">0 </span>{
+            <span class="comment">// no memory operation needed for ZST
+            // BUT we want to avoid calling `val`s destructor
+            </span>mem::forget(val)
+        } <span class="kw">else </span>{
+            <span class="kw">unsafe </span>{
+                ptr::write(node.as_ref().data.get(), val);
             }
         }
 
-        <span class="ident">Box</span> {
-            <span class="ident">inner</span>: <span class="ident"><span class="kw">super</span>::Box</span> {
-                <span class="ident">node</span>,
-                <span class="ident">_state</span>: <span class="ident">PhantomData</span>,
+        Box {
+            inner: <span class="kw">super</span>::Box {
+                node,
+                _state: PhantomData,
             },
-            <span class="ident">_pool</span>: <span class="ident">PhantomData</span>,
+            _pool: PhantomData,
         }
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">P</span>, <span class="ident">Uninit</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">P</span>: <span class="ident">Pool</span>,
-    <span class="ident">P::Data</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>,
+<span class="kw">impl</span>&lt;P&gt; Box&lt;P, Uninit&gt;
+<span class="kw">where
+    </span>P: Pool,
+    P::Data: AsRef&lt;[u8]&gt;,
 {
-    <span class="attribute">#[<span class="ident">deprecated</span>(
-        <span class="ident">since</span> <span class="op">=</span> <span class="string">&quot;0.7.3&quot;</span>,
-        <span class="ident">note</span> <span class="op">=</span> <span class="string">&quot;This can access uninitialized memory, use `init(..)` instead (https://github.com/japaric/heapless/issues/212)&quot;</span>
-    )]</span>
-    <span class="doccomment">/// (DO NOT USE, SEE DEPRECATION) Freezes the contents of this memory block</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// See [rust-lang/rust#58363](https://github.com/rust-lang/rust/pull/58363) for details.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">freeze</span>(<span class="self">self</span>) -&gt; <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">P</span>, <span class="ident">Init</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">node</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">node</span>;
+    <span class="attribute">#[deprecated(
+        since = <span class="string">&quot;0.7.3&quot;</span>,
+        note = <span class="string">&quot;This can access uninitialized memory, use `init(..)` instead (https://github.com/japaric/heapless/issues/212)&quot;
+    </span>)]
+    </span><span class="doccomment">/// (DO NOT USE, SEE DEPRECATION) Freezes the contents of this memory block
+    ///
+    /// See [rust-lang/rust#58363](https://github.com/rust-lang/rust/pull/58363) for details.
+    </span><span class="kw">pub fn </span>freeze(<span class="self">self</span>) -&gt; Box&lt;P, Init&gt; {
+        <span class="kw">let </span>node = <span class="self">self</span>.inner.node;
 
-        <span class="ident">mem::forget</span>(<span class="self">self</span>);
+        mem::forget(<span class="self">self</span>);
 
-        <span class="comment">// it seems we can get away with not calling `ptr::freeze` here and not run into UB</span>
-        <span class="comment">// because we are dealing with static memory and using fences</span>
-        <span class="comment">// let p: *const u8 = (*node.as_ref().data.get()).as_slice().as_ptr();</span>
-        <span class="comment">// ptr::freeze(p as *mut u8);</span>
+        <span class="comment">// it seems we can get away with not calling `ptr::freeze` here and not run into UB
+        // because we are dealing with static memory and using fences
+        // let p: *const u8 = (*node.as_ref().data.get()).as_slice().as_ptr();
+        // ptr::freeze(p as *mut u8);
 
-        <span class="ident">Box</span> {
-            <span class="ident">inner</span>: <span class="ident"><span class="kw">super</span>::Box</span> {
-                <span class="ident">node</span>,
-                <span class="ident">_state</span>: <span class="ident">PhantomData</span>,
+        </span>Box {
+            inner: <span class="kw">super</span>::Box {
+                node,
+                _state: PhantomData,
             },
-            <span class="ident">_pool</span>: <span class="ident">PhantomData</span>,
+            _pool: PhantomData,
         }
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">P</span>, <span class="ident">Init</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">P</span>: <span class="ident">Pool</span>,
+<span class="kw">impl</span>&lt;P&gt; Box&lt;P, Init&gt;
+<span class="kw">where
+    </span>P: Pool,
 {
-    <span class="doccomment">/// Forgets the contents of this memory block without running its destructor.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// Note that this this does not return the memory block to the pool. The</span>
-    <span class="doccomment">/// block can be reused, or returned to the pool by dropping it.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">forget</span>(<span class="self">self</span>) -&gt; <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">P</span>, <span class="ident">Uninit</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">node</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">node</span>;
+    <span class="doccomment">/// Forgets the contents of this memory block without running its destructor.
+    ///
+    /// Note that this this does not return the memory block to the pool. The
+    /// block can be reused, or returned to the pool by dropping it.
+    </span><span class="kw">pub fn </span>forget(<span class="self">self</span>) -&gt; Box&lt;P, Uninit&gt; {
+        <span class="kw">let </span>node = <span class="self">self</span>.inner.node;
 
-        <span class="ident">mem::forget</span>(<span class="self">self</span>);
-        <span class="kw">if</span> <span class="ident">mem::size_of</span>::<span class="op">&lt;</span><span class="ident">P::Data</span><span class="op">&gt;</span>() <span class="op">==</span> <span class="number">0</span> {
-            <span class="comment">// no need to do a pointer dereference in this case</span>
-        } <span class="kw">else</span> {
-            <span class="ident">mem::forget</span>(<span class="kw">unsafe</span> { <span class="ident">ptr::read</span>(<span class="ident">node</span>.<span class="ident">as_ref</span>().<span class="ident">data</span>.<span class="ident">get</span>()) });
+        mem::forget(<span class="self">self</span>);
+        <span class="kw">if </span>mem::size_of::&lt;P::Data&gt;() == <span class="number">0 </span>{
+            <span class="comment">// no need to do a pointer dereference in this case
+        </span>} <span class="kw">else </span>{
+            mem::forget(<span class="kw">unsafe </span>{ ptr::read(node.as_ref().data.get()) });
         }
 
-        <span class="ident">Box</span> {
-            <span class="ident">inner</span>: <span class="ident"><span class="kw">super</span>::Box</span> {
-                <span class="ident">node</span>,
-                <span class="ident">_state</span>: <span class="ident">PhantomData</span>,
+        Box {
+            inner: <span class="kw">super</span>::Box {
+                node,
+                _state: PhantomData,
             },
-            <span class="ident">_pool</span>: <span class="ident">PhantomData</span>,
+            _pool: PhantomData,
         }
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> <span class="ident">Deref</span> <span class="kw">for</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">P</span>: <span class="ident">Pool</span>,
+<span class="kw">impl</span>&lt;P&gt; Deref <span class="kw">for </span>Box&lt;P&gt;
+<span class="kw">where
+    </span>P: Pool,
 {
-    <span class="kw">type</span> <span class="ident">Target</span> <span class="op">=</span> <span class="ident">P::Data</span>;
+    <span class="kw">type </span>Target = P::Data;
 
-    <span class="kw">fn</span> <span class="ident">deref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">P::Data</span> {
-        <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">deref</span>()
+    <span class="kw">fn </span>deref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>P::Data {
+        <span class="self">self</span>.inner.deref()
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> <span class="ident">DerefMut</span> <span class="kw">for</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">P</span>: <span class="ident">Pool</span>,
+<span class="kw">impl</span>&lt;P&gt; DerefMut <span class="kw">for </span>Box&lt;P&gt;
+<span class="kw">where
+    </span>P: Pool,
 {
-    <span class="kw">fn</span> <span class="ident">deref_mut</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut</span> <span class="ident">P::Data</span> {
-        <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">deref_mut</span>()
+    <span class="kw">fn </span>deref_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>P::Data {
+        <span class="self">self</span>.inner.deref_mut()
     }
 }
 
-<span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">Pool</span><span class="op">&gt;</span> <span class="ident">stable_deref_trait::StableDeref</span> <span class="kw">for</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> {}
+<span class="kw">unsafe impl</span>&lt;P: Pool&gt; stable_deref_trait::StableDeref <span class="kw">for </span>Box&lt;P&gt; {}
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> <span class="ident">fmt::Debug</span> <span class="kw">for</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">P</span>: <span class="ident">Pool</span>,
-    <span class="ident">P::Data</span>: <span class="ident">fmt::Debug</span>,
+<span class="kw">impl</span>&lt;P&gt; fmt::Debug <span class="kw">for </span>Box&lt;P&gt;
+<span class="kw">where
+    </span>P: Pool,
+    P::Data: fmt::Debug,
 {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">fmt::Result</span> {
-        <span class="op">&lt;</span><span class="ident">P::Data</span> <span class="kw">as</span> <span class="ident">fmt::Debug</span><span class="op">&gt;</span><span class="ident">::fmt</span>(<span class="self">self</span>, <span class="ident">f</span>)
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+        &lt;P::Data <span class="kw">as </span>fmt::Debug&gt;::fmt(<span class="self">self</span>, f)
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> <span class="ident">fmt::Display</span> <span class="kw">for</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">P</span>: <span class="ident">Pool</span>,
-    <span class="ident">P::Data</span>: <span class="ident">fmt::Display</span>,
+<span class="kw">impl</span>&lt;P&gt; fmt::Display <span class="kw">for </span>Box&lt;P&gt;
+<span class="kw">where
+    </span>P: Pool,
+    P::Data: fmt::Display,
 {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">fmt::Result</span> {
-        <span class="op">&lt;</span><span class="ident">P::Data</span> <span class="kw">as</span> <span class="ident">fmt::Display</span><span class="op">&gt;</span><span class="ident">::fmt</span>(<span class="self">self</span>, <span class="ident">f</span>)
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+        &lt;P::Data <span class="kw">as </span>fmt::Display&gt;::fmt(<span class="self">self</span>, f)
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span>, <span class="ident">S</span><span class="op">&gt;</span> <span class="ident">Drop</span> <span class="kw">for</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">P</span>, <span class="ident">S</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">P</span>: <span class="ident">Pool</span>,
-    <span class="ident">S</span>: <span class="lifetime">&#39;static</span>,
+<span class="kw">impl</span>&lt;P, S&gt; Drop <span class="kw">for </span>Box&lt;P, S&gt;
+<span class="kw">where
+    </span>P: Pool,
+    S: <span class="lifetime">&#39;static</span>,
 {
-    <span class="kw">fn</span> <span class="ident">drop</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
-        <span class="kw">if</span> <span class="ident">TypeId::of</span>::<span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>() <span class="op">==</span> <span class="ident">TypeId::of</span>::<span class="op">&lt;</span><span class="ident">Init</span><span class="op">&gt;</span>() {
-            <span class="kw">let</span> <span class="ident">p</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">mem::size_of</span>::<span class="op">&lt;</span><span class="ident">P::Data</span><span class="op">&gt;</span>() <span class="op">==</span> <span class="number">0</span> {
-                <span class="comment">// any pointer will do to invoke the destructor of a ZST</span>
-                <span class="ident">NonNull::dangling</span>().<span class="ident">as_ptr</span>()
-            } <span class="kw">else</span> {
-                <span class="kw">unsafe</span> { <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">node</span>.<span class="ident">as_ref</span>().<span class="ident">data</span>.<span class="ident">get</span>() }
+    <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="kw">if </span>TypeId::of::&lt;S&gt;() == TypeId::of::&lt;Init&gt;() {
+            <span class="kw">let </span>p = <span class="kw">if </span>mem::size_of::&lt;P::Data&gt;() == <span class="number">0 </span>{
+                <span class="comment">// any pointer will do to invoke the destructor of a ZST
+                </span>NonNull::dangling().as_ptr()
+            } <span class="kw">else </span>{
+                <span class="kw">unsafe </span>{ <span class="self">self</span>.inner.node.as_ref().data.get() }
             };
-            <span class="kw">unsafe</span> {
-                <span class="ident">ptr::drop_in_place</span>(<span class="ident">p</span>);
+            <span class="kw">unsafe </span>{
+                ptr::drop_in_place(p);
             }
         }
 
-        <span class="kw">if</span> <span class="ident">mem::size_of</span>::<span class="op">&lt;</span><span class="ident">P::Data</span><span class="op">&gt;</span>() <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
-            <span class="ident">P::ptr</span>().<span class="ident">stack</span>.<span class="ident">push</span>(<span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">node</span>)
+        <span class="kw">if </span>mem::size_of::&lt;P::Data&gt;() != <span class="number">0 </span>{
+            P::ptr().stack.push(<span class="self">self</span>.inner.node)
         }
     }
 }
 
-<span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span>, <span class="ident">S</span><span class="op">&gt;</span> <span class="ident">Send</span> <span class="kw">for</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">P</span>, <span class="ident">S</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">P</span>: <span class="ident">Pool</span>,
-    <span class="ident">P::Data</span>: <span class="ident">Send</span>,
+<span class="kw">unsafe impl</span>&lt;P, S&gt; Send <span class="kw">for </span>Box&lt;P, S&gt;
+<span class="kw">where
+    </span>P: Pool,
+    P::Data: Send,
 {
 }
 
-<span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span>, <span class="ident">S</span><span class="op">&gt;</span> <span class="ident">Sync</span> <span class="kw">for</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">P</span>, <span class="ident">S</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">P</span>: <span class="ident">Pool</span>,
-    <span class="ident">P::Data</span>: <span class="ident">Sync</span>,
+<span class="kw">unsafe impl</span>&lt;P, S&gt; Sync <span class="kw">for </span>Box&lt;P, S&gt;
+<span class="kw">where
+    </span>P: Pool,
+    P::Data: Sync,
 {
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">T</span>]<span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">P</span>: <span class="ident">Pool</span>,
-    <span class="ident">P::Data</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">T</span>]<span class="op">&gt;</span>,
+<span class="kw">impl</span>&lt;P, T&gt; AsRef&lt;[T]&gt; <span class="kw">for </span>Box&lt;P&gt;
+<span class="kw">where
+    </span>P: Pool,
+    P::Data: AsRef&lt;[T]&gt;,
 {
-    <span class="kw">fn</span> <span class="ident">as_ref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[<span class="ident">T</span>] {
-        <span class="self">self</span>.<span class="ident">deref</span>().<span class="ident">as_ref</span>()
+    <span class="kw">fn </span>as_ref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[T] {
+        <span class="self">self</span>.deref().as_ref()
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">AsMut</span><span class="op">&lt;</span>[<span class="ident">T</span>]<span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">P</span>: <span class="ident">Pool</span>,
-    <span class="ident">P::Data</span>: <span class="ident">AsMut</span><span class="op">&lt;</span>[<span class="ident">T</span>]<span class="op">&gt;</span>,
+<span class="kw">impl</span>&lt;P, T&gt; AsMut&lt;[T]&gt; <span class="kw">for </span>Box&lt;P&gt;
+<span class="kw">where
+    </span>P: Pool,
+    P::Data: AsMut&lt;[T]&gt;,
 {
-    <span class="kw">fn</span> <span class="ident">as_mut</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut</span> [<span class="ident">T</span>] {
-        <span class="self">self</span>.<span class="ident">deref_mut</span>().<span class="ident">as_mut</span>()
+    <span class="kw">fn </span>as_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>[T] {
+        <span class="self">self</span>.deref_mut().as_mut()
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> <span class="ident">PartialEq</span> <span class="kw">for</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">P</span>: <span class="ident">Pool</span>,
-    <span class="ident">P::Data</span>: <span class="ident">PartialEq</span>,
+<span class="kw">impl</span>&lt;P&gt; PartialEq <span class="kw">for </span>Box&lt;P&gt;
+<span class="kw">where
+    </span>P: Pool,
+    P::Data: PartialEq,
 {
-    <span class="kw">fn</span> <span class="ident">eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rhs</span>: <span class="kw-2">&amp;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>) -&gt; <span class="ident">bool</span> {
-        <span class="op">&lt;</span><span class="ident">P::Data</span> <span class="kw">as</span> <span class="ident">PartialEq</span><span class="op">&gt;</span><span class="ident">::eq</span>(<span class="self">self</span>, <span class="ident">rhs</span>)
+    <span class="kw">fn </span>eq(<span class="kw-2">&amp;</span><span class="self">self</span>, rhs: <span class="kw-2">&amp;</span>Box&lt;P&gt;) -&gt; bool {
+        &lt;P::Data <span class="kw">as </span>PartialEq&gt;::eq(<span class="self">self</span>, rhs)
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> <span class="ident">Eq</span> <span class="kw">for</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">P</span>: <span class="ident">Pool</span>,
-    <span class="ident">P::Data</span>: <span class="ident">Eq</span>,
+<span class="kw">impl</span>&lt;P&gt; Eq <span class="kw">for </span>Box&lt;P&gt;
+<span class="kw">where
+    </span>P: Pool,
+    P::Data: Eq,
 {
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> <span class="ident">PartialOrd</span> <span class="kw">for</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">P</span>: <span class="ident">Pool</span>,
-    <span class="ident">P::Data</span>: <span class="ident">PartialOrd</span>,
+<span class="kw">impl</span>&lt;P&gt; PartialOrd <span class="kw">for </span>Box&lt;P&gt;
+<span class="kw">where
+    </span>P: Pool,
+    P::Data: PartialOrd,
 {
-    <span class="kw">fn</span> <span class="ident">partial_cmp</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rhs</span>: <span class="kw-2">&amp;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">cmp::Ordering</span><span class="op">&gt;</span> {
-        <span class="op">&lt;</span><span class="ident">P::Data</span> <span class="kw">as</span> <span class="ident">PartialOrd</span><span class="op">&gt;</span><span class="ident">::partial_cmp</span>(<span class="self">self</span>, <span class="ident">rhs</span>)
+    <span class="kw">fn </span>partial_cmp(<span class="kw-2">&amp;</span><span class="self">self</span>, rhs: <span class="kw-2">&amp;</span>Box&lt;P&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;cmp::Ordering&gt; {
+        &lt;P::Data <span class="kw">as </span>PartialOrd&gt;::partial_cmp(<span class="self">self</span>, rhs)
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> <span class="ident">Ord</span> <span class="kw">for</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">P</span>: <span class="ident">Pool</span>,
-    <span class="ident">P::Data</span>: <span class="ident">Ord</span>,
+<span class="kw">impl</span>&lt;P&gt; Ord <span class="kw">for </span>Box&lt;P&gt;
+<span class="kw">where
+    </span>P: Pool,
+    P::Data: Ord,
 {
-    <span class="kw">fn</span> <span class="ident">cmp</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rhs</span>: <span class="kw-2">&amp;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>) -&gt; <span class="ident">cmp::Ordering</span> {
-        <span class="op">&lt;</span><span class="ident">P::Data</span> <span class="kw">as</span> <span class="ident">Ord</span><span class="op">&gt;</span><span class="ident">::cmp</span>(<span class="self">self</span>, <span class="ident">rhs</span>)
+    <span class="kw">fn </span>cmp(<span class="kw-2">&amp;</span><span class="self">self</span>, rhs: <span class="kw-2">&amp;</span>Box&lt;P&gt;) -&gt; cmp::Ordering {
+        &lt;P::Data <span class="kw">as </span>Ord&gt;::cmp(<span class="self">self</span>, rhs)
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> <span class="ident">Hash</span> <span class="kw">for</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">P</span>: <span class="ident">Pool</span>,
-    <span class="ident">P::Data</span>: <span class="ident">Hash</span>,
+<span class="kw">impl</span>&lt;P&gt; Hash <span class="kw">for </span>Box&lt;P&gt;
+<span class="kw">where
+    </span>P: Pool,
+    P::Data: Hash,
 {
-    <span class="kw">fn</span> <span class="ident">hash</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">state</span>: <span class="kw-2">&amp;mut</span> <span class="ident">H</span>)
-    <span class="kw">where</span>
-        <span class="ident">H</span>: <span class="ident">Hasher</span>,
+    <span class="kw">fn </span>hash&lt;H&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, state: <span class="kw-2">&amp;mut </span>H)
+    <span class="kw">where
+        </span>H: Hasher,
     {
-        <span class="op">&lt;</span><span class="ident">P::Data</span> <span class="kw">as</span> <span class="ident">Hash</span><span class="op">&gt;</span><span class="ident">::hash</span>(<span class="self">self</span>, <span class="ident">state</span>)
+        &lt;P::Data <span class="kw">as </span>Hash&gt;::hash(<span class="self">self</span>, state)
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
-<span class="kw">mod</span> <span class="ident">tests</span> {
-    <span class="kw">use</span> <span class="ident">core</span>::{
-        <span class="ident">mem</span>,
-        <span class="ident">sync::atomic</span>::{<span class="ident">AtomicUsize</span>, <span class="ident">Ordering</span>},
+<span class="attribute">#[cfg(test)]
+</span><span class="kw">mod </span>tests {
+    <span class="kw">use </span>core::{
+        mem,
+        sync::atomic::{AtomicUsize, Ordering},
     };
 
-    <span class="kw">use</span> <span class="kw">super</span>::{<span class="ident"><span class="kw">super</span>::Node</span>, <span class="ident">Pool</span>};
+    <span class="kw">use super</span>::{<span class="kw">super</span>::Node, Pool};
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">sanity</span>() {
-        <span class="kw">const</span> <span class="ident">SZ</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">2</span> <span class="op">*</span> <span class="ident">mem::size_of</span>::<span class="op">&lt;</span><span class="ident">Node</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>() <span class="op">-</span> <span class="number">1</span>;
-        <span class="kw">static</span> <span class="kw-2">mut</span> <span class="ident">MEMORY</span>: [<span class="ident">u8</span>; <span class="ident">SZ</span>] <span class="op">=</span> [<span class="number">0</span>; <span class="ident">SZ</span>];
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>sanity() {
+        <span class="kw">const </span>SZ: usize = <span class="number">2 </span>* mem::size_of::&lt;Node&lt;u8&gt;&gt;() - <span class="number">1</span>;
+        <span class="kw">static </span><span class="kw-2">mut </span>MEMORY: [u8; SZ] = [<span class="number">0</span>; SZ];
 
-        <span class="macro">pool!</span>(<span class="ident">A</span>: <span class="ident">u8</span>);
+        <span class="macro">pool!</span>(A: u8);
 
-        <span class="comment">// empty pool</span>
-        <span class="macro">assert!</span>(<span class="ident">A::alloc</span>().<span class="ident">is_none</span>());
+        <span class="comment">// empty pool
+        </span><span class="macro">assert!</span>(A::alloc().is_none());
 
-        <span class="ident">A::grow</span>(<span class="kw">unsafe</span> { <span class="kw-2">&amp;mut</span> <span class="ident">MEMORY</span> });
+        A::grow(<span class="kw">unsafe </span>{ <span class="kw-2">&amp;mut </span>MEMORY });
 
-        <span class="kw">let</span> <span class="ident">x</span> <span class="op">=</span> <span class="ident">A::alloc</span>().<span class="ident">unwrap</span>().<span class="ident">init</span>(<span class="number">0</span>);
-        <span class="macro">assert_eq!</span>(<span class="kw-2">*</span><span class="ident">x</span>, <span class="number">0</span>);
+        <span class="kw">let </span>x = A::alloc().unwrap().init(<span class="number">0</span>);
+        <span class="macro">assert_eq!</span>(<span class="kw-2">*</span>x, <span class="number">0</span>);
 
-        <span class="comment">// pool exhausted</span>
-        <span class="macro">assert!</span>(<span class="ident">A::alloc</span>().<span class="ident">is_none</span>());
+        <span class="comment">// pool exhausted
+        </span><span class="macro">assert!</span>(A::alloc().is_none());
 
-        <span class="ident">drop</span>(<span class="ident">x</span>);
+        drop(x);
 
-        <span class="comment">// should be possible to allocate again</span>
-        <span class="macro">assert_eq!</span>(<span class="kw-2">*</span><span class="ident">A::alloc</span>().<span class="ident">unwrap</span>().<span class="ident">init</span>(<span class="number">1</span>), <span class="number">1</span>);
+        <span class="comment">// should be possible to allocate again
+        </span><span class="macro">assert_eq!</span>(<span class="kw-2">*</span>A::alloc().unwrap().init(<span class="number">1</span>), <span class="number">1</span>);
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">boxed_zst_is_well_aligned</span>() {
-        <span class="attribute">#[<span class="ident">repr</span>(<span class="ident">align</span>(<span class="number">2</span>))]</span>
-        <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Zst2</span>;
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>boxed_zst_is_well_aligned() {
+        <span class="attribute">#[repr(align(<span class="number">2</span>))]
+        </span><span class="kw">pub struct </span>Zst2;
 
-        <span class="macro">pool!</span>(<span class="ident">A</span>: <span class="ident">Zst2</span>);
+        <span class="macro">pool!</span>(A: Zst2);
 
-        <span class="kw">let</span> <span class="ident">x</span> <span class="op">=</span> <span class="ident">A::alloc</span>().<span class="ident">unwrap</span>().<span class="ident">init</span>(<span class="ident">Zst2</span>);
-        <span class="macro">assert_eq!</span>(<span class="number">0</span>, <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">x</span> <span class="kw">as</span> <span class="kw-2">*const</span> <span class="ident">Zst2</span> <span class="kw">as</span> <span class="ident">usize</span> <span class="op">%</span> <span class="number">2</span>);
+        <span class="kw">let </span>x = A::alloc().unwrap().init(Zst2);
+        <span class="macro">assert_eq!</span>(<span class="number">0</span>, <span class="kw-2">&amp;*</span>x <span class="kw">as </span><span class="kw-2">*const </span>Zst2 <span class="kw">as </span>usize % <span class="number">2</span>);
 
-        <span class="attribute">#[<span class="ident">repr</span>(<span class="ident">align</span>(<span class="number">4096</span>))]</span>
-        <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Zst4096</span>;
+        <span class="attribute">#[repr(align(<span class="number">4096</span>))]
+        </span><span class="kw">pub struct </span>Zst4096;
 
-        <span class="macro">pool!</span>(<span class="ident">B</span>: <span class="ident">Zst4096</span>);
+        <span class="macro">pool!</span>(B: Zst4096);
 
-        <span class="kw">let</span> <span class="ident">x</span> <span class="op">=</span> <span class="ident">B::alloc</span>().<span class="ident">unwrap</span>().<span class="ident">init</span>(<span class="ident">Zst4096</span>);
-        <span class="macro">assert_eq!</span>(<span class="number">0</span>, <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">x</span> <span class="kw">as</span> <span class="kw-2">*const</span> <span class="ident">Zst4096</span> <span class="kw">as</span> <span class="ident">usize</span> <span class="op">%</span> <span class="number">4096</span>);
+        <span class="kw">let </span>x = B::alloc().unwrap().init(Zst4096);
+        <span class="macro">assert_eq!</span>(<span class="number">0</span>, <span class="kw-2">&amp;*</span>x <span class="kw">as </span><span class="kw-2">*const </span>Zst4096 <span class="kw">as </span>usize % <span class="number">4096</span>);
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">destructors</span>() {
-        <span class="kw">static</span> <span class="ident">COUNT</span>: <span class="ident">AtomicUsize</span> <span class="op">=</span> <span class="ident">AtomicUsize::new</span>(<span class="number">0</span>);
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>destructors() {
+        <span class="kw">static </span>COUNT: AtomicUsize = AtomicUsize::new(<span class="number">0</span>);
 
-        <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">X</span>;
+        <span class="kw">pub struct </span>X;
 
-        <span class="kw">impl</span> <span class="ident">X</span> {
-            <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="ident">X</span> {
-                <span class="ident">COUNT</span>.<span class="ident">fetch_add</span>(<span class="number">1</span>, <span class="ident">Ordering::Relaxed</span>);
-                <span class="ident">X</span>
+        <span class="kw">impl </span>X {
+            <span class="kw">fn </span>new() -&gt; X {
+                COUNT.fetch_add(<span class="number">1</span>, Ordering::Relaxed);
+                X
             }
         }
 
-        <span class="kw">impl</span> <span class="ident">Drop</span> <span class="kw">for</span> <span class="ident">X</span> {
-            <span class="kw">fn</span> <span class="ident">drop</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
-                <span class="ident">COUNT</span>.<span class="ident">fetch_sub</span>(<span class="number">1</span>, <span class="ident">Ordering::Relaxed</span>);
+        <span class="kw">impl </span>Drop <span class="kw">for </span>X {
+            <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+                COUNT.fetch_sub(<span class="number">1</span>, Ordering::Relaxed);
             }
         }
 
-        <span class="macro">pool!</span>(<span class="ident">A</span>: <span class="ident">X</span>);
+        <span class="macro">pool!</span>(A: X);
 
-        <span class="kw">let</span> <span class="ident">x</span> <span class="op">=</span> <span class="ident">A::alloc</span>().<span class="ident">unwrap</span>().<span class="ident">init</span>(<span class="ident">X::new</span>());
-        <span class="kw">let</span> <span class="ident">y</span> <span class="op">=</span> <span class="ident">A::alloc</span>().<span class="ident">unwrap</span>().<span class="ident">init</span>(<span class="ident">X::new</span>());
-        <span class="kw">let</span> <span class="ident">z</span> <span class="op">=</span> <span class="ident">A::alloc</span>().<span class="ident">unwrap</span>().<span class="ident">init</span>(<span class="ident">X::new</span>());
+        <span class="kw">let </span>x = A::alloc().unwrap().init(X::new());
+        <span class="kw">let </span>y = A::alloc().unwrap().init(X::new());
+        <span class="kw">let </span>z = A::alloc().unwrap().init(X::new());
 
-        <span class="macro">assert_eq!</span>(<span class="ident">COUNT</span>.<span class="ident">load</span>(<span class="ident">Ordering::Relaxed</span>), <span class="number">3</span>);
+        <span class="macro">assert_eq!</span>(COUNT.load(Ordering::Relaxed), <span class="number">3</span>);
 
-        <span class="comment">// this runs `X`&#39;s destructor</span>
-        <span class="ident">drop</span>(<span class="ident">x</span>);
+        <span class="comment">// this runs `X`&#39;s destructor
+        </span>drop(x);
 
-        <span class="macro">assert_eq!</span>(<span class="ident">COUNT</span>.<span class="ident">load</span>(<span class="ident">Ordering::Relaxed</span>), <span class="number">2</span>);
+        <span class="macro">assert_eq!</span>(COUNT.load(Ordering::Relaxed), <span class="number">2</span>);
 
-        <span class="comment">// this leaks memory</span>
-        <span class="ident">mem::forget</span>(<span class="ident">y</span>);
+        <span class="comment">// this leaks memory
+        </span>mem::forget(y);
 
-        <span class="macro">assert_eq!</span>(<span class="ident">COUNT</span>.<span class="ident">load</span>(<span class="ident">Ordering::Relaxed</span>), <span class="number">2</span>);
+        <span class="macro">assert_eq!</span>(COUNT.load(Ordering::Relaxed), <span class="number">2</span>);
 
-        <span class="comment">// this forgets `X` without leaking memory</span>
-        <span class="ident">z</span>.<span class="ident">forget</span>();
+        <span class="comment">// this forgets `X` without leaking memory
+        </span>z.forget();
 
-        <span class="macro">assert_eq!</span>(<span class="ident">COUNT</span>.<span class="ident">load</span>(<span class="ident">Ordering::Relaxed</span>), <span class="number">2</span>);
+        <span class="macro">assert_eq!</span>(COUNT.load(Ordering::Relaxed), <span class="number">2</span>);
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="heapless" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="heapless" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

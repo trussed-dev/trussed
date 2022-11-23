@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/mechanisms/totp.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>totp.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../trussed/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../trussed/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../trussed/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/mechanisms/totp.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>totp.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../trussed/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../trussed/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../trussed/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -105,112 +105,112 @@
 <span id="105">105</span>
 <span id="106">106</span>
 <span id="107">107</span>
-</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::api</span>::<span class="kw-2">*</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::error::Error</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::service</span>::<span class="kw-2">*</span>;
+</pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::api::<span class="kw-2">*</span>;
+<span class="kw">use </span><span class="kw">crate</span>::error::Error;
+<span class="kw">use </span><span class="kw">crate</span>::service::<span class="kw-2">*</span>;
 
-<span class="comment">// code copied from https://github.com/avacariu/rust-oath</span>
+<span class="comment">// code copied from https://github.com/avacariu/rust-oath
 
-<span class="kw">const</span> <span class="ident">DIGITS</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">6</span>;
-<span class="kw">const</span> <span class="ident">TOTP_KEY_SIZE</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">20</span>;
+</span><span class="kw">const </span>DIGITS: u32 = <span class="number">6</span>;
+<span class="kw">const </span>TOTP_KEY_SIZE: usize = <span class="number">20</span>;
 
-<span class="comment">// https://tools.ietf.org/html/rfc4226#section-5.3</span>
+<span class="comment">// https://tools.ietf.org/html/rfc4226#section-5.3
 
-<span class="attribute">#[<span class="ident">inline</span>(<span class="ident">never</span>)]</span>
-<span class="kw">fn</span> <span class="ident">hotp_raw</span>(<span class="ident">key</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">counter</span>: <span class="ident">u64</span>, <span class="ident">digits</span>: <span class="ident">u32</span>) -&gt; <span class="ident">u64</span> {
-    <span class="ident">hmac_and_truncate</span>(<span class="ident">key</span>, <span class="kw-2">&amp;</span><span class="ident">counter</span>.<span class="ident">to_be_bytes</span>(), <span class="ident">digits</span>)
+</span><span class="attribute">#[inline(never)]
+</span><span class="kw">fn </span>hotp_raw(key: <span class="kw-2">&amp;</span>[u8], counter: u64, digits: u32) -&gt; u64 {
+    hmac_and_truncate(key, <span class="kw-2">&amp;</span>counter.to_be_bytes(), digits)
 }
 
-<span class="attribute">#[<span class="ident">inline</span>(<span class="ident">never</span>)]</span>
-<span class="kw">fn</span> <span class="ident">hmac_and_truncate</span>(<span class="ident">key</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">message</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">digits</span>: <span class="ident">u32</span>) -&gt; <span class="ident">u64</span> {
-    <span class="kw">use</span> <span class="ident">hmac</span>::{<span class="ident">Hmac</span>, <span class="ident">Mac</span>, <span class="ident">NewMac</span>};
-    <span class="comment">// let mut hmac = Hmac::&lt;D&gt;::new(GenericArray::from_slice(key));</span>
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">hmac</span> <span class="op">=</span> <span class="ident">Hmac</span>::<span class="op">&lt;</span><span class="ident">sha1::Sha1</span><span class="op">&gt;</span><span class="ident">::new_from_slice</span>(<span class="ident">key</span>).<span class="ident">unwrap</span>();
-    <span class="ident">hmac</span>.<span class="ident">update</span>(<span class="ident">message</span>);
-    <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">hmac</span>.<span class="ident">finalize</span>();
+<span class="attribute">#[inline(never)]
+</span><span class="kw">fn </span>hmac_and_truncate(key: <span class="kw-2">&amp;</span>[u8], message: <span class="kw-2">&amp;</span>[u8], digits: u32) -&gt; u64 {
+    <span class="kw">use </span>hmac::{Hmac, Mac, NewMac};
+    <span class="comment">// let mut hmac = Hmac::&lt;D&gt;::new(GenericArray::from_slice(key));
+    </span><span class="kw">let </span><span class="kw-2">mut </span>hmac = Hmac::&lt;sha1::Sha1&gt;::new_from_slice(key).unwrap();
+    hmac.update(message);
+    <span class="kw">let </span>result = hmac.finalize();
 
-    <span class="comment">// output of `.code()` is GenericArray&lt;u8, OutputSize&gt;, again 20B</span>
-    <span class="comment">// crypto-mac docs warn: &quot;Be very careful using this method,</span>
-    <span class="comment">// since incorrect use of the code material may permit timing attacks</span>
-    <span class="comment">// which defeat the security provided by the Mac trait.&quot;</span>
-    <span class="kw">let</span> <span class="ident">hs</span> <span class="op">=</span> <span class="ident">result</span>.<span class="ident">into_bytes</span>();
+    <span class="comment">// output of `.code()` is GenericArray&lt;u8, OutputSize&gt;, again 20B
+    // crypto-mac docs warn: &quot;Be very careful using this method,
+    // since incorrect use of the code material may permit timing attacks
+    // which defeat the security provided by the Mac trait.&quot;
+    </span><span class="kw">let </span>hs = result.into_bytes();
 
-    <span class="ident">dynamic_truncation</span>(<span class="kw-2">&amp;</span><span class="ident">hs</span>) <span class="op">%</span> <span class="number">10_u64</span>.<span class="ident">pow</span>(<span class="ident">digits</span>)
+    dynamic_truncation(<span class="kw-2">&amp;</span>hs) % <span class="number">10_u64</span>.pow(digits)
 }
 
-<span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">fn</span> <span class="ident">dynamic_truncation</span>(<span class="ident">hs</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="ident">u64</span> {
-    <span class="comment">// low-order bits of byte 19 (last) of the 20B output</span>
-    <span class="kw">let</span> <span class="ident">offset_bits</span> <span class="op">=</span> (<span class="kw-2">*</span><span class="ident">hs</span>.<span class="ident">last</span>().<span class="ident">unwrap</span>() <span class="op">&amp;</span> <span class="number">0xf</span>) <span class="kw">as</span> <span class="ident">usize</span>;
+<span class="attribute">#[inline]
+</span><span class="kw">fn </span>dynamic_truncation(hs: <span class="kw-2">&amp;</span>[u8]) -&gt; u64 {
+    <span class="comment">// low-order bits of byte 19 (last) of the 20B output
+    </span><span class="kw">let </span>offset_bits = (<span class="kw-2">*</span>hs.last().unwrap() &amp; <span class="number">0xf</span>) <span class="kw">as </span>usize;
 
-    <span class="kw">let</span> <span class="ident">p</span> <span class="op">=</span> <span class="ident">u32::from_be_bytes</span>(<span class="ident">hs</span>[<span class="ident">offset_bits</span>..][..<span class="number">4</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()) <span class="kw">as</span> <span class="ident">u64</span>;
+    <span class="kw">let </span>p = u32::from_be_bytes(hs[offset_bits..][..<span class="number">4</span>].try_into().unwrap()) <span class="kw">as </span>u64;
 
-    <span class="comment">// zero highest bit, avoids signed/unsigned &quot;ambiguity&quot;</span>
-    <span class="ident">p</span> <span class="op">&amp;</span> <span class="number">0x7fff_ffff</span>
-}
+    <span class="comment">// zero highest bit, avoids signed/unsigned &quot;ambiguity&quot;
+    </span>p &amp; <span class="number">0x7fff_ffff
+</span>}
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;totp&quot;</span>)]</span>
-<span class="kw">impl</span> <span class="ident">Sign</span> <span class="kw">for</span> <span class="ident"><span class="kw">super</span>::Totp</span> {
-    <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">never</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">sign</span>(<span class="ident">keystore</span>: <span class="kw-2">&amp;mut</span> <span class="kw">impl</span> <span class="ident">Keystore</span>, <span class="ident">request</span>: <span class="kw-2">&amp;</span><span class="ident">request::Sign</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">reply::Sign</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">key_id</span> <span class="op">=</span> <span class="ident">request</span>.<span class="ident">key</span>;
+<span class="attribute">#[cfg(feature = <span class="string">&quot;totp&quot;</span>)]
+</span><span class="kw">impl </span>Sign <span class="kw">for </span><span class="kw">super</span>::Totp {
+    <span class="attribute">#[inline(never)]
+    </span><span class="kw">fn </span>sign(keystore: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Keystore, request: <span class="kw-2">&amp;</span>request::Sign) -&gt; <span class="prelude-ty">Result</span>&lt;reply::Sign, Error&gt; {
+        <span class="kw">let </span>key_id = request.key;
 
-        <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="ident">keystore</span>.<span class="ident">load_key</span>(<span class="ident">key::Secrecy::Secret</span>, <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span><span class="ident">key_id</span>)<span class="question-mark">?</span>;
+        <span class="kw">let </span>key = keystore.load_key(key::Secrecy::Secret, <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span>key_id)<span class="question-mark">?</span>;
 
-        <span class="kw">if</span> <span class="op">!</span><span class="macro">matches!</span>(
-            <span class="ident">key</span>.<span class="ident">kind</span>,
-            <span class="ident">key::Kind::Symmetric</span>(<span class="ident">TOTP_KEY_SIZE</span>) <span class="op">|</span> <span class="ident">key::Kind::Shared</span>(<span class="ident">TOTP_KEY_SIZE</span>)
+        <span class="kw">if </span>!<span class="macro">matches!</span>(
+            key.kind,
+            key::Kind::Symmetric(TOTP_KEY_SIZE) | key::Kind::Shared(TOTP_KEY_SIZE)
         ) {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::WrongKeyKind</span>);
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::WrongKeyKind);
         }
 
-        <span class="kw">let</span> <span class="ident">secret</span> <span class="op">=</span> <span class="ident">key</span>.<span class="ident">material</span>;
+        <span class="kw">let </span>secret = key.material;
 
-        <span class="kw">if</span> <span class="ident">request</span>.<span class="ident">message</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="number">8</span> {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::InternalError</span>);
+        <span class="kw">if </span>request.message.len() != <span class="number">8 </span>{
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InternalError);
         }
-        <span class="kw">let</span> <span class="ident">timestamp_as_le_bytes</span> <span class="op">=</span> <span class="ident">request</span>.<span class="ident">message</span>[..].<span class="ident">try_into</span>().<span class="ident">unwrap</span>();
-        <span class="kw">let</span> <span class="ident">timestamp</span> <span class="op">=</span> <span class="ident">u64::from_le_bytes</span>(<span class="ident">timestamp_as_le_bytes</span>);
-        <span class="kw">let</span> <span class="ident">totp_material</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="ident">hotp_raw</span>(<span class="kw-2">&amp;</span><span class="ident">secret</span>, <span class="ident">timestamp</span>, <span class="ident">DIGITS</span>);
+        <span class="kw">let </span>timestamp_as_le_bytes = request.message[..].try_into().unwrap();
+        <span class="kw">let </span>timestamp = u64::from_le_bytes(timestamp_as_le_bytes);
+        <span class="kw">let </span>totp_material: u64 = hotp_raw(<span class="kw-2">&amp;</span>secret, timestamp, DIGITS);
 
-        <span class="comment">// return signature (encode as LE)</span>
-        <span class="prelude-val">Ok</span>(<span class="ident">reply::Sign</span> {
-            <span class="ident">signature</span>: <span class="ident"><span class="kw">crate</span>::Bytes::from_slice</span>(<span class="ident">totp_material</span>.<span class="ident">to_le_bytes</span>().<span class="ident">as_ref</span>()).<span class="ident">unwrap</span>(),
+        <span class="comment">// return signature (encode as LE)
+        </span><span class="prelude-val">Ok</span>(reply::Sign {
+            signature: <span class="kw">crate</span>::Bytes::from_slice(totp_material.to_le_bytes().as_ref()).unwrap(),
         })
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;totp&quot;</span>)]</span>
-<span class="kw">impl</span> <span class="ident">Exists</span> <span class="kw">for</span> <span class="ident"><span class="kw">super</span>::Totp</span> {
-    <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">never</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">exists</span>(
-        <span class="ident">keystore</span>: <span class="kw-2">&amp;mut</span> <span class="kw">impl</span> <span class="ident">Keystore</span>,
-        <span class="ident">request</span>: <span class="kw-2">&amp;</span><span class="ident">request::Exists</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">reply::Exists</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">key_id</span> <span class="op">=</span> <span class="ident">request</span>.<span class="ident">key</span>;
+<span class="attribute">#[cfg(feature = <span class="string">&quot;totp&quot;</span>)]
+</span><span class="kw">impl </span>Exists <span class="kw">for </span><span class="kw">super</span>::Totp {
+    <span class="attribute">#[inline(never)]
+    </span><span class="kw">fn </span>exists(
+        keystore: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Keystore,
+        request: <span class="kw-2">&amp;</span>request::Exists,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;reply::Exists, Error&gt; {
+        <span class="kw">let </span>key_id = request.key;
 
-        <span class="kw">let</span> <span class="ident">exists</span> <span class="op">=</span> <span class="ident">keystore</span>.<span class="ident">exists_key</span>(
-            <span class="ident">key::Secrecy::Secret</span>,
-            <span class="prelude-val">Some</span>(<span class="ident">key::Kind::Symmetric</span>(<span class="number">20</span>)),
-            <span class="kw-2">&amp;</span><span class="ident">key_id</span>,
+        <span class="kw">let </span>exists = keystore.exists_key(
+            key::Secrecy::Secret,
+            <span class="prelude-val">Some</span>(key::Kind::Symmetric(<span class="number">20</span>)),
+            <span class="kw-2">&amp;</span>key_id,
         );
-        <span class="prelude-val">Ok</span>(<span class="ident">reply::Exists</span> { <span class="ident">exists</span> })
+        <span class="prelude-val">Ok</span>(reply::Exists { exists })
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
-<span class="kw">mod</span> <span class="ident">tests</span> {
-    <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
+<span class="attribute">#[cfg(test)]
+</span><span class="kw">mod </span>tests {
+    <span class="kw">use super</span>::<span class="kw-2">*</span>;
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">test_hotp</span>() {
-        <span class="macro">assert_eq!</span>(<span class="ident">hotp_raw</span>(<span class="string">b&quot;\xff&quot;</span>, <span class="number">23</span>, <span class="number">6</span>), <span class="number">330795</span>);
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>test_hotp() {
+        <span class="macro">assert_eq!</span>(hotp_raw(<span class="string">b&quot;\xff&quot;</span>, <span class="number">23</span>, <span class="number">6</span>), <span class="number">330795</span>);
 
-        <span class="comment">// test materials from RFC 4226</span>
-        <span class="macro">assert_eq!</span>(<span class="ident">hotp_raw</span>(<span class="string">b&quot;12345678901234567890&quot;</span>, <span class="number">0</span>, <span class="number">6</span>), <span class="number">755224</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">hotp_raw</span>(<span class="string">b&quot;12345678901234567890&quot;</span>, <span class="number">1</span>, <span class="number">6</span>), <span class="number">287082</span>);
-        <span class="macro">assert_ne!</span>(<span class="ident">hotp_raw</span>(<span class="string">b&quot;12345678901234567890&quot;</span>, <span class="number">1</span>, <span class="number">6</span>), <span class="number">287081</span>);
+        <span class="comment">// test materials from RFC 4226
+        </span><span class="macro">assert_eq!</span>(hotp_raw(<span class="string">b&quot;12345678901234567890&quot;</span>, <span class="number">0</span>, <span class="number">6</span>), <span class="number">755224</span>);
+        <span class="macro">assert_eq!</span>(hotp_raw(<span class="string">b&quot;12345678901234567890&quot;</span>, <span class="number">1</span>, <span class="number">6</span>), <span class="number">287082</span>);
+        <span class="macro">assert_ne!</span>(hotp_raw(<span class="string">b&quot;12345678901234567890&quot;</span>, <span class="number">1</span>, <span class="number">6</span>), <span class="number">287081</span>);
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="trussed" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="trussed" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

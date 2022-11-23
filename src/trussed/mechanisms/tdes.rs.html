@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/mechanisms/tdes.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>tdes.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../trussed/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../trussed/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../trussed/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/mechanisms/tdes.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>tdes.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../trussed/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../trussed/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../trussed/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -89,96 +89,136 @@
 <span id="89">89</span>
 <span id="90">90</span>
 <span id="91">91</span>
-</pre><pre class="rust"><code><span class="doccomment">//! This is so nasty!</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! We need to support 3DES to provide compatibility with Yubico&#39;s braindead</span>
-<span class="doccomment">//! implementation of key management...</span>
+<span id="92">92</span>
+<span id="93">93</span>
+<span id="94">94</span>
+<span id="95">95</span>
+<span id="96">96</span>
+<span id="97">97</span>
+<span id="98">98</span>
+<span id="99">99</span>
+<span id="100">100</span>
+<span id="101">101</span>
+<span id="102">102</span>
+<span id="103">103</span>
+<span id="104">104</span>
+<span id="105">105</span>
+<span id="106">106</span>
+<span id="107">107</span>
+<span id="108">108</span>
+<span id="109">109</span>
+<span id="110">110</span>
+<span id="111">111</span>
+</pre><pre class="rust"><code><span class="doccomment">//! This is so nasty!
+//!
+//! We need to support 3DES to provide compatibility with Yubico&#39;s braindead
+//! implementation of key management...
 
-<span class="comment">// use cortex_m_semihosting::{dbg, hprintln};</span>
+</span><span class="comment">// use cortex_m_semihosting::{dbg, hprintln};
 
-<span class="comment">// needed to even get ::new() from des...</span>
-<span class="kw">use</span> <span class="ident">des::cipher</span>::{<span class="ident">BlockDecrypt</span>, <span class="ident">BlockEncrypt</span>, <span class="ident">NewBlockCipher</span>};
+// needed to even get ::new() from des...
+</span><span class="kw">use </span>des::cipher::{BlockDecrypt, BlockEncrypt, NewBlockCipher};
 
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::api</span>::<span class="kw-2">*</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::error::Error</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::service</span>::<span class="kw-2">*</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::types</span>::<span class="kw-2">*</span>;
+<span class="kw">use </span><span class="kw">crate</span>::api::<span class="kw-2">*</span>;
+<span class="kw">use </span><span class="kw">crate</span>::error::Error;
+<span class="kw">use </span><span class="kw">crate</span>::service::<span class="kw-2">*</span>;
+<span class="kw">use </span><span class="kw">crate</span>::types::<span class="kw-2">*</span>;
 
-<span class="kw">const</span> <span class="ident">TDES_KEY_SIZE</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">24</span>;
+<span class="kw">const </span>TDES_KEY_SIZE: usize = <span class="number">24</span>;
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;tdes&quot;</span>)]</span>
-<span class="kw">impl</span> <span class="ident">Encrypt</span> <span class="kw">for</span> <span class="ident"><span class="kw">super</span>::Tdes</span> {
-    <span class="doccomment">/// Encrypts a single block. Let&#39;s hope we don&#39;t have to support ECB!!</span>
-    <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">never</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">encrypt</span>(
-        <span class="ident">keystore</span>: <span class="kw-2">&amp;mut</span> <span class="kw">impl</span> <span class="ident">Keystore</span>,
-        <span class="ident">request</span>: <span class="kw-2">&amp;</span><span class="ident">request::Encrypt</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">reply::Encrypt</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="ident">request</span>.<span class="ident">message</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="number">8</span> {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::WrongMessageLength</span>);
+<span class="attribute">#[cfg(feature = <span class="string">&quot;tdes&quot;</span>)]
+</span><span class="kw">impl </span>Encrypt <span class="kw">for </span><span class="kw">super</span>::Tdes {
+    <span class="doccomment">/// Encrypts a single block. Let&#39;s hope we don&#39;t have to support ECB!!
+    </span><span class="attribute">#[inline(never)]
+    </span><span class="kw">fn </span>encrypt(
+        keystore: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Keystore,
+        request: <span class="kw-2">&amp;</span>request::Encrypt,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;reply::Encrypt, Error&gt; {
+        <span class="kw">if </span>request.message.len() != <span class="number">8 </span>{
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::WrongMessageLength);
         }
 
-        <span class="kw">let</span> <span class="ident">key_id</span> <span class="op">=</span> <span class="ident">request</span>.<span class="ident">key</span>;
+        <span class="kw">let </span>key_id = request.key;
 
-        <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="ident">keystore</span>.<span class="ident">load_key</span>(<span class="ident">key::Secrecy::Secret</span>, <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span><span class="ident">key_id</span>)<span class="question-mark">?</span>;
-        <span class="comment">// FIXME: Symmetric keys of the correct size can&#39;t currently be obtained with without using</span>
-        <span class="comment">// `unsafe_inject_shared_key` so tdes needs to accept &quot;shared&quot; keys</span>
-        <span class="kw">if</span> <span class="op">!</span><span class="macro">matches!</span>(
-            <span class="ident">key</span>.<span class="ident">kind</span>,
-            <span class="ident">key::Kind::Symmetric</span>(<span class="ident">TDES_KEY_SIZE</span>) <span class="op">|</span> <span class="ident">key::Kind::Shared</span>(<span class="ident">TDES_KEY_SIZE</span>)
+        <span class="kw">let </span>key = keystore.load_key(key::Secrecy::Secret, <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span>key_id)<span class="question-mark">?</span>;
+        <span class="comment">// FIXME: Symmetric keys of the correct size can&#39;t currently be obtained with without using
+        // `unsafe_inject_shared_key` so tdes needs to accept &quot;shared&quot; keys
+        </span><span class="kw">if </span>!<span class="macro">matches!</span>(
+            key.kind,
+            key::Kind::Symmetric(TDES_KEY_SIZE) | key::Kind::Shared(TDES_KEY_SIZE)
         ) {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::WrongKeyKind</span>);
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::WrongKeyKind);
         }
 
-        <span class="kw">let</span> <span class="ident">symmetric_key</span>: [<span class="ident">u8</span>; <span class="ident">TDES_KEY_SIZE</span>] <span class="op">=</span> <span class="ident">key</span>
-            .<span class="ident">material</span>
-            .<span class="ident">as_slice</span>()
-            .<span class="ident">try_into</span>()
-            .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error::InternalError</span>)<span class="question-mark">?</span>;
+        <span class="kw">let </span>symmetric_key: [u8; TDES_KEY_SIZE] = key
+            .material
+            .as_slice()
+            .try_into()
+            .map_err(|<span class="kw">_</span>| Error::InternalError)<span class="question-mark">?</span>;
 
-        <span class="kw">let</span> <span class="ident">cipher</span> <span class="op">=</span> <span class="ident">des::TdesEde3::new</span>(<span class="ident">GenericArray::from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">symmetric_key</span>));
+        <span class="kw">let </span>cipher = des::TdesEde3::new(GenericArray::from_slice(<span class="kw-2">&amp;</span>symmetric_key));
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">message</span> <span class="op">=</span> <span class="ident">request</span>.<span class="ident">message</span>.<span class="ident">clone</span>();
-        <span class="ident">cipher</span>.<span class="ident">encrypt_block</span>(<span class="ident">GenericArray::from_mut_slice</span>(<span class="kw-2">&amp;mut</span> <span class="ident">message</span>));
+        <span class="kw">let </span><span class="kw-2">mut </span>message = request.message.clone();
+        cipher.encrypt_block(GenericArray::from_mut_slice(<span class="kw-2">&amp;mut </span>message));
 
-        <span class="prelude-val">Ok</span>(<span class="ident">reply::Encrypt</span> {
-            <span class="ident">ciphertext</span>: <span class="ident">message</span>,
-            <span class="ident">nonce</span>: <span class="ident">Default::default</span>(),
-            <span class="ident">tag</span>: <span class="ident">Default::default</span>(),
+        <span class="prelude-val">Ok</span>(reply::Encrypt {
+            ciphertext: message,
+            nonce: Default::default(),
+            tag: Default::default(),
         })
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;tdes&quot;</span>)]</span>
-<span class="kw">impl</span> <span class="ident">Decrypt</span> <span class="kw">for</span> <span class="ident"><span class="kw">super</span>::Tdes</span> {
-    <span class="doccomment">/// Decrypts a single block. Let&#39;s hope we don&#39;t have to support ECB!!</span>
-    <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">never</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">decrypt</span>(
-        <span class="ident">keystore</span>: <span class="kw-2">&amp;mut</span> <span class="kw">impl</span> <span class="ident">Keystore</span>,
-        <span class="ident">request</span>: <span class="kw-2">&amp;</span><span class="ident">request::Decrypt</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">reply::Decrypt</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="ident">request</span>.<span class="ident">message</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="number">8</span> {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::WrongMessageLength</span>);
+<span class="attribute">#[cfg(feature = <span class="string">&quot;tdes&quot;</span>)]
+</span><span class="kw">impl </span>Decrypt <span class="kw">for </span><span class="kw">super</span>::Tdes {
+    <span class="doccomment">/// Decrypts a single block. Let&#39;s hope we don&#39;t have to support ECB!!
+    </span><span class="attribute">#[inline(never)]
+    </span><span class="kw">fn </span>decrypt(
+        keystore: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Keystore,
+        request: <span class="kw-2">&amp;</span>request::Decrypt,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;reply::Decrypt, Error&gt; {
+        <span class="kw">if </span>request.message.len() != <span class="number">8 </span>{
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::WrongMessageLength);
         }
 
-        <span class="kw">let</span> <span class="ident">key_id</span> <span class="op">=</span> <span class="ident">request</span>.<span class="ident">key</span>;
+        <span class="kw">let </span>key_id = request.key;
 
-        <span class="kw">let</span> <span class="ident">symmetric_key</span>: [<span class="ident">u8</span>; <span class="number">24</span>] <span class="op">=</span> <span class="ident">keystore</span>
-            .<span class="ident">load_key</span>(<span class="ident">key::Secrecy::Secret</span>, <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span><span class="ident">key_id</span>)<span class="question-mark">?</span>
-            .<span class="ident">material</span>
-            .<span class="ident">as_slice</span>()
-            .<span class="ident">try_into</span>()
-            .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error::InternalError</span>)<span class="question-mark">?</span>;
+        <span class="kw">let </span>symmetric_key: [u8; TDES_KEY_SIZE] = keystore
+            .load_key(key::Secrecy::Secret, <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span>key_id)<span class="question-mark">?
+            </span>.material
+            .as_slice()
+            .try_into()
+            .map_err(|<span class="kw">_</span>| Error::InternalError)<span class="question-mark">?</span>;
 
-        <span class="kw">let</span> <span class="ident">cipher</span> <span class="op">=</span> <span class="ident">des::TdesEde3::new</span>(<span class="ident">GenericArray::from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">symmetric_key</span>));
+        <span class="kw">let </span>cipher = des::TdesEde3::new(GenericArray::from_slice(<span class="kw-2">&amp;</span>symmetric_key));
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">message</span> <span class="op">=</span> <span class="ident">request</span>.<span class="ident">message</span>.<span class="ident">clone</span>();
-        <span class="ident">cipher</span>.<span class="ident">decrypt_block</span>(<span class="ident">GenericArray::from_mut_slice</span>(<span class="kw-2">&amp;mut</span> <span class="ident">message</span>));
+        <span class="kw">let </span><span class="kw-2">mut </span>message = request.message.clone();
+        cipher.decrypt_block(GenericArray::from_mut_slice(<span class="kw-2">&amp;mut </span>message));
 
-        <span class="prelude-val">Ok</span>(<span class="ident">reply::Decrypt</span> {
-            <span class="ident">plaintext</span>: <span class="prelude-val">Some</span>(<span class="ident">message</span>),
+        <span class="prelude-val">Ok</span>(reply::Decrypt {
+            plaintext: <span class="prelude-val">Some</span>(message),
         })
+    }
+}
+
+<span class="kw">impl </span>UnsafeInjectKey <span class="kw">for </span><span class="kw">super</span>::Tdes {
+    <span class="kw">fn </span>unsafe_inject_key(
+        keystore: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Keystore,
+        request: <span class="kw-2">&amp;</span>request::UnsafeInjectKey,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;reply::UnsafeInjectKey, Error&gt; {
+        <span class="kw">if </span>request.raw_key.len() != TDES_KEY_SIZE {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidSerializedKey);
+        }
+
+        <span class="kw">let </span>key_id = keystore.store_key(
+            request.attributes.persistence,
+            key::Secrecy::Secret,
+            key::Kind::Symmetric(request.raw_key.len()),
+            <span class="kw-2">&amp;</span>request.raw_key,
+        )<span class="question-mark">?</span>;
+
+        <span class="prelude-val">Ok</span>(reply::UnsafeInjectKey { key: key_id })
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="trussed" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="trussed" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

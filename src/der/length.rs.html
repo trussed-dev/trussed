@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/der-0.4.5/src/length.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>length.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" href="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../der/index.html"><div class="logo-container"><img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../der/index.html"><div class="logo-container">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/der-0.4.5/src/length.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>length.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" href="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../der/index.html"><div class="logo-container"><img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../der/index.html"><div class="logo-container">
                     <img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../der/index.html">
                         <img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
@@ -305,310 +305,310 @@
 <span id="303">303</span>
 <span id="304">304</span>
 <span id="305">305</span>
-</pre><pre class="rust"><code><span class="doccomment">//! Length calculations for encoded ASN.1 DER values</span>
+</pre><pre class="rust"><code><span class="doccomment">//! Length calculations for encoded ASN.1 DER values
 
-<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">Decodable</span>, <span class="ident">Decoder</span>, <span class="ident">Encodable</span>, <span class="ident">Encoder</span>, <span class="ident">Error</span>, <span class="ident">ErrorKind</span>, <span class="prelude-ty">Result</span>};
-<span class="kw">use</span> <span class="ident">core</span>::{
-    <span class="ident">convert</span>::{<span class="ident">TryFrom</span>, <span class="ident">TryInto</span>},
-    <span class="ident">fmt</span>,
-    <span class="ident">ops::Add</span>,
+</span><span class="kw">use crate</span>::{Decodable, Decoder, Encodable, Encoder, Error, ErrorKind, <span class="prelude-ty">Result</span>};
+<span class="kw">use </span>core::{
+    convert::{TryFrom, TryInto},
+    fmt,
+    ops::Add,
 };
 
-<span class="doccomment">/// Maximum length as a `u32` (256 MiB).</span>
-<span class="kw">const</span> <span class="ident">MAX_U32</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xfff_ffff</span>;
+<span class="doccomment">/// Maximum length as a `u32` (256 MiB).
+</span><span class="kw">const </span>MAX_U32: u32 = <span class="number">0xfff_ffff</span>;
 
-<span class="doccomment">/// ASN.1-encoded length.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// Maximum length is defined by the [`Length::MAX`] constant (256 MiB).</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">Default</span>, <span class="ident">Eq</span>, <span class="ident">PartialEq</span>, <span class="ident">PartialOrd</span>, <span class="ident">Ord</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Length</span>(<span class="ident">u32</span>);
+<span class="doccomment">/// ASN.1-encoded length.
+///
+/// Maximum length is defined by the [`Length::MAX`] constant (256 MiB).
+</span><span class="attribute">#[derive(Copy, Clone, Debug, Default, Eq, PartialEq, PartialOrd, Ord)]
+</span><span class="kw">pub struct </span>Length(u32);
 
-<span class="kw">impl</span> <span class="ident">Length</span> {
-    <span class="doccomment">/// Length of `0`</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">ZERO</span>: <span class="self">Self</span> <span class="op">=</span> <span class="self">Self</span>(<span class="number">0</span>);
+<span class="kw">impl </span>Length {
+    <span class="doccomment">/// Length of `0`
+    </span><span class="kw">pub const </span>ZERO: <span class="self">Self </span>= <span class="self">Self</span>(<span class="number">0</span>);
 
-    <span class="doccomment">/// Length of `1`</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">ONE</span>: <span class="self">Self</span> <span class="op">=</span> <span class="self">Self</span>(<span class="number">1</span>);
+    <span class="doccomment">/// Length of `1`
+    </span><span class="kw">pub const </span>ONE: <span class="self">Self </span>= <span class="self">Self</span>(<span class="number">1</span>);
 
-    <span class="doccomment">/// Maximum length currently supported: 256 MiB</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">MAX</span>: <span class="self">Self</span> <span class="op">=</span> <span class="self">Self</span>(<span class="ident">MAX_U32</span>);
+    <span class="doccomment">/// Maximum length currently supported: 256 MiB
+    </span><span class="kw">pub const </span>MAX: <span class="self">Self </span>= <span class="self">Self</span>(MAX_U32);
 
-    <span class="doccomment">/// Create a new [`Length`] for any value which fits inside of a [`u16`].</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// This function is const-safe and therefore useful for [`Length`] constants.</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">value</span>: <span class="ident">u16</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">Length</span>(<span class="ident">value</span> <span class="kw">as</span> <span class="ident">u32</span>)
+    <span class="doccomment">/// Create a new [`Length`] for any value which fits inside of a [`u16`].
+    ///
+    /// This function is const-safe and therefore useful for [`Length`] constants.
+    </span><span class="kw">pub const fn </span>new(value: u16) -&gt; <span class="self">Self </span>{
+        Length(value <span class="kw">as </span>u32)
     }
 
-    <span class="doccomment">/// Get the length of DER Tag-Length-Value (TLV) encoded data if `self`</span>
-    <span class="doccomment">/// is the length of the inner &quot;value&quot; portion of the message.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">for_tlv</span>(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
-        <span class="ident">Length</span>(<span class="number">1</span>) <span class="op">+</span> <span class="self">self</span>.<span class="ident">encoded_len</span>()<span class="question-mark">?</span> <span class="op">+</span> <span class="self">self</span>
-    }
+    <span class="doccomment">/// Get the length of DER Tag-Length-Value (TLV) encoded data if `self`
+    /// is the length of the inner &quot;value&quot; portion of the message.
+    </span><span class="kw">pub fn </span>for_tlv(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
+        Length(<span class="number">1</span>) + <span class="self">self</span>.encoded_len()<span class="question-mark">? </span>+ <span class="self">self
+    </span>}
 
-    <span class="doccomment">/// Get initial octet of the encoded length (if one is required).</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// From X.690 Section 8.1.3.5:</span>
-    <span class="doccomment">/// &gt; In the long form, the length octets shall consist of an initial octet</span>
-    <span class="doccomment">/// &gt; and one or more subsequent octets. The initial octet shall be encoded</span>
-    <span class="doccomment">/// &gt; as follows:</span>
-    <span class="doccomment">/// &gt;</span>
-    <span class="doccomment">/// &gt; a) bit 8 shall be one;</span>
-    <span class="doccomment">/// &gt; b) bits 7 to 1 shall encode the number of subsequent octets in the</span>
-    <span class="doccomment">/// &gt;    length octets, as an unsigned binary integer with bit 7 as the</span>
-    <span class="doccomment">/// &gt;    most significant bit;</span>
-    <span class="doccomment">/// &gt; c) the value 11111111₂ shall not be used.</span>
-    <span class="kw">fn</span> <span class="ident">initial_octet</span>(<span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
-        <span class="kw">match</span> <span class="self">self</span>.<span class="number">0</span> {
-            <span class="number">0x80</span>..<span class="op">=</span><span class="number">0xFF</span> =&gt; <span class="prelude-val">Some</span>(<span class="number">0x81</span>),
-            <span class="number">0x100</span>..<span class="op">=</span><span class="number">0xFFFF</span> =&gt; <span class="prelude-val">Some</span>(<span class="number">0x82</span>),
-            <span class="number">0x10000</span>..<span class="op">=</span><span class="ident">MAX_U32</span> =&gt; <span class="prelude-val">Some</span>(<span class="number">0x83</span>),
-            <span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
+    <span class="doccomment">/// Get initial octet of the encoded length (if one is required).
+    ///
+    /// From X.690 Section 8.1.3.5:
+    /// &gt; In the long form, the length octets shall consist of an initial octet
+    /// &gt; and one or more subsequent octets. The initial octet shall be encoded
+    /// &gt; as follows:
+    /// &gt;
+    /// &gt; a) bit 8 shall be one;
+    /// &gt; b) bits 7 to 1 shall encode the number of subsequent octets in the
+    /// &gt;    length octets, as an unsigned binary integer with bit 7 as the
+    /// &gt;    most significant bit;
+    /// &gt; c) the value 11111111₂ shall not be used.
+    </span><span class="kw">fn </span>initial_octet(<span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;u8&gt; {
+        <span class="kw">match </span><span class="self">self</span>.<span class="number">0 </span>{
+            <span class="number">0x80</span>..=<span class="number">0xFF </span>=&gt; <span class="prelude-val">Some</span>(<span class="number">0x81</span>),
+            <span class="number">0x100</span>..=<span class="number">0xFFFF </span>=&gt; <span class="prelude-val">Some</span>(<span class="number">0x82</span>),
+            <span class="number">0x10000</span>..=MAX_U32 =&gt; <span class="prelude-val">Some</span>(<span class="number">0x83</span>),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
         }
     }
 }
 
-<span class="kw">impl</span> <span class="ident">Add</span> <span class="kw">for</span> <span class="ident">Length</span> {
-    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>;
+<span class="kw">impl </span>Add <span class="kw">for </span>Length {
+    <span class="kw">type </span>Output = <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt;;
 
-    <span class="kw">fn</span> <span class="ident">add</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="number">0</span>
-            .<span class="ident">checked_add</span>(<span class="ident">other</span>.<span class="number">0</span>)
-            .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">ErrorKind::Overflow</span>.<span class="ident">into</span>())
-            .<span class="ident">and_then</span>(<span class="ident">TryInto::try_into</span>)
+    <span class="kw">fn </span>add(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
+        <span class="self">self</span>.<span class="number">0
+            </span>.checked_add(other.<span class="number">0</span>)
+            .ok_or_else(|| ErrorKind::Overflow.into())
+            .and_then(TryInto::try_into)
     }
 }
 
-<span class="kw">impl</span> <span class="ident">Add</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Length</span> {
-    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>;
+<span class="kw">impl </span>Add&lt;u8&gt; <span class="kw">for </span>Length {
+    <span class="kw">type </span>Output = <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt;;
 
-    <span class="kw">fn</span> <span class="ident">add</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="ident">u8</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
-        <span class="self">self</span> <span class="op">+</span> <span class="ident">Length::from</span>(<span class="ident">other</span>)
+    <span class="kw">fn </span>add(<span class="self">self</span>, other: u8) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
+        <span class="self">self </span>+ Length::from(other)
     }
 }
 
-<span class="kw">impl</span> <span class="ident">Add</span><span class="op">&lt;</span><span class="ident">u16</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Length</span> {
-    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>;
+<span class="kw">impl </span>Add&lt;u16&gt; <span class="kw">for </span>Length {
+    <span class="kw">type </span>Output = <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt;;
 
-    <span class="kw">fn</span> <span class="ident">add</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="ident">u16</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
-        <span class="self">self</span> <span class="op">+</span> <span class="ident">Length::from</span>(<span class="ident">other</span>)
+    <span class="kw">fn </span>add(<span class="self">self</span>, other: u16) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
+        <span class="self">self </span>+ Length::from(other)
     }
 }
 
-<span class="kw">impl</span> <span class="ident">Add</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Length</span> {
-    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>;
+<span class="kw">impl </span>Add&lt;u32&gt; <span class="kw">for </span>Length {
+    <span class="kw">type </span>Output = <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt;;
 
-    <span class="kw">fn</span> <span class="ident">add</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="ident">u32</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
-        <span class="self">self</span> <span class="op">+</span> <span class="ident">Length::try_from</span>(<span class="ident">other</span>)<span class="question-mark">?</span>
+    <span class="kw">fn </span>add(<span class="self">self</span>, other: u32) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
+        <span class="self">self </span>+ Length::try_from(other)<span class="question-mark">?
+    </span>}
+}
+
+<span class="kw">impl </span>Add&lt;usize&gt; <span class="kw">for </span>Length {
+    <span class="kw">type </span>Output = <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt;;
+
+    <span class="kw">fn </span>add(<span class="self">self</span>, other: usize) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
+        <span class="self">self </span>+ Length::try_from(other)<span class="question-mark">?
+    </span>}
+}
+
+<span class="kw">impl </span>Add&lt;Length&gt; <span class="kw">for </span><span class="prelude-ty">Result</span>&lt;Length&gt; {
+    <span class="kw">type </span>Output = <span class="self">Self</span>;
+
+    <span class="kw">fn </span>add(<span class="self">self</span>, other: Length) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span><span class="question-mark">? </span>+ other
     }
 }
 
-<span class="kw">impl</span> <span class="ident">Add</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Length</span> {
-    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>;
-
-    <span class="kw">fn</span> <span class="ident">add</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
-        <span class="self">self</span> <span class="op">+</span> <span class="ident">Length::try_from</span>(<span class="ident">other</span>)<span class="question-mark">?</span>
+<span class="kw">impl </span>From&lt;u8&gt; <span class="kw">for </span>Length {
+    <span class="kw">fn </span>from(len: u8) -&gt; Length {
+        Length(len <span class="kw">as </span>u32)
     }
 }
 
-<span class="kw">impl</span> <span class="ident">Add</span><span class="op">&lt;</span><span class="ident">Length</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Length</span><span class="op">&gt;</span> {
-    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="self">Self</span>;
-
-    <span class="kw">fn</span> <span class="ident">add</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="ident">Length</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">self</span><span class="question-mark">?</span> <span class="op">+</span> <span class="ident">other</span>
+<span class="kw">impl </span>From&lt;u16&gt; <span class="kw">for </span>Length {
+    <span class="kw">fn </span>from(len: u16) -&gt; Length {
+        Length(len <span class="kw">as </span>u32)
     }
 }
 
-<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Length</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">len</span>: <span class="ident">u8</span>) -&gt; <span class="ident">Length</span> {
-        <span class="ident">Length</span>(<span class="ident">len</span> <span class="kw">as</span> <span class="ident">u32</span>)
-    }
-}
+<span class="kw">impl </span>TryFrom&lt;u32&gt; <span class="kw">for </span>Length {
+    <span class="kw">type </span>Error = Error;
 
-<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">u16</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Length</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">len</span>: <span class="ident">u16</span>) -&gt; <span class="ident">Length</span> {
-        <span class="ident">Length</span>(<span class="ident">len</span> <span class="kw">as</span> <span class="ident">u32</span>)
-    }
-}
-
-<span class="kw">impl</span> <span class="ident">TryFrom</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Length</span> {
-    <span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">Error</span>;
-
-    <span class="kw">fn</span> <span class="ident">try_from</span>(<span class="ident">len</span>: <span class="ident">u32</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Length</span><span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="ident">len</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident"><span class="self">Self</span>::MAX</span>.<span class="number">0</span> {
-            <span class="prelude-val">Ok</span>(<span class="ident">Length</span>(<span class="ident">len</span>))
-        } <span class="kw">else</span> {
-            <span class="prelude-val">Err</span>(<span class="ident">ErrorKind::Overflow</span>.<span class="ident">into</span>())
+    <span class="kw">fn </span>try_from(len: u32) -&gt; <span class="prelude-ty">Result</span>&lt;Length&gt; {
+        <span class="kw">if </span>len &lt;= <span class="self">Self</span>::MAX.<span class="number">0 </span>{
+            <span class="prelude-val">Ok</span>(Length(len))
+        } <span class="kw">else </span>{
+            <span class="prelude-val">Err</span>(ErrorKind::Overflow.into())
         }
     }
 }
 
-<span class="kw">impl</span> <span class="ident">TryFrom</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Length</span> {
-    <span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">Error</span>;
+<span class="kw">impl </span>TryFrom&lt;usize&gt; <span class="kw">for </span>Length {
+    <span class="kw">type </span>Error = Error;
 
-    <span class="kw">fn</span> <span class="ident">try_from</span>(<span class="ident">len</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Length</span><span class="op">&gt;</span> {
-        <span class="ident">u32::try_from</span>(<span class="ident">len</span>)
-            .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">ErrorKind::Overflow</span>)<span class="question-mark">?</span>
-            .<span class="ident">try_into</span>()
+    <span class="kw">fn </span>try_from(len: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Length&gt; {
+        u32::try_from(len)
+            .map_err(|<span class="kw">_</span>| ErrorKind::Overflow)<span class="question-mark">?
+            </span>.try_into()
     }
 }
 
-<span class="kw">impl</span> <span class="ident">TryFrom</span><span class="op">&lt;</span><span class="ident">Length</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">usize</span> {
-    <span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">Error</span>;
+<span class="kw">impl </span>TryFrom&lt;Length&gt; <span class="kw">for </span>usize {
+    <span class="kw">type </span>Error = Error;
 
-    <span class="kw">fn</span> <span class="ident">try_from</span>(<span class="ident">len</span>: <span class="ident">Length</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
-        <span class="ident">len</span>.<span class="number">0</span>.<span class="ident">try_into</span>().<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">ErrorKind::Overflow</span>.<span class="ident">into</span>())
+    <span class="kw">fn </span>try_from(len: Length) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
+        len.<span class="number">0</span>.try_into().map_err(|<span class="kw">_</span>| ErrorKind::Overflow.into())
     }
 }
 
-<span class="kw">impl</span> <span class="ident">Decodable</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Length</span> {
-    <span class="kw">fn</span> <span class="ident">decode</span>(<span class="ident">decoder</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Decoder</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Length</span><span class="op">&gt;</span> {
-        <span class="kw">match</span> <span class="ident">decoder</span>.<span class="ident">byte</span>()<span class="question-mark">?</span> {
-            <span class="comment">// Note: per X.690 Section 8.1.3.6.1 the byte 0x80 encodes indefinite</span>
-            <span class="comment">// lengths, which are not allowed in DER, so disallow that byte.</span>
-            <span class="ident">len</span> <span class="kw">if</span> <span class="ident">len</span> <span class="op">&lt;</span> <span class="number">0x80</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">len</span>.<span class="ident">into</span>()),
-            <span class="comment">// 1-4 byte variable-sized length prefix</span>
-            <span class="ident">tag</span> @ <span class="number">0x81</span>..<span class="op">=</span><span class="number">0x84</span> =&gt; {
-                <span class="kw">let</span> <span class="ident">nbytes</span> <span class="op">=</span> <span class="ident">tag</span>.<span class="ident">checked_sub</span>(<span class="number">0x80</span>).<span class="ident">ok_or</span>(<span class="ident">ErrorKind::Overlength</span>)<span class="question-mark">?</span> <span class="kw">as</span> <span class="ident">usize</span>;
-                <span class="macro">debug_assert!</span>(<span class="ident">nbytes</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">4</span>);
+<span class="kw">impl </span>Decodable&lt;<span class="lifetime">&#39;_</span>&gt; <span class="kw">for </span>Length {
+    <span class="kw">fn </span>decode(decoder: <span class="kw-2">&amp;mut </span>Decoder&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Length&gt; {
+        <span class="kw">match </span>decoder.byte()<span class="question-mark">? </span>{
+            <span class="comment">// Note: per X.690 Section 8.1.3.6.1 the byte 0x80 encodes indefinite
+            // lengths, which are not allowed in DER, so disallow that byte.
+            </span>len <span class="kw">if </span>len &lt; <span class="number">0x80 </span>=&gt; <span class="prelude-val">Ok</span>(len.into()),
+            <span class="comment">// 1-4 byte variable-sized length prefix
+            </span>tag @ <span class="number">0x81</span>..=<span class="number">0x84 </span>=&gt; {
+                <span class="kw">let </span>nbytes = tag.checked_sub(<span class="number">0x80</span>).ok_or(ErrorKind::Overlength)<span class="question-mark">? </span><span class="kw">as </span>usize;
+                <span class="macro">debug_assert!</span>(nbytes &lt;= <span class="number">4</span>);
 
-                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">decoded_len</span> <span class="op">=</span> <span class="number">0</span>;
-                <span class="kw">for</span> <span class="kw">_</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">nbytes</span> {
-                    <span class="ident">decoded_len</span> <span class="op">=</span> (<span class="ident">decoded_len</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">8</span>) <span class="op">|</span> <span class="ident">decoder</span>.<span class="ident">byte</span>()<span class="question-mark">?</span> <span class="kw">as</span> <span class="ident">u32</span>;
+                <span class="kw">let </span><span class="kw-2">mut </span>decoded_len = <span class="number">0</span>;
+                <span class="kw">for _ in </span><span class="number">0</span>..nbytes {
+                    decoded_len = (decoded_len &lt;&lt; <span class="number">8</span>) | decoder.byte()<span class="question-mark">? </span><span class="kw">as </span>u32;
                 }
 
-                <span class="kw">let</span> <span class="ident">length</span> <span class="op">=</span> <span class="ident">Length::try_from</span>(<span class="ident">decoded_len</span>)<span class="question-mark">?</span>;
+                <span class="kw">let </span>length = Length::try_from(decoded_len)<span class="question-mark">?</span>;
 
-                <span class="comment">// X.690 Section 10.1: DER lengths must be encoded with a minimum</span>
-                <span class="comment">// number of octets</span>
-                <span class="kw">if</span> <span class="ident">length</span>.<span class="ident">initial_octet</span>() <span class="op">==</span> <span class="prelude-val">Some</span>(<span class="ident">tag</span>) {
-                    <span class="prelude-val">Ok</span>(<span class="ident">length</span>)
-                } <span class="kw">else</span> {
-                    <span class="prelude-val">Err</span>(<span class="ident">ErrorKind::Overlength</span>.<span class="ident">into</span>())
+                <span class="comment">// X.690 Section 10.1: DER lengths must be encoded with a minimum
+                // number of octets
+                </span><span class="kw">if </span>length.initial_octet() == <span class="prelude-val">Some</span>(tag) {
+                    <span class="prelude-val">Ok</span>(length)
+                } <span class="kw">else </span>{
+                    <span class="prelude-val">Err</span>(ErrorKind::Overlength.into())
                 }
             }
-            <span class="kw">_</span> =&gt; {
-                <span class="comment">// We specialize to a maximum 4-byte length (including initial octet)</span>
-                <span class="prelude-val">Err</span>(<span class="ident">ErrorKind::Overlength</span>.<span class="ident">into</span>())
+            <span class="kw">_ </span>=&gt; {
+                <span class="comment">// We specialize to a maximum 4-byte length (including initial octet)
+                </span><span class="prelude-val">Err</span>(ErrorKind::Overlength.into())
             }
         }
     }
 }
 
-<span class="kw">impl</span> <span class="ident">Encodable</span> <span class="kw">for</span> <span class="ident">Length</span> {
-    <span class="kw">fn</span> <span class="ident">encoded_len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Length</span><span class="op">&gt;</span> {
-        <span class="kw">match</span> <span class="self">self</span>.<span class="number">0</span> {
-            <span class="number">0</span>..<span class="op">=</span><span class="number">0x7F</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">Length</span>(<span class="number">1</span>)),
-            <span class="number">0x80</span>..<span class="op">=</span><span class="number">0xFF</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">Length</span>(<span class="number">2</span>)),
-            <span class="number">0x100</span>..<span class="op">=</span><span class="number">0xFFFF</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">Length</span>(<span class="number">3</span>)),
-            <span class="number">0x10000</span>..<span class="op">=</span><span class="ident">MAX_U32</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">Length</span>(<span class="number">4</span>)),
-            <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">ErrorKind::Overflow</span>.<span class="ident">into</span>()),
+<span class="kw">impl </span>Encodable <span class="kw">for </span>Length {
+    <span class="kw">fn </span>encoded_len(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Length&gt; {
+        <span class="kw">match </span><span class="self">self</span>.<span class="number">0 </span>{
+            <span class="number">0</span>..=<span class="number">0x7F </span>=&gt; <span class="prelude-val">Ok</span>(Length(<span class="number">1</span>)),
+            <span class="number">0x80</span>..=<span class="number">0xFF </span>=&gt; <span class="prelude-val">Ok</span>(Length(<span class="number">2</span>)),
+            <span class="number">0x100</span>..=<span class="number">0xFFFF </span>=&gt; <span class="prelude-val">Ok</span>(Length(<span class="number">3</span>)),
+            <span class="number">0x10000</span>..=MAX_U32 =&gt; <span class="prelude-val">Ok</span>(Length(<span class="number">4</span>)),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(ErrorKind::Overflow.into()),
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">encode</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">encoder</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Encoder</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">tag_byte</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">initial_octet</span>() {
-            <span class="ident">encoder</span>.<span class="ident">byte</span>(<span class="ident">tag_byte</span>)<span class="question-mark">?</span>;
+    <span class="kw">fn </span>encode(<span class="kw-2">&amp;</span><span class="self">self</span>, encoder: <span class="kw-2">&amp;mut </span>Encoder&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(tag_byte) = <span class="self">self</span>.initial_octet() {
+            encoder.byte(tag_byte)<span class="question-mark">?</span>;
 
-            <span class="kw">match</span> <span class="self">self</span>.<span class="number">0</span>.<span class="ident">to_be_bytes</span>() {
-                [<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="ident">byte</span>] =&gt; <span class="ident">encoder</span>.<span class="ident">byte</span>(<span class="ident">byte</span>),
-                [<span class="number">0</span>, <span class="number">0</span>, <span class="ident">bytes</span> @ ..] =&gt; <span class="ident">encoder</span>.<span class="ident">bytes</span>(<span class="kw-2">&amp;</span><span class="ident">bytes</span>),
-                [<span class="number">0</span>, <span class="ident">bytes</span> @ ..] =&gt; <span class="ident">encoder</span>.<span class="ident">bytes</span>(<span class="kw-2">&amp;</span><span class="ident">bytes</span>),
-                <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">ErrorKind::Overlength</span>.<span class="ident">into</span>()),
+            <span class="kw">match </span><span class="self">self</span>.<span class="number">0</span>.to_be_bytes() {
+                [<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, byte] =&gt; encoder.byte(byte),
+                [<span class="number">0</span>, <span class="number">0</span>, bytes @ ..] =&gt; encoder.bytes(<span class="kw-2">&amp;</span>bytes),
+                [<span class="number">0</span>, bytes @ ..] =&gt; encoder.bytes(<span class="kw-2">&amp;</span>bytes),
+                <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(ErrorKind::Overlength.into()),
             }
-        } <span class="kw">else</span> {
-            <span class="ident">encoder</span>.<span class="ident">byte</span>(<span class="self">self</span>.<span class="number">0</span> <span class="kw">as</span> <span class="ident">u8</span>)
+        } <span class="kw">else </span>{
+            encoder.byte(<span class="self">self</span>.<span class="number">0 </span><span class="kw">as </span>u8)
         }
     }
 }
 
-<span class="kw">impl</span> <span class="ident">fmt::Display</span> <span class="kw">for</span> <span class="ident">Length</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">fmt::Result</span> {
-        <span class="self">self</span>.<span class="number">0</span>.<span class="ident">fmt</span>(<span class="ident">f</span>)
+<span class="kw">impl </span>fmt::Display <span class="kw">for </span>Length {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+        <span class="self">self</span>.<span class="number">0</span>.fmt(f)
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
-<span class="kw">mod</span> <span class="ident">tests</span> {
-    <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::Length</span>;
-    <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">Decodable</span>, <span class="ident">Encodable</span>, <span class="ident">ErrorKind</span>};
-    <span class="kw">use</span> <span class="ident">core::convert::TryFrom</span>;
+<span class="attribute">#[cfg(test)]
+</span><span class="kw">mod </span>tests {
+    <span class="kw">use </span><span class="kw">super</span>::Length;
+    <span class="kw">use crate</span>::{Decodable, Encodable, ErrorKind};
+    <span class="kw">use </span>core::convert::TryFrom;
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">decode</span>() {
-        <span class="macro">assert_eq!</span>(<span class="ident">Length::ZERO</span>, <span class="ident">Length::from_der</span>(<span class="kw-2">&amp;</span>[<span class="number">0x00</span>]).<span class="ident">unwrap</span>());
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>decode() {
+        <span class="macro">assert_eq!</span>(Length::ZERO, Length::from_der(<span class="kw-2">&amp;</span>[<span class="number">0x00</span>]).unwrap());
 
-        <span class="macro">assert_eq!</span>(<span class="ident">Length::from</span>(<span class="number">0x7Fu8</span>), <span class="ident">Length::from_der</span>(<span class="kw-2">&amp;</span>[<span class="number">0x7F</span>]).<span class="ident">unwrap</span>());
+        <span class="macro">assert_eq!</span>(Length::from(<span class="number">0x7Fu8</span>), Length::from_der(<span class="kw-2">&amp;</span>[<span class="number">0x7F</span>]).unwrap());
 
         <span class="macro">assert_eq!</span>(
-            <span class="ident">Length::from</span>(<span class="number">0x80u8</span>),
-            <span class="ident">Length::from_der</span>(<span class="kw-2">&amp;</span>[<span class="number">0x81</span>, <span class="number">0x80</span>]).<span class="ident">unwrap</span>()
+            Length::from(<span class="number">0x80u8</span>),
+            Length::from_der(<span class="kw-2">&amp;</span>[<span class="number">0x81</span>, <span class="number">0x80</span>]).unwrap()
         );
 
         <span class="macro">assert_eq!</span>(
-            <span class="ident">Length::from</span>(<span class="number">0xFFu8</span>),
-            <span class="ident">Length::from_der</span>(<span class="kw-2">&amp;</span>[<span class="number">0x81</span>, <span class="number">0xFF</span>]).<span class="ident">unwrap</span>()
+            Length::from(<span class="number">0xFFu8</span>),
+            Length::from_der(<span class="kw-2">&amp;</span>[<span class="number">0x81</span>, <span class="number">0xFF</span>]).unwrap()
         );
 
         <span class="macro">assert_eq!</span>(
-            <span class="ident">Length::from</span>(<span class="number">0x100u16</span>),
-            <span class="ident">Length::from_der</span>(<span class="kw-2">&amp;</span>[<span class="number">0x82</span>, <span class="number">0x01</span>, <span class="number">0x00</span>]).<span class="ident">unwrap</span>()
+            Length::from(<span class="number">0x100u16</span>),
+            Length::from_der(<span class="kw-2">&amp;</span>[<span class="number">0x82</span>, <span class="number">0x01</span>, <span class="number">0x00</span>]).unwrap()
         );
 
         <span class="macro">assert_eq!</span>(
-            <span class="ident">Length::try_from</span>(<span class="number">0x10000u32</span>).<span class="ident">unwrap</span>(),
-            <span class="ident">Length::from_der</span>(<span class="kw-2">&amp;</span>[<span class="number">0x83</span>, <span class="number">0x01</span>, <span class="number">0x00</span>, <span class="number">0x00</span>]).<span class="ident">unwrap</span>()
+            Length::try_from(<span class="number">0x10000u32</span>).unwrap(),
+            Length::from_der(<span class="kw-2">&amp;</span>[<span class="number">0x83</span>, <span class="number">0x01</span>, <span class="number">0x00</span>, <span class="number">0x00</span>]).unwrap()
         );
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">encode</span>() {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buffer</span> <span class="op">=</span> [<span class="number">0u8</span>; <span class="number">4</span>];
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>encode() {
+        <span class="kw">let </span><span class="kw-2">mut </span>buffer = [<span class="number">0u8</span>; <span class="number">4</span>];
 
-        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>[<span class="number">0x00</span>], <span class="ident">Length::ZERO</span>.<span class="ident">encode_to_slice</span>(<span class="kw-2">&amp;mut</span> <span class="ident">buffer</span>).<span class="ident">unwrap</span>());
+        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>[<span class="number">0x00</span>], Length::ZERO.encode_to_slice(<span class="kw-2">&amp;mut </span>buffer).unwrap());
 
         <span class="macro">assert_eq!</span>(
             <span class="kw-2">&amp;</span>[<span class="number">0x7F</span>],
-            <span class="ident">Length::from</span>(<span class="number">0x7Fu8</span>).<span class="ident">encode_to_slice</span>(<span class="kw-2">&amp;mut</span> <span class="ident">buffer</span>).<span class="ident">unwrap</span>()
+            Length::from(<span class="number">0x7Fu8</span>).encode_to_slice(<span class="kw-2">&amp;mut </span>buffer).unwrap()
         );
 
         <span class="macro">assert_eq!</span>(
             <span class="kw-2">&amp;</span>[<span class="number">0x81</span>, <span class="number">0x80</span>],
-            <span class="ident">Length::from</span>(<span class="number">0x80u8</span>).<span class="ident">encode_to_slice</span>(<span class="kw-2">&amp;mut</span> <span class="ident">buffer</span>).<span class="ident">unwrap</span>()
+            Length::from(<span class="number">0x80u8</span>).encode_to_slice(<span class="kw-2">&amp;mut </span>buffer).unwrap()
         );
 
         <span class="macro">assert_eq!</span>(
             <span class="kw-2">&amp;</span>[<span class="number">0x81</span>, <span class="number">0xFF</span>],
-            <span class="ident">Length::from</span>(<span class="number">0xFFu8</span>).<span class="ident">encode_to_slice</span>(<span class="kw-2">&amp;mut</span> <span class="ident">buffer</span>).<span class="ident">unwrap</span>()
+            Length::from(<span class="number">0xFFu8</span>).encode_to_slice(<span class="kw-2">&amp;mut </span>buffer).unwrap()
         );
 
         <span class="macro">assert_eq!</span>(
             <span class="kw-2">&amp;</span>[<span class="number">0x82</span>, <span class="number">0x01</span>, <span class="number">0x00</span>],
-            <span class="ident">Length::from</span>(<span class="number">0x100u16</span>).<span class="ident">encode_to_slice</span>(<span class="kw-2">&amp;mut</span> <span class="ident">buffer</span>).<span class="ident">unwrap</span>()
+            Length::from(<span class="number">0x100u16</span>).encode_to_slice(<span class="kw-2">&amp;mut </span>buffer).unwrap()
         );
 
         <span class="macro">assert_eq!</span>(
             <span class="kw-2">&amp;</span>[<span class="number">0x83</span>, <span class="number">0x01</span>, <span class="number">0x00</span>, <span class="number">0x00</span>],
-            <span class="ident">Length::try_from</span>(<span class="number">0x10000u32</span>)
-                .<span class="ident">unwrap</span>()
-                .<span class="ident">encode_to_slice</span>(<span class="kw-2">&amp;mut</span> <span class="ident">buffer</span>)
-                .<span class="ident">unwrap</span>()
+            Length::try_from(<span class="number">0x10000u32</span>)
+                .unwrap()
+                .encode_to_slice(<span class="kw-2">&amp;mut </span>buffer)
+                .unwrap()
         );
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">reject_indefinite_lengths</span>() {
-        <span class="macro">assert!</span>(<span class="ident">Length::from_der</span>(<span class="kw-2">&amp;</span>[<span class="number">0x80</span>]).<span class="ident">is_err</span>());
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>reject_indefinite_lengths() {
+        <span class="macro">assert!</span>(Length::from_der(<span class="kw-2">&amp;</span>[<span class="number">0x80</span>]).is_err());
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">add_overflows_when_max_length_exceeded</span>() {
-        <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">Length::MAX</span> <span class="op">+</span> <span class="ident">Length::ONE</span>;
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>add_overflows_when_max_length_exceeded() {
+        <span class="kw">let </span>result = Length::MAX + Length::ONE;
         <span class="macro">assert_eq!</span>(
-            <span class="ident">result</span>.<span class="ident">err</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">err</span><span class="op">|</span> <span class="ident">err</span>.<span class="ident">kind</span>()),
-            <span class="prelude-val">Some</span>(<span class="ident">ErrorKind::Overflow</span>)
+            result.err().map(|err| err.kind()),
+            <span class="prelude-val">Some</span>(ErrorKind::Overflow)
         );
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="der" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="der" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

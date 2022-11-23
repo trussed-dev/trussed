@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/mechanisms/p256.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>p256.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../trussed/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../trussed/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../trussed/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/mechanisms/p256.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>p256.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../trussed/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../trussed/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../trussed/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -381,388 +381,388 @@
 <span id="381">381</span>
 <span id="382">382</span>
 <span id="383">383</span>
-</pre><pre class="rust"><code><span class="comment">// use core::convert::{TryFrom, TryInto};</span>
+</pre><pre class="rust"><code><span class="comment">// use core::convert::{TryFrom, TryInto};
 
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::api</span>::<span class="kw-2">*</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::error::Error</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::service</span>::<span class="kw-2">*</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::types</span>::<span class="kw-2">*</span>;
+</span><span class="kw">use </span><span class="kw">crate</span>::api::<span class="kw-2">*</span>;
+<span class="kw">use </span><span class="kw">crate</span>::error::Error;
+<span class="kw">use </span><span class="kw">crate</span>::service::<span class="kw-2">*</span>;
+<span class="kw">use </span><span class="kw">crate</span>::types::<span class="kw-2">*</span>;
 
-<span class="attribute">#[<span class="ident">inline</span>(<span class="ident">never</span>)]</span>
-<span class="kw">fn</span> <span class="ident">load_secret_key</span>(
-    <span class="ident">keystore</span>: <span class="kw-2">&amp;mut</span> <span class="kw">impl</span> <span class="ident">Keystore</span>,
-    <span class="ident">key_id</span>: <span class="kw-2">&amp;</span><span class="ident">KeyId</span>,
-) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">p256_cortex_m4::SecretKey</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
-    <span class="comment">// info_now!(&quot;loading keypair&quot;);</span>
-    <span class="kw">let</span> <span class="ident">secret_scalar</span>: [<span class="ident">u8</span>; <span class="number">32</span>] <span class="op">=</span> <span class="ident">keystore</span>
-        .<span class="ident">load_key</span>(<span class="ident">key::Secrecy::Secret</span>, <span class="prelude-val">Some</span>(<span class="ident">key::Kind::P256</span>), <span class="ident">key_id</span>)<span class="question-mark">?</span>
-        .<span class="ident">material</span>
-        .<span class="ident">as_slice</span>()
-        .<span class="ident">try_into</span>()
-        .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error::InternalError</span>)<span class="question-mark">?</span>;
+<span class="attribute">#[inline(never)]
+</span><span class="kw">fn </span>load_secret_key(
+    keystore: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Keystore,
+    key_id: <span class="kw-2">&amp;</span>KeyId,
+) -&gt; <span class="prelude-ty">Result</span>&lt;p256_cortex_m4::SecretKey, Error&gt; {
+    <span class="comment">// info_now!(&quot;loading keypair&quot;);
+    </span><span class="kw">let </span>secret_scalar: [u8; <span class="number">32</span>] = keystore
+        .load_key(key::Secrecy::Secret, <span class="prelude-val">Some</span>(key::Kind::P256), key_id)<span class="question-mark">?
+        </span>.material
+        .as_slice()
+        .try_into()
+        .map_err(|<span class="kw">_</span>| Error::InternalError)<span class="question-mark">?</span>;
 
-    <span class="kw">let</span> <span class="ident">secret_key</span> <span class="op">=</span>
-        <span class="ident">p256_cortex_m4::SecretKey::from_bytes</span>(<span class="kw-2">&amp;</span><span class="ident">secret_scalar</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error::InternalError</span>)<span class="question-mark">?</span>;
-    <span class="prelude-val">Ok</span>(<span class="ident">secret_key</span>)
+    <span class="kw">let </span>secret_key =
+        p256_cortex_m4::SecretKey::from_bytes(<span class="kw-2">&amp;</span>secret_scalar).map_err(|<span class="kw">_</span>| Error::InternalError)<span class="question-mark">?</span>;
+    <span class="prelude-val">Ok</span>(secret_key)
 }
 
-<span class="attribute">#[<span class="ident">inline</span>(<span class="ident">never</span>)]</span>
-<span class="kw">fn</span> <span class="ident">load_public_key</span>(
-    <span class="ident">keystore</span>: <span class="kw-2">&amp;mut</span> <span class="kw">impl</span> <span class="ident">Keystore</span>,
-    <span class="ident">key_id</span>: <span class="kw-2">&amp;</span><span class="ident">KeyId</span>,
-) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">p256_cortex_m4::PublicKey</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
-    <span class="kw">let</span> <span class="ident">compressed_public_key</span>: [<span class="ident">u8</span>; <span class="number">33</span>] <span class="op">=</span> <span class="ident">keystore</span>
-        .<span class="ident">load_key</span>(<span class="ident">key::Secrecy::Public</span>, <span class="prelude-val">Some</span>(<span class="ident">key::Kind::P256</span>), <span class="ident">key_id</span>)<span class="question-mark">?</span>
-        .<span class="ident">material</span>
-        .<span class="ident">as_slice</span>()
-        .<span class="ident">try_into</span>()
-        .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error::InternalError</span>)<span class="question-mark">?</span>;
+<span class="attribute">#[inline(never)]
+</span><span class="kw">fn </span>load_public_key(
+    keystore: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Keystore,
+    key_id: <span class="kw-2">&amp;</span>KeyId,
+) -&gt; <span class="prelude-ty">Result</span>&lt;p256_cortex_m4::PublicKey, Error&gt; {
+    <span class="kw">let </span>compressed_public_key: [u8; <span class="number">33</span>] = keystore
+        .load_key(key::Secrecy::Public, <span class="prelude-val">Some</span>(key::Kind::P256), key_id)<span class="question-mark">?
+        </span>.material
+        .as_slice()
+        .try_into()
+        .map_err(|<span class="kw">_</span>| Error::InternalError)<span class="question-mark">?</span>;
 
-    <span class="ident">p256_cortex_m4::PublicKey::from_sec1_bytes</span>(<span class="kw-2">&amp;</span><span class="ident">compressed_public_key</span>)
-        .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error::InternalError</span>)
+    p256_cortex_m4::PublicKey::from_sec1_bytes(<span class="kw-2">&amp;</span>compressed_public_key)
+        .map_err(|<span class="kw">_</span>| Error::InternalError)
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;p256&quot;</span>)]</span>
-<span class="kw">impl</span> <span class="ident">Agree</span> <span class="kw">for</span> <span class="ident"><span class="kw">super</span>::P256</span> {
-    <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">never</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">agree</span>(
-        <span class="ident">keystore</span>: <span class="kw-2">&amp;mut</span> <span class="kw">impl</span> <span class="ident">Keystore</span>,
-        <span class="ident">request</span>: <span class="kw-2">&amp;</span><span class="ident">request::Agree</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">reply::Agree</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">private_id</span> <span class="op">=</span> <span class="ident">request</span>.<span class="ident">private_key</span>;
-        <span class="kw">let</span> <span class="ident">public_id</span> <span class="op">=</span> <span class="ident">request</span>.<span class="ident">public_key</span>;
+<span class="attribute">#[cfg(feature = <span class="string">&quot;p256&quot;</span>)]
+</span><span class="kw">impl </span>Agree <span class="kw">for </span><span class="kw">super</span>::P256 {
+    <span class="attribute">#[inline(never)]
+    </span><span class="kw">fn </span>agree(
+        keystore: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Keystore,
+        request: <span class="kw-2">&amp;</span>request::Agree,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;reply::Agree, Error&gt; {
+        <span class="kw">let </span>private_id = request.private_key;
+        <span class="kw">let </span>public_id = request.public_key;
 
-        <span class="kw">let</span> <span class="ident">secret_key</span> <span class="op">=</span> <span class="ident">load_secret_key</span>(<span class="ident">keystore</span>, <span class="kw-2">&amp;</span><span class="ident">private_id</span>)<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">public_key</span> <span class="op">=</span> <span class="ident">load_public_key</span>(<span class="ident">keystore</span>, <span class="kw-2">&amp;</span><span class="ident">public_id</span>)<span class="question-mark">?</span>;
+        <span class="kw">let </span>secret_key = load_secret_key(keystore, <span class="kw-2">&amp;</span>private_id)<span class="question-mark">?</span>;
+        <span class="kw">let </span>public_key = load_public_key(keystore, <span class="kw-2">&amp;</span>public_id)<span class="question-mark">?</span>;
 
-        <span class="kw">let</span> <span class="ident">shared_secret</span> <span class="op">=</span> <span class="ident">secret_key</span>.<span class="ident">agree</span>(<span class="kw-2">&amp;</span><span class="ident">public_key</span>);
+        <span class="kw">let </span>shared_secret = secret_key.agree(<span class="kw-2">&amp;</span>public_key);
 
-        <span class="kw">let</span> <span class="ident">flags</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">request</span>.<span class="ident">attributes</span>.<span class="ident">serializable</span> {
-            <span class="ident">key::Flags::SERIALIZABLE</span>
-        } <span class="kw">else</span> {
-            <span class="ident">key::Flags::empty</span>()
+        <span class="kw">let </span>flags = <span class="kw">if </span>request.attributes.serializable {
+            key::Flags::SERIALIZABLE
+        } <span class="kw">else </span>{
+            key::Flags::empty()
         };
-        <span class="kw">let</span> <span class="ident">info</span> <span class="op">=</span> <span class="ident">key::Info</span> {
-            <span class="ident">kind</span>: <span class="ident">key::Kind::Shared</span>(<span class="ident">shared_secret</span>.<span class="ident">as_bytes</span>().<span class="ident">len</span>()),
-            <span class="ident">flags</span>,
+        <span class="kw">let </span>info = key::Info {
+            kind: key::Kind::Shared(shared_secret.as_bytes().len()),
+            flags,
         };
 
-        <span class="kw">let</span> <span class="ident">key_id</span> <span class="op">=</span> <span class="ident">keystore</span>.<span class="ident">store_key</span>(
-            <span class="ident">request</span>.<span class="ident">attributes</span>.<span class="ident">persistence</span>,
-            <span class="ident">key::Secrecy::Secret</span>,
-            <span class="ident">info</span>,
-            <span class="ident">shared_secret</span>.<span class="ident">as_bytes</span>(),
+        <span class="kw">let </span>key_id = keystore.store_key(
+            request.attributes.persistence,
+            key::Secrecy::Secret,
+            info,
+            shared_secret.as_bytes(),
         )<span class="question-mark">?</span>;
 
-        <span class="comment">// return handle</span>
-        <span class="prelude-val">Ok</span>(<span class="ident">reply::Agree</span> {
-            <span class="ident">shared_secret</span>: <span class="ident">key_id</span>,
+        <span class="comment">// return handle
+        </span><span class="prelude-val">Ok</span>(reply::Agree {
+            shared_secret: key_id,
         })
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;p256&quot;</span>)]</span>
-<span class="kw">impl</span> <span class="ident">DeriveKey</span> <span class="kw">for</span> <span class="ident"><span class="kw">super</span>::P256</span> {
-    <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">never</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">derive_key</span>(
-        <span class="ident">keystore</span>: <span class="kw-2">&amp;mut</span> <span class="kw">impl</span> <span class="ident">Keystore</span>,
-        <span class="ident">request</span>: <span class="kw-2">&amp;</span><span class="ident">request::DeriveKey</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">reply::DeriveKey</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">base_id</span> <span class="op">=</span> <span class="ident">request</span>.<span class="ident">base_key</span>;
+<span class="attribute">#[cfg(feature = <span class="string">&quot;p256&quot;</span>)]
+</span><span class="kw">impl </span>DeriveKey <span class="kw">for </span><span class="kw">super</span>::P256 {
+    <span class="attribute">#[inline(never)]
+    </span><span class="kw">fn </span>derive_key(
+        keystore: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Keystore,
+        request: <span class="kw-2">&amp;</span>request::DeriveKey,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;reply::DeriveKey, Error&gt; {
+        <span class="kw">let </span>base_id = request.base_key;
 
-        <span class="kw">let</span> <span class="ident">secret_key</span> <span class="op">=</span> <span class="ident">load_secret_key</span>(<span class="ident">keystore</span>, <span class="kw-2">&amp;</span><span class="ident">base_id</span>)<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">public_key</span> <span class="op">=</span> <span class="ident">secret_key</span>.<span class="ident">public_key</span>();
+        <span class="kw">let </span>secret_key = load_secret_key(keystore, <span class="kw-2">&amp;</span>base_id)<span class="question-mark">?</span>;
+        <span class="kw">let </span>public_key = secret_key.public_key();
 
-        <span class="kw">let</span> <span class="ident">public_id</span> <span class="op">=</span> <span class="ident">keystore</span>.<span class="ident">store_key</span>(
-            <span class="ident">request</span>.<span class="ident">attributes</span>.<span class="ident">persistence</span>,
-            <span class="ident">key::Secrecy::Public</span>,
-            <span class="ident">key::Kind::P256</span>,
-            <span class="kw-2">&amp;</span><span class="ident">public_key</span>.<span class="ident">to_compressed_sec1_bytes</span>(),
+        <span class="kw">let </span>public_id = keystore.store_key(
+            request.attributes.persistence,
+            key::Secrecy::Public,
+            key::Kind::P256,
+            <span class="kw-2">&amp;</span>public_key.to_compressed_sec1_bytes(),
         )<span class="question-mark">?</span>;
 
-        <span class="prelude-val">Ok</span>(<span class="ident">reply::DeriveKey</span> { <span class="ident">key</span>: <span class="ident">public_id</span> })
+        <span class="prelude-val">Ok</span>(reply::DeriveKey { key: public_id })
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;p256&quot;</span>)]</span>
-<span class="kw">impl</span> <span class="ident">DeserializeKey</span> <span class="kw">for</span> <span class="ident"><span class="kw">super</span>::P256</span> {
-    <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">never</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">deserialize_key</span>(
-        <span class="ident">keystore</span>: <span class="kw-2">&amp;mut</span> <span class="kw">impl</span> <span class="ident">Keystore</span>,
-        <span class="ident">request</span>: <span class="kw-2">&amp;</span><span class="ident">request::DeserializeKey</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">reply::DeserializeKey</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="comment">// - mechanism: Mechanism</span>
-        <span class="comment">// - serialized_key: Message</span>
-        <span class="comment">// - attributes: StorageAttributes</span>
+<span class="attribute">#[cfg(feature = <span class="string">&quot;p256&quot;</span>)]
+</span><span class="kw">impl </span>DeserializeKey <span class="kw">for </span><span class="kw">super</span>::P256 {
+    <span class="attribute">#[inline(never)]
+    </span><span class="kw">fn </span>deserialize_key(
+        keystore: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Keystore,
+        request: <span class="kw-2">&amp;</span>request::DeserializeKey,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;reply::DeserializeKey, Error&gt; {
+        <span class="comment">// - mechanism: Mechanism
+        // - serialized_key: Message
+        // - attributes: StorageAttributes
 
-        <span class="kw">let</span> <span class="ident">public_key</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">request</span>.<span class="ident">format</span> {
-            <span class="ident">KeySerialization::Cose</span> =&gt; {
-                <span class="comment">// TODO: this should all be done upstream</span>
-                <span class="kw">let</span> <span class="ident">cose_public_key</span>: <span class="ident">cosey::P256PublicKey</span> <span class="op">=</span>
-                    <span class="ident"><span class="kw">crate</span>::cbor_deserialize</span>(<span class="kw-2">&amp;</span><span class="ident">request</span>.<span class="ident">serialized_key</span>)
-                        .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error::CborError</span>)<span class="question-mark">?</span>;
-                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">serialized_key</span> <span class="op">=</span> [<span class="number">0u8</span>; <span class="number">64</span>];
-                <span class="kw">if</span> <span class="ident">cose_public_key</span>.<span class="ident">x</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="number">32</span> <span class="op">|</span><span class="op">|</span> <span class="ident">cose_public_key</span>.<span class="ident">y</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="number">32</span> {
-                    <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::InvalidSerializedKey</span>);
+        </span><span class="kw">let </span>public_key = <span class="kw">match </span>request.format {
+            KeySerialization::Cose =&gt; {
+                <span class="comment">// TODO: this should all be done upstream
+                </span><span class="kw">let </span>cose_public_key: cosey::P256PublicKey =
+                    <span class="kw">crate</span>::cbor_deserialize(<span class="kw-2">&amp;</span>request.serialized_key)
+                        .map_err(|<span class="kw">_</span>| Error::CborError)<span class="question-mark">?</span>;
+                <span class="kw">let </span><span class="kw-2">mut </span>serialized_key = [<span class="number">0u8</span>; <span class="number">64</span>];
+                <span class="kw">if </span>cose_public_key.x.len() != <span class="number">32 </span>|| cose_public_key.y.len() != <span class="number">32 </span>{
+                    <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidSerializedKey);
                 }
 
-                <span class="ident">serialized_key</span>[..<span class="number">32</span>].<span class="ident">copy_from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">cose_public_key</span>.<span class="ident">x</span>);
-                <span class="ident">serialized_key</span>[<span class="number">32</span>..].<span class="ident">copy_from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">cose_public_key</span>.<span class="ident">y</span>);
+                serialized_key[..<span class="number">32</span>].copy_from_slice(<span class="kw-2">&amp;</span>cose_public_key.x);
+                serialized_key[<span class="number">32</span>..].copy_from_slice(<span class="kw-2">&amp;</span>cose_public_key.y);
 
-                <span class="ident">p256_cortex_m4::PublicKey::from_untagged_bytes</span>(<span class="kw-2">&amp;</span><span class="ident">serialized_key</span>)
-                    .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error::InvalidSerializedKey</span>)<span class="question-mark">?</span>
-            }
+                p256_cortex_m4::PublicKey::from_untagged_bytes(<span class="kw-2">&amp;</span>serialized_key)
+                    .map_err(|<span class="kw">_</span>| Error::InvalidSerializedKey)<span class="question-mark">?
+            </span>}
 
-            <span class="ident">KeySerialization::EcdhEsHkdf256</span> =&gt; {
-                <span class="comment">// TODO: this should all be done upstream</span>
-                <span class="kw">let</span> <span class="ident">cose_public_key</span>: <span class="ident">cosey::EcdhEsHkdf256PublicKey</span> <span class="op">=</span>
-                    <span class="ident"><span class="kw">crate</span>::cbor_deserialize</span>(<span class="kw-2">&amp;</span><span class="ident">request</span>.<span class="ident">serialized_key</span>)
-                        .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error::CborError</span>)<span class="question-mark">?</span>;
-                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">serialized_key</span> <span class="op">=</span> [<span class="number">0u8</span>; <span class="number">64</span>];
-                <span class="kw">if</span> <span class="ident">cose_public_key</span>.<span class="ident">x</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="number">32</span> <span class="op">|</span><span class="op">|</span> <span class="ident">cose_public_key</span>.<span class="ident">y</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="number">32</span> {
-                    <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::InvalidSerializedKey</span>);
+            KeySerialization::EcdhEsHkdf256 =&gt; {
+                <span class="comment">// TODO: this should all be done upstream
+                </span><span class="kw">let </span>cose_public_key: cosey::EcdhEsHkdf256PublicKey =
+                    <span class="kw">crate</span>::cbor_deserialize(<span class="kw-2">&amp;</span>request.serialized_key)
+                        .map_err(|<span class="kw">_</span>| Error::CborError)<span class="question-mark">?</span>;
+                <span class="kw">let </span><span class="kw-2">mut </span>serialized_key = [<span class="number">0u8</span>; <span class="number">64</span>];
+                <span class="kw">if </span>cose_public_key.x.len() != <span class="number">32 </span>|| cose_public_key.y.len() != <span class="number">32 </span>{
+                    <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidSerializedKey);
                 }
 
-                <span class="ident">serialized_key</span>[..<span class="number">32</span>].<span class="ident">copy_from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">cose_public_key</span>.<span class="ident">x</span>);
-                <span class="ident">serialized_key</span>[<span class="number">32</span>..].<span class="ident">copy_from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">cose_public_key</span>.<span class="ident">y</span>);
+                serialized_key[..<span class="number">32</span>].copy_from_slice(<span class="kw-2">&amp;</span>cose_public_key.x);
+                serialized_key[<span class="number">32</span>..].copy_from_slice(<span class="kw-2">&amp;</span>cose_public_key.y);
 
-                <span class="ident">p256_cortex_m4::PublicKey::from_untagged_bytes</span>(<span class="kw-2">&amp;</span><span class="ident">serialized_key</span>)
-                    .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error::InvalidSerializedKey</span>)<span class="question-mark">?</span>
-            }
+                p256_cortex_m4::PublicKey::from_untagged_bytes(<span class="kw-2">&amp;</span>serialized_key)
+                    .map_err(|<span class="kw">_</span>| Error::InvalidSerializedKey)<span class="question-mark">?
+            </span>}
 
-            <span class="ident">KeySerialization::Raw</span> =&gt; {
-                <span class="kw">if</span> <span class="ident">request</span>.<span class="ident">serialized_key</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="number">64</span> {
-                    <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::InvalidSerializedKey</span>);
+            KeySerialization::Raw =&gt; {
+                <span class="kw">if </span>request.serialized_key.len() != <span class="number">64 </span>{
+                    <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidSerializedKey);
                 }
 
-                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">serialized_key</span> <span class="op">=</span> [<span class="number">0u8</span>; <span class="number">64</span>];
-                <span class="ident">serialized_key</span>.<span class="ident">copy_from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">request</span>.<span class="ident">serialized_key</span>[..<span class="number">64</span>]);
+                <span class="kw">let </span><span class="kw-2">mut </span>serialized_key = [<span class="number">0u8</span>; <span class="number">64</span>];
+                serialized_key.copy_from_slice(<span class="kw-2">&amp;</span>request.serialized_key[..<span class="number">64</span>]);
 
-                <span class="ident">p256_cortex_m4::PublicKey::from_untagged_bytes</span>(<span class="kw-2">&amp;</span><span class="ident">serialized_key</span>)
-                    .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error::InvalidSerializedKey</span>)<span class="question-mark">?</span>
-            }
+                p256_cortex_m4::PublicKey::from_untagged_bytes(<span class="kw-2">&amp;</span>serialized_key)
+                    .map_err(|<span class="kw">_</span>| Error::InvalidSerializedKey)<span class="question-mark">?
+            </span>}
 
-            <span class="kw">_</span> =&gt; {
-                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::InternalError</span>);
+            <span class="kw">_ </span>=&gt; {
+                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InternalError);
             }
         };
 
-        <span class="kw">let</span> <span class="ident">public_id</span> <span class="op">=</span> <span class="ident">keystore</span>.<span class="ident">store_key</span>(
-            <span class="ident">request</span>.<span class="ident">attributes</span>.<span class="ident">persistence</span>,
-            <span class="ident">key::Secrecy::Public</span>,
-            <span class="ident">key::Kind::P256</span>,
-            <span class="kw-2">&amp;</span><span class="ident">public_key</span>.<span class="ident">to_compressed_sec1_bytes</span>(),
+        <span class="kw">let </span>public_id = keystore.store_key(
+            request.attributes.persistence,
+            key::Secrecy::Public,
+            key::Kind::P256,
+            <span class="kw-2">&amp;</span>public_key.to_compressed_sec1_bytes(),
         )<span class="question-mark">?</span>;
 
-        <span class="prelude-val">Ok</span>(<span class="ident">reply::DeserializeKey</span> { <span class="ident">key</span>: <span class="ident">public_id</span> })
+        <span class="prelude-val">Ok</span>(reply::DeserializeKey { key: public_id })
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;p256&quot;</span>)]</span>
-<span class="kw">impl</span> <span class="ident">GenerateKey</span> <span class="kw">for</span> <span class="ident"><span class="kw">super</span>::P256</span> {
-    <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">never</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">generate_key</span>(
-        <span class="ident">keystore</span>: <span class="kw-2">&amp;mut</span> <span class="kw">impl</span> <span class="ident">Keystore</span>,
-        <span class="ident">request</span>: <span class="kw-2">&amp;</span><span class="ident">request::GenerateKey</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">reply::GenerateKey</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">keypair</span> <span class="op">=</span> <span class="ident">p256_cortex_m4::Keypair::random</span>(<span class="kw-2">&amp;mut</span> <span class="ident">keystore</span>.<span class="ident">rng</span>());
+<span class="attribute">#[cfg(feature = <span class="string">&quot;p256&quot;</span>)]
+</span><span class="kw">impl </span>GenerateKey <span class="kw">for </span><span class="kw">super</span>::P256 {
+    <span class="attribute">#[inline(never)]
+    </span><span class="kw">fn </span>generate_key(
+        keystore: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Keystore,
+        request: <span class="kw-2">&amp;</span>request::GenerateKey,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;reply::GenerateKey, Error&gt; {
+        <span class="kw">let </span>keypair = p256_cortex_m4::Keypair::random(<span class="kw-2">&amp;mut </span>keystore.rng());
 
-        <span class="comment">// store keys</span>
-        <span class="kw">let</span> <span class="ident">key_id</span> <span class="op">=</span> <span class="ident">keystore</span>.<span class="ident">store_key</span>(
-            <span class="ident">request</span>.<span class="ident">attributes</span>.<span class="ident">persistence</span>,
-            <span class="ident">key::Secrecy::Secret</span>,
-            <span class="ident">key::Info::from</span>(<span class="ident">key::Kind::P256</span>).<span class="ident">with_local_flag</span>(),
-            <span class="kw-2">&amp;</span><span class="kw">unsafe</span> { <span class="ident">keypair</span>.<span class="ident">secret</span>.<span class="ident">to_bytes</span>() },
+        <span class="comment">// store keys
+        </span><span class="kw">let </span>key_id = keystore.store_key(
+            request.attributes.persistence,
+            key::Secrecy::Secret,
+            key::Info::from(key::Kind::P256).with_local_flag(),
+            <span class="kw-2">&amp;</span><span class="kw">unsafe </span>{ keypair.secret.to_bytes() },
         )<span class="question-mark">?</span>;
 
-        <span class="comment">// return handle</span>
-        <span class="prelude-val">Ok</span>(<span class="ident">reply::GenerateKey</span> { <span class="ident">key</span>: <span class="ident">key_id</span> })
+        <span class="comment">// return handle
+        </span><span class="prelude-val">Ok</span>(reply::GenerateKey { key: key_id })
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;p256&quot;</span>)]</span>
-<span class="kw">impl</span> <span class="ident">SerializeKey</span> <span class="kw">for</span> <span class="ident"><span class="kw">super</span>::P256</span> {
-    <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">never</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">serialize_key</span>(
-        <span class="ident">keystore</span>: <span class="kw-2">&amp;mut</span> <span class="kw">impl</span> <span class="ident">Keystore</span>,
-        <span class="ident">request</span>: <span class="kw-2">&amp;</span><span class="ident">request::SerializeKey</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">reply::SerializeKey</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">key_id</span> <span class="op">=</span> <span class="ident">request</span>.<span class="ident">key</span>;
+<span class="attribute">#[cfg(feature = <span class="string">&quot;p256&quot;</span>)]
+</span><span class="kw">impl </span>SerializeKey <span class="kw">for </span><span class="kw">super</span>::P256 {
+    <span class="attribute">#[inline(never)]
+    </span><span class="kw">fn </span>serialize_key(
+        keystore: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Keystore,
+        request: <span class="kw-2">&amp;</span>request::SerializeKey,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;reply::SerializeKey, Error&gt; {
+        <span class="kw">let </span>key_id = request.key;
 
-        <span class="kw">let</span> <span class="ident">public_key</span> <span class="op">=</span> <span class="ident">load_public_key</span>(<span class="ident">keystore</span>, <span class="kw-2">&amp;</span><span class="ident">key_id</span>)<span class="question-mark">?</span>;
+        <span class="kw">let </span>public_key = load_public_key(keystore, <span class="kw-2">&amp;</span>key_id)<span class="question-mark">?</span>;
 
-        <span class="kw">let</span> <span class="ident">serialized_key</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">request</span>.<span class="ident">format</span> {
-            <span class="ident">KeySerialization::EcdhEsHkdf256</span> =&gt; {
-                <span class="kw">let</span> <span class="ident">cose_pk</span> <span class="op">=</span> <span class="ident">cosey::EcdhEsHkdf256PublicKey</span> {
-                    <span class="ident">x</span>: <span class="ident">Bytes::from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">public_key</span>.<span class="ident">x</span>()).<span class="ident">unwrap</span>(),
-                    <span class="ident">y</span>: <span class="ident">Bytes::from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">public_key</span>.<span class="ident">y</span>()).<span class="ident">unwrap</span>(),
+        <span class="kw">let </span>serialized_key = <span class="kw">match </span>request.format {
+            KeySerialization::EcdhEsHkdf256 =&gt; {
+                <span class="kw">let </span>cose_pk = cosey::EcdhEsHkdf256PublicKey {
+                    x: Bytes::from_slice(<span class="kw-2">&amp;</span>public_key.x()).unwrap(),
+                    y: Bytes::from_slice(<span class="kw-2">&amp;</span>public_key.y()).unwrap(),
                 };
-                <span class="ident"><span class="kw">crate</span>::cbor_serialize_bytes</span>(<span class="kw-2">&amp;</span><span class="ident">cose_pk</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error::CborError</span>)<span class="question-mark">?</span>
-            }
-            <span class="ident">KeySerialization::Cose</span> =&gt; {
-                <span class="kw">let</span> <span class="ident">cose_pk</span> <span class="op">=</span> <span class="ident">cosey::P256PublicKey</span> {
-                    <span class="ident">x</span>: <span class="ident">Bytes::from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">public_key</span>.<span class="ident">x</span>()).<span class="ident">unwrap</span>(),
-                    <span class="ident">y</span>: <span class="ident">Bytes::from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">public_key</span>.<span class="ident">y</span>()).<span class="ident">unwrap</span>(),
+                <span class="kw">crate</span>::cbor_serialize_bytes(<span class="kw-2">&amp;</span>cose_pk).map_err(|<span class="kw">_</span>| Error::CborError)<span class="question-mark">?
+            </span>}
+            KeySerialization::Cose =&gt; {
+                <span class="kw">let </span>cose_pk = cosey::P256PublicKey {
+                    x: Bytes::from_slice(<span class="kw-2">&amp;</span>public_key.x()).unwrap(),
+                    y: Bytes::from_slice(<span class="kw-2">&amp;</span>public_key.y()).unwrap(),
                 };
-                <span class="ident"><span class="kw">crate</span>::cbor_serialize_bytes</span>(<span class="kw-2">&amp;</span><span class="ident">cose_pk</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error::CborError</span>)<span class="question-mark">?</span>
+                <span class="kw">crate</span>::cbor_serialize_bytes(<span class="kw-2">&amp;</span>cose_pk).map_err(|<span class="kw">_</span>| Error::CborError)<span class="question-mark">?
+            </span>}
+            KeySerialization::Raw =&gt; {
+                <span class="kw">let </span><span class="kw-2">mut </span>serialized_key = Message::new();
+                serialized_key
+                    .extend_from_slice(<span class="kw-2">&amp;</span>public_key.x())
+                    .map_err(|<span class="kw">_</span>| Error::InternalError)<span class="question-mark">?</span>;
+                serialized_key
+                    .extend_from_slice(<span class="kw-2">&amp;</span>public_key.y())
+                    .map_err(|<span class="kw">_</span>| Error::InternalError)<span class="question-mark">?</span>;
+                serialized_key
             }
-            <span class="ident">KeySerialization::Raw</span> =&gt; {
-                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">serialized_key</span> <span class="op">=</span> <span class="ident">Message::new</span>();
-                <span class="ident">serialized_key</span>
-                    .<span class="ident">extend_from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">public_key</span>.<span class="ident">x</span>())
-                    .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error::InternalError</span>)<span class="question-mark">?</span>;
-                <span class="ident">serialized_key</span>
-                    .<span class="ident">extend_from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">public_key</span>.<span class="ident">y</span>())
-                    .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error::InternalError</span>)<span class="question-mark">?</span>;
-                <span class="ident">serialized_key</span>
-            }
-            <span class="ident">KeySerialization::Sec1</span> =&gt; {
-                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">serialized_key</span> <span class="op">=</span> <span class="ident">Message::new</span>();
-                <span class="ident">serialized_key</span>
-                    .<span class="ident">extend_from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">public_key</span>.<span class="ident">to_compressed_sec1_bytes</span>())
-                    .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error::InternalError</span>)<span class="question-mark">?</span>;
-                <span class="ident">serialized_key</span>
-            }
-        };
-
-        <span class="prelude-val">Ok</span>(<span class="ident">reply::SerializeKey</span> { <span class="ident">serialized_key</span> })
-    }
-}
-
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;p256&quot;</span>)]</span>
-<span class="kw">impl</span> <span class="ident">Exists</span> <span class="kw">for</span> <span class="ident"><span class="kw">super</span>::P256</span> {
-    <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">never</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">exists</span>(
-        <span class="ident">keystore</span>: <span class="kw-2">&amp;mut</span> <span class="kw">impl</span> <span class="ident">Keystore</span>,
-        <span class="ident">request</span>: <span class="kw-2">&amp;</span><span class="ident">request::Exists</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">reply::Exists</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">key_id</span> <span class="op">=</span> <span class="ident">request</span>.<span class="ident">key</span>;
-        <span class="kw">let</span> <span class="ident">exists</span> <span class="op">=</span> <span class="ident">keystore</span>.<span class="ident">exists_key</span>(<span class="ident">key::Secrecy::Secret</span>, <span class="prelude-val">Some</span>(<span class="ident">key::Kind::P256</span>), <span class="kw-2">&amp;</span><span class="ident">key_id</span>);
-        <span class="prelude-val">Ok</span>(<span class="ident">reply::Exists</span> { <span class="ident">exists</span> })
-    }
-}
-
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;p256&quot;</span>)]</span>
-<span class="kw">impl</span> <span class="ident">Sign</span> <span class="kw">for</span> <span class="ident"><span class="kw">super</span>::P256</span> {
-    <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">never</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">sign</span>(<span class="ident">keystore</span>: <span class="kw-2">&amp;mut</span> <span class="kw">impl</span> <span class="ident">Keystore</span>, <span class="ident">request</span>: <span class="kw-2">&amp;</span><span class="ident">request::Sign</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">reply::Sign</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">key_id</span> <span class="op">=</span> <span class="ident">request</span>.<span class="ident">key</span>;
-
-        <span class="kw">let</span> <span class="ident">secret_key</span> <span class="op">=</span> <span class="ident">load_secret_key</span>(<span class="ident">keystore</span>, <span class="kw-2">&amp;</span><span class="ident">key_id</span>)<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">signature</span> <span class="op">=</span> <span class="ident">secret_key</span>.<span class="ident">sign</span>(<span class="kw-2">&amp;</span><span class="ident">request</span>.<span class="ident">message</span>, <span class="ident">keystore</span>.<span class="ident">rng</span>());
-
-        <span class="comment">// debug_now!(&quot;making signature&quot;);</span>
-        <span class="kw">let</span> <span class="ident">serialized_signature</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">request</span>.<span class="ident">format</span> {
-            <span class="ident">SignatureSerialization::Asn1Der</span> =&gt; {
-                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buffer</span> <span class="op">=</span> [<span class="number">0u8</span>; <span class="number">72</span>];
-                <span class="kw">let</span> <span class="ident">l</span> <span class="op">=</span> <span class="ident">signature</span>.<span class="ident">to_sec1_bytes</span>(<span class="kw-2">&amp;mut</span> <span class="ident">buffer</span>);
-                <span class="ident">Signature::from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">buffer</span>[..<span class="ident">l</span>]).<span class="ident">unwrap</span>()
-            }
-            <span class="ident">SignatureSerialization::Raw</span> =&gt; {
-                <span class="ident">Signature::from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">signature</span>.<span class="ident">to_untagged_bytes</span>()).<span class="ident">unwrap</span>()
+            KeySerialization::Sec1 =&gt; {
+                <span class="kw">let </span><span class="kw-2">mut </span>serialized_key = Message::new();
+                serialized_key
+                    .extend_from_slice(<span class="kw-2">&amp;</span>public_key.to_compressed_sec1_bytes())
+                    .map_err(|<span class="kw">_</span>| Error::InternalError)<span class="question-mark">?</span>;
+                serialized_key
             }
         };
 
-        <span class="comment">// return signature</span>
-        <span class="prelude-val">Ok</span>(<span class="ident">reply::Sign</span> {
-            <span class="ident">signature</span>: <span class="ident">serialized_signature</span>,
+        <span class="prelude-val">Ok</span>(reply::SerializeKey { serialized_key })
+    }
+}
+
+<span class="attribute">#[cfg(feature = <span class="string">&quot;p256&quot;</span>)]
+</span><span class="kw">impl </span>Exists <span class="kw">for </span><span class="kw">super</span>::P256 {
+    <span class="attribute">#[inline(never)]
+    </span><span class="kw">fn </span>exists(
+        keystore: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Keystore,
+        request: <span class="kw-2">&amp;</span>request::Exists,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;reply::Exists, Error&gt; {
+        <span class="kw">let </span>key_id = request.key;
+        <span class="kw">let </span>exists = keystore.exists_key(key::Secrecy::Secret, <span class="prelude-val">Some</span>(key::Kind::P256), <span class="kw-2">&amp;</span>key_id);
+        <span class="prelude-val">Ok</span>(reply::Exists { exists })
+    }
+}
+
+<span class="attribute">#[cfg(feature = <span class="string">&quot;p256&quot;</span>)]
+</span><span class="kw">impl </span>Sign <span class="kw">for </span><span class="kw">super</span>::P256 {
+    <span class="attribute">#[inline(never)]
+    </span><span class="kw">fn </span>sign(keystore: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Keystore, request: <span class="kw-2">&amp;</span>request::Sign) -&gt; <span class="prelude-ty">Result</span>&lt;reply::Sign, Error&gt; {
+        <span class="kw">let </span>key_id = request.key;
+
+        <span class="kw">let </span>secret_key = load_secret_key(keystore, <span class="kw-2">&amp;</span>key_id)<span class="question-mark">?</span>;
+        <span class="kw">let </span>signature = secret_key.sign(<span class="kw-2">&amp;</span>request.message, keystore.rng());
+
+        <span class="comment">// debug_now!(&quot;making signature&quot;);
+        </span><span class="kw">let </span>serialized_signature = <span class="kw">match </span>request.format {
+            SignatureSerialization::Asn1Der =&gt; {
+                <span class="kw">let </span><span class="kw-2">mut </span>buffer = [<span class="number">0u8</span>; <span class="number">72</span>];
+                <span class="kw">let </span>l = signature.to_sec1_bytes(<span class="kw-2">&amp;mut </span>buffer);
+                Signature::from_slice(<span class="kw-2">&amp;</span>buffer[..l]).unwrap()
+            }
+            SignatureSerialization::Raw =&gt; {
+                Signature::from_slice(<span class="kw-2">&amp;</span>signature.to_untagged_bytes()).unwrap()
+            }
+        };
+
+        <span class="comment">// return signature
+        </span><span class="prelude-val">Ok</span>(reply::Sign {
+            signature: serialized_signature,
         })
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;p256&quot;</span>)]</span>
-<span class="kw">impl</span> <span class="ident">Sign</span> <span class="kw">for</span> <span class="ident"><span class="kw">super</span>::P256Prehashed</span> {
-    <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">never</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">sign</span>(<span class="ident">keystore</span>: <span class="kw-2">&amp;mut</span> <span class="kw">impl</span> <span class="ident">Keystore</span>, <span class="ident">request</span>: <span class="kw-2">&amp;</span><span class="ident">request::Sign</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">reply::Sign</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">key_id</span> <span class="op">=</span> <span class="ident">request</span>.<span class="ident">key</span>;
+<span class="attribute">#[cfg(feature = <span class="string">&quot;p256&quot;</span>)]
+</span><span class="kw">impl </span>Sign <span class="kw">for </span><span class="kw">super</span>::P256Prehashed {
+    <span class="attribute">#[inline(never)]
+    </span><span class="kw">fn </span>sign(keystore: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Keystore, request: <span class="kw-2">&amp;</span>request::Sign) -&gt; <span class="prelude-ty">Result</span>&lt;reply::Sign, Error&gt; {
+        <span class="kw">let </span>key_id = request.key;
 
-        <span class="kw">let</span> <span class="ident">secret_key</span> <span class="op">=</span> <span class="ident">load_secret_key</span>(<span class="ident">keystore</span>, <span class="kw-2">&amp;</span><span class="ident">key_id</span>)<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">signature</span> <span class="op">=</span> <span class="ident">secret_key</span>.<span class="ident">sign_prehashed</span>(<span class="kw-2">&amp;</span><span class="ident">request</span>.<span class="ident">message</span>, <span class="ident">keystore</span>.<span class="ident">rng</span>());
+        <span class="kw">let </span>secret_key = load_secret_key(keystore, <span class="kw-2">&amp;</span>key_id)<span class="question-mark">?</span>;
+        <span class="kw">let </span>signature = secret_key.sign_prehashed(<span class="kw-2">&amp;</span>request.message, keystore.rng());
 
-        <span class="comment">// debug_now!(&quot;making signature&quot;);</span>
-        <span class="kw">let</span> <span class="ident">serialized_signature</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">request</span>.<span class="ident">format</span> {
-            <span class="ident">SignatureSerialization::Asn1Der</span> =&gt; {
-                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buffer</span> <span class="op">=</span> [<span class="number">0u8</span>; <span class="number">72</span>];
-                <span class="kw">let</span> <span class="ident">l</span> <span class="op">=</span> <span class="ident">signature</span>.<span class="ident">to_sec1_bytes</span>(<span class="kw-2">&amp;mut</span> <span class="ident">buffer</span>);
-                <span class="ident">Signature::from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">buffer</span>[..<span class="ident">l</span>]).<span class="ident">unwrap</span>()
+        <span class="comment">// debug_now!(&quot;making signature&quot;);
+        </span><span class="kw">let </span>serialized_signature = <span class="kw">match </span>request.format {
+            SignatureSerialization::Asn1Der =&gt; {
+                <span class="kw">let </span><span class="kw-2">mut </span>buffer = [<span class="number">0u8</span>; <span class="number">72</span>];
+                <span class="kw">let </span>l = signature.to_sec1_bytes(<span class="kw-2">&amp;mut </span>buffer);
+                Signature::from_slice(<span class="kw-2">&amp;</span>buffer[..l]).unwrap()
             }
-            <span class="ident">SignatureSerialization::Raw</span> =&gt; {
-                <span class="ident">Signature::from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">signature</span>.<span class="ident">to_untagged_bytes</span>()).<span class="ident">unwrap</span>()
+            SignatureSerialization::Raw =&gt; {
+                Signature::from_slice(<span class="kw-2">&amp;</span>signature.to_untagged_bytes()).unwrap()
             }
         };
 
-        <span class="comment">// return signature</span>
-        <span class="prelude-val">Ok</span>(<span class="ident">reply::Sign</span> {
-            <span class="ident">signature</span>: <span class="ident">serialized_signature</span>,
+        <span class="comment">// return signature
+        </span><span class="prelude-val">Ok</span>(reply::Sign {
+            signature: serialized_signature,
         })
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;p256&quot;</span>)]</span>
-<span class="kw">impl</span> <span class="ident">Verify</span> <span class="kw">for</span> <span class="ident"><span class="kw">super</span>::P256</span> {
-    <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">never</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">verify</span>(
-        <span class="ident">keystore</span>: <span class="kw-2">&amp;mut</span> <span class="kw">impl</span> <span class="ident">Keystore</span>,
-        <span class="ident">request</span>: <span class="kw-2">&amp;</span><span class="ident">request::Verify</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">reply::Verify</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">key_id</span> <span class="op">=</span> <span class="ident">request</span>.<span class="ident">key</span>;
+<span class="attribute">#[cfg(feature = <span class="string">&quot;p256&quot;</span>)]
+</span><span class="kw">impl </span>Verify <span class="kw">for </span><span class="kw">super</span>::P256 {
+    <span class="attribute">#[inline(never)]
+    </span><span class="kw">fn </span>verify(
+        keystore: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Keystore,
+        request: <span class="kw-2">&amp;</span>request::Verify,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;reply::Verify, Error&gt; {
+        <span class="kw">let </span>key_id = request.key;
 
-        <span class="kw">let</span> <span class="ident">public_key</span> <span class="op">=</span> <span class="ident">load_public_key</span>(<span class="ident">keystore</span>, <span class="kw-2">&amp;</span><span class="ident">key_id</span>)<span class="question-mark">?</span>;
+        <span class="kw">let </span>public_key = load_public_key(keystore, <span class="kw-2">&amp;</span>key_id)<span class="question-mark">?</span>;
 
-        <span class="kw">let</span> <span class="ident">signature</span> <span class="op">=</span> <span class="ident">p256_cortex_m4::Signature::from_untagged_bytes</span>(<span class="kw-2">&amp;</span><span class="ident">request</span>.<span class="ident">signature</span>)
-            <span class="comment">// well... or wrong encoding, need r,s in range 1..=n-1</span>
-            .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error::WrongSignatureLength</span>)<span class="question-mark">?</span>;
+        <span class="kw">let </span>signature = p256_cortex_m4::Signature::from_untagged_bytes(<span class="kw-2">&amp;</span>request.signature)
+            <span class="comment">// well... or wrong encoding, need r,s in range 1..=n-1
+            </span>.map_err(|<span class="kw">_</span>| Error::WrongSignatureLength)<span class="question-mark">?</span>;
 
-        <span class="kw">if</span> <span class="kw">let</span> <span class="ident">SignatureSerialization::Raw</span> <span class="op">=</span> <span class="ident">request</span>.<span class="ident">format</span> {
-        } <span class="kw">else</span> {
-            <span class="comment">// well more TODO</span>
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::InvalidSerializationFormat</span>);
+        <span class="kw">if let </span>SignatureSerialization::Raw = request.format {
+        } <span class="kw">else </span>{
+            <span class="comment">// well more TODO
+            </span><span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidSerializationFormat);
         }
 
-        <span class="kw">let</span> <span class="ident">valid</span> <span class="op">=</span> <span class="ident">public_key</span>.<span class="ident">verify</span>(<span class="kw-2">&amp;</span><span class="ident">request</span>.<span class="ident">message</span>, <span class="kw-2">&amp;</span><span class="ident">signature</span>);
-        <span class="prelude-val">Ok</span>(<span class="ident">reply::Verify</span> { <span class="ident">valid</span> })
+        <span class="kw">let </span>valid = public_key.verify(<span class="kw-2">&amp;</span>request.message, <span class="kw-2">&amp;</span>signature);
+        <span class="prelude-val">Ok</span>(reply::Verify { valid })
     }
 }
 
-<span class="kw">impl</span> <span class="ident">UnsafeInjectKey</span> <span class="kw">for</span> <span class="ident"><span class="kw">super</span>::P256</span> {
-    <span class="kw">fn</span> <span class="ident">unsafe_inject_key</span>(
-        <span class="ident">keystore</span>: <span class="kw-2">&amp;mut</span> <span class="kw">impl</span> <span class="ident">Keystore</span>,
-        <span class="ident">request</span>: <span class="kw-2">&amp;</span><span class="ident">request::UnsafeInjectKey</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">reply::UnsafeInjectKey</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="ident">request</span>.<span class="ident">format</span> <span class="op">!</span><span class="op">=</span> <span class="ident">KeySerialization::Raw</span> {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::InvalidSerializationFormat</span>);
+<span class="kw">impl </span>UnsafeInjectKey <span class="kw">for </span><span class="kw">super</span>::P256 {
+    <span class="kw">fn </span>unsafe_inject_key(
+        keystore: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Keystore,
+        request: <span class="kw-2">&amp;</span>request::UnsafeInjectKey,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;reply::UnsafeInjectKey, Error&gt; {
+        <span class="kw">if </span>request.format != KeySerialization::Raw {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidSerializationFormat);
         }
 
-        <span class="kw">let</span> <span class="ident">sk</span> <span class="op">=</span> <span class="ident">p256_cortex_m4::SecretKey::from_bytes</span>(<span class="kw-2">&amp;</span><span class="ident">request</span>.<span class="ident">raw_key</span>)
-            .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error::InvalidSerializedKey</span>)<span class="question-mark">?</span>;
+        <span class="kw">let </span>sk = p256_cortex_m4::SecretKey::from_bytes(<span class="kw-2">&amp;</span>request.raw_key)
+            .map_err(|<span class="kw">_</span>| Error::InvalidSerializedKey)<span class="question-mark">?</span>;
 
-        <span class="kw">let</span> <span class="ident">info</span> <span class="op">=</span> <span class="ident">key::Info</span> {
-            <span class="ident">flags</span>: <span class="ident">key::Flags::SENSITIVE</span>,
-            <span class="ident">kind</span>: <span class="ident">key::Kind::P256</span>,
+        <span class="kw">let </span>info = key::Info {
+            flags: key::Flags::SENSITIVE,
+            kind: key::Kind::P256,
         };
 
-        <span class="ident">keystore</span>
-            .<span class="ident">store_key</span>(
-                <span class="ident">request</span>.<span class="ident">attributes</span>.<span class="ident">persistence</span>,
-                <span class="ident">key::Secrecy::Secret</span>,
-                <span class="ident">info</span>,
-                <span class="kw">unsafe</span> { <span class="kw-2">&amp;</span><span class="ident">sk</span>.<span class="ident">to_bytes</span>() },
+        keystore
+            .store_key(
+                request.attributes.persistence,
+                key::Secrecy::Secret,
+                info,
+                <span class="kw">unsafe </span>{ <span class="kw-2">&amp;</span>sk.to_bytes() },
             )
-            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">key</span><span class="op">|</span> <span class="ident">reply::UnsafeInjectKey</span> { <span class="ident">key</span> })
+            .map(|key| reply::UnsafeInjectKey { key })
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;p256&quot;</span>))]</span>
-<span class="kw">impl</span> <span class="ident">Agree</span> <span class="kw">for</span> <span class="ident"><span class="kw">super</span>::P256</span> {}
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;p256&quot;</span>))]</span>
-<span class="kw">impl</span> <span class="ident">DeriveKey</span> <span class="kw">for</span> <span class="ident"><span class="kw">super</span>::P256</span> {}
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;p256&quot;</span>))]</span>
-<span class="kw">impl</span> <span class="ident">GenerateKey</span> <span class="kw">for</span> <span class="ident"><span class="kw">super</span>::P256</span> {}
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;p256&quot;</span>))]</span>
-<span class="kw">impl</span> <span class="ident">Sign</span> <span class="kw">for</span> <span class="ident"><span class="kw">super</span>::P256</span> {}
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;p256&quot;</span>))]</span>
-<span class="kw">impl</span> <span class="ident">Verify</span> <span class="kw">for</span> <span class="ident"><span class="kw">super</span>::P256</span> {}
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;p256&quot;</span>))]</span>
-<span class="kw">impl</span> <span class="ident">UnsafeInjectKey</span> <span class="kw">for</span> <span class="ident"><span class="kw">super</span>::P256</span> {}
+<span class="attribute">#[cfg(not(feature = <span class="string">&quot;p256&quot;</span>))]
+</span><span class="kw">impl </span>Agree <span class="kw">for </span><span class="kw">super</span>::P256 {}
+<span class="attribute">#[cfg(not(feature = <span class="string">&quot;p256&quot;</span>))]
+</span><span class="kw">impl </span>DeriveKey <span class="kw">for </span><span class="kw">super</span>::P256 {}
+<span class="attribute">#[cfg(not(feature = <span class="string">&quot;p256&quot;</span>))]
+</span><span class="kw">impl </span>GenerateKey <span class="kw">for </span><span class="kw">super</span>::P256 {}
+<span class="attribute">#[cfg(not(feature = <span class="string">&quot;p256&quot;</span>))]
+</span><span class="kw">impl </span>Sign <span class="kw">for </span><span class="kw">super</span>::P256 {}
+<span class="attribute">#[cfg(not(feature = <span class="string">&quot;p256&quot;</span>))]
+</span><span class="kw">impl </span>Verify <span class="kw">for </span><span class="kw">super</span>::P256 {}
+<span class="attribute">#[cfg(not(feature = <span class="string">&quot;p256&quot;</span>))]
+</span><span class="kw">impl </span>UnsafeInjectKey <span class="kw">for </span><span class="kw">super</span>::P256 {}
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="trussed" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="trussed" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

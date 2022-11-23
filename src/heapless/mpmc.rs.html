@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/heapless-0.7.16/src/mpmc.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>mpmc.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../heapless/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../heapless/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../heapless/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/heapless-0.7.16/src/mpmc.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>mpmc.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../heapless/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../heapless/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../heapless/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -327,334 +327,334 @@
 <span id="327">327</span>
 <span id="328">328</span>
 <span id="329">329</span>
-</pre><pre class="rust"><code><span class="doccomment">//! A fixed capacity Multiple-Producer Multiple-Consumer (MPMC) lock-free queue</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! NOTE: This module is not available on targets that do *not* support CAS operations and are not</span>
-<span class="doccomment">//! emulated by the [`atomic_polyfill`](https://crates.io/crates/atomic-polyfill) crate (e.g.,</span>
-<span class="doccomment">//! MSP430).</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! # Example</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! This queue can be constructed in &quot;const context&quot;. Placing it in a `static` variable lets *all*</span>
-<span class="doccomment">//! contexts (interrupts / threads / `main`) safely enqueue and dequeue items from it.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ``` ignore</span>
-<span class="doccomment">//! #![no_main]</span>
-<span class="doccomment">//! #![no_std]</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! use panic_semihosting as _;</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! use cortex_m::{asm, peripheral::syst::SystClkSource};</span>
-<span class="doccomment">//! use cortex_m_rt::{entry, exception};</span>
-<span class="doccomment">//! use cortex_m_semihosting::hprintln;</span>
-<span class="doccomment">//! use heapless::mpmc::Q2;</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! static Q: Q2&lt;u8&gt; = Q2::new();</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! #[entry]</span>
-<span class="doccomment">//! fn main() -&gt; ! {</span>
-<span class="doccomment">//!     if let Some(p) = cortex_m::Peripherals::take() {</span>
-<span class="doccomment">//!         let mut syst = p.SYST;</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//!         // configures the system timer to trigger a SysTick exception every second</span>
-<span class="doccomment">//!         syst.set_clock_source(SystClkSource::Core);</span>
-<span class="doccomment">//!         syst.set_reload(12_000_000);</span>
-<span class="doccomment">//!         syst.enable_counter();</span>
-<span class="doccomment">//!         syst.enable_interrupt();</span>
-<span class="doccomment">//!     }</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//!     loop {</span>
-<span class="doccomment">//!         if let Some(x) = Q.dequeue() {</span>
-<span class="doccomment">//!             hprintln!(&quot;{}&quot;, x).ok();</span>
-<span class="doccomment">//!         } else {</span>
-<span class="doccomment">//!             asm::wfi();</span>
-<span class="doccomment">//!         }</span>
-<span class="doccomment">//!     }</span>
-<span class="doccomment">//! }</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! #[exception]</span>
-<span class="doccomment">//! fn SysTick() {</span>
-<span class="doccomment">//!     static mut COUNT: u8 = 0;</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//!     Q.enqueue(*COUNT).ok();</span>
-<span class="doccomment">//!     *COUNT += 1;</span>
-<span class="doccomment">//! }</span>
-<span class="doccomment">//! ```</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! # Benchmark</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! Measured on a ARM Cortex-M3 core running at 8 MHz and with zero Flash wait cycles</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! N| `Q8::&lt;u8&gt;::enqueue().ok()` (`z`) | `Q8::&lt;u8&gt;::dequeue()` (`z`) |</span>
-<span class="doccomment">//! -|----------------------------------|-----------------------------|</span>
-<span class="doccomment">//! 0|34                                |35                           |</span>
-<span class="doccomment">//! 1|52                                |53                           |</span>
-<span class="doccomment">//! 2|69                                |71                           |</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! - `N` denotes the number of *interruptions*. On Cortex-M, an interruption consists of an</span>
-<span class="doccomment">//!   interrupt handler preempting the would-be atomic section of the `enqueue` / `dequeue`</span>
-<span class="doccomment">//!   operation. Note that it does *not* matter if the higher priority handler uses the queue or</span>
-<span class="doccomment">//!   not.</span>
-<span class="doccomment">//! - All execution times are in clock cycles. 1 clock cycle = 125 ns.</span>
-<span class="doccomment">//! - Execution time is *dependent* of `mem::size_of::&lt;T&gt;()`. Both operations include one</span>
-<span class="doccomment">//! `memcpy(T)` in their successful path.</span>
-<span class="doccomment">//! - The optimization level is indicated in parentheses.</span>
-<span class="doccomment">//! - The numbers reported correspond to the successful path (i.e. `Some` is returned by `dequeue`</span>
-<span class="doccomment">//! and `Ok` is returned by `enqueue`).</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! # Portability</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! This module requires CAS atomic instructions which are not available on all architectures</span>
-<span class="doccomment">//! (e.g.  ARMv6-M (`thumbv6m-none-eabi`) and MSP430 (`msp430-none-elf`)). These atomics can be</span>
-<span class="doccomment">//! emulated however with [`atomic_polyfill`](https://crates.io/crates/atomic-polyfill), which is</span>
-<span class="doccomment">//! enabled with the `cas` feature and is enabled by default for `thumbv6m-none-eabi` and `riscv32`</span>
-<span class="doccomment">//! targets. MSP430 is currently not supported by</span>
-<span class="doccomment">//! [`atomic_polyfill`](https://crates.io/crates/atomic-polyfill).</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! # References</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! This is an implementation of Dmitry Vyukov&#39;s [&quot;Bounded MPMC queue&quot;][0] minus the cache padding.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! [0]: http://www.1024cores.net/home/lock-free-algorithms/queues/bounded-mpmc-queue</span>
+</pre><pre class="rust"><code><span class="doccomment">//! A fixed capacity Multiple-Producer Multiple-Consumer (MPMC) lock-free queue
+//!
+//! NOTE: This module is not available on targets that do *not* support CAS operations and are not
+//! emulated by the [`atomic_polyfill`](https://crates.io/crates/atomic-polyfill) crate (e.g.,
+//! MSP430).
+//!
+//! # Example
+//!
+//! This queue can be constructed in &quot;const context&quot;. Placing it in a `static` variable lets *all*
+//! contexts (interrupts / threads / `main`) safely enqueue and dequeue items from it.
+//!
+//! ``` ignore
+//! #![no_main]
+//! #![no_std]
+//!
+//! use panic_semihosting as _;
+//!
+//! use cortex_m::{asm, peripheral::syst::SystClkSource};
+//! use cortex_m_rt::{entry, exception};
+//! use cortex_m_semihosting::hprintln;
+//! use heapless::mpmc::Q2;
+//!
+//! static Q: Q2&lt;u8&gt; = Q2::new();
+//!
+//! #[entry]
+//! fn main() -&gt; ! {
+//!     if let Some(p) = cortex_m::Peripherals::take() {
+//!         let mut syst = p.SYST;
+//!
+//!         // configures the system timer to trigger a SysTick exception every second
+//!         syst.set_clock_source(SystClkSource::Core);
+//!         syst.set_reload(12_000_000);
+//!         syst.enable_counter();
+//!         syst.enable_interrupt();
+//!     }
+//!
+//!     loop {
+//!         if let Some(x) = Q.dequeue() {
+//!             hprintln!(&quot;{}&quot;, x).ok();
+//!         } else {
+//!             asm::wfi();
+//!         }
+//!     }
+//! }
+//!
+//! #[exception]
+//! fn SysTick() {
+//!     static mut COUNT: u8 = 0;
+//!
+//!     Q.enqueue(*COUNT).ok();
+//!     *COUNT += 1;
+//! }
+//! ```
+//!
+//! # Benchmark
+//!
+//! Measured on a ARM Cortex-M3 core running at 8 MHz and with zero Flash wait cycles
+//!
+//! N| `Q8::&lt;u8&gt;::enqueue().ok()` (`z`) | `Q8::&lt;u8&gt;::dequeue()` (`z`) |
+//! -|----------------------------------|-----------------------------|
+//! 0|34                                |35                           |
+//! 1|52                                |53                           |
+//! 2|69                                |71                           |
+//!
+//! - `N` denotes the number of *interruptions*. On Cortex-M, an interruption consists of an
+//!   interrupt handler preempting the would-be atomic section of the `enqueue` / `dequeue`
+//!   operation. Note that it does *not* matter if the higher priority handler uses the queue or
+//!   not.
+//! - All execution times are in clock cycles. 1 clock cycle = 125 ns.
+//! - Execution time is *dependent* of `mem::size_of::&lt;T&gt;()`. Both operations include one
+//! `memcpy(T)` in their successful path.
+//! - The optimization level is indicated in parentheses.
+//! - The numbers reported correspond to the successful path (i.e. `Some` is returned by `dequeue`
+//! and `Ok` is returned by `enqueue`).
+//!
+//! # Portability
+//!
+//! This module requires CAS atomic instructions which are not available on all architectures
+//! (e.g.  ARMv6-M (`thumbv6m-none-eabi`) and MSP430 (`msp430-none-elf`)). These atomics can be
+//! emulated however with [`atomic_polyfill`](https://crates.io/crates/atomic-polyfill), which is
+//! enabled with the `cas` feature and is enabled by default for `thumbv6m-none-eabi` and `riscv32`
+//! targets. MSP430 is currently not supported by
+//! [`atomic_polyfill`](https://crates.io/crates/atomic-polyfill).
+//!
+//! # References
+//!
+//! This is an implementation of Dmitry Vyukov&#39;s [&quot;Bounded MPMC queue&quot;][0] minus the cache padding.
+//!
+//! [0]: http://www.1024cores.net/home/lock-free-algorithms/queues/bounded-mpmc-queue
 
-<span class="kw">use</span> <span class="ident">core</span>::{<span class="ident">cell::UnsafeCell</span>, <span class="ident">mem::MaybeUninit</span>};
+</span><span class="kw">use </span>core::{cell::UnsafeCell, mem::MaybeUninit};
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;mpmc_large&quot;</span>, <span class="ident">not</span>(<span class="ident">cas_atomic_polyfill</span>)))]</span>
-<span class="kw">type</span> <span class="ident">AtomicTargetSize</span> <span class="op">=</span> <span class="ident">core::sync::atomic::AtomicUsize</span>;
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;mpmc_large&quot;</span>, <span class="ident">cas_atomic_polyfill</span>))]</span>
-<span class="kw">type</span> <span class="ident">AtomicTargetSize</span> <span class="op">=</span> <span class="ident">atomic_polyfill::AtomicUsize</span>;
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;mpmc_large&quot;</span>), <span class="ident">not</span>(<span class="ident">cas_atomic_polyfill</span>)))]</span>
-<span class="kw">type</span> <span class="ident">AtomicTargetSize</span> <span class="op">=</span> <span class="ident">core::sync::atomic::AtomicU8</span>;
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;mpmc_large&quot;</span>), <span class="ident">cas_atomic_polyfill</span>))]</span>
-<span class="kw">type</span> <span class="ident">AtomicTargetSize</span> <span class="op">=</span> <span class="ident">atomic_polyfill::AtomicU8</span>;
+<span class="attribute">#[cfg(all(feature = <span class="string">&quot;mpmc_large&quot;</span>, not(cas_atomic_polyfill)))]
+</span><span class="kw">type </span>AtomicTargetSize = core::sync::atomic::AtomicUsize;
+<span class="attribute">#[cfg(all(feature = <span class="string">&quot;mpmc_large&quot;</span>, cas_atomic_polyfill))]
+</span><span class="kw">type </span>AtomicTargetSize = atomic_polyfill::AtomicUsize;
+<span class="attribute">#[cfg(all(not(feature = <span class="string">&quot;mpmc_large&quot;</span>), not(cas_atomic_polyfill)))]
+</span><span class="kw">type </span>AtomicTargetSize = core::sync::atomic::AtomicU8;
+<span class="attribute">#[cfg(all(not(feature = <span class="string">&quot;mpmc_large&quot;</span>), cas_atomic_polyfill))]
+</span><span class="kw">type </span>AtomicTargetSize = atomic_polyfill::AtomicU8;
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">cas_atomic_polyfill</span>))]</span>
-<span class="kw">type</span> <span class="ident">Ordering</span> <span class="op">=</span> <span class="ident">core::sync::atomic::Ordering</span>;
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">cas_atomic_polyfill</span>)]</span>
-<span class="kw">type</span> <span class="ident">Ordering</span> <span class="op">=</span> <span class="ident">atomic_polyfill::Ordering</span>;
+<span class="attribute">#[cfg(not(cas_atomic_polyfill))]
+</span><span class="kw">type </span>Ordering = core::sync::atomic::Ordering;
+<span class="attribute">#[cfg(cas_atomic_polyfill)]
+</span><span class="kw">type </span>Ordering = atomic_polyfill::Ordering;
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;mpmc_large&quot;</span>)]</span>
-<span class="kw">type</span> <span class="ident">IntSize</span> <span class="op">=</span> <span class="ident">usize</span>;
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;mpmc_large&quot;</span>))]</span>
-<span class="kw">type</span> <span class="ident">IntSize</span> <span class="op">=</span> <span class="ident">u8</span>;
+<span class="attribute">#[cfg(feature = <span class="string">&quot;mpmc_large&quot;</span>)]
+</span><span class="kw">type </span>IntSize = usize;
+<span class="attribute">#[cfg(not(feature = <span class="string">&quot;mpmc_large&quot;</span>))]
+</span><span class="kw">type </span>IntSize = u8;
 
-<span class="doccomment">/// MPMC queue with a capability for 2 elements.</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">Q2</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">MpMcQueue</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="number">2</span><span class="op">&gt;</span>;
+<span class="doccomment">/// MPMC queue with a capability for 2 elements.
+</span><span class="kw">pub type </span>Q2&lt;T&gt; = MpMcQueue&lt;T, <span class="number">2</span>&gt;;
 
-<span class="doccomment">/// MPMC queue with a capability for 4 elements.</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">Q4</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">MpMcQueue</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="number">4</span><span class="op">&gt;</span>;
+<span class="doccomment">/// MPMC queue with a capability for 4 elements.
+</span><span class="kw">pub type </span>Q4&lt;T&gt; = MpMcQueue&lt;T, <span class="number">4</span>&gt;;
 
-<span class="doccomment">/// MPMC queue with a capability for 8 elements.</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">Q8</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">MpMcQueue</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="number">8</span><span class="op">&gt;</span>;
+<span class="doccomment">/// MPMC queue with a capability for 8 elements.
+</span><span class="kw">pub type </span>Q8&lt;T&gt; = MpMcQueue&lt;T, <span class="number">8</span>&gt;;
 
-<span class="doccomment">/// MPMC queue with a capability for 16 elements.</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">Q16</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">MpMcQueue</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="number">16</span><span class="op">&gt;</span>;
+<span class="doccomment">/// MPMC queue with a capability for 16 elements.
+</span><span class="kw">pub type </span>Q16&lt;T&gt; = MpMcQueue&lt;T, <span class="number">16</span>&gt;;
 
-<span class="doccomment">/// MPMC queue with a capability for 32 elements.</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">Q32</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">MpMcQueue</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="number">32</span><span class="op">&gt;</span>;
+<span class="doccomment">/// MPMC queue with a capability for 32 elements.
+</span><span class="kw">pub type </span>Q32&lt;T&gt; = MpMcQueue&lt;T, <span class="number">32</span>&gt;;
 
-<span class="doccomment">/// MPMC queue with a capability for 64 elements.</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">Q64</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">MpMcQueue</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="number">64</span><span class="op">&gt;</span>;
+<span class="doccomment">/// MPMC queue with a capability for 64 elements.
+</span><span class="kw">pub type </span>Q64&lt;T&gt; = MpMcQueue&lt;T, <span class="number">64</span>&gt;;
 
-<span class="doccomment">/// MPMC queue with a capacity for N elements</span>
-<span class="doccomment">/// N must be a power of 2</span>
-<span class="doccomment">/// The max value of N is u8::MAX - 1 if `mpmc_large` feature is not enabled.</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">MpMcQueue</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> {
-    <span class="ident">buffer</span>: <span class="ident">UnsafeCell</span><span class="op">&lt;</span>[<span class="ident">Cell</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>; <span class="ident">N</span>]<span class="op">&gt;</span>,
-    <span class="ident">dequeue_pos</span>: <span class="ident">AtomicTargetSize</span>,
-    <span class="ident">enqueue_pos</span>: <span class="ident">AtomicTargetSize</span>,
+<span class="doccomment">/// MPMC queue with a capacity for N elements
+/// N must be a power of 2
+/// The max value of N is u8::MAX - 1 if `mpmc_large` feature is not enabled.
+</span><span class="kw">pub struct </span>MpMcQueue&lt;T, <span class="kw">const </span>N: usize&gt; {
+    buffer: UnsafeCell&lt;[Cell&lt;T&gt;; N]&gt;,
+    dequeue_pos: AtomicTargetSize,
+    enqueue_pos: AtomicTargetSize,
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">MpMcQueue</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">N</span><span class="op">&gt;</span> {
-    <span class="kw">const</span> <span class="ident">MASK</span>: <span class="ident">IntSize</span> <span class="op">=</span> (<span class="ident">N</span> <span class="op">-</span> <span class="number">1</span>) <span class="kw">as</span> <span class="ident">IntSize</span>;
-    <span class="kw">const</span> <span class="ident">EMPTY_CELL</span>: <span class="ident">Cell</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Cell::new</span>(<span class="number">0</span>);
+<span class="kw">impl</span>&lt;T, <span class="kw">const </span>N: usize&gt; MpMcQueue&lt;T, N&gt; {
+    <span class="kw">const </span>MASK: IntSize = (N - <span class="number">1</span>) <span class="kw">as </span>IntSize;
+    <span class="kw">const </span>EMPTY_CELL: Cell&lt;T&gt; = Cell::new(<span class="number">0</span>);
 
-    <span class="kw">const</span> <span class="ident">ASSERT</span>: [(); <span class="number">1</span>] <span class="op">=</span> [()];
+    <span class="kw">const </span>ASSERT: [(); <span class="number">1</span>] = [()];
 
-    <span class="doccomment">/// Creates an empty queue</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="self">Self</span> {
-        <span class="comment">// Const assert</span>
-        <span class="ident"><span class="kw">crate</span>::sealed::greater_than_1</span>::<span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span>();
-        <span class="ident"><span class="kw">crate</span>::sealed::power_of_two</span>::<span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span>();
+    <span class="doccomment">/// Creates an empty queue
+    </span><span class="kw">pub const fn </span>new() -&gt; <span class="self">Self </span>{
+        <span class="comment">// Const assert
+        </span><span class="kw">crate</span>::sealed::greater_than_1::&lt;N&gt;();
+        <span class="kw">crate</span>::sealed::power_of_two::&lt;N&gt;();
 
-        <span class="comment">// Const assert on size.</span>
-        <span class="ident"><span class="self">Self</span>::ASSERT</span>[<span class="op">!</span>(<span class="ident">N</span> <span class="op">&lt;</span> (<span class="ident">IntSize::MAX</span> <span class="kw">as</span> <span class="ident">usize</span>)) <span class="kw">as</span> <span class="ident">usize</span>];
+        <span class="comment">// Const assert on size.
+        </span><span class="self">Self</span>::ASSERT[!(N &lt; (IntSize::MAX <span class="kw">as </span>usize)) <span class="kw">as </span>usize];
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">cell_count</span> <span class="op">=</span> <span class="number">0</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>cell_count = <span class="number">0</span>;
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">result_cells</span>: [<span class="ident">Cell</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>; <span class="ident">N</span>] <span class="op">=</span> [<span class="ident"><span class="self">Self</span>::EMPTY_CELL</span>; <span class="ident">N</span>];
-        <span class="kw">while</span> <span class="ident">cell_count</span> <span class="op">!</span><span class="op">=</span> <span class="ident">N</span> {
-            <span class="ident">result_cells</span>[<span class="ident">cell_count</span>] <span class="op">=</span> <span class="ident">Cell::new</span>(<span class="ident">cell_count</span>);
-            <span class="ident">cell_count</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>result_cells: [Cell&lt;T&gt;; N] = [<span class="self">Self</span>::EMPTY_CELL; N];
+        <span class="kw">while </span>cell_count != N {
+            result_cells[cell_count] = Cell::new(cell_count);
+            cell_count += <span class="number">1</span>;
         }
 
-        <span class="self">Self</span> {
-            <span class="ident">buffer</span>: <span class="ident">UnsafeCell::new</span>(<span class="ident">result_cells</span>),
-            <span class="ident">dequeue_pos</span>: <span class="ident">AtomicTargetSize::new</span>(<span class="number">0</span>),
-            <span class="ident">enqueue_pos</span>: <span class="ident">AtomicTargetSize::new</span>(<span class="number">0</span>),
+        <span class="self">Self </span>{
+            buffer: UnsafeCell::new(result_cells),
+            dequeue_pos: AtomicTargetSize::new(<span class="number">0</span>),
+            enqueue_pos: AtomicTargetSize::new(<span class="number">0</span>),
         }
     }
 
-    <span class="doccomment">/// Returns the item in the front of the queue, or `None` if the queue is empty</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">dequeue</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="kw">unsafe</span> { <span class="ident">dequeue</span>(<span class="self">self</span>.<span class="ident">buffer</span>.<span class="ident">get</span>() <span class="kw">as</span> <span class="kw-2">*mut</span> <span class="kw">_</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">dequeue_pos</span>, <span class="ident"><span class="self">Self</span>::MASK</span>) }
+    <span class="doccomment">/// Returns the item in the front of the queue, or `None` if the queue is empty
+    </span><span class="kw">pub fn </span>dequeue(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;T&gt; {
+        <span class="kw">unsafe </span>{ dequeue(<span class="self">self</span>.buffer.get() <span class="kw">as </span><span class="kw-2">*mut </span><span class="kw">_</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.dequeue_pos, <span class="self">Self</span>::MASK) }
     }
 
-    <span class="doccomment">/// Adds an `item` to the end of the queue</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// Returns back the `item` if the queue is full</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">enqueue</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">item</span>: <span class="ident">T</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="kw">unsafe</span> {
-            <span class="ident">enqueue</span>(
-                <span class="self">self</span>.<span class="ident">buffer</span>.<span class="ident">get</span>() <span class="kw">as</span> <span class="kw-2">*mut</span> <span class="kw">_</span>,
-                <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">enqueue_pos</span>,
-                <span class="ident"><span class="self">Self</span>::MASK</span>,
-                <span class="ident">item</span>,
+    <span class="doccomment">/// Adds an `item` to the end of the queue
+    ///
+    /// Returns back the `item` if the queue is full
+    </span><span class="kw">pub fn </span>enqueue(<span class="kw-2">&amp;</span><span class="self">self</span>, item: T) -&gt; <span class="prelude-ty">Result</span>&lt;(), T&gt; {
+        <span class="kw">unsafe </span>{
+            enqueue(
+                <span class="self">self</span>.buffer.get() <span class="kw">as </span><span class="kw-2">*mut </span><span class="kw">_</span>,
+                <span class="kw-2">&amp;</span><span class="self">self</span>.enqueue_pos,
+                <span class="self">Self</span>::MASK,
+                item,
             )
         }
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">MpMcQueue</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">N</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
-        <span class="ident"><span class="self">Self</span>::new</span>()
+<span class="kw">impl</span>&lt;T, <span class="kw">const </span>N: usize&gt; Default <span class="kw">for </span>MpMcQueue&lt;T, N&gt; {
+    <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>::new()
     }
 }
 
-<span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">Sync</span> <span class="kw">for</span> <span class="ident">MpMcQueue</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">N</span><span class="op">&gt;</span> <span class="kw">where</span> <span class="ident">T</span>: <span class="ident">Send</span> {}
+<span class="kw">unsafe impl</span>&lt;T, <span class="kw">const </span>N: usize&gt; Sync <span class="kw">for </span>MpMcQueue&lt;T, N&gt; <span class="kw">where </span>T: Send {}
 
-<span class="kw">struct</span> <span class="ident">Cell</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="ident">data</span>: <span class="ident">MaybeUninit</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-    <span class="ident">sequence</span>: <span class="ident">AtomicTargetSize</span>,
+<span class="kw">struct </span>Cell&lt;T&gt; {
+    data: MaybeUninit&lt;T&gt;,
+    sequence: AtomicTargetSize,
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Cell</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">seq</span>: <span class="ident">usize</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">Self</span> {
-            <span class="ident">data</span>: <span class="ident">MaybeUninit::uninit</span>(),
-            <span class="ident">sequence</span>: <span class="ident">AtomicTargetSize::new</span>(<span class="ident">seq</span> <span class="kw">as</span> <span class="ident">IntSize</span>),
+<span class="kw">impl</span>&lt;T&gt; Cell&lt;T&gt; {
+    <span class="kw">const fn </span>new(seq: usize) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            data: MaybeUninit::uninit(),
+            sequence: AtomicTargetSize::new(seq <span class="kw">as </span>IntSize),
         }
     }
 }
 
-<span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">dequeue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(
-    <span class="ident">buffer</span>: <span class="kw-2">*mut</span> <span class="ident">Cell</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-    <span class="ident">dequeue_pos</span>: <span class="kw-2">&amp;</span><span class="ident">AtomicTargetSize</span>,
-    <span class="ident">mask</span>: <span class="ident">IntSize</span>,
-) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">pos</span> <span class="op">=</span> <span class="ident">dequeue_pos</span>.<span class="ident">load</span>(<span class="ident">Ordering::Relaxed</span>);
+<span class="kw">unsafe fn </span>dequeue&lt;T&gt;(
+    buffer: <span class="kw-2">*mut </span>Cell&lt;T&gt;,
+    dequeue_pos: <span class="kw-2">&amp;</span>AtomicTargetSize,
+    mask: IntSize,
+) -&gt; <span class="prelude-ty">Option</span>&lt;T&gt; {
+    <span class="kw">let </span><span class="kw-2">mut </span>pos = dequeue_pos.load(Ordering::Relaxed);
 
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">cell</span>;
-    <span class="kw">loop</span> {
-        <span class="ident">cell</span> <span class="op">=</span> <span class="ident">buffer</span>.<span class="ident">add</span>(<span class="ident">usize::from</span>(<span class="ident">pos</span> <span class="op">&amp;</span> <span class="ident">mask</span>));
-        <span class="kw">let</span> <span class="ident">seq</span> <span class="op">=</span> (<span class="kw-2">*</span><span class="ident">cell</span>).<span class="ident">sequence</span>.<span class="ident">load</span>(<span class="ident">Ordering::Acquire</span>);
-        <span class="kw">let</span> <span class="ident">dif</span> <span class="op">=</span> (<span class="ident">seq</span> <span class="kw">as</span> <span class="ident">i8</span>).<span class="ident">wrapping_sub</span>((<span class="ident">pos</span>.<span class="ident">wrapping_add</span>(<span class="number">1</span>)) <span class="kw">as</span> <span class="ident">i8</span>);
+    <span class="kw">let </span><span class="kw-2">mut </span>cell;
+    <span class="kw">loop </span>{
+        cell = buffer.add(usize::from(pos &amp; mask));
+        <span class="kw">let </span>seq = (<span class="kw-2">*</span>cell).sequence.load(Ordering::Acquire);
+        <span class="kw">let </span>dif = (seq <span class="kw">as </span>i8).wrapping_sub((pos.wrapping_add(<span class="number">1</span>)) <span class="kw">as </span>i8);
 
-        <span class="kw">if</span> <span class="ident">dif</span> <span class="op">==</span> <span class="number">0</span> {
-            <span class="kw">if</span> <span class="ident">dequeue_pos</span>
-                .<span class="ident">compare_exchange_weak</span>(
-                    <span class="ident">pos</span>,
-                    <span class="ident">pos</span>.<span class="ident">wrapping_add</span>(<span class="number">1</span>),
-                    <span class="ident">Ordering::Relaxed</span>,
-                    <span class="ident">Ordering::Relaxed</span>,
+        <span class="kw">if </span>dif == <span class="number">0 </span>{
+            <span class="kw">if </span>dequeue_pos
+                .compare_exchange_weak(
+                    pos,
+                    pos.wrapping_add(<span class="number">1</span>),
+                    Ordering::Relaxed,
+                    Ordering::Relaxed,
                 )
-                .<span class="ident">is_ok</span>()
+                .is_ok()
             {
                 <span class="kw">break</span>;
             }
-        } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">dif</span> <span class="op">&lt;</span> <span class="number">0</span> {
-            <span class="kw">return</span> <span class="prelude-val">None</span>;
-        } <span class="kw">else</span> {
-            <span class="ident">pos</span> <span class="op">=</span> <span class="ident">dequeue_pos</span>.<span class="ident">load</span>(<span class="ident">Ordering::Relaxed</span>);
+        } <span class="kw">else if </span>dif &lt; <span class="number">0 </span>{
+            <span class="kw">return </span><span class="prelude-val">None</span>;
+        } <span class="kw">else </span>{
+            pos = dequeue_pos.load(Ordering::Relaxed);
         }
     }
 
-    <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> (<span class="kw-2">*</span><span class="ident">cell</span>).<span class="ident">data</span>.<span class="ident">as_ptr</span>().<span class="ident">read</span>();
-    (<span class="kw-2">*</span><span class="ident">cell</span>)
-        .<span class="ident">sequence</span>
-        .<span class="ident">store</span>(<span class="ident">pos</span>.<span class="ident">wrapping_add</span>(<span class="ident">mask</span>).<span class="ident">wrapping_add</span>(<span class="number">1</span>), <span class="ident">Ordering::Release</span>);
-    <span class="prelude-val">Some</span>(<span class="ident">data</span>)
+    <span class="kw">let </span>data = (<span class="kw-2">*</span>cell).data.as_ptr().read();
+    (<span class="kw-2">*</span>cell)
+        .sequence
+        .store(pos.wrapping_add(mask).wrapping_add(<span class="number">1</span>), Ordering::Release);
+    <span class="prelude-val">Some</span>(data)
 }
 
-<span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">enqueue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(
-    <span class="ident">buffer</span>: <span class="kw-2">*mut</span> <span class="ident">Cell</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-    <span class="ident">enqueue_pos</span>: <span class="kw-2">&amp;</span><span class="ident">AtomicTargetSize</span>,
-    <span class="ident">mask</span>: <span class="ident">IntSize</span>,
-    <span class="ident">item</span>: <span class="ident">T</span>,
-) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">pos</span> <span class="op">=</span> <span class="ident">enqueue_pos</span>.<span class="ident">load</span>(<span class="ident">Ordering::Relaxed</span>);
+<span class="kw">unsafe fn </span>enqueue&lt;T&gt;(
+    buffer: <span class="kw-2">*mut </span>Cell&lt;T&gt;,
+    enqueue_pos: <span class="kw-2">&amp;</span>AtomicTargetSize,
+    mask: IntSize,
+    item: T,
+) -&gt; <span class="prelude-ty">Result</span>&lt;(), T&gt; {
+    <span class="kw">let </span><span class="kw-2">mut </span>pos = enqueue_pos.load(Ordering::Relaxed);
 
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">cell</span>;
-    <span class="kw">loop</span> {
-        <span class="ident">cell</span> <span class="op">=</span> <span class="ident">buffer</span>.<span class="ident">add</span>(<span class="ident">usize::from</span>(<span class="ident">pos</span> <span class="op">&amp;</span> <span class="ident">mask</span>));
-        <span class="kw">let</span> <span class="ident">seq</span> <span class="op">=</span> (<span class="kw-2">*</span><span class="ident">cell</span>).<span class="ident">sequence</span>.<span class="ident">load</span>(<span class="ident">Ordering::Acquire</span>);
-        <span class="kw">let</span> <span class="ident">dif</span> <span class="op">=</span> (<span class="ident">seq</span> <span class="kw">as</span> <span class="ident">i8</span>).<span class="ident">wrapping_sub</span>(<span class="ident">pos</span> <span class="kw">as</span> <span class="ident">i8</span>);
+    <span class="kw">let </span><span class="kw-2">mut </span>cell;
+    <span class="kw">loop </span>{
+        cell = buffer.add(usize::from(pos &amp; mask));
+        <span class="kw">let </span>seq = (<span class="kw-2">*</span>cell).sequence.load(Ordering::Acquire);
+        <span class="kw">let </span>dif = (seq <span class="kw">as </span>i8).wrapping_sub(pos <span class="kw">as </span>i8);
 
-        <span class="kw">if</span> <span class="ident">dif</span> <span class="op">==</span> <span class="number">0</span> {
-            <span class="kw">if</span> <span class="ident">enqueue_pos</span>
-                .<span class="ident">compare_exchange_weak</span>(
-                    <span class="ident">pos</span>,
-                    <span class="ident">pos</span>.<span class="ident">wrapping_add</span>(<span class="number">1</span>),
-                    <span class="ident">Ordering::Relaxed</span>,
-                    <span class="ident">Ordering::Relaxed</span>,
+        <span class="kw">if </span>dif == <span class="number">0 </span>{
+            <span class="kw">if </span>enqueue_pos
+                .compare_exchange_weak(
+                    pos,
+                    pos.wrapping_add(<span class="number">1</span>),
+                    Ordering::Relaxed,
+                    Ordering::Relaxed,
                 )
-                .<span class="ident">is_ok</span>()
+                .is_ok()
             {
                 <span class="kw">break</span>;
             }
-        } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">dif</span> <span class="op">&lt;</span> <span class="number">0</span> {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">item</span>);
-        } <span class="kw">else</span> {
-            <span class="ident">pos</span> <span class="op">=</span> <span class="ident">enqueue_pos</span>.<span class="ident">load</span>(<span class="ident">Ordering::Relaxed</span>);
+        } <span class="kw">else if </span>dif &lt; <span class="number">0 </span>{
+            <span class="kw">return </span><span class="prelude-val">Err</span>(item);
+        } <span class="kw">else </span>{
+            pos = enqueue_pos.load(Ordering::Relaxed);
         }
     }
 
-    (<span class="kw-2">*</span><span class="ident">cell</span>).<span class="ident">data</span>.<span class="ident">as_mut_ptr</span>().<span class="ident">write</span>(<span class="ident">item</span>);
-    (<span class="kw-2">*</span><span class="ident">cell</span>)
-        .<span class="ident">sequence</span>
-        .<span class="ident">store</span>(<span class="ident">pos</span>.<span class="ident">wrapping_add</span>(<span class="number">1</span>), <span class="ident">Ordering::Release</span>);
+    (<span class="kw-2">*</span>cell).data.as_mut_ptr().write(item);
+    (<span class="kw-2">*</span>cell)
+        .sequence
+        .store(pos.wrapping_add(<span class="number">1</span>), Ordering::Release);
     <span class="prelude-val">Ok</span>(())
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
-<span class="kw">mod</span> <span class="ident">tests</span> {
-    <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::Q2</span>;
+<span class="attribute">#[cfg(test)]
+</span><span class="kw">mod </span>tests {
+    <span class="kw">use </span><span class="kw">super</span>::Q2;
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">sanity</span>() {
-        <span class="kw">let</span> <span class="ident">q</span> <span class="op">=</span> <span class="ident">Q2::new</span>();
-        <span class="ident">q</span>.<span class="ident">enqueue</span>(<span class="number">0</span>).<span class="ident">unwrap</span>();
-        <span class="ident">q</span>.<span class="ident">enqueue</span>(<span class="number">1</span>).<span class="ident">unwrap</span>();
-        <span class="macro">assert!</span>(<span class="ident">q</span>.<span class="ident">enqueue</span>(<span class="number">2</span>).<span class="ident">is_err</span>());
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>sanity() {
+        <span class="kw">let </span>q = Q2::new();
+        q.enqueue(<span class="number">0</span>).unwrap();
+        q.enqueue(<span class="number">1</span>).unwrap();
+        <span class="macro">assert!</span>(q.enqueue(<span class="number">2</span>).is_err());
 
-        <span class="macro">assert_eq!</span>(<span class="ident">q</span>.<span class="ident">dequeue</span>(), <span class="prelude-val">Some</span>(<span class="number">0</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">q</span>.<span class="ident">dequeue</span>(), <span class="prelude-val">Some</span>(<span class="number">1</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">q</span>.<span class="ident">dequeue</span>(), <span class="prelude-val">None</span>);
+        <span class="macro">assert_eq!</span>(q.dequeue(), <span class="prelude-val">Some</span>(<span class="number">0</span>));
+        <span class="macro">assert_eq!</span>(q.dequeue(), <span class="prelude-val">Some</span>(<span class="number">1</span>));
+        <span class="macro">assert_eq!</span>(q.dequeue(), <span class="prelude-val">None</span>);
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">drain_at_pos255</span>() {
-        <span class="kw">let</span> <span class="ident">q</span> <span class="op">=</span> <span class="ident">Q2::new</span>();
-        <span class="kw">for</span> <span class="kw">_</span> <span class="kw">in</span> <span class="number">0</span>..<span class="number">255</span> {
-            <span class="macro">assert!</span>(<span class="ident">q</span>.<span class="ident">enqueue</span>(<span class="number">0</span>).<span class="ident">is_ok</span>());
-            <span class="macro">assert_eq!</span>(<span class="ident">q</span>.<span class="ident">dequeue</span>(), <span class="prelude-val">Some</span>(<span class="number">0</span>));
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>drain_at_pos255() {
+        <span class="kw">let </span>q = Q2::new();
+        <span class="kw">for _ in </span><span class="number">0</span>..<span class="number">255 </span>{
+            <span class="macro">assert!</span>(q.enqueue(<span class="number">0</span>).is_ok());
+            <span class="macro">assert_eq!</span>(q.dequeue(), <span class="prelude-val">Some</span>(<span class="number">0</span>));
         }
-        <span class="comment">// this should not block forever</span>
-        <span class="macro">assert_eq!</span>(<span class="ident">q</span>.<span class="ident">dequeue</span>(), <span class="prelude-val">None</span>);
+        <span class="comment">// this should not block forever
+        </span><span class="macro">assert_eq!</span>(q.dequeue(), <span class="prelude-val">None</span>);
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">full_at_wrapped_pos0</span>() {
-        <span class="kw">let</span> <span class="ident">q</span> <span class="op">=</span> <span class="ident">Q2::new</span>();
-        <span class="kw">for</span> <span class="kw">_</span> <span class="kw">in</span> <span class="number">0</span>..<span class="number">254</span> {
-            <span class="macro">assert!</span>(<span class="ident">q</span>.<span class="ident">enqueue</span>(<span class="number">0</span>).<span class="ident">is_ok</span>());
-            <span class="macro">assert_eq!</span>(<span class="ident">q</span>.<span class="ident">dequeue</span>(), <span class="prelude-val">Some</span>(<span class="number">0</span>));
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>full_at_wrapped_pos0() {
+        <span class="kw">let </span>q = Q2::new();
+        <span class="kw">for _ in </span><span class="number">0</span>..<span class="number">254 </span>{
+            <span class="macro">assert!</span>(q.enqueue(<span class="number">0</span>).is_ok());
+            <span class="macro">assert_eq!</span>(q.dequeue(), <span class="prelude-val">Some</span>(<span class="number">0</span>));
         }
-        <span class="macro">assert!</span>(<span class="ident">q</span>.<span class="ident">enqueue</span>(<span class="number">0</span>).<span class="ident">is_ok</span>());
-        <span class="macro">assert!</span>(<span class="ident">q</span>.<span class="ident">enqueue</span>(<span class="number">0</span>).<span class="ident">is_ok</span>());
-        <span class="comment">// this should not block forever</span>
-        <span class="macro">assert!</span>(<span class="ident">q</span>.<span class="ident">enqueue</span>(<span class="number">0</span>).<span class="ident">is_err</span>());
+        <span class="macro">assert!</span>(q.enqueue(<span class="number">0</span>).is_ok());
+        <span class="macro">assert!</span>(q.enqueue(<span class="number">0</span>).is_ok());
+        <span class="comment">// this should not block forever
+        </span><span class="macro">assert!</span>(q.enqueue(<span class="number">0</span>).is_err());
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="heapless" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="heapless" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

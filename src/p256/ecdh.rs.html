@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/p256-0.9.0/src/ecdh.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>ecdh.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" href="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../p256/index.html"><div class="logo-container"><img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../p256/index.html"><div class="logo-container">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/p256-0.9.0/src/ecdh.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>ecdh.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" href="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../p256/index.html"><div class="logo-container"><img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../p256/index.html"><div class="logo-container">
                     <img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../p256/index.html">
                         <img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
@@ -51,56 +51,56 @@
 <span id="49">49</span>
 <span id="50">50</span>
 <span id="51">51</span>
-</pre><pre class="rust"><code><span class="doccomment">//! Elliptic Curve Diffie-Hellman (Ephemeral) Support.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! This module contains a high-level interface for performing ephemeral</span>
-<span class="doccomment">//! Diffie-Hellman key exchanges using the secp256k1 elliptic curve.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! # Usage</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! This usage example is from the perspective of two participants in the</span>
-<span class="doccomment">//! exchange, nicknamed &quot;Alice&quot; and &quot;Bob&quot;.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ```</span>
-<span class="doccomment">//! use p256::{EncodedPoint, PublicKey, ecdh::EphemeralSecret};</span>
-<span class="doccomment">//! use rand_core::OsRng; // requires &#39;getrandom&#39; feature</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! // Alice</span>
-<span class="doccomment">//! let alice_secret = EphemeralSecret::random(&amp;mut OsRng);</span>
-<span class="doccomment">//! let alice_pk_bytes = EncodedPoint::from(alice_secret.public_key());</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! // Bob</span>
-<span class="doccomment">//! let bob_secret = EphemeralSecret::random(&amp;mut OsRng);</span>
-<span class="doccomment">//! let bob_pk_bytes = EncodedPoint::from(bob_secret.public_key());</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! // Alice decodes Bob&#39;s serialized public key and computes a shared secret from it</span>
-<span class="doccomment">//! let bob_public = PublicKey::from_sec1_bytes(bob_pk_bytes.as_ref())</span>
-<span class="doccomment">//!     .expect(&quot;bob&#39;s public key is invalid!&quot;); // In real usage, don&#39;t panic, handle this!</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! let alice_shared = alice_secret.diffie_hellman(&amp;bob_public);</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! // Bob deocdes Alice&#39;s serialized public key and computes the same shared secret</span>
-<span class="doccomment">//! let alice_public = PublicKey::from_sec1_bytes(alice_pk_bytes.as_ref())</span>
-<span class="doccomment">//!     .expect(&quot;alice&#39;s public key is invalid!&quot;); // In real usage, don&#39;t panic, handle this!</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! let bob_shared = bob_secret.diffie_hellman(&amp;alice_public);</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! // Both participants arrive on the same shared secret</span>
-<span class="doccomment">//! assert_eq!(alice_shared.as_bytes(), bob_shared.as_bytes());</span>
-<span class="doccomment">//! ```</span>
+</pre><pre class="rust"><code><span class="doccomment">//! Elliptic Curve Diffie-Hellman (Ephemeral) Support.
+//!
+//! This module contains a high-level interface for performing ephemeral
+//! Diffie-Hellman key exchanges using the secp256k1 elliptic curve.
+//!
+//! # Usage
+//!
+//! This usage example is from the perspective of two participants in the
+//! exchange, nicknamed &quot;Alice&quot; and &quot;Bob&quot;.
+//!
+//! ```
+//! use p256::{EncodedPoint, PublicKey, ecdh::EphemeralSecret};
+//! use rand_core::OsRng; // requires &#39;getrandom&#39; feature
+//!
+//! // Alice
+//! let alice_secret = EphemeralSecret::random(&amp;mut OsRng);
+//! let alice_pk_bytes = EncodedPoint::from(alice_secret.public_key());
+//!
+//! // Bob
+//! let bob_secret = EphemeralSecret::random(&amp;mut OsRng);
+//! let bob_pk_bytes = EncodedPoint::from(bob_secret.public_key());
+//!
+//! // Alice decodes Bob&#39;s serialized public key and computes a shared secret from it
+//! let bob_public = PublicKey::from_sec1_bytes(bob_pk_bytes.as_ref())
+//!     .expect(&quot;bob&#39;s public key is invalid!&quot;); // In real usage, don&#39;t panic, handle this!
+//!
+//! let alice_shared = alice_secret.diffie_hellman(&amp;bob_public);
+//!
+//! // Bob deocdes Alice&#39;s serialized public key and computes the same shared secret
+//! let alice_public = PublicKey::from_sec1_bytes(alice_pk_bytes.as_ref())
+//!     .expect(&quot;alice&#39;s public key is invalid!&quot;); // In real usage, don&#39;t panic, handle this!
+//!
+//! let bob_shared = bob_secret.diffie_hellman(&amp;alice_public);
+//!
+//! // Both participants arrive on the same shared secret
+//! assert_eq!(alice_shared.as_bytes(), bob_shared.as_bytes());
+//! ```
 
-<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">AffinePoint</span>, <span class="ident">NistP256</span>};
+</span><span class="kw">use crate</span>::{AffinePoint, NistP256};
 
-<span class="doccomment">/// NIST P-256 Ephemeral Diffie-Hellman Secret.</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">EphemeralSecret</span> <span class="op">=</span> <span class="ident">elliptic_curve::ecdh::EphemeralSecret</span><span class="op">&lt;</span><span class="ident">NistP256</span><span class="op">&gt;</span>;
+<span class="doccomment">/// NIST P-256 Ephemeral Diffie-Hellman Secret.
+</span><span class="kw">pub type </span>EphemeralSecret = elliptic_curve::ecdh::EphemeralSecret&lt;NistP256&gt;;
 
-<span class="doccomment">/// Shared secret value computed via ECDH key agreement.</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">SharedSecret</span> <span class="op">=</span> <span class="ident">elliptic_curve::ecdh::SharedSecret</span><span class="op">&lt;</span><span class="ident">NistP256</span><span class="op">&gt;</span>;
+<span class="doccomment">/// Shared secret value computed via ECDH key agreement.
+</span><span class="kw">pub type </span>SharedSecret = elliptic_curve::ecdh::SharedSecret&lt;NistP256&gt;;
 
-<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">AffinePoint</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">SharedSecret</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">affine</span>: <span class="kw-2">&amp;</span><span class="ident">AffinePoint</span>) -&gt; <span class="ident">SharedSecret</span> {
-        <span class="ident">affine</span>.<span class="ident">x</span>.<span class="ident">to_bytes</span>().<span class="ident">into</span>()
+<span class="kw">impl </span>From&lt;<span class="kw-2">&amp;</span>AffinePoint&gt; <span class="kw">for </span>SharedSecret {
+    <span class="kw">fn </span>from(affine: <span class="kw-2">&amp;</span>AffinePoint) -&gt; SharedSecret {
+        affine.x.to_bytes().into()
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="p256" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="p256" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/elliptic-curve-0.10.6/src/ecdh.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>ecdh.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" href="https://raw.githubusercontent.com/RustCrypto/media/8f1a9894/logo.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../elliptic_curve/index.html"><div class="logo-container"><img src="https://raw.githubusercontent.com/RustCrypto/media/8f1a9894/logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../elliptic_curve/index.html"><div class="logo-container">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/elliptic-curve-0.10.6/src/ecdh.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>ecdh.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" href="https://raw.githubusercontent.com/RustCrypto/media/8f1a9894/logo.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../elliptic_curve/index.html"><div class="logo-container"><img src="https://raw.githubusercontent.com/RustCrypto/media/8f1a9894/logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../elliptic_curve/index.html"><div class="logo-container">
                     <img src="https://raw.githubusercontent.com/RustCrypto/media/8f1a9894/logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../elliptic_curve/index.html">
                         <img src="https://raw.githubusercontent.com/RustCrypto/media/8f1a9894/logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
@@ -218,223 +218,223 @@
 <span id="216">216</span>
 <span id="217">217</span>
 <span id="218">218</span>
-</pre><pre class="rust"><code><span class="doccomment">//! Elliptic Curve Diffie-Hellman Support.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! This module contains a generic ECDH implementation which is usable with</span>
-<span class="doccomment">//! any elliptic curve which implements the [`ProjectiveArithmetic`] trait (presently</span>
-<span class="doccomment">//! the `k256` and `p256` crates)</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! # ECDH Ephemeral (ECDHE) Usage</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! Ephemeral Diffie-Hellman provides a one-time key exchange between two peers</span>
-<span class="doccomment">//! using a randomly generated set of keys for each exchange.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! In practice ECDHE is used as part of an [Authenticated Key Exchange (AKE)][AKE]</span>
-<span class="doccomment">//! protocol (e.g. [SIGMA]), where an existing cryptographic trust relationship</span>
-<span class="doccomment">//! can be used to determine the authenticity of the ephemeral keys, such as</span>
-<span class="doccomment">//! a digital signature. Without such an additional step, ECDHE is insecure!</span>
-<span class="doccomment">//! (see security warning below)</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! See the documentation for the [`EphemeralSecret`] type for more information</span>
-<span class="doccomment">//! on performing ECDH ephemeral key exchanges.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! # Static ECDH Usage</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! Static ECDH key exchanges are supported via the low-level</span>
-<span class="doccomment">//! [`diffie_hellman`] function.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! [AKE]: https://en.wikipedia.org/wiki/Authenticated_Key_Exchange</span>
-<span class="doccomment">//! [SIGMA]: https://webee.technion.ac.il/~hugo/sigma-pdf.pdf</span>
+</pre><pre class="rust"><code><span class="doccomment">//! Elliptic Curve Diffie-Hellman Support.
+//!
+//! This module contains a generic ECDH implementation which is usable with
+//! any elliptic curve which implements the [`ProjectiveArithmetic`] trait (presently
+//! the `k256` and `p256` crates)
+//!
+//! # ECDH Ephemeral (ECDHE) Usage
+//!
+//! Ephemeral Diffie-Hellman provides a one-time key exchange between two peers
+//! using a randomly generated set of keys for each exchange.
+//!
+//! In practice ECDHE is used as part of an [Authenticated Key Exchange (AKE)][AKE]
+//! protocol (e.g. [SIGMA]), where an existing cryptographic trust relationship
+//! can be used to determine the authenticity of the ephemeral keys, such as
+//! a digital signature. Without such an additional step, ECDHE is insecure!
+//! (see security warning below)
+//!
+//! See the documentation for the [`EphemeralSecret`] type for more information
+//! on performing ECDH ephemeral key exchanges.
+//!
+//! # Static ECDH Usage
+//!
+//! Static ECDH key exchanges are supported via the low-level
+//! [`diffie_hellman`] function.
+//!
+//! [AKE]: https://en.wikipedia.org/wiki/Authenticated_Key_Exchange
+//! [SIGMA]: https://webee.technion.ac.il/~hugo/sigma-pdf.pdf
 
-<span class="kw">use</span> <span class="kw">crate</span>::{
-    <span class="ident">weierstrass::Curve</span>, <span class="ident">AffinePoint</span>, <span class="ident">FieldBytes</span>, <span class="ident">NonZeroScalar</span>, <span class="ident">ProjectiveArithmetic</span>,
-    <span class="ident">ProjectivePoint</span>, <span class="ident">PublicKey</span>, <span class="ident">Scalar</span>,
+</span><span class="kw">use crate</span>::{
+    weierstrass::Curve, AffinePoint, FieldBytes, NonZeroScalar, ProjectiveArithmetic,
+    ProjectivePoint, PublicKey, Scalar,
 };
-<span class="kw">use</span> <span class="ident">core::borrow::Borrow</span>;
-<span class="kw">use</span> <span class="ident">group::Curve</span> <span class="kw">as</span> <span class="kw">_</span>;
-<span class="kw">use</span> <span class="ident">rand_core</span>::{<span class="ident">CryptoRng</span>, <span class="ident">RngCore</span>};
-<span class="kw">use</span> <span class="ident">zeroize::Zeroize</span>;
+<span class="kw">use </span>core::borrow::Borrow;
+<span class="kw">use </span>group::Curve <span class="kw">as _</span>;
+<span class="kw">use </span>rand_core::{CryptoRng, RngCore};
+<span class="kw">use </span>zeroize::Zeroize;
 
-<span class="doccomment">/// Low-level Elliptic Curve Diffie-Hellman (ECDH) function.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// Whenever possible, we recommend using the high-level ECDH ephemeral API</span>
-<span class="doccomment">/// provided by [`EphemeralSecret`].</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// However, if you are implementing a protocol which requires a static scalar</span>
-<span class="doccomment">/// value as part of an ECDH exchange, this API can be used to compute a</span>
-<span class="doccomment">/// [`SharedSecret`] from that value.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// Note that this API operates on the low-level [`NonZeroScalar`] and</span>
-<span class="doccomment">/// [`AffinePoint`] types. If you are attempting to use the higher-level</span>
-<span class="doccomment">/// [`SecretKey`][`crate::SecretKey`] and [`PublicKey`] types, you will</span>
-<span class="doccomment">/// need to use the following conversions:</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// ```ignore</span>
-<span class="doccomment">/// let shared_secret = elliptic_curve::ecdh::diffie_hellman(</span>
-<span class="doccomment">///     secret_key.secret_scalar(),</span>
-<span class="doccomment">///     public_key.as_affine()</span>
-<span class="doccomment">/// );</span>
-<span class="doccomment">/// ```</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">diffie_hellman</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>(
-    <span class="ident">secret_key</span>: <span class="kw">impl</span> <span class="ident">Borrow</span><span class="op">&lt;</span><span class="ident">NonZeroScalar</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="ident">public_key</span>: <span class="kw">impl</span> <span class="ident">Borrow</span><span class="op">&lt;</span><span class="ident">AffinePoint</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-) -&gt; <span class="ident">SharedSecret</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">Curve</span> <span class="op">+</span> <span class="ident">ProjectiveArithmetic</span>,
-    <span class="ident">AffinePoint</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>: <span class="ident">Zeroize</span>,
-    <span class="ident">Scalar</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>: <span class="ident">Zeroize</span>,
-    <span class="ident">SharedSecret</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>: <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">AffinePoint</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+<span class="doccomment">/// Low-level Elliptic Curve Diffie-Hellman (ECDH) function.
+///
+/// Whenever possible, we recommend using the high-level ECDH ephemeral API
+/// provided by [`EphemeralSecret`].
+///
+/// However, if you are implementing a protocol which requires a static scalar
+/// value as part of an ECDH exchange, this API can be used to compute a
+/// [`SharedSecret`] from that value.
+///
+/// Note that this API operates on the low-level [`NonZeroScalar`] and
+/// [`AffinePoint`] types. If you are attempting to use the higher-level
+/// [`SecretKey`][`crate::SecretKey`] and [`PublicKey`] types, you will
+/// need to use the following conversions:
+///
+/// ```ignore
+/// let shared_secret = elliptic_curve::ecdh::diffie_hellman(
+///     secret_key.secret_scalar(),
+///     public_key.as_affine()
+/// );
+/// ```
+</span><span class="kw">pub fn </span>diffie_hellman&lt;C&gt;(
+    secret_key: <span class="kw">impl </span>Borrow&lt;NonZeroScalar&lt;C&gt;&gt;,
+    public_key: <span class="kw">impl </span>Borrow&lt;AffinePoint&lt;C&gt;&gt;,
+) -&gt; SharedSecret&lt;C&gt;
+<span class="kw">where
+    </span>C: Curve + ProjectiveArithmetic,
+    AffinePoint&lt;C&gt;: Zeroize,
+    Scalar&lt;C&gt;: Zeroize,
+    SharedSecret&lt;C&gt;: <span class="kw">for</span>&lt;<span class="lifetime">&#39;a</span>&gt; From&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>AffinePoint&lt;C&gt;&gt;,
 {
-    <span class="kw">let</span> <span class="ident">public_point</span> <span class="op">=</span> <span class="ident">ProjectivePoint</span>::<span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span><span class="ident">::from</span>(<span class="kw-2">*</span><span class="ident">public_key</span>.<span class="ident">borrow</span>());
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">secret_point</span> <span class="op">=</span> (<span class="ident">public_point</span> <span class="op">*</span> <span class="ident">secret_key</span>.<span class="ident">borrow</span>().<span class="ident">as_ref</span>()).<span class="ident">to_affine</span>();
-    <span class="kw">let</span> <span class="ident">shared_secret</span> <span class="op">=</span> <span class="ident">SharedSecret::from</span>(<span class="kw-2">&amp;</span><span class="ident">secret_point</span>);
-    <span class="ident">secret_point</span>.<span class="ident">zeroize</span>();
-    <span class="ident">shared_secret</span>
+    <span class="kw">let </span>public_point = ProjectivePoint::&lt;C&gt;::from(<span class="kw-2">*</span>public_key.borrow());
+    <span class="kw">let </span><span class="kw-2">mut </span>secret_point = (public_point * secret_key.borrow().as_ref()).to_affine();
+    <span class="kw">let </span>shared_secret = SharedSecret::from(<span class="kw-2">&amp;</span>secret_point);
+    secret_point.zeroize();
+    shared_secret
 }
 
-<span class="doccomment">/// Ephemeral Diffie-Hellman Secret.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// These are ephemeral &quot;secret key&quot; values which are deliberately designed</span>
-<span class="doccomment">/// to avoid being persisted.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// To perform an ephemeral Diffie-Hellman exchange, do the following:</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// - Have each participant generate an [`EphemeralSecret`] value</span>
-<span class="doccomment">/// - Compute the [`PublicKey`] for that value</span>
-<span class="doccomment">/// - Have each peer provide their [`PublicKey`] to their counterpart</span>
-<span class="doccomment">/// - Use [`EphemeralSecret`] and the other participant&#39;s [`PublicKey`]</span>
-<span class="doccomment">///   to compute a [`SharedSecret`] value.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// # ⚠️ SECURITY WARNING ⚠️</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// Ephemeral Diffie-Hellman exchanges are unauthenticated and without a</span>
-<span class="doccomment">/// further authentication step are trivially vulnerable to man-in-the-middle</span>
-<span class="doccomment">/// attacks!</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// These exchanges should be performed in the context of a protocol which</span>
-<span class="doccomment">/// takes further steps to authenticate the peers in a key exchange.</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">EphemeralSecret</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">Curve</span> <span class="op">+</span> <span class="ident">ProjectiveArithmetic</span>,
-    <span class="ident">Scalar</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>: <span class="ident">Zeroize</span>,
+<span class="doccomment">/// Ephemeral Diffie-Hellman Secret.
+///
+/// These are ephemeral &quot;secret key&quot; values which are deliberately designed
+/// to avoid being persisted.
+///
+/// To perform an ephemeral Diffie-Hellman exchange, do the following:
+///
+/// - Have each participant generate an [`EphemeralSecret`] value
+/// - Compute the [`PublicKey`] for that value
+/// - Have each peer provide their [`PublicKey`] to their counterpart
+/// - Use [`EphemeralSecret`] and the other participant&#39;s [`PublicKey`]
+///   to compute a [`SharedSecret`] value.
+///
+/// # ⚠️ SECURITY WARNING ⚠️
+///
+/// Ephemeral Diffie-Hellman exchanges are unauthenticated and without a
+/// further authentication step are trivially vulnerable to man-in-the-middle
+/// attacks!
+///
+/// These exchanges should be performed in the context of a protocol which
+/// takes further steps to authenticate the peers in a key exchange.
+</span><span class="kw">pub struct </span>EphemeralSecret&lt;C&gt;
+<span class="kw">where
+    </span>C: Curve + ProjectiveArithmetic,
+    Scalar&lt;C&gt;: Zeroize,
 {
-    <span class="ident">scalar</span>: <span class="ident">NonZeroScalar</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>,
+    scalar: NonZeroScalar&lt;C&gt;,
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> <span class="ident">EphemeralSecret</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">Curve</span> <span class="op">+</span> <span class="ident">ProjectiveArithmetic</span>,
-    <span class="ident">AffinePoint</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>: <span class="ident">Zeroize</span>,
-    <span class="ident">Scalar</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>: <span class="ident">Zeroize</span>,
-    <span class="ident">SharedSecret</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>: <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">AffinePoint</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+<span class="kw">impl</span>&lt;C&gt; EphemeralSecret&lt;C&gt;
+<span class="kw">where
+    </span>C: Curve + ProjectiveArithmetic,
+    AffinePoint&lt;C&gt;: Zeroize,
+    Scalar&lt;C&gt;: Zeroize,
+    SharedSecret&lt;C&gt;: <span class="kw">for</span>&lt;<span class="lifetime">&#39;a</span>&gt; From&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>AffinePoint&lt;C&gt;&gt;,
 {
-    <span class="doccomment">/// Generate a cryptographically random [`EphemeralSecret`].</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">random</span>(<span class="ident">rng</span>: <span class="kw">impl</span> <span class="ident">CryptoRng</span> <span class="op">+</span> <span class="ident">RngCore</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">Self</span> {
-            <span class="ident">scalar</span>: <span class="ident">NonZeroScalar::random</span>(<span class="ident">rng</span>),
+    <span class="doccomment">/// Generate a cryptographically random [`EphemeralSecret`].
+    </span><span class="kw">pub fn </span>random(rng: <span class="kw">impl </span>CryptoRng + RngCore) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            scalar: NonZeroScalar::random(rng),
         }
     }
 
-    <span class="doccomment">/// Get the public key associated with this ephemeral secret.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// The `compress` flag enables point compression.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">public_key</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">PublicKey</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> {
-        <span class="ident">PublicKey::from_secret_scalar</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">scalar</span>)
+    <span class="doccomment">/// Get the public key associated with this ephemeral secret.
+    ///
+    /// The `compress` flag enables point compression.
+    </span><span class="kw">pub fn </span>public_key(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; PublicKey&lt;C&gt; {
+        PublicKey::from_secret_scalar(<span class="kw-2">&amp;</span><span class="self">self</span>.scalar)
     }
 
-    <span class="doccomment">/// Compute a Diffie-Hellman shared secret from an ephemeral secret and the</span>
-    <span class="doccomment">/// public key of the other participant in the exchange.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">diffie_hellman</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">public_key</span>: <span class="kw-2">&amp;</span><span class="ident">PublicKey</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>) -&gt; <span class="ident">SharedSecret</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> {
-        <span class="ident">diffie_hellman</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">scalar</span>, <span class="ident">public_key</span>.<span class="ident">as_affine</span>())
+    <span class="doccomment">/// Compute a Diffie-Hellman shared secret from an ephemeral secret and the
+    /// public key of the other participant in the exchange.
+    </span><span class="kw">pub fn </span>diffie_hellman(<span class="kw-2">&amp;</span><span class="self">self</span>, public_key: <span class="kw-2">&amp;</span>PublicKey&lt;C&gt;) -&gt; SharedSecret&lt;C&gt; {
+        diffie_hellman(<span class="kw-2">&amp;</span><span class="self">self</span>.scalar, public_key.as_affine())
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">EphemeralSecret</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">PublicKey</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">Curve</span> <span class="op">+</span> <span class="ident">ProjectiveArithmetic</span>,
-    <span class="ident">AffinePoint</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>: <span class="ident">Zeroize</span>,
-    <span class="ident">Scalar</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>: <span class="ident">Zeroize</span>,
-    <span class="ident">SharedSecret</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>: <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">AffinePoint</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+<span class="kw">impl</span>&lt;C&gt; From&lt;<span class="kw-2">&amp;</span>EphemeralSecret&lt;C&gt;&gt; <span class="kw">for </span>PublicKey&lt;C&gt;
+<span class="kw">where
+    </span>C: Curve + ProjectiveArithmetic,
+    AffinePoint&lt;C&gt;: Zeroize,
+    Scalar&lt;C&gt;: Zeroize,
+    SharedSecret&lt;C&gt;: <span class="kw">for</span>&lt;<span class="lifetime">&#39;a</span>&gt; From&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>AffinePoint&lt;C&gt;&gt;,
 {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">ephemeral_secret</span>: <span class="kw-2">&amp;</span><span class="ident">EphemeralSecret</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">ephemeral_secret</span>.<span class="ident">public_key</span>()
+    <span class="kw">fn </span>from(ephemeral_secret: <span class="kw-2">&amp;</span>EphemeralSecret&lt;C&gt;) -&gt; <span class="self">Self </span>{
+        ephemeral_secret.public_key()
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> <span class="ident">Zeroize</span> <span class="kw">for</span> <span class="ident">EphemeralSecret</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">Curve</span> <span class="op">+</span> <span class="ident">ProjectiveArithmetic</span>,
-    <span class="ident">Scalar</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>: <span class="ident">Zeroize</span>,
+<span class="kw">impl</span>&lt;C&gt; Zeroize <span class="kw">for </span>EphemeralSecret&lt;C&gt;
+<span class="kw">where
+    </span>C: Curve + ProjectiveArithmetic,
+    Scalar&lt;C&gt;: Zeroize,
 {
-    <span class="kw">fn</span> <span class="ident">zeroize</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
-        <span class="self">self</span>.<span class="ident">scalar</span>.<span class="ident">zeroize</span>()
+    <span class="kw">fn </span>zeroize(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="self">self</span>.scalar.zeroize()
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> <span class="ident">Drop</span> <span class="kw">for</span> <span class="ident">EphemeralSecret</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">Curve</span> <span class="op">+</span> <span class="ident">ProjectiveArithmetic</span>,
-    <span class="ident">Scalar</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>: <span class="ident">Zeroize</span>,
+<span class="kw">impl</span>&lt;C&gt; Drop <span class="kw">for </span>EphemeralSecret&lt;C&gt;
+<span class="kw">where
+    </span>C: Curve + ProjectiveArithmetic,
+    Scalar&lt;C&gt;: Zeroize,
 {
-    <span class="kw">fn</span> <span class="ident">drop</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
-        <span class="self">self</span>.<span class="ident">zeroize</span>();
+    <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="self">self</span>.zeroize();
     }
 }
 
-<span class="doccomment">/// Shared secret value computed via ECDH key agreement.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// This value contains the raw serialized x-coordinate of the elliptic curve</span>
-<span class="doccomment">/// point computed from a Diffie-Hellman exchange.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// # ⚠️ WARNING: NOT UNIFORMLY RANDOM! ⚠️</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// This value is not uniformly random and should not be used directly</span>
-<span class="doccomment">/// as a cryptographic key for anything which requires that property</span>
-<span class="doccomment">/// (e.g. symmetric ciphers).</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// Instead, the resulting value should be used as input to a Key Derivation</span>
-<span class="doccomment">/// Function (KDF) or cryptographic hash function to produce a symmetric key.</span>
-<span class="comment">// TODO(tarcieri): KDF traits and support for deriving uniform keys</span>
-<span class="comment">// See: https://github.com/RustCrypto/traits/issues/5</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SharedSecret</span><span class="op">&lt;</span><span class="ident">C</span>: <span class="ident">Curve</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Computed secret value</span>
-    <span class="ident">secret_bytes</span>: <span class="ident">FieldBytes</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>,
+<span class="doccomment">/// Shared secret value computed via ECDH key agreement.
+///
+/// This value contains the raw serialized x-coordinate of the elliptic curve
+/// point computed from a Diffie-Hellman exchange.
+///
+/// # ⚠️ WARNING: NOT UNIFORMLY RANDOM! ⚠️
+///
+/// This value is not uniformly random and should not be used directly
+/// as a cryptographic key for anything which requires that property
+/// (e.g. symmetric ciphers).
+///
+/// Instead, the resulting value should be used as input to a Key Derivation
+/// Function (KDF) or cryptographic hash function to produce a symmetric key.
+</span><span class="comment">// TODO(tarcieri): KDF traits and support for deriving uniform keys
+// See: https://github.com/RustCrypto/traits/issues/5
+</span><span class="kw">pub struct </span>SharedSecret&lt;C: Curve&gt; {
+    <span class="doccomment">/// Computed secret value
+    </span>secret_bytes: FieldBytes&lt;C&gt;,
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>: <span class="ident">Curve</span><span class="op">&gt;</span> <span class="ident">SharedSecret</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Shared secret value, serialized as bytes.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// As noted in the comments for this struct, this value is non-uniform and</span>
-    <span class="doccomment">/// should not be used directly as a symmetric encryption key, but instead</span>
-    <span class="doccomment">/// as input to a KDF (or failing that, a hash function) used to produce</span>
-    <span class="doccomment">/// a symmetric key.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">as_bytes</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">FieldBytes</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> {
-        <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">secret_bytes</span>
+<span class="kw">impl</span>&lt;C: Curve&gt; SharedSecret&lt;C&gt; {
+    <span class="doccomment">/// Shared secret value, serialized as bytes.
+    ///
+    /// As noted in the comments for this struct, this value is non-uniform and
+    /// should not be used directly as a symmetric encryption key, but instead
+    /// as input to a KDF (or failing that, a hash function) used to produce
+    /// a symmetric key.
+    </span><span class="kw">pub fn </span>as_bytes(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>FieldBytes&lt;C&gt; {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.secret_bytes
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>: <span class="ident">Curve</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">FieldBytes</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">SharedSecret</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// NOTE: this impl is intended to be used by curve implementations to</span>
-    <span class="doccomment">/// instantiate a [`SharedSecret`] value from their respective</span>
-    <span class="doccomment">/// [`AffinePoint`] type.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// Curve implementations should provide the field element representing</span>
-    <span class="doccomment">/// the affine x-coordinate as `secret_bytes`.</span>
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">secret_bytes</span>: <span class="ident">FieldBytes</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">Self</span> { <span class="ident">secret_bytes</span> }
+<span class="kw">impl</span>&lt;C: Curve&gt; From&lt;FieldBytes&lt;C&gt;&gt; <span class="kw">for </span>SharedSecret&lt;C&gt; {
+    <span class="doccomment">/// NOTE: this impl is intended to be used by curve implementations to
+    /// instantiate a [`SharedSecret`] value from their respective
+    /// [`AffinePoint`] type.
+    ///
+    /// Curve implementations should provide the field element representing
+    /// the affine x-coordinate as `secret_bytes`.
+    </span><span class="kw">fn </span>from(secret_bytes: FieldBytes&lt;C&gt;) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{ secret_bytes }
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>: <span class="ident">Curve</span><span class="op">&gt;</span> <span class="ident">Zeroize</span> <span class="kw">for</span> <span class="ident">SharedSecret</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">zeroize</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
-        <span class="self">self</span>.<span class="ident">secret_bytes</span>.<span class="ident">zeroize</span>()
+<span class="kw">impl</span>&lt;C: Curve&gt; Zeroize <span class="kw">for </span>SharedSecret&lt;C&gt; {
+    <span class="kw">fn </span>zeroize(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="self">self</span>.secret_bytes.zeroize()
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>: <span class="ident">Curve</span><span class="op">&gt;</span> <span class="ident">Drop</span> <span class="kw">for</span> <span class="ident">SharedSecret</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">drop</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
-        <span class="self">self</span>.<span class="ident">zeroize</span>();
+<span class="kw">impl</span>&lt;C: Curve&gt; Drop <span class="kw">for </span>SharedSecret&lt;C&gt; {
+    <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="self">self</span>.zeroize();
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="elliptic_curve" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="elliptic_curve" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

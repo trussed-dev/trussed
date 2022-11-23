@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/mechanisms/aes256cbc.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>aes256cbc.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../trussed/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../trussed/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../trussed/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/mechanisms/aes256cbc.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>aes256cbc.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../trussed/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../trussed/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../trussed/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -173,180 +173,180 @@
 <span id="173">173</span>
 <span id="174">174</span>
 <span id="175">175</span>
-</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::api</span>::<span class="kw-2">*</span>;
-<span class="comment">// use crate::config::*;</span>
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::error::Error</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::service</span>::<span class="kw-2">*</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::types</span>::<span class="kw-2">*</span>;
+</pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::api::<span class="kw-2">*</span>;
+<span class="comment">// use crate::config::*;
+</span><span class="kw">use </span><span class="kw">crate</span>::error::Error;
+<span class="kw">use </span><span class="kw">crate</span>::service::<span class="kw-2">*</span>;
+<span class="kw">use </span><span class="kw">crate</span>::types::<span class="kw-2">*</span>;
 
-<span class="kw">const</span> <span class="ident">AES256_KEY_SIZE</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">32</span>;
+<span class="kw">const </span>AES256_KEY_SIZE: usize = <span class="number">32</span>;
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;aes256-cbc&quot;</span>)]</span>
-<span class="kw">impl</span> <span class="ident">Encrypt</span> <span class="kw">for</span> <span class="ident"><span class="kw">super</span>::Aes256Cbc</span> {
-    <span class="doccomment">/// Encrypts the input *with zero IV*</span>
-    <span class="kw">fn</span> <span class="ident">encrypt</span>(
-        <span class="ident">keystore</span>: <span class="kw-2">&amp;mut</span> <span class="kw">impl</span> <span class="ident">Keystore</span>,
-        <span class="ident">request</span>: <span class="kw-2">&amp;</span><span class="ident">request::Encrypt</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">reply::Encrypt</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="kw">use</span> <span class="ident">block_modes</span>::{<span class="ident">BlockMode</span>, <span class="ident">Cbc</span>};
-        <span class="comment">// use block_modes::Cbc;</span>
-        <span class="kw">use</span> <span class="ident">aes::Aes256</span>;
-        <span class="kw">use</span> <span class="ident">block_modes::block_padding::ZeroPadding</span>;
+<span class="attribute">#[cfg(feature = <span class="string">&quot;aes256-cbc&quot;</span>)]
+</span><span class="kw">impl </span>Encrypt <span class="kw">for </span><span class="kw">super</span>::Aes256Cbc {
+    <span class="doccomment">/// Encrypts the input *with zero IV*
+    </span><span class="kw">fn </span>encrypt(
+        keystore: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Keystore,
+        request: <span class="kw-2">&amp;</span>request::Encrypt,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;reply::Encrypt, Error&gt; {
+        <span class="kw">use </span>block_modes::{BlockMode, Cbc};
+        <span class="comment">// use block_modes::Cbc;
+        </span><span class="kw">use </span>aes::Aes256;
+        <span class="kw">use </span>block_modes::block_padding::ZeroPadding;
 
-        <span class="comment">// TODO: perhaps use NoPadding and have client pad, to emphasize spec-conformance?</span>
-        <span class="kw">type</span> <span class="ident">Aes256Cbc</span> <span class="op">=</span> <span class="ident">Cbc</span><span class="op">&lt;</span><span class="ident">Aes256</span>, <span class="ident">ZeroPadding</span><span class="op">&gt;</span>;
+        <span class="comment">// TODO: perhaps use NoPadding and have client pad, to emphasize spec-conformance?
+        </span><span class="kw">type </span>Aes256Cbc = Cbc&lt;Aes256, ZeroPadding&gt;;
 
-        <span class="kw">let</span> <span class="ident">key_id</span> <span class="op">=</span> <span class="ident">request</span>.<span class="ident">key</span>;
-        <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="ident">keystore</span>.<span class="ident">load_key</span>(<span class="ident">key::Secrecy::Secret</span>, <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span><span class="ident">key_id</span>)<span class="question-mark">?</span>;
-        <span class="kw">if</span> <span class="op">!</span><span class="macro">matches!</span>(<span class="ident">key</span>.<span class="ident">kind</span>, <span class="ident">key::Kind::Symmetric</span>(<span class="ident">AES256_KEY_SIZE</span>)) {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::WrongKeyKind</span>);
+        <span class="kw">let </span>key_id = request.key;
+        <span class="kw">let </span>key = keystore.load_key(key::Secrecy::Secret, <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span>key_id)<span class="question-mark">?</span>;
+        <span class="kw">if </span>!<span class="macro">matches!</span>(key.kind, key::Kind::Symmetric(AES256_KEY_SIZE)) {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::WrongKeyKind);
         }
 
-        <span class="kw">let</span> <span class="ident">symmetric_key</span>: [<span class="ident">u8</span>; <span class="ident">AES256_KEY_SIZE</span>] <span class="op">=</span> <span class="ident">key</span>
-            .<span class="ident">material</span>
-            .<span class="ident">as_slice</span>()
-            .<span class="ident">try_into</span>()
-            .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error::InternalError</span>)<span class="question-mark">?</span>;
+        <span class="kw">let </span>symmetric_key: [u8; AES256_KEY_SIZE] = key
+            .material
+            .as_slice()
+            .try_into()
+            .map_err(|<span class="kw">_</span>| Error::InternalError)<span class="question-mark">?</span>;
 
-        <span class="kw">let</span> <span class="ident">zero_iv</span> <span class="op">=</span> [<span class="number">0u8</span>; <span class="number">16</span>];
-        <span class="kw">let</span> <span class="ident">cipher</span> <span class="op">=</span> <span class="ident">Aes256Cbc::new_from_slices</span>(<span class="kw-2">&amp;</span><span class="ident">symmetric_key</span>, <span class="kw-2">&amp;</span><span class="ident">zero_iv</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let </span>zero_iv = [<span class="number">0u8</span>; <span class="number">16</span>];
+        <span class="kw">let </span>cipher = Aes256Cbc::new_from_slices(<span class="kw-2">&amp;</span>symmetric_key, <span class="kw-2">&amp;</span>zero_iv).unwrap();
 
-        <span class="comment">// buffer must have enough space for message+padding</span>
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buffer</span> <span class="op">=</span> <span class="ident">request</span>.<span class="ident">message</span>.<span class="ident">clone</span>();
-        <span class="comment">// // copy message to the buffer</span>
-        <span class="comment">// let pos = plaintext.len();</span>
-        <span class="comment">// buffer[..pos].copy_from_slice(plaintext);</span>
-        <span class="kw">let</span> <span class="ident">l</span> <span class="op">=</span> <span class="ident">buffer</span>.<span class="ident">len</span>();
-        <span class="comment">// hprintln!(&quot; aes256cbc encrypting l = {}B: {:?}&quot;, l, &amp;buffer).ok();</span>
+        <span class="comment">// buffer must have enough space for message+padding
+        </span><span class="kw">let </span><span class="kw-2">mut </span>buffer = request.message.clone();
+        <span class="comment">// // copy message to the buffer
+        // let pos = plaintext.len();
+        // buffer[..pos].copy_from_slice(plaintext);
+        </span><span class="kw">let </span>l = buffer.len();
+        <span class="comment">// hprintln!(&quot; aes256cbc encrypting l = {}B: {:?}&quot;, l, &amp;buffer).ok();
 
-        <span class="comment">// Encrypt message in-place.</span>
-        <span class="comment">// &amp;buffer[..pos] is used as a message and &amp;buffer[pos..] as a reserved space for padding.</span>
-        <span class="comment">// The padding space should be big enough for padding, otherwise method will return Err(BlockModeError).</span>
-        <span class="kw">let</span> <span class="ident">ciphertext</span> <span class="op">=</span> <span class="ident">cipher</span>.<span class="ident">encrypt</span>(<span class="kw-2">&amp;mut</span> <span class="ident">buffer</span>, <span class="ident">l</span>).<span class="ident">unwrap</span>();
+        // Encrypt message in-place.
+        // &amp;buffer[..pos] is used as a message and &amp;buffer[pos..] as a reserved space for padding.
+        // The padding space should be big enough for padding, otherwise method will return Err(BlockModeError).
+        </span><span class="kw">let </span>ciphertext = cipher.encrypt(<span class="kw-2">&amp;mut </span>buffer, l).unwrap();
 
-        <span class="kw">let</span> <span class="ident">ciphertext</span> <span class="op">=</span> <span class="ident">Message::from_slice</span>(<span class="ident">ciphertext</span>).<span class="ident">unwrap</span>();
-        <span class="prelude-val">Ok</span>(<span class="ident">reply::Encrypt</span> {
-            <span class="ident">ciphertext</span>,
-            <span class="ident">nonce</span>: <span class="ident">ShortData::new</span>(),
-            <span class="ident">tag</span>: <span class="ident">ShortData::new</span>(),
+        <span class="kw">let </span>ciphertext = Message::from_slice(ciphertext).unwrap();
+        <span class="prelude-val">Ok</span>(reply::Encrypt {
+            ciphertext,
+            nonce: ShortData::new(),
+            tag: ShortData::new(),
         })
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;aes256-cbc&quot;</span>)]</span>
-<span class="kw">impl</span> <span class="ident">WrapKey</span> <span class="kw">for</span> <span class="ident"><span class="kw">super</span>::Aes256Cbc</span> {
-    <span class="kw">fn</span> <span class="ident">wrap_key</span>(
-        <span class="ident">keystore</span>: <span class="kw-2">&amp;mut</span> <span class="kw">impl</span> <span class="ident">Keystore</span>,
-        <span class="ident">request</span>: <span class="kw-2">&amp;</span><span class="ident">request::WrapKey</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">reply::WrapKey</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="comment">// TODO: need to check both secret and private keys</span>
-        <span class="comment">// let path = keystore.key_path(key::Secrecy::Secret, &amp;request.key)?;</span>
-        <span class="comment">// let (serialized_key, _location) = keystore.load_key_unchecked(&amp;path)?;</span>
+<span class="attribute">#[cfg(feature = <span class="string">&quot;aes256-cbc&quot;</span>)]
+</span><span class="kw">impl </span>WrapKey <span class="kw">for </span><span class="kw">super</span>::Aes256Cbc {
+    <span class="kw">fn </span>wrap_key(
+        keystore: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Keystore,
+        request: <span class="kw-2">&amp;</span>request::WrapKey,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;reply::WrapKey, Error&gt; {
+        <span class="comment">// TODO: need to check both secret and private keys
+        // let path = keystore.key_path(key::Secrecy::Secret, &amp;request.key)?;
+        // let (serialized_key, _location) = keystore.load_key_unchecked(&amp;path)?;
 
-        <span class="comment">// let message: Message = serialized_key.material.try_to_byte_buf().map_err(|_| Error::InternalError)?;</span>
+        // let message: Message = serialized_key.material.try_to_byte_buf().map_err(|_| Error::InternalError)?;
 
-        <span class="kw">let</span> <span class="ident">message</span> <span class="op">=</span> <span class="ident">Message::from_slice</span>(
-            <span class="ident">keystore</span>
-                .<span class="ident">load_key</span>(<span class="ident">key::Secrecy::Secret</span>, <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span><span class="ident">request</span>.<span class="ident">key</span>)<span class="question-mark">?</span>
-                .<span class="ident">material</span>
-                .<span class="ident">as_slice</span>(),
+        </span><span class="kw">let </span>message = Message::from_slice(
+            keystore
+                .load_key(key::Secrecy::Secret, <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span>request.key)<span class="question-mark">?
+                </span>.material
+                .as_slice(),
         )
-        .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error::InternalError</span>)<span class="question-mark">?</span>;
+        .map_err(|<span class="kw">_</span>| Error::InternalError)<span class="question-mark">?</span>;
 
-        <span class="kw">let</span> <span class="ident">encryption_request</span> <span class="op">=</span> <span class="ident">request::Encrypt</span> {
-            <span class="ident">mechanism</span>: <span class="ident">Mechanism::Aes256Cbc</span>,
-            <span class="ident">key</span>: <span class="ident">request</span>.<span class="ident">wrapping_key</span>,
-            <span class="ident">message</span>,
-            <span class="ident">associated_data</span>: <span class="ident">ShortData::new</span>(),
-            <span class="ident">nonce</span>: <span class="prelude-val">None</span>,
+        <span class="kw">let </span>encryption_request = request::Encrypt {
+            mechanism: Mechanism::Aes256Cbc,
+            key: request.wrapping_key,
+            message,
+            associated_data: ShortData::new(),
+            nonce: <span class="prelude-val">None</span>,
         };
-        <span class="kw">let</span> <span class="ident">encryption_reply</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident"><span class="kw">super</span>::Aes256Cbc</span><span class="op">&gt;</span><span class="ident">::encrypt</span>(<span class="ident">keystore</span>, <span class="kw-2">&amp;</span><span class="ident">encryption_request</span>)<span class="question-mark">?</span>;
+        <span class="kw">let </span>encryption_reply = &lt;<span class="kw">super</span>::Aes256Cbc&gt;::encrypt(keystore, <span class="kw-2">&amp;</span>encryption_request)<span class="question-mark">?</span>;
 
-        <span class="kw">let</span> <span class="ident">wrapped_key</span> <span class="op">=</span> <span class="ident">encryption_reply</span>.<span class="ident">ciphertext</span>;
+        <span class="kw">let </span>wrapped_key = encryption_reply.ciphertext;
 
-        <span class="prelude-val">Ok</span>(<span class="ident">reply::WrapKey</span> { <span class="ident">wrapped_key</span> })
+        <span class="prelude-val">Ok</span>(reply::WrapKey { wrapped_key })
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;aes256-cbc&quot;</span>)]</span>
-<span class="kw">impl</span> <span class="ident">Decrypt</span> <span class="kw">for</span> <span class="ident"><span class="kw">super</span>::Aes256Cbc</span> {
-    <span class="kw">fn</span> <span class="ident">decrypt</span>(
-        <span class="ident">keystore</span>: <span class="kw-2">&amp;mut</span> <span class="kw">impl</span> <span class="ident">Keystore</span>,
-        <span class="ident">request</span>: <span class="kw-2">&amp;</span><span class="ident">request::Decrypt</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">reply::Decrypt</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="kw">use</span> <span class="ident">block_modes</span>::{<span class="ident">BlockMode</span>, <span class="ident">Cbc</span>};
-        <span class="comment">// use block_modes::Cbc;</span>
-        <span class="kw">use</span> <span class="ident">aes::Aes256</span>;
-        <span class="kw">use</span> <span class="ident">block_modes::block_padding::ZeroPadding</span>;
+<span class="attribute">#[cfg(feature = <span class="string">&quot;aes256-cbc&quot;</span>)]
+</span><span class="kw">impl </span>Decrypt <span class="kw">for </span><span class="kw">super</span>::Aes256Cbc {
+    <span class="kw">fn </span>decrypt(
+        keystore: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Keystore,
+        request: <span class="kw-2">&amp;</span>request::Decrypt,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;reply::Decrypt, Error&gt; {
+        <span class="kw">use </span>block_modes::{BlockMode, Cbc};
+        <span class="comment">// use block_modes::Cbc;
+        </span><span class="kw">use </span>aes::Aes256;
+        <span class="kw">use </span>block_modes::block_padding::ZeroPadding;
 
-        <span class="comment">// TODO: perhaps use NoPadding and have client pad, to emphasize spec-conformance?</span>
-        <span class="kw">type</span> <span class="ident">Aes256Cbc</span> <span class="op">=</span> <span class="ident">Cbc</span><span class="op">&lt;</span><span class="ident">Aes256</span>, <span class="ident">ZeroPadding</span><span class="op">&gt;</span>;
+        <span class="comment">// TODO: perhaps use NoPadding and have client pad, to emphasize spec-conformance?
+        </span><span class="kw">type </span>Aes256Cbc = Cbc&lt;Aes256, ZeroPadding&gt;;
 
-        <span class="kw">let</span> <span class="ident">key_id</span> <span class="op">=</span> <span class="ident">request</span>.<span class="ident">key</span>;
-        <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="ident">keystore</span>.<span class="ident">load_key</span>(<span class="ident">key::Secrecy::Secret</span>, <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span><span class="ident">key_id</span>)<span class="question-mark">?</span>;
-        <span class="kw">if</span> <span class="op">!</span><span class="macro">matches!</span>(<span class="ident">key</span>.<span class="ident">kind</span>, <span class="ident">key::Kind::Symmetric</span>(<span class="ident">AES256_KEY_SIZE</span>)) {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::WrongKeyKind</span>);
+        <span class="kw">let </span>key_id = request.key;
+        <span class="kw">let </span>key = keystore.load_key(key::Secrecy::Secret, <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span>key_id)<span class="question-mark">?</span>;
+        <span class="kw">if </span>!<span class="macro">matches!</span>(key.kind, key::Kind::Symmetric(AES256_KEY_SIZE)) {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::WrongKeyKind);
         }
 
-        <span class="kw">let</span> <span class="ident">symmetric_key</span>: [<span class="ident">u8</span>; <span class="ident">AES256_KEY_SIZE</span>] <span class="op">=</span> <span class="ident">key</span>
-            .<span class="ident">material</span>
-            .<span class="ident">as_slice</span>()
-            .<span class="ident">try_into</span>()
-            .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error::InternalError</span>)<span class="question-mark">?</span>;
+        <span class="kw">let </span>symmetric_key: [u8; AES256_KEY_SIZE] = key
+            .material
+            .as_slice()
+            .try_into()
+            .map_err(|<span class="kw">_</span>| Error::InternalError)<span class="question-mark">?</span>;
 
-        <span class="kw">let</span> <span class="ident">zero_iv</span> <span class="op">=</span> [<span class="number">0u8</span>; <span class="number">16</span>];
-        <span class="kw">let</span> <span class="ident">cipher</span> <span class="op">=</span> <span class="ident">Aes256Cbc::new_from_slices</span>(<span class="kw-2">&amp;</span><span class="ident">symmetric_key</span>, <span class="kw-2">&amp;</span><span class="ident">zero_iv</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let </span>zero_iv = [<span class="number">0u8</span>; <span class="number">16</span>];
+        <span class="kw">let </span>cipher = Aes256Cbc::new_from_slices(<span class="kw-2">&amp;</span>symmetric_key, <span class="kw-2">&amp;</span>zero_iv).unwrap();
 
-        <span class="comment">// buffer must have enough space for message+padding</span>
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buffer</span> <span class="op">=</span> <span class="ident">request</span>.<span class="ident">message</span>.<span class="ident">clone</span>();
-        <span class="comment">// // copy message to the buffer</span>
-        <span class="comment">// let pos = plaintext.len();</span>
-        <span class="comment">// buffer[..pos].copy_from_slice(plaintext);</span>
-        <span class="comment">// let l = buffer.len();</span>
+        <span class="comment">// buffer must have enough space for message+padding
+        </span><span class="kw">let </span><span class="kw-2">mut </span>buffer = request.message.clone();
+        <span class="comment">// // copy message to the buffer
+        // let pos = plaintext.len();
+        // buffer[..pos].copy_from_slice(plaintext);
+        // let l = buffer.len();
 
-        <span class="comment">// Decrypt message in-place.</span>
-        <span class="comment">// Returns an error if buffer length is not multiple of block size and</span>
-        <span class="comment">// if after decoding message has malformed padding.</span>
-        <span class="comment">// hprintln!(&quot;encrypted: {:?}&quot;, &amp;buffer).ok();</span>
-        <span class="comment">// hprintln!(&quot;symmetric key: {:?}&quot;, &amp;symmetric_key).ok();</span>
-        <span class="kw">let</span> <span class="ident">plaintext</span> <span class="op">=</span> <span class="ident">cipher</span>.<span class="ident">decrypt</span>(<span class="kw-2">&amp;mut</span> <span class="ident">buffer</span>).<span class="ident">unwrap</span>();
-        <span class="comment">// hprintln!(&quot;decrypted: {:?}&quot;, &amp;plaintext).ok();</span>
-        <span class="kw">let</span> <span class="ident">plaintext</span> <span class="op">=</span> <span class="ident">Message::from_slice</span>(<span class="ident">plaintext</span>).<span class="ident">unwrap</span>();
+        // Decrypt message in-place.
+        // Returns an error if buffer length is not multiple of block size and
+        // if after decoding message has malformed padding.
+        // hprintln!(&quot;encrypted: {:?}&quot;, &amp;buffer).ok();
+        // hprintln!(&quot;symmetric key: {:?}&quot;, &amp;symmetric_key).ok();
+        </span><span class="kw">let </span>plaintext = cipher.decrypt(<span class="kw-2">&amp;mut </span>buffer).unwrap();
+        <span class="comment">// hprintln!(&quot;decrypted: {:?}&quot;, &amp;plaintext).ok();
+        </span><span class="kw">let </span>plaintext = Message::from_slice(plaintext).unwrap();
 
-        <span class="prelude-val">Ok</span>(<span class="ident">reply::Decrypt</span> {
-            <span class="ident">plaintext</span>: <span class="prelude-val">Some</span>(<span class="ident">plaintext</span>),
+        <span class="prelude-val">Ok</span>(reply::Decrypt {
+            plaintext: <span class="prelude-val">Some</span>(plaintext),
         })
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;aes256-cbc&quot;</span>)]</span>
-<span class="kw">impl</span> <span class="ident">UnsafeInjectKey</span> <span class="kw">for</span> <span class="ident"><span class="kw">super</span>::Aes256Cbc</span> {
-    <span class="kw">fn</span> <span class="ident">unsafe_inject_key</span>(
-        <span class="ident">keystore</span>: <span class="kw-2">&amp;mut</span> <span class="kw">impl</span> <span class="ident">Keystore</span>,
-        <span class="ident">request</span>: <span class="kw-2">&amp;</span><span class="ident">request::UnsafeInjectKey</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">reply::UnsafeInjectKey</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="ident">request</span>.<span class="ident">raw_key</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="number">32</span> {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::InvalidSerializedKey</span>);
+<span class="attribute">#[cfg(feature = <span class="string">&quot;aes256-cbc&quot;</span>)]
+</span><span class="kw">impl </span>UnsafeInjectKey <span class="kw">for </span><span class="kw">super</span>::Aes256Cbc {
+    <span class="kw">fn </span>unsafe_inject_key(
+        keystore: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Keystore,
+        request: <span class="kw-2">&amp;</span>request::UnsafeInjectKey,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;reply::UnsafeInjectKey, Error&gt; {
+        <span class="kw">if </span>request.raw_key.len() != AES256_KEY_SIZE {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidSerializedKey);
         }
 
-        <span class="kw">let</span> <span class="ident">key_id</span> <span class="op">=</span> <span class="ident">keystore</span>.<span class="ident">store_key</span>(
-            <span class="ident">request</span>.<span class="ident">attributes</span>.<span class="ident">persistence</span>,
-            <span class="ident">key::Secrecy::Secret</span>,
-            <span class="ident">key::Kind::Symmetric</span>(<span class="ident">request</span>.<span class="ident">raw_key</span>.<span class="ident">len</span>()),
-            <span class="kw-2">&amp;</span><span class="ident">request</span>.<span class="ident">raw_key</span>,
+        <span class="kw">let </span>key_id = keystore.store_key(
+            request.attributes.persistence,
+            key::Secrecy::Secret,
+            key::Kind::Symmetric(request.raw_key.len()),
+            <span class="kw-2">&amp;</span>request.raw_key,
         )<span class="question-mark">?</span>;
 
-        <span class="prelude-val">Ok</span>(<span class="ident">reply::UnsafeInjectKey</span> { <span class="ident">key</span>: <span class="ident">key_id</span> })
+        <span class="prelude-val">Ok</span>(reply::UnsafeInjectKey { key: key_id })
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;aes256-cbc&quot;</span>))]</span>
-<span class="kw">impl</span> <span class="ident">UnsafeInjectKey</span> <span class="kw">for</span> <span class="ident"><span class="kw">super</span>::Aes256Cbc</span> {}
+<span class="attribute">#[cfg(not(feature = <span class="string">&quot;aes256-cbc&quot;</span>))]
+</span><span class="kw">impl </span>UnsafeInjectKey <span class="kw">for </span><span class="kw">super</span>::Aes256Cbc {}
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;aes256-cbc&quot;</span>))]</span>
-<span class="kw">impl</span> <span class="ident">Decrypt</span> <span class="kw">for</span> <span class="ident"><span class="kw">super</span>::Aes256Cbc</span> {}
+<span class="attribute">#[cfg(not(feature = <span class="string">&quot;aes256-cbc&quot;</span>))]
+</span><span class="kw">impl </span>Decrypt <span class="kw">for </span><span class="kw">super</span>::Aes256Cbc {}
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;aes256-cbc&quot;</span>))]</span>
-<span class="kw">impl</span> <span class="ident">Encrypt</span> <span class="kw">for</span> <span class="ident"><span class="kw">super</span>::Aes256Cbc</span> {}
+<span class="attribute">#[cfg(not(feature = <span class="string">&quot;aes256-cbc&quot;</span>))]
+</span><span class="kw">impl </span>Encrypt <span class="kw">for </span><span class="kw">super</span>::Aes256Cbc {}
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="trussed" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="trussed" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

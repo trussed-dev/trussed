@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/p256-0.9.0/src/arithmetic/field.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>field.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="icon" href="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../p256/index.html"><div class="logo-container"><img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../p256/index.html"><div class="logo-container">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/p256-0.9.0/src/arithmetic/field.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>field.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="icon" href="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../p256/index.html"><div class="logo-container"><img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../p256/index.html"><div class="logo-container">
                     <img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../p256/index.html">
                         <img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
@@ -647,652 +647,652 @@
 <span id="645">645</span>
 <span id="646">646</span>
 <span id="647">647</span>
-</pre><pre class="rust"><code><span class="doccomment">//! Field arithmetic modulo p = 2^{224}(2^{32} − 1) + 2^{192} + 2^{96} − 1</span>
+</pre><pre class="rust"><code><span class="doccomment">//! Field arithmetic modulo p = 2^{224}(2^{32} − 1) + 2^{192} + 2^{96} − 1
 
-<span class="kw">use</span> <span class="kw">crate</span>::{
-    <span class="ident">arithmetic::util</span>::{<span class="ident">adc</span>, <span class="ident">mac</span>, <span class="ident">sbb</span>},
-    <span class="ident">FieldBytes</span>,
+</span><span class="kw">use crate</span>::{
+    arithmetic::util::{adc, mac, sbb},
+    FieldBytes,
 };
-<span class="kw">use</span> <span class="ident">core::convert::TryInto</span>;
-<span class="kw">use</span> <span class="ident">core::ops</span>::{<span class="ident">Add</span>, <span class="ident">AddAssign</span>, <span class="ident">Mul</span>, <span class="ident">MulAssign</span>, <span class="ident">Neg</span>, <span class="ident">Sub</span>, <span class="ident">SubAssign</span>};
-<span class="kw">use</span> <span class="ident">elliptic_curve</span>::{
-    <span class="ident">rand_core</span>::{<span class="ident">CryptoRng</span>, <span class="ident">RngCore</span>},
-    <span class="ident">subtle</span>::{<span class="ident">Choice</span>, <span class="ident">ConditionallySelectable</span>, <span class="ident">ConstantTimeEq</span>, <span class="ident">CtOption</span>},
+<span class="kw">use </span>core::convert::TryInto;
+<span class="kw">use </span>core::ops::{Add, AddAssign, Mul, MulAssign, Neg, Sub, SubAssign};
+<span class="kw">use </span>elliptic_curve::{
+    rand_core::{CryptoRng, RngCore},
+    subtle::{Choice, ConditionallySelectable, ConstantTimeEq, CtOption},
 };
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;zeroize&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident">elliptic_curve::zeroize::Zeroize</span>;
+<span class="attribute">#[cfg(feature = <span class="string">&quot;zeroize&quot;</span>)]
+</span><span class="kw">use </span>elliptic_curve::zeroize::Zeroize;
 
-<span class="doccomment">/// The number of 64-bit limbs used to represent a [`FieldElement`].</span>
-<span class="kw">const</span> <span class="ident">LIMBS</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">4</span>;
+<span class="doccomment">/// The number of 64-bit limbs used to represent a [`FieldElement`].
+</span><span class="kw">const </span>LIMBS: usize = <span class="number">4</span>;
 
-<span class="doccomment">/// Constant representing the modulus</span>
-<span class="doccomment">/// p = 2^{224}(2^{32} − 1) + 2^{192} + 2^{96} − 1</span>
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">MODULUS</span>: <span class="ident">FieldElement</span> <span class="op">=</span> <span class="ident">FieldElement</span>([
+<span class="doccomment">/// Constant representing the modulus
+/// p = 2^{224}(2^{32} − 1) + 2^{192} + 2^{96} − 1
+</span><span class="kw">pub const </span>MODULUS: FieldElement = FieldElement([
     <span class="number">0xffff_ffff_ffff_ffff</span>,
     <span class="number">0x0000_0000_ffff_ffff</span>,
     <span class="number">0x0000_0000_0000_0000</span>,
     <span class="number">0xffff_ffff_0000_0001</span>,
 ]);
 
-<span class="doccomment">/// R = 2^256 mod p</span>
-<span class="kw">const</span> <span class="ident">R</span>: <span class="ident">FieldElement</span> <span class="op">=</span> <span class="ident">FieldElement</span>([
+<span class="doccomment">/// R = 2^256 mod p
+</span><span class="kw">const </span>R: FieldElement = FieldElement([
     <span class="number">0x0000_0000_0000_0001</span>,
     <span class="number">0xffff_ffff_0000_0000</span>,
     <span class="number">0xffff_ffff_ffff_ffff</span>,
     <span class="number">0x0000_0000_ffff_fffe</span>,
 ]);
 
-<span class="doccomment">/// R^2 = 2^512 mod p</span>
-<span class="kw">const</span> <span class="ident">R2</span>: <span class="ident">FieldElement</span> <span class="op">=</span> <span class="ident">FieldElement</span>([
+<span class="doccomment">/// R^2 = 2^512 mod p
+</span><span class="kw">const </span>R2: FieldElement = FieldElement([
     <span class="number">0x0000_0000_0000_0003</span>,
     <span class="number">0xffff_fffb_ffff_ffff</span>,
     <span class="number">0xffff_ffff_ffff_fffe</span>,
     <span class="number">0x0000_0004_ffff_fffd</span>,
 ]);
 
-<span class="doccomment">/// An element in the finite field modulo p = 2^{224}(2^{32} − 1) + 2^{192} + 2^{96} − 1.</span>
-<span class="comment">// The internal representation is in little-endian order. Elements are always in</span>
-<span class="comment">// Montgomery form; i.e., FieldElement(a) = aR mod p, with R = 2^256.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">Debug</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">FieldElement</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) [<span class="ident">u64</span>; <span class="ident">LIMBS</span>]);
+<span class="doccomment">/// An element in the finite field modulo p = 2^{224}(2^{32} − 1) + 2^{192} + 2^{96} − 1.
+</span><span class="comment">// The internal representation is in little-endian order. Elements are always in
+// Montgomery form; i.e., FieldElement(a) = aR mod p, with R = 2^256.
+</span><span class="attribute">#[derive(Clone, Copy, Debug)]
+</span><span class="kw">pub struct </span>FieldElement(<span class="kw">pub</span>(<span class="kw">crate</span>) [u64; LIMBS]);
 
-<span class="kw">impl</span> <span class="ident">ConditionallySelectable</span> <span class="kw">for</span> <span class="ident">FieldElement</span> {
-    <span class="kw">fn</span> <span class="ident">conditional_select</span>(<span class="ident">a</span>: <span class="kw-2">&amp;</span><span class="ident">FieldElement</span>, <span class="ident">b</span>: <span class="kw-2">&amp;</span><span class="ident">FieldElement</span>, <span class="ident">choice</span>: <span class="ident">Choice</span>) -&gt; <span class="ident">FieldElement</span> {
-        <span class="ident">FieldElement</span>([
-            <span class="ident">u64::conditional_select</span>(<span class="kw-2">&amp;</span><span class="ident">a</span>.<span class="number">0</span>[<span class="number">0</span>], <span class="kw-2">&amp;</span><span class="ident">b</span>.<span class="number">0</span>[<span class="number">0</span>], <span class="ident">choice</span>),
-            <span class="ident">u64::conditional_select</span>(<span class="kw-2">&amp;</span><span class="ident">a</span>.<span class="number">0</span>[<span class="number">1</span>], <span class="kw-2">&amp;</span><span class="ident">b</span>.<span class="number">0</span>[<span class="number">1</span>], <span class="ident">choice</span>),
-            <span class="ident">u64::conditional_select</span>(<span class="kw-2">&amp;</span><span class="ident">a</span>.<span class="number">0</span>[<span class="number">2</span>], <span class="kw-2">&amp;</span><span class="ident">b</span>.<span class="number">0</span>[<span class="number">2</span>], <span class="ident">choice</span>),
-            <span class="ident">u64::conditional_select</span>(<span class="kw-2">&amp;</span><span class="ident">a</span>.<span class="number">0</span>[<span class="number">3</span>], <span class="kw-2">&amp;</span><span class="ident">b</span>.<span class="number">0</span>[<span class="number">3</span>], <span class="ident">choice</span>),
+<span class="kw">impl </span>ConditionallySelectable <span class="kw">for </span>FieldElement {
+    <span class="kw">fn </span>conditional_select(a: <span class="kw-2">&amp;</span>FieldElement, b: <span class="kw-2">&amp;</span>FieldElement, choice: Choice) -&gt; FieldElement {
+        FieldElement([
+            u64::conditional_select(<span class="kw-2">&amp;</span>a.<span class="number">0</span>[<span class="number">0</span>], <span class="kw-2">&amp;</span>b.<span class="number">0</span>[<span class="number">0</span>], choice),
+            u64::conditional_select(<span class="kw-2">&amp;</span>a.<span class="number">0</span>[<span class="number">1</span>], <span class="kw-2">&amp;</span>b.<span class="number">0</span>[<span class="number">1</span>], choice),
+            u64::conditional_select(<span class="kw-2">&amp;</span>a.<span class="number">0</span>[<span class="number">2</span>], <span class="kw-2">&amp;</span>b.<span class="number">0</span>[<span class="number">2</span>], choice),
+            u64::conditional_select(<span class="kw-2">&amp;</span>a.<span class="number">0</span>[<span class="number">3</span>], <span class="kw-2">&amp;</span>b.<span class="number">0</span>[<span class="number">3</span>], choice),
         ])
     }
 }
 
-<span class="kw">impl</span> <span class="ident">ConstantTimeEq</span> <span class="kw">for</span> <span class="ident">FieldElement</span> {
-    <span class="kw">fn</span> <span class="ident">ct_eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="ident">Choice</span> {
-        <span class="self">self</span>.<span class="number">0</span>[<span class="number">0</span>].<span class="ident">ct_eq</span>(<span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="number">0</span>[<span class="number">0</span>])
-            <span class="op">&amp;</span> <span class="self">self</span>.<span class="number">0</span>[<span class="number">1</span>].<span class="ident">ct_eq</span>(<span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="number">0</span>[<span class="number">1</span>])
-            <span class="op">&amp;</span> <span class="self">self</span>.<span class="number">0</span>[<span class="number">2</span>].<span class="ident">ct_eq</span>(<span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="number">0</span>[<span class="number">2</span>])
-            <span class="op">&amp;</span> <span class="self">self</span>.<span class="number">0</span>[<span class="number">3</span>].<span class="ident">ct_eq</span>(<span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="number">0</span>[<span class="number">3</span>])
+<span class="kw">impl </span>ConstantTimeEq <span class="kw">for </span>FieldElement {
+    <span class="kw">fn </span>ct_eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; Choice {
+        <span class="self">self</span>.<span class="number">0</span>[<span class="number">0</span>].ct_eq(<span class="kw-2">&amp;</span>other.<span class="number">0</span>[<span class="number">0</span>])
+            &amp; <span class="self">self</span>.<span class="number">0</span>[<span class="number">1</span>].ct_eq(<span class="kw-2">&amp;</span>other.<span class="number">0</span>[<span class="number">1</span>])
+            &amp; <span class="self">self</span>.<span class="number">0</span>[<span class="number">2</span>].ct_eq(<span class="kw-2">&amp;</span>other.<span class="number">0</span>[<span class="number">2</span>])
+            &amp; <span class="self">self</span>.<span class="number">0</span>[<span class="number">3</span>].ct_eq(<span class="kw-2">&amp;</span>other.<span class="number">0</span>[<span class="number">3</span>])
     }
 }
 
-<span class="kw">impl</span> <span class="ident">PartialEq</span> <span class="kw">for</span> <span class="ident">FieldElement</span> {
-    <span class="kw">fn</span> <span class="ident">eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="ident">bool</span> {
-        <span class="self">self</span>.<span class="ident">ct_eq</span>(<span class="ident">other</span>).<span class="ident">into</span>()
+<span class="kw">impl </span>PartialEq <span class="kw">for </span>FieldElement {
+    <span class="kw">fn </span>eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; bool {
+        <span class="self">self</span>.ct_eq(other).into()
     }
 }
 
-<span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">FieldElement</span> {
-    <span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
-        <span class="ident">FieldElement::zero</span>()
+<span class="kw">impl </span>Default <span class="kw">for </span>FieldElement {
+    <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
+        FieldElement::zero()
     }
 }
 
-<span class="kw">impl</span> <span class="ident">FieldElement</span> {
-    <span class="doccomment">/// Returns the zero element.</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">zero</span>() -&gt; <span class="ident">FieldElement</span> {
-        <span class="ident">FieldElement</span>([<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>])
+<span class="kw">impl </span>FieldElement {
+    <span class="doccomment">/// Returns the zero element.
+    </span><span class="kw">pub const fn </span>zero() -&gt; FieldElement {
+        FieldElement([<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>])
     }
 
-    <span class="doccomment">/// Returns the multiplicative identity.</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">one</span>() -&gt; <span class="ident">FieldElement</span> {
-        <span class="ident">R</span>
+    <span class="doccomment">/// Returns the multiplicative identity.
+    </span><span class="kw">pub const fn </span>one() -&gt; FieldElement {
+        R
     }
 
-    <span class="doccomment">/// Returns a uniformly-random element within the field.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">generate</span>(<span class="kw-2">mut</span> <span class="ident">rng</span>: <span class="kw">impl</span> <span class="ident">CryptoRng</span> <span class="op">+</span> <span class="ident">RngCore</span>) -&gt; <span class="self">Self</span> {
-        <span class="comment">// We reduce a random 512-bit value into a 256-bit field, which results in a</span>
-        <span class="comment">// negligible bias from the uniform distribution.</span>
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> [<span class="number">0</span>; <span class="number">64</span>];
-        <span class="ident">rng</span>.<span class="ident">fill_bytes</span>(<span class="kw-2">&amp;mut</span> <span class="ident">buf</span>);
-        <span class="ident">FieldElement::from_bytes_wide</span>(<span class="ident">buf</span>)
+    <span class="doccomment">/// Returns a uniformly-random element within the field.
+    </span><span class="kw">pub fn </span>generate(<span class="kw-2">mut </span>rng: <span class="kw">impl </span>CryptoRng + RngCore) -&gt; <span class="self">Self </span>{
+        <span class="comment">// We reduce a random 512-bit value into a 256-bit field, which results in a
+        // negligible bias from the uniform distribution.
+        </span><span class="kw">let </span><span class="kw-2">mut </span>buf = [<span class="number">0</span>; <span class="number">64</span>];
+        rng.fill_bytes(<span class="kw-2">&amp;mut </span>buf);
+        FieldElement::from_bytes_wide(buf)
     }
 
-    <span class="kw">fn</span> <span class="ident">from_bytes_wide</span>(<span class="ident">bytes</span>: [<span class="ident">u8</span>; <span class="number">64</span>]) -&gt; <span class="self">Self</span> {
-        <span class="ident">FieldElement::montgomery_reduce</span>(
-            <span class="ident">u64::from_be_bytes</span>(<span class="ident">bytes</span>[<span class="number">0</span>..<span class="number">8</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
-            <span class="ident">u64::from_be_bytes</span>(<span class="ident">bytes</span>[<span class="number">8</span>..<span class="number">16</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
-            <span class="ident">u64::from_be_bytes</span>(<span class="ident">bytes</span>[<span class="number">16</span>..<span class="number">24</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
-            <span class="ident">u64::from_be_bytes</span>(<span class="ident">bytes</span>[<span class="number">24</span>..<span class="number">32</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
-            <span class="ident">u64::from_be_bytes</span>(<span class="ident">bytes</span>[<span class="number">32</span>..<span class="number">40</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
-            <span class="ident">u64::from_be_bytes</span>(<span class="ident">bytes</span>[<span class="number">40</span>..<span class="number">48</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
-            <span class="ident">u64::from_be_bytes</span>(<span class="ident">bytes</span>[<span class="number">48</span>..<span class="number">56</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
-            <span class="ident">u64::from_be_bytes</span>(<span class="ident">bytes</span>[<span class="number">56</span>..<span class="number">64</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>()),
+    <span class="kw">fn </span>from_bytes_wide(bytes: [u8; <span class="number">64</span>]) -&gt; <span class="self">Self </span>{
+        FieldElement::montgomery_reduce(
+            u64::from_be_bytes(bytes[<span class="number">0</span>..<span class="number">8</span>].try_into().unwrap()),
+            u64::from_be_bytes(bytes[<span class="number">8</span>..<span class="number">16</span>].try_into().unwrap()),
+            u64::from_be_bytes(bytes[<span class="number">16</span>..<span class="number">24</span>].try_into().unwrap()),
+            u64::from_be_bytes(bytes[<span class="number">24</span>..<span class="number">32</span>].try_into().unwrap()),
+            u64::from_be_bytes(bytes[<span class="number">32</span>..<span class="number">40</span>].try_into().unwrap()),
+            u64::from_be_bytes(bytes[<span class="number">40</span>..<span class="number">48</span>].try_into().unwrap()),
+            u64::from_be_bytes(bytes[<span class="number">48</span>..<span class="number">56</span>].try_into().unwrap()),
+            u64::from_be_bytes(bytes[<span class="number">56</span>..<span class="number">64</span>].try_into().unwrap()),
         )
     }
 
-    <span class="doccomment">/// Attempts to parse the given byte array as an SEC1-encoded field element.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// Returns None if the byte array does not contain a big-endian integer in the range</span>
-    <span class="doccomment">/// [0, p).</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_bytes</span>(<span class="ident">bytes</span>: <span class="kw-2">&amp;</span><span class="ident">FieldBytes</span>) -&gt; <span class="ident">CtOption</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">w</span> <span class="op">=</span> [<span class="number">0u64</span>; <span class="ident">LIMBS</span>];
+    <span class="doccomment">/// Attempts to parse the given byte array as an SEC1-encoded field element.
+    ///
+    /// Returns None if the byte array does not contain a big-endian integer in the range
+    /// [0, p).
+    </span><span class="kw">pub fn </span>from_bytes(bytes: <span class="kw-2">&amp;</span>FieldBytes) -&gt; CtOption&lt;<span class="self">Self</span>&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>w = [<span class="number">0u64</span>; LIMBS];
 
-        <span class="comment">// Interpret the bytes as a big-endian integer w.</span>
-        <span class="ident">w</span>[<span class="number">3</span>] <span class="op">=</span> <span class="ident">u64::from_be_bytes</span>(<span class="ident">bytes</span>[<span class="number">0</span>..<span class="number">8</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>());
-        <span class="ident">w</span>[<span class="number">2</span>] <span class="op">=</span> <span class="ident">u64::from_be_bytes</span>(<span class="ident">bytes</span>[<span class="number">8</span>..<span class="number">16</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>());
-        <span class="ident">w</span>[<span class="number">1</span>] <span class="op">=</span> <span class="ident">u64::from_be_bytes</span>(<span class="ident">bytes</span>[<span class="number">16</span>..<span class="number">24</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>());
-        <span class="ident">w</span>[<span class="number">0</span>] <span class="op">=</span> <span class="ident">u64::from_be_bytes</span>(<span class="ident">bytes</span>[<span class="number">24</span>..<span class="number">32</span>].<span class="ident">try_into</span>().<span class="ident">unwrap</span>());
+        <span class="comment">// Interpret the bytes as a big-endian integer w.
+        </span>w[<span class="number">3</span>] = u64::from_be_bytes(bytes[<span class="number">0</span>..<span class="number">8</span>].try_into().unwrap());
+        w[<span class="number">2</span>] = u64::from_be_bytes(bytes[<span class="number">8</span>..<span class="number">16</span>].try_into().unwrap());
+        w[<span class="number">1</span>] = u64::from_be_bytes(bytes[<span class="number">16</span>..<span class="number">24</span>].try_into().unwrap());
+        w[<span class="number">0</span>] = u64::from_be_bytes(bytes[<span class="number">24</span>..<span class="number">32</span>].try_into().unwrap());
 
-        <span class="comment">// If w is in the range [0, p) then w - p will overflow, resulting in a borrow</span>
-        <span class="comment">// value of 2^64 - 1.</span>
-        <span class="kw">let</span> (<span class="kw">_</span>, <span class="ident">borrow</span>) <span class="op">=</span> <span class="ident">sbb</span>(<span class="ident">w</span>[<span class="number">0</span>], <span class="ident">MODULUS</span>.<span class="number">0</span>[<span class="number">0</span>], <span class="number">0</span>);
-        <span class="kw">let</span> (<span class="kw">_</span>, <span class="ident">borrow</span>) <span class="op">=</span> <span class="ident">sbb</span>(<span class="ident">w</span>[<span class="number">1</span>], <span class="ident">MODULUS</span>.<span class="number">0</span>[<span class="number">1</span>], <span class="ident">borrow</span>);
-        <span class="kw">let</span> (<span class="kw">_</span>, <span class="ident">borrow</span>) <span class="op">=</span> <span class="ident">sbb</span>(<span class="ident">w</span>[<span class="number">2</span>], <span class="ident">MODULUS</span>.<span class="number">0</span>[<span class="number">2</span>], <span class="ident">borrow</span>);
-        <span class="kw">let</span> (<span class="kw">_</span>, <span class="ident">borrow</span>) <span class="op">=</span> <span class="ident">sbb</span>(<span class="ident">w</span>[<span class="number">3</span>], <span class="ident">MODULUS</span>.<span class="number">0</span>[<span class="number">3</span>], <span class="ident">borrow</span>);
-        <span class="kw">let</span> <span class="ident">is_some</span> <span class="op">=</span> (<span class="ident">borrow</span> <span class="kw">as</span> <span class="ident">u8</span>) <span class="op">&amp;</span> <span class="number">1</span>;
+        <span class="comment">// If w is in the range [0, p) then w - p will overflow, resulting in a borrow
+        // value of 2^64 - 1.
+        </span><span class="kw">let </span>(<span class="kw">_</span>, borrow) = sbb(w[<span class="number">0</span>], MODULUS.<span class="number">0</span>[<span class="number">0</span>], <span class="number">0</span>);
+        <span class="kw">let </span>(<span class="kw">_</span>, borrow) = sbb(w[<span class="number">1</span>], MODULUS.<span class="number">0</span>[<span class="number">1</span>], borrow);
+        <span class="kw">let </span>(<span class="kw">_</span>, borrow) = sbb(w[<span class="number">2</span>], MODULUS.<span class="number">0</span>[<span class="number">2</span>], borrow);
+        <span class="kw">let </span>(<span class="kw">_</span>, borrow) = sbb(w[<span class="number">3</span>], MODULUS.<span class="number">0</span>[<span class="number">3</span>], borrow);
+        <span class="kw">let </span>is_some = (borrow <span class="kw">as </span>u8) &amp; <span class="number">1</span>;
 
-        <span class="comment">// Convert w to Montgomery form: w * R^2 * R^-1 mod p = wR mod p</span>
-        <span class="ident">CtOption::new</span>(<span class="ident">FieldElement</span>(<span class="ident">w</span>).<span class="ident">mul</span>(<span class="kw-2">&amp;</span><span class="ident">R2</span>), <span class="ident">Choice::from</span>(<span class="ident">is_some</span>))
+        <span class="comment">// Convert w to Montgomery form: w * R^2 * R^-1 mod p = wR mod p
+        </span>CtOption::new(FieldElement(w).mul(<span class="kw-2">&amp;</span>R2), Choice::from(is_some))
     }
 
-    <span class="doccomment">/// Returns the SEC1 encoding of this field element.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">to_bytes</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">FieldBytes</span> {
-        <span class="comment">// Convert from Montgomery form to canonical form</span>
-        <span class="kw">let</span> <span class="ident">tmp</span> <span class="op">=</span>
-            <span class="ident">FieldElement::montgomery_reduce</span>(<span class="self">self</span>.<span class="number">0</span>[<span class="number">0</span>], <span class="self">self</span>.<span class="number">0</span>[<span class="number">1</span>], <span class="self">self</span>.<span class="number">0</span>[<span class="number">2</span>], <span class="self">self</span>.<span class="number">0</span>[<span class="number">3</span>], <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>);
+    <span class="doccomment">/// Returns the SEC1 encoding of this field element.
+    </span><span class="kw">pub fn </span>to_bytes(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; FieldBytes {
+        <span class="comment">// Convert from Montgomery form to canonical form
+        </span><span class="kw">let </span>tmp =
+            FieldElement::montgomery_reduce(<span class="self">self</span>.<span class="number">0</span>[<span class="number">0</span>], <span class="self">self</span>.<span class="number">0</span>[<span class="number">1</span>], <span class="self">self</span>.<span class="number">0</span>[<span class="number">2</span>], <span class="self">self</span>.<span class="number">0</span>[<span class="number">3</span>], <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>);
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ret</span> <span class="op">=</span> <span class="ident">FieldBytes::default</span>();
-        <span class="ident">ret</span>[<span class="number">0</span>..<span class="number">8</span>].<span class="ident">copy_from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">tmp</span>.<span class="number">0</span>[<span class="number">3</span>].<span class="ident">to_be_bytes</span>());
-        <span class="ident">ret</span>[<span class="number">8</span>..<span class="number">16</span>].<span class="ident">copy_from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">tmp</span>.<span class="number">0</span>[<span class="number">2</span>].<span class="ident">to_be_bytes</span>());
-        <span class="ident">ret</span>[<span class="number">16</span>..<span class="number">24</span>].<span class="ident">copy_from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">tmp</span>.<span class="number">0</span>[<span class="number">1</span>].<span class="ident">to_be_bytes</span>());
-        <span class="ident">ret</span>[<span class="number">24</span>..<span class="number">32</span>].<span class="ident">copy_from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">tmp</span>.<span class="number">0</span>[<span class="number">0</span>].<span class="ident">to_be_bytes</span>());
-        <span class="ident">ret</span>
+        <span class="kw">let </span><span class="kw-2">mut </span>ret = FieldBytes::default();
+        ret[<span class="number">0</span>..<span class="number">8</span>].copy_from_slice(<span class="kw-2">&amp;</span>tmp.<span class="number">0</span>[<span class="number">3</span>].to_be_bytes());
+        ret[<span class="number">8</span>..<span class="number">16</span>].copy_from_slice(<span class="kw-2">&amp;</span>tmp.<span class="number">0</span>[<span class="number">2</span>].to_be_bytes());
+        ret[<span class="number">16</span>..<span class="number">24</span>].copy_from_slice(<span class="kw-2">&amp;</span>tmp.<span class="number">0</span>[<span class="number">1</span>].to_be_bytes());
+        ret[<span class="number">24</span>..<span class="number">32</span>].copy_from_slice(<span class="kw-2">&amp;</span>tmp.<span class="number">0</span>[<span class="number">0</span>].to_be_bytes());
+        ret
     }
 
-    <span class="doccomment">/// Determine if this `FieldElement` is zero.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// # Returns</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// If zero, return `Choice(1)`.  Otherwise, return `Choice(0)`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_zero</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Choice</span> {
-        <span class="self">self</span>.<span class="ident">ct_eq</span>(<span class="kw-2">&amp;</span><span class="ident">FieldElement::zero</span>())
+    <span class="doccomment">/// Determine if this `FieldElement` is zero.
+    ///
+    /// # Returns
+    ///
+    /// If zero, return `Choice(1)`.  Otherwise, return `Choice(0)`.
+    </span><span class="kw">pub fn </span>is_zero(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Choice {
+        <span class="self">self</span>.ct_eq(<span class="kw-2">&amp;</span>FieldElement::zero())
     }
 
-    <span class="doccomment">/// Determine if this `FieldElement` is odd in the SEC1 sense: `self mod 2 == 1`.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// # Returns</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// If odd, return `Choice(1)`.  Otherwise, return `Choice(0)`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_odd</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Choice</span> {
-        <span class="kw">let</span> <span class="ident">bytes</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">to_bytes</span>();
-        (<span class="ident">bytes</span>[<span class="number">31</span>] <span class="op">&amp;</span> <span class="number">1</span>).<span class="ident">into</span>()
+    <span class="doccomment">/// Determine if this `FieldElement` is odd in the SEC1 sense: `self mod 2 == 1`.
+    ///
+    /// # Returns
+    ///
+    /// If odd, return `Choice(1)`.  Otherwise, return `Choice(0)`.
+    </span><span class="kw">pub fn </span>is_odd(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Choice {
+        <span class="kw">let </span>bytes = <span class="self">self</span>.to_bytes();
+        (bytes[<span class="number">31</span>] &amp; <span class="number">1</span>).into()
     }
 
-    <span class="doccomment">/// Returns self + rhs mod p</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">add</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rhs</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="comment">// Bit 256 of p is set, so addition can result in five words.</span>
-        <span class="kw">let</span> (<span class="ident">w0</span>, <span class="ident">carry</span>) <span class="op">=</span> <span class="ident">adc</span>(<span class="self">self</span>.<span class="number">0</span>[<span class="number">0</span>], <span class="ident">rhs</span>.<span class="number">0</span>[<span class="number">0</span>], <span class="number">0</span>);
-        <span class="kw">let</span> (<span class="ident">w1</span>, <span class="ident">carry</span>) <span class="op">=</span> <span class="ident">adc</span>(<span class="self">self</span>.<span class="number">0</span>[<span class="number">1</span>], <span class="ident">rhs</span>.<span class="number">0</span>[<span class="number">1</span>], <span class="ident">carry</span>);
-        <span class="kw">let</span> (<span class="ident">w2</span>, <span class="ident">carry</span>) <span class="op">=</span> <span class="ident">adc</span>(<span class="self">self</span>.<span class="number">0</span>[<span class="number">2</span>], <span class="ident">rhs</span>.<span class="number">0</span>[<span class="number">2</span>], <span class="ident">carry</span>);
-        <span class="kw">let</span> (<span class="ident">w3</span>, <span class="ident">w4</span>) <span class="op">=</span> <span class="ident">adc</span>(<span class="self">self</span>.<span class="number">0</span>[<span class="number">3</span>], <span class="ident">rhs</span>.<span class="number">0</span>[<span class="number">3</span>], <span class="ident">carry</span>);
+    <span class="doccomment">/// Returns self + rhs mod p
+    </span><span class="kw">pub const fn </span>add(<span class="kw-2">&amp;</span><span class="self">self</span>, rhs: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="self">Self </span>{
+        <span class="comment">// Bit 256 of p is set, so addition can result in five words.
+        </span><span class="kw">let </span>(w0, carry) = adc(<span class="self">self</span>.<span class="number">0</span>[<span class="number">0</span>], rhs.<span class="number">0</span>[<span class="number">0</span>], <span class="number">0</span>);
+        <span class="kw">let </span>(w1, carry) = adc(<span class="self">self</span>.<span class="number">0</span>[<span class="number">1</span>], rhs.<span class="number">0</span>[<span class="number">1</span>], carry);
+        <span class="kw">let </span>(w2, carry) = adc(<span class="self">self</span>.<span class="number">0</span>[<span class="number">2</span>], rhs.<span class="number">0</span>[<span class="number">2</span>], carry);
+        <span class="kw">let </span>(w3, w4) = adc(<span class="self">self</span>.<span class="number">0</span>[<span class="number">3</span>], rhs.<span class="number">0</span>[<span class="number">3</span>], carry);
 
-        <span class="comment">// Attempt to subtract the modulus, to ensure the result is in the field.</span>
-        <span class="ident"><span class="self">Self</span>::sub_inner</span>(
-            <span class="ident">w0</span>,
-            <span class="ident">w1</span>,
-            <span class="ident">w2</span>,
-            <span class="ident">w3</span>,
-            <span class="ident">w4</span>,
-            <span class="ident">MODULUS</span>.<span class="number">0</span>[<span class="number">0</span>],
-            <span class="ident">MODULUS</span>.<span class="number">0</span>[<span class="number">1</span>],
-            <span class="ident">MODULUS</span>.<span class="number">0</span>[<span class="number">2</span>],
-            <span class="ident">MODULUS</span>.<span class="number">0</span>[<span class="number">3</span>],
+        <span class="comment">// Attempt to subtract the modulus, to ensure the result is in the field.
+        </span><span class="self">Self</span>::sub_inner(
+            w0,
+            w1,
+            w2,
+            w3,
+            w4,
+            MODULUS.<span class="number">0</span>[<span class="number">0</span>],
+            MODULUS.<span class="number">0</span>[<span class="number">1</span>],
+            MODULUS.<span class="number">0</span>[<span class="number">2</span>],
+            MODULUS.<span class="number">0</span>[<span class="number">3</span>],
             <span class="number">0</span>,
         )
     }
 
-    <span class="doccomment">/// Returns 2*self.</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">double</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">self</span>.<span class="ident">add</span>(<span class="self">self</span>)
+    <span class="doccomment">/// Returns 2*self.
+    </span><span class="kw">pub const fn </span>double(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.add(<span class="self">self</span>)
     }
 
-    <span class="doccomment">/// Returns self - rhs mod p</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">subtract</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rhs</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident"><span class="self">Self</span>::sub_inner</span>(
-            <span class="self">self</span>.<span class="number">0</span>[<span class="number">0</span>], <span class="self">self</span>.<span class="number">0</span>[<span class="number">1</span>], <span class="self">self</span>.<span class="number">0</span>[<span class="number">2</span>], <span class="self">self</span>.<span class="number">0</span>[<span class="number">3</span>], <span class="number">0</span>, <span class="ident">rhs</span>.<span class="number">0</span>[<span class="number">0</span>], <span class="ident">rhs</span>.<span class="number">0</span>[<span class="number">1</span>], <span class="ident">rhs</span>.<span class="number">0</span>[<span class="number">2</span>], <span class="ident">rhs</span>.<span class="number">0</span>[<span class="number">3</span>],
+    <span class="doccomment">/// Returns self - rhs mod p
+    </span><span class="kw">pub const fn </span>subtract(<span class="kw-2">&amp;</span><span class="self">self</span>, rhs: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>::sub_inner(
+            <span class="self">self</span>.<span class="number">0</span>[<span class="number">0</span>], <span class="self">self</span>.<span class="number">0</span>[<span class="number">1</span>], <span class="self">self</span>.<span class="number">0</span>[<span class="number">2</span>], <span class="self">self</span>.<span class="number">0</span>[<span class="number">3</span>], <span class="number">0</span>, rhs.<span class="number">0</span>[<span class="number">0</span>], rhs.<span class="number">0</span>[<span class="number">1</span>], rhs.<span class="number">0</span>[<span class="number">2</span>], rhs.<span class="number">0</span>[<span class="number">3</span>],
             <span class="number">0</span>,
         )
     }
 
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::too_many_arguments</span>)]</span>
-    <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">sub_inner</span>(
-        <span class="ident">l0</span>: <span class="ident">u64</span>,
-        <span class="ident">l1</span>: <span class="ident">u64</span>,
-        <span class="ident">l2</span>: <span class="ident">u64</span>,
-        <span class="ident">l3</span>: <span class="ident">u64</span>,
-        <span class="ident">l4</span>: <span class="ident">u64</span>,
-        <span class="ident">r0</span>: <span class="ident">u64</span>,
-        <span class="ident">r1</span>: <span class="ident">u64</span>,
-        <span class="ident">r2</span>: <span class="ident">u64</span>,
-        <span class="ident">r3</span>: <span class="ident">u64</span>,
-        <span class="ident">r4</span>: <span class="ident">u64</span>,
-    ) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> (<span class="ident">w0</span>, <span class="ident">borrow</span>) <span class="op">=</span> <span class="ident">sbb</span>(<span class="ident">l0</span>, <span class="ident">r0</span>, <span class="number">0</span>);
-        <span class="kw">let</span> (<span class="ident">w1</span>, <span class="ident">borrow</span>) <span class="op">=</span> <span class="ident">sbb</span>(<span class="ident">l1</span>, <span class="ident">r1</span>, <span class="ident">borrow</span>);
-        <span class="kw">let</span> (<span class="ident">w2</span>, <span class="ident">borrow</span>) <span class="op">=</span> <span class="ident">sbb</span>(<span class="ident">l2</span>, <span class="ident">r2</span>, <span class="ident">borrow</span>);
-        <span class="kw">let</span> (<span class="ident">w3</span>, <span class="ident">borrow</span>) <span class="op">=</span> <span class="ident">sbb</span>(<span class="ident">l3</span>, <span class="ident">r3</span>, <span class="ident">borrow</span>);
-        <span class="kw">let</span> (<span class="kw">_</span>, <span class="ident">borrow</span>) <span class="op">=</span> <span class="ident">sbb</span>(<span class="ident">l4</span>, <span class="ident">r4</span>, <span class="ident">borrow</span>);
+    <span class="attribute">#[inline]
+    #[allow(clippy::too_many_arguments)]
+    </span><span class="kw">const fn </span>sub_inner(
+        l0: u64,
+        l1: u64,
+        l2: u64,
+        l3: u64,
+        l4: u64,
+        r0: u64,
+        r1: u64,
+        r2: u64,
+        r3: u64,
+        r4: u64,
+    ) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>(w0, borrow) = sbb(l0, r0, <span class="number">0</span>);
+        <span class="kw">let </span>(w1, borrow) = sbb(l1, r1, borrow);
+        <span class="kw">let </span>(w2, borrow) = sbb(l2, r2, borrow);
+        <span class="kw">let </span>(w3, borrow) = sbb(l3, r3, borrow);
+        <span class="kw">let </span>(<span class="kw">_</span>, borrow) = sbb(l4, r4, borrow);
 
-        <span class="comment">// If underflow occurred on the final limb, borrow = 0xfff...fff, otherwise</span>
-        <span class="comment">// borrow = 0x000...000. Thus, we use it as a mask to conditionally add the</span>
-        <span class="comment">// modulus.</span>
-        <span class="kw">let</span> (<span class="ident">w0</span>, <span class="ident">carry</span>) <span class="op">=</span> <span class="ident">adc</span>(<span class="ident">w0</span>, <span class="ident">MODULUS</span>.<span class="number">0</span>[<span class="number">0</span>] <span class="op">&amp;</span> <span class="ident">borrow</span>, <span class="number">0</span>);
-        <span class="kw">let</span> (<span class="ident">w1</span>, <span class="ident">carry</span>) <span class="op">=</span> <span class="ident">adc</span>(<span class="ident">w1</span>, <span class="ident">MODULUS</span>.<span class="number">0</span>[<span class="number">1</span>] <span class="op">&amp;</span> <span class="ident">borrow</span>, <span class="ident">carry</span>);
-        <span class="kw">let</span> (<span class="ident">w2</span>, <span class="ident">carry</span>) <span class="op">=</span> <span class="ident">adc</span>(<span class="ident">w2</span>, <span class="ident">MODULUS</span>.<span class="number">0</span>[<span class="number">2</span>] <span class="op">&amp;</span> <span class="ident">borrow</span>, <span class="ident">carry</span>);
-        <span class="kw">let</span> (<span class="ident">w3</span>, <span class="kw">_</span>) <span class="op">=</span> <span class="ident">adc</span>(<span class="ident">w3</span>, <span class="ident">MODULUS</span>.<span class="number">0</span>[<span class="number">3</span>] <span class="op">&amp;</span> <span class="ident">borrow</span>, <span class="ident">carry</span>);
+        <span class="comment">// If underflow occurred on the final limb, borrow = 0xfff...fff, otherwise
+        // borrow = 0x000...000. Thus, we use it as a mask to conditionally add the
+        // modulus.
+        </span><span class="kw">let </span>(w0, carry) = adc(w0, MODULUS.<span class="number">0</span>[<span class="number">0</span>] &amp; borrow, <span class="number">0</span>);
+        <span class="kw">let </span>(w1, carry) = adc(w1, MODULUS.<span class="number">0</span>[<span class="number">1</span>] &amp; borrow, carry);
+        <span class="kw">let </span>(w2, carry) = adc(w2, MODULUS.<span class="number">0</span>[<span class="number">2</span>] &amp; borrow, carry);
+        <span class="kw">let </span>(w3, <span class="kw">_</span>) = adc(w3, MODULUS.<span class="number">0</span>[<span class="number">3</span>] &amp; borrow, carry);
 
-        <span class="ident">FieldElement</span>([<span class="ident">w0</span>, <span class="ident">w1</span>, <span class="ident">w2</span>, <span class="ident">w3</span>])
+        FieldElement([w0, w1, w2, w3])
     }
 
-    <span class="doccomment">/// Montgomery Reduction</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// The general algorithm is:</span>
-    <span class="doccomment">/// ```text</span>
-    <span class="doccomment">/// A &lt;- input (2n b-limbs)</span>
-    <span class="doccomment">/// for i in 0..n {</span>
-    <span class="doccomment">///     k &lt;- A[i] p&#39; mod b</span>
-    <span class="doccomment">///     A &lt;- A + k p b^i</span>
-    <span class="doccomment">/// }</span>
-    <span class="doccomment">/// A &lt;- A / b^n</span>
-    <span class="doccomment">/// if A &gt;= p {</span>
-    <span class="doccomment">///     A &lt;- A - p</span>
-    <span class="doccomment">/// }</span>
-    <span class="doccomment">/// ```</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// For secp256r1, we have the following simplifications:</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// - `p&#39;` is 1, so our multiplicand is simply the first limb of the intermediate A.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// - The first limb of p is 2^64 - 1; multiplications by this limb can be simplified</span>
-    <span class="doccomment">///   to a shift and subtraction:</span>
-    <span class="doccomment">///   ```text</span>
-    <span class="doccomment">///       a_i * (2^64 - 1) = a_i * 2^64 - a_i = (a_i &lt;&lt; 64) - a_i</span>
-    <span class="doccomment">///   ```</span>
-    <span class="doccomment">///   However, because `p&#39; = 1`, the first limb of p is multiplied by limb i of the</span>
-    <span class="doccomment">///   intermediate A and then immediately added to that same limb, so we simply</span>
-    <span class="doccomment">///   initialize the carry to limb i of the intermediate.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// - The third limb of p is zero, so we can ignore any multiplications by it and just</span>
-    <span class="doccomment">///   add the carry.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// References:</span>
-    <span class="doccomment">/// - Handbook of Applied Cryptography, Chapter 14</span>
-    <span class="doccomment">///   Algorithm 14.32</span>
-    <span class="doccomment">///   http://cacr.uwaterloo.ca/hac/about/chap14.pdf</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// - Efficient and Secure Elliptic Curve Cryptography Implementation of Curve P-256</span>
-    <span class="doccomment">///   Algorithm 7) Montgomery Word-by-Word Reduction</span>
-    <span class="doccomment">///   https://csrc.nist.gov/csrc/media/events/workshop-on-elliptic-curve-cryptography-standards/documents/papers/session6-adalier-mehmet.pdf</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::too_many_arguments</span>)]</span>
-    <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">montgomery_reduce</span>(
-        <span class="ident">r0</span>: <span class="ident">u64</span>,
-        <span class="ident">r1</span>: <span class="ident">u64</span>,
-        <span class="ident">r2</span>: <span class="ident">u64</span>,
-        <span class="ident">r3</span>: <span class="ident">u64</span>,
-        <span class="ident">r4</span>: <span class="ident">u64</span>,
-        <span class="ident">r5</span>: <span class="ident">u64</span>,
-        <span class="ident">r6</span>: <span class="ident">u64</span>,
-        <span class="ident">r7</span>: <span class="ident">u64</span>,
-    ) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> (<span class="ident">r1</span>, <span class="ident">carry</span>) <span class="op">=</span> <span class="ident">mac</span>(<span class="ident">r1</span>, <span class="ident">r0</span>, <span class="ident">MODULUS</span>.<span class="number">0</span>[<span class="number">1</span>], <span class="ident">r0</span>);
-        <span class="kw">let</span> (<span class="ident">r2</span>, <span class="ident">carry</span>) <span class="op">=</span> <span class="ident">adc</span>(<span class="ident">r2</span>, <span class="number">0</span>, <span class="ident">carry</span>);
-        <span class="kw">let</span> (<span class="ident">r3</span>, <span class="ident">carry</span>) <span class="op">=</span> <span class="ident">mac</span>(<span class="ident">r3</span>, <span class="ident">r0</span>, <span class="ident">MODULUS</span>.<span class="number">0</span>[<span class="number">3</span>], <span class="ident">carry</span>);
-        <span class="kw">let</span> (<span class="ident">r4</span>, <span class="ident">carry2</span>) <span class="op">=</span> <span class="ident">adc</span>(<span class="ident">r4</span>, <span class="number">0</span>, <span class="ident">carry</span>);
+    <span class="doccomment">/// Montgomery Reduction
+    ///
+    /// The general algorithm is:
+    /// ```text
+    /// A &lt;- input (2n b-limbs)
+    /// for i in 0..n {
+    ///     k &lt;- A[i] p&#39; mod b
+    ///     A &lt;- A + k p b^i
+    /// }
+    /// A &lt;- A / b^n
+    /// if A &gt;= p {
+    ///     A &lt;- A - p
+    /// }
+    /// ```
+    ///
+    /// For secp256r1, we have the following simplifications:
+    ///
+    /// - `p&#39;` is 1, so our multiplicand is simply the first limb of the intermediate A.
+    ///
+    /// - The first limb of p is 2^64 - 1; multiplications by this limb can be simplified
+    ///   to a shift and subtraction:
+    ///   ```text
+    ///       a_i * (2^64 - 1) = a_i * 2^64 - a_i = (a_i &lt;&lt; 64) - a_i
+    ///   ```
+    ///   However, because `p&#39; = 1`, the first limb of p is multiplied by limb i of the
+    ///   intermediate A and then immediately added to that same limb, so we simply
+    ///   initialize the carry to limb i of the intermediate.
+    ///
+    /// - The third limb of p is zero, so we can ignore any multiplications by it and just
+    ///   add the carry.
+    ///
+    /// References:
+    /// - Handbook of Applied Cryptography, Chapter 14
+    ///   Algorithm 14.32
+    ///   http://cacr.uwaterloo.ca/hac/about/chap14.pdf
+    ///
+    /// - Efficient and Secure Elliptic Curve Cryptography Implementation of Curve P-256
+    ///   Algorithm 7) Montgomery Word-by-Word Reduction
+    ///   https://csrc.nist.gov/csrc/media/events/workshop-on-elliptic-curve-cryptography-standards/documents/papers/session6-adalier-mehmet.pdf
+    </span><span class="attribute">#[inline]
+    #[allow(clippy::too_many_arguments)]
+    </span><span class="kw">const fn </span>montgomery_reduce(
+        r0: u64,
+        r1: u64,
+        r2: u64,
+        r3: u64,
+        r4: u64,
+        r5: u64,
+        r6: u64,
+        r7: u64,
+    ) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>(r1, carry) = mac(r1, r0, MODULUS.<span class="number">0</span>[<span class="number">1</span>], r0);
+        <span class="kw">let </span>(r2, carry) = adc(r2, <span class="number">0</span>, carry);
+        <span class="kw">let </span>(r3, carry) = mac(r3, r0, MODULUS.<span class="number">0</span>[<span class="number">3</span>], carry);
+        <span class="kw">let </span>(r4, carry2) = adc(r4, <span class="number">0</span>, carry);
 
-        <span class="kw">let</span> (<span class="ident">r2</span>, <span class="ident">carry</span>) <span class="op">=</span> <span class="ident">mac</span>(<span class="ident">r2</span>, <span class="ident">r1</span>, <span class="ident">MODULUS</span>.<span class="number">0</span>[<span class="number">1</span>], <span class="ident">r1</span>);
-        <span class="kw">let</span> (<span class="ident">r3</span>, <span class="ident">carry</span>) <span class="op">=</span> <span class="ident">adc</span>(<span class="ident">r3</span>, <span class="number">0</span>, <span class="ident">carry</span>);
-        <span class="kw">let</span> (<span class="ident">r4</span>, <span class="ident">carry</span>) <span class="op">=</span> <span class="ident">mac</span>(<span class="ident">r4</span>, <span class="ident">r1</span>, <span class="ident">MODULUS</span>.<span class="number">0</span>[<span class="number">3</span>], <span class="ident">carry</span>);
-        <span class="kw">let</span> (<span class="ident">r5</span>, <span class="ident">carry2</span>) <span class="op">=</span> <span class="ident">adc</span>(<span class="ident">r5</span>, <span class="ident">carry2</span>, <span class="ident">carry</span>);
+        <span class="kw">let </span>(r2, carry) = mac(r2, r1, MODULUS.<span class="number">0</span>[<span class="number">1</span>], r1);
+        <span class="kw">let </span>(r3, carry) = adc(r3, <span class="number">0</span>, carry);
+        <span class="kw">let </span>(r4, carry) = mac(r4, r1, MODULUS.<span class="number">0</span>[<span class="number">3</span>], carry);
+        <span class="kw">let </span>(r5, carry2) = adc(r5, carry2, carry);
 
-        <span class="kw">let</span> (<span class="ident">r3</span>, <span class="ident">carry</span>) <span class="op">=</span> <span class="ident">mac</span>(<span class="ident">r3</span>, <span class="ident">r2</span>, <span class="ident">MODULUS</span>.<span class="number">0</span>[<span class="number">1</span>], <span class="ident">r2</span>);
-        <span class="kw">let</span> (<span class="ident">r4</span>, <span class="ident">carry</span>) <span class="op">=</span> <span class="ident">adc</span>(<span class="ident">r4</span>, <span class="number">0</span>, <span class="ident">carry</span>);
-        <span class="kw">let</span> (<span class="ident">r5</span>, <span class="ident">carry</span>) <span class="op">=</span> <span class="ident">mac</span>(<span class="ident">r5</span>, <span class="ident">r2</span>, <span class="ident">MODULUS</span>.<span class="number">0</span>[<span class="number">3</span>], <span class="ident">carry</span>);
-        <span class="kw">let</span> (<span class="ident">r6</span>, <span class="ident">carry2</span>) <span class="op">=</span> <span class="ident">adc</span>(<span class="ident">r6</span>, <span class="ident">carry2</span>, <span class="ident">carry</span>);
+        <span class="kw">let </span>(r3, carry) = mac(r3, r2, MODULUS.<span class="number">0</span>[<span class="number">1</span>], r2);
+        <span class="kw">let </span>(r4, carry) = adc(r4, <span class="number">0</span>, carry);
+        <span class="kw">let </span>(r5, carry) = mac(r5, r2, MODULUS.<span class="number">0</span>[<span class="number">3</span>], carry);
+        <span class="kw">let </span>(r6, carry2) = adc(r6, carry2, carry);
 
-        <span class="kw">let</span> (<span class="ident">r4</span>, <span class="ident">carry</span>) <span class="op">=</span> <span class="ident">mac</span>(<span class="ident">r4</span>, <span class="ident">r3</span>, <span class="ident">MODULUS</span>.<span class="number">0</span>[<span class="number">1</span>], <span class="ident">r3</span>);
-        <span class="kw">let</span> (<span class="ident">r5</span>, <span class="ident">carry</span>) <span class="op">=</span> <span class="ident">adc</span>(<span class="ident">r5</span>, <span class="number">0</span>, <span class="ident">carry</span>);
-        <span class="kw">let</span> (<span class="ident">r6</span>, <span class="ident">carry</span>) <span class="op">=</span> <span class="ident">mac</span>(<span class="ident">r6</span>, <span class="ident">r3</span>, <span class="ident">MODULUS</span>.<span class="number">0</span>[<span class="number">3</span>], <span class="ident">carry</span>);
-        <span class="kw">let</span> (<span class="ident">r7</span>, <span class="ident">r8</span>) <span class="op">=</span> <span class="ident">adc</span>(<span class="ident">r7</span>, <span class="ident">carry2</span>, <span class="ident">carry</span>);
+        <span class="kw">let </span>(r4, carry) = mac(r4, r3, MODULUS.<span class="number">0</span>[<span class="number">1</span>], r3);
+        <span class="kw">let </span>(r5, carry) = adc(r5, <span class="number">0</span>, carry);
+        <span class="kw">let </span>(r6, carry) = mac(r6, r3, MODULUS.<span class="number">0</span>[<span class="number">3</span>], carry);
+        <span class="kw">let </span>(r7, r8) = adc(r7, carry2, carry);
 
-        <span class="comment">// Result may be within MODULUS of the correct value</span>
-        <span class="ident"><span class="self">Self</span>::sub_inner</span>(
-            <span class="ident">r4</span>,
-            <span class="ident">r5</span>,
-            <span class="ident">r6</span>,
-            <span class="ident">r7</span>,
-            <span class="ident">r8</span>,
-            <span class="ident">MODULUS</span>.<span class="number">0</span>[<span class="number">0</span>],
-            <span class="ident">MODULUS</span>.<span class="number">0</span>[<span class="number">1</span>],
-            <span class="ident">MODULUS</span>.<span class="number">0</span>[<span class="number">2</span>],
-            <span class="ident">MODULUS</span>.<span class="number">0</span>[<span class="number">3</span>],
+        <span class="comment">// Result may be within MODULUS of the correct value
+        </span><span class="self">Self</span>::sub_inner(
+            r4,
+            r5,
+            r6,
+            r7,
+            r8,
+            MODULUS.<span class="number">0</span>[<span class="number">0</span>],
+            MODULUS.<span class="number">0</span>[<span class="number">1</span>],
+            MODULUS.<span class="number">0</span>[<span class="number">2</span>],
+            MODULUS.<span class="number">0</span>[<span class="number">3</span>],
             <span class="number">0</span>,
         )
     }
 
-    <span class="doccomment">/// Returns self * rhs mod p</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">mul</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rhs</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="comment">// Schoolbook multiplication.</span>
+    <span class="doccomment">/// Returns self * rhs mod p
+    </span><span class="kw">pub const fn </span>mul(<span class="kw-2">&amp;</span><span class="self">self</span>, rhs: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="self">Self </span>{
+        <span class="comment">// Schoolbook multiplication.
 
-        <span class="kw">let</span> (<span class="ident">w0</span>, <span class="ident">carry</span>) <span class="op">=</span> <span class="ident">mac</span>(<span class="number">0</span>, <span class="self">self</span>.<span class="number">0</span>[<span class="number">0</span>], <span class="ident">rhs</span>.<span class="number">0</span>[<span class="number">0</span>], <span class="number">0</span>);
-        <span class="kw">let</span> (<span class="ident">w1</span>, <span class="ident">carry</span>) <span class="op">=</span> <span class="ident">mac</span>(<span class="number">0</span>, <span class="self">self</span>.<span class="number">0</span>[<span class="number">0</span>], <span class="ident">rhs</span>.<span class="number">0</span>[<span class="number">1</span>], <span class="ident">carry</span>);
-        <span class="kw">let</span> (<span class="ident">w2</span>, <span class="ident">carry</span>) <span class="op">=</span> <span class="ident">mac</span>(<span class="number">0</span>, <span class="self">self</span>.<span class="number">0</span>[<span class="number">0</span>], <span class="ident">rhs</span>.<span class="number">0</span>[<span class="number">2</span>], <span class="ident">carry</span>);
-        <span class="kw">let</span> (<span class="ident">w3</span>, <span class="ident">w4</span>) <span class="op">=</span> <span class="ident">mac</span>(<span class="number">0</span>, <span class="self">self</span>.<span class="number">0</span>[<span class="number">0</span>], <span class="ident">rhs</span>.<span class="number">0</span>[<span class="number">3</span>], <span class="ident">carry</span>);
+        </span><span class="kw">let </span>(w0, carry) = mac(<span class="number">0</span>, <span class="self">self</span>.<span class="number">0</span>[<span class="number">0</span>], rhs.<span class="number">0</span>[<span class="number">0</span>], <span class="number">0</span>);
+        <span class="kw">let </span>(w1, carry) = mac(<span class="number">0</span>, <span class="self">self</span>.<span class="number">0</span>[<span class="number">0</span>], rhs.<span class="number">0</span>[<span class="number">1</span>], carry);
+        <span class="kw">let </span>(w2, carry) = mac(<span class="number">0</span>, <span class="self">self</span>.<span class="number">0</span>[<span class="number">0</span>], rhs.<span class="number">0</span>[<span class="number">2</span>], carry);
+        <span class="kw">let </span>(w3, w4) = mac(<span class="number">0</span>, <span class="self">self</span>.<span class="number">0</span>[<span class="number">0</span>], rhs.<span class="number">0</span>[<span class="number">3</span>], carry);
 
-        <span class="kw">let</span> (<span class="ident">w1</span>, <span class="ident">carry</span>) <span class="op">=</span> <span class="ident">mac</span>(<span class="ident">w1</span>, <span class="self">self</span>.<span class="number">0</span>[<span class="number">1</span>], <span class="ident">rhs</span>.<span class="number">0</span>[<span class="number">0</span>], <span class="number">0</span>);
-        <span class="kw">let</span> (<span class="ident">w2</span>, <span class="ident">carry</span>) <span class="op">=</span> <span class="ident">mac</span>(<span class="ident">w2</span>, <span class="self">self</span>.<span class="number">0</span>[<span class="number">1</span>], <span class="ident">rhs</span>.<span class="number">0</span>[<span class="number">1</span>], <span class="ident">carry</span>);
-        <span class="kw">let</span> (<span class="ident">w3</span>, <span class="ident">carry</span>) <span class="op">=</span> <span class="ident">mac</span>(<span class="ident">w3</span>, <span class="self">self</span>.<span class="number">0</span>[<span class="number">1</span>], <span class="ident">rhs</span>.<span class="number">0</span>[<span class="number">2</span>], <span class="ident">carry</span>);
-        <span class="kw">let</span> (<span class="ident">w4</span>, <span class="ident">w5</span>) <span class="op">=</span> <span class="ident">mac</span>(<span class="ident">w4</span>, <span class="self">self</span>.<span class="number">0</span>[<span class="number">1</span>], <span class="ident">rhs</span>.<span class="number">0</span>[<span class="number">3</span>], <span class="ident">carry</span>);
+        <span class="kw">let </span>(w1, carry) = mac(w1, <span class="self">self</span>.<span class="number">0</span>[<span class="number">1</span>], rhs.<span class="number">0</span>[<span class="number">0</span>], <span class="number">0</span>);
+        <span class="kw">let </span>(w2, carry) = mac(w2, <span class="self">self</span>.<span class="number">0</span>[<span class="number">1</span>], rhs.<span class="number">0</span>[<span class="number">1</span>], carry);
+        <span class="kw">let </span>(w3, carry) = mac(w3, <span class="self">self</span>.<span class="number">0</span>[<span class="number">1</span>], rhs.<span class="number">0</span>[<span class="number">2</span>], carry);
+        <span class="kw">let </span>(w4, w5) = mac(w4, <span class="self">self</span>.<span class="number">0</span>[<span class="number">1</span>], rhs.<span class="number">0</span>[<span class="number">3</span>], carry);
 
-        <span class="kw">let</span> (<span class="ident">w2</span>, <span class="ident">carry</span>) <span class="op">=</span> <span class="ident">mac</span>(<span class="ident">w2</span>, <span class="self">self</span>.<span class="number">0</span>[<span class="number">2</span>], <span class="ident">rhs</span>.<span class="number">0</span>[<span class="number">0</span>], <span class="number">0</span>);
-        <span class="kw">let</span> (<span class="ident">w3</span>, <span class="ident">carry</span>) <span class="op">=</span> <span class="ident">mac</span>(<span class="ident">w3</span>, <span class="self">self</span>.<span class="number">0</span>[<span class="number">2</span>], <span class="ident">rhs</span>.<span class="number">0</span>[<span class="number">1</span>], <span class="ident">carry</span>);
-        <span class="kw">let</span> (<span class="ident">w4</span>, <span class="ident">carry</span>) <span class="op">=</span> <span class="ident">mac</span>(<span class="ident">w4</span>, <span class="self">self</span>.<span class="number">0</span>[<span class="number">2</span>], <span class="ident">rhs</span>.<span class="number">0</span>[<span class="number">2</span>], <span class="ident">carry</span>);
-        <span class="kw">let</span> (<span class="ident">w5</span>, <span class="ident">w6</span>) <span class="op">=</span> <span class="ident">mac</span>(<span class="ident">w5</span>, <span class="self">self</span>.<span class="number">0</span>[<span class="number">2</span>], <span class="ident">rhs</span>.<span class="number">0</span>[<span class="number">3</span>], <span class="ident">carry</span>);
+        <span class="kw">let </span>(w2, carry) = mac(w2, <span class="self">self</span>.<span class="number">0</span>[<span class="number">2</span>], rhs.<span class="number">0</span>[<span class="number">0</span>], <span class="number">0</span>);
+        <span class="kw">let </span>(w3, carry) = mac(w3, <span class="self">self</span>.<span class="number">0</span>[<span class="number">2</span>], rhs.<span class="number">0</span>[<span class="number">1</span>], carry);
+        <span class="kw">let </span>(w4, carry) = mac(w4, <span class="self">self</span>.<span class="number">0</span>[<span class="number">2</span>], rhs.<span class="number">0</span>[<span class="number">2</span>], carry);
+        <span class="kw">let </span>(w5, w6) = mac(w5, <span class="self">self</span>.<span class="number">0</span>[<span class="number">2</span>], rhs.<span class="number">0</span>[<span class="number">3</span>], carry);
 
-        <span class="kw">let</span> (<span class="ident">w3</span>, <span class="ident">carry</span>) <span class="op">=</span> <span class="ident">mac</span>(<span class="ident">w3</span>, <span class="self">self</span>.<span class="number">0</span>[<span class="number">3</span>], <span class="ident">rhs</span>.<span class="number">0</span>[<span class="number">0</span>], <span class="number">0</span>);
-        <span class="kw">let</span> (<span class="ident">w4</span>, <span class="ident">carry</span>) <span class="op">=</span> <span class="ident">mac</span>(<span class="ident">w4</span>, <span class="self">self</span>.<span class="number">0</span>[<span class="number">3</span>], <span class="ident">rhs</span>.<span class="number">0</span>[<span class="number">1</span>], <span class="ident">carry</span>);
-        <span class="kw">let</span> (<span class="ident">w5</span>, <span class="ident">carry</span>) <span class="op">=</span> <span class="ident">mac</span>(<span class="ident">w5</span>, <span class="self">self</span>.<span class="number">0</span>[<span class="number">3</span>], <span class="ident">rhs</span>.<span class="number">0</span>[<span class="number">2</span>], <span class="ident">carry</span>);
-        <span class="kw">let</span> (<span class="ident">w6</span>, <span class="ident">w7</span>) <span class="op">=</span> <span class="ident">mac</span>(<span class="ident">w6</span>, <span class="self">self</span>.<span class="number">0</span>[<span class="number">3</span>], <span class="ident">rhs</span>.<span class="number">0</span>[<span class="number">3</span>], <span class="ident">carry</span>);
+        <span class="kw">let </span>(w3, carry) = mac(w3, <span class="self">self</span>.<span class="number">0</span>[<span class="number">3</span>], rhs.<span class="number">0</span>[<span class="number">0</span>], <span class="number">0</span>);
+        <span class="kw">let </span>(w4, carry) = mac(w4, <span class="self">self</span>.<span class="number">0</span>[<span class="number">3</span>], rhs.<span class="number">0</span>[<span class="number">1</span>], carry);
+        <span class="kw">let </span>(w5, carry) = mac(w5, <span class="self">self</span>.<span class="number">0</span>[<span class="number">3</span>], rhs.<span class="number">0</span>[<span class="number">2</span>], carry);
+        <span class="kw">let </span>(w6, w7) = mac(w6, <span class="self">self</span>.<span class="number">0</span>[<span class="number">3</span>], rhs.<span class="number">0</span>[<span class="number">3</span>], carry);
 
-        <span class="ident">FieldElement::montgomery_reduce</span>(<span class="ident">w0</span>, <span class="ident">w1</span>, <span class="ident">w2</span>, <span class="ident">w3</span>, <span class="ident">w4</span>, <span class="ident">w5</span>, <span class="ident">w6</span>, <span class="ident">w7</span>)
+        FieldElement::montgomery_reduce(w0, w1, w2, w3, w4, w5, w6, w7)
     }
 
-    <span class="doccomment">/// Returns self * self mod p</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">square</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self</span> {
-        <span class="comment">// Schoolbook multiplication.</span>
-        <span class="self">self</span>.<span class="ident">mul</span>(<span class="self">self</span>)
+    <span class="doccomment">/// Returns self * self mod p
+    </span><span class="kw">pub const fn </span>square(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
+        <span class="comment">// Schoolbook multiplication.
+        </span><span class="self">self</span>.mul(<span class="self">self</span>)
     }
 
-    <span class="doccomment">/// Returns `self^by`, where `by` is a little-endian integer exponent.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// **This operation is variable time with respect to the exponent.** If the exponent</span>
-    <span class="doccomment">/// is fixed, this operation is effectively constant time.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">pow_vartime</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">by</span>: <span class="kw-2">&amp;</span>[<span class="ident">u64</span>; <span class="number">4</span>]) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::one</span>();
-        <span class="kw">for</span> <span class="ident">e</span> <span class="kw">in</span> <span class="ident">by</span>.<span class="ident">iter</span>().<span class="ident">rev</span>() {
-            <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> (<span class="number">0</span>..<span class="number">64</span>).<span class="ident">rev</span>() {
-                <span class="ident">res</span> <span class="op">=</span> <span class="ident">res</span>.<span class="ident">square</span>();
+    <span class="doccomment">/// Returns `self^by`, where `by` is a little-endian integer exponent.
+    ///
+    /// **This operation is variable time with respect to the exponent.** If the exponent
+    /// is fixed, this operation is effectively constant time.
+    </span><span class="kw">pub fn </span>pow_vartime(<span class="kw-2">&amp;</span><span class="self">self</span>, by: <span class="kw-2">&amp;</span>[u64; <span class="number">4</span>]) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span><span class="kw-2">mut </span>res = <span class="self">Self</span>::one();
+        <span class="kw">for </span>e <span class="kw">in </span>by.iter().rev() {
+            <span class="kw">for </span>i <span class="kw">in </span>(<span class="number">0</span>..<span class="number">64</span>).rev() {
+                res = res.square();
 
-                <span class="kw">if</span> ((<span class="kw-2">*</span><span class="ident">e</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">i</span>) <span class="op">&amp;</span> <span class="number">1</span>) <span class="op">==</span> <span class="number">1</span> {
-                    <span class="ident">res</span> <span class="op">=</span> <span class="ident">res</span> <span class="op">*</span> <span class="self">self</span>;
+                <span class="kw">if </span>((<span class="kw-2">*</span>e &gt;&gt; i) &amp; <span class="number">1</span>) == <span class="number">1 </span>{
+                    res = res * <span class="self">self</span>;
                 }
             }
         }
-        <span class="ident">res</span>
+        res
     }
 
-    <span class="doccomment">/// Returns the multiplicative inverse of self, if self is non-zero.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">invert</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">CtOption</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
-        <span class="comment">// We need to find b such that b * a ≡ 1 mod p. As we are in a prime</span>
-        <span class="comment">// field, we can apply Fermat&#39;s Little Theorem:</span>
-        <span class="comment">//</span>
-        <span class="comment">//    a^p         ≡ a mod p</span>
-        <span class="comment">//    a^(p-1)     ≡ 1 mod p</span>
-        <span class="comment">//    a^(p-2) * a ≡ 1 mod p</span>
-        <span class="comment">//</span>
-        <span class="comment">// Thus inversion can be implemented with a single exponentiation.</span>
-        <span class="kw">let</span> <span class="ident">inverse</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">pow_vartime</span>(<span class="kw-2">&amp;</span>[
+    <span class="doccomment">/// Returns the multiplicative inverse of self, if self is non-zero.
+    </span><span class="kw">pub fn </span>invert(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; CtOption&lt;<span class="self">Self</span>&gt; {
+        <span class="comment">// We need to find b such that b * a ≡ 1 mod p. As we are in a prime
+        // field, we can apply Fermat&#39;s Little Theorem:
+        //
+        //    a^p         ≡ a mod p
+        //    a^(p-1)     ≡ 1 mod p
+        //    a^(p-2) * a ≡ 1 mod p
+        //
+        // Thus inversion can be implemented with a single exponentiation.
+        </span><span class="kw">let </span>inverse = <span class="self">self</span>.pow_vartime(<span class="kw-2">&amp;</span>[
             <span class="number">0xffff_ffff_ffff_fffd</span>,
             <span class="number">0x0000_0000_ffff_ffff</span>,
             <span class="number">0x0000_0000_0000_0000</span>,
             <span class="number">0xffff_ffff_0000_0001</span>,
         ]);
 
-        <span class="ident">CtOption::new</span>(<span class="ident">inverse</span>, <span class="op">!</span><span class="self">self</span>.<span class="ident">is_zero</span>())
+        CtOption::new(inverse, !<span class="self">self</span>.is_zero())
     }
 
-    <span class="doccomment">/// Returns the square root of self mod p, or `None` if no square root exists.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">sqrt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">CtOption</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
-        <span class="comment">// We need to find alpha such that alpha^2 = beta mod p. For secp256r1,</span>
-        <span class="comment">// p ≡ 3 mod 4. By Euler&#39;s Criterion, beta^(p-1)/2 ≡ 1 mod p. So:</span>
-        <span class="comment">//</span>
-        <span class="comment">//     alpha^2 = beta beta^((p - 1) / 2) mod p ≡ beta^((p + 1) / 2) mod p</span>
-        <span class="comment">//     alpha = ± beta^((p + 1) / 4) mod p</span>
-        <span class="comment">//</span>
-        <span class="comment">// Thus sqrt can be implemented with a single exponentiation.</span>
+    <span class="doccomment">/// Returns the square root of self mod p, or `None` if no square root exists.
+    </span><span class="kw">pub fn </span>sqrt(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; CtOption&lt;<span class="self">Self</span>&gt; {
+        <span class="comment">// We need to find alpha such that alpha^2 = beta mod p. For secp256r1,
+        // p ≡ 3 mod 4. By Euler&#39;s Criterion, beta^(p-1)/2 ≡ 1 mod p. So:
+        //
+        //     alpha^2 = beta beta^((p - 1) / 2) mod p ≡ beta^((p + 1) / 2) mod p
+        //     alpha = ± beta^((p + 1) / 4) mod p
+        //
+        // Thus sqrt can be implemented with a single exponentiation.
 
-        <span class="kw">let</span> <span class="ident">sqrt</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">pow_vartime</span>(<span class="kw-2">&amp;</span>[
+        </span><span class="kw">let </span>sqrt = <span class="self">self</span>.pow_vartime(<span class="kw-2">&amp;</span>[
             <span class="number">0x0000_0000_0000_0000</span>,
             <span class="number">0x0000_0000_4000_0000</span>,
             <span class="number">0x4000_0000_0000_0000</span>,
             <span class="number">0x3fff_ffff_c000_0000</span>,
         ]);
 
-        <span class="ident">CtOption::new</span>(
-            <span class="ident">sqrt</span>,
-            (<span class="kw-2">&amp;</span><span class="ident">sqrt</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">sqrt</span>).<span class="ident">ct_eq</span>(<span class="self">self</span>), <span class="comment">// Only return Some if it&#39;s the square root.</span>
-        )
+        CtOption::new(
+            sqrt,
+            (<span class="kw-2">&amp;</span>sqrt * <span class="kw-2">&amp;</span>sqrt).ct_eq(<span class="self">self</span>), <span class="comment">// Only return Some if it&#39;s the square root.
+        </span>)
     }
 }
 
-<span class="kw">impl</span> <span class="ident">Add</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">FieldElement</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="ident">FieldElement</span> {
-    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">FieldElement</span>;
+<span class="kw">impl </span>Add&lt;<span class="kw-2">&amp;</span>FieldElement&gt; <span class="kw">for </span><span class="kw-2">&amp;</span>FieldElement {
+    <span class="kw">type </span>Output = FieldElement;
 
-    <span class="kw">fn</span> <span class="ident">add</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="ident">FieldElement</span>) -&gt; <span class="ident">FieldElement</span> {
-        <span class="ident">FieldElement::add</span>(<span class="self">self</span>, <span class="ident">other</span>)
+    <span class="kw">fn </span>add(<span class="self">self</span>, other: <span class="kw-2">&amp;</span>FieldElement) -&gt; FieldElement {
+        FieldElement::add(<span class="self">self</span>, other)
     }
 }
 
-<span class="kw">impl</span> <span class="ident">Add</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">FieldElement</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">FieldElement</span> {
-    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">FieldElement</span>;
+<span class="kw">impl </span>Add&lt;<span class="kw-2">&amp;</span>FieldElement&gt; <span class="kw">for </span>FieldElement {
+    <span class="kw">type </span>Output = FieldElement;
 
-    <span class="kw">fn</span> <span class="ident">add</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="ident">FieldElement</span>) -&gt; <span class="ident">FieldElement</span> {
-        <span class="ident">FieldElement::add</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>)
+    <span class="kw">fn </span>add(<span class="self">self</span>, other: <span class="kw-2">&amp;</span>FieldElement) -&gt; FieldElement {
+        FieldElement::add(<span class="kw-2">&amp;</span><span class="self">self</span>, other)
     }
 }
 
-<span class="kw">impl</span> <span class="ident">AddAssign</span><span class="op">&lt;</span><span class="ident">FieldElement</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">FieldElement</span> {
-    <span class="kw">fn</span> <span class="ident">add_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">rhs</span>: <span class="ident">FieldElement</span>) {
-        <span class="kw-2">*</span><span class="self">self</span> <span class="op">=</span> <span class="ident">FieldElement::add</span>(<span class="self">self</span>, <span class="kw-2">&amp;</span><span class="ident">rhs</span>);
+<span class="kw">impl </span>AddAssign&lt;FieldElement&gt; <span class="kw">for </span>FieldElement {
+    <span class="kw">fn </span>add_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, rhs: FieldElement) {
+        <span class="kw-2">*</span><span class="self">self </span>= FieldElement::add(<span class="self">self</span>, <span class="kw-2">&amp;</span>rhs);
     }
 }
 
-<span class="kw">impl</span> <span class="ident">Sub</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">FieldElement</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="ident">FieldElement</span> {
-    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">FieldElement</span>;
+<span class="kw">impl </span>Sub&lt;<span class="kw-2">&amp;</span>FieldElement&gt; <span class="kw">for </span><span class="kw-2">&amp;</span>FieldElement {
+    <span class="kw">type </span>Output = FieldElement;
 
-    <span class="kw">fn</span> <span class="ident">sub</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="ident">FieldElement</span>) -&gt; <span class="ident">FieldElement</span> {
-        <span class="ident">FieldElement::subtract</span>(<span class="self">self</span>, <span class="ident">other</span>)
+    <span class="kw">fn </span>sub(<span class="self">self</span>, other: <span class="kw-2">&amp;</span>FieldElement) -&gt; FieldElement {
+        FieldElement::subtract(<span class="self">self</span>, other)
     }
 }
 
-<span class="kw">impl</span> <span class="ident">Sub</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">FieldElement</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">FieldElement</span> {
-    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">FieldElement</span>;
+<span class="kw">impl </span>Sub&lt;<span class="kw-2">&amp;</span>FieldElement&gt; <span class="kw">for </span>FieldElement {
+    <span class="kw">type </span>Output = FieldElement;
 
-    <span class="kw">fn</span> <span class="ident">sub</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="ident">FieldElement</span>) -&gt; <span class="ident">FieldElement</span> {
-        <span class="ident">FieldElement::subtract</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>)
+    <span class="kw">fn </span>sub(<span class="self">self</span>, other: <span class="kw-2">&amp;</span>FieldElement) -&gt; FieldElement {
+        FieldElement::subtract(<span class="kw-2">&amp;</span><span class="self">self</span>, other)
     }
 }
 
-<span class="kw">impl</span> <span class="ident">SubAssign</span><span class="op">&lt;</span><span class="ident">FieldElement</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">FieldElement</span> {
-    <span class="kw">fn</span> <span class="ident">sub_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">rhs</span>: <span class="ident">FieldElement</span>) {
-        <span class="kw-2">*</span><span class="self">self</span> <span class="op">=</span> <span class="ident">FieldElement::subtract</span>(<span class="self">self</span>, <span class="kw-2">&amp;</span><span class="ident">rhs</span>);
+<span class="kw">impl </span>SubAssign&lt;FieldElement&gt; <span class="kw">for </span>FieldElement {
+    <span class="kw">fn </span>sub_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, rhs: FieldElement) {
+        <span class="kw-2">*</span><span class="self">self </span>= FieldElement::subtract(<span class="self">self</span>, <span class="kw-2">&amp;</span>rhs);
     }
 }
 
-<span class="kw">impl</span> <span class="ident">Mul</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">FieldElement</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="ident">FieldElement</span> {
-    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">FieldElement</span>;
+<span class="kw">impl </span>Mul&lt;<span class="kw-2">&amp;</span>FieldElement&gt; <span class="kw">for </span><span class="kw-2">&amp;</span>FieldElement {
+    <span class="kw">type </span>Output = FieldElement;
 
-    <span class="kw">fn</span> <span class="ident">mul</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="ident">FieldElement</span>) -&gt; <span class="ident">FieldElement</span> {
-        <span class="ident">FieldElement::mul</span>(<span class="self">self</span>, <span class="ident">other</span>)
+    <span class="kw">fn </span>mul(<span class="self">self</span>, other: <span class="kw-2">&amp;</span>FieldElement) -&gt; FieldElement {
+        FieldElement::mul(<span class="self">self</span>, other)
     }
 }
 
-<span class="kw">impl</span> <span class="ident">Mul</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">FieldElement</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">FieldElement</span> {
-    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">FieldElement</span>;
+<span class="kw">impl </span>Mul&lt;<span class="kw-2">&amp;</span>FieldElement&gt; <span class="kw">for </span>FieldElement {
+    <span class="kw">type </span>Output = FieldElement;
 
-    <span class="kw">fn</span> <span class="ident">mul</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="ident">FieldElement</span>) -&gt; <span class="ident">FieldElement</span> {
-        <span class="ident">FieldElement::mul</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>)
+    <span class="kw">fn </span>mul(<span class="self">self</span>, other: <span class="kw-2">&amp;</span>FieldElement) -&gt; FieldElement {
+        FieldElement::mul(<span class="kw-2">&amp;</span><span class="self">self</span>, other)
     }
 }
 
-<span class="kw">impl</span> <span class="ident">MulAssign</span><span class="op">&lt;</span><span class="ident">FieldElement</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">FieldElement</span> {
-    <span class="kw">fn</span> <span class="ident">mul_assign</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">rhs</span>: <span class="ident">FieldElement</span>) {
-        <span class="kw-2">*</span><span class="self">self</span> <span class="op">=</span> <span class="ident">FieldElement::mul</span>(<span class="self">self</span>, <span class="kw-2">&amp;</span><span class="ident">rhs</span>);
+<span class="kw">impl </span>MulAssign&lt;FieldElement&gt; <span class="kw">for </span>FieldElement {
+    <span class="kw">fn </span>mul_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, rhs: FieldElement) {
+        <span class="kw-2">*</span><span class="self">self </span>= FieldElement::mul(<span class="self">self</span>, <span class="kw-2">&amp;</span>rhs);
     }
 }
 
-<span class="kw">impl</span> <span class="ident">Neg</span> <span class="kw">for</span> <span class="ident">FieldElement</span> {
-    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">FieldElement</span>;
+<span class="kw">impl </span>Neg <span class="kw">for </span>FieldElement {
+    <span class="kw">type </span>Output = FieldElement;
 
-    <span class="kw">fn</span> <span class="ident">neg</span>(<span class="self">self</span>) -&gt; <span class="ident">FieldElement</span> {
-        <span class="ident">FieldElement::zero</span>() <span class="op">-</span> <span class="kw-2">&amp;</span><span class="self">self</span>
+    <span class="kw">fn </span>neg(<span class="self">self</span>) -&gt; FieldElement {
+        FieldElement::zero() - <span class="kw-2">&amp;</span><span class="self">self
+    </span>}
+}
+
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Neg <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>FieldElement {
+    <span class="kw">type </span>Output = FieldElement;
+
+    <span class="kw">fn </span>neg(<span class="self">self</span>) -&gt; FieldElement {
+        FieldElement::zero() - <span class="self">self
+    </span>}
+}
+
+<span class="attribute">#[cfg(feature = <span class="string">&quot;zeroize&quot;</span>)]
+</span><span class="kw">impl </span>Zeroize <span class="kw">for </span>FieldElement {
+    <span class="kw">fn </span>zeroize(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="self">self</span>.<span class="number">0</span>.zeroize();
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Neg</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">FieldElement</span> {
-    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">FieldElement</span>;
+<span class="attribute">#[cfg(test)]
+</span><span class="kw">mod </span>tests {
+    <span class="kw">use </span><span class="kw">super</span>::FieldElement;
+    <span class="kw">use crate</span>::{test_vectors::field::DBL_TEST_VECTORS, FieldBytes};
+    <span class="kw">use </span>proptest::{num::u64::ANY, prelude::<span class="kw-2">*</span>};
 
-    <span class="kw">fn</span> <span class="ident">neg</span>(<span class="self">self</span>) -&gt; <span class="ident">FieldElement</span> {
-        <span class="ident">FieldElement::zero</span>() <span class="op">-</span> <span class="self">self</span>
-    }
-}
-
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;zeroize&quot;</span>)]</span>
-<span class="kw">impl</span> <span class="ident">Zeroize</span> <span class="kw">for</span> <span class="ident">FieldElement</span> {
-    <span class="kw">fn</span> <span class="ident">zeroize</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
-        <span class="self">self</span>.<span class="number">0</span>.<span class="ident">zeroize</span>();
-    }
-}
-
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
-<span class="kw">mod</span> <span class="ident">tests</span> {
-    <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::FieldElement</span>;
-    <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">test_vectors::field::DBL_TEST_VECTORS</span>, <span class="ident">FieldBytes</span>};
-    <span class="kw">use</span> <span class="ident">proptest</span>::{<span class="ident">num::u64::ANY</span>, <span class="ident">prelude</span>::<span class="kw-2">*</span>};
-
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">zero_is_additive_identity</span>() {
-        <span class="kw">let</span> <span class="ident">zero</span> <span class="op">=</span> <span class="ident">FieldElement::zero</span>();
-        <span class="kw">let</span> <span class="ident">one</span> <span class="op">=</span> <span class="ident">FieldElement::one</span>();
-        <span class="macro">assert_eq!</span>(<span class="ident">zero</span>.<span class="ident">add</span>(<span class="kw-2">&amp;</span><span class="ident">zero</span>), <span class="ident">zero</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">one</span>.<span class="ident">add</span>(<span class="kw-2">&amp;</span><span class="ident">zero</span>), <span class="ident">one</span>);
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>zero_is_additive_identity() {
+        <span class="kw">let </span>zero = FieldElement::zero();
+        <span class="kw">let </span>one = FieldElement::one();
+        <span class="macro">assert_eq!</span>(zero.add(<span class="kw-2">&amp;</span>zero), zero);
+        <span class="macro">assert_eq!</span>(one.add(<span class="kw-2">&amp;</span>zero), one);
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">one_is_multiplicative_identity</span>() {
-        <span class="kw">let</span> <span class="ident">one</span> <span class="op">=</span> <span class="ident">FieldElement::one</span>();
-        <span class="macro">assert_eq!</span>(<span class="ident">one</span>.<span class="ident">mul</span>(<span class="kw-2">&amp;</span><span class="ident">one</span>), <span class="ident">one</span>);
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>one_is_multiplicative_identity() {
+        <span class="kw">let </span>one = FieldElement::one();
+        <span class="macro">assert_eq!</span>(one.mul(<span class="kw-2">&amp;</span>one), one);
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">from_bytes</span>() {
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>from_bytes() {
         <span class="macro">assert_eq!</span>(
-            <span class="ident">FieldElement::from_bytes</span>(<span class="kw-2">&amp;</span><span class="ident">FieldBytes::default</span>()).<span class="ident">unwrap</span>(),
-            <span class="ident">FieldElement::zero</span>()
+            FieldElement::from_bytes(<span class="kw-2">&amp;</span>FieldBytes::default()).unwrap(),
+            FieldElement::zero()
         );
         <span class="macro">assert_eq!</span>(
-            <span class="ident">FieldElement::from_bytes</span>(
+            FieldElement::from_bytes(
                 <span class="kw-2">&amp;</span>[
                     <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,
-                    <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>
-                ]
-                .<span class="ident">into</span>()
+                    <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">1
+                </span>]
+                .into()
             )
-            .<span class="ident">unwrap</span>(),
-            <span class="ident">FieldElement::one</span>()
+            .unwrap(),
+            FieldElement::one()
         );
-        <span class="macro">assert!</span>(<span class="ident">bool::from</span>(
-            <span class="ident">FieldElement::from_bytes</span>(<span class="kw-2">&amp;</span>[<span class="number">0xff</span>; <span class="number">32</span>].<span class="ident">into</span>()).<span class="ident">is_none</span>()
+        <span class="macro">assert!</span>(bool::from(
+            FieldElement::from_bytes(<span class="kw-2">&amp;</span>[<span class="number">0xff</span>; <span class="number">32</span>].into()).is_none()
         ));
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">to_bytes</span>() {
-        <span class="macro">assert_eq!</span>(<span class="ident">FieldElement::zero</span>().<span class="ident">to_bytes</span>(), <span class="ident">FieldBytes::default</span>());
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>to_bytes() {
+        <span class="macro">assert_eq!</span>(FieldElement::zero().to_bytes(), FieldBytes::default());
         <span class="macro">assert_eq!</span>(
-            <span class="ident">FieldElement::one</span>().<span class="ident">to_bytes</span>(),
+            FieldElement::one().to_bytes(),
             [
                 <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,
-                <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>
-            ]
-            .<span class="ident">into</span>()
+                <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">1
+            </span>]
+            .into()
         );
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">repeated_add</span>() {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">r</span> <span class="op">=</span> <span class="ident">FieldElement::one</span>();
-        <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">DBL_TEST_VECTORS</span>.<span class="ident">len</span>() {
-            <span class="macro">assert_eq!</span>(<span class="ident">r</span>.<span class="ident">to_bytes</span>(), <span class="ident">DBL_TEST_VECTORS</span>[<span class="ident">i</span>].<span class="ident">into</span>());
-            <span class="ident">r</span> <span class="op">=</span> <span class="ident">r</span> <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">r</span>;
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>repeated_add() {
+        <span class="kw">let </span><span class="kw-2">mut </span>r = FieldElement::one();
+        <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..DBL_TEST_VECTORS.len() {
+            <span class="macro">assert_eq!</span>(r.to_bytes(), DBL_TEST_VECTORS[i].into());
+            r = r + <span class="kw-2">&amp;</span>r;
         }
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">repeated_double</span>() {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">r</span> <span class="op">=</span> <span class="ident">FieldElement::one</span>();
-        <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">DBL_TEST_VECTORS</span>.<span class="ident">len</span>() {
-            <span class="macro">assert_eq!</span>(<span class="ident">r</span>.<span class="ident">to_bytes</span>(), <span class="ident">DBL_TEST_VECTORS</span>[<span class="ident">i</span>].<span class="ident">into</span>());
-            <span class="ident">r</span> <span class="op">=</span> <span class="ident">r</span>.<span class="ident">double</span>();
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>repeated_double() {
+        <span class="kw">let </span><span class="kw-2">mut </span>r = FieldElement::one();
+        <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..DBL_TEST_VECTORS.len() {
+            <span class="macro">assert_eq!</span>(r.to_bytes(), DBL_TEST_VECTORS[i].into());
+            r = r.double();
         }
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">repeated_mul</span>() {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">r</span> <span class="op">=</span> <span class="ident">FieldElement::one</span>();
-        <span class="kw">let</span> <span class="ident">two</span> <span class="op">=</span> <span class="ident">r</span> <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">r</span>;
-        <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">DBL_TEST_VECTORS</span>.<span class="ident">len</span>() {
-            <span class="macro">assert_eq!</span>(<span class="ident">r</span>.<span class="ident">to_bytes</span>(), <span class="ident">DBL_TEST_VECTORS</span>[<span class="ident">i</span>].<span class="ident">into</span>());
-            <span class="ident">r</span> <span class="op">=</span> <span class="ident">r</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">two</span>;
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>repeated_mul() {
+        <span class="kw">let </span><span class="kw-2">mut </span>r = FieldElement::one();
+        <span class="kw">let </span>two = r + <span class="kw-2">&amp;</span>r;
+        <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..DBL_TEST_VECTORS.len() {
+            <span class="macro">assert_eq!</span>(r.to_bytes(), DBL_TEST_VECTORS[i].into());
+            r = r * <span class="kw-2">&amp;</span>two;
         }
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">negation</span>() {
-        <span class="kw">let</span> <span class="ident">two</span> <span class="op">=</span> <span class="ident">FieldElement::one</span>().<span class="ident">double</span>();
-        <span class="kw">let</span> <span class="ident">neg_two</span> <span class="op">=</span> <span class="op">-</span><span class="ident">two</span>;
-        <span class="macro">assert_eq!</span>(<span class="ident">two</span> <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">neg_two</span>, <span class="ident">FieldElement::zero</span>());
-        <span class="macro">assert_eq!</span>(<span class="op">-</span><span class="ident">neg_two</span>, <span class="ident">two</span>);
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>negation() {
+        <span class="kw">let </span>two = FieldElement::one().double();
+        <span class="kw">let </span>neg_two = -two;
+        <span class="macro">assert_eq!</span>(two + <span class="kw-2">&amp;</span>neg_two, FieldElement::zero());
+        <span class="macro">assert_eq!</span>(-neg_two, two);
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">pow_vartime</span>() {
-        <span class="kw">let</span> <span class="ident">one</span> <span class="op">=</span> <span class="ident">FieldElement::one</span>();
-        <span class="kw">let</span> <span class="ident">two</span> <span class="op">=</span> <span class="ident">one</span> <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">one</span>;
-        <span class="kw">let</span> <span class="ident">four</span> <span class="op">=</span> <span class="ident">two</span>.<span class="ident">square</span>();
-        <span class="macro">assert_eq!</span>(<span class="ident">two</span>.<span class="ident">pow_vartime</span>(<span class="kw-2">&amp;</span>[<span class="number">2</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>]), <span class="ident">four</span>);
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>pow_vartime() {
+        <span class="kw">let </span>one = FieldElement::one();
+        <span class="kw">let </span>two = one + <span class="kw-2">&amp;</span>one;
+        <span class="kw">let </span>four = two.square();
+        <span class="macro">assert_eq!</span>(two.pow_vartime(<span class="kw-2">&amp;</span>[<span class="number">2</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>]), four);
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">invert</span>() {
-        <span class="macro">assert!</span>(<span class="ident">bool::from</span>(<span class="ident">FieldElement::zero</span>().<span class="ident">invert</span>().<span class="ident">is_none</span>()));
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>invert() {
+        <span class="macro">assert!</span>(bool::from(FieldElement::zero().invert().is_none()));
 
-        <span class="kw">let</span> <span class="ident">one</span> <span class="op">=</span> <span class="ident">FieldElement::one</span>();
-        <span class="macro">assert_eq!</span>(<span class="ident">one</span>.<span class="ident">invert</span>().<span class="ident">unwrap</span>(), <span class="ident">one</span>);
+        <span class="kw">let </span>one = FieldElement::one();
+        <span class="macro">assert_eq!</span>(one.invert().unwrap(), one);
 
-        <span class="kw">let</span> <span class="ident">two</span> <span class="op">=</span> <span class="ident">one</span> <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">one</span>;
-        <span class="kw">let</span> <span class="ident">inv_two</span> <span class="op">=</span> <span class="ident">two</span>.<span class="ident">invert</span>().<span class="ident">unwrap</span>();
-        <span class="macro">assert_eq!</span>(<span class="ident">two</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">inv_two</span>, <span class="ident">one</span>);
+        <span class="kw">let </span>two = one + <span class="kw-2">&amp;</span>one;
+        <span class="kw">let </span>inv_two = two.invert().unwrap();
+        <span class="macro">assert_eq!</span>(two * <span class="kw-2">&amp;</span>inv_two, one);
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">sqrt</span>() {
-        <span class="kw">let</span> <span class="ident">one</span> <span class="op">=</span> <span class="ident">FieldElement::one</span>();
-        <span class="kw">let</span> <span class="ident">two</span> <span class="op">=</span> <span class="ident">one</span> <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">one</span>;
-        <span class="kw">let</span> <span class="ident">four</span> <span class="op">=</span> <span class="ident">two</span>.<span class="ident">square</span>();
-        <span class="macro">assert_eq!</span>(<span class="ident">four</span>.<span class="ident">sqrt</span>().<span class="ident">unwrap</span>(), <span class="ident">two</span>);
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>sqrt() {
+        <span class="kw">let </span>one = FieldElement::one();
+        <span class="kw">let </span>two = one + <span class="kw-2">&amp;</span>one;
+        <span class="kw">let </span>four = two.square();
+        <span class="macro">assert_eq!</span>(four.sqrt().unwrap(), two);
     }
 
-    <span class="macro">proptest!</span> {
-        <span class="doccomment">/// This checks behaviour well within the field ranges, because it doesn&#39;t set the</span>
-        <span class="doccomment">/// highest limb.</span>
-        <span class="attribute">#[<span class="ident">test</span>]</span>
-        <span class="kw">fn</span> <span class="ident">add_then_sub</span>(
-            <span class="ident">a0</span> <span class="kw">in</span> <span class="ident">ANY</span>,
-            <span class="ident">a1</span> <span class="kw">in</span> <span class="ident">ANY</span>,
-            <span class="ident">a2</span> <span class="kw">in</span> <span class="ident">ANY</span>,
-            <span class="ident">b0</span> <span class="kw">in</span> <span class="ident">ANY</span>,
-            <span class="ident">b1</span> <span class="kw">in</span> <span class="ident">ANY</span>,
-            <span class="ident">b2</span> <span class="kw">in</span> <span class="ident">ANY</span>,
+    <span class="macro">proptest! </span>{
+        <span class="doccomment">/// This checks behaviour well within the field ranges, because it doesn&#39;t set the
+        /// highest limb.
+        </span><span class="attribute">#[test]
+        </span><span class="kw">fn </span>add_then_sub(
+            a0 <span class="kw">in </span>ANY,
+            a1 <span class="kw">in </span>ANY,
+            a2 <span class="kw">in </span>ANY,
+            b0 <span class="kw">in </span>ANY,
+            b1 <span class="kw">in </span>ANY,
+            b2 <span class="kw">in </span>ANY,
         ) {
-            <span class="kw">let</span> <span class="ident">a</span> <span class="op">=</span> <span class="ident">FieldElement</span>([<span class="ident">a0</span>, <span class="ident">a1</span>, <span class="ident">a2</span>, <span class="number">0</span>]);
-            <span class="kw">let</span> <span class="ident">b</span> <span class="op">=</span> <span class="ident">FieldElement</span>([<span class="ident">b0</span>, <span class="ident">b1</span>, <span class="ident">b2</span>, <span class="number">0</span>]);
-            <span class="macro">assert_eq!</span>(<span class="ident">a</span>.<span class="ident">add</span>(<span class="kw-2">&amp;</span><span class="ident">b</span>).<span class="ident">subtract</span>(<span class="kw-2">&amp;</span><span class="ident">a</span>), <span class="ident">b</span>);
+            <span class="kw">let </span>a = FieldElement([a0, a1, a2, <span class="number">0</span>]);
+            <span class="kw">let </span>b = FieldElement([b0, b1, b2, <span class="number">0</span>]);
+            <span class="macro">assert_eq!</span>(a.add(<span class="kw-2">&amp;</span>b).subtract(<span class="kw-2">&amp;</span>a), b);
         }
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="p256" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="p256" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

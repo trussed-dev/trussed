@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/crypto-bigint-0.2.11/src/limb/cmp.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>cmp.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="icon" href="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../crypto_bigint/index.html"><div class="logo-container"><img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../crypto_bigint/index.html"><div class="logo-container">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/crypto-bigint-0.2.11/src/limb/cmp.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>cmp.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="icon" href="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../crypto_bigint/index.html"><div class="logo-container"><img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../crypto_bigint/index.html"><div class="logo-container">
                     <img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../crypto_bigint/index.html">
                         <img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
@@ -182,187 +182,187 @@
 <span id="180">180</span>
 <span id="181">181</span>
 <span id="182">182</span>
-</pre><pre class="rust"><code><span class="doccomment">//! Limb comparisons</span>
+</pre><pre class="rust"><code><span class="doccomment">//! Limb comparisons
 
-<span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">Inner</span>, <span class="ident">Limb</span>, <span class="ident">SignedInner</span>, <span class="ident">SignedWide</span>, <span class="ident">BIT_SIZE</span>, <span class="ident">HI_BIT</span>};
-<span class="kw">use</span> <span class="ident">core::cmp::Ordering</span>;
-<span class="kw">use</span> <span class="ident">subtle</span>::{<span class="ident">Choice</span>, <span class="ident">ConstantTimeEq</span>, <span class="ident">ConstantTimeGreater</span>, <span class="ident">ConstantTimeLess</span>};
+</span><span class="kw">use super</span>::{Inner, Limb, SignedInner, SignedWide, BIT_SIZE, HI_BIT};
+<span class="kw">use </span>core::cmp::Ordering;
+<span class="kw">use </span>subtle::{Choice, ConstantTimeEq, ConstantTimeGreater, ConstantTimeLess};
 
-<span class="kw">impl</span> <span class="ident">Limb</span> {
-    <span class="doccomment">/// Is this limb equal to zero?</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_zero</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Choice</span> {
-        <span class="self">self</span>.<span class="ident">ct_eq</span>(<span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::ZERO</span>)
+<span class="kw">impl </span>Limb {
+    <span class="doccomment">/// Is this limb equal to zero?
+    </span><span class="attribute">#[inline]
+    </span><span class="kw">pub fn </span>is_zero(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Choice {
+        <span class="self">self</span>.ct_eq(<span class="kw-2">&amp;</span><span class="self">Self</span>::ZERO)
     }
 
-    <span class="doccomment">/// Is this limb an odd number?</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_odd</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Choice</span> {
-        <span class="ident">Choice::from</span>(<span class="self">self</span>.<span class="number">0</span> <span class="kw">as</span> <span class="ident">u8</span> <span class="op">&amp;</span> <span class="number">1</span>)
+    <span class="doccomment">/// Is this limb an odd number?
+    </span><span class="attribute">#[inline]
+    </span><span class="kw">pub fn </span>is_odd(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Choice {
+        Choice::from(<span class="self">self</span>.<span class="number">0 </span><span class="kw">as </span>u8 &amp; <span class="number">1</span>)
     }
 
-    <span class="doccomment">/// Perform a comparison of the inner value in variable-time.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// Note that the [`PartialOrd`] and [`Ord`] impls wrap constant-time</span>
-    <span class="doccomment">/// comparisons using the `subtle` crate.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">cmp_vartime</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="ident">Ordering</span> {
-        <span class="self">self</span>.<span class="number">0</span>.<span class="ident">cmp</span>(<span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="number">0</span>)
+    <span class="doccomment">/// Perform a comparison of the inner value in variable-time.
+    ///
+    /// Note that the [`PartialOrd`] and [`Ord`] impls wrap constant-time
+    /// comparisons using the `subtle` crate.
+    </span><span class="kw">pub fn </span>cmp_vartime(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; Ordering {
+        <span class="self">self</span>.<span class="number">0</span>.cmp(<span class="kw-2">&amp;</span>other.<span class="number">0</span>)
     }
 
-    <span class="doccomment">/// Performs an equality check in variable-time.</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">eq_vartime</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="ident">bool</span> {
-        <span class="self">self</span>.<span class="number">0</span> <span class="op">==</span> <span class="ident">other</span>.<span class="number">0</span>
+    <span class="doccomment">/// Performs an equality check in variable-time.
+    </span><span class="kw">pub const fn </span>eq_vartime(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; bool {
+        <span class="self">self</span>.<span class="number">0 </span>== other.<span class="number">0
+    </span>}
+
+    <span class="doccomment">/// Returns all 1&#39;s if `a`!=0 or 0 if `a`==0.
+    ///
+    /// Const-friendly: we can&#39;t yet use `subtle` in `const fn` contexts.
+    </span><span class="attribute">#[inline]
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const fn </span>is_nonzero(<span class="self">self</span>) -&gt; Inner {
+        <span class="kw">let </span>inner = <span class="self">self</span>.<span class="number">0 </span><span class="kw">as </span>SignedInner;
+        ((inner | inner.saturating_neg()) &gt;&gt; HI_BIT) <span class="kw">as </span>Inner
     }
 
-    <span class="doccomment">/// Returns all 1&#39;s if `a`!=0 or 0 if `a`==0.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// Const-friendly: we can&#39;t yet use `subtle` in `const fn` contexts.</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">is_nonzero</span>(<span class="self">self</span>) -&gt; <span class="ident">Inner</span> {
-        <span class="kw">let</span> <span class="ident">inner</span> <span class="op">=</span> <span class="self">self</span>.<span class="number">0</span> <span class="kw">as</span> <span class="ident">SignedInner</span>;
-        ((<span class="ident">inner</span> <span class="op">|</span> <span class="ident">inner</span>.<span class="ident">saturating_neg</span>()) <span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">HI_BIT</span>) <span class="kw">as</span> <span class="ident">Inner</span>
-    }
-
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">ct_cmp</span>(<span class="ident">lhs</span>: <span class="self">Self</span>, <span class="ident">rhs</span>: <span class="self">Self</span>) -&gt; <span class="ident">SignedInner</span> {
-        <span class="kw">let</span> <span class="ident">a</span> <span class="op">=</span> <span class="ident">lhs</span>.<span class="number">0</span> <span class="kw">as</span> <span class="ident">SignedWide</span>;
-        <span class="kw">let</span> <span class="ident">b</span> <span class="op">=</span> <span class="ident">rhs</span>.<span class="number">0</span> <span class="kw">as</span> <span class="ident">SignedWide</span>;
-        <span class="kw">let</span> <span class="ident">gt</span> <span class="op">=</span> ((<span class="ident">b</span> <span class="op">-</span> <span class="ident">a</span>) <span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">BIT_SIZE</span>) <span class="op">&amp;</span> <span class="number">1</span>;
-        <span class="kw">let</span> <span class="ident">lt</span> <span class="op">=</span> ((<span class="ident">a</span> <span class="op">-</span> <span class="ident">b</span>) <span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">BIT_SIZE</span>) <span class="op">&amp;</span> <span class="number">1</span> <span class="op">&amp;</span> <span class="op">!</span><span class="ident">gt</span>;
-        (<span class="ident">gt</span> <span class="kw">as</span> <span class="ident">SignedInner</span>) <span class="op">-</span> (<span class="ident">lt</span> <span class="kw">as</span> <span class="ident">SignedInner</span>)
-    }
-}
-
-<span class="kw">impl</span> <span class="ident">ConstantTimeEq</span> <span class="kw">for</span> <span class="ident">Limb</span> {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">ct_eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="ident">Choice</span> {
-        <span class="self">self</span>.<span class="number">0</span>.<span class="ident">ct_eq</span>(<span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="number">0</span>)
+    <span class="attribute">#[inline]
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const fn </span>ct_cmp(lhs: <span class="self">Self</span>, rhs: <span class="self">Self</span>) -&gt; SignedInner {
+        <span class="kw">let </span>a = lhs.<span class="number">0 </span><span class="kw">as </span>SignedWide;
+        <span class="kw">let </span>b = rhs.<span class="number">0 </span><span class="kw">as </span>SignedWide;
+        <span class="kw">let </span>gt = ((b - a) &gt;&gt; BIT_SIZE) &amp; <span class="number">1</span>;
+        <span class="kw">let </span>lt = ((a - b) &gt;&gt; BIT_SIZE) &amp; <span class="number">1 </span>&amp; !gt;
+        (gt <span class="kw">as </span>SignedInner) - (lt <span class="kw">as </span>SignedInner)
     }
 }
 
-<span class="kw">impl</span> <span class="ident">ConstantTimeGreater</span> <span class="kw">for</span> <span class="ident">Limb</span> {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">ct_gt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="ident">Choice</span> {
-        <span class="self">self</span>.<span class="number">0</span>.<span class="ident">ct_gt</span>(<span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="number">0</span>)
+<span class="kw">impl </span>ConstantTimeEq <span class="kw">for </span>Limb {
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>ct_eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; Choice {
+        <span class="self">self</span>.<span class="number">0</span>.ct_eq(<span class="kw-2">&amp;</span>other.<span class="number">0</span>)
     }
 }
 
-<span class="kw">impl</span> <span class="ident">ConstantTimeLess</span> <span class="kw">for</span> <span class="ident">Limb</span> {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">ct_lt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="ident">Choice</span> {
-        <span class="self">self</span>.<span class="number">0</span>.<span class="ident">ct_lt</span>(<span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="number">0</span>)
+<span class="kw">impl </span>ConstantTimeGreater <span class="kw">for </span>Limb {
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>ct_gt(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; Choice {
+        <span class="self">self</span>.<span class="number">0</span>.ct_gt(<span class="kw-2">&amp;</span>other.<span class="number">0</span>)
     }
 }
 
-<span class="kw">impl</span> <span class="ident">Eq</span> <span class="kw">for</span> <span class="ident">Limb</span> {}
+<span class="kw">impl </span>ConstantTimeLess <span class="kw">for </span>Limb {
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>ct_lt(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; Choice {
+        <span class="self">self</span>.<span class="number">0</span>.ct_lt(<span class="kw-2">&amp;</span>other.<span class="number">0</span>)
+    }
+}
 
-<span class="kw">impl</span> <span class="ident">Ord</span> <span class="kw">for</span> <span class="ident">Limb</span> {
-    <span class="kw">fn</span> <span class="ident">cmp</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="ident">Ordering</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">n</span> <span class="op">=</span> <span class="number">0i8</span>;
-        <span class="ident">n</span> <span class="op">-</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">ct_lt</span>(<span class="ident">other</span>).<span class="ident">unwrap_u8</span>() <span class="kw">as</span> <span class="ident">i8</span>;
-        <span class="ident">n</span> <span class="op">+</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">ct_gt</span>(<span class="ident">other</span>).<span class="ident">unwrap_u8</span>() <span class="kw">as</span> <span class="ident">i8</span>;
+<span class="kw">impl </span>Eq <span class="kw">for </span>Limb {}
 
-        <span class="kw">match</span> <span class="ident">n</span> {
-            <span class="op">-</span><span class="number">1</span> =&gt; <span class="ident">Ordering::Less</span>,
-            <span class="number">1</span> =&gt; <span class="ident">Ordering::Greater</span>,
-            <span class="kw">_</span> =&gt; {
-                <span class="macro">debug_assert_eq!</span>(<span class="ident">n</span>, <span class="number">0</span>);
-                <span class="macro">debug_assert!</span>(<span class="ident">bool::from</span>(<span class="self">self</span>.<span class="ident">ct_eq</span>(<span class="ident">other</span>)));
-                <span class="ident">Ordering::Equal</span>
+<span class="kw">impl </span>Ord <span class="kw">for </span>Limb {
+    <span class="kw">fn </span>cmp(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; Ordering {
+        <span class="kw">let </span><span class="kw-2">mut </span>n = <span class="number">0i8</span>;
+        n -= <span class="self">self</span>.ct_lt(other).unwrap_u8() <span class="kw">as </span>i8;
+        n += <span class="self">self</span>.ct_gt(other).unwrap_u8() <span class="kw">as </span>i8;
+
+        <span class="kw">match </span>n {
+            -<span class="number">1 </span>=&gt; Ordering::Less,
+            <span class="number">1 </span>=&gt; Ordering::Greater,
+            <span class="kw">_ </span>=&gt; {
+                <span class="macro">debug_assert_eq!</span>(n, <span class="number">0</span>);
+                <span class="macro">debug_assert!</span>(bool::from(<span class="self">self</span>.ct_eq(other)));
+                Ordering::Equal
             }
         }
     }
 }
 
-<span class="kw">impl</span> <span class="ident">PartialOrd</span> <span class="kw">for</span> <span class="ident">Limb</span> {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">partial_cmp</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Ordering</span><span class="op">&gt;</span> {
-        <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">cmp</span>(<span class="ident">other</span>))
+<span class="kw">impl </span>PartialOrd <span class="kw">for </span>Limb {
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>partial_cmp(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;Ordering&gt; {
+        <span class="prelude-val">Some</span>(<span class="self">self</span>.cmp(other))
     }
 }
 
-<span class="kw">impl</span> <span class="ident">PartialEq</span> <span class="kw">for</span> <span class="ident">Limb</span> {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="ident">bool</span> {
-        <span class="self">self</span>.<span class="ident">ct_eq</span>(<span class="ident">other</span>).<span class="ident">into</span>()
+<span class="kw">impl </span>PartialEq <span class="kw">for </span>Limb {
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; bool {
+        <span class="self">self</span>.ct_eq(other).into()
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
-<span class="kw">mod</span> <span class="ident">tests</span> {
-    <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::Limb</span>;
-    <span class="kw">use</span> <span class="ident">core::cmp::Ordering</span>;
-    <span class="kw">use</span> <span class="ident">subtle</span>::{<span class="ident">ConstantTimeEq</span>, <span class="ident">ConstantTimeGreater</span>, <span class="ident">ConstantTimeLess</span>};
+<span class="attribute">#[cfg(test)]
+</span><span class="kw">mod </span>tests {
+    <span class="kw">use </span><span class="kw">crate</span>::Limb;
+    <span class="kw">use </span>core::cmp::Ordering;
+    <span class="kw">use </span>subtle::{ConstantTimeEq, ConstantTimeGreater, ConstantTimeLess};
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">is_zero</span>() {
-        <span class="macro">assert!</span>(<span class="ident">bool::from</span>(<span class="ident">Limb::ZERO</span>.<span class="ident">is_zero</span>()));
-        <span class="macro">assert!</span>(<span class="op">!</span><span class="ident">bool::from</span>(<span class="ident">Limb::ONE</span>.<span class="ident">is_zero</span>()));
-        <span class="macro">assert!</span>(<span class="op">!</span><span class="ident">bool::from</span>(<span class="ident">Limb::MAX</span>.<span class="ident">is_zero</span>()));
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>is_zero() {
+        <span class="macro">assert!</span>(bool::from(Limb::ZERO.is_zero()));
+        <span class="macro">assert!</span>(!bool::from(Limb::ONE.is_zero()));
+        <span class="macro">assert!</span>(!bool::from(Limb::MAX.is_zero()));
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">is_odd</span>() {
-        <span class="macro">assert!</span>(<span class="op">!</span><span class="ident">bool::from</span>(<span class="ident">Limb::ZERO</span>.<span class="ident">is_odd</span>()));
-        <span class="macro">assert!</span>(<span class="ident">bool::from</span>(<span class="ident">Limb::ONE</span>.<span class="ident">is_odd</span>()));
-        <span class="macro">assert!</span>(<span class="ident">bool::from</span>(<span class="ident">Limb::MAX</span>.<span class="ident">is_odd</span>()));
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>is_odd() {
+        <span class="macro">assert!</span>(!bool::from(Limb::ZERO.is_odd()));
+        <span class="macro">assert!</span>(bool::from(Limb::ONE.is_odd()));
+        <span class="macro">assert!</span>(bool::from(Limb::MAX.is_odd()));
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">ct_eq</span>() {
-        <span class="kw">let</span> <span class="ident">a</span> <span class="op">=</span> <span class="ident">Limb::ZERO</span>;
-        <span class="kw">let</span> <span class="ident">b</span> <span class="op">=</span> <span class="ident">Limb::MAX</span>;
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>ct_eq() {
+        <span class="kw">let </span>a = Limb::ZERO;
+        <span class="kw">let </span>b = Limb::MAX;
 
-        <span class="macro">assert!</span>(<span class="ident">bool::from</span>(<span class="ident">a</span>.<span class="ident">ct_eq</span>(<span class="kw-2">&amp;</span><span class="ident">a</span>)));
-        <span class="macro">assert!</span>(<span class="op">!</span><span class="ident">bool::from</span>(<span class="ident">a</span>.<span class="ident">ct_eq</span>(<span class="kw-2">&amp;</span><span class="ident">b</span>)));
-        <span class="macro">assert!</span>(<span class="op">!</span><span class="ident">bool::from</span>(<span class="ident">b</span>.<span class="ident">ct_eq</span>(<span class="kw-2">&amp;</span><span class="ident">a</span>)));
-        <span class="macro">assert!</span>(<span class="ident">bool::from</span>(<span class="ident">b</span>.<span class="ident">ct_eq</span>(<span class="kw-2">&amp;</span><span class="ident">b</span>)));
+        <span class="macro">assert!</span>(bool::from(a.ct_eq(<span class="kw-2">&amp;</span>a)));
+        <span class="macro">assert!</span>(!bool::from(a.ct_eq(<span class="kw-2">&amp;</span>b)));
+        <span class="macro">assert!</span>(!bool::from(b.ct_eq(<span class="kw-2">&amp;</span>a)));
+        <span class="macro">assert!</span>(bool::from(b.ct_eq(<span class="kw-2">&amp;</span>b)));
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">ct_gt</span>() {
-        <span class="kw">let</span> <span class="ident">a</span> <span class="op">=</span> <span class="ident">Limb::ZERO</span>;
-        <span class="kw">let</span> <span class="ident">b</span> <span class="op">=</span> <span class="ident">Limb::ONE</span>;
-        <span class="kw">let</span> <span class="ident">c</span> <span class="op">=</span> <span class="ident">Limb::MAX</span>;
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>ct_gt() {
+        <span class="kw">let </span>a = Limb::ZERO;
+        <span class="kw">let </span>b = Limb::ONE;
+        <span class="kw">let </span>c = Limb::MAX;
 
-        <span class="macro">assert!</span>(<span class="ident">bool::from</span>(<span class="ident">b</span>.<span class="ident">ct_gt</span>(<span class="kw-2">&amp;</span><span class="ident">a</span>)));
-        <span class="macro">assert!</span>(<span class="ident">bool::from</span>(<span class="ident">c</span>.<span class="ident">ct_gt</span>(<span class="kw-2">&amp;</span><span class="ident">a</span>)));
-        <span class="macro">assert!</span>(<span class="ident">bool::from</span>(<span class="ident">c</span>.<span class="ident">ct_gt</span>(<span class="kw-2">&amp;</span><span class="ident">b</span>)));
+        <span class="macro">assert!</span>(bool::from(b.ct_gt(<span class="kw-2">&amp;</span>a)));
+        <span class="macro">assert!</span>(bool::from(c.ct_gt(<span class="kw-2">&amp;</span>a)));
+        <span class="macro">assert!</span>(bool::from(c.ct_gt(<span class="kw-2">&amp;</span>b)));
 
-        <span class="macro">assert!</span>(<span class="op">!</span><span class="ident">bool::from</span>(<span class="ident">a</span>.<span class="ident">ct_gt</span>(<span class="kw-2">&amp;</span><span class="ident">a</span>)));
-        <span class="macro">assert!</span>(<span class="op">!</span><span class="ident">bool::from</span>(<span class="ident">b</span>.<span class="ident">ct_gt</span>(<span class="kw-2">&amp;</span><span class="ident">b</span>)));
-        <span class="macro">assert!</span>(<span class="op">!</span><span class="ident">bool::from</span>(<span class="ident">c</span>.<span class="ident">ct_gt</span>(<span class="kw-2">&amp;</span><span class="ident">c</span>)));
+        <span class="macro">assert!</span>(!bool::from(a.ct_gt(<span class="kw-2">&amp;</span>a)));
+        <span class="macro">assert!</span>(!bool::from(b.ct_gt(<span class="kw-2">&amp;</span>b)));
+        <span class="macro">assert!</span>(!bool::from(c.ct_gt(<span class="kw-2">&amp;</span>c)));
 
-        <span class="macro">assert!</span>(<span class="op">!</span><span class="ident">bool::from</span>(<span class="ident">a</span>.<span class="ident">ct_gt</span>(<span class="kw-2">&amp;</span><span class="ident">b</span>)));
-        <span class="macro">assert!</span>(<span class="op">!</span><span class="ident">bool::from</span>(<span class="ident">a</span>.<span class="ident">ct_gt</span>(<span class="kw-2">&amp;</span><span class="ident">c</span>)));
-        <span class="macro">assert!</span>(<span class="op">!</span><span class="ident">bool::from</span>(<span class="ident">b</span>.<span class="ident">ct_gt</span>(<span class="kw-2">&amp;</span><span class="ident">c</span>)));
+        <span class="macro">assert!</span>(!bool::from(a.ct_gt(<span class="kw-2">&amp;</span>b)));
+        <span class="macro">assert!</span>(!bool::from(a.ct_gt(<span class="kw-2">&amp;</span>c)));
+        <span class="macro">assert!</span>(!bool::from(b.ct_gt(<span class="kw-2">&amp;</span>c)));
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">ct_lt</span>() {
-        <span class="kw">let</span> <span class="ident">a</span> <span class="op">=</span> <span class="ident">Limb::ZERO</span>;
-        <span class="kw">let</span> <span class="ident">b</span> <span class="op">=</span> <span class="ident">Limb::ONE</span>;
-        <span class="kw">let</span> <span class="ident">c</span> <span class="op">=</span> <span class="ident">Limb::MAX</span>;
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>ct_lt() {
+        <span class="kw">let </span>a = Limb::ZERO;
+        <span class="kw">let </span>b = Limb::ONE;
+        <span class="kw">let </span>c = Limb::MAX;
 
-        <span class="macro">assert!</span>(<span class="ident">bool::from</span>(<span class="ident">a</span>.<span class="ident">ct_lt</span>(<span class="kw-2">&amp;</span><span class="ident">b</span>)));
-        <span class="macro">assert!</span>(<span class="ident">bool::from</span>(<span class="ident">a</span>.<span class="ident">ct_lt</span>(<span class="kw-2">&amp;</span><span class="ident">c</span>)));
-        <span class="macro">assert!</span>(<span class="ident">bool::from</span>(<span class="ident">b</span>.<span class="ident">ct_lt</span>(<span class="kw-2">&amp;</span><span class="ident">c</span>)));
+        <span class="macro">assert!</span>(bool::from(a.ct_lt(<span class="kw-2">&amp;</span>b)));
+        <span class="macro">assert!</span>(bool::from(a.ct_lt(<span class="kw-2">&amp;</span>c)));
+        <span class="macro">assert!</span>(bool::from(b.ct_lt(<span class="kw-2">&amp;</span>c)));
 
-        <span class="macro">assert!</span>(<span class="op">!</span><span class="ident">bool::from</span>(<span class="ident">a</span>.<span class="ident">ct_lt</span>(<span class="kw-2">&amp;</span><span class="ident">a</span>)));
-        <span class="macro">assert!</span>(<span class="op">!</span><span class="ident">bool::from</span>(<span class="ident">b</span>.<span class="ident">ct_lt</span>(<span class="kw-2">&amp;</span><span class="ident">b</span>)));
-        <span class="macro">assert!</span>(<span class="op">!</span><span class="ident">bool::from</span>(<span class="ident">c</span>.<span class="ident">ct_lt</span>(<span class="kw-2">&amp;</span><span class="ident">c</span>)));
+        <span class="macro">assert!</span>(!bool::from(a.ct_lt(<span class="kw-2">&amp;</span>a)));
+        <span class="macro">assert!</span>(!bool::from(b.ct_lt(<span class="kw-2">&amp;</span>b)));
+        <span class="macro">assert!</span>(!bool::from(c.ct_lt(<span class="kw-2">&amp;</span>c)));
 
-        <span class="macro">assert!</span>(<span class="op">!</span><span class="ident">bool::from</span>(<span class="ident">b</span>.<span class="ident">ct_lt</span>(<span class="kw-2">&amp;</span><span class="ident">a</span>)));
-        <span class="macro">assert!</span>(<span class="op">!</span><span class="ident">bool::from</span>(<span class="ident">c</span>.<span class="ident">ct_lt</span>(<span class="kw-2">&amp;</span><span class="ident">a</span>)));
-        <span class="macro">assert!</span>(<span class="op">!</span><span class="ident">bool::from</span>(<span class="ident">c</span>.<span class="ident">ct_lt</span>(<span class="kw-2">&amp;</span><span class="ident">b</span>)));
+        <span class="macro">assert!</span>(!bool::from(b.ct_lt(<span class="kw-2">&amp;</span>a)));
+        <span class="macro">assert!</span>(!bool::from(c.ct_lt(<span class="kw-2">&amp;</span>a)));
+        <span class="macro">assert!</span>(!bool::from(c.ct_lt(<span class="kw-2">&amp;</span>b)));
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">cmp</span>() {
-        <span class="macro">assert_eq!</span>(<span class="ident">Limb::ZERO</span>.<span class="ident">cmp</span>(<span class="kw-2">&amp;</span><span class="ident">Limb::ONE</span>), <span class="ident">Ordering::Less</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">Limb::ONE</span>.<span class="ident">cmp</span>(<span class="kw-2">&amp;</span><span class="ident">Limb::ONE</span>), <span class="ident">Ordering::Equal</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">Limb::MAX</span>.<span class="ident">cmp</span>(<span class="kw-2">&amp;</span><span class="ident">Limb::ONE</span>), <span class="ident">Ordering::Greater</span>);
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>cmp() {
+        <span class="macro">assert_eq!</span>(Limb::ZERO.cmp(<span class="kw-2">&amp;</span>Limb::ONE), Ordering::Less);
+        <span class="macro">assert_eq!</span>(Limb::ONE.cmp(<span class="kw-2">&amp;</span>Limb::ONE), Ordering::Equal);
+        <span class="macro">assert_eq!</span>(Limb::MAX.cmp(<span class="kw-2">&amp;</span>Limb::ONE), Ordering::Greater);
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="crypto_bigint" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="crypto_bigint" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

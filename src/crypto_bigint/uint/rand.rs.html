@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/crypto-bigint-0.2.11/src/uint/rand.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>rand.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="icon" href="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../crypto_bigint/index.html"><div class="logo-container"><img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../crypto_bigint/index.html"><div class="logo-container">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/crypto-bigint-0.2.11/src/uint/rand.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>rand.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="icon" href="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../crypto_bigint/index.html"><div class="logo-container"><img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../crypto_bigint/index.html"><div class="logo-container">
                     <img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../crypto_bigint/index.html">
                         <img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
@@ -57,62 +57,62 @@
 <span id="55">55</span>
 <span id="56">56</span>
 <span id="57">57</span>
-</pre><pre class="rust"><code><span class="doccomment">//! Random number generator support</span>
-<span class="comment">// TODO(tarcieri): use `Random` and `RandomMod` impls exclusively in next breaking release</span>
+</pre><pre class="rust"><code><span class="doccomment">//! Random number generator support
+</span><span class="comment">// TODO(tarcieri): use `Random` and `RandomMod` impls exclusively in next breaking release
 
-<span class="kw">use</span> <span class="ident"><span class="kw">super</span>::UInt</span>;
-<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">Limb</span>, <span class="ident">Random</span>, <span class="ident">RandomMod</span>};
-<span class="kw">use</span> <span class="ident">rand_core</span>::{<span class="ident">CryptoRng</span>, <span class="ident">RngCore</span>};
-<span class="kw">use</span> <span class="ident">subtle::ConstantTimeLess</span>;
+</span><span class="kw">use </span><span class="kw">super</span>::UInt;
+<span class="kw">use crate</span>::{Limb, Random, RandomMod};
+<span class="kw">use </span>rand_core::{CryptoRng, RngCore};
+<span class="kw">use </span>subtle::ConstantTimeLess;
 
-<span class="comment">// TODO(tarcieri): replace this `impl` block with `impl Random`/`impl RandomMod`</span>
-<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">docsrs</span>, <span class="ident">doc</span>(<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;rand&quot;</span>)))]</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="kw">const</span> <span class="ident">LIMBS</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Generate a cryptographically secure random [`UInt`].</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">random</span>(<span class="kw-2">mut</span> <span class="ident">rng</span>: <span class="kw">impl</span> <span class="ident">CryptoRng</span> <span class="op">+</span> <span class="ident">RngCore</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">limbs</span> <span class="op">=</span> [<span class="ident">Limb::default</span>(); <span class="ident">LIMBS</span>];
+<span class="comment">// TODO(tarcieri): replace this `impl` block with `impl Random`/`impl RandomMod`
+</span><span class="attribute">#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;rand&quot;</span>)))]
+</span><span class="kw">impl</span>&lt;<span class="kw">const </span>LIMBS: usize&gt; UInt&lt;LIMBS&gt; {
+    <span class="doccomment">/// Generate a cryptographically secure random [`UInt`].
+    </span><span class="kw">pub fn </span>random(<span class="kw-2">mut </span>rng: <span class="kw">impl </span>CryptoRng + RngCore) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span><span class="kw-2">mut </span>limbs = [Limb::default(); LIMBS];
 
-        <span class="kw">for</span> <span class="ident">limb</span> <span class="kw">in</span> <span class="kw-2">&amp;mut</span> <span class="ident">limbs</span> {
-            <span class="kw-2">*</span><span class="ident">limb</span> <span class="op">=</span> <span class="ident">Limb::random</span>(<span class="kw-2">&amp;mut</span> <span class="ident">rng</span>)
+        <span class="kw">for </span>limb <span class="kw">in </span><span class="kw-2">&amp;mut </span>limbs {
+            <span class="kw-2">*</span>limb = Limb::random(<span class="kw-2">&amp;mut </span>rng)
         }
 
-        <span class="ident">limbs</span>.<span class="ident">into</span>()
+        limbs.into()
     }
 
-    <span class="doccomment">/// Generate a cryptographically secure random [`UInt`] which is less than</span>
-    <span class="doccomment">/// a given `modulus`.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// This function uses rejection sampling, a method which produces an</span>
-    <span class="doccomment">/// unbiased distribution of in-range values provided the underlying</span>
-    <span class="doccomment">/// [`CryptoRng`] is unbiased, but runs in variable-time.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// The variable-time nature of the algorithm should not pose a security</span>
-    <span class="doccomment">/// issue so long as the underlying random number generator is truly a</span>
-    <span class="doccomment">/// [`CryptoRng`], where previous outputs are unrelated to subsequent</span>
-    <span class="doccomment">/// outputs and do not reveal information about the RNG&#39;s internal state.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">random_mod</span>(<span class="kw-2">mut</span> <span class="ident">rng</span>: <span class="kw">impl</span> <span class="ident">CryptoRng</span> <span class="op">+</span> <span class="ident">RngCore</span>, <span class="ident">modulus</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">loop</span> {
-            <span class="kw">let</span> <span class="ident">n</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::random</span>(<span class="kw-2">&amp;mut</span> <span class="ident">rng</span>);
+    <span class="doccomment">/// Generate a cryptographically secure random [`UInt`] which is less than
+    /// a given `modulus`.
+    ///
+    /// This function uses rejection sampling, a method which produces an
+    /// unbiased distribution of in-range values provided the underlying
+    /// [`CryptoRng`] is unbiased, but runs in variable-time.
+    ///
+    /// The variable-time nature of the algorithm should not pose a security
+    /// issue so long as the underlying random number generator is truly a
+    /// [`CryptoRng`], where previous outputs are unrelated to subsequent
+    /// outputs and do not reveal information about the RNG&#39;s internal state.
+    </span><span class="kw">pub fn </span>random_mod(<span class="kw-2">mut </span>rng: <span class="kw">impl </span>CryptoRng + RngCore, modulus: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="self">Self </span>{
+        <span class="kw">loop </span>{
+            <span class="kw">let </span>n = <span class="self">Self</span>::random(<span class="kw-2">&amp;mut </span>rng);
 
-            <span class="kw">if</span> <span class="ident">n</span>.<span class="ident">ct_lt</span>(<span class="ident">modulus</span>).<span class="ident">into</span>() {
-                <span class="kw">return</span> <span class="ident">n</span>;
+            <span class="kw">if </span>n.ct_lt(modulus).into() {
+                <span class="kw">return </span>n;
             }
         }
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">docsrs</span>, <span class="ident">doc</span>(<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;rand&quot;</span>)))]</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="kw">const</span> <span class="ident">LIMBS</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">Random</span> <span class="kw">for</span> <span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">random</span>(<span class="ident">rng</span>: <span class="kw">impl</span> <span class="ident">CryptoRng</span> <span class="op">+</span> <span class="ident">RngCore</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident"><span class="self">Self</span>::random</span>(<span class="ident">rng</span>)
+<span class="attribute">#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;rand&quot;</span>)))]
+</span><span class="kw">impl</span>&lt;<span class="kw">const </span>LIMBS: usize&gt; Random <span class="kw">for </span>UInt&lt;LIMBS&gt; {
+    <span class="kw">fn </span>random(rng: <span class="kw">impl </span>CryptoRng + RngCore) -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>::random(rng)
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">docsrs</span>, <span class="ident">doc</span>(<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;rand&quot;</span>)))]</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="kw">const</span> <span class="ident">LIMBS</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">RandomMod</span> <span class="kw">for</span> <span class="ident">UInt</span><span class="op">&lt;</span><span class="ident">LIMBS</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">random_mod</span>(<span class="ident">rng</span>: <span class="kw">impl</span> <span class="ident">CryptoRng</span> <span class="op">+</span> <span class="ident">RngCore</span>, <span class="ident">modulus</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident"><span class="self">Self</span>::random_mod</span>(<span class="ident">rng</span>, <span class="ident">modulus</span>)
+<span class="attribute">#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;rand&quot;</span>)))]
+</span><span class="kw">impl</span>&lt;<span class="kw">const </span>LIMBS: usize&gt; RandomMod <span class="kw">for </span>UInt&lt;LIMBS&gt; {
+    <span class="kw">fn </span>random_mod(rng: <span class="kw">impl </span>CryptoRng + RngCore, modulus: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>::random_mod(rng, modulus)
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="crypto_bigint" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="crypto_bigint" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

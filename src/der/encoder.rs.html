@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/der-0.4.5/src/encoder.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>encoder.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" href="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../der/index.html"><div class="logo-container"><img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../der/index.html"><div class="logo-container">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/der-0.4.5/src/encoder.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>encoder.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" href="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../der/index.html"><div class="logo-container"><img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../der/index.html"><div class="logo-container">
                     <img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../der/index.html">
                         <img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
@@ -253,258 +253,258 @@
 <span id="251">251</span>
 <span id="252">252</span>
 <span id="253">253</span>
-</pre><pre class="rust"><code><span class="doccomment">//! DER encoder.</span>
+</pre><pre class="rust"><code><span class="doccomment">//! DER encoder.
 
-<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">asn1</span>::<span class="kw-2">*</span>, <span class="ident">message</span>, <span class="ident">Encodable</span>, <span class="ident">Error</span>, <span class="ident">ErrorKind</span>, <span class="ident">Header</span>, <span class="ident">Length</span>, <span class="prelude-ty">Result</span>, <span class="ident">Tag</span>};
-<span class="kw">use</span> <span class="ident">core::convert</span>::{<span class="ident">TryFrom</span>, <span class="ident">TryInto</span>};
+</span><span class="kw">use crate</span>::{asn1::<span class="kw-2">*</span>, message, Encodable, Error, ErrorKind, Header, Length, <span class="prelude-ty">Result</span>, Tag};
+<span class="kw">use </span>core::convert::{TryFrom, TryInto};
 
-<span class="doccomment">/// DER encoder.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Encoder</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Buffer into which DER-encoded message is written</span>
-    <span class="ident">bytes</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> [<span class="ident">u8</span>]<span class="op">&gt;</span>,
+<span class="doccomment">/// DER encoder.
+</span><span class="attribute">#[derive(Debug)]
+</span><span class="kw">pub struct </span>Encoder&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="doccomment">/// Buffer into which DER-encoded message is written
+    </span>bytes: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>[u8]&gt;,
 
-    <span class="doccomment">/// Total number of bytes written to buffer so far</span>
-    <span class="ident">position</span>: <span class="ident">Length</span>,
+    <span class="doccomment">/// Total number of bytes written to buffer so far
+    </span>position: Length,
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Encoder</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Create a new encoder with the given byte slice as a backing buffer.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">bytes</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> [<span class="ident">u8</span>]) -&gt; <span class="self">Self</span> {
-        <span class="self">Self</span> {
-            <span class="ident">bytes</span>: <span class="prelude-val">Some</span>(<span class="ident">bytes</span>),
-            <span class="ident">position</span>: <span class="ident">Length::ZERO</span>,
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Encoder&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="doccomment">/// Create a new encoder with the given byte slice as a backing buffer.
+    </span><span class="kw">pub fn </span>new(bytes: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>[u8]) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            bytes: <span class="prelude-val">Some</span>(bytes),
+            position: Length::ZERO,
         }
     }
 
-    <span class="doccomment">/// Encode a value which impls the [`Encodable`] trait.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">encode</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Encodable</span><span class="op">&gt;</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">encodable</span>: <span class="kw-2">&amp;</span><span class="ident">T</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">is_failed</span>() {
-            <span class="self">self</span>.<span class="ident">error</span>(<span class="ident">ErrorKind::Failed</span>)<span class="question-mark">?</span>;
+    <span class="doccomment">/// Encode a value which impls the [`Encodable`] trait.
+    </span><span class="kw">pub fn </span>encode&lt;T: Encodable&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, encodable: <span class="kw-2">&amp;</span>T) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">if </span><span class="self">self</span>.is_failed() {
+            <span class="self">self</span>.error(ErrorKind::Failed)<span class="question-mark">?</span>;
         }
 
-        <span class="ident">encodable</span>.<span class="ident">encode</span>(<span class="self">self</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> {
-            <span class="self">self</span>.<span class="ident">bytes</span>.<span class="ident">take</span>();
-            <span class="ident">e</span>.<span class="ident">nested</span>(<span class="self">self</span>.<span class="ident">position</span>)
+        encodable.encode(<span class="self">self</span>).map_err(|e| {
+            <span class="self">self</span>.bytes.take();
+            e.nested(<span class="self">self</span>.position)
         })
     }
 
-    <span class="doccomment">/// Return an error with the given [`ErrorKind`], annotating it with</span>
-    <span class="doccomment">/// context about where the error occurred.</span>
-    <span class="comment">// TODO(tarcieri): change return type to `Error`</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">error</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">kind</span>: <span class="ident">ErrorKind</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">bytes</span>.<span class="ident">take</span>();
-        <span class="prelude-val">Err</span>(<span class="ident">kind</span>.<span class="ident">at</span>(<span class="self">self</span>.<span class="ident">position</span>))
+    <span class="doccomment">/// Return an error with the given [`ErrorKind`], annotating it with
+    /// context about where the error occurred.
+    </span><span class="comment">// TODO(tarcieri): change return type to `Error`
+    </span><span class="kw">pub fn </span>error&lt;T&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, kind: ErrorKind) -&gt; <span class="prelude-ty">Result</span>&lt;T&gt; {
+        <span class="self">self</span>.bytes.take();
+        <span class="prelude-val">Err</span>(kind.at(<span class="self">self</span>.position))
     }
 
-    <span class="doccomment">/// Return an error for an invalid value with the given tag.</span>
-    <span class="comment">// TODO(tarcieri): compose this with `Encoder::error` after changing its return type</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">value_error</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">tag</span>: <span class="ident">Tag</span>) -&gt; <span class="ident">Error</span> {
-        <span class="self">self</span>.<span class="ident">bytes</span>.<span class="ident">take</span>();
-        <span class="ident">tag</span>.<span class="ident">value_error</span>().<span class="ident">kind</span>().<span class="ident">at</span>(<span class="self">self</span>.<span class="ident">position</span>)
+    <span class="doccomment">/// Return an error for an invalid value with the given tag.
+    </span><span class="comment">// TODO(tarcieri): compose this with `Encoder::error` after changing its return type
+    </span><span class="kw">pub fn </span>value_error(<span class="kw-2">&amp;mut </span><span class="self">self</span>, tag: Tag) -&gt; Error {
+        <span class="self">self</span>.bytes.take();
+        tag.value_error().kind().at(<span class="self">self</span>.position)
     }
 
-    <span class="doccomment">/// Did the decoding operation fail due to an error?</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_failed</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
-        <span class="self">self</span>.<span class="ident">bytes</span>.<span class="ident">is_none</span>()
+    <span class="doccomment">/// Did the decoding operation fail due to an error?
+    </span><span class="kw">pub fn </span>is_failed(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+        <span class="self">self</span>.bytes.is_none()
     }
 
-    <span class="doccomment">/// Finish encoding to the buffer, returning a slice containing the data</span>
-    <span class="doccomment">/// written to the buffer.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">finish</span>(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>]<span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">pos</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">position</span>;
-        <span class="kw">let</span> <span class="ident">range</span> <span class="op">=</span> ..<span class="ident">usize::try_from</span>(<span class="self">self</span>.<span class="ident">position</span>)<span class="question-mark">?</span>;
+    <span class="doccomment">/// Finish encoding to the buffer, returning a slice containing the data
+    /// written to the buffer.
+    </span><span class="kw">pub fn </span>finish(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]&gt; {
+        <span class="kw">let </span>pos = <span class="self">self</span>.position;
+        <span class="kw">let </span>range = ..usize::try_from(<span class="self">self</span>.position)<span class="question-mark">?</span>;
 
-        <span class="kw">match</span> <span class="self">self</span>.<span class="ident">bytes</span> {
-            <span class="prelude-val">Some</span>(<span class="ident">bytes</span>) =&gt; <span class="ident">bytes</span>.<span class="ident">get</span>(<span class="ident">range</span>).<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">ErrorKind::Truncated</span>.<span class="ident">at</span>(<span class="ident">pos</span>)),
-            <span class="prelude-val">None</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">ErrorKind::Failed</span>.<span class="ident">at</span>(<span class="ident">pos</span>)),
+        <span class="kw">match </span><span class="self">self</span>.bytes {
+            <span class="prelude-val">Some</span>(bytes) =&gt; bytes.get(range).ok_or_else(|| ErrorKind::Truncated.at(pos)),
+            <span class="prelude-val">None </span>=&gt; <span class="prelude-val">Err</span>(ErrorKind::Failed.at(pos)),
         }
     }
 
-    <span class="doccomment">/// Encode the provided value as an ASN.1 `BIT STRING`</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">bit_string</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">value</span>: <span class="kw">impl</span> <span class="ident">TryInto</span><span class="op">&lt;</span><span class="ident">BitString</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="ident">value</span>
-            .<span class="ident">try_into</span>()
-            .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">value_error</span>(<span class="ident">Tag::BitString</span>))
-            .<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">value</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">encode</span>(<span class="kw-2">&amp;</span><span class="ident">value</span>))
+    <span class="doccomment">/// Encode the provided value as an ASN.1 `BIT STRING`
+    </span><span class="kw">pub fn </span>bit_string(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: <span class="kw">impl </span>TryInto&lt;BitString&lt;<span class="lifetime">&#39;a</span>&gt;&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        value
+            .try_into()
+            .map_err(|<span class="kw">_</span>| <span class="self">self</span>.value_error(Tag::BitString))
+            .and_then(|value| <span class="self">self</span>.encode(<span class="kw-2">&amp;</span>value))
     }
 
-    <span class="doccomment">/// Encode the provided value as an ASN.1 `GeneralizedTime`</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">generalized_time</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">value</span>: <span class="kw">impl</span> <span class="ident">TryInto</span><span class="op">&lt;</span><span class="ident">GeneralizedTime</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="ident">value</span>
-            .<span class="ident">try_into</span>()
-            .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">value_error</span>(<span class="ident">Tag::GeneralizedTime</span>))
-            .<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">value</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">encode</span>(<span class="kw-2">&amp;</span><span class="ident">value</span>))
+    <span class="doccomment">/// Encode the provided value as an ASN.1 `GeneralizedTime`
+    </span><span class="kw">pub fn </span>generalized_time(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: <span class="kw">impl </span>TryInto&lt;GeneralizedTime&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        value
+            .try_into()
+            .map_err(|<span class="kw">_</span>| <span class="self">self</span>.value_error(Tag::GeneralizedTime))
+            .and_then(|value| <span class="self">self</span>.encode(<span class="kw-2">&amp;</span>value))
     }
 
-    <span class="doccomment">/// Encode the provided value as an ASN.1 `IA5String`</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">ia5_string</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">value</span>: <span class="kw">impl</span> <span class="ident">TryInto</span><span class="op">&lt;</span><span class="ident">Ia5String</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="ident">value</span>
-            .<span class="ident">try_into</span>()
-            .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">value_error</span>(<span class="ident">Tag::Ia5String</span>))
-            .<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">value</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">encode</span>(<span class="kw-2">&amp;</span><span class="ident">value</span>))
+    <span class="doccomment">/// Encode the provided value as an ASN.1 `IA5String`
+    </span><span class="kw">pub fn </span>ia5_string(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: <span class="kw">impl </span>TryInto&lt;Ia5String&lt;<span class="lifetime">&#39;a</span>&gt;&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        value
+            .try_into()
+            .map_err(|<span class="kw">_</span>| <span class="self">self</span>.value_error(Tag::Ia5String))
+            .and_then(|value| <span class="self">self</span>.encode(<span class="kw-2">&amp;</span>value))
     }
 
-    <span class="doccomment">/// Encode a message with the provided [`Encodable`] fields as an</span>
-    <span class="doccomment">/// ASN.1 `SEQUENCE`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">message</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">fields</span>: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">Encodable</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">length</span> <span class="op">=</span> <span class="ident">message::encoded_len_inner</span>(<span class="ident">fields</span>)<span class="question-mark">?</span>;
+    <span class="doccomment">/// Encode a message with the provided [`Encodable`] fields as an
+    /// ASN.1 `SEQUENCE`.
+    </span><span class="kw">pub fn </span>message(<span class="kw-2">&amp;mut </span><span class="self">self</span>, fields: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span><span class="kw">dyn </span>Encodable]) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">let </span>length = message::encoded_len_inner(fields)<span class="question-mark">?</span>;
 
-        <span class="self">self</span>.<span class="ident">sequence</span>(<span class="ident">length</span>, <span class="op">|</span><span class="ident">nested_encoder</span><span class="op">|</span> {
-            <span class="kw">for</span> <span class="ident">field</span> <span class="kw">in</span> <span class="ident">fields</span> {
-                <span class="ident">field</span>.<span class="ident">encode</span>(<span class="ident">nested_encoder</span>)<span class="question-mark">?</span>;
+        <span class="self">self</span>.sequence(length, |nested_encoder| {
+            <span class="kw">for </span>field <span class="kw">in </span>fields {
+                field.encode(nested_encoder)<span class="question-mark">?</span>;
             }
 
             <span class="prelude-val">Ok</span>(())
         })
     }
 
-    <span class="doccomment">/// Encode an ASN.1 `NULL` value.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">null</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">encode</span>(<span class="kw-2">&amp;</span><span class="ident">Null</span>)
+    <span class="doccomment">/// Encode an ASN.1 `NULL` value.
+    </span><span class="kw">pub fn </span>null(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="self">self</span>.encode(<span class="kw-2">&amp;</span>Null)
     }
 
-    <span class="doccomment">/// Encode the provided value as an ASN.1 `OCTET STRING`</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">octet_string</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">value</span>: <span class="kw">impl</span> <span class="ident">TryInto</span><span class="op">&lt;</span><span class="ident">OctetString</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="ident">value</span>
-            .<span class="ident">try_into</span>()
-            .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">value_error</span>(<span class="ident">Tag::OctetString</span>))
-            .<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">value</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">encode</span>(<span class="kw-2">&amp;</span><span class="ident">value</span>))
+    <span class="doccomment">/// Encode the provided value as an ASN.1 `OCTET STRING`
+    </span><span class="kw">pub fn </span>octet_string(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: <span class="kw">impl </span>TryInto&lt;OctetString&lt;<span class="lifetime">&#39;a</span>&gt;&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        value
+            .try_into()
+            .map_err(|<span class="kw">_</span>| <span class="self">self</span>.value_error(Tag::OctetString))
+            .and_then(|value| <span class="self">self</span>.encode(<span class="kw-2">&amp;</span>value))
     }
 
-    <span class="doccomment">/// Encode an ASN.1 [`ObjectIdentifier`]</span>
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;oid&quot;</span>)]</span>
-    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">docsrs</span>, <span class="ident">doc</span>(<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;oid&quot;</span>)))]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">oid</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">value</span>: <span class="kw">impl</span> <span class="ident">TryInto</span><span class="op">&lt;</span><span class="ident">ObjectIdentifier</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="ident">value</span>
-            .<span class="ident">try_into</span>()
-            .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">value_error</span>(<span class="ident">Tag::ObjectIdentifier</span>))
-            .<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">value</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">encode</span>(<span class="kw-2">&amp;</span><span class="ident">value</span>))
+    <span class="doccomment">/// Encode an ASN.1 [`ObjectIdentifier`]
+    </span><span class="attribute">#[cfg(feature = <span class="string">&quot;oid&quot;</span>)]
+    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;oid&quot;</span>)))]
+    </span><span class="kw">pub fn </span>oid(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: <span class="kw">impl </span>TryInto&lt;ObjectIdentifier&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        value
+            .try_into()
+            .map_err(|<span class="kw">_</span>| <span class="self">self</span>.value_error(Tag::ObjectIdentifier))
+            .and_then(|value| <span class="self">self</span>.encode(<span class="kw-2">&amp;</span>value))
     }
 
-    <span class="doccomment">/// Encode the provided value as an ASN.1 `PrintableString`</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">printable_string</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">value</span>: <span class="kw">impl</span> <span class="ident">TryInto</span><span class="op">&lt;</span><span class="ident">PrintableString</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="ident">value</span>
-            .<span class="ident">try_into</span>()
-            .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">value_error</span>(<span class="ident">Tag::PrintableString</span>))
-            .<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">value</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">encode</span>(<span class="kw-2">&amp;</span><span class="ident">value</span>))
+    <span class="doccomment">/// Encode the provided value as an ASN.1 `PrintableString`
+    </span><span class="kw">pub fn </span>printable_string(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: <span class="kw">impl </span>TryInto&lt;PrintableString&lt;<span class="lifetime">&#39;a</span>&gt;&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        value
+            .try_into()
+            .map_err(|<span class="kw">_</span>| <span class="self">self</span>.value_error(Tag::PrintableString))
+            .and_then(|value| <span class="self">self</span>.encode(<span class="kw-2">&amp;</span>value))
     }
 
-    <span class="doccomment">/// Encode an ASN.1 `SEQUENCE` of the given length.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// Spawns a nested [`Encoder`] which is expected to be exactly the</span>
-    <span class="doccomment">/// specified length upon completion.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">sequence</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">length</span>: <span class="ident">Length</span>, <span class="ident">f</span>: <span class="ident">F</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>
-    <span class="kw">where</span>
-        <span class="ident">F</span>: <span class="ident">FnOnce</span>(<span class="kw-2">&amp;mut</span> <span class="ident">Encoder</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>,
+    <span class="doccomment">/// Encode an ASN.1 `SEQUENCE` of the given length.
+    ///
+    /// Spawns a nested [`Encoder`] which is expected to be exactly the
+    /// specified length upon completion.
+    </span><span class="kw">pub fn </span>sequence&lt;F&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, length: Length, f: F) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt;
+    <span class="kw">where
+        </span>F: FnOnce(<span class="kw-2">&amp;mut </span>Encoder&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt;,
     {
-        <span class="ident">Header::new</span>(<span class="ident">Tag::Sequence</span>, <span class="ident">length</span>).<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">header</span><span class="op">|</span> <span class="ident">header</span>.<span class="ident">encode</span>(<span class="self">self</span>))<span class="question-mark">?</span>;
+        Header::new(Tag::Sequence, length).and_then(|header| header.encode(<span class="self">self</span>))<span class="question-mark">?</span>;
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">nested_encoder</span> <span class="op">=</span> <span class="ident">Encoder::new</span>(<span class="self">self</span>.<span class="ident">reserve</span>(<span class="ident">length</span>)<span class="question-mark">?</span>);
-        <span class="ident">f</span>(<span class="kw-2">&amp;mut</span> <span class="ident">nested_encoder</span>)<span class="question-mark">?</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>nested_encoder = Encoder::new(<span class="self">self</span>.reserve(length)<span class="question-mark">?</span>);
+        f(<span class="kw-2">&amp;mut </span>nested_encoder)<span class="question-mark">?</span>;
 
-        <span class="kw">if</span> <span class="ident">nested_encoder</span>.<span class="ident">finish</span>()<span class="question-mark">?</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="ident">usize::try_from</span>(<span class="ident">length</span>)<span class="question-mark">?</span> {
+        <span class="kw">if </span>nested_encoder.finish()<span class="question-mark">?</span>.len() == usize::try_from(length)<span class="question-mark">? </span>{
             <span class="prelude-val">Ok</span>(())
-        } <span class="kw">else</span> {
-            <span class="self">self</span>.<span class="ident">error</span>(<span class="ident">ErrorKind::Length</span> { <span class="ident">tag</span>: <span class="ident">Tag::Sequence</span> })
+        } <span class="kw">else </span>{
+            <span class="self">self</span>.error(ErrorKind::Length { tag: Tag::Sequence })
         }
     }
 
-    <span class="doccomment">/// Encode the provided value as an ASN.1 `UTCTime`</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">utc_time</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">value</span>: <span class="kw">impl</span> <span class="ident">TryInto</span><span class="op">&lt;</span><span class="ident">UtcTime</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="ident">value</span>
-            .<span class="ident">try_into</span>()
-            .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">value_error</span>(<span class="ident">Tag::UtcTime</span>))
-            .<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">value</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">encode</span>(<span class="kw-2">&amp;</span><span class="ident">value</span>))
+    <span class="doccomment">/// Encode the provided value as an ASN.1 `UTCTime`
+    </span><span class="kw">pub fn </span>utc_time(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: <span class="kw">impl </span>TryInto&lt;UtcTime&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        value
+            .try_into()
+            .map_err(|<span class="kw">_</span>| <span class="self">self</span>.value_error(Tag::UtcTime))
+            .and_then(|value| <span class="self">self</span>.encode(<span class="kw-2">&amp;</span>value))
     }
 
-    <span class="doccomment">/// Encode the provided value as an ASN.1 `Utf8String`</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">utf8_string</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">value</span>: <span class="kw">impl</span> <span class="ident">TryInto</span><span class="op">&lt;</span><span class="ident">Utf8String</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="ident">value</span>
-            .<span class="ident">try_into</span>()
-            .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">value_error</span>(<span class="ident">Tag::Utf8String</span>))
-            .<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">value</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">encode</span>(<span class="kw-2">&amp;</span><span class="ident">value</span>))
+    <span class="doccomment">/// Encode the provided value as an ASN.1 `Utf8String`
+    </span><span class="kw">pub fn </span>utf8_string(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: <span class="kw">impl </span>TryInto&lt;Utf8String&lt;<span class="lifetime">&#39;a</span>&gt;&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        value
+            .try_into()
+            .map_err(|<span class="kw">_</span>| <span class="self">self</span>.value_error(Tag::Utf8String))
+            .and_then(|value| <span class="self">self</span>.encode(<span class="kw-2">&amp;</span>value))
     }
 
-    <span class="doccomment">/// Reserve a portion of the internal buffer, updating the internal cursor</span>
-    <span class="doccomment">/// position and returning a mutable slice.</span>
-    <span class="kw">fn</span> <span class="ident">reserve</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">len</span>: <span class="kw">impl</span> <span class="ident">TryInto</span><span class="op">&lt;</span><span class="ident">Length</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">&amp;mut</span> [<span class="ident">u8</span>]<span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="ident">len</span>
-            .<span class="ident">try_into</span>()
-            .<span class="ident">or_else</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">error</span>(<span class="ident">ErrorKind::Overflow</span>))<span class="question-mark">?</span>;
+    <span class="doccomment">/// Reserve a portion of the internal buffer, updating the internal cursor
+    /// position and returning a mutable slice.
+    </span><span class="kw">fn </span>reserve(<span class="kw-2">&amp;mut </span><span class="self">self</span>, len: <span class="kw">impl </span>TryInto&lt;Length&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;mut </span>[u8]&gt; {
+        <span class="kw">let </span>len = len
+            .try_into()
+            .or_else(|<span class="kw">_</span>| <span class="self">self</span>.error(ErrorKind::Overflow))<span class="question-mark">?</span>;
 
-        <span class="kw">if</span> <span class="ident">len</span> <span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">remaining_len</span>()<span class="question-mark">?</span> {
-            <span class="self">self</span>.<span class="ident">error</span>(<span class="ident">ErrorKind::Overlength</span>)<span class="question-mark">?</span>;
+        <span class="kw">if </span>len &gt; <span class="self">self</span>.remaining_len()<span class="question-mark">? </span>{
+            <span class="self">self</span>.error(ErrorKind::Overlength)<span class="question-mark">?</span>;
         }
 
-        <span class="kw">let</span> <span class="ident">end</span> <span class="op">=</span> (<span class="self">self</span>.<span class="ident">position</span> <span class="op">+</span> <span class="ident">len</span>).<span class="ident">or_else</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">error</span>(<span class="ident">e</span>.<span class="ident">kind</span>()))<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">range</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">position</span>.<span class="ident">try_into</span>()<span class="question-mark">?</span>..<span class="ident">end</span>.<span class="ident">try_into</span>()<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">position</span> <span class="op">=</span> <span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">position</span>;
+        <span class="kw">let </span>end = (<span class="self">self</span>.position + len).or_else(|e| <span class="self">self</span>.error(e.kind()))<span class="question-mark">?</span>;
+        <span class="kw">let </span>range = <span class="self">self</span>.position.try_into()<span class="question-mark">?</span>..end.try_into()<span class="question-mark">?</span>;
+        <span class="kw">let </span>position = <span class="kw-2">&amp;mut </span><span class="self">self</span>.position;
 
-        <span class="comment">// TODO(tarcieri): non-panicking version of this code</span>
-        <span class="comment">// We ensure above that the buffer is untainted and there is sufficient</span>
-        <span class="comment">// space to perform this slicing operation, however it would be nice to</span>
-        <span class="comment">// have fully panic-free code.</span>
-        <span class="comment">//</span>
-        <span class="comment">// Unfortunately tainting the buffer on error is tricky to do when</span>
-        <span class="comment">// potentially holding a reference to the buffer, and failure to taint</span>
-        <span class="comment">// it would not uphold the invariant that any errors should taint it.</span>
-        <span class="kw">let</span> <span class="ident">slice</span> <span class="op">=</span> <span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">bytes</span>.<span class="ident">as_mut</span>().<span class="ident">expect</span>(<span class="string">&quot;DER encoder tainted&quot;</span>)[<span class="ident">range</span>];
-        <span class="kw-2">*</span><span class="ident">position</span> <span class="op">=</span> <span class="ident">end</span>;
+        <span class="comment">// TODO(tarcieri): non-panicking version of this code
+        // We ensure above that the buffer is untainted and there is sufficient
+        // space to perform this slicing operation, however it would be nice to
+        // have fully panic-free code.
+        //
+        // Unfortunately tainting the buffer on error is tricky to do when
+        // potentially holding a reference to the buffer, and failure to taint
+        // it would not uphold the invariant that any errors should taint it.
+        </span><span class="kw">let </span>slice = <span class="kw-2">&amp;mut </span><span class="self">self</span>.bytes.as_mut().expect(<span class="string">&quot;DER encoder tainted&quot;</span>)[range];
+        <span class="kw-2">*</span>position = end;
 
-        <span class="prelude-val">Ok</span>(<span class="ident">slice</span>)
+        <span class="prelude-val">Ok</span>(slice)
     }
 
-    <span class="doccomment">/// Encode a single byte into the backing buffer.</span>
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">byte</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">byte</span>: <span class="ident">u8</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="kw">match</span> <span class="self">self</span>.<span class="ident">reserve</span>(<span class="number">1u8</span>)<span class="question-mark">?</span>.<span class="ident">first_mut</span>() {
-            <span class="prelude-val">Some</span>(<span class="ident">b</span>) =&gt; {
-                <span class="kw-2">*</span><span class="ident">b</span> <span class="op">=</span> <span class="ident">byte</span>;
+    <span class="doccomment">/// Encode a single byte into the backing buffer.
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>byte(<span class="kw-2">&amp;mut </span><span class="self">self</span>, byte: u8) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">match </span><span class="self">self</span>.reserve(<span class="number">1u8</span>)<span class="question-mark">?</span>.first_mut() {
+            <span class="prelude-val">Some</span>(b) =&gt; {
+                <span class="kw-2">*</span>b = byte;
                 <span class="prelude-val">Ok</span>(())
             }
-            <span class="prelude-val">None</span> =&gt; <span class="self">self</span>.<span class="ident">error</span>(<span class="ident">ErrorKind::Truncated</span>),
+            <span class="prelude-val">None </span>=&gt; <span class="self">self</span>.error(ErrorKind::Truncated),
         }
     }
 
-    <span class="doccomment">/// Encode the provided byte slice into the backing buffer.</span>
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">bytes</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">slice</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">reserve</span>(<span class="ident">slice</span>.<span class="ident">len</span>())<span class="question-mark">?</span>.<span class="ident">copy_from_slice</span>(<span class="ident">slice</span>);
+    <span class="doccomment">/// Encode the provided byte slice into the backing buffer.
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>bytes(<span class="kw-2">&amp;mut </span><span class="self">self</span>, slice: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="self">self</span>.reserve(slice.len())<span class="question-mark">?</span>.copy_from_slice(slice);
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="doccomment">/// Get the size of the buffer in bytes.</span>
-    <span class="kw">fn</span> <span class="ident">buffer_len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Length</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">bytes</span>
-            .<span class="ident">as_ref</span>()
-            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">bytes</span><span class="op">|</span> <span class="ident">bytes</span>.<span class="ident">len</span>())
-            .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">ErrorKind::Failed</span>.<span class="ident">at</span>(<span class="self">self</span>.<span class="ident">position</span>))
-            .<span class="ident">and_then</span>(<span class="ident">TryInto::try_into</span>)
+    <span class="doccomment">/// Get the size of the buffer in bytes.
+    </span><span class="kw">fn </span>buffer_len(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Length&gt; {
+        <span class="self">self</span>.bytes
+            .as_ref()
+            .map(|bytes| bytes.len())
+            .ok_or_else(|| ErrorKind::Failed.at(<span class="self">self</span>.position))
+            .and_then(TryInto::try_into)
     }
 
-    <span class="doccomment">/// Get the number of bytes still remaining in the buffer.</span>
-    <span class="kw">fn</span> <span class="ident">remaining_len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Length</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">buffer_len</span> <span class="op">=</span> <span class="ident">usize::try_from</span>(<span class="self">self</span>.<span class="ident">buffer_len</span>()<span class="question-mark">?</span>)<span class="question-mark">?</span>;
+    <span class="doccomment">/// Get the number of bytes still remaining in the buffer.
+    </span><span class="kw">fn </span>remaining_len(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Length&gt; {
+        <span class="kw">let </span>buffer_len = usize::try_from(<span class="self">self</span>.buffer_len()<span class="question-mark">?</span>)<span class="question-mark">?</span>;
 
-        <span class="ident">buffer_len</span>
-            .<span class="ident">checked_sub</span>(<span class="self">self</span>.<span class="ident">position</span>.<span class="ident">try_into</span>()<span class="question-mark">?</span>)
-            .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">ErrorKind::Truncated</span>.<span class="ident">at</span>(<span class="self">self</span>.<span class="ident">position</span>))
-            .<span class="ident">and_then</span>(<span class="ident">TryInto::try_into</span>)
+        buffer_len
+            .checked_sub(<span class="self">self</span>.position.try_into()<span class="question-mark">?</span>)
+            .ok_or_else(|| ErrorKind::Truncated.at(<span class="self">self</span>.position))
+            .and_then(TryInto::try_into)
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
-<span class="kw">mod</span> <span class="ident">tests</span> {
-    <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::Encoder</span>;
-    <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">Encodable</span>, <span class="ident">ErrorKind</span>, <span class="ident">Length</span>};
+<span class="attribute">#[cfg(test)]
+</span><span class="kw">mod </span>tests {
+    <span class="kw">use </span><span class="kw">super</span>::Encoder;
+    <span class="kw">use crate</span>::{Encodable, ErrorKind, Length};
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">overlength_message</span>() {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buffer</span> <span class="op">=</span> [];
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">encoder</span> <span class="op">=</span> <span class="ident">Encoder::new</span>(<span class="kw-2">&amp;mut</span> <span class="ident">buffer</span>);
-        <span class="kw">let</span> <span class="ident">err</span> <span class="op">=</span> <span class="bool-val">false</span>.<span class="ident">encode</span>(<span class="kw-2">&amp;mut</span> <span class="ident">encoder</span>).<span class="ident">err</span>().<span class="ident">unwrap</span>();
-        <span class="macro">assert_eq!</span>(<span class="ident">err</span>.<span class="ident">kind</span>(), <span class="ident">ErrorKind::Overlength</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">err</span>.<span class="ident">position</span>(), <span class="prelude-val">Some</span>(<span class="ident">Length::ZERO</span>));
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>overlength_message() {
+        <span class="kw">let </span><span class="kw-2">mut </span>buffer = [];
+        <span class="kw">let </span><span class="kw-2">mut </span>encoder = Encoder::new(<span class="kw-2">&amp;mut </span>buffer);
+        <span class="kw">let </span>err = <span class="bool-val">false</span>.encode(<span class="kw-2">&amp;mut </span>encoder).err().unwrap();
+        <span class="macro">assert_eq!</span>(err.kind(), ErrorKind::Overlength);
+        <span class="macro">assert_eq!</span>(err.position(), <span class="prelude-val">Some</span>(Length::ZERO));
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="der" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="der" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

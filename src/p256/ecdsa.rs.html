@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/p256-0.9.0/src/ecdsa.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>ecdsa.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" href="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../p256/index.html"><div class="logo-container"><img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../p256/index.html"><div class="logo-container">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/p256-0.9.0/src/ecdsa.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>ecdsa.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" href="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../p256/index.html"><div class="logo-container"><img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../p256/index.html"><div class="logo-container">
                     <img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../p256/index.html">
                         <img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
@@ -185,190 +185,190 @@
 <span id="183">183</span>
 <span id="184">184</span>
 <span id="185">185</span>
-</pre><pre class="rust"><code><span class="doccomment">//! Elliptic Curve Digital Signature Algorithm (ECDSA)</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! This module contains support for computing and verifying ECDSA signatures.</span>
-<span class="doccomment">//! To use it, you will need to enable one of the two following Cargo features:</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! - `ecdsa-core`: provides only the [`Signature`] type (which represents an</span>
-<span class="doccomment">//!   ECDSA/P-256 signature). Does not require the `arithmetic` feature.</span>
-<span class="doccomment">//!   This is useful for 3rd-party crates which wish to use the `Signature`</span>
-<span class="doccomment">//!   type for interoperability purposes (particularly in conjunction with the</span>
-<span class="doccomment">//!   [`signature::Signer`] trait. Example use cases for this include other</span>
-<span class="doccomment">//!   software implementations of ECDSA/P-256 and wrappers for cloud KMS</span>
-<span class="doccomment">//!   services or hardware devices (HSM or crypto hardware wallet).</span>
-<span class="doccomment">//! - `ecdsa`: provides `ecdsa-core` features plus the [`SigningKey`] and</span>
-<span class="doccomment">//!   [`VerifyingKey`] types which natively implement ECDSA/P-256 signing and</span>
-<span class="doccomment">//!   verification.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ## Signing/Verification Example</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! This example requires the `ecdsa` Cargo feature is enabled:</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ```</span>
-<span class="doccomment">//! # #[cfg(feature = &quot;ecdsa&quot;)]</span>
-<span class="doccomment">//! # {</span>
-<span class="doccomment">//! use p256::{</span>
-<span class="doccomment">//!     ecdsa::{SigningKey, Signature, signature::Signer},</span>
-<span class="doccomment">//! };</span>
-<span class="doccomment">//! use rand_core::OsRng; // requires &#39;getrandom&#39; feature</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! // Signing</span>
-<span class="doccomment">//! let signing_key = SigningKey::random(&amp;mut OsRng); // Serialize with `::to_bytes()`</span>
-<span class="doccomment">//! let message = b&quot;ECDSA proves knowledge of a secret number in the context of a single message&quot;;</span>
-<span class="doccomment">//! let signature = signing_key.sign(message);</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! // Verification</span>
-<span class="doccomment">//! use p256::ecdsa::{VerifyingKey, signature::Verifier};</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! let verify_key = VerifyingKey::from(&amp;signing_key); // Serialize with `::to_encoded_point()`</span>
-<span class="doccomment">//! assert!(verify_key.verify(message, &amp;signature).is_ok());</span>
-<span class="doccomment">//! # }</span>
-<span class="doccomment">//! ```</span>
+</pre><pre class="rust"><code><span class="doccomment">//! Elliptic Curve Digital Signature Algorithm (ECDSA)
+//!
+//! This module contains support for computing and verifying ECDSA signatures.
+//! To use it, you will need to enable one of the two following Cargo features:
+//!
+//! - `ecdsa-core`: provides only the [`Signature`] type (which represents an
+//!   ECDSA/P-256 signature). Does not require the `arithmetic` feature.
+//!   This is useful for 3rd-party crates which wish to use the `Signature`
+//!   type for interoperability purposes (particularly in conjunction with the
+//!   [`signature::Signer`] trait. Example use cases for this include other
+//!   software implementations of ECDSA/P-256 and wrappers for cloud KMS
+//!   services or hardware devices (HSM or crypto hardware wallet).
+//! - `ecdsa`: provides `ecdsa-core` features plus the [`SigningKey`] and
+//!   [`VerifyingKey`] types which natively implement ECDSA/P-256 signing and
+//!   verification.
+//!
+//! ## Signing/Verification Example
+//!
+//! This example requires the `ecdsa` Cargo feature is enabled:
+//!
+//! ```
+//! # #[cfg(feature = &quot;ecdsa&quot;)]
+//! # {
+//! use p256::{
+//!     ecdsa::{SigningKey, Signature, signature::Signer},
+//! };
+//! use rand_core::OsRng; // requires &#39;getrandom&#39; feature
+//!
+//! // Signing
+//! let signing_key = SigningKey::random(&amp;mut OsRng); // Serialize with `::to_bytes()`
+//! let message = b&quot;ECDSA proves knowledge of a secret number in the context of a single message&quot;;
+//! let signature = signing_key.sign(message);
+//!
+//! // Verification
+//! use p256::ecdsa::{VerifyingKey, signature::Verifier};
+//!
+//! let verify_key = VerifyingKey::from(&amp;signing_key); // Serialize with `::to_encoded_point()`
+//! assert!(verify_key.verify(message, &amp;signature).is_ok());
+//! # }
+//! ```
 
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">ecdsa_core::signature</span>::{<span class="self">self</span>, <span class="ident">Error</span>};
+</span><span class="kw">pub use </span>ecdsa_core::signature::{<span class="self">self</span>, Error};
 
-<span class="kw">use</span> <span class="ident"><span class="kw">super</span>::NistP256</span>;
+<span class="kw">use </span><span class="kw">super</span>::NistP256;
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;ecdsa&quot;</span>)]</span>
-<span class="kw">use</span> {
-    <span class="kw">crate</span>::{<span class="ident">AffinePoint</span>, <span class="ident">ProjectivePoint</span>, <span class="ident">Scalar</span>},
-    <span class="ident">core::borrow::Borrow</span>,
-    <span class="ident">ecdsa_core::hazmat</span>::{<span class="ident">SignPrimitive</span>, <span class="ident">VerifyPrimitive</span>},
-    <span class="ident">elliptic_curve::ops::Invert</span>,
+<span class="attribute">#[cfg(feature = <span class="string">&quot;ecdsa&quot;</span>)]
+</span><span class="kw">use </span>{
+    <span class="kw">crate</span>::{AffinePoint, ProjectivePoint, Scalar},
+    core::borrow::Borrow,
+    ecdsa_core::hazmat::{SignPrimitive, VerifyPrimitive},
+    elliptic_curve::ops::Invert,
 };
 
-<span class="doccomment">/// ECDSA/P-256 signature (fixed-size)</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">Signature</span> <span class="op">=</span> <span class="ident">ecdsa_core::Signature</span><span class="op">&lt;</span><span class="ident">NistP256</span><span class="op">&gt;</span>;
+<span class="doccomment">/// ECDSA/P-256 signature (fixed-size)
+</span><span class="kw">pub type </span>Signature = ecdsa_core::Signature&lt;NistP256&gt;;
 
-<span class="doccomment">/// ECDSA/P-256 signature (ASN.1 DER encoded)</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">DerSignature</span> <span class="op">=</span> <span class="ident">ecdsa_core::der::Signature</span><span class="op">&lt;</span><span class="ident">NistP256</span><span class="op">&gt;</span>;
+<span class="doccomment">/// ECDSA/P-256 signature (ASN.1 DER encoded)
+</span><span class="kw">pub type </span>DerSignature = ecdsa_core::der::Signature&lt;NistP256&gt;;
 
-<span class="doccomment">/// ECDSA/P-256 signing key</span>
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;ecdsa&quot;</span>)]</span>
-<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">docsrs</span>, <span class="ident">doc</span>(<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;ecdsa&quot;</span>)))]</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">SigningKey</span> <span class="op">=</span> <span class="ident">ecdsa_core::SigningKey</span><span class="op">&lt;</span><span class="ident">NistP256</span><span class="op">&gt;</span>;
+<span class="doccomment">/// ECDSA/P-256 signing key
+</span><span class="attribute">#[cfg(feature = <span class="string">&quot;ecdsa&quot;</span>)]
+#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;ecdsa&quot;</span>)))]
+</span><span class="kw">pub type </span>SigningKey = ecdsa_core::SigningKey&lt;NistP256&gt;;
 
-<span class="doccomment">/// ECDSA/P-256 verification key (i.e. public key)</span>
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;ecdsa&quot;</span>)]</span>
-<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">docsrs</span>, <span class="ident">doc</span>(<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;ecdsa&quot;</span>)))]</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">VerifyingKey</span> <span class="op">=</span> <span class="ident">ecdsa_core::VerifyingKey</span><span class="op">&lt;</span><span class="ident">NistP256</span><span class="op">&gt;</span>;
+<span class="doccomment">/// ECDSA/P-256 verification key (i.e. public key)
+</span><span class="attribute">#[cfg(feature = <span class="string">&quot;ecdsa&quot;</span>)]
+#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;ecdsa&quot;</span>)))]
+</span><span class="kw">pub type </span>VerifyingKey = ecdsa_core::VerifyingKey&lt;NistP256&gt;;
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;sha256&quot;</span>)]</span>
-<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">docsrs</span>, <span class="ident">doc</span>(<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;sha256&quot;</span>)))]</span>
-<span class="kw">impl</span> <span class="ident">ecdsa_core::hazmat::DigestPrimitive</span> <span class="kw">for</span> <span class="ident">NistP256</span> {
-    <span class="kw">type</span> <span class="ident">Digest</span> <span class="op">=</span> <span class="ident">sha2::Sha256</span>;
+<span class="attribute">#[cfg(feature = <span class="string">&quot;sha256&quot;</span>)]
+#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;sha256&quot;</span>)))]
+</span><span class="kw">impl </span>ecdsa_core::hazmat::DigestPrimitive <span class="kw">for </span>NistP256 {
+    <span class="kw">type </span>Digest = sha2::Sha256;
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;ecdsa&quot;</span>)]</span>
-<span class="kw">impl</span> <span class="ident">SignPrimitive</span><span class="op">&lt;</span><span class="ident">NistP256</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Scalar</span> {
-    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::many_single_char_names</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">try_sign_prehashed</span><span class="op">&lt;</span><span class="ident">K</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ephemeral_scalar</span>: <span class="kw-2">&amp;</span><span class="ident">K</span>, <span class="ident">z</span>: <span class="kw-2">&amp;</span><span class="ident">Scalar</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Signature</span>, <span class="ident">Error</span><span class="op">&gt;</span>
-    <span class="kw">where</span>
-        <span class="ident">K</span>: <span class="ident">Borrow</span><span class="op">&lt;</span><span class="ident">Scalar</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Invert</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">Scalar</span><span class="op">&gt;</span>,
+<span class="attribute">#[cfg(feature = <span class="string">&quot;ecdsa&quot;</span>)]
+</span><span class="kw">impl </span>SignPrimitive&lt;NistP256&gt; <span class="kw">for </span>Scalar {
+    <span class="attribute">#[allow(clippy::many_single_char_names)]
+    </span><span class="kw">fn </span>try_sign_prehashed&lt;K&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, ephemeral_scalar: <span class="kw-2">&amp;</span>K, z: <span class="kw-2">&amp;</span>Scalar) -&gt; <span class="prelude-ty">Result</span>&lt;Signature, Error&gt;
+    <span class="kw">where
+        </span>K: Borrow&lt;Scalar&gt; + Invert&lt;Output = Scalar&gt;,
     {
-        <span class="kw">let</span> <span class="ident">k_inverse</span> <span class="op">=</span> <span class="ident">ephemeral_scalar</span>.<span class="ident">invert</span>();
-        <span class="kw">let</span> <span class="ident">k</span> <span class="op">=</span> <span class="ident">ephemeral_scalar</span>.<span class="ident">borrow</span>();
+        <span class="kw">let </span>k_inverse = ephemeral_scalar.invert();
+        <span class="kw">let </span>k = ephemeral_scalar.borrow();
 
-        <span class="kw">if</span> <span class="ident">k_inverse</span>.<span class="ident">is_none</span>().<span class="ident">into</span>() <span class="op">|</span><span class="op">|</span> <span class="ident">k</span>.<span class="ident">is_zero</span>().<span class="ident">into</span>() {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::new</span>());
+        <span class="kw">if </span>k_inverse.is_none().into() || k.is_zero().into() {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new());
         }
 
-        <span class="kw">let</span> <span class="ident">k_inverse</span> <span class="op">=</span> <span class="ident">k_inverse</span>.<span class="ident">unwrap</span>();
+        <span class="kw">let </span>k_inverse = k_inverse.unwrap();
 
-        <span class="comment">// Compute `x`-coordinate of affine point 𝑘×𝑮</span>
-        <span class="kw">let</span> <span class="ident">x</span> <span class="op">=</span> (<span class="ident">ProjectivePoint::generator</span>() <span class="op">*</span> <span class="ident">k</span>).<span class="ident">to_affine</span>().<span class="ident">x</span>;
+        <span class="comment">// Compute `x`-coordinate of affine point 𝑘×𝑮
+        </span><span class="kw">let </span>x = (ProjectivePoint::generator() * k).to_affine().x;
 
-        <span class="comment">// Lift `x` (element of base field) to serialized big endian integer,</span>
-        <span class="comment">// then reduce it to an element of the scalar field</span>
-        <span class="kw">let</span> <span class="ident">r</span> <span class="op">=</span> <span class="ident">Scalar::from_bytes_reduced</span>(<span class="kw-2">&amp;</span><span class="ident">x</span>.<span class="ident">to_bytes</span>());
+        <span class="comment">// Lift `x` (element of base field) to serialized big endian integer,
+        // then reduce it to an element of the scalar field
+        </span><span class="kw">let </span>r = Scalar::from_bytes_reduced(<span class="kw-2">&amp;</span>x.to_bytes());
 
-        <span class="comment">// Compute `s` as a signature over `r` and `z`.</span>
-        <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">k_inverse</span> <span class="op">*</span> (<span class="ident">z</span> <span class="op">+</span> <span class="kw-2">&amp;</span>(<span class="ident">r</span> <span class="op">*</span> <span class="self">self</span>));
+        <span class="comment">// Compute `s` as a signature over `r` and `z`.
+        </span><span class="kw">let </span>s = k_inverse * (z + <span class="kw-2">&amp;</span>(r * <span class="self">self</span>));
 
-        <span class="kw">if</span> <span class="ident">s</span>.<span class="ident">is_zero</span>().<span class="ident">into</span>() {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::new</span>());
+        <span class="kw">if </span>s.is_zero().into() {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new());
         }
 
-        <span class="ident">Signature::from_scalars</span>(<span class="ident">r</span>, <span class="ident">s</span>)
+        Signature::from_scalars(r, s)
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;ecdsa&quot;</span>)]</span>
-<span class="kw">impl</span> <span class="ident">VerifyPrimitive</span><span class="op">&lt;</span><span class="ident">NistP256</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">AffinePoint</span> {
-    <span class="kw">fn</span> <span class="ident">verify_prehashed</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">z</span>: <span class="kw-2">&amp;</span><span class="ident">Scalar</span>, <span class="ident">signature</span>: <span class="kw-2">&amp;</span><span class="ident">Signature</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">r</span> <span class="op">=</span> <span class="ident">signature</span>.<span class="ident">r</span>();
-        <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">signature</span>.<span class="ident">s</span>();
-        <span class="kw">let</span> <span class="ident">s_inv</span> <span class="op">=</span> <span class="ident">s</span>.<span class="ident">invert</span>().<span class="ident">unwrap</span>();
-        <span class="kw">let</span> <span class="ident">u1</span> <span class="op">=</span> <span class="ident">z</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">s_inv</span>;
-        <span class="kw">let</span> <span class="ident">u2</span> <span class="op">=</span> <span class="kw-2">*</span><span class="ident">r</span> <span class="op">*</span> <span class="ident">s_inv</span>;
+<span class="attribute">#[cfg(feature = <span class="string">&quot;ecdsa&quot;</span>)]
+</span><span class="kw">impl </span>VerifyPrimitive&lt;NistP256&gt; <span class="kw">for </span>AffinePoint {
+    <span class="kw">fn </span>verify_prehashed(<span class="kw-2">&amp;</span><span class="self">self</span>, z: <span class="kw-2">&amp;</span>Scalar, signature: <span class="kw-2">&amp;</span>Signature) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
+        <span class="kw">let </span>r = signature.r();
+        <span class="kw">let </span>s = signature.s();
+        <span class="kw">let </span>s_inv = s.invert().unwrap();
+        <span class="kw">let </span>u1 = z * <span class="kw-2">&amp;</span>s_inv;
+        <span class="kw">let </span>u2 = <span class="kw-2">*</span>r * s_inv;
 
-        <span class="kw">let</span> <span class="ident">x</span> <span class="op">=</span> ((<span class="ident">ProjectivePoint::generator</span>() <span class="op">*</span> <span class="ident">u1</span>) <span class="op">+</span> (<span class="ident">ProjectivePoint::from</span>(<span class="kw-2">*</span><span class="self">self</span>) <span class="op">*</span> <span class="ident">u2</span>))
-            .<span class="ident">to_affine</span>()
-            .<span class="ident">x</span>;
+        <span class="kw">let </span>x = ((ProjectivePoint::generator() * u1) + (ProjectivePoint::from(<span class="kw-2">*</span><span class="self">self</span>) * u2))
+            .to_affine()
+            .x;
 
-        <span class="kw">if</span> <span class="ident">Scalar::from_bytes_reduced</span>(<span class="kw-2">&amp;</span><span class="ident">x</span>.<span class="ident">to_bytes</span>()) <span class="op">==</span> <span class="kw-2">*</span><span class="ident">r</span> {
+        <span class="kw">if </span>Scalar::from_bytes_reduced(<span class="kw-2">&amp;</span>x.to_bytes()) == <span class="kw-2">*</span>r {
             <span class="prelude-val">Ok</span>(())
-        } <span class="kw">else</span> {
-            <span class="prelude-val">Err</span>(<span class="ident">Error::new</span>())
+        } <span class="kw">else </span>{
+            <span class="prelude-val">Err</span>(Error::new())
         }
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">test</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;ecdsa&quot;</span>))]</span>
-<span class="kw">mod</span> <span class="ident">tests</span> {
-    <span class="kw">use</span> <span class="kw">crate</span>::{
-        <span class="ident">ecdsa</span>::{<span class="ident">signature::Signer</span>, <span class="ident">SigningKey</span>},
-        <span class="ident">test_vectors::ecdsa::ECDSA_TEST_VECTORS</span>,
-        <span class="ident">BlindedScalar</span>, <span class="ident">Scalar</span>,
+<span class="attribute">#[cfg(all(test, feature = <span class="string">&quot;ecdsa&quot;</span>))]
+</span><span class="kw">mod </span>tests {
+    <span class="kw">use crate</span>::{
+        ecdsa::{signature::Signer, SigningKey},
+        test_vectors::ecdsa::ECDSA_TEST_VECTORS,
+        BlindedScalar, Scalar,
     };
-    <span class="kw">use</span> <span class="ident">ecdsa_core::hazmat::SignPrimitive</span>;
-    <span class="kw">use</span> <span class="ident">elliptic_curve</span>::{<span class="ident">generic_array::GenericArray</span>, <span class="ident">group::ff::PrimeField</span>, <span class="ident">rand_core::OsRng</span>};
-    <span class="kw">use</span> <span class="ident">hex_literal::hex</span>;
+    <span class="kw">use </span>ecdsa_core::hazmat::SignPrimitive;
+    <span class="kw">use </span>elliptic_curve::{generic_array::GenericArray, group::ff::PrimeField, rand_core::OsRng};
+    <span class="kw">use </span>hex_literal::hex;
 
-    <span class="comment">// Test vector from RFC 6979 Appendix 2.5 (NIST P-256 + SHA-256)</span>
-    <span class="comment">// &lt;https://tools.ietf.org/html/rfc6979#appendix-A.2.5&gt;</span>
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">rfc6979</span>() {
-        <span class="kw">let</span> <span class="ident">x</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="macro">hex!</span>(<span class="string">&quot;c9afa9d845ba75166b5c215767b1d6934e50c3db36e89b127b8a622b120f6721&quot;</span>);
-        <span class="kw">let</span> <span class="ident">signer</span> <span class="op">=</span> <span class="ident">SigningKey::from_bytes</span>(<span class="ident">x</span>).<span class="ident">unwrap</span>();
-        <span class="kw">let</span> <span class="ident">signature</span> <span class="op">=</span> <span class="ident">signer</span>.<span class="ident">sign</span>(<span class="string">b&quot;sample&quot;</span>);
+    <span class="comment">// Test vector from RFC 6979 Appendix 2.5 (NIST P-256 + SHA-256)
+    // &lt;https://tools.ietf.org/html/rfc6979#appendix-A.2.5&gt;
+    </span><span class="attribute">#[test]
+    </span><span class="kw">fn </span>rfc6979() {
+        <span class="kw">let </span>x = <span class="kw-2">&amp;</span><span class="macro">hex!</span>(<span class="string">&quot;c9afa9d845ba75166b5c215767b1d6934e50c3db36e89b127b8a622b120f6721&quot;</span>);
+        <span class="kw">let </span>signer = SigningKey::from_bytes(x).unwrap();
+        <span class="kw">let </span>signature = signer.sign(<span class="string">b&quot;sample&quot;</span>);
         <span class="macro">assert_eq!</span>(
-            <span class="ident">signature</span>.<span class="ident">as_ref</span>(),
+            signature.as_ref(),
             <span class="kw-2">&amp;</span><span class="macro">hex!</span>(
                 <span class="string">&quot;efd48b2aacb6a8fd1140dd9cd45e81d69d2c877b56aaf991c34d0ea84eaf3716
-                     f7cb1c942d657c41d436c7a1b6e29f65f3e900dbb9aff4064dc4ab2f843acda8&quot;</span>
-            )[..]
+                     f7cb1c942d657c41d436c7a1b6e29f65f3e900dbb9aff4064dc4ab2f843acda8&quot;
+            </span>)[..]
         );
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">scalar_blinding</span>() {
-        <span class="kw">let</span> <span class="ident">vector</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">ECDSA_TEST_VECTORS</span>[<span class="number">0</span>];
-        <span class="kw">let</span> <span class="ident">d</span> <span class="op">=</span> <span class="ident">Scalar::from_repr</span>(<span class="ident">GenericArray::clone_from_slice</span>(<span class="ident">vector</span>.<span class="ident">d</span>)).<span class="ident">unwrap</span>();
-        <span class="kw">let</span> <span class="ident">k</span> <span class="op">=</span> <span class="ident">Scalar::from_repr</span>(<span class="ident">GenericArray::clone_from_slice</span>(<span class="ident">vector</span>.<span class="ident">k</span>)).<span class="ident">unwrap</span>();
-        <span class="kw">let</span> <span class="ident">k_blinded</span> <span class="op">=</span> <span class="ident">BlindedScalar::new</span>(<span class="ident">k</span>, <span class="kw-2">&amp;mut</span> <span class="ident">OsRng</span>);
-        <span class="kw">let</span> <span class="ident">z</span> <span class="op">=</span> <span class="ident">Scalar::from_repr</span>(<span class="ident">GenericArray::clone_from_slice</span>(<span class="ident">vector</span>.<span class="ident">m</span>)).<span class="ident">unwrap</span>();
-        <span class="kw">let</span> <span class="ident">sig</span> <span class="op">=</span> <span class="ident">d</span>.<span class="ident">try_sign_prehashed</span>(<span class="kw-2">&amp;</span><span class="ident">k_blinded</span>, <span class="kw-2">&amp;</span><span class="ident">z</span>).<span class="ident">unwrap</span>();
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>scalar_blinding() {
+        <span class="kw">let </span>vector = <span class="kw-2">&amp;</span>ECDSA_TEST_VECTORS[<span class="number">0</span>];
+        <span class="kw">let </span>d = Scalar::from_repr(GenericArray::clone_from_slice(vector.d)).unwrap();
+        <span class="kw">let </span>k = Scalar::from_repr(GenericArray::clone_from_slice(vector.k)).unwrap();
+        <span class="kw">let </span>k_blinded = BlindedScalar::new(k, <span class="kw-2">&amp;mut </span>OsRng);
+        <span class="kw">let </span>z = Scalar::from_repr(GenericArray::clone_from_slice(vector.m)).unwrap();
+        <span class="kw">let </span>sig = d.try_sign_prehashed(<span class="kw-2">&amp;</span>k_blinded, <span class="kw-2">&amp;</span>z).unwrap();
 
-        <span class="macro">assert_eq!</span>(<span class="ident">vector</span>.<span class="ident">r</span>, <span class="ident">sig</span>.<span class="ident">r</span>().<span class="ident">to_bytes</span>().<span class="ident">as_slice</span>());
-        <span class="macro">assert_eq!</span>(<span class="ident">vector</span>.<span class="ident">s</span>, <span class="ident">sig</span>.<span class="ident">s</span>().<span class="ident">to_bytes</span>().<span class="ident">as_slice</span>());
+        <span class="macro">assert_eq!</span>(vector.r, sig.r().to_bytes().as_slice());
+        <span class="macro">assert_eq!</span>(vector.s, sig.s().to_bytes().as_slice());
     }
 
-    <span class="kw">mod</span> <span class="ident">sign</span> {
-        <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">test_vectors::ecdsa::ECDSA_TEST_VECTORS</span>, <span class="ident">NistP256</span>};
-        <span class="macro">ecdsa_core::new_signing_test!</span>(<span class="ident">NistP256</span>, <span class="ident">ECDSA_TEST_VECTORS</span>);
+    <span class="kw">mod </span>sign {
+        <span class="kw">use crate</span>::{test_vectors::ecdsa::ECDSA_TEST_VECTORS, NistP256};
+        <span class="macro">ecdsa_core::new_signing_test!</span>(NistP256, ECDSA_TEST_VECTORS);
     }
 
-    <span class="kw">mod</span> <span class="ident">verify</span> {
-        <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">test_vectors::ecdsa::ECDSA_TEST_VECTORS</span>, <span class="ident">NistP256</span>};
-        <span class="macro">ecdsa_core::new_verification_test!</span>(<span class="ident">NistP256</span>, <span class="ident">ECDSA_TEST_VECTORS</span>);
+    <span class="kw">mod </span>verify {
+        <span class="kw">use crate</span>::{test_vectors::ecdsa::ECDSA_TEST_VECTORS, NistP256};
+        <span class="macro">ecdsa_core::new_verification_test!</span>(NistP256, ECDSA_TEST_VECTORS);
     }
 
-    <span class="kw">mod</span> <span class="ident">wycheproof</span> {
-        <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::NistP256</span>;
-        <span class="macro">ecdsa_core::new_wycheproof_test!</span>(<span class="ident">wycheproof</span>, <span class="string">&quot;wycheproof&quot;</span>, <span class="ident">NistP256</span>);
+    <span class="kw">mod </span>wycheproof {
+        <span class="kw">use </span><span class="kw">crate</span>::NistP256;
+        <span class="macro">ecdsa_core::new_wycheproof_test!</span>(wycheproof, <span class="string">&quot;wycheproof&quot;</span>, NistP256);
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="p256" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="p256" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>
