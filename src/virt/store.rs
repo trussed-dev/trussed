@@ -108,7 +108,11 @@ impl Filesystem {
             file.set_len(len).expect("failed to set storage file len");
             true
         };
-        Self { internal, format }
+        let fs = Self { internal, format };
+        unsafe {
+            fs.reset();
+        }
+        fs
     }
 }
 
@@ -147,8 +151,18 @@ store!(
     Volatile: VolatileStorage
 );
 
-#[derive(Copy, Clone, Debug, Default)]
+#[derive(Copy, Clone, Debug)]
 pub struct Ram {}
+
+impl Default for Ram {
+    fn default() -> Self {
+        let ram = Self {};
+        unsafe {
+            ram.reset();
+        }
+        ram
+    }
+}
 
 impl StoreProvider for Ram {
     type Store = RamStore;
