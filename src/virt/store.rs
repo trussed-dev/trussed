@@ -22,7 +22,7 @@ pub trait StoreProvider {
     unsafe fn reset(&self);
 }
 
-const STORAGE_SIZE: usize = 1024 * 16;
+const STORAGE_SIZE: usize = 512 * 128;
 
 const_ram_storage!(InternalStorage, STORAGE_SIZE);
 const_ram_storage!(ExternalStorage, STORAGE_SIZE);
@@ -48,6 +48,7 @@ impl Storage for FilesystemStorage {
     // type ATTRBYTES_MAX = U1022;
 
     fn read(&self, offset: usize, buffer: &mut [u8]) -> LfsResult<usize> {
+        debug!("read: offset: {}, len: {}", offset, buffer.len());
         let mut file = File::open(&self.0).unwrap();
         file.seek(SeekFrom::Start(offset as _)).unwrap();
         let bytes_read = file.read(buffer).unwrap();
@@ -56,6 +57,10 @@ impl Storage for FilesystemStorage {
     }
 
     fn write(&mut self, offset: usize, data: &[u8]) -> LfsResult<usize> {
+        debug!("write: offset: {}, len: {}", offset, data.len());
+        if offset + data.len() > STORAGE_SIZE {
+            return Err(littlefs2::io::Error::NoSpace);
+        }
         let mut file = OpenOptions::new().write(true).open(&self.0).unwrap();
         file.seek(SeekFrom::Start(offset as _)).unwrap();
         let bytes_written = file.write(data).unwrap();
@@ -65,6 +70,10 @@ impl Storage for FilesystemStorage {
     }
 
     fn erase(&mut self, offset: usize, len: usize) -> LfsResult<usize> {
+        debug!("erase: offset: {}, len: {}", offset, len);
+        if offset + len > STORAGE_SIZE {
+            return Err(littlefs2::io::Error::NoSpace);
+        }
         let mut file = OpenOptions::new().write(true).open(&self.0).unwrap();
         file.seek(SeekFrom::Start(offset as _)).unwrap();
         let zero_block = [0xFFu8; Self::BLOCK_SIZE];
