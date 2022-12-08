@@ -51,7 +51,7 @@ impl Storage for FilesystemStorage {
         let mut file = File::open(&self.0).unwrap();
         file.seek(SeekFrom::Start(offset as _)).unwrap();
         let bytes_read = file.read(buffer).unwrap();
-        assert_eq!(bytes_read, buffer.len());
+        assert!(bytes_read <= buffer.len());
         Ok(bytes_read as _)
     }
 
