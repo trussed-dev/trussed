@@ -39,7 +39,7 @@ where
     // let rng = chacha20::ChaCha8Rng::from_rng(rand_core::OsRng).unwrap();
     let platform = Platform {
         rng: ChaCha8Rng::from_seed([42u8; 32]),
-        store,
+        _store: store,
         ui: UserInterface::new(),
     };
     f(platform)
@@ -70,7 +70,7 @@ where
 
 pub struct Platform<S: StoreProvider> {
     rng: ChaCha8Rng,
-    store: S,
+    _store: S,
     ui: UserInterface,
 }
 
@@ -100,6 +100,6 @@ unsafe impl<S: StoreProvider> platform::Platform for Platform<S> {
     }
 
     fn store(&self) -> Self::S {
-        unsafe { self.store.store() }
+        unsafe { S::store() }
     }
 }
