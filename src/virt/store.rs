@@ -17,7 +17,7 @@ use crate::{
 pub trait StoreProvider {
     type Store: Store;
 
-    unsafe fn store(&self) -> Self::Store;
+    unsafe fn store() -> Self::Store;
 
     unsafe fn reset(&self);
 }
@@ -124,7 +124,7 @@ impl Filesystem {
 impl StoreProvider for Filesystem {
     type Store = FilesystemStore;
 
-    unsafe fn store(&self) -> Self::Store {
+    unsafe fn store() -> Self::Store {
         Self::Store { __: PhantomData }
     }
 
@@ -135,7 +135,7 @@ impl StoreProvider for Filesystem {
         let (ifs_alloc, ifs_storage, efs_alloc, efs_storage, vfs_alloc, vfs_storage) =
             Self::Store::allocate(ifs, efs, vfs);
         let format = self.format;
-        self.store()
+        Self::store()
             .mount(
                 ifs_alloc,
                 ifs_storage,
@@ -162,7 +162,7 @@ pub struct Ram {}
 impl StoreProvider for Ram {
     type Store = RamStore;
 
-    unsafe fn store(&self) -> Self::Store {
+    unsafe fn store() -> Self::Store {
         Self::Store { __: PhantomData }
     }
 
@@ -172,7 +172,7 @@ impl StoreProvider for Ram {
         let vfs = VolatileStorage::default();
         let (ifs_alloc, ifs_storage, efs_alloc, efs_storage, vfs_alloc, vfs_storage) =
             Self::Store::allocate(ifs, efs, vfs);
-        self.store()
+        Self::store()
             .mount(
                 ifs_alloc,
                 ifs_storage,
