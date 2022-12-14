@@ -32,6 +32,7 @@ where
 {
     let _guard = MUTEX.lock().unwrap_or_else(|err| err.into_inner());
     unsafe {
+        TrussedInterchange::reset_claims();
         store.reset();
     }
     // causing a regression again
@@ -79,23 +80,9 @@ impl<S: StoreProvider> Platform<S> {
         client_id: &str,
         test: impl FnOnce(ClientImplementation<Service<Self>>) -> R,
     ) -> R {
-        let service = Service::from(self);
+        let service = Service::new(self);
         let client = service.try_into_new_client(client_id).unwrap();
         test(client)
-    }
-}
-
-impl<S: StoreProvider> From<Platform<S>> for Service<Platform<S>> {
-    fn from(platform: Platform<S>) -> Self {
-        // reset platform
-        unsafe {
-            TrussedInterchange::reset_claims();
-        }
-        unsafe {
-            platform.store.reset();
-        }
-
-        Service::new(platform)
     }
 }
 
