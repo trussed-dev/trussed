@@ -39,6 +39,9 @@ where
     F: FnOnce(Platform<S>) -> R,
 {
     let _guard = MUTEX.lock().unwrap_or_else(|err| err.into_inner());
+    unsafe {
+        store.reset();
+    }
     // causing a regression again
     // let rng = chacha20::ChaCha8Rng::from_rng(rand_core::OsRng).unwrap();
     let platform = Platform {
