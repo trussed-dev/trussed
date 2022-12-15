@@ -72,6 +72,8 @@
 <span id="72">72</span>
 <span id="73">73</span>
 <span id="74">74</span>
+<span id="75">75</span>
+<span id="76">76</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::api::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">crate</span>::error::Error;
 <span class="kw">use </span><span class="kw">crate</span>::service::<span class="kw-2">*</span>;
@@ -90,7 +92,9 @@
         <span class="kw">let </span>key_id = request.base_key;
         <span class="kw">let </span>key = keystore.load_key(key::Secrecy::Secret, <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span>key_id)<span class="question-mark">?</span>;
         <span class="kw">if </span>!<span class="macro">matches!</span>(key.kind, key::Kind::Symmetric(..) | key::Kind::Shared(..)) {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::WrongKeyKind);
+            <span class="comment">// We have to disable this check for compatibility with fido-authenticator, see:
+            // https://github.com/solokeys/fido-authenticator/issues/21
+            </span><span class="macro">warn!</span>(<span class="string">&quot;derive_key for hmacsha256 called with invalid key kind ({:?})&quot;</span>, key.kind);
         }
         <span class="kw">let </span>shared_secret = key.material;
 
