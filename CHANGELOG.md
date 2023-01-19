@@ -31,8 +31,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed off-by-one error in `RandomBytes` request.
 - Fixed a race condition when iterating over the filesystem in more than one
   client ([#64]).
+- Fixed missing path validation in `Filestore` that allowed clients to escape
+  their namespace ([#65]).
 
 [#64]: https://github.com/trussed-dev/trussed/issues/64
+[#65]: https://github.com/trussed-dev/trussed/issues/65
 
 ## [0.1.0] - 2022-01-26
 
