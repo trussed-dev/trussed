@@ -40,12 +40,17 @@ impl<S: Store> ClientFilestore<S> {
     }
 
     /// Client files are store below `/<client_id>/dat/`.
-    pub fn actual_path(&self, client_path: &PathBuf) -> PathBuf {
+    pub fn actual_path(&self, client_path: &PathBuf) -> Result<PathBuf> {
+        // Clients must not escape their namespace
+        if client_path.as_ref().contains("..") {
+            return Err(Error::InvalidPath);
+        }
+
         let mut path = PathBuf::new();
         path.push(&self.client_id);
         path.push(&PathBuf::from("dat"));
         path.push(client_path);
-        path
+        Ok(path)
     }
 
     // TODO: this is waaay too fiddly, need an approach
@@ -126,27 +131,30 @@ pub trait Filestore {
 
 impl<S: Store> Filestore for ClientFilestore<S> {
     fn read<const N: usize>(&mut self, path: &PathBuf, location: Location) -> Result<Bytes<N>> {
-        let path = self.actual_path(path);
+        let path = self.actual_path(path)?;
 
         store::read(self.store, location, &path)
     }
 
     fn write(&mut self, path: &PathBuf, location: Location, data: &[u8]) -> Result<()> {
-        let path = self.actual_path(path);
+        let path = self.actual_path(path)?;
         store::store(self.store, location, &path, data)
     }
 
     fn exists(&mut self, path: &PathBuf, location: Location) -> bool {
-        let path = self.actual_path(path);
-        store::exists(self.store, location, &path)
+        if let Ok(path) = self.actual_path(path) {
+            store::exists(self.store, location, &path)
+        } else {
+            false
+        }
     }
     fn metadata(&mut self, path: &PathBuf, location: Location) -> Result<Option<Metadata>> {
-        let path = self.actual_path(path);
+        let path = self.actual_path(path)?;
         store::metadata(self.store, location, &path)
     }
 
     fn remove_file(&mut self, path: &PathBuf, location: Location) -> Result<()> {
-        let path = self.actual_path(path);
+        let path = self.actual_path(path)?;
 
         match store::delete(self.store, location, &path) {
             true => Ok(()),
@@ -155,7 +163,7 @@ impl<S: Store> Filestore for ClientFilestore<S> {
     }
 
     fn remove_dir(&mut self, path: &PathBuf, location: Location) -> Result<()> {
-        let path = self.actual_path(path);
+        let path = self.actual_path(path)?;
 
         match store::delete(self.store, location, &path) {
             true => Ok(()),
@@ -164,7 +172,7 @@ impl<S: Store> Filestore for ClientFilestore<S> {
     }
 
     fn remove_dir_all(&mut self, path: &PathBuf, location: Location) -> Result<usize> {
-        let path = self.actual_path(path);
+        let path = self.actual_path(path)?;
 
         store::remove_dir_all_where(self.store, location, &path, |_| true)
             .map_err(|_| Error::InternalError)
@@ -181,7 +189,7 @@ impl<S: Store> Filestore for ClientFilestore<S> {
         }
         let fs = self.store.ifs();
 
-        let dir = self.actual_path(clients_dir);
+        let dir = self.actual_path(clients_dir)?;
 
         Ok(fs
             .read_dir_and_then(&dir, |it| {
@@ -270,7 +278,7 @@ impl<S: Store> Filestore for ClientFilestore<S> {
         }
         let fs = self.store.ifs();
 
-        let dir = self.actual_path(clients_dir);
+        let dir = self.actual_path(clients_dir)?;
 
         Ok(fs
             .read_dir_and_then(&dir, |it| {
@@ -392,7 +400,7 @@ impl<S: Store> Filestore for ClientFilestore<S> {
         }
 
         let clients_dir = underneath.unwrap_or_else(|| PathBuf::from("/"));
-        let dir = self.actual_path(&clients_dir);
+        let dir = self.actual_path(&clients_dir)?;
         let fs = self.store.ifs();
 
         info_now!("base dir {:?}", &dir);
