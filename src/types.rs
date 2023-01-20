@@ -24,6 +24,10 @@ use crate::store::filestore::{ReadDirFilesState, ReadDirState};
 pub use crate::client::FutureResult;
 pub use crate::platform::Platform;
 
+/// An empty enum that cannot be constructed.
+#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+pub enum Empty {}
+
 /// The ID of a Trussed object.
 ///
 /// Apart from the 256 "special" IDs, generated as a random 128-bit number,

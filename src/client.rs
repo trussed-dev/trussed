@@ -77,11 +77,13 @@
 //!
 use core::{marker::PhantomData, task::Poll};
 
-use interchange::Requester;
+use interchange::{Interchange as _, Requester};
 
 use crate::api::*;
+use crate::backend::{BackendId, Dispatch};
 use crate::error::*;
 use crate::pipe::TrussedInterchange;
+use crate::service::Service;
 use crate::types::*;
 
 pub use crate::platform::Syscall;
@@ -684,6 +686,83 @@ pub trait UiClient: PollClient {
 
     fn wink(&mut self, duration: core::time::Duration) -> ClientResult<'_, reply::Wink, Self> {
         self.request(request::Wink { duration })
+    }
+}
+
+/// Builder for [`ClientImplementation`][].
+///
+/// This builder can be used to select the backends used for the client.  If no backends are used,
+/// [`Service::try_new_client`][], [`Service::try_as_new_client`][] and
+/// [`Service::try_into_new_client`][] can be used directly.
+///
+/// The maximum number of clients that can be created is defined by the `clients-?` features.  If
+/// this number is exceeded, [`Error::ClientCountExceeded`][] is returned.
+pub struct ClientBuilder<I: 'static = Empty> {
+    id: PathBuf,
+    backends: &'static [BackendId<I>],
+}
+
+impl ClientBuilder {
+    /// Creates a new client builder using the given client ID.
+    ///
+    /// Per default, the client does not support backends and always uses the Trussed core
+    /// implementation to execute requests.
+    pub fn new(id: impl Into<PathBuf>) -> Self {
+        Self {
+            id: id.into(),
+            backends: &[],
+        }
+    }
+}
+
+impl<I: 'static> ClientBuilder<I> {
+    /// Selects the backends to use for this client.
+    ///
+    /// If `backends` is empty, the Trussed core implementation is always used.
+    pub fn backends<J: 'static>(self, backends: &'static [BackendId<J>]) -> ClientBuilder<J> {
+        ClientBuilder {
+            id: self.id,
+            backends,
+        }
+    }
+
+    fn create_endpoint<P: Platform, D: Dispatch<P, BackendId = I>>(
+        self,
+        service: &mut Service<P, D>,
+    ) -> Result<Requester<TrussedInterchange>, Error> {
+        let (requester, responder) =
+            TrussedInterchange::claim().ok_or(Error::ClientCountExceeded)?;
+        let client_ctx = ClientContext::from(self.id);
+        service.add_endpoint(responder, client_ctx, self.backends)?;
+        Ok(requester)
+    }
+
+    /// Builds the client using a custom [`Syscall`][] implementation.
+    pub fn build<P: Platform, D: Dispatch<P, BackendId = I>, S: Syscall>(
+        self,
+        service: &mut Service<P, D>,
+        syscall: S,
+    ) -> Result<ClientImplementation<S>, Error> {
+        self.create_endpoint(service)
+            .map(|requester| ClientImplementation::new(requester, syscall))
+    }
+
+    /// Builds the client using a [`Service`][] instance.
+    pub fn build_with_service<P: Platform, D: Dispatch<P, BackendId = I>>(
+        self,
+        mut service: Service<P, D>,
+    ) -> Result<ClientImplementation<Service<P, D>>, Error> {
+        self.create_endpoint(&mut service)
+            .map(|requester| ClientImplementation::new(requester, service))
+    }
+
+    /// Builds the client using a mutable reference to a [`Service`][].
+    pub fn build_with_service_mut<P: Platform, D: Dispatch<P, BackendId = I>>(
+        self,
+        service: &mut Service<P, D>,
+    ) -> Result<ClientImplementation<&mut Service<P, D>>, Error> {
+        self.create_endpoint(service)
+            .map(|requester| ClientImplementation::new(requester, service))
     }
 }
 
