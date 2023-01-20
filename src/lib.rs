@@ -23,6 +23,7 @@ generate_macros!();
 pub use interchange::Interchange;
 
 pub mod api;
+pub mod backend;
 pub mod client;
 pub mod config;
 pub mod error;

@@ -12,13 +12,18 @@ use chacha20::ChaCha8Rng;
 use rand_core::SeedableRng as _;
 
 use crate::{
-    pipe::TrussedInterchange, platform, service::Service, ClientImplementation, Interchange as _,
+    backend::{BackendId, CoreOnly, Dispatch},
+    client::ClientBuilder,
+    pipe::TrussedInterchange,
+    platform,
+    service::Service,
+    ClientImplementation, Interchange as _,
 };
 
 pub use store::{Filesystem, Ram, StoreProvider};
 pub use ui::UserInterface;
 
-pub type Client<S> = ClientImplementation<Service<Platform<S>>>;
+pub type Client<S, D = CoreOnly> = ClientImplementation<Service<Platform<S>, D>>;
 
 // We need this mutex to make sure that:
 // - TrussedInterchange is not used concurrently
@@ -82,6 +87,21 @@ impl<S: StoreProvider> Platform<S> {
     ) -> R {
         let service = Service::new(self);
         let client = service.try_into_new_client(client_id).unwrap();
+        test(client)
+    }
+
+    pub fn run_client_with_backends<R, D: Dispatch<Self>>(
+        self,
+        client_id: &str,
+        dispatch: D,
+        backends: &'static [BackendId<D::BackendId>],
+        test: impl FnOnce(ClientImplementation<Service<Self, D>>) -> R,
+    ) -> R {
+        let service = Service::with_dispatch(self, dispatch);
+        let client = ClientBuilder::new(client_id)
+            .backends(backends)
+            .build_with_service(service)
+            .unwrap();
         test(client)
     }
 }

@@ -23,6 +23,7 @@ pub enum Error {
     // our errors
     AeadError,
     CborError,
+    ClientCountExceeded,
     EntropyMalfunction,
     FilesystemReadFailure,
     FilesystemWriteFailure,

@@ -187,7 +187,7 @@ macro_rules! setup {
         let test_client_id = "TEST";
 
         assert!(trussed
-            .add_endpoint(test_trussed_responder, test_client_id)
+            .add_endpoint(test_trussed_responder, test_client_id, &[])
             .is_ok());
 
         trussed.set_seed_if_uninitialized(&$seed);
