@@ -18,7 +18,10 @@ impl DeriveKey for super::HmacSha256 {
         if !matches!(key.kind, key::Kind::Symmetric(..) | key::Kind::Shared(..)) {
             // We have to disable this check for compatibility with fido-authenticator, see:
             // https://github.com/solokeys/fido-authenticator/issues/21
-            warn!("derive_key for hmacsha256 called with invalid key kind ({:?})", key.kind);
+            warn!(
+                "derive_key for hmacsha256 called with invalid key kind ({:?})",
+                key.kind
+            );
         }
         let shared_secret = key.material;
 
