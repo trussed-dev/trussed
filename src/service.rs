@@ -5,7 +5,7 @@ use littlefs2::path::PathBuf;
 pub use rand_core::{RngCore, SeedableRng};
 
 use crate::api::*;
-use crate::backend::{BackendId, CoreOnly, Dispatch};
+use crate::backend::{BackendId, CoreOnly};
 use crate::client::{ClientBuilder, ClientImplementation};
 use crate::config::*;
 use crate::error::{Error, Result};
@@ -54,11 +54,27 @@ rpc_trait! {
     WrapKey, wrap_key,
 }
 
+cfg_if::cfg_if! {
+    if #[cfg(feature = "ext")] {
+        use crate::ext::ExtensionDispatch;
+
+        pub trait DispatchRequirement<P: Platform>: ExtensionDispatch<P> {}
+
+        impl<P: Platform, D: ExtensionDispatch<P>> DispatchRequirement<P> for D {}
+    } else {
+        use crate::backend::Dispatch;
+
+        pub trait DispatchRequirement<P: Platform>: Dispatch<P> {}
+
+        impl<P: Platform, D: Dispatch<P>> DispatchRequirement<P> for D {}
+    }
+}
+
 pub struct ServiceResources<P>
 where
     P: Platform,
 {
-    pub(crate) platform: P,
+    platform: P,
     rng_state: Option<ChaCha8Rng>,
 }
 
@@ -69,12 +85,20 @@ impl<P: Platform> ServiceResources<P> {
             rng_state: None,
         }
     }
+
+    pub fn platform(&self) -> &P {
+        &self.platform
+    }
+
+    pub fn platform_mut(&mut self) -> &mut P {
+        &mut self.platform
+    }
 }
 
 pub struct Service<P, D = CoreOnly>
 where
     P: Platform,
-    D: Dispatch<P>,
+    D: DispatchRequirement<P>,
 {
     eps: Vec<ServiceEndpoint<D::BackendId, D::Context>, { MAX_SERVICE_CLIENTS::USIZE }>,
     resources: ServiceResources<P>,
@@ -82,7 +106,7 @@ where
 }
 
 // need to be able to send crypto service to an interrupt handler
-unsafe impl<P: Platform, D: Dispatch<P>> Send for Service<P, D> {}
+unsafe impl<P: Platform, D: DispatchRequirement<P>> Send for Service<P, D> {}
 
 impl<P: Platform> ServiceResources<P> {
     pub fn certstore(&mut self, ctx: &CoreContext) -> Result<ClientCertstore<P::S>> {
@@ -109,6 +133,32 @@ impl<P: Platform> ServiceResources<P> {
         self.rng()
             .map(|rng| ClientKeystore::new(ctx.path.clone(), rng, self.platform.store()))
             .map_err(|_| Error::EntropyMalfunction)
+    }
+
+    pub fn dispatch<D: DispatchRequirement<P>>(
+        &mut self,
+        dispatch: &mut D,
+        backend: &BackendId<D::BackendId>,
+        ctx: &mut Context<D::Context>,
+        request: &Request,
+    ) -> Result<Reply, Error> {
+        #[cfg(feature = "ext")]
+        if let Request::Extension(request) = &request {
+            if let BackendId::Custom(backend) = backend {
+                return D::ExtensionId::try_from(request.id)
+                    .and_then(|extension| {
+                        dispatch.extension_request(backend, &extension, ctx, request, self)
+                    })
+                    .map(Reply::Extension);
+            } else {
+                return Err(Error::RequestNotAvailable);
+            }
+        }
+
+        match backend {
+            BackendId::Core => self.reply_to(&mut ctx.core, request),
+            BackendId::Custom(backend) => dispatch.request(backend, ctx, request, self),
+        }
     }
 
     #[inline(never)]
@@ -574,6 +624,11 @@ impl<P: Platform> ServiceResources<P> {
                     .map(|id| Reply::WriteCertificate(reply::WriteCertificate { id } ))
             }
 
+            #[cfg(feature = "ext")]
+            Request::Extension(_) => {
+                Err(Error::RequestNotAvailable)
+            }
+
             // _ => {
             //     // #[cfg(test)]
             //     // println!("todo: {:?} request!", &request);
@@ -665,7 +720,7 @@ impl<P: Platform> Service<P> {
     }
 }
 
-impl<P: Platform, D: Dispatch<P>> Service<P, D> {
+impl<P: Platform, D: DispatchRequirement<P>> Service<P, D> {
     pub fn with_dispatch(platform: P, dispatch: D) -> Self {
         let resources = ServiceResources::new(platform);
         Self {
@@ -704,7 +759,7 @@ impl<P: Platform> Service<P> {
     }
 }
 
-impl<P: Platform, D: Dispatch<P>> Service<P, D> {
+impl<P: Platform, D: DispatchRequirement<P>> Service<P, D> {
     pub fn add_endpoint(
         &mut self,
         interchange: Responder<TrussedInterchange>,
@@ -760,23 +815,19 @@ impl<P: Platform, D: Dispatch<P>> Service<P, D> {
                 // #[cfg(test)] println!("service got request: {:?}", &request);
 
                 // resources.currently_serving = ep.client_id.clone();
-                let mut reply_result = Err(Error::RequestNotAvailable);
-                if ep.backends.is_empty() {
-                    reply_result = resources.reply_to(&mut ep.ctx.core, &request);
+                let reply_result = if ep.backends.is_empty() {
+                    resources.reply_to(&mut ep.ctx.core, &request)
                 } else {
+                    let mut reply_result = Err(Error::RequestNotAvailable);
                     for backend in ep.backends {
-                        reply_result = match backend {
-                            BackendId::Core => resources.reply_to(&mut ep.ctx.core, &request),
-                            BackendId::Custom(id) => {
-                                self.dispatch.request(id, &mut ep.ctx, &request, resources)
-                            }
-                        };
-
+                        reply_result =
+                            resources.dispatch(&mut self.dispatch, backend, &mut ep.ctx, &request);
                         if reply_result != Err(Error::RequestNotAvailable) {
                             break;
                         }
                     }
-                }
+                    reply_result
+                };
 
                 resources
                     .platform
@@ -812,7 +863,7 @@ impl<P: Platform, D: Dispatch<P>> Service<P, D> {
 impl<P, D> crate::client::Syscall for &mut Service<P, D>
 where
     P: Platform,
-    D: Dispatch<P>,
+    D: DispatchRequirement<P>,
 {
     fn syscall(&mut self) {
         self.process();
@@ -822,7 +873,7 @@ where
 impl<P, D> crate::client::Syscall for Service<P, D>
 where
     P: Platform,
-    D: Dispatch<P>,
+    D: DispatchRequirement<P>,
 {
     fn syscall(&mut self) {
         self.process();

@@ -13,7 +13,7 @@ use trussed::{
 };
 
 type Platform = virt::Platform<Ram>;
-type Client = ClientImplementation<Service<Platform, Dispatch>>;
+type Client = ClientImplementation<Service<Platform, Dispatch>, Dispatch>;
 
 const BACKENDS_TEST: &[BackendId<Backend>] = &[BackendId::Custom(Backend::Test), BackendId::Core];
 
@@ -44,6 +44,11 @@ impl backend::Dispatch<Platform> for Dispatch {
             }
         }
     }
+}
+
+#[cfg(feature = "ext")]
+impl trussed::ext::ExtensionDispatch<Platform> for Dispatch {
+    type ExtensionId = trussed::backend::NoId;
 }
 
 #[derive(Default)]

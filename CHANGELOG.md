@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added methods for creating the client stores to `ServiceResources`.
 - Implemented `unsafe_inject_key` for Aes256Cbc, Ed255, X255, P256.
 - Added support for custom backends in `backend` module.
+- Added optional support for API extensions in `ext` module behind the `ext`
+  feature.
 
 ### Changed
 
