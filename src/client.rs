@@ -732,8 +732,7 @@ impl<I: 'static> ClientBuilder<I> {
     ) -> Result<Requester<TrussedInterchange>, Error> {
         let (requester, responder) =
             TrussedInterchange::claim().ok_or(Error::ClientCountExceeded)?;
-        let client_ctx = ClientContext::from(self.id);
-        service.add_endpoint(responder, client_ctx, self.backends)?;
+        service.add_endpoint(responder, self.id, self.backends)?;
         Ok(requester)
     }
 
