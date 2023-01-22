@@ -11,7 +11,7 @@ use crate::{
     error::Error,
     platform::Platform,
     service::ServiceResources,
-    types::{ClientContext, Empty},
+    types::{Context, CoreContext, Empty, NoData},
 };
 
 /// The ID of a backend.
@@ -25,14 +25,21 @@ pub enum BackendId<I> {
 
 /// A custom backend that can override the core request implementations.
 pub trait Backend<P: Platform> {
+    /// The context for requests handled by this backend.
+    type Context: Default;
+
     /// Executes a request using this backend or returns [`Error::RequestNotAvailable`][] if it is
     /// not supported by this backend.
     fn request(
         &mut self,
-        client_ctx: &mut ClientContext,
+        core_ctx: &mut CoreContext,
+        backend_ctx: &mut Self::Context,
         request: &Request,
         resources: &mut ServiceResources<P>,
-    ) -> Result<Reply, Error>;
+    ) -> Result<Reply, Error> {
+        let _ = (core_ctx, backend_ctx, request, resources);
+        Err(Error::RequestNotAvailable)
+    }
 }
 
 /// Dispatches requests to custom backends.
@@ -44,13 +51,15 @@ pub trait Backend<P: Platform> {
 pub trait Dispatch<P: Platform> {
     /// The ID type for the custom backends used by this dispatch implementation.
     type BackendId: 'static;
+    /// The context type used by this dispatch.
+    type Context: Default;
 
     /// Executes a request using a backend or returns [`Error::RequestNotAvailable`][] if it is not
     /// supported by the backend.
     fn request(
         &mut self,
         backend: &Self::BackendId,
-        ctx: &mut ClientContext,
+        ctx: &mut Context<Self::Context>,
         request: &Request,
         resources: &mut ServiceResources<P>,
     ) -> Result<Reply, Error> {
@@ -65,4 +74,5 @@ pub struct CoreOnly;
 
 impl<P: Platform> Dispatch<P> for CoreOnly {
     type BackendId = Empty;
+    type Context = NoData;
 }

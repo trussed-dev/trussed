@@ -28,6 +28,10 @@ pub use crate::platform::Platform;
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum Empty {}
 
+/// An empty struct not storing any data.
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+pub struct NoData;
+
 /// The ID of a Trussed object.
 ///
 /// Apart from the 256 "special" IDs, generated as a random 128-bit number,
@@ -237,17 +241,36 @@ pub mod consent {
 // pub type AeadNonce = [u8; 12];
 // pub type AeadTag = [u8; 16];
 
-// The "ClientContext" struct is the closest equivalent to a PCB that Trussed
+/// The context for a syscall (per client).
+///
+/// The context stores the state used by the standard syscall implementations, see
+/// [`CoreContext`][].  Additionally, backends can define a custom context for their syscall
+/// implementations.
+pub struct Context<B> {
+    pub core: CoreContext,
+    pub backends: B,
+}
+
+impl<B: Default> From<CoreContext> for Context<B> {
+    fn from(core: CoreContext) -> Self {
+        Self {
+            core,
+            backends: B::default(),
+        }
+    }
+}
+
+// The "CoreContext" struct is the closest equivalent to a PCB that Trussed
 // currently has. Trussed currently uses it to choose the client-specific
 // subtree in the filesystem (see docs in src/store.rs) and to maintain
 // the walker state of the directory traversal syscalls.
-pub struct ClientContext {
+pub struct CoreContext {
     pub path: PathBuf,
     pub read_dir_state: Option<ReadDirState>,
     pub read_dir_files_state: Option<ReadDirFilesState>,
 }
 
-impl ClientContext {
+impl CoreContext {
     pub fn new(path: PathBuf) -> Self {
         Self {
             path,
@@ -257,13 +280,13 @@ impl ClientContext {
     }
 }
 
-impl From<PathBuf> for ClientContext {
+impl From<PathBuf> for CoreContext {
     fn from(path: PathBuf) -> Self {
         Self::new(path)
     }
 }
 
-impl From<&str> for ClientContext {
+impl From<&str> for CoreContext {
     fn from(s: &str) -> Self {
         Self::new(s.into())
     }

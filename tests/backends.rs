@@ -7,7 +7,7 @@ use trussed::{
     error::Error,
     platform,
     service::{Service, ServiceResources},
-    types::{ClientContext, Location, Message, PathBuf},
+    types::{Context, CoreContext, Location, Message, PathBuf},
     virt::{self, Ram},
     ClientImplementation,
 };
@@ -28,16 +28,20 @@ struct Dispatch {
 
 impl backend::Dispatch<Platform> for Dispatch {
     type BackendId = Backend;
+    type Context = ();
 
     fn request(
         &mut self,
         backend: &Self::BackendId,
-        ctx: &mut ClientContext,
+        ctx: &mut Context<()>,
         request: &Request,
         resources: &mut ServiceResources<Platform>,
     ) -> Result<Reply, Error> {
         match backend {
-            Backend::Test => self.test.request(ctx, request, resources),
+            Backend::Test => {
+                self.test
+                    .request(&mut ctx.core, &mut ctx.backends, request, resources)
+            }
         }
     }
 }
@@ -46,9 +50,12 @@ impl backend::Dispatch<Platform> for Dispatch {
 struct TestBackend;
 
 impl<P: platform::Platform> backend::Backend<P> for TestBackend {
+    type Context = ();
+
     fn request(
         &mut self,
-        _client_ctx: &mut ClientContext,
+        _core_ctx: &mut CoreContext,
+        _backend_ctx: &mut Self::Context,
         request: &Request,
         _resources: &mut ServiceResources<P>,
     ) -> Result<Reply, Error> {

@@ -76,7 +76,7 @@ where
     P: Platform,
     D: Dispatch<P>,
 {
-    eps: Vec<ServiceEndpoint<D::BackendId>, { MAX_SERVICE_CLIENTS::USIZE }>,
+    eps: Vec<ServiceEndpoint<D::BackendId, D::Context>, { MAX_SERVICE_CLIENTS::USIZE }>,
     resources: ServiceResources<P>,
     dispatch: D,
 }
@@ -85,43 +85,43 @@ where
 unsafe impl<P: Platform, D: Dispatch<P>> Send for Service<P, D> {}
 
 impl<P: Platform> ServiceResources<P> {
-    pub fn certstore(&mut self, client_ctx: &ClientContext) -> Result<ClientCertstore<P::S>> {
+    pub fn certstore(&mut self, ctx: &CoreContext) -> Result<ClientCertstore<P::S>> {
         self.rng()
-            .map(|rng| ClientCertstore::new(client_ctx.path.clone(), rng, self.platform.store()))
+            .map(|rng| ClientCertstore::new(ctx.path.clone(), rng, self.platform.store()))
             .map_err(|_| Error::EntropyMalfunction)
     }
 
-    pub fn counterstore(&mut self, client_ctx: &ClientContext) -> Result<ClientCounterstore<P::S>> {
+    pub fn counterstore(&mut self, ctx: &CoreContext) -> Result<ClientCounterstore<P::S>> {
         self.rng()
-            .map(|rng| ClientCounterstore::new(client_ctx.path.clone(), rng, self.platform.store()))
+            .map(|rng| ClientCounterstore::new(ctx.path.clone(), rng, self.platform.store()))
             .map_err(|_| Error::EntropyMalfunction)
     }
 
-    pub fn filestore(&mut self, client_ctx: &ClientContext) -> ClientFilestore<P::S> {
-        ClientFilestore::new(client_ctx.path.clone(), self.platform.store())
+    pub fn filestore(&mut self, ctx: &CoreContext) -> ClientFilestore<P::S> {
+        ClientFilestore::new(ctx.path.clone(), self.platform.store())
     }
 
     pub fn trussed_filestore(&mut self) -> ClientFilestore<P::S> {
         ClientFilestore::new(PathBuf::from("trussed"), self.platform.store())
     }
 
-    pub fn keystore(&mut self, client_ctx: &ClientContext) -> Result<ClientKeystore<P::S>> {
+    pub fn keystore(&mut self, ctx: &CoreContext) -> Result<ClientKeystore<P::S>> {
         self.rng()
-            .map(|rng| ClientKeystore::new(client_ctx.path.clone(), rng, self.platform.store()))
+            .map(|rng| ClientKeystore::new(ctx.path.clone(), rng, self.platform.store()))
             .map_err(|_| Error::EntropyMalfunction)
     }
 
     #[inline(never)]
-    pub fn reply_to(&mut self, client_ctx: &mut ClientContext, request: &Request) -> Result<Reply> {
+    pub fn reply_to(&mut self, ctx: &mut CoreContext, request: &Request) -> Result<Reply> {
         // TODO: what we want to do here is map an enum to a generic type
         // Is there a nicer way to do this?
 
         let full_store = self.platform.store();
 
-        let keystore = &mut self.keystore(client_ctx)?;
-        let certstore = &mut self.certstore(client_ctx)?;
-        let counterstore = &mut self.counterstore(client_ctx)?;
-        let filestore = &mut self.filestore(client_ctx);
+        let keystore = &mut self.keystore(ctx)?;
+        let certstore = &mut self.certstore(ctx)?;
+        let counterstore = &mut self.counterstore(ctx)?;
+        let filestore = &mut self.filestore(ctx);
 
         debug_now!("TRUSSED {:?}", request);
         match request {
@@ -322,11 +322,11 @@ impl<P: Platform> ServiceResources<P> {
             Request::ReadDirFirst(request) => {
                 let maybe_entry = match filestore.read_dir_first(&request.dir, request.location, request.not_before_filename.as_ref())? {
                     Some((entry, read_dir_state)) => {
-                        client_ctx.read_dir_state = Some(read_dir_state);
+                        ctx.read_dir_state = Some(read_dir_state);
                         Some(entry)
                     }
                     None => {
-                        client_ctx.read_dir_state = None;
+                        ctx.read_dir_state = None;
                         None
 
                     }
@@ -336,18 +336,18 @@ impl<P: Platform> ServiceResources<P> {
 
             Request::ReadDirNext(_request) => {
                 // ensure next call has nothing to work with, unless we store state again
-                let read_dir_state = client_ctx.read_dir_state.take();
+                let read_dir_state = ctx.read_dir_state.take();
 
                 let maybe_entry = match read_dir_state {
                     None => None,
                     Some(state) => {
                         match filestore.read_dir_next(state)? {
                             Some((entry, read_dir_state)) => {
-                                client_ctx.read_dir_state = Some(read_dir_state);
+                                ctx.read_dir_state = Some(read_dir_state);
                                 Some(entry)
                             }
                             None => {
-                                client_ctx.read_dir_state = None;
+                                ctx.read_dir_state = None;
                                 None
                             }
                         }
@@ -360,11 +360,11 @@ impl<P: Platform> ServiceResources<P> {
             Request::ReadDirFilesFirst(request) => {
                 let maybe_data = match filestore.read_dir_files_first(&request.dir, request.location, request.user_attribute.clone())? {
                     Some((data, state)) => {
-                        client_ctx.read_dir_files_state = Some(state);
+                        ctx.read_dir_files_state = Some(state);
                         data
                     }
                     None => {
-                        client_ctx.read_dir_files_state = None;
+                        ctx.read_dir_files_state = None;
                         None
                     }
                 };
@@ -372,18 +372,18 @@ impl<P: Platform> ServiceResources<P> {
             }
 
             Request::ReadDirFilesNext(_request) => {
-                let read_dir_files_state = client_ctx.read_dir_files_state.take();
+                let read_dir_files_state = ctx.read_dir_files_state.take();
 
                 let maybe_data = match read_dir_files_state {
                     None => None,
                     Some(state) => {
                         match filestore.read_dir_files_next(state)? {
                             Some((data, state)) => {
-                                client_ctx.read_dir_files_state = Some(state);
+                                ctx.read_dir_files_state = Some(state);
                                 data
                             }
                             None => {
-                                client_ctx.read_dir_files_state = None;
+                                ctx.read_dir_files_state = None;
                                 None
                             }
                         }
@@ -708,17 +708,17 @@ impl<P: Platform, D: Dispatch<P>> Service<P, D> {
     pub fn add_endpoint(
         &mut self,
         interchange: Responder<TrussedInterchange>,
-        client_ctx: impl Into<ClientContext>,
+        core_ctx: impl Into<CoreContext>,
         backends: &'static [BackendId<D::BackendId>],
     ) -> Result<(), Error> {
-        let client_ctx = client_ctx.into();
-        if client_ctx.path == PathBuf::from("trussed") {
+        let core_ctx = core_ctx.into();
+        if core_ctx.path == PathBuf::from("trussed") {
             panic!("trussed is a reserved client ID");
         }
         self.eps
             .push(ServiceEndpoint {
                 interchange,
-                client_ctx,
+                ctx: core_ctx.into(),
                 backends,
             })
             .map_err(|_| Error::ClientCountExceeded)
@@ -762,14 +762,13 @@ impl<P: Platform, D: Dispatch<P>> Service<P, D> {
                 // resources.currently_serving = ep.client_id.clone();
                 let mut reply_result = Err(Error::RequestNotAvailable);
                 if ep.backends.is_empty() {
-                    reply_result = resources.reply_to(&mut ep.client_ctx, &request);
+                    reply_result = resources.reply_to(&mut ep.ctx.core, &request);
                 } else {
                     for backend in ep.backends {
                         reply_result = match backend {
-                            BackendId::Core => resources.reply_to(&mut ep.client_ctx, &request),
+                            BackendId::Core => resources.reply_to(&mut ep.ctx.core, &request),
                             BackendId::Custom(id) => {
-                                self.dispatch
-                                    .request(id, &mut ep.client_ctx, &request, resources)
+                                self.dispatch.request(id, &mut ep.ctx, &request, resources)
                             }
                         };
 
