@@ -24,10 +24,6 @@ use crate::store::filestore::{ReadDirFilesState, ReadDirState};
 pub use crate::client::FutureResult;
 pub use crate::platform::Platform;
 
-/// An empty enum that cannot be constructed.
-#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-pub enum Empty {}
-
 /// An empty struct not storing any data.
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct NoData;

@@ -102,6 +102,9 @@ generate_enums! {
     // Other //
     ///////////
     DebugDumpStore: 0x79
+
+    #[cfg(feature = "ext")]
+    Extension: 0xff
 }
 
 pub trait RequestVariant: Into<Request> + TryFrom<Request, Error = crate::Error> {
@@ -339,6 +342,10 @@ pub mod request {
           - location: Location
           - der: Message
 
+        #[cfg(feature = "ext")]
+        Extension:
+          - id: u8
+          - request: Bytes<{ crate::config::EXTENSION_REQUEST_LENGTH }>
     }
 }
 
@@ -489,5 +496,9 @@ pub mod reply {
 
         WriteCertificate:
           - id: CertId
+
+        #[cfg(feature = "ext")]
+        Extension:
+          - reply: Bytes<{ crate::config::EXTENSION_REPLY_LENGTH }>
     }
 }

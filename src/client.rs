@@ -80,10 +80,10 @@ use core::{marker::PhantomData, task::Poll};
 use interchange::{Interchange as _, Requester};
 
 use crate::api::*;
-use crate::backend::{BackendId, Dispatch};
+use crate::backend::{BackendId, CoreOnly};
 use crate::error::*;
 use crate::pipe::TrussedInterchange;
-use crate::service::Service;
+use crate::service::{DispatchRequirement, Service};
 use crate::types::*;
 
 pub use crate::platform::Syscall;
@@ -98,6 +98,7 @@ pub enum ClientError {
     Full,
     Pending,
     DataTooLarge,
+    SerializationFailed,
 }
 
 pub type ClientResult<'c, T, C> = Result<FutureResult<'c, T, C>, ClientError>;
@@ -108,7 +109,7 @@ pub trait Client:
 {
 }
 
-impl<S: Syscall> Client for ClientImplementation<S> {}
+impl<S: Syscall, E> Client for ClientImplementation<S, E> {}
 
 /// Lowest level interface, use one of the higher level ones.
 pub trait PollClient {
@@ -120,7 +121,7 @@ pub struct FutureResult<'c, T, C: ?Sized>
 where
     C: PollClient,
 {
-    client: &'c mut C,
+    pub(crate) client: &'c mut C,
     __: PhantomData<T>,
 }
 
@@ -143,7 +144,7 @@ where
 }
 
 /// The client implementation client applications actually receive.
-pub struct ClientImplementation<S> {
+pub struct ClientImplementation<S, D = CoreOnly> {
     // raw: RawClient<Client<S>>,
     syscall: S,
 
@@ -151,6 +152,7 @@ pub struct ClientImplementation<S> {
     pub(crate) interchange: Requester<TrussedInterchange>,
     // pending: Option<Discriminant<Request>>,
     pending: Option<u8>,
+    _marker: PhantomData<D>,
 }
 
 // impl<S> From<(RawClient, S)> for Client<S>
@@ -161,7 +163,7 @@ pub struct ClientImplementation<S> {
 //     }
 // }
 
-impl<S> ClientImplementation<S>
+impl<S, E> ClientImplementation<S, E>
 where
     S: Syscall,
 {
@@ -170,11 +172,12 @@ where
             interchange,
             pending: None,
             syscall,
+            _marker: Default::default(),
         }
     }
 }
 
-impl<S> PollClient for ClientImplementation<S>
+impl<S, E> PollClient for ClientImplementation<S, E>
 where
     S: Syscall,
 {
@@ -228,12 +231,12 @@ where
     }
 }
 
-impl<S: Syscall> CertificateClient for ClientImplementation<S> {}
-impl<S: Syscall> CryptoClient for ClientImplementation<S> {}
-impl<S: Syscall> CounterClient for ClientImplementation<S> {}
-impl<S: Syscall> FilesystemClient for ClientImplementation<S> {}
-impl<S: Syscall> ManagementClient for ClientImplementation<S> {}
-impl<S: Syscall> UiClient for ClientImplementation<S> {}
+impl<S: Syscall, E> CertificateClient for ClientImplementation<S, E> {}
+impl<S: Syscall, E> CryptoClient for ClientImplementation<S, E> {}
+impl<S: Syscall, E> CounterClient for ClientImplementation<S, E> {}
+impl<S: Syscall, E> FilesystemClient for ClientImplementation<S, E> {}
+impl<S: Syscall, E> ManagementClient for ClientImplementation<S, E> {}
+impl<S: Syscall, E> UiClient for ClientImplementation<S, E> {}
 
 /// Read/Write + Delete certificates
 pub trait CertificateClient: PollClient {
@@ -697,12 +700,12 @@ pub trait UiClient: PollClient {
 ///
 /// The maximum number of clients that can be created is defined by the `clients-?` features.  If
 /// this number is exceeded, [`Error::ClientCountExceeded`][] is returned.
-pub struct ClientBuilder<I: 'static = Empty> {
+pub struct ClientBuilder<P: Platform, D: DispatchRequirement<P> = CoreOnly> {
     id: PathBuf,
-    backends: &'static [BackendId<I>],
+    backends: &'static [BackendId<D::BackendId>],
 }
 
-impl ClientBuilder {
+impl<P: Platform> ClientBuilder<P> {
     /// Creates a new client builder using the given client ID.
     ///
     /// Per default, the client does not support backends and always uses the Trussed core
@@ -715,18 +718,21 @@ impl ClientBuilder {
     }
 }
 
-impl<I: 'static> ClientBuilder<I> {
+impl<P: Platform, D: DispatchRequirement<P>> ClientBuilder<P, D> {
     /// Selects the backends to use for this client.
     ///
     /// If `backends` is empty, the Trussed core implementation is always used.
-    pub fn backends<J: 'static>(self, backends: &'static [BackendId<J>]) -> ClientBuilder<J> {
+    pub fn backends<E: DispatchRequirement<P>>(
+        self,
+        backends: &'static [BackendId<E::BackendId>],
+    ) -> ClientBuilder<P, E> {
         ClientBuilder {
             id: self.id,
             backends,
         }
     }
 
-    fn create_endpoint<P: Platform, D: Dispatch<P, BackendId = I>>(
+    fn create_endpoint(
         self,
         service: &mut Service<P, D>,
     ) -> Result<Requester<TrussedInterchange>, Error> {
@@ -737,29 +743,29 @@ impl<I: 'static> ClientBuilder<I> {
     }
 
     /// Builds the client using a custom [`Syscall`][] implementation.
-    pub fn build<P: Platform, D: Dispatch<P, BackendId = I>, S: Syscall>(
+    pub fn build<S: Syscall>(
         self,
         service: &mut Service<P, D>,
         syscall: S,
-    ) -> Result<ClientImplementation<S>, Error> {
+    ) -> Result<ClientImplementation<S, D>, Error> {
         self.create_endpoint(service)
             .map(|requester| ClientImplementation::new(requester, syscall))
     }
 
     /// Builds the client using a [`Service`][] instance.
-    pub fn build_with_service<P: Platform, D: Dispatch<P, BackendId = I>>(
+    pub fn build_with_service(
         self,
         mut service: Service<P, D>,
-    ) -> Result<ClientImplementation<Service<P, D>>, Error> {
+    ) -> Result<ClientImplementation<Service<P, D>, D>, Error> {
         self.create_endpoint(&mut service)
             .map(|requester| ClientImplementation::new(requester, service))
     }
 
     /// Builds the client using a mutable reference to a [`Service`][].
-    pub fn build_with_service_mut<P: Platform, D: Dispatch<P, BackendId = I>>(
+    pub fn build_with_service_mut(
         self,
         service: &mut Service<P, D>,
-    ) -> Result<ClientImplementation<&mut Service<P, D>>, Error> {
+    ) -> Result<ClientImplementation<&mut Service<P, D>, D>, Error> {
         self.create_endpoint(service)
             .map(|requester| ClientImplementation::new(requester, service))
     }

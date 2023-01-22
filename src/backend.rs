@@ -11,7 +11,7 @@ use crate::{
     error::Error,
     platform::Platform,
     service::ServiceResources,
-    types::{Context, CoreContext, Empty, NoData},
+    types::{Context, CoreContext, NoData},
 };
 
 /// The ID of a backend.
@@ -73,6 +73,16 @@ pub trait Dispatch<P: Platform> {
 pub struct CoreOnly;
 
 impl<P: Platform> Dispatch<P> for CoreOnly {
-    type BackendId = Empty;
+    type BackendId = NoId;
     type Context = NoData;
+}
+
+pub enum NoId {}
+
+impl TryFrom<u8> for NoId {
+    type Error = Error;
+
+    fn try_from(_: u8) -> Result<Self, Self::Error> {
+        Err(Error::InternalError)
+    }
 }

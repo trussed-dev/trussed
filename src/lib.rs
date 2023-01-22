@@ -27,6 +27,8 @@ pub mod backend;
 pub mod client;
 pub mod config;
 pub mod error;
+#[cfg(feature = "ext")]
+pub mod ext;
 pub mod key;
 pub mod mechanisms;
 pub mod pipe;
