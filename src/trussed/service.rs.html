@@ -821,8 +821,6 @@
 <span id="821">821</span>
 <span id="822">822</span>
 <span id="823">823</span>
-<span id="824">824</span>
-<span id="825">825</span>
 </pre><pre class="rust"><code><span class="kw">use </span>chacha20::ChaCha8Rng;
 <span class="kw">use </span>heapless_bytes::Unsigned;
 <span class="kw">use </span>interchange::Responder;
@@ -882,11 +880,6 @@
     </span>P: Platform,
 {
     <span class="kw">pub</span>(<span class="kw">crate</span>) platform: P,
-    <span class="comment">// // Option?
-    // currently_serving: ClientId,
-    // TODO: how/when to clear
-    </span>read_dir_files_state: <span class="prelude-ty">Option</span>&lt;ReadDirFilesState&gt;,
-    read_dir_state: <span class="prelude-ty">Option</span>&lt;ReadDirState&gt;,
     rng_state: <span class="prelude-ty">Option</span>&lt;ChaCha8Rng&gt;,
 }
 
@@ -894,9 +887,6 @@
     <span class="kw">pub fn </span>new(platform: P) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             platform,
-            <span class="comment">// currently_serving: PathBuf::new(),
-            </span>read_dir_files_state: <span class="prelude-val">None</span>,
-            read_dir_state: <span class="prelude-val">None</span>,
             rng_state: <span class="prelude-val">None</span>,
         }
     }
@@ -915,7 +905,11 @@
 
 <span class="kw">impl</span>&lt;P: Platform&gt; ServiceResources&lt;P&gt; {
     <span class="attribute">#[inline(never)]
-    </span><span class="kw">pub fn </span>reply_to(<span class="kw-2">&amp;mut </span><span class="self">self</span>, client_id: PathBuf, request: <span class="kw-2">&amp;</span>Request) -&gt; <span class="prelude-ty">Result</span>&lt;Reply, Error&gt; {
+    </span><span class="kw">pub fn </span>reply_to(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        client_ctx: <span class="kw-2">&amp;mut </span>ClientContext,
+        request: <span class="kw-2">&amp;</span>Request,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Reply, Error&gt; {
         <span class="comment">// TODO: what we want to do here is map an enum to a generic type
         // Is there a nicer way to do this?
 
@@ -923,7 +917,7 @@
 
         <span class="comment">// prepare keystore, bound to client_id, for cryptographic calls
         </span><span class="kw">let </span><span class="kw-2">mut </span>keystore: ClientKeystore&lt;P::S&gt; = ClientKeystore::new(
-            client_id.clone(),
+            client_ctx.path.clone(),
             <span class="self">self</span>.rng().map_err(|<span class="kw">_</span>| Error::EntropyMalfunction)<span class="question-mark">?</span>,
             full_store,
         );
@@ -931,7 +925,7 @@
 
         <span class="comment">// prepare certstore, bound to client_id, for cert calls
         </span><span class="kw">let </span><span class="kw-2">mut </span>certstore: ClientCertstore&lt;P::S&gt; = ClientCertstore::new(
-            client_id.clone(),
+            client_ctx.path.clone(),
             <span class="self">self</span>.rng().map_err(|<span class="kw">_</span>| Error::EntropyMalfunction)<span class="question-mark">?</span>,
             full_store,
         );
@@ -939,14 +933,15 @@
 
         <span class="comment">// prepare counterstore, bound to client_id, for counter calls
         </span><span class="kw">let </span><span class="kw-2">mut </span>counterstore: ClientCounterstore&lt;P::S&gt; = ClientCounterstore::new(
-            client_id.clone(),
+            client_ctx.path.clone(),
             <span class="self">self</span>.rng().map_err(|<span class="kw">_</span>| Error::EntropyMalfunction)<span class="question-mark">?</span>,
             full_store,
         );
         <span class="kw">let </span>counterstore = <span class="kw-2">&amp;mut </span>counterstore;
 
         <span class="comment">// prepare filestore, bound to client_id, for storage calls
-        </span><span class="kw">let </span><span class="kw-2">mut </span>filestore: ClientFilestore&lt;P::S&gt; = ClientFilestore::new(client_id, full_store);
+        </span><span class="kw">let </span><span class="kw-2">mut </span>filestore: ClientFilestore&lt;P::S&gt; =
+            ClientFilestore::new(client_ctx.path.clone(), full_store);
         <span class="kw">let </span>filestore = <span class="kw-2">&amp;mut </span>filestore;
 
         <span class="macro">debug_now!</span>(<span class="string">&quot;TRUSSED {:?}&quot;</span>, request);
@@ -1148,11 +1143,11 @@
             Request::ReadDirFirst(request) =&gt; {
                 <span class="kw">let </span>maybe_entry = <span class="kw">match </span>filestore.read_dir_first(<span class="kw-2">&amp;</span>request.dir, request.location, request.not_before_filename.as_ref())<span class="question-mark">? </span>{
                     <span class="prelude-val">Some</span>((entry, read_dir_state)) =&gt; {
-                        <span class="self">self</span>.read_dir_state = <span class="prelude-val">Some</span>(read_dir_state);
+                        client_ctx.read_dir_state = <span class="prelude-val">Some</span>(read_dir_state);
                         <span class="prelude-val">Some</span>(entry)
                     }
                     <span class="prelude-val">None </span>=&gt; {
-                        <span class="self">self</span>.read_dir_state = <span class="prelude-val">None</span>;
+                        client_ctx.read_dir_state = <span class="prelude-val">None</span>;
                         <span class="prelude-val">None
 
                     </span>}
@@ -1162,18 +1157,18 @@
 
             Request::ReadDirNext(_request) =&gt; {
                 <span class="comment">// ensure next call has nothing to work with, unless we store state again
-                </span><span class="kw">let </span>read_dir_state = <span class="self">self</span>.read_dir_state.take();
+                </span><span class="kw">let </span>read_dir_state = client_ctx.read_dir_state.take();
 
                 <span class="kw">let </span>maybe_entry = <span class="kw">match </span>read_dir_state {
                     <span class="prelude-val">None </span>=&gt; <span class="prelude-val">None</span>,
                     <span class="prelude-val">Some</span>(state) =&gt; {
                         <span class="kw">match </span>filestore.read_dir_next(state)<span class="question-mark">? </span>{
                             <span class="prelude-val">Some</span>((entry, read_dir_state)) =&gt; {
-                                <span class="self">self</span>.read_dir_state = <span class="prelude-val">Some</span>(read_dir_state);
+                                client_ctx.read_dir_state = <span class="prelude-val">Some</span>(read_dir_state);
                                 <span class="prelude-val">Some</span>(entry)
                             }
                             <span class="prelude-val">None </span>=&gt; {
-                                <span class="self">self</span>.read_dir_state = <span class="prelude-val">None</span>;
+                                client_ctx.read_dir_state = <span class="prelude-val">None</span>;
                                 <span class="prelude-val">None
                             </span>}
                         }
@@ -1186,11 +1181,11 @@
             Request::ReadDirFilesFirst(request) =&gt; {
                 <span class="kw">let </span>maybe_data = <span class="kw">match </span>filestore.read_dir_files_first(<span class="kw-2">&amp;</span>request.dir, request.location, request.user_attribute.clone())<span class="question-mark">? </span>{
                     <span class="prelude-val">Some</span>((data, state)) =&gt; {
-                        <span class="self">self</span>.read_dir_files_state = <span class="prelude-val">Some</span>(state);
+                        client_ctx.read_dir_files_state = <span class="prelude-val">Some</span>(state);
                         data
                     }
                     <span class="prelude-val">None </span>=&gt; {
-                        <span class="self">self</span>.read_dir_files_state = <span class="prelude-val">None</span>;
+                        client_ctx.read_dir_files_state = <span class="prelude-val">None</span>;
                         <span class="prelude-val">None
                     </span>}
                 };
@@ -1198,18 +1193,18 @@
             }
 
             Request::ReadDirFilesNext(_request) =&gt; {
-                <span class="kw">let </span>read_dir_files_state = <span class="self">self</span>.read_dir_files_state.take();
+                <span class="kw">let </span>read_dir_files_state = client_ctx.read_dir_files_state.take();
 
                 <span class="kw">let </span>maybe_data = <span class="kw">match </span>read_dir_files_state {
                     <span class="prelude-val">None </span>=&gt; <span class="prelude-val">None</span>,
                     <span class="prelude-val">Some</span>(state) =&gt; {
                         <span class="kw">match </span>filestore.read_dir_files_next(state)<span class="question-mark">? </span>{
                             <span class="prelude-val">Some</span>((data, state)) =&gt; {
-                                <span class="self">self</span>.read_dir_files_state = <span class="prelude-val">Some</span>(state);
+                                client_ctx.read_dir_files_state = <span class="prelude-val">Some</span>(state);
                                 data
                             }
                             <span class="prelude-val">None </span>=&gt; {
-                                <span class="self">self</span>.read_dir_files_state = <span class="prelude-val">None</span>;
+                                client_ctx.read_dir_files_state = <span class="prelude-val">None</span>;
                                 <span class="prelude-val">None
                             </span>}
                         }
@@ -1505,8 +1500,8 @@
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw">crate</span>::client::ClientImplementation&lt;S&gt;, ()&gt; {
         <span class="kw">use </span>interchange::Interchange;
         <span class="kw">let </span>(requester, responder) = TrussedInterchange::claim().ok_or(())<span class="question-mark">?</span>;
-        <span class="kw">let </span>client_id = ClientId::from(client_id.as_bytes());
-        <span class="self">self</span>.add_endpoint(responder, client_id)
+        <span class="kw">let </span>client_ctx = ClientContext::from(client_id);
+        <span class="self">self</span>.add_endpoint(responder, client_ctx)
             .map_err(|_service_endpoint| ())<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(<span class="kw">crate</span>::client::ClientImplementation::new(requester, syscall))
@@ -1522,8 +1517,8 @@
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw">crate</span>::client::ClientImplementation&lt;<span class="kw-2">&amp;mut </span>Service&lt;P&gt;&gt;, ()&gt; {
         <span class="kw">use </span>interchange::Interchange;
         <span class="kw">let </span>(requester, responder) = TrussedInterchange::claim().ok_or(())<span class="question-mark">?</span>;
-        <span class="kw">let </span>client_id = ClientId::from(client_id.as_bytes());
-        <span class="self">self</span>.add_endpoint(responder, client_id)
+        <span class="kw">let </span>client_ctx = ClientContext::from(client_id);
+        <span class="self">self</span>.add_endpoint(responder, client_ctx)
             .map_err(|_service_endpoint| ())<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(<span class="kw">crate</span>::client::ClientImplementation::new(requester, <span class="self">self</span>))
@@ -1538,8 +1533,8 @@
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw">crate</span>::client::ClientImplementation&lt;Service&lt;P&gt;&gt;, ()&gt; {
         <span class="kw">use </span>interchange::Interchange;
         <span class="kw">let </span>(requester, responder) = TrussedInterchange::claim().ok_or(())<span class="question-mark">?</span>;
-        <span class="kw">let </span>client_id = ClientId::from(client_id.as_bytes());
-        <span class="self">self</span>.add_endpoint(responder, client_id)
+        <span class="kw">let </span>client_ctx = ClientContext::from(client_id);
+        <span class="self">self</span>.add_endpoint(responder, client_ctx)
             .map_err(|_service_endpoint| ())<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(<span class="kw">crate</span>::client::ClientImplementation::new(requester, <span class="self">self</span>))
@@ -1548,14 +1543,15 @@
     <span class="kw">pub fn </span>add_endpoint(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         interchange: Responder&lt;TrussedInterchange&gt;,
-        client_id: ClientId,
+        client_ctx: <span class="kw">impl </span>Into&lt;ClientContext&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(), ServiceEndpoint&gt; {
-        <span class="kw">if </span>client_id == PathBuf::from(<span class="string">&quot;trussed&quot;</span>) {
+        <span class="kw">let </span>client_ctx = client_ctx.into();
+        <span class="kw">if </span>client_ctx.path == PathBuf::from(<span class="string">&quot;trussed&quot;</span>) {
             <span class="macro">panic!</span>(<span class="string">&quot;trussed is a reserved client ID&quot;</span>);
         }
         <span class="self">self</span>.eps.push(ServiceEndpoint {
             interchange,
-            client_id,
+            client_ctx,
         })
     }
 
@@ -1598,7 +1594,7 @@
                 <span class="comment">// #[cfg(test)] println!(&quot;service got request: {:?}&quot;, &amp;request);
 
                 // resources.currently_serving = ep.client_id.clone();
-                </span><span class="kw">let </span>reply_result = resources.reply_to(ep.client_id.clone(), <span class="kw-2">&amp;</span>request);
+                </span><span class="kw">let </span>reply_result = resources.reply_to(<span class="kw-2">&amp;mut </span>ep.client_ctx, <span class="kw-2">&amp;</span>request);
 
                 resources
                     .platform

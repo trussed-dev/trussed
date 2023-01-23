@@ -540,6 +540,36 @@
 <span id="540">540</span>
 <span id="541">541</span>
 <span id="542">542</span>
+<span id="543">543</span>
+<span id="544">544</span>
+<span id="545">545</span>
+<span id="546">546</span>
+<span id="547">547</span>
+<span id="548">548</span>
+<span id="549">549</span>
+<span id="550">550</span>
+<span id="551">551</span>
+<span id="552">552</span>
+<span id="553">553</span>
+<span id="554">554</span>
+<span id="555">555</span>
+<span id="556">556</span>
+<span id="557">557</span>
+<span id="558">558</span>
+<span id="559">559</span>
+<span id="560">560</span>
+<span id="561">561</span>
+<span id="562">562</span>
+<span id="563">563</span>
+<span id="564">564</span>
+<span id="565">565</span>
+<span id="566">566</span>
+<span id="567">567</span>
+<span id="568">568</span>
+<span id="569">569</span>
+<span id="570">570</span>
+<span id="571">571</span>
+<span id="572">572</span>
 </pre><pre class="rust"><code><span class="kw">use </span>core::marker::PhantomData;
 <span class="kw">use </span>core::ops::Deref;
 
@@ -561,6 +591,7 @@
 
 <span class="kw">use </span><span class="kw">crate</span>::config::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">crate</span>::key::Secrecy;
+<span class="kw">use </span><span class="kw">crate</span>::store::filestore::{ReadDirFilesState, ReadDirState};
 
 <span class="kw">pub use </span><span class="kw">crate</span>::client::FutureResult;
 <span class="kw">pub use </span><span class="kw">crate</span>::platform::Platform;
@@ -774,8 +805,37 @@
 // pub type AeadNonce = [u8; 12];
 // pub type AeadTag = [u8; 16];
 
-// pub type ClientId = heapless::Vec&lt;u8, heapless::consts::U32&gt;;
-</span><span class="kw">pub type </span>ClientId = PathBuf;
+// The &quot;ClientContext&quot; struct is the closest equivalent to a PCB that Trussed
+// currently has. Trussed currently uses it to choose the client-specific
+// subtree in the filesystem (see docs in src/store.rs) and to maintain
+// the walker state of the directory traversal syscalls.
+</span><span class="kw">pub struct </span>ClientContext {
+    <span class="kw">pub </span>path: PathBuf,
+    <span class="kw">pub </span>read_dir_state: <span class="prelude-ty">Option</span>&lt;ReadDirState&gt;,
+    <span class="kw">pub </span>read_dir_files_state: <span class="prelude-ty">Option</span>&lt;ReadDirFilesState&gt;,
+}
+
+<span class="kw">impl </span>ClientContext {
+    <span class="kw">pub fn </span>new(path: PathBuf) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            path,
+            read_dir_state: <span class="prelude-val">None</span>,
+            read_dir_files_state: <span class="prelude-val">None</span>,
+        }
+    }
+}
+
+<span class="kw">impl </span>From&lt;PathBuf&gt; <span class="kw">for </span>ClientContext {
+    <span class="kw">fn </span>from(path: PathBuf) -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>::new(path)
+    }
+}
+
+<span class="kw">impl </span>From&lt;<span class="kw-2">&amp;</span>str&gt; <span class="kw">for </span>ClientContext {
+    <span class="kw">fn </span>from(s: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>::new(s.into())
+    }
+}
 
 <span class="comment">// Object Hierarchy according to Cryptoki
 // - Storage
