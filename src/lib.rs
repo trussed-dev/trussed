@@ -48,11 +48,12 @@ pub use error::Error;
 pub use platform::Platform;
 pub use service::Service;
 
-pub use cbor_smol::{cbor_deserialize, cbor_serialize, cbor_serialize_bytes};
+pub use cbor_smol::{cbor_deserialize, cbor_serialize_bytes};
 pub use heapless_bytes::Bytes;
-pub use postcard::{from_bytes as postcard_deserialize, to_slice as postcard_serialize};
 
-pub fn postcard_serialize_bytes<T: serde::Serialize, const N: usize>(
+pub(crate) use postcard::from_bytes as postcard_deserialize;
+
+pub(crate) fn postcard_serialize_bytes<T: serde::Serialize, const N: usize>(
     object: &T,
 ) -> postcard::Result<Bytes<N>> {
     let vec = postcard::to_vec(object)?;
