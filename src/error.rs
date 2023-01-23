@@ -7,6 +7,7 @@ pub type Result<T, E = Error> = core::result::Result<T, E>;
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 #[repr(u32)]
+#[non_exhaustive]
 pub enum Error {
     // cryptoki errors
     HostMemory = 0x0000_0002,

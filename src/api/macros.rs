@@ -3,6 +3,7 @@ macro_rules! generate_enums {
 
     #[derive(Clone, Eq, PartialEq, Debug)]
     #[allow(clippy::large_enum_variant)]
+    #[non_exhaustive]
     pub enum Request {
         DummyRequest, // for testing
         $(
@@ -13,6 +14,7 @@ macro_rules! generate_enums {
 
     #[derive(Clone, Eq, PartialEq, Debug)]
     #[allow(clippy::large_enum_variant)]
+    #[non_exhaustive]
     pub enum Reply {
         DummyReply, // for testing
         $(
