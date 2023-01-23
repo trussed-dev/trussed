@@ -32,6 +32,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Upgrade the `interchange` dependency to version 0.3.0 ([#99][])
   - As a consequence the type `pipe::TrussedInterchange` becomes a const`pipe::TRUSSED_INTERCHANGE`
 - Updated `littlefs2` to 0.4.0.
+- Made `Request`, `Reply`, `Error`, `Context`, `CoreContext`, `Mechanism`,
+  `ui::Status` non-exhaustive.
 
 ### Fixed
 

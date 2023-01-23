@@ -170,6 +170,7 @@ pub mod ui {
     // TODO: Consider whether a simple "language" to specify "patterns"
     // makes sense, vs. "semantic" indications with platform-specific implementation
     #[derive(Copy, Clone, Eq, PartialEq, Debug, Serialize, Deserialize)]
+    #[non_exhaustive]
     pub enum Status {
         Idle,
         WaitingForUserPresence,
@@ -242,6 +243,7 @@ pub mod consent {
 /// The context stores the state used by the standard syscall implementations, see
 /// [`CoreContext`][].  Additionally, backends can define a custom context for their syscall
 /// implementations.
+#[non_exhaustive]
 pub struct Context<B> {
     pub core: CoreContext,
     pub backends: B,
@@ -260,6 +262,7 @@ impl<B: Default> From<CoreContext> for Context<B> {
 // currently has. Trussed currently uses it to choose the client-specific
 // subtree in the filesystem (see docs in src/store.rs) and to maintain
 // the walker state of the directory traversal syscalls.
+#[non_exhaustive]
 pub struct CoreContext {
     pub path: PathBuf,
     pub read_dir_state: Option<ReadDirState>,
@@ -545,6 +548,7 @@ impl Default for StorageAttributes {
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Serialize, Deserialize)]
+#[non_exhaustive]
 pub enum Mechanism {
     Aes256Cbc,
     Chacha8Poly1305,
