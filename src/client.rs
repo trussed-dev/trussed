@@ -75,7 +75,7 @@
 //! the `Ready` variant of the `core::task::Poll` struct returns by the `FutureResult`'s `poll` method.
 //! Possible causes are listed in `trussed::error::Error`.
 //!
-use core::marker::PhantomData;
+use core::{marker::PhantomData, task::Poll};
 
 use interchange::Requester;
 
@@ -98,7 +98,7 @@ pub enum ClientError {
     DataTooLarge,
 }
 
-pub type ClientResult<'c, T, C> = core::result::Result<FutureResult<'c, T, C>, ClientError>;
+pub type ClientResult<'c, T, C> = Result<FutureResult<'c, T, C>, ClientError>;
 
 /// All-in-one trait bounding on the sub-traits.
 pub trait Client:
@@ -110,11 +110,8 @@ impl<S: Syscall> Client for ClientImplementation<S> {}
 
 /// Lowest level interface, use one of the higher level ones.
 pub trait PollClient {
-    fn request<T: From<crate::api::Reply>>(
-        &mut self,
-        req: impl Into<Request>,
-    ) -> ClientResult<'_, T, Self>;
-    fn poll(&mut self) -> core::task::Poll<core::result::Result<Reply, Error>>;
+    fn request<T: From<Reply>>(&mut self, req: impl Into<Request>) -> ClientResult<'_, T, Self>;
+    fn poll(&mut self) -> Poll<Result<Reply, Error>>;
     fn syscall(&mut self);
 }
 
@@ -128,7 +125,7 @@ where
 
 impl<'c, T, C> FutureResult<'c, T, C>
 where
-    T: From<crate::api::Reply>,
+    T: From<Reply>,
     C: PollClient,
 {
     pub fn new(client: &'c mut C) -> Self {
@@ -137,13 +134,8 @@ where
             __: PhantomData,
         }
     }
-    pub fn poll(&mut self) -> core::task::Poll<core::result::Result<T, Error>> {
-        use core::task::Poll::{Pending, Ready};
-        match self.client.poll() {
-            Ready(Ok(reply)) => Ready(Ok(T::from(reply))),
-            Ready(Err(error)) => Ready(Err(error)),
-            Pending => Pending,
-        }
+    pub fn poll(&mut self) -> Poll<Result<T, Error>> {
+        self.client.poll().map(|result| result.map(From::from))
     }
 }
 
@@ -183,7 +175,7 @@ impl<S> PollClient for ClientImplementation<S>
 where
     S: Syscall,
 {
-    fn poll(&mut self) -> core::task::Poll<core::result::Result<Reply, Error>> {
+    fn poll(&mut self) -> Poll<Result<Reply, Error>> {
         match self.interchange.take_response() {
             Some(reply) => {
                 // #[cfg(all(test, feature = "verbose-tests"))]
@@ -192,7 +184,7 @@ where
                     Ok(reply) => {
                         if Some(u8::from(&reply)) == self.pending {
                             self.pending = None;
-                            core::task::Poll::Ready(Ok(reply))
+                            Poll::Ready(Ok(reply))
                         } else {
                             // #[cfg(all(test, feature = "verbose-tests"))]
                             info!(
@@ -200,24 +192,21 @@ where
                                 Some(u8::from(&reply)),
                                 self.pending
                             );
-                            core::task::Poll::Ready(Err(Error::InternalError))
+                            Poll::Ready(Err(Error::InternalError))
                         }
                     }
                     Err(error) => {
                         self.pending = None;
-                        core::task::Poll::Ready(Err(error))
+                        Poll::Ready(Err(error))
                     }
                 }
             }
-            None => core::task::Poll::Pending,
+            None => Poll::Pending,
         }
     }
 
     // call with any of `crate::api::request::*`
-    fn request<T: From<crate::api::Reply>>(
-        &mut self,
-        req: impl Into<Request>,
-    ) -> ClientResult<'_, T, Self> {
+    fn request<T: From<Reply>>(&mut self, req: impl Into<Request>) -> ClientResult<'_, T, Self> {
         // TODO: handle failure
         // TODO: fail on pending (non-canceled) request)
         if self.pending.is_some() {
