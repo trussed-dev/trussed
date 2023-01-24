@@ -1,4 +1,7 @@
 #![allow(clippy::transmute_ptr_to_ptr)]
+// Ignore lint caused by interchange! macro
+#![allow(clippy::derive_partial_eq_without_eq)]
+
 use interchange::Responder;
 
 use crate::api::{Reply, Request};

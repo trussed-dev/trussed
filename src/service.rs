@@ -717,6 +717,7 @@ impl<P: Platform> Service<P> {
         Ok(crate::client::ClientImplementation::new(requester, self))
     }
 
+    #[allow(clippy::result_large_err)]
     pub fn add_endpoint(
         &mut self,
         interchange: Responder<TrussedInterchange>,
