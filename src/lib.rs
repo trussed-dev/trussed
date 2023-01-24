@@ -13,6 +13,9 @@
 // #[cfg(test)]
 // extern crate std;
 
+// Temporarily disabled until documentation coverage is improved.
+#![allow(clippy::missing_safety_doc)]
+
 #[macro_use]
 extern crate delog;
 generate_macros!();
