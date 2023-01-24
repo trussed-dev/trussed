@@ -19,7 +19,7 @@ fn load_secret_key(
         .map_err(|_| Error::InternalError)?;
 
     let secret_key =
-        p256_cortex_m4::SecretKey::from_bytes(&secret_scalar).map_err(|_| Error::InternalError)?;
+        p256_cortex_m4::SecretKey::from_bytes(secret_scalar).map_err(|_| Error::InternalError)?;
     Ok(secret_key)
 }
 
@@ -182,7 +182,7 @@ impl GenerateKey for super::P256 {
         keystore: &mut impl Keystore,
         request: &request::GenerateKey,
     ) -> Result<reply::GenerateKey, Error> {
-        let keypair = p256_cortex_m4::Keypair::random(&mut keystore.rng());
+        let keypair = p256_cortex_m4::Keypair::random(keystore.rng());
 
         // store keys
         let key_id = keystore.store_key(

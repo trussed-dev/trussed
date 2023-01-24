@@ -10,9 +10,7 @@ impl DeriveKey for super::Sha256 {
         keystore: &mut impl Keystore,
         request: &request::DeriveKey,
     ) -> Result<reply::DeriveKey, Error> {
-        let base_id = &request.base_key;
-
-        let key = keystore.load_key(key::Secrecy::Secret, None, &base_id)?;
+        let key = keystore.load_key(key::Secrecy::Secret, None, &request.base_key)?;
         if !matches!(key.kind, key::Kind::Symmetric(..) | key::Kind::Shared(..)) {
             return Err(Error::NoSuchKey);
         }

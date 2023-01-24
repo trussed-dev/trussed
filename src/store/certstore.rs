@@ -32,7 +32,7 @@ impl<S: Store> Certstore for ClientCertstore<S> {
         locations
             .iter()
             .any(|&location| store::delete(self.store, location, &path))
-            .then(|| ())
+            .then_some(())
             .ok_or(Error::NoSuchKey)
     }
 

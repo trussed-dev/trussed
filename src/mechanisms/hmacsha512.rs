@@ -23,7 +23,7 @@ impl DeriveKey for super::HmacSha512 {
             HmacSha512::new_from_slice(shared_secret.as_ref()).map_err(|_| Error::InternalError)?;
 
         if let Some(additional_data) = &request.additional_data {
-            mac.update(&additional_data);
+            mac.update(additional_data);
         }
         let mut derived_key = [0u8; 64];
         derived_key.copy_from_slice(&mac.finalize().into_bytes()); //.try_into().map_err(|_| Error::InternalError)?;
@@ -52,8 +52,8 @@ impl Sign for super::HmacSha512 {
         }
         let shared_secret = key.material;
 
-        let mut mac = HmacSha512::new_from_slice(&shared_secret.as_ref())
-            .map_err(|_| Error::InternalError)?;
+        let mut mac =
+            HmacSha512::new_from_slice(shared_secret.as_ref()).map_err(|_| Error::InternalError)?;
 
         mac.update(&request.message);
         let result = mac.finalize();
