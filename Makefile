@@ -1,3 +1,6 @@
+clippy:
+	cargo clippy --all-features --all-targets -- --deny warnings
+
 quick-test:
 	cargo test -- --nocapture
 
