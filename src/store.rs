@@ -320,6 +320,8 @@ macro_rules! store {
                 unsafe { VFS.as_mut_ptr() }
             }
 
+            // Ignore lint for compatibility
+            #[allow(clippy::too_many_arguments)]
             pub fn mount(
                 &self,
 
