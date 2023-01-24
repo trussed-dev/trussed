@@ -19,11 +19,11 @@ impl DeriveKey for super::HmacBlake2s {
         }
         let shared_secret = key.material;
 
-        let mut mac = HmacBlake2s::new_from_slice(&shared_secret.as_ref())
+        let mut mac = HmacBlake2s::new_from_slice(shared_secret.as_ref())
             .map_err(|_| Error::InternalError)?;
 
         if let Some(additional_data) = &request.additional_data {
-            mac.update(&additional_data);
+            mac.update(additional_data);
         }
         let derived_key: [u8; 32] = mac
             .finalize()
@@ -55,7 +55,7 @@ impl Sign for super::HmacBlake2s {
         }
         let shared_secret = key.material;
 
-        let mut mac = HmacBlake2s::new_from_slice(&shared_secret.as_ref())
+        let mut mac = HmacBlake2s::new_from_slice(shared_secret.as_ref())
             .map_err(|_| Error::InternalError)?;
 
         mac.update(&request.message);

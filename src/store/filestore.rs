@@ -53,7 +53,7 @@ impl<S: Store> ClientFilestore<S> {
     pub fn client_path(&self, actual_path: &Path) -> PathBuf {
         let bytes = actual_path.as_ref().as_bytes();
         let absolute = bytes[0] == b'/';
-        let offset = if absolute { 1 } else { 0 };
+        let offset = usize::from(absolute);
 
         // we know `client_id` here, could use its length
         let end_of_namespace = bytes[1..]

@@ -23,6 +23,12 @@ impl UserInterface {
     }
 }
 
+impl Default for UserInterface {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl platform::UserInterface for UserInterface {
     fn check_user_presence(&mut self) -> Level {
         self.inner

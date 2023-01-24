@@ -17,7 +17,7 @@ impl MockRng {
         use chacha20::cipher::NewCipher;
         let key = GenericArray::from_slice(b"an example very very secret key.");
         let nonce = GenericArray::from_slice(b"secret nonce");
-        Self(ChaCha20::new(&key, &nonce))
+        Self(ChaCha20::new(key, nonce))
     }
 }
 
@@ -38,7 +38,8 @@ impl crate::service::RngCore for MockRng {
     }
 
     fn try_fill_bytes(&mut self, dest: &mut [u8]) -> Result<(), rand_core::Error> {
-        Ok(self.fill_bytes(dest))
+        self.fill_bytes(dest);
+        Ok(())
     }
 }
 
@@ -331,8 +332,8 @@ fn agree_p256() {
     let shared_secret = block!(client
         .agree(
             Mechanism::P256,
-            auth_private_key.clone(),
-            plat_public_key.clone(),
+            auth_private_key,
+            plat_public_key,
             StorageAttributes::new().set_persistence(Location::Volatile)
         )
         .expect("no client error"))
@@ -342,8 +343,8 @@ fn agree_p256() {
     let alt_shared_secret = block!(client
         .agree(
             Mechanism::P256,
-            plat_private_key.clone(),
-            auth_public_key.clone(),
+            plat_private_key,
+            auth_public_key,
             StorageAttributes::new().set_persistence(Location::Volatile)
         )
         .expect("no client error"))
@@ -356,7 +357,7 @@ fn agree_p256() {
     let symmetric_key = block!(client
         .derive_key(
             Mechanism::Sha256,
-            shared_secret.clone(),
+            shared_secret,
             None,
             StorageAttributes::new().set_persistence(Location::Volatile)
         )
@@ -369,7 +370,7 @@ fn agree_p256() {
     let _tag = block!(client
         .sign(
             Mechanism::HmacSha256,
-            symmetric_key.clone(),
+            symmetric_key,
             &new_pin_enc,
             SignatureSerialization::Raw
         )
@@ -432,7 +433,7 @@ fn rng() {
 
     setup!(client1);
     let bytes = gen_bytes!(client1, 1024 * 100);
-    let entropy = shannon_entropy(&bytes);
+    let entropy = shannon_entropy(bytes);
     println!("got entropy of {} bytes: {}", bytes.len(), entropy);
     assert!(entropy > 7.99);
 
@@ -477,9 +478,7 @@ fn rng() {
         if bytes_3[i] != bytes_twin2[i] {
             break;
         }
-        if i > 200 {
-            assert!(false, "Changing seed did not change rng");
-        }
+        assert!(i <= 200, "Changing seed did not change rng");
     }
 
     let mem = create_memory!();
