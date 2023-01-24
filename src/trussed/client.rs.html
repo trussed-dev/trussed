@@ -822,17 +822,6 @@
 <span id="822">822</span>
 <span id="823">823</span>
 <span id="824">824</span>
-<span id="825">825</span>
-<span id="826">826</span>
-<span id="827">827</span>
-<span id="828">828</span>
-<span id="829">829</span>
-<span id="830">830</span>
-<span id="831">831</span>
-<span id="832">832</span>
-<span id="833">833</span>
-<span id="834">834</span>
-<span id="835">835</span>
 </pre><pre class="rust"><code><span class="doccomment">//! # Client interface for applications.
 //!
 //! The API methods (such as `GenerateKey`, `Sign`, `Verify`,...) are implemented by a variety
@@ -910,7 +899,7 @@
 //! the `Ready` variant of the `core::task::Poll` struct returns by the `FutureResult`&#39;s `poll` method.
 //! Possible causes are listed in `trussed::error::Error`.
 //!
-</span><span class="kw">use </span>core::marker::PhantomData;
+</span><span class="kw">use </span>core::{marker::PhantomData, task::Poll};
 
 <span class="kw">use </span>interchange::Requester;
 
@@ -933,7 +922,7 @@
     DataTooLarge,
 }
 
-<span class="kw">pub type </span>ClientResult&lt;<span class="lifetime">&#39;c</span>, T, C&gt; = core::result::Result&lt;FutureResult&lt;<span class="lifetime">&#39;c</span>, T, C&gt;, ClientError&gt;;
+<span class="kw">pub type </span>ClientResult&lt;<span class="lifetime">&#39;c</span>, T, C&gt; = <span class="prelude-ty">Result</span>&lt;FutureResult&lt;<span class="lifetime">&#39;c</span>, T, C&gt;, ClientError&gt;;
 
 <span class="doccomment">/// All-in-one trait bounding on the sub-traits.
 </span><span class="kw">pub trait </span>Client:
@@ -945,11 +934,8 @@
 
 <span class="doccomment">/// Lowest level interface, use one of the higher level ones.
 </span><span class="kw">pub trait </span>PollClient {
-    <span class="kw">fn </span>request&lt;T: From&lt;<span class="kw">crate</span>::api::Reply&gt;&gt;(
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        req: <span class="kw">impl </span>Into&lt;Request&gt;,
-    ) -&gt; ClientResult&lt;<span class="lifetime">&#39;_</span>, T, <span class="self">Self</span>&gt;;
-    <span class="kw">fn </span>poll(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; core::task::Poll&lt;core::result::Result&lt;Reply, Error&gt;&gt;;
+    <span class="kw">fn </span>request&lt;T: From&lt;Reply&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, req: <span class="kw">impl </span>Into&lt;Request&gt;) -&gt; ClientResult&lt;<span class="lifetime">&#39;_</span>, T, <span class="self">Self</span>&gt;;
+    <span class="kw">fn </span>poll(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;Reply, Error&gt;&gt;;
     <span class="kw">fn </span>syscall(<span class="kw-2">&amp;mut </span><span class="self">self</span>);
 }
 
@@ -963,7 +949,7 @@
 
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;c</span>, T, C&gt; FutureResult&lt;<span class="lifetime">&#39;c</span>, T, C&gt;
 <span class="kw">where
-    </span>T: From&lt;<span class="kw">crate</span>::api::Reply&gt;,
+    </span>T: From&lt;Reply&gt;,
     C: PollClient,
 {
     <span class="kw">pub fn </span>new(client: <span class="kw-2">&amp;</span><span class="lifetime">&#39;c </span><span class="kw-2">mut </span>C) -&gt; <span class="self">Self </span>{
@@ -972,13 +958,8 @@
             __: PhantomData,
         }
     }
-    <span class="kw">pub fn </span>poll(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; core::task::Poll&lt;core::result::Result&lt;T, Error&gt;&gt; {
-        <span class="kw">use </span>core::task::Poll::{Pending, Ready};
-        <span class="kw">match </span><span class="self">self</span>.client.poll() {
-            Ready(<span class="prelude-val">Ok</span>(reply)) =&gt; Ready(<span class="prelude-val">Ok</span>(T::from(reply))),
-            Ready(<span class="prelude-val">Err</span>(error)) =&gt; Ready(<span class="prelude-val">Err</span>(error)),
-            Pending =&gt; Pending,
-        }
+    <span class="kw">pub fn </span>poll(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;T, Error&gt;&gt; {
+        <span class="self">self</span>.client.poll().map(|result| result.map(From::from))
     }
 }
 
@@ -1018,7 +999,7 @@
 <span class="kw">where
     </span>S: Syscall,
 {
-    <span class="kw">fn </span>poll(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; core::task::Poll&lt;core::result::Result&lt;Reply, Error&gt;&gt; {
+    <span class="kw">fn </span>poll(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;Reply, Error&gt;&gt; {
         <span class="kw">match </span><span class="self">self</span>.interchange.take_response() {
             <span class="prelude-val">Some</span>(reply) =&gt; {
                 <span class="comment">// #[cfg(all(test, feature = &quot;verbose-tests&quot;))]
@@ -1027,7 +1008,7 @@
                     <span class="prelude-val">Ok</span>(reply) =&gt; {
                         <span class="kw">if </span><span class="prelude-val">Some</span>(u8::from(<span class="kw-2">&amp;</span>reply)) == <span class="self">self</span>.pending {
                             <span class="self">self</span>.pending = <span class="prelude-val">None</span>;
-                            core::task::Poll::Ready(<span class="prelude-val">Ok</span>(reply))
+                            Poll::Ready(<span class="prelude-val">Ok</span>(reply))
                         } <span class="kw">else </span>{
                             <span class="comment">// #[cfg(all(test, feature = &quot;verbose-tests&quot;))]
                             </span><span class="macro">info!</span>(
@@ -1035,24 +1016,21 @@
                                 <span class="prelude-val">Some</span>(u8::from(<span class="kw-2">&amp;</span>reply)),
                                 <span class="self">self</span>.pending
                             );
-                            core::task::Poll::Ready(<span class="prelude-val">Err</span>(Error::InternalError))
+                            Poll::Ready(<span class="prelude-val">Err</span>(Error::InternalError))
                         }
                     }
                     <span class="prelude-val">Err</span>(error) =&gt; {
                         <span class="self">self</span>.pending = <span class="prelude-val">None</span>;
-                        core::task::Poll::Ready(<span class="prelude-val">Err</span>(error))
+                        Poll::Ready(<span class="prelude-val">Err</span>(error))
                     }
                 }
             }
-            <span class="prelude-val">None </span>=&gt; core::task::Poll::Pending,
+            <span class="prelude-val">None </span>=&gt; Poll::Pending,
         }
     }
 
     <span class="comment">// call with any of `crate::api::request::*`
-    </span><span class="kw">fn </span>request&lt;T: From&lt;<span class="kw">crate</span>::api::Reply&gt;&gt;(
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        req: <span class="kw">impl </span>Into&lt;Request&gt;,
-    ) -&gt; ClientResult&lt;<span class="lifetime">&#39;_</span>, T, <span class="self">Self</span>&gt; {
+    </span><span class="kw">fn </span>request&lt;T: From&lt;Reply&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, req: <span class="kw">impl </span>Into&lt;Request&gt;) -&gt; ClientResult&lt;<span class="lifetime">&#39;_</span>, T, <span class="self">Self</span>&gt; {
         <span class="comment">// TODO: handle failure
         // TODO: fail on pending (non-canceled) request)
         </span><span class="kw">if </span><span class="self">self</span>.pending.is_some() {
