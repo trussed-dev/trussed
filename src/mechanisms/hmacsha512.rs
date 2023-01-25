@@ -13,31 +13,28 @@ impl DeriveKey for super::HmacSha512 {
         use hmac::{Hmac, Mac, NewMac};
         type HmacSha512 = Hmac<sha2::Sha512>;
 
-        let key_id = request.base_key.object_id;
-        let key = keystore.load_key(key::Secrecy::Secret, None, &key_id)?;
+        let key = keystore.load_key(key::Secrecy::Secret, None, &request.base_key)?;
         if !matches!(key.kind, key::Kind::Symmetric(..) | key::Kind::Shared(..)) {
             return Err(Error::WrongKeyKind);
         }
         let shared_secret = key.material;
 
         let mut mac =
-            HmacSha512::new_varkey(&shared_secret.as_ref()).map_err(|_| Error::InternalError)?;
+            HmacSha512::new_from_slice(shared_secret.as_ref()).map_err(|_| Error::InternalError)?;
 
         if let Some(additional_data) = &request.additional_data {
             mac.update(&additional_data);
         }
         let mut derived_key = [0u8; 64];
         derived_key.copy_from_slice(&mac.finalize().into_bytes()); //.try_into().map_err(|_| Error::InternalError)?;
-        let key_id = keystore.store_key(
+        let key = keystore.store_key(
             request.attributes.persistence,
             key::Secrecy::Secret,
             key::Kind::Symmetric(64),
             &derived_key,
         )?;
 
-        Ok(reply::DeriveKey {
-            key: ObjectHandle { object_id: key_id },
-        })
+        Ok(reply::DeriveKey { key })
     }
 }
 
@@ -49,15 +46,14 @@ impl Sign for super::HmacSha512 {
         use sha2::Sha512;
         type HmacSha512 = Hmac<Sha512>;
 
-        let key_id = request.key.object_id;
-        let key = keystore.load_key(key::Secrecy::Secret, None, &key_id)?;
+        let key = keystore.load_key(key::Secrecy::Secret, None, &request.key)?;
         if !matches!(key.kind, key::Kind::Symmetric(..) | key::Kind::Shared(..)) {
             return Err(Error::WrongKeyKind);
         }
         let shared_secret = key.material;
 
-        let mut mac =
-            HmacSha512::new_varkey(&shared_secret.as_ref()).map_err(|_| Error::InternalError)?;
+        let mut mac = HmacSha512::new_from_slice(&shared_secret.as_ref())
+            .map_err(|_| Error::InternalError)?;
 
         mac.update(&request.message);
         let result = mac.finalize();
