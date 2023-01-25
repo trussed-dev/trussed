@@ -736,92 +736,6 @@
 <span id="736">736</span>
 <span id="737">737</span>
 <span id="738">738</span>
-<span id="739">739</span>
-<span id="740">740</span>
-<span id="741">741</span>
-<span id="742">742</span>
-<span id="743">743</span>
-<span id="744">744</span>
-<span id="745">745</span>
-<span id="746">746</span>
-<span id="747">747</span>
-<span id="748">748</span>
-<span id="749">749</span>
-<span id="750">750</span>
-<span id="751">751</span>
-<span id="752">752</span>
-<span id="753">753</span>
-<span id="754">754</span>
-<span id="755">755</span>
-<span id="756">756</span>
-<span id="757">757</span>
-<span id="758">758</span>
-<span id="759">759</span>
-<span id="760">760</span>
-<span id="761">761</span>
-<span id="762">762</span>
-<span id="763">763</span>
-<span id="764">764</span>
-<span id="765">765</span>
-<span id="766">766</span>
-<span id="767">767</span>
-<span id="768">768</span>
-<span id="769">769</span>
-<span id="770">770</span>
-<span id="771">771</span>
-<span id="772">772</span>
-<span id="773">773</span>
-<span id="774">774</span>
-<span id="775">775</span>
-<span id="776">776</span>
-<span id="777">777</span>
-<span id="778">778</span>
-<span id="779">779</span>
-<span id="780">780</span>
-<span id="781">781</span>
-<span id="782">782</span>
-<span id="783">783</span>
-<span id="784">784</span>
-<span id="785">785</span>
-<span id="786">786</span>
-<span id="787">787</span>
-<span id="788">788</span>
-<span id="789">789</span>
-<span id="790">790</span>
-<span id="791">791</span>
-<span id="792">792</span>
-<span id="793">793</span>
-<span id="794">794</span>
-<span id="795">795</span>
-<span id="796">796</span>
-<span id="797">797</span>
-<span id="798">798</span>
-<span id="799">799</span>
-<span id="800">800</span>
-<span id="801">801</span>
-<span id="802">802</span>
-<span id="803">803</span>
-<span id="804">804</span>
-<span id="805">805</span>
-<span id="806">806</span>
-<span id="807">807</span>
-<span id="808">808</span>
-<span id="809">809</span>
-<span id="810">810</span>
-<span id="811">811</span>
-<span id="812">812</span>
-<span id="813">813</span>
-<span id="814">814</span>
-<span id="815">815</span>
-<span id="816">816</span>
-<span id="817">817</span>
-<span id="818">818</span>
-<span id="819">819</span>
-<span id="820">820</span>
-<span id="821">821</span>
-<span id="822">822</span>
-<span id="823">823</span>
-<span id="824">824</span>
 </pre><pre class="rust"><code><span class="doccomment">//! # Client interface for applications.
 //!
 //! The API methods (such as `GenerateKey`, `Sign`, `Verify`,...) are implemented by a variety
@@ -936,7 +850,6 @@
 </span><span class="kw">pub trait </span>PollClient {
     <span class="kw">fn </span>request&lt;T: From&lt;Reply&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, req: <span class="kw">impl </span>Into&lt;Request&gt;) -&gt; ClientResult&lt;<span class="lifetime">&#39;_</span>, T, <span class="self">Self</span>&gt;;
     <span class="kw">fn </span>poll(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;Reply, Error&gt;&gt;;
-    <span class="kw">fn </span>syscall(<span class="kw-2">&amp;mut </span><span class="self">self</span>);
 }
 
 <span class="kw">pub struct </span>FutureResult&lt;<span class="lifetime">&#39;c</span>, T, C: <span class="question-mark">?</span>Sized&gt;
@@ -1044,11 +957,8 @@
         </span><span class="kw">let </span>request = req.into();
         <span class="self">self</span>.pending = <span class="prelude-val">Some</span>(u8::from(<span class="kw-2">&amp;</span>request));
         <span class="self">self</span>.interchange.request(<span class="kw-2">&amp;</span>request).map_err(drop).unwrap();
+        <span class="self">self</span>.syscall.syscall();
         <span class="prelude-val">Ok</span>(FutureResult::new(<span class="self">self</span>))
-    }
-
-    <span class="kw">fn </span>syscall(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
-        <span class="self">self</span>.syscall.syscall()
     }
 }
 
@@ -1065,15 +975,11 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         id: CertId,
     ) -&gt; ClientResult&lt;<span class="lifetime">&#39;_</span>, reply::DeleteCertificate, <span class="self">Self</span>&gt; {
-        <span class="kw">let </span>r = <span class="self">self</span>.request(request::DeleteCertificate { id })<span class="question-mark">?</span>;
-        r.client.syscall();
-        <span class="prelude-val">Ok</span>(r)
+        <span class="self">self</span>.request(request::DeleteCertificate { id })
     }
 
     <span class="kw">fn </span>read_certificate(<span class="kw-2">&amp;mut </span><span class="self">self</span>, id: CertId) -&gt; ClientResult&lt;<span class="lifetime">&#39;_</span>, reply::ReadCertificate, <span class="self">Self</span>&gt; {
-        <span class="kw">let </span>r = <span class="self">self</span>.request(request::ReadCertificate { id })<span class="question-mark">?</span>;
-        r.client.syscall();
-        <span class="prelude-val">Ok</span>(r)
+        <span class="self">self</span>.request(request::ReadCertificate { id })
     }
 
     <span class="doccomment">/// Currently, this writes the cert (assumed but not verified to be DER)
@@ -1086,9 +992,7 @@
         der: <span class="kw-2">&amp;</span>[u8],
     ) -&gt; ClientResult&lt;<span class="lifetime">&#39;_</span>, reply::WriteCertificate, <span class="self">Self</span>&gt; {
         <span class="kw">let </span>der = Message::from_slice(der).map_err(|<span class="kw">_</span>| ClientError::DataTooLarge)<span class="question-mark">?</span>;
-        <span class="kw">let </span>r = <span class="self">self</span>.request(request::WriteCertificate { location, der })<span class="question-mark">?</span>;
-        r.client.syscall();
-        <span class="prelude-val">Ok</span>(r)
+        <span class="self">self</span>.request(request::WriteCertificate { location, der })
     }
 }
 
@@ -1105,14 +1009,12 @@
         public_key: KeyId,
         attributes: StorageAttributes,
     ) -&gt; ClientResult&lt;<span class="lifetime">&#39;_</span>, reply::Agree, <span class="self">Self</span>&gt; {
-        <span class="kw">let </span>r = <span class="self">self</span>.request(request::Agree {
+        <span class="self">self</span>.request(request::Agree {
             mechanism,
             private_key,
             public_key,
             attributes,
-        })<span class="question-mark">?</span>;
-        r.client.syscall();
-        <span class="prelude-val">Ok</span>(r)
+        })
     }
 
     <span class="kw">fn </span>attest(
@@ -1120,12 +1022,10 @@
         signing_mechanism: Mechanism,
         private_key: KeyId,
     ) -&gt; ClientResult&lt;<span class="lifetime">&#39;_</span>, reply::Attest, <span class="self">Self</span>&gt; {
-        <span class="kw">let </span>r = <span class="self">self</span>.request(request::Attest {
+        <span class="self">self</span>.request(request::Attest {
             signing_mechanism,
             private_key,
-        })<span class="question-mark">?</span>;
-        r.client.syscall();
-        <span class="prelude-val">Ok</span>(r)
+        })
     }
 
     <span class="kw">fn </span>decrypt&lt;<span class="lifetime">&#39;c</span>&gt;(
@@ -1142,32 +1042,26 @@
             Message::from_slice(associated_data).map_err(|<span class="kw">_</span>| ClientError::DataTooLarge)<span class="question-mark">?</span>;
         <span class="kw">let </span>nonce = ShortData::from_slice(nonce).map_err(|<span class="kw">_</span>| ClientError::DataTooLarge)<span class="question-mark">?</span>;
         <span class="kw">let </span>tag = ShortData::from_slice(tag).map_err(|<span class="kw">_</span>| ClientError::DataTooLarge)<span class="question-mark">?</span>;
-        <span class="kw">let </span>r = <span class="self">self</span>.request(request::Decrypt {
+        <span class="self">self</span>.request(request::Decrypt {
             mechanism,
             key,
             message,
             associated_data,
             nonce,
             tag,
-        })<span class="question-mark">?</span>;
-        r.client.syscall();
-        <span class="prelude-val">Ok</span>(r)
+        })
     }
 
     <span class="kw">fn </span>delete(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: KeyId) -&gt; ClientResult&lt;<span class="lifetime">&#39;_</span>, reply::Delete, <span class="self">Self</span>&gt; {
-        <span class="kw">let </span>r = <span class="self">self</span>.request(request::Delete {
+        <span class="self">self</span>.request(request::Delete {
             key,
             <span class="comment">// mechanism,
-        </span>})<span class="question-mark">?</span>;
-        r.client.syscall();
-        <span class="prelude-val">Ok</span>(r)
+        </span>})
     }
 
     <span class="doccomment">/// Skips deleting read-only / manufacture keys (currently, &quot;low ID&quot;).
     </span><span class="kw">fn </span>delete_all(<span class="kw-2">&amp;mut </span><span class="self">self</span>, location: Location) -&gt; ClientResult&lt;<span class="lifetime">&#39;_</span>, reply::DeleteAllKeys, <span class="self">Self</span>&gt; {
-        <span class="kw">let </span>r = <span class="self">self</span>.request(request::DeleteAllKeys { location })<span class="question-mark">?</span>;
-        r.client.syscall();
-        <span class="prelude-val">Ok</span>(r)
+        <span class="self">self</span>.request(request::DeleteAllKeys { location })
     }
 
     <span class="kw">fn </span>derive_key(
@@ -1177,14 +1071,12 @@
         additional_data: <span class="prelude-ty">Option</span>&lt;MediumData&gt;,
         attributes: StorageAttributes,
     ) -&gt; ClientResult&lt;<span class="lifetime">&#39;_</span>, reply::DeriveKey, <span class="self">Self</span>&gt; {
-        <span class="kw">let </span>r = <span class="self">self</span>.request(request::DeriveKey {
+        <span class="self">self</span>.request(request::DeriveKey {
             mechanism,
             base_key,
             additional_data,
             attributes,
-        })<span class="question-mark">?</span>;
-        r.client.syscall();
-        <span class="prelude-val">Ok</span>(r)
+        })
     }
 
     <span class="kw">fn </span>deserialize_key&lt;<span class="lifetime">&#39;c</span>&gt;(
@@ -1196,14 +1088,12 @@
     ) -&gt; ClientResult&lt;<span class="lifetime">&#39;c</span>, reply::DeserializeKey, <span class="self">Self</span>&gt; {
         <span class="kw">let </span>serialized_key =
             Message::from_slice(serialized_key).map_err(|<span class="kw">_</span>| ClientError::DataTooLarge)<span class="question-mark">?</span>;
-        <span class="kw">let </span>r = <span class="self">self</span>.request(request::DeserializeKey {
+        <span class="self">self</span>.request(request::DeserializeKey {
             mechanism,
             serialized_key,
             format,
             attributes,
-        })<span class="question-mark">?</span>;
-        r.client.syscall();
-        <span class="prelude-val">Ok</span>(r)
+        })
     }
 
     <span class="kw">fn </span>encrypt&lt;<span class="lifetime">&#39;c</span>&gt;(
@@ -1217,15 +1107,13 @@
         <span class="kw">let </span>message = Message::from_slice(message).map_err(|<span class="kw">_</span>| ClientError::DataTooLarge)<span class="question-mark">?</span>;
         <span class="kw">let </span>associated_data =
             ShortData::from_slice(associated_data).map_err(|<span class="kw">_</span>| ClientError::DataTooLarge)<span class="question-mark">?</span>;
-        <span class="kw">let </span>r = <span class="self">self</span>.request(request::Encrypt {
+        <span class="self">self</span>.request(request::Encrypt {
             mechanism,
             key,
             message,
             associated_data,
             nonce,
-        })<span class="question-mark">?</span>;
-        r.client.syscall();
-        <span class="prelude-val">Ok</span>(r)
+        })
     }
 
     <span class="kw">fn </span>exists(
@@ -1233,9 +1121,7 @@
         mechanism: Mechanism,
         key: KeyId,
     ) -&gt; ClientResult&lt;<span class="lifetime">&#39;_</span>, reply::Exists, <span class="self">Self</span>&gt; {
-        <span class="kw">let </span>r = <span class="self">self</span>.request(request::Exists { key, mechanism })<span class="question-mark">?</span>;
-        r.client.syscall();
-        <span class="prelude-val">Ok</span>(r)
+        <span class="self">self</span>.request(request::Exists { key, mechanism })
     }
 
     <span class="kw">fn </span>generate_key(
@@ -1243,12 +1129,10 @@
         mechanism: Mechanism,
         attributes: StorageAttributes,
     ) -&gt; ClientResult&lt;<span class="lifetime">&#39;_</span>, reply::GenerateKey, <span class="self">Self</span>&gt; {
-        <span class="kw">let </span>r = <span class="self">self</span>.request(request::GenerateKey {
+        <span class="self">self</span>.request(request::GenerateKey {
             mechanism,
             attributes,
-        })<span class="question-mark">?</span>;
-        r.client.syscall();
-        <span class="prelude-val">Ok</span>(r)
+        })
     }
 
     <span class="kw">fn </span>generate_secret_key(
@@ -1256,12 +1140,10 @@
         size: usize,
         persistence: Location,
     ) -&gt; ClientResult&lt;<span class="lifetime">&#39;_</span>, reply::GenerateSecretKey, <span class="self">Self</span>&gt; {
-        <span class="kw">let </span>r = <span class="self">self</span>.request(request::GenerateSecretKey {
+        <span class="self">self</span>.request(request::GenerateSecretKey {
             size,
             attributes: StorageAttributes::new().set_persistence(persistence),
-        })<span class="question-mark">?</span>;
-        r.client.syscall();
-        <span class="prelude-val">Ok</span>(r)
+        })
     }
 
     <span class="kw">fn </span>hash(
@@ -1269,15 +1151,11 @@
         mechanism: Mechanism,
         message: Message,
     ) -&gt; ClientResult&lt;<span class="lifetime">&#39;_</span>, reply::Hash, <span class="self">Self</span>&gt; {
-        <span class="kw">let </span>r = <span class="self">self</span>.request(request::Hash { mechanism, message })<span class="question-mark">?</span>;
-        r.client.syscall();
-        <span class="prelude-val">Ok</span>(r)
+        <span class="self">self</span>.request(request::Hash { mechanism, message })
     }
 
     <span class="kw">fn </span>random_bytes(<span class="kw-2">&amp;mut </span><span class="self">self</span>, count: usize) -&gt; ClientResult&lt;<span class="lifetime">&#39;_</span>, reply::RandomBytes, <span class="self">Self</span>&gt; {
-        <span class="kw">let </span>r = <span class="self">self</span>.request(request::RandomBytes { count })<span class="question-mark">?</span>;
-        r.client.syscall();
-        <span class="prelude-val">Ok</span>(r)
+        <span class="self">self</span>.request(request::RandomBytes { count })
     }
 
     <span class="kw">fn </span>serialize_key(
@@ -1286,13 +1164,11 @@
         key: KeyId,
         format: KeySerialization,
     ) -&gt; ClientResult&lt;<span class="lifetime">&#39;_</span>, reply::SerializeKey, <span class="self">Self</span>&gt; {
-        <span class="kw">let </span>r = <span class="self">self</span>.request(request::SerializeKey {
+        <span class="self">self</span>.request(request::SerializeKey {
             key,
             mechanism,
             format,
-        })<span class="question-mark">?</span>;
-        r.client.syscall();
-        <span class="prelude-val">Ok</span>(r)
+        })
     }
 
     <span class="kw">fn </span>sign&lt;<span class="lifetime">&#39;c</span>&gt;(
@@ -1302,14 +1178,12 @@
         data: <span class="kw-2">&amp;</span>[u8],
         format: SignatureSerialization,
     ) -&gt; ClientResult&lt;<span class="lifetime">&#39;c</span>, reply::Sign, <span class="self">Self</span>&gt; {
-        <span class="kw">let </span>r = <span class="self">self</span>.request(request::Sign {
+        <span class="self">self</span>.request(request::Sign {
             key,
             mechanism,
             message: Bytes::from_slice(data).map_err(|<span class="kw">_</span>| ClientError::DataTooLarge)<span class="question-mark">?</span>,
             format,
-        })<span class="question-mark">?</span>;
-        r.client.syscall();
-        <span class="prelude-val">Ok</span>(r)
+        })
     }
 
     <span class="kw">fn </span>verify&lt;<span class="lifetime">&#39;c</span>&gt;(
@@ -1320,15 +1194,13 @@
         signature: <span class="kw-2">&amp;</span>[u8],
         format: SignatureSerialization,
     ) -&gt; ClientResult&lt;<span class="lifetime">&#39;c</span>, reply::Verify, <span class="self">Self</span>&gt; {
-        <span class="kw">let </span>r = <span class="self">self</span>.request(request::Verify {
+        <span class="self">self</span>.request(request::Verify {
             mechanism,
             key,
             message: Message::from_slice(message).expect(<span class="string">&quot;all good&quot;</span>),
             signature: Signature::from_slice(signature).expect(<span class="string">&quot;all good&quot;</span>),
             format,
-        })<span class="question-mark">?</span>;
-        r.client.syscall();
-        <span class="prelude-val">Ok</span>(r)
+        })
     }
 
     <span class="kw">fn </span>unsafe_inject_key(
@@ -1338,14 +1210,12 @@
         persistence: Location,
         format: KeySerialization,
     ) -&gt; ClientResult&lt;<span class="lifetime">&#39;_</span>, reply::UnsafeInjectKey, <span class="self">Self</span>&gt; {
-        <span class="kw">let </span>r = <span class="self">self</span>.request(request::UnsafeInjectKey {
+        <span class="self">self</span>.request(request::UnsafeInjectKey {
             mechanism,
             raw_key: ShortData::from_slice(raw_key).unwrap(),
             attributes: StorageAttributes::new().set_persistence(persistence),
             format,
-        })<span class="question-mark">?</span>;
-        r.client.syscall();
-        <span class="prelude-val">Ok</span>(r)
+        })
     }
 
     <span class="kw">fn </span>unsafe_inject_shared_key(
@@ -1353,12 +1223,10 @@
         raw_key: <span class="kw-2">&amp;</span>[u8],
         location: Location,
     ) -&gt; ClientResult&lt;<span class="lifetime">&#39;_</span>, reply::UnsafeInjectSharedKey, <span class="self">Self</span>&gt; {
-        <span class="kw">let </span>r = <span class="self">self</span>.request(request::UnsafeInjectSharedKey {
+        <span class="self">self</span>.request(request::UnsafeInjectSharedKey {
             raw_key: ShortData::from_slice(raw_key).unwrap(),
             location,
-        })<span class="question-mark">?</span>;
-        r.client.syscall();
-        <span class="prelude-val">Ok</span>(r)
+        })
     }
 
     <span class="kw">fn </span>unwrap_key&lt;<span class="lifetime">&#39;c</span>&gt;(
@@ -1371,15 +1239,13 @@
     ) -&gt; ClientResult&lt;<span class="lifetime">&#39;c</span>, reply::UnwrapKey, <span class="self">Self</span>&gt; {
         <span class="kw">let </span>associated_data =
             Message::from_slice(associated_data).map_err(|<span class="kw">_</span>| ClientError::DataTooLarge)<span class="question-mark">?</span>;
-        <span class="kw">let </span>r = <span class="self">self</span>.request(request::UnwrapKey {
+        <span class="self">self</span>.request(request::UnwrapKey {
             mechanism,
             wrapping_key,
             wrapped_key,
             associated_data,
             attributes,
-        })<span class="question-mark">?</span>;
-        r.client.syscall();
-        <span class="prelude-val">Ok</span>(r)
+        })
     }
 
     <span class="kw">fn </span>wrap_key(
@@ -1391,14 +1257,12 @@
     ) -&gt; ClientResult&lt;<span class="lifetime">&#39;_</span>, reply::WrapKey, <span class="self">Self</span>&gt; {
         <span class="kw">let </span>associated_data =
             Message::from_slice(associated_data).map_err(|<span class="kw">_</span>| ClientError::DataTooLarge)<span class="question-mark">?</span>;
-        <span class="kw">let </span>r = <span class="self">self</span>.request(request::WrapKey {
+        <span class="self">self</span>.request(request::WrapKey {
             mechanism,
             wrapping_key,
             key,
             associated_data,
-        })<span class="question-mark">?</span>;
-        r.client.syscall();
-        <span class="prelude-val">Ok</span>(r)
+        })
     }
 }
 
@@ -1408,27 +1272,21 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         location: Location,
     ) -&gt; ClientResult&lt;<span class="lifetime">&#39;_</span>, reply::CreateCounter, <span class="self">Self</span>&gt; {
-        <span class="kw">let </span>r = <span class="self">self</span>.request(request::CreateCounter { location })<span class="question-mark">?</span>;
-        r.client.syscall();
-        <span class="prelude-val">Ok</span>(r)
+        <span class="self">self</span>.request(request::CreateCounter { location })
     }
 
     <span class="kw">fn </span>increment_counter(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         id: CounterId,
     ) -&gt; ClientResult&lt;<span class="lifetime">&#39;_</span>, reply::IncrementCounter, <span class="self">Self</span>&gt; {
-        <span class="kw">let </span>r = <span class="self">self</span>.request(request::IncrementCounter { id })<span class="question-mark">?</span>;
-        r.client.syscall();
-        <span class="prelude-val">Ok</span>(r)
+        <span class="self">self</span>.request(request::IncrementCounter { id })
     }
 }
 
 <span class="doccomment">/// Read/Write/Delete files, iterate over directories.
 </span><span class="kw">pub trait </span>FilesystemClient: PollClient {
     <span class="kw">fn </span>debug_dump_store(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; ClientResult&lt;<span class="lifetime">&#39;_</span>, reply::DebugDumpStore, <span class="self">Self</span>&gt; {
-        <span class="kw">let </span>r = <span class="self">self</span>.request(request::DebugDumpStore {})<span class="question-mark">?</span>;
-        r.client.syscall();
-        <span class="prelude-val">Ok</span>(r)
+        <span class="self">self</span>.request(request::DebugDumpStore {})
     }
 
     <span class="kw">fn </span>read_dir_first(
@@ -1437,19 +1295,15 @@
         dir: PathBuf,
         not_before_filename: <span class="prelude-ty">Option</span>&lt;PathBuf&gt;,
     ) -&gt; ClientResult&lt;<span class="lifetime">&#39;_</span>, reply::ReadDirFirst, <span class="self">Self</span>&gt; {
-        <span class="kw">let </span>r = <span class="self">self</span>.request(request::ReadDirFirst {
+        <span class="self">self</span>.request(request::ReadDirFirst {
             location,
             dir,
             not_before_filename,
-        })<span class="question-mark">?</span>;
-        r.client.syscall();
-        <span class="prelude-val">Ok</span>(r)
+        })
     }
 
     <span class="kw">fn </span>read_dir_next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; ClientResult&lt;<span class="lifetime">&#39;_</span>, reply::ReadDirNext, <span class="self">Self</span>&gt; {
-        <span class="kw">let </span>r = <span class="self">self</span>.request(request::ReadDirNext {})<span class="question-mark">?</span>;
-        r.client.syscall();
-        <span class="prelude-val">Ok</span>(r)
+        <span class="self">self</span>.request(request::ReadDirNext {})
     }
 
     <span class="kw">fn </span>read_dir_files_first(
@@ -1458,19 +1312,15 @@
         dir: PathBuf,
         user_attribute: <span class="prelude-ty">Option</span>&lt;UserAttribute&gt;,
     ) -&gt; ClientResult&lt;<span class="lifetime">&#39;_</span>, reply::ReadDirFilesFirst, <span class="self">Self</span>&gt; {
-        <span class="kw">let </span>r = <span class="self">self</span>.request(request::ReadDirFilesFirst {
+        <span class="self">self</span>.request(request::ReadDirFilesFirst {
             dir,
             location,
             user_attribute,
-        })<span class="question-mark">?</span>;
-        r.client.syscall();
-        <span class="prelude-val">Ok</span>(r)
+        })
     }
 
     <span class="kw">fn </span>read_dir_files_next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; ClientResult&lt;<span class="lifetime">&#39;_</span>, reply::ReadDirFilesNext, <span class="self">Self</span>&gt; {
-        <span class="kw">let </span>r = <span class="self">self</span>.request(request::ReadDirFilesNext {})<span class="question-mark">?</span>;
-        r.client.syscall();
-        <span class="prelude-val">Ok</span>(r)
+        <span class="self">self</span>.request(request::ReadDirFilesNext {})
     }
 
     <span class="kw">fn </span>remove_dir(
@@ -1478,9 +1328,7 @@
         location: Location,
         path: PathBuf,
     ) -&gt; ClientResult&lt;<span class="lifetime">&#39;_</span>, reply::RemoveDirAll, <span class="self">Self</span>&gt; {
-        <span class="kw">let </span>r = <span class="self">self</span>.request(request::RemoveDir { location, path })<span class="question-mark">?</span>;
-        r.client.syscall();
-        <span class="prelude-val">Ok</span>(r)
+        <span class="self">self</span>.request(request::RemoveDir { location, path })
     }
 
     <span class="kw">fn </span>remove_dir_all(
@@ -1488,9 +1336,7 @@
         location: Location,
         path: PathBuf,
     ) -&gt; ClientResult&lt;<span class="lifetime">&#39;_</span>, reply::RemoveDirAll, <span class="self">Self</span>&gt; {
-        <span class="kw">let </span>r = <span class="self">self</span>.request(request::RemoveDirAll { location, path })<span class="question-mark">?</span>;
-        r.client.syscall();
-        <span class="prelude-val">Ok</span>(r)
+        <span class="self">self</span>.request(request::RemoveDirAll { location, path })
     }
 
     <span class="kw">fn </span>remove_file(
@@ -1498,9 +1344,7 @@
         location: Location,
         path: PathBuf,
     ) -&gt; ClientResult&lt;<span class="lifetime">&#39;_</span>, reply::RemoveFile, <span class="self">Self</span>&gt; {
-        <span class="kw">let </span>r = <span class="self">self</span>.request(request::RemoveFile { location, path })<span class="question-mark">?</span>;
-        r.client.syscall();
-        <span class="prelude-val">Ok</span>(r)
+        <span class="self">self</span>.request(request::RemoveFile { location, path })
     }
 
     <span class="kw">fn </span>read_file(
@@ -1508,9 +1352,7 @@
         location: Location,
         path: PathBuf,
     ) -&gt; ClientResult&lt;<span class="lifetime">&#39;_</span>, reply::ReadFile, <span class="self">Self</span>&gt; {
-        <span class="kw">let </span>r = <span class="self">self</span>.request(request::ReadFile { location, path })<span class="question-mark">?</span>;
-        r.client.syscall();
-        <span class="prelude-val">Ok</span>(r)
+        <span class="self">self</span>.request(request::ReadFile { location, path })
     }
 
     <span class="doccomment">/// Fetch the Metadata for a file or directory
@@ -1521,9 +1363,7 @@
         location: Location,
         path: PathBuf,
     ) -&gt; ClientResult&lt;<span class="lifetime">&#39;_</span>, reply::Metadata, <span class="self">Self</span>&gt; {
-        <span class="kw">let </span>r = <span class="self">self</span>.request(request::Metadata { location, path })<span class="question-mark">?</span>;
-        r.client.syscall();
-        <span class="prelude-val">Ok</span>(r)
+        <span class="self">self</span>.request(request::Metadata { location, path })
     }
 
     <span class="kw">fn </span>locate_file(
@@ -1532,13 +1372,11 @@
         dir: <span class="prelude-ty">Option</span>&lt;PathBuf&gt;,
         filename: PathBuf,
     ) -&gt; ClientResult&lt;<span class="lifetime">&#39;_</span>, reply::LocateFile, <span class="self">Self</span>&gt; {
-        <span class="kw">let </span>r = <span class="self">self</span>.request(request::LocateFile {
+        <span class="self">self</span>.request(request::LocateFile {
             location,
             dir,
             filename,
-        })<span class="question-mark">?</span>;
-        r.client.syscall();
-        <span class="prelude-val">Ok</span>(r)
+        })
     }
 
     <span class="kw">fn </span>write_file(
@@ -1548,29 +1386,23 @@
         data: Message,
         user_attribute: <span class="prelude-ty">Option</span>&lt;UserAttribute&gt;,
     ) -&gt; ClientResult&lt;<span class="lifetime">&#39;_</span>, reply::WriteFile, <span class="self">Self</span>&gt; {
-        <span class="kw">let </span>r = <span class="self">self</span>.request(request::WriteFile {
+        <span class="self">self</span>.request(request::WriteFile {
             location,
             path,
             data,
             user_attribute,
-        })<span class="question-mark">?</span>;
-        r.client.syscall();
-        <span class="prelude-val">Ok</span>(r)
+        })
     }
 }
 
 <span class="doccomment">/// All the other methods that are fit to expose.
 </span><span class="kw">pub trait </span>ManagementClient: PollClient {
     <span class="kw">fn </span>reboot(<span class="kw-2">&amp;mut </span><span class="self">self</span>, to: reboot::To) -&gt; ClientResult&lt;<span class="lifetime">&#39;_</span>, reply::Reboot, <span class="self">Self</span>&gt; {
-        <span class="kw">let </span>r = <span class="self">self</span>.request(request::Reboot { to })<span class="question-mark">?</span>;
-        r.client.syscall();
-        <span class="prelude-val">Ok</span>(r)
+        <span class="self">self</span>.request(request::Reboot { to })
     }
 
     <span class="kw">fn </span>uptime(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; ClientResult&lt;<span class="lifetime">&#39;_</span>, reply::Uptime, <span class="self">Self</span>&gt; {
-        <span class="kw">let </span>r = <span class="self">self</span>.request(request::Uptime {})<span class="question-mark">?</span>;
-        r.client.syscall();
-        <span class="prelude-val">Ok</span>(r)
+        <span class="self">self</span>.request(request::Uptime {})
     }
 }
 
@@ -1580,18 +1412,14 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         timeout_milliseconds: u32,
     ) -&gt; ClientResult&lt;<span class="lifetime">&#39;_</span>, reply::RequestUserConsent, <span class="self">Self</span>&gt; {
-        <span class="kw">let </span>r = <span class="self">self</span>.request(request::RequestUserConsent {
+        <span class="self">self</span>.request(request::RequestUserConsent {
             level: consent::Level::Normal,
             timeout_milliseconds,
-        })<span class="question-mark">?</span>;
-        r.client.syscall();
-        <span class="prelude-val">Ok</span>(r)
+        })
     }
 
     <span class="kw">fn </span>wink(<span class="kw-2">&amp;mut </span><span class="self">self</span>, duration: core::time::Duration) -&gt; ClientResult&lt;<span class="lifetime">&#39;_</span>, reply::Wink, <span class="self">Self</span>&gt; {
-        <span class="kw">let </span>r = <span class="self">self</span>.request(request::Wink { duration })<span class="question-mark">?</span>;
-        r.client.syscall();
-        <span class="prelude-val">Ok</span>(r)
+        <span class="self">self</span>.request(request::Wink { duration })
     }
 }
 
