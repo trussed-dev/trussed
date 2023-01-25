@@ -13,8 +13,7 @@ impl DeriveKey for super::HmacBlake2s {
         use hmac::{Hmac, Mac, NewMac};
         type HmacBlake2s = Hmac<blake2::Blake2s>;
 
-        let key_id = request.base_key.object_id;
-        let key = keystore.load_key(key::Secrecy::Secret, None, &key_id)?;
+        let key = keystore.load_key(key::Secrecy::Secret, None, &request.base_key)?;
         if !matches!(key.kind, key::Kind::Symmetric(..) | key::Kind::Shared(..)) {
             return Err(Error::WrongKeyKind);
         }
@@ -31,16 +30,14 @@ impl DeriveKey for super::HmacBlake2s {
             .into_bytes()
             .try_into()
             .map_err(|_| Error::InternalError)?;
-        let key_id = keystore.store_key(
+        let key = keystore.store_key(
             request.attributes.persistence,
             key::Secrecy::Secret,
             key::Kind::Symmetric(32),
             &derived_key,
         )?;
 
-        Ok(reply::DeriveKey {
-            key: ObjectHandle { object_id: key_id },
-        })
+        Ok(reply::DeriveKey { key })
     }
 }
 
@@ -52,8 +49,7 @@ impl Sign for super::HmacBlake2s {
         use hmac::{Hmac, Mac, NewMac};
         type HmacBlake2s = Hmac<Blake2s>;
 
-        let key_id = request.key.object_id;
-        let key = keystore.load_key(key::Secrecy::Secret, None, &key_id)?;
+        let key = keystore.load_key(key::Secrecy::Secret, None, &request.key)?;
         if !matches!(key.kind, key::Kind::Symmetric(..) | key::Kind::Shared(..)) {
             return Err(Error::WrongKeyKind);
         }
