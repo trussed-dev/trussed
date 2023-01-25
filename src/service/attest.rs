@@ -21,13 +21,13 @@ use crate::{
 #[cfg(not(feature = "test-attestation-cert-ids"))]
 pub const ED255_ATTN_KEY: KeyId = KeyId::from_special(1);
 #[cfg(feature = "test-attestation-cert-ids")]
-pub const ED255_ATTN_KEY: KeyId = KeyId(Id(u128::from_be_bytes([
+pub const ED255_ATTN_KEY: KeyId = KeyId(crate::types::Id(u128::from_be_bytes([
     0x12, 0xd2, 0xa7, 0xe4, 0x03, 0x55, 0x21, 0x42, 0x99, 0xf1, 0x57, 0x34, 0xc5, 0xd7, 0xd0, 0xe7,
 ])));
 #[cfg(not(feature = "test-attestation-cert-ids"))]
 pub const P256_ATTN_KEY: KeyId = KeyId::from_special(2);
 #[cfg(feature = "test-attestation-cert-ids")]
-pub const P256_ATTN_KEY: KeyId = KeyId(Id(u128::from_be_bytes([
+pub const P256_ATTN_KEY: KeyId = KeyId(crate::types::Id(u128::from_be_bytes([
     0xc8, 0xd6, 0x77, 0xa3, 0x93, 0x46, 0xc9, 0x8f, 0xc8, 0x5a, 0xb0, 0x5d, 0x29, 0xc5, 0x75, 0x32,
 ])));
 
