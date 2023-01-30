@@ -36,6 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `ui::Status` non-exhaustive.
 - Made `postcard_deserialize`, `postcard_serialize` and
   `postcard_serialize_bytes` private.
+- Changed `&PathBuf` to `&Path` where possible.
 
 ### Fixed
 

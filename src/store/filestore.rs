@@ -5,6 +5,7 @@ use crate::{
     types::{LfsStorage, Location, Message, UserAttribute},
     Bytes,
 };
+use littlefs2::path;
 
 #[derive(Clone)]
 pub struct ReadDirState {
@@ -43,7 +44,7 @@ impl<S: Store> ClientFilestore<S> {
     }
 
     /// Client files are store below `/<client_id>/dat/`.
-    pub fn actual_path(&self, client_path: &PathBuf) -> Result<PathBuf> {
+    pub fn actual_path(&self, client_path: &Path) -> Result<PathBuf> {
         // Clients must not escape their namespace
         if client_path.as_ref().contains("..") {
             return Err(Error::InvalidPath);
@@ -51,7 +52,7 @@ impl<S: Store> ClientFilestore<S> {
 
         let mut path = PathBuf::new();
         path.push(&self.client_id);
-        path.push(&PathBuf::from("dat"));
+        path.push(path!("dat"));
         path.push(client_path);
         Ok(path)
     }
@@ -75,18 +76,18 @@ impl<S: Store> ClientFilestore<S> {
 }
 
 pub trait Filestore {
-    fn read<const N: usize>(&mut self, path: &PathBuf, location: Location) -> Result<Bytes<N>>;
-    fn write(&mut self, path: &PathBuf, location: Location, data: &[u8]) -> Result<()>;
-    fn exists(&mut self, path: &PathBuf, location: Location) -> bool;
-    fn metadata(&mut self, path: &PathBuf, location: Location) -> Result<Option<Metadata>>;
-    fn remove_file(&mut self, path: &PathBuf, location: Location) -> Result<()>;
-    fn remove_dir(&mut self, path: &PathBuf, location: Location) -> Result<()>;
-    fn remove_dir_all(&mut self, path: &PathBuf, location: Location) -> Result<usize>;
+    fn read<const N: usize>(&mut self, path: &Path, location: Location) -> Result<Bytes<N>>;
+    fn write(&mut self, path: &Path, location: Location, data: &[u8]) -> Result<()>;
+    fn exists(&mut self, path: &Path, location: Location) -> bool;
+    fn metadata(&mut self, path: &Path, location: Location) -> Result<Option<Metadata>>;
+    fn remove_file(&mut self, path: &Path, location: Location) -> Result<()>;
+    fn remove_dir(&mut self, path: &Path, location: Location) -> Result<()>;
+    fn remove_dir_all(&mut self, path: &Path, location: Location) -> Result<usize>;
     fn locate_file(
         &mut self,
         location: Location,
-        underneath: Option<PathBuf>,
-        filename: PathBuf,
+        underneath: Option<&Path>,
+        filename: &Path,
     ) -> Result<Option<PathBuf>>;
 
     /// Iterate over entries of a directory (both file and directory entries).
@@ -100,9 +101,9 @@ pub trait Filestore {
     /// call to `read_dir_next` can resume operation.
     fn read_dir_first(
         &mut self,
-        dir: &PathBuf,
+        dir: &Path,
         location: Location,
-        not_before: Option<&PathBuf>,
+        not_before: Option<&Path>,
     ) -> Result<Option<(DirEntry, ReadDirState)>>;
 
     /// Continue iterating over entries of a directory.
@@ -120,7 +121,7 @@ pub trait Filestore {
     /// Additionally, files may optionally be filtered via attributes.
     fn read_dir_files_first(
         &mut self,
-        clients_dir: &PathBuf,
+        clients_dir: &Path,
         location: Location,
         user_attribute: Option<UserAttribute>,
     ) -> Result<Option<(Option<Message>, ReadDirFilesState)>>;
@@ -136,9 +137,9 @@ pub trait Filestore {
 impl<S: Store> ClientFilestore<S> {
     fn read_dir_first_impl<F: LfsStorage + 'static>(
         &mut self,
-        clients_dir: &PathBuf,
+        clients_dir: &Path,
         location: Location,
-        not_before: Option<&PathBuf>,
+        not_before: Option<&Path>,
         fs: &'static Fs<F>,
     ) -> Result<Option<(DirEntry, ReadDirState)>> {
         let dir = self.actual_path(clients_dir)?;
@@ -228,7 +229,7 @@ impl<S: Store> ClientFilestore<S> {
     }
     fn read_dir_files_first_impl<F: LfsStorage + 'static>(
         &mut self,
-        clients_dir: &PathBuf,
+        clients_dir: &Path,
         location: Location,
         user_attribute: Option<UserAttribute>,
         fs: &'static Fs<F>,
@@ -346,30 +347,30 @@ impl<S: Store> ClientFilestore<S> {
 }
 
 impl<S: Store> Filestore for ClientFilestore<S> {
-    fn read<const N: usize>(&mut self, path: &PathBuf, location: Location) -> Result<Bytes<N>> {
+    fn read<const N: usize>(&mut self, path: &Path, location: Location) -> Result<Bytes<N>> {
         let path = self.actual_path(path)?;
 
         store::read(self.store, location, &path)
     }
 
-    fn write(&mut self, path: &PathBuf, location: Location, data: &[u8]) -> Result<()> {
+    fn write(&mut self, path: &Path, location: Location, data: &[u8]) -> Result<()> {
         let path = self.actual_path(path)?;
         store::store(self.store, location, &path, data)
     }
 
-    fn exists(&mut self, path: &PathBuf, location: Location) -> bool {
+    fn exists(&mut self, path: &Path, location: Location) -> bool {
         if let Ok(path) = self.actual_path(path) {
             store::exists(self.store, location, &path)
         } else {
             false
         }
     }
-    fn metadata(&mut self, path: &PathBuf, location: Location) -> Result<Option<Metadata>> {
+    fn metadata(&mut self, path: &Path, location: Location) -> Result<Option<Metadata>> {
         let path = self.actual_path(path)?;
         store::metadata(self.store, location, &path)
     }
 
-    fn remove_file(&mut self, path: &PathBuf, location: Location) -> Result<()> {
+    fn remove_file(&mut self, path: &Path, location: Location) -> Result<()> {
         let path = self.actual_path(path)?;
 
         match store::delete(self.store, location, &path) {
@@ -378,7 +379,7 @@ impl<S: Store> Filestore for ClientFilestore<S> {
         }
     }
 
-    fn remove_dir(&mut self, path: &PathBuf, location: Location) -> Result<()> {
+    fn remove_dir(&mut self, path: &Path, location: Location) -> Result<()> {
         let path = self.actual_path(path)?;
 
         match store::delete(self.store, location, &path) {
@@ -387,7 +388,7 @@ impl<S: Store> Filestore for ClientFilestore<S> {
         }
     }
 
-    fn remove_dir_all(&mut self, path: &PathBuf, location: Location) -> Result<usize> {
+    fn remove_dir_all(&mut self, path: &Path, location: Location) -> Result<usize> {
         let path = self.actual_path(path)?;
 
         store::remove_dir_all_where(self.store, location, &path, |_| true)
@@ -396,9 +397,9 @@ impl<S: Store> Filestore for ClientFilestore<S> {
 
     fn read_dir_first(
         &mut self,
-        clients_dir: &PathBuf,
+        clients_dir: &Path,
         location: Location,
-        not_before: Option<&PathBuf>,
+        not_before: Option<&Path>,
     ) -> Result<Option<(DirEntry, ReadDirState)>> {
         match location {
             Location::Internal => {
@@ -423,7 +424,7 @@ impl<S: Store> Filestore for ClientFilestore<S> {
 
     fn read_dir_files_first(
         &mut self,
-        clients_dir: &PathBuf,
+        clients_dir: &Path,
         location: Location,
         user_attribute: Option<UserAttribute>,
     ) -> Result<Option<(Option<Message>, ReadDirFilesState)>> {
@@ -463,25 +464,25 @@ impl<S: Store> Filestore for ClientFilestore<S> {
     fn locate_file(
         &mut self,
         location: Location,
-        underneath: Option<PathBuf>,
-        filename: PathBuf,
+        underneath: Option<&Path>,
+        filename: &Path,
     ) -> Result<Option<PathBuf>> {
         if location != Location::Internal {
             return Err(Error::RequestNotAvailable);
         }
 
-        let clients_dir = underneath.unwrap_or_else(|| PathBuf::from("/"));
-        let dir = self.actual_path(&clients_dir)?;
+        let clients_dir = underneath.unwrap_or_else(|| path!("/"));
+        let dir = self.actual_path(clients_dir)?;
         let fs = self.store.ifs();
 
         info_now!("base dir {:?}", &dir);
 
         fn recursively_locate<S: 'static + crate::types::LfsStorage>(
             fs: &'static crate::store::Fs<S>,
-            dir: PathBuf,
+            dir: &Path,
             filename: &Path,
         ) -> Option<PathBuf> {
-            fs.read_dir_and_then(&dir, |it| {
+            fs.read_dir_and_then(dir, |it| {
                 it.map(|entry| entry.unwrap())
                     .skip(2)
                     .filter_map(|entry| {
@@ -493,7 +494,7 @@ impl<S: Store> Filestore for ClientFilestore<S> {
                                 None
                             }
                         } else {
-                            recursively_locate(fs, PathBuf::from(entry.path()), filename)
+                            recursively_locate(fs, entry.path(), filename)
                         }
                     })
                     .next()
@@ -502,7 +503,7 @@ impl<S: Store> Filestore for ClientFilestore<S> {
             .ok()
         }
 
-        let path = recursively_locate(fs, dir, &filename).map(|path| self.client_path(&path));
+        let path = recursively_locate(fs, &dir, filename).map(|path| self.client_path(&path));
 
         Ok(path)
     }
