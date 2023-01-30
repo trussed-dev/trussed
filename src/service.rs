@@ -1,4 +1,7 @@
-use littlefs2::path::PathBuf;
+use littlefs2::{
+    path,
+    path::{Path, PathBuf},
+};
 use rand_chacha::ChaCha8Rng;
 pub use rand_core::{RngCore, SeedableRng};
 
@@ -296,7 +299,7 @@ impl<P: Platform> ServiceResources<P> {
             },
 
             Request::LocateFile(request) => {
-                let path = filestore.locate_file(request.location, request.dir.clone(), request.filename.clone())?;
+                let path = filestore.locate_file(request.location, request.dir.as_deref(), &request.filename)?;
 
                 Ok(Reply::LocateFile(reply::LocateFile { path }) )
             }
@@ -306,14 +309,14 @@ impl<P: Platform> ServiceResources<P> {
             Request::DebugDumpStore(_request) => {
 
                 info_now!(":: PERSISTENT");
-                recursively_list(self.platform.store().ifs(), PathBuf::from("/"));
+                recursively_list(self.platform.store().ifs(), path!("/"));
 
                 info_now!(":: VOLATILE");
-                recursively_list(self.platform.store().vfs(), PathBuf::from("/"));
+                recursively_list(self.platform.store().vfs(), path!("/"));
 
-                fn recursively_list<S: 'static + crate::types::LfsStorage>(fs: &'static crate::store::Fs<S>, path: PathBuf) {
+                fn recursively_list<S: 'static + crate::types::LfsStorage>(fs: &'static crate::store::Fs<S>, path: &Path) {
                     // let fs = store.vfs();
-                    fs.read_dir_and_then(&path, |dir| {
+                    fs.read_dir_and_then(path, |dir| {
                         for (i, entry) in dir.enumerate() {
                             let entry = entry.unwrap();
                             if i < 2 {
@@ -322,7 +325,7 @@ impl<P: Platform> ServiceResources<P> {
                             }
                             info_now!("{:?} p({:?})", entry.path(), &path);
                             if entry.file_type().is_dir() {
-                                recursively_list(fs, PathBuf::from(entry.path()));
+                                recursively_list(fs, entry.path());
                             }
                             if entry.file_type().is_file() {
                                 let _contents: Vec<u8, 256> = fs.read(entry.path()).unwrap();
@@ -339,7 +342,7 @@ impl<P: Platform> ServiceResources<P> {
             }
 
             Request::ReadDirFirst(request) => {
-                let maybe_entry = match filestore.read_dir_first(&request.dir, request.location, request.not_before_filename.as_ref())? {
+                let maybe_entry = match filestore.read_dir_first(&request.dir, request.location, request.not_before_filename.as_deref())? {
                     Some((entry, read_dir_state)) => {
                         ctx.read_dir_state = Some(read_dir_state);
                         Some(entry)
@@ -614,15 +617,15 @@ impl<P: Platform> ServiceResources<P> {
             None => {
                 let mut filestore = self.trussed_filestore();
 
-                let path = PathBuf::from("rng-state.bin");
+                let path = path!("rng-state.bin");
 
                 // Load previous seed, e.g., externally injected entropy on first run.
                 // Else, default to zeros - will mix in new HW RNG entropy next
-                let mixin_seed = if !filestore.exists(&path, Location::Internal) {
+                let mixin_seed = if !filestore.exists(path, Location::Internal) {
                     [0u8; 32]
                 } else {
                     // Use the last saved state.
-                    let mixin_bytes: Bytes<32> = filestore.read(&path, Location::Internal)?;
+                    let mixin_bytes: Bytes<32> = filestore.read(path, Location::Internal)?;
                     let mut mixin_seed = [0u8; 32];
                     mixin_seed.clone_from_slice(&mixin_bytes);
                     mixin_seed
@@ -662,7 +665,7 @@ impl<P: Platform> ServiceResources<P> {
                 let mut seed_to_store = [0u8; 32];
                 rng.fill_bytes(&mut seed_to_store);
                 filestore
-                    .write(&path, Location::Internal, seed_to_store.as_ref())
+                    .write(path, Location::Internal, seed_to_store.as_ref())
                     .unwrap();
 
                 // 5. Finish
@@ -744,7 +747,7 @@ impl<P: Platform, D: Dispatch> Service<P, D> {
         backends: &'static [BackendId<D::BackendId>],
     ) -> Result<(), Error> {
         let core_ctx = core_ctx.into();
-        if core_ctx.path == PathBuf::from("trussed") {
+        if &*core_ctx.path == path!("trussed") {
             panic!("trussed is a reserved client ID");
         }
         self.eps
@@ -758,10 +761,10 @@ impl<P: Platform, D: Dispatch> Service<P, D> {
 
     pub fn set_seed_if_uninitialized(&mut self, seed: &[u8; 32]) {
         let mut filestore = self.resources.trussed_filestore();
-        let path = PathBuf::from("rng-state.bin");
-        if !filestore.exists(&path, Location::Internal) {
+        let path = path!("rng-state.bin");
+        if !filestore.exists(path, Location::Internal) {
             filestore
-                .write(&path, Location::Internal, seed.as_ref())
+                .write(path, Location::Internal, seed.as_ref())
                 .unwrap();
         }
     }

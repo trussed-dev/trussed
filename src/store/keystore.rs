@@ -1,4 +1,7 @@
-use littlefs2::path::PathBuf;
+use littlefs2::{
+    path,
+    path::{Path, PathBuf},
+};
 use rand_chacha::ChaCha8Rng;
 
 use crate::{
@@ -10,7 +13,7 @@ use crate::{
     Bytes,
 };
 
-pub type ClientId = littlefs2::path::PathBuf;
+pub type ClientId = PathBuf;
 
 pub struct ClientKeystore<S>
 where
@@ -76,9 +79,9 @@ impl<S: Store> ClientKeystore<S> {
     pub fn key_directory(&self, secrecy: key::Secrecy) -> PathBuf {
         let mut path = PathBuf::new();
         path.push(&self.client_id);
-        path.push(&match secrecy {
-            key::Secrecy::Secret => PathBuf::from("sec"),
-            key::Secrecy::Public => PathBuf::from("pub"),
+        path.push(match secrecy {
+            key::Secrecy::Secret => path!("sec"),
+            key::Secrecy::Public => path!("pub"),
         });
         path
     }

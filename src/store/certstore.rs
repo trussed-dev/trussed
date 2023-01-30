@@ -1,4 +1,7 @@
-use littlefs2::path::PathBuf;
+use littlefs2::{
+    path,
+    path::{Path, PathBuf},
+};
 use rand_chacha::ChaCha8Rng;
 
 use crate::{
@@ -65,7 +68,7 @@ impl<S: Store> ClientCertstore<S> {
     fn cert_path(&self, id: CertId) -> PathBuf {
         let mut path = PathBuf::new();
         path.push(&self.client_id);
-        path.push(&PathBuf::from("x5c"));
+        path.push(path!("x5c"));
         path.push(&PathBuf::from(id.hex().as_slice()));
         path
     }

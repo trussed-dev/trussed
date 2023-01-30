@@ -1,4 +1,7 @@
-use littlefs2::path::PathBuf;
+use littlefs2::{
+    path,
+    path::{Path, PathBuf},
+};
 use rand_chacha::ChaCha8Rng;
 
 use crate::{
@@ -30,7 +33,7 @@ impl<S: Store> ClientCounterstore<S> {
     fn counter_path(&self, id: CounterId) -> PathBuf {
         let mut path = PathBuf::new();
         path.push(&self.client_id);
-        path.push(&PathBuf::from("ctr"));
+        path.push(path!("ctr"));
         path.push(&PathBuf::from(id.hex().as_slice()));
         path
     }
