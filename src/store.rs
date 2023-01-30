@@ -32,6 +32,7 @@
 //!
 //! Here's my current thinking:
 //!
+//! ```text
 //! /
 //! |-- data/
 //!     |-- <app id>/
@@ -44,9 +45,11 @@
 //!         +-- file.1
 //!         +-- file.2
 //! |-- keys/
+//! ```
 //!
 //! NOTE !!! ==> ideally can filter out CredentialProtectionPolicy in ReadDirFiles (via attribute)
 //!
+//! ```text
 //! (fido)
 //!     :   |-- data/              <-- the KeyValue portion
 //!         :   |-- rk/
@@ -57,6 +60,7 @@
 //!                 |-- <rp hash>/
 //!             + config
 //!             +
+//! ```
 //!
 //! Why? This:
 //! - typical use-case is one RK per RP (I'd assume!)
