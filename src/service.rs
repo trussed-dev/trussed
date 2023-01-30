@@ -6,7 +6,7 @@ pub use rand_core::{RngCore, SeedableRng};
 
 use crate::api::*;
 use crate::config::*;
-use crate::error::Error;
+use crate::error::{Error, Result};
 pub use crate::key;
 use crate::mechanisms;
 pub use crate::pipe::ServiceEndpoint;
@@ -30,7 +30,7 @@ macro_rules! rpc_trait { ($($Name:ident, $name:ident,)*) => { $(
 
     pub trait $Name {
         fn $name(_keystore: &mut impl Keystore, _request: &request::$Name)
-        -> Result<reply::$Name, Error> { Err(Error::MechanismNotAvailable) }
+        -> Result<reply::$Name> { Err(Error::MechanismNotAvailable) }
     }
 )* } }
 
@@ -81,45 +81,43 @@ where
 unsafe impl<P: Platform> Send for Service<P> {}
 
 impl<P: Platform> ServiceResources<P> {
+    pub fn certstore(&mut self, client_ctx: &ClientContext) -> Result<ClientCertstore<P::S>> {
+        self.rng()
+            .map(|rng| ClientCertstore::new(client_ctx.path.clone(), rng, self.platform.store()))
+            .map_err(|_| Error::EntropyMalfunction)
+    }
+
+    pub fn counterstore(&mut self, client_ctx: &ClientContext) -> Result<ClientCounterstore<P::S>> {
+        self.rng()
+            .map(|rng| ClientCounterstore::new(client_ctx.path.clone(), rng, self.platform.store()))
+            .map_err(|_| Error::EntropyMalfunction)
+    }
+
+    pub fn filestore(&mut self, client_ctx: &ClientContext) -> ClientFilestore<P::S> {
+        ClientFilestore::new(client_ctx.path.clone(), self.platform.store())
+    }
+
+    pub fn trussed_filestore(&mut self) -> ClientFilestore<P::S> {
+        ClientFilestore::new(PathBuf::from("trussed"), self.platform.store())
+    }
+
+    pub fn keystore(&mut self, client_ctx: &ClientContext) -> Result<ClientKeystore<P::S>> {
+        self.rng()
+            .map(|rng| ClientKeystore::new(client_ctx.path.clone(), rng, self.platform.store()))
+            .map_err(|_| Error::EntropyMalfunction)
+    }
+
     #[inline(never)]
-    pub fn reply_to(
-        &mut self,
-        client_ctx: &mut ClientContext,
-        request: &Request,
-    ) -> Result<Reply, Error> {
+    pub fn reply_to(&mut self, client_ctx: &mut ClientContext, request: &Request) -> Result<Reply> {
         // TODO: what we want to do here is map an enum to a generic type
         // Is there a nicer way to do this?
 
         let full_store = self.platform.store();
 
-        // prepare keystore, bound to client_id, for cryptographic calls
-        let mut keystore: ClientKeystore<P::S> = ClientKeystore::new(
-            client_ctx.path.clone(),
-            self.rng().map_err(|_| Error::EntropyMalfunction)?,
-            full_store,
-        );
-        let keystore = &mut keystore;
-
-        // prepare certstore, bound to client_id, for cert calls
-        let mut certstore: ClientCertstore<P::S> = ClientCertstore::new(
-            client_ctx.path.clone(),
-            self.rng().map_err(|_| Error::EntropyMalfunction)?,
-            full_store,
-        );
-        let certstore = &mut certstore;
-
-        // prepare counterstore, bound to client_id, for counter calls
-        let mut counterstore: ClientCounterstore<P::S> = ClientCounterstore::new(
-            client_ctx.path.clone(),
-            self.rng().map_err(|_| Error::EntropyMalfunction)?,
-            full_store,
-        );
-        let counterstore = &mut counterstore;
-
-        // prepare filestore, bound to client_id, for storage calls
-        let mut filestore: ClientFilestore<P::S> =
-            ClientFilestore::new(client_ctx.path.clone(), full_store);
-        let filestore = &mut filestore;
+        let keystore = &mut self.keystore(client_ctx)?;
+        let certstore = &mut self.certstore(client_ctx)?;
+        let counterstore = &mut self.counterstore(client_ctx)?;
+        let filestore = &mut self.filestore(client_ctx);
 
         debug_now!("TRUSSED {:?}", request);
         match request {
@@ -587,8 +585,7 @@ impl<P: Platform> ServiceResources<P> {
         let mut rng = match self.rng_state.take() {
             Some(rng) => rng,
             None => {
-                let mut filestore: ClientFilestore<P::S> =
-                    ClientFilestore::new(PathBuf::from("trussed"), self.platform.store());
+                let mut filestore = self.trussed_filestore();
 
                 let path = PathBuf::from("rng-state.bin");
 
@@ -734,10 +731,7 @@ impl<P: Platform> Service<P> {
     }
 
     pub fn set_seed_if_uninitialized(&mut self, seed: &[u8; 32]) {
-        let mut filestore: ClientFilestore<P::S> =
-            ClientFilestore::new(PathBuf::from("trussed"), self.resources.platform.store());
-        let filestore = &mut filestore;
-
+        let mut filestore = self.resources.trussed_filestore();
         let path = PathBuf::from("rng-state.bin");
         if !filestore.exists(&path, Location::Internal) {
             filestore
