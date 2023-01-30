@@ -258,7 +258,7 @@ pub trait CertificateClient: PollClient {
         location: Location,
         der: &[u8],
     ) -> ClientResult<'_, reply::WriteCertificate, Self> {
-        let der = Message::from_slice(der).map_err(|_| ClientError::DataTooLarge)?;
+        let der = LargeMessage::from_slice(der).map_err(|_| ClientError::DataTooLarge)?;
         self.request(request::WriteCertificate { location, der })
     }
 }
@@ -650,7 +650,7 @@ pub trait FilesystemClient: PollClient {
         &mut self,
         location: Location,
         path: PathBuf,
-        data: Message,
+        data: LargeMessage,
         user_attribute: Option<UserAttribute>,
     ) -> ClientResult<'_, reply::WriteFile, Self> {
         self.request(request::WriteFile {

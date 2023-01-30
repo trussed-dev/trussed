@@ -532,7 +532,7 @@ fn filesystem() {
             Location::Internal,
             PathBuf::from("test_file"),
             data.clone(),
-            None,
+            None
         )
         .expect("no client error"))
     .expect("no errors");

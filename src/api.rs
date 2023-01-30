@@ -279,8 +279,8 @@ pub mod request {
         WriteFile:
           - location: Location
           - path: PathBuf
-          - data: Message
           - user_attribute: Option<UserAttribute>
+          - data: LargeMessage
 
         UnsafeInjectKey:
           - mechanism: Mechanism        // -> implies key type
@@ -339,7 +339,7 @@ pub mod request {
 
         WriteCertificate:
           - location: Location
-          - der: Message
+          - der: LargeMessage
 
         SerdeExtension:
           - id: u8
@@ -429,7 +429,7 @@ pub mod reply {
           - entry: Option<DirEntry>
 
         ReadFile:
-          - data: Message
+          - data: LargeMessage
 
         Metadata:
           - metadata: Option<crate::types::Metadata>
@@ -490,7 +490,7 @@ pub mod reply {
         DeleteCertificate:
 
         ReadCertificate:
-          - der: Message
+          - der: LargeMessage
 
         WriteCertificate:
           - id: CertId

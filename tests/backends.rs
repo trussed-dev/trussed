@@ -7,7 +7,7 @@ use trussed::{
     error::Error,
     platform,
     service::{Service, ServiceResources},
-    types::{Context, CoreContext, Location, Message, PathBuf},
+    types::{Context, CoreContext, LargeMessage, Location, PathBuf},
     virt::{self, Ram},
     ClientImplementation,
 };
@@ -61,7 +61,7 @@ impl backend::Backend for TestBackend {
     ) -> Result<Reply, Error> {
         match request {
             Request::ReadFile(_) => {
-                let mut data = Message::new();
+                let mut data = LargeMessage::new();
                 data.push(0xff).unwrap();
                 Ok(Reply::ReadFile(ReadFile { data }))
             }

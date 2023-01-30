@@ -589,6 +589,7 @@ pub type ShortData = Bytes<MAX_SHORT_DATA_LENGTH>;
 
 pub type Message = Bytes<MAX_MESSAGE_LENGTH>;
 pub type SerializedKey = Bytes<MAX_KEY_MATERIAL_LENGTH>;
+pub type LargeMessage = Bytes<MAX_LARGE_MESSAGE_LENGTH>;
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Serialize, Deserialize)]
 pub enum KeySerialization {

@@ -9,6 +9,7 @@ use littlefs2::consts;
 pub type MAX_APPLICATION_NAME_LENGTH = consts::U256;
 pub const MAX_LONG_DATA_LENGTH: usize = 1024;
 pub const MAX_MESSAGE_LENGTH: usize = 1024;
+pub const MAX_LARGE_MESSAGE_LENGTH: usize = 2048;
 pub type MAX_OBJECT_HANDLES = consts::U16;
 pub type MAX_LABEL_LENGTH = consts::U256;
 pub const MAX_MEDIUM_DATA_LENGTH: usize = 256;

@@ -4,7 +4,7 @@ use littlefs2::path::PathBuf;
 use crate::{
     error::{Error, Result},
     store::{self, Store},
-    types::{CertId, Location, Message},
+    types::{CertId, LargeMessage, Location},
 };
 
 pub struct ClientCertstore<S>
@@ -18,11 +18,11 @@ where
 
 pub trait Certstore {
     fn delete_certificate(&mut self, id: CertId) -> Result<()>;
-    fn read_certificate(&mut self, id: CertId) -> Result<Message>;
+    fn read_certificate(&mut self, id: CertId) -> Result<LargeMessage>;
     /// TODO: feels a bit heavy-weight to pass in the ClientCounterstore here
     /// just to ensure the next global counter ("counter zero") is used, and
     /// not something random.
-    fn write_certificate(&mut self, location: Location, der: &Message) -> Result<CertId>;
+    fn write_certificate(&mut self, location: Location, der: &[u8]) -> Result<CertId>;
 }
 
 impl<S: Store> Certstore for ClientCertstore<S> {
@@ -36,7 +36,7 @@ impl<S: Store> Certstore for ClientCertstore<S> {
             .ok_or(Error::NoSuchKey)
     }
 
-    fn read_certificate(&mut self, id: CertId) -> Result<Message> {
+    fn read_certificate(&mut self, id: CertId) -> Result<LargeMessage> {
         let path = self.cert_path(id);
         let locations = [Location::Internal, Location::External, Location::Volatile];
         locations
@@ -45,10 +45,10 @@ impl<S: Store> Certstore for ClientCertstore<S> {
             .ok_or(Error::NoSuchCertificate)
     }
 
-    fn write_certificate(&mut self, location: Location, der: &Message) -> Result<CertId> {
+    fn write_certificate(&mut self, location: Location, der: &[u8]) -> Result<CertId> {
         let id = CertId::new(&mut self.rng);
         let path = self.cert_path(id);
-        store::store(self.store, location, &path, der.as_slice())?;
+        store::store(self.store, location, &path, der)?;
         Ok(id)
     }
 }
