@@ -110,7 +110,10 @@ impl<S: Syscall> Client for ClientImplementation<S> {}
 
 /// Lowest level interface, use one of the higher level ones.
 pub trait PollClient {
-    fn request<T: From<Reply>>(&mut self, req: impl Into<Request>) -> ClientResult<'_, T, Self>;
+    fn request<Rq: RequestData>(
+        &mut self,
+        req: Rq,
+    ) -> ClientResult<'_, Rq::CorrespondingReply, Self>;
     fn poll(&mut self) -> Poll<Result<Reply, Error>>;
 }
 
@@ -124,7 +127,7 @@ where
 
 impl<'c, T, C> FutureResult<'c, T, C>
 where
-    T: From<Reply>,
+    T: ReplyData,
     C: PollClient,
 {
     pub fn new(client: &'c mut C) -> Self {
@@ -134,7 +137,9 @@ where
         }
     }
     pub fn poll(&mut self) -> Poll<Result<T, Error>> {
-        self.client.poll().map(|result| result.map(From::from))
+        self.client
+            .poll()
+            .map(|result| result.and_then(TryFrom::try_from))
     }
 }
 
@@ -205,7 +210,10 @@ where
     }
 
     // call with any of `crate::api::request::*`
-    fn request<T: From<Reply>>(&mut self, req: impl Into<Request>) -> ClientResult<'_, T, Self> {
+    fn request<Rq: RequestData>(
+        &mut self,
+        req: Rq,
+    ) -> ClientResult<'_, Rq::CorrespondingReply, Self> {
         // TODO: handle failure
         // TODO: fail on pending (non-canceled) request)
         if self.pending.is_some() {
@@ -589,7 +597,7 @@ pub trait FilesystemClient: PollClient {
         &mut self,
         location: Location,
         path: PathBuf,
-    ) -> ClientResult<'_, reply::RemoveDirAll, Self> {
+    ) -> ClientResult<'_, reply::RemoveDir, Self> {
         self.request(request::RemoveDir { location, path })
     }
 
