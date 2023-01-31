@@ -79,21 +79,13 @@ macro_rules! impl_reply {
         )*
     }
 
-    // impl core::convert::TryFrom<Reply> for $reply {
-    //     type Error = ();
-    //     fn try_from(reply: Reply) -> Result<reply::$reply, Self::Error> {
-    //         match reply {
-    //             Reply::$reply(reply) => Ok(reply),
-    //             _ => Err(()),
-    //         }
-    //     }
-    // }
+    impl ::core::convert::TryFrom<$crate::api::Reply> for $reply {
+        type Error = $crate::error::Error;
 
-    impl From<Reply> for $reply {
-        fn from(reply: Reply) -> reply::$reply {
+        fn try_from(reply: $crate::api::Reply) -> ::core::result::Result<Self, Self::Error> {
             match reply {
-                Reply::$reply(reply) => reply,
-                _ => { unsafe { unreachable_unchecked() } }
+                $crate::api::Reply::$reply(reply) => Ok(reply),
+                _ => Err(Self::Error::InvalidReply),
             }
         }
     }
