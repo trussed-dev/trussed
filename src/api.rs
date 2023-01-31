@@ -105,11 +105,11 @@ generate_enums! {
 }
 
 pub trait RequestData: Into<Request> + TryFrom<Request, Error = crate::Error> {
-    type CorrespondingReply: ReplyData<CorrespondingRequest = Self>;
+    type Reply: ReplyData<Request = Self>;
 }
 
 pub trait ReplyData: Into<Reply> + TryFrom<Reply, Error = crate::Error> {
-    type CorrespondingRequest: RequestData<CorrespondingReply = Self>;
+    type Request: RequestData<Reply = Self>;
 }
 
 pub mod request {
