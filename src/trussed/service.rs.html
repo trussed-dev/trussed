@@ -816,12 +816,6 @@
 <span id="816">816</span>
 <span id="817">817</span>
 <span id="818">818</span>
-<span id="819">819</span>
-<span id="820">820</span>
-<span id="821">821</span>
-<span id="822">822</span>
-<span id="823">823</span>
-<span id="824">824</span>
 </pre><pre class="rust"><code><span class="kw">use </span>chacha20::ChaCha8Rng;
 <span class="kw">use </span>heapless_bytes::Unsigned;
 <span class="kw">use </span>interchange::Responder;
@@ -830,7 +824,7 @@
 
 <span class="kw">use </span><span class="kw">crate</span>::api::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">crate</span>::config::<span class="kw-2">*</span>;
-<span class="kw">use </span><span class="kw">crate</span>::error::Error;
+<span class="kw">use </span><span class="kw">crate</span>::error::{Error, <span class="prelude-ty">Result</span>};
 <span class="kw">pub use </span><span class="kw">crate</span>::key;
 <span class="kw">use </span><span class="kw">crate</span>::mechanisms;
 <span class="kw">pub use </span><span class="kw">crate</span>::pipe::ServiceEndpoint;
@@ -854,7 +848,7 @@
 
     <span class="kw">pub trait </span><span class="macro-nonterminal">$Name </span>{
         <span class="kw">fn </span><span class="macro-nonterminal">$name</span>(_keystore: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Keystore, _request: <span class="kw-2">&amp;</span>request::<span class="macro-nonterminal">$Name</span>)
-        -&gt; <span class="prelude-ty">Result</span>&lt;reply::<span class="macro-nonterminal">$Name</span>, Error&gt; { <span class="prelude-val">Err</span>(Error::MechanismNotAvailable) }
+        -&gt; <span class="prelude-ty">Result</span>&lt;reply::<span class="macro-nonterminal">$Name</span>&gt; { <span class="prelude-val">Err</span>(Error::MechanismNotAvailable) }
     }
 )* } }
 
@@ -905,45 +899,43 @@
 </span><span class="kw">unsafe impl</span>&lt;P: Platform&gt; Send <span class="kw">for </span>Service&lt;P&gt; {}
 
 <span class="kw">impl</span>&lt;P: Platform&gt; ServiceResources&lt;P&gt; {
+    <span class="kw">pub fn </span>certstore(<span class="kw-2">&amp;mut </span><span class="self">self</span>, client_ctx: <span class="kw-2">&amp;</span>ClientContext) -&gt; <span class="prelude-ty">Result</span>&lt;ClientCertstore&lt;P::S&gt;&gt; {
+        <span class="self">self</span>.rng()
+            .map(|rng| ClientCertstore::new(client_ctx.path.clone(), rng, <span class="self">self</span>.platform.store()))
+            .map_err(|<span class="kw">_</span>| Error::EntropyMalfunction)
+    }
+
+    <span class="kw">pub fn </span>counterstore(<span class="kw-2">&amp;mut </span><span class="self">self</span>, client_ctx: <span class="kw-2">&amp;</span>ClientContext) -&gt; <span class="prelude-ty">Result</span>&lt;ClientCounterstore&lt;P::S&gt;&gt; {
+        <span class="self">self</span>.rng()
+            .map(|rng| ClientCounterstore::new(client_ctx.path.clone(), rng, <span class="self">self</span>.platform.store()))
+            .map_err(|<span class="kw">_</span>| Error::EntropyMalfunction)
+    }
+
+    <span class="kw">pub fn </span>filestore(<span class="kw-2">&amp;mut </span><span class="self">self</span>, client_ctx: <span class="kw-2">&amp;</span>ClientContext) -&gt; ClientFilestore&lt;P::S&gt; {
+        ClientFilestore::new(client_ctx.path.clone(), <span class="self">self</span>.platform.store())
+    }
+
+    <span class="kw">pub fn </span>trussed_filestore(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; ClientFilestore&lt;P::S&gt; {
+        ClientFilestore::new(PathBuf::from(<span class="string">&quot;trussed&quot;</span>), <span class="self">self</span>.platform.store())
+    }
+
+    <span class="kw">pub fn </span>keystore(<span class="kw-2">&amp;mut </span><span class="self">self</span>, client_ctx: <span class="kw-2">&amp;</span>ClientContext) -&gt; <span class="prelude-ty">Result</span>&lt;ClientKeystore&lt;P::S&gt;&gt; {
+        <span class="self">self</span>.rng()
+            .map(|rng| ClientKeystore::new(client_ctx.path.clone(), rng, <span class="self">self</span>.platform.store()))
+            .map_err(|<span class="kw">_</span>| Error::EntropyMalfunction)
+    }
+
     <span class="attribute">#[inline(never)]
-    </span><span class="kw">pub fn </span>reply_to(
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        client_ctx: <span class="kw-2">&amp;mut </span>ClientContext,
-        request: <span class="kw-2">&amp;</span>Request,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Reply, Error&gt; {
+    </span><span class="kw">pub fn </span>reply_to(<span class="kw-2">&amp;mut </span><span class="self">self</span>, client_ctx: <span class="kw-2">&amp;mut </span>ClientContext, request: <span class="kw-2">&amp;</span>Request) -&gt; <span class="prelude-ty">Result</span>&lt;Reply&gt; {
         <span class="comment">// TODO: what we want to do here is map an enum to a generic type
         // Is there a nicer way to do this?
 
         </span><span class="kw">let </span>full_store = <span class="self">self</span>.platform.store();
 
-        <span class="comment">// prepare keystore, bound to client_id, for cryptographic calls
-        </span><span class="kw">let </span><span class="kw-2">mut </span>keystore: ClientKeystore&lt;P::S&gt; = ClientKeystore::new(
-            client_ctx.path.clone(),
-            <span class="self">self</span>.rng().map_err(|<span class="kw">_</span>| Error::EntropyMalfunction)<span class="question-mark">?</span>,
-            full_store,
-        );
-        <span class="kw">let </span>keystore = <span class="kw-2">&amp;mut </span>keystore;
-
-        <span class="comment">// prepare certstore, bound to client_id, for cert calls
-        </span><span class="kw">let </span><span class="kw-2">mut </span>certstore: ClientCertstore&lt;P::S&gt; = ClientCertstore::new(
-            client_ctx.path.clone(),
-            <span class="self">self</span>.rng().map_err(|<span class="kw">_</span>| Error::EntropyMalfunction)<span class="question-mark">?</span>,
-            full_store,
-        );
-        <span class="kw">let </span>certstore = <span class="kw-2">&amp;mut </span>certstore;
-
-        <span class="comment">// prepare counterstore, bound to client_id, for counter calls
-        </span><span class="kw">let </span><span class="kw-2">mut </span>counterstore: ClientCounterstore&lt;P::S&gt; = ClientCounterstore::new(
-            client_ctx.path.clone(),
-            <span class="self">self</span>.rng().map_err(|<span class="kw">_</span>| Error::EntropyMalfunction)<span class="question-mark">?</span>,
-            full_store,
-        );
-        <span class="kw">let </span>counterstore = <span class="kw-2">&amp;mut </span>counterstore;
-
-        <span class="comment">// prepare filestore, bound to client_id, for storage calls
-        </span><span class="kw">let </span><span class="kw-2">mut </span>filestore: ClientFilestore&lt;P::S&gt; =
-            ClientFilestore::new(client_ctx.path.clone(), full_store);
-        <span class="kw">let </span>filestore = <span class="kw-2">&amp;mut </span>filestore;
+        <span class="kw">let </span>keystore = <span class="kw-2">&amp;mut </span><span class="self">self</span>.keystore(client_ctx)<span class="question-mark">?</span>;
+        <span class="kw">let </span>certstore = <span class="kw-2">&amp;mut </span><span class="self">self</span>.certstore(client_ctx)<span class="question-mark">?</span>;
+        <span class="kw">let </span>counterstore = <span class="kw-2">&amp;mut </span><span class="self">self</span>.counterstore(client_ctx)<span class="question-mark">?</span>;
+        <span class="kw">let </span>filestore = <span class="kw-2">&amp;mut </span><span class="self">self</span>.filestore(client_ctx);
 
         <span class="macro">debug_now!</span>(<span class="string">&quot;TRUSSED {:?}&quot;</span>, request);
         <span class="kw">match </span>request {
@@ -1411,8 +1403,7 @@
         </span><span class="kw">let </span><span class="kw-2">mut </span>rng = <span class="kw">match </span><span class="self">self</span>.rng_state.take() {
             <span class="prelude-val">Some</span>(rng) =&gt; rng,
             <span class="prelude-val">None </span>=&gt; {
-                <span class="kw">let </span><span class="kw-2">mut </span>filestore: ClientFilestore&lt;P::S&gt; =
-                    ClientFilestore::new(PathBuf::from(<span class="string">&quot;trussed&quot;</span>), <span class="self">self</span>.platform.store());
+                <span class="kw">let </span><span class="kw-2">mut </span>filestore = <span class="self">self</span>.trussed_filestore();
 
                 <span class="kw">let </span>path = PathBuf::from(<span class="string">&quot;rng-state.bin&quot;</span>);
 
@@ -1558,10 +1549,7 @@
     }
 
     <span class="kw">pub fn </span>set_seed_if_uninitialized(<span class="kw-2">&amp;mut </span><span class="self">self</span>, seed: <span class="kw-2">&amp;</span>[u8; <span class="number">32</span>]) {
-        <span class="kw">let </span><span class="kw-2">mut </span>filestore: ClientFilestore&lt;P::S&gt; =
-            ClientFilestore::new(PathBuf::from(<span class="string">&quot;trussed&quot;</span>), <span class="self">self</span>.resources.platform.store());
-        <span class="kw">let </span>filestore = <span class="kw-2">&amp;mut </span>filestore;
-
+        <span class="kw">let </span><span class="kw-2">mut </span>filestore = <span class="self">self</span>.resources.trussed_filestore();
         <span class="kw">let </span>path = PathBuf::from(<span class="string">&quot;rng-state.bin&quot;</span>);
         <span class="kw">if </span>!filestore.exists(<span class="kw-2">&amp;</span>path, Location::Internal) {
             filestore
