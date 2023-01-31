@@ -72,7 +72,7 @@ macro_rules! impl_request {
     }
 
     impl RequestData for $request {
-        type CorrespondingReply = reply::$request;
+        type Reply = reply::$request;
     }
 
     )*}
@@ -109,7 +109,7 @@ macro_rules! impl_reply {
     }
 
     impl ReplyData for $reply {
-        type CorrespondingRequest = request::$reply;
+        type Request = request::$reply;
     }
 
     )*}
