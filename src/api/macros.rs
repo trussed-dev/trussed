@@ -61,6 +61,19 @@ macro_rules! impl_request {
             Self::$request(request)
         }
     }
+    impl core::convert::TryFrom<Request> for $request {
+        type Error = crate::Error;
+        fn try_from(request: Request) -> Result<request::$request, Self::Error> {
+            match request {
+                Request::$request(request) => Ok(request),
+                _ => Err(crate::Error::InternalError),
+            }
+        }
+    }
+
+    impl RequestData for $request {
+        type CorrespondingReply = reply::$request;
+    }
 
     )*}
 }
@@ -79,23 +92,24 @@ macro_rules! impl_reply {
         )*
     }
 
-    // impl core::convert::TryFrom<Reply> for $reply {
-    //     type Error = ();
-    //     fn try_from(reply: Reply) -> Result<reply::$reply, Self::Error> {
-    //         match reply {
-    //             Reply::$reply(reply) => Ok(reply),
-    //             _ => Err(()),
-    //         }
-    //     }
-    // }
-
-    impl From<Reply> for $reply {
-        fn from(reply: Reply) -> reply::$reply {
+    impl core::convert::TryFrom<Reply> for $reply {
+        type Error = crate::Error;
+        fn try_from(reply: Reply) -> Result<reply::$reply, Self::Error> {
             match reply {
-                Reply::$reply(reply) => reply,
-                _ => { unsafe { unreachable_unchecked() } }
+                Reply::$reply(reply) => Ok(reply),
+                _ => Err(crate::Error::InternalError),
             }
         }
+    }
+
+    impl core::convert::From<$reply> for Reply {
+        fn from(reply: $reply) -> Reply {
+            Reply::$reply(reply)
+        }
+    }
+
+    impl ReplyData for $reply {
+        type CorrespondingRequest = request::$reply;
     }
 
     )*}

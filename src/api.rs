@@ -6,7 +6,6 @@
 //! [pkcs11-headers]: https://docs.oasis-open.org/pkcs11/pkcs11-base/v3.0/cs01/include/pkcs11-v3.0/
 
 use crate::types::*;
-use core::hint::unreachable_unchecked;
 use core::time::Duration;
 
 #[macro_use]
@@ -103,6 +102,14 @@ generate_enums! {
     // Other //
     ///////////
     DebugDumpStore: 0x79
+}
+
+pub trait RequestData: Into<Request> + TryFrom<Request, Error = crate::Error> {
+    type CorrespondingReply: ReplyData<CorrespondingRequest = Self>;
+}
+
+pub trait ReplyData: Into<Reply> + TryFrom<Reply, Error = crate::Error> {
+    type CorrespondingRequest: RequestData<CorrespondingReply = Self>;
 }
 
 pub mod request {
