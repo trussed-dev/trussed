@@ -240,6 +240,7 @@ impl SerializeKey for super::P256 {
                     .map_err(|_| Error::InternalError)?;
                 serialized_key
             }
+            _ => return Err(Error::InvalidSerializationFormat),
         };
 
         Ok(reply::SerializeKey { serialized_key })

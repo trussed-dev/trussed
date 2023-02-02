@@ -564,6 +564,9 @@ pub enum Mechanism {
     X255,
     /// Used to serialize the output of a diffie-hellman
     SharedSecret,
+    Rsa2048Pkcs1v15,
+    Rsa3072Pkcs1v15,
+    Rsa4096Pkcs1v15,
 }
 
 pub type LongData = Bytes<MAX_LONG_DATA_LENGTH>;
@@ -580,6 +583,12 @@ pub enum KeySerialization {
     EcdhEsHkdf256,
     Raw,
     Sec1,
+    /// Used by backends implementing RSA.
+    ///
+    /// Since RSA keys have multiple parts, and that the [`SerializeKey`](crate::api::Reply::SerializeKey) and
+    /// [`UnsafeInjectKey`](crate::api::Request::UnsafeInjectKey) have only transfer one byte array, the RSA key is serialized with postcard
+    RsaParts,
+    Pkcs8Der,
 }
 
 pub type Signature = Bytes<MAX_SIGNATURE_LENGTH>;
