@@ -63,6 +63,9 @@ pub enum Kind {
     Symmetric(usize),
     /// 32B symmetric key + nonce, the parameter is the length of the nonce in bytes
     Symmetric32Nonce(usize),
+    Rsa2048,
+    Rsa3072,
+    Rsa4096,
     Ed255,
     P256,
     X255,
@@ -150,6 +153,9 @@ impl Kind {
             Kind::Ed255 => 4,
             Kind::P256 => 5,
             Kind::X255 => 6,
+            Kind::Rsa2048 => 7,
+            Kind::Rsa3072 => 8,
+            Kind::Rsa4096 => 9,
         }
     }
 
