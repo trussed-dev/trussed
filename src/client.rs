@@ -110,7 +110,7 @@ impl<S: Syscall> Client for ClientImplementation<S> {}
 
 /// Lowest level interface, use one of the higher level ones.
 pub trait PollClient {
-    fn request<Rq: RequestData>(&mut self, req: Rq) -> ClientResult<'_, Rq::Reply, Self>;
+    fn request<Rq: RequestVariant>(&mut self, req: Rq) -> ClientResult<'_, Rq::Reply, Self>;
     fn poll(&mut self) -> Poll<Result<Reply, Error>>;
 }
 
@@ -124,7 +124,7 @@ where
 
 impl<'c, T, C> FutureResult<'c, T, C>
 where
-    T: ReplyData,
+    T: ReplyVariant,
     C: PollClient,
 {
     pub fn new(client: &'c mut C) -> Self {
@@ -207,7 +207,7 @@ where
     }
 
     // call with any of `crate::api::request::*`
-    fn request<Rq: RequestData>(&mut self, req: Rq) -> ClientResult<'_, Rq::Reply, Self> {
+    fn request<Rq: RequestVariant>(&mut self, req: Rq) -> ClientResult<'_, Rq::Reply, Self> {
         // TODO: handle failure
         // TODO: fail on pending (non-canceled) request)
         if self.pending.is_some() {

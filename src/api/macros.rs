@@ -71,7 +71,7 @@ macro_rules! impl_request {
         }
     }
 
-    impl RequestData for $request {
+    impl RequestVariant for $request {
         type Reply = reply::$request;
     }
 
@@ -108,7 +108,7 @@ macro_rules! impl_reply {
         }
     }
 
-    impl ReplyData for $reply {
+    impl ReplyVariant for $reply {
         type Request = request::$reply;
     }
 
