@@ -428,6 +428,14 @@
 <span id="428">428</span>
 <span id="429">429</span>
 <span id="430">430</span>
+<span id="431">431</span>
+<span id="432">432</span>
+<span id="433">433</span>
+<span id="434">434</span>
+<span id="435">435</span>
+<span id="436">436</span>
+<span id="437">437</span>
+<span id="438">438</span>
 </pre><pre class="rust"><code><span class="kw">use crate</span>::{
     error::{Error, <span class="prelude-ty">Result</span>},
     <span class="comment">// service::ReadDirState,
@@ -470,12 +478,17 @@
     }
 
     <span class="doccomment">/// Client files are store below `/&lt;client_id&gt;/dat/`.
-    </span><span class="kw">pub fn </span>actual_path(<span class="kw-2">&amp;</span><span class="self">self</span>, client_path: <span class="kw-2">&amp;</span>PathBuf) -&gt; PathBuf {
+    </span><span class="kw">pub fn </span>actual_path(<span class="kw-2">&amp;</span><span class="self">self</span>, client_path: <span class="kw-2">&amp;</span>PathBuf) -&gt; <span class="prelude-ty">Result</span>&lt;PathBuf&gt; {
+        <span class="comment">// Clients must not escape their namespace
+        </span><span class="kw">if </span>client_path.as_ref().contains(<span class="string">&quot;..&quot;</span>) {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidPath);
+        }
+
         <span class="kw">let </span><span class="kw-2">mut </span>path = PathBuf::new();
         path.push(<span class="kw-2">&amp;</span><span class="self">self</span>.client_id);
         path.push(<span class="kw-2">&amp;</span>PathBuf::from(<span class="string">&quot;dat&quot;</span>));
         path.push(client_path);
-        path
+        <span class="prelude-val">Ok</span>(path)
     }
 
     <span class="comment">// TODO: this is waaay too fiddly, need an approach
@@ -556,27 +569,30 @@
 
 <span class="kw">impl</span>&lt;S: Store&gt; Filestore <span class="kw">for </span>ClientFilestore&lt;S&gt; {
     <span class="kw">fn </span>read&lt;<span class="kw">const </span>N: usize&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>PathBuf, location: Location) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&lt;N&gt;&gt; {
-        <span class="kw">let </span>path = <span class="self">self</span>.actual_path(path);
+        <span class="kw">let </span>path = <span class="self">self</span>.actual_path(path)<span class="question-mark">?</span>;
 
         store::read(<span class="self">self</span>.store, location, <span class="kw-2">&amp;</span>path)
     }
 
     <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>PathBuf, location: Location, data: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>path = <span class="self">self</span>.actual_path(path);
+        <span class="kw">let </span>path = <span class="self">self</span>.actual_path(path)<span class="question-mark">?</span>;
         store::store(<span class="self">self</span>.store, location, <span class="kw-2">&amp;</span>path, data)
     }
 
     <span class="kw">fn </span>exists(<span class="kw-2">&amp;mut </span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>PathBuf, location: Location) -&gt; bool {
-        <span class="kw">let </span>path = <span class="self">self</span>.actual_path(path);
-        store::exists(<span class="self">self</span>.store, location, <span class="kw-2">&amp;</span>path)
+        <span class="kw">if let </span><span class="prelude-val">Ok</span>(path) = <span class="self">self</span>.actual_path(path) {
+            store::exists(<span class="self">self</span>.store, location, <span class="kw-2">&amp;</span>path)
+        } <span class="kw">else </span>{
+            <span class="bool-val">false
+        </span>}
     }
     <span class="kw">fn </span>metadata(<span class="kw-2">&amp;mut </span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>PathBuf, location: Location) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Metadata&gt;&gt; {
-        <span class="kw">let </span>path = <span class="self">self</span>.actual_path(path);
+        <span class="kw">let </span>path = <span class="self">self</span>.actual_path(path)<span class="question-mark">?</span>;
         store::metadata(<span class="self">self</span>.store, location, <span class="kw-2">&amp;</span>path)
     }
 
     <span class="kw">fn </span>remove_file(<span class="kw-2">&amp;mut </span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>PathBuf, location: Location) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>path = <span class="self">self</span>.actual_path(path);
+        <span class="kw">let </span>path = <span class="self">self</span>.actual_path(path)<span class="question-mark">?</span>;
 
         <span class="kw">match </span>store::delete(<span class="self">self</span>.store, location, <span class="kw-2">&amp;</span>path) {
             <span class="bool-val">true </span>=&gt; <span class="prelude-val">Ok</span>(()),
@@ -585,7 +601,7 @@
     }
 
     <span class="kw">fn </span>remove_dir(<span class="kw-2">&amp;mut </span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>PathBuf, location: Location) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>path = <span class="self">self</span>.actual_path(path);
+        <span class="kw">let </span>path = <span class="self">self</span>.actual_path(path)<span class="question-mark">?</span>;
 
         <span class="kw">match </span>store::delete(<span class="self">self</span>.store, location, <span class="kw-2">&amp;</span>path) {
             <span class="bool-val">true </span>=&gt; <span class="prelude-val">Ok</span>(()),
@@ -594,7 +610,7 @@
     }
 
     <span class="kw">fn </span>remove_dir_all(<span class="kw-2">&amp;mut </span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>PathBuf, location: Location) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
-        <span class="kw">let </span>path = <span class="self">self</span>.actual_path(path);
+        <span class="kw">let </span>path = <span class="self">self</span>.actual_path(path)<span class="question-mark">?</span>;
 
         store::remove_dir_all_where(<span class="self">self</span>.store, location, <span class="kw-2">&amp;</span>path, |<span class="kw">_</span>| <span class="bool-val">true</span>)
             .map_err(|<span class="kw">_</span>| Error::InternalError)
@@ -611,7 +627,7 @@
         }
         <span class="kw">let </span>fs = <span class="self">self</span>.store.ifs();
 
-        <span class="kw">let </span>dir = <span class="self">self</span>.actual_path(clients_dir);
+        <span class="kw">let </span>dir = <span class="self">self</span>.actual_path(clients_dir)<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(fs
             .read_dir_and_then(<span class="kw-2">&amp;</span>dir, |it| {
@@ -700,7 +716,7 @@
         }
         <span class="kw">let </span>fs = <span class="self">self</span>.store.ifs();
 
-        <span class="kw">let </span>dir = <span class="self">self</span>.actual_path(clients_dir);
+        <span class="kw">let </span>dir = <span class="self">self</span>.actual_path(clients_dir)<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(fs
             .read_dir_and_then(<span class="kw-2">&amp;</span>dir, |it| {
@@ -822,7 +838,7 @@
         }
 
         <span class="kw">let </span>clients_dir = underneath.unwrap_or_else(|| PathBuf::from(<span class="string">&quot;/&quot;</span>));
-        <span class="kw">let </span>dir = <span class="self">self</span>.actual_path(<span class="kw-2">&amp;</span>clients_dir);
+        <span class="kw">let </span>dir = <span class="self">self</span>.actual_path(<span class="kw-2">&amp;</span>clients_dir)<span class="question-mark">?</span>;
         <span class="kw">let </span>fs = <span class="self">self</span>.store.ifs();
 
         <span class="macro">info_now!</span>(<span class="string">&quot;base dir {:?}&quot;</span>, <span class="kw-2">&amp;</span>dir);
