@@ -104,12 +104,12 @@ generate_enums! {
     DebugDumpStore: 0x79
 }
 
-pub trait RequestData: Into<Request> + TryFrom<Request, Error = crate::Error> {
-    type Reply: ReplyData<Request = Self>;
+pub trait RequestVariant: Into<Request> + TryFrom<Request, Error = crate::Error> {
+    type Reply: ReplyVariant<Request = Self>;
 }
 
-pub trait ReplyData: Into<Reply> + TryFrom<Reply, Error = crate::Error> {
-    type Request: RequestData<Reply = Self>;
+pub trait ReplyVariant: Into<Reply> + TryFrom<Reply, Error = crate::Error> {
+    type Request: RequestVariant<Reply = Self>;
 }
 
 pub mod request {
