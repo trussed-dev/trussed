@@ -816,6 +816,18 @@
 <span id="816">816</span>
 <span id="817">817</span>
 <span id="818">818</span>
+<span id="819">819</span>
+<span id="820">820</span>
+<span id="821">821</span>
+<span id="822">822</span>
+<span id="823">823</span>
+<span id="824">824</span>
+<span id="825">825</span>
+<span id="826">826</span>
+<span id="827">827</span>
+<span id="828">828</span>
+<span id="829">829</span>
+<span id="830">830</span>
 </pre><pre class="rust"><code><span class="kw">use </span>chacha20::ChaCha8Rng;
 <span class="kw">use </span>heapless_bytes::Unsigned;
 <span class="kw">use </span>interchange::Responder;
@@ -823,6 +835,8 @@
 <span class="kw">pub use </span>rand_core::{RngCore, SeedableRng};
 
 <span class="kw">use </span><span class="kw">crate</span>::api::<span class="kw-2">*</span>;
+<span class="kw">use </span><span class="kw">crate</span>::backend::{BackendId, CoreOnly, Dispatch};
+<span class="kw">use </span><span class="kw">crate</span>::client::{ClientBuilder, ClientImplementation};
 <span class="kw">use </span><span class="kw">crate</span>::config::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">crate</span>::error::{Error, <span class="prelude-ty">Result</span>};
 <span class="kw">pub use </span><span class="kw">crate</span>::key;
@@ -887,55 +901,57 @@
     }
 }
 
-<span class="kw">pub struct </span>Service&lt;P&gt;
+<span class="kw">pub struct </span>Service&lt;P, D = CoreOnly&gt;
 <span class="kw">where
     </span>P: Platform,
+    D: Dispatch&lt;P&gt;,
 {
-    eps: Vec&lt;ServiceEndpoint, { MAX_SERVICE_CLIENTS::USIZE }&gt;,
+    eps: Vec&lt;ServiceEndpoint&lt;D::BackendId, D::Context&gt;, { MAX_SERVICE_CLIENTS::USIZE }&gt;,
     resources: ServiceResources&lt;P&gt;,
+    dispatch: D,
 }
 
 <span class="comment">// need to be able to send crypto service to an interrupt handler
-</span><span class="kw">unsafe impl</span>&lt;P: Platform&gt; Send <span class="kw">for </span>Service&lt;P&gt; {}
+</span><span class="kw">unsafe impl</span>&lt;P: Platform, D: Dispatch&lt;P&gt;&gt; Send <span class="kw">for </span>Service&lt;P, D&gt; {}
 
 <span class="kw">impl</span>&lt;P: Platform&gt; ServiceResources&lt;P&gt; {
-    <span class="kw">pub fn </span>certstore(<span class="kw-2">&amp;mut </span><span class="self">self</span>, client_ctx: <span class="kw-2">&amp;</span>ClientContext) -&gt; <span class="prelude-ty">Result</span>&lt;ClientCertstore&lt;P::S&gt;&gt; {
+    <span class="kw">pub fn </span>certstore(<span class="kw-2">&amp;mut </span><span class="self">self</span>, ctx: <span class="kw-2">&amp;</span>CoreContext) -&gt; <span class="prelude-ty">Result</span>&lt;ClientCertstore&lt;P::S&gt;&gt; {
         <span class="self">self</span>.rng()
-            .map(|rng| ClientCertstore::new(client_ctx.path.clone(), rng, <span class="self">self</span>.platform.store()))
+            .map(|rng| ClientCertstore::new(ctx.path.clone(), rng, <span class="self">self</span>.platform.store()))
             .map_err(|<span class="kw">_</span>| Error::EntropyMalfunction)
     }
 
-    <span class="kw">pub fn </span>counterstore(<span class="kw-2">&amp;mut </span><span class="self">self</span>, client_ctx: <span class="kw-2">&amp;</span>ClientContext) -&gt; <span class="prelude-ty">Result</span>&lt;ClientCounterstore&lt;P::S&gt;&gt; {
+    <span class="kw">pub fn </span>counterstore(<span class="kw-2">&amp;mut </span><span class="self">self</span>, ctx: <span class="kw-2">&amp;</span>CoreContext) -&gt; <span class="prelude-ty">Result</span>&lt;ClientCounterstore&lt;P::S&gt;&gt; {
         <span class="self">self</span>.rng()
-            .map(|rng| ClientCounterstore::new(client_ctx.path.clone(), rng, <span class="self">self</span>.platform.store()))
+            .map(|rng| ClientCounterstore::new(ctx.path.clone(), rng, <span class="self">self</span>.platform.store()))
             .map_err(|<span class="kw">_</span>| Error::EntropyMalfunction)
     }
 
-    <span class="kw">pub fn </span>filestore(<span class="kw-2">&amp;mut </span><span class="self">self</span>, client_ctx: <span class="kw-2">&amp;</span>ClientContext) -&gt; ClientFilestore&lt;P::S&gt; {
-        ClientFilestore::new(client_ctx.path.clone(), <span class="self">self</span>.platform.store())
+    <span class="kw">pub fn </span>filestore(<span class="kw-2">&amp;mut </span><span class="self">self</span>, ctx: <span class="kw-2">&amp;</span>CoreContext) -&gt; ClientFilestore&lt;P::S&gt; {
+        ClientFilestore::new(ctx.path.clone(), <span class="self">self</span>.platform.store())
     }
 
     <span class="kw">pub fn </span>trussed_filestore(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; ClientFilestore&lt;P::S&gt; {
         ClientFilestore::new(PathBuf::from(<span class="string">&quot;trussed&quot;</span>), <span class="self">self</span>.platform.store())
     }
 
-    <span class="kw">pub fn </span>keystore(<span class="kw-2">&amp;mut </span><span class="self">self</span>, client_ctx: <span class="kw-2">&amp;</span>ClientContext) -&gt; <span class="prelude-ty">Result</span>&lt;ClientKeystore&lt;P::S&gt;&gt; {
+    <span class="kw">pub fn </span>keystore(<span class="kw-2">&amp;mut </span><span class="self">self</span>, ctx: <span class="kw-2">&amp;</span>CoreContext) -&gt; <span class="prelude-ty">Result</span>&lt;ClientKeystore&lt;P::S&gt;&gt; {
         <span class="self">self</span>.rng()
-            .map(|rng| ClientKeystore::new(client_ctx.path.clone(), rng, <span class="self">self</span>.platform.store()))
+            .map(|rng| ClientKeystore::new(ctx.path.clone(), rng, <span class="self">self</span>.platform.store()))
             .map_err(|<span class="kw">_</span>| Error::EntropyMalfunction)
     }
 
     <span class="attribute">#[inline(never)]
-    </span><span class="kw">pub fn </span>reply_to(<span class="kw-2">&amp;mut </span><span class="self">self</span>, client_ctx: <span class="kw-2">&amp;mut </span>ClientContext, request: <span class="kw-2">&amp;</span>Request) -&gt; <span class="prelude-ty">Result</span>&lt;Reply&gt; {
+    </span><span class="kw">pub fn </span>reply_to(<span class="kw-2">&amp;mut </span><span class="self">self</span>, ctx: <span class="kw-2">&amp;mut </span>CoreContext, request: <span class="kw-2">&amp;</span>Request) -&gt; <span class="prelude-ty">Result</span>&lt;Reply&gt; {
         <span class="comment">// TODO: what we want to do here is map an enum to a generic type
         // Is there a nicer way to do this?
 
         </span><span class="kw">let </span>full_store = <span class="self">self</span>.platform.store();
 
-        <span class="kw">let </span>keystore = <span class="kw-2">&amp;mut </span><span class="self">self</span>.keystore(client_ctx)<span class="question-mark">?</span>;
-        <span class="kw">let </span>certstore = <span class="kw-2">&amp;mut </span><span class="self">self</span>.certstore(client_ctx)<span class="question-mark">?</span>;
-        <span class="kw">let </span>counterstore = <span class="kw-2">&amp;mut </span><span class="self">self</span>.counterstore(client_ctx)<span class="question-mark">?</span>;
-        <span class="kw">let </span>filestore = <span class="kw-2">&amp;mut </span><span class="self">self</span>.filestore(client_ctx);
+        <span class="kw">let </span>keystore = <span class="kw-2">&amp;mut </span><span class="self">self</span>.keystore(ctx)<span class="question-mark">?</span>;
+        <span class="kw">let </span>certstore = <span class="kw-2">&amp;mut </span><span class="self">self</span>.certstore(ctx)<span class="question-mark">?</span>;
+        <span class="kw">let </span>counterstore = <span class="kw-2">&amp;mut </span><span class="self">self</span>.counterstore(ctx)<span class="question-mark">?</span>;
+        <span class="kw">let </span>filestore = <span class="kw-2">&amp;mut </span><span class="self">self</span>.filestore(ctx);
 
         <span class="macro">debug_now!</span>(<span class="string">&quot;TRUSSED {:?}&quot;</span>, request);
         <span class="kw">match </span>request {
@@ -1136,11 +1152,11 @@
             Request::ReadDirFirst(request) =&gt; {
                 <span class="kw">let </span>maybe_entry = <span class="kw">match </span>filestore.read_dir_first(<span class="kw-2">&amp;</span>request.dir, request.location, request.not_before_filename.as_ref())<span class="question-mark">? </span>{
                     <span class="prelude-val">Some</span>((entry, read_dir_state)) =&gt; {
-                        client_ctx.read_dir_state = <span class="prelude-val">Some</span>(read_dir_state);
+                        ctx.read_dir_state = <span class="prelude-val">Some</span>(read_dir_state);
                         <span class="prelude-val">Some</span>(entry)
                     }
                     <span class="prelude-val">None </span>=&gt; {
-                        client_ctx.read_dir_state = <span class="prelude-val">None</span>;
+                        ctx.read_dir_state = <span class="prelude-val">None</span>;
                         <span class="prelude-val">None
 
                     </span>}
@@ -1150,18 +1166,18 @@
 
             Request::ReadDirNext(_request) =&gt; {
                 <span class="comment">// ensure next call has nothing to work with, unless we store state again
-                </span><span class="kw">let </span>read_dir_state = client_ctx.read_dir_state.take();
+                </span><span class="kw">let </span>read_dir_state = ctx.read_dir_state.take();
 
                 <span class="kw">let </span>maybe_entry = <span class="kw">match </span>read_dir_state {
                     <span class="prelude-val">None </span>=&gt; <span class="prelude-val">None</span>,
                     <span class="prelude-val">Some</span>(state) =&gt; {
                         <span class="kw">match </span>filestore.read_dir_next(state)<span class="question-mark">? </span>{
                             <span class="prelude-val">Some</span>((entry, read_dir_state)) =&gt; {
-                                client_ctx.read_dir_state = <span class="prelude-val">Some</span>(read_dir_state);
+                                ctx.read_dir_state = <span class="prelude-val">Some</span>(read_dir_state);
                                 <span class="prelude-val">Some</span>(entry)
                             }
                             <span class="prelude-val">None </span>=&gt; {
-                                client_ctx.read_dir_state = <span class="prelude-val">None</span>;
+                                ctx.read_dir_state = <span class="prelude-val">None</span>;
                                 <span class="prelude-val">None
                             </span>}
                         }
@@ -1174,11 +1190,11 @@
             Request::ReadDirFilesFirst(request) =&gt; {
                 <span class="kw">let </span>maybe_data = <span class="kw">match </span>filestore.read_dir_files_first(<span class="kw-2">&amp;</span>request.dir, request.location, request.user_attribute.clone())<span class="question-mark">? </span>{
                     <span class="prelude-val">Some</span>((data, state)) =&gt; {
-                        client_ctx.read_dir_files_state = <span class="prelude-val">Some</span>(state);
+                        ctx.read_dir_files_state = <span class="prelude-val">Some</span>(state);
                         data
                     }
                     <span class="prelude-val">None </span>=&gt; {
-                        client_ctx.read_dir_files_state = <span class="prelude-val">None</span>;
+                        ctx.read_dir_files_state = <span class="prelude-val">None</span>;
                         <span class="prelude-val">None
                     </span>}
                 };
@@ -1186,18 +1202,18 @@
             }
 
             Request::ReadDirFilesNext(_request) =&gt; {
-                <span class="kw">let </span>read_dir_files_state = client_ctx.read_dir_files_state.take();
+                <span class="kw">let </span>read_dir_files_state = ctx.read_dir_files_state.take();
 
                 <span class="kw">let </span>maybe_data = <span class="kw">match </span>read_dir_files_state {
                     <span class="prelude-val">None </span>=&gt; <span class="prelude-val">None</span>,
                     <span class="prelude-val">Some</span>(state) =&gt; {
                         <span class="kw">match </span>filestore.read_dir_files_next(state)<span class="question-mark">? </span>{
                             <span class="prelude-val">Some</span>((data, state)) =&gt; {
-                                client_ctx.read_dir_files_state = <span class="prelude-val">Some</span>(state);
+                                ctx.read_dir_files_state = <span class="prelude-val">Some</span>(state);
                                 data
                             }
                             <span class="prelude-val">None </span>=&gt; {
-                                client_ctx.read_dir_files_state = <span class="prelude-val">None</span>;
+                                ctx.read_dir_files_state = <span class="prelude-val">None</span>;
                                 <span class="prelude-val">None
                             </span>}
                         }
@@ -1475,77 +1491,67 @@
 
 <span class="kw">impl</span>&lt;P: Platform&gt; Service&lt;P&gt; {
     <span class="kw">pub fn </span>new(platform: P) -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>::with_dispatch(platform, Default::default())
+    }
+}
+
+<span class="kw">impl</span>&lt;P: Platform, D: Dispatch&lt;P&gt;&gt; Service&lt;P, D&gt; {
+    <span class="kw">pub fn </span>with_dispatch(platform: P, dispatch: D) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>resources = ServiceResources::new(platform);
         <span class="self">Self </span>{
             eps: Vec::new(),
             resources,
+            dispatch,
         }
     }
+}
 
+<span class="kw">impl</span>&lt;P: Platform&gt; Service&lt;P&gt; {
     <span class="doccomment">/// Add a new client, claiming one of the statically configured
     /// interchange pairs.
-    </span><span class="attribute">#[allow(clippy::result_unit_err)]
-    </span><span class="kw">pub fn </span>try_new_client&lt;S: <span class="kw">crate</span>::platform::Syscall&gt;(
+    </span><span class="kw">pub fn </span>try_new_client&lt;S: Syscall&gt;(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         client_id: <span class="kw-2">&amp;</span>str,
         syscall: S,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw">crate</span>::client::ClientImplementation&lt;S&gt;, ()&gt; {
-        <span class="kw">use </span>interchange::Interchange;
-        <span class="kw">let </span>(requester, responder) = TrussedInterchange::claim().ok_or(())<span class="question-mark">?</span>;
-        <span class="kw">let </span>client_ctx = ClientContext::from(client_id);
-        <span class="self">self</span>.add_endpoint(responder, client_ctx)
-            .map_err(|_service_endpoint| ())<span class="question-mark">?</span>;
-
-        <span class="prelude-val">Ok</span>(<span class="kw">crate</span>::client::ClientImplementation::new(requester, syscall))
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;ClientImplementation&lt;S&gt;, Error&gt; {
+        ClientBuilder::new(client_id).build(<span class="self">self</span>, syscall)
     }
 
     <span class="doccomment">/// Specialization of `try_new_client`, using `self`&#39;s implementation of `Syscall`
     /// (directly call self for processing). This method is only useful for single-threaded
     /// single-app runners.
-    </span><span class="attribute">#[allow(clippy::result_unit_err)]
     </span><span class="kw">pub fn </span>try_as_new_client(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         client_id: <span class="kw-2">&amp;</span>str,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw">crate</span>::client::ClientImplementation&lt;<span class="kw-2">&amp;mut </span>Service&lt;P&gt;&gt;, ()&gt; {
-        <span class="kw">use </span>interchange::Interchange;
-        <span class="kw">let </span>(requester, responder) = TrussedInterchange::claim().ok_or(())<span class="question-mark">?</span>;
-        <span class="kw">let </span>client_ctx = ClientContext::from(client_id);
-        <span class="self">self</span>.add_endpoint(responder, client_ctx)
-            .map_err(|_service_endpoint| ())<span class="question-mark">?</span>;
-
-        <span class="prelude-val">Ok</span>(<span class="kw">crate</span>::client::ClientImplementation::new(requester, <span class="self">self</span>))
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;ClientImplementation&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, Error&gt; {
+        ClientBuilder::new(client_id).build_with_service_mut(<span class="self">self</span>)
     }
 
     <span class="doccomment">/// Similar to [try_as_new_client][Service::try_as_new_client] except that the returning client owns the
     /// Service and is therefore `&#39;static`
-    </span><span class="attribute">#[allow(clippy::result_unit_err)]
-    </span><span class="kw">pub fn </span>try_into_new_client(
-        <span class="kw-2">mut </span><span class="self">self</span>,
-        client_id: <span class="kw-2">&amp;</span>str,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw">crate</span>::client::ClientImplementation&lt;Service&lt;P&gt;&gt;, ()&gt; {
-        <span class="kw">use </span>interchange::Interchange;
-        <span class="kw">let </span>(requester, responder) = TrussedInterchange::claim().ok_or(())<span class="question-mark">?</span>;
-        <span class="kw">let </span>client_ctx = ClientContext::from(client_id);
-        <span class="self">self</span>.add_endpoint(responder, client_ctx)
-            .map_err(|_service_endpoint| ())<span class="question-mark">?</span>;
-
-        <span class="prelude-val">Ok</span>(<span class="kw">crate</span>::client::ClientImplementation::new(requester, <span class="self">self</span>))
+    </span><span class="kw">pub fn </span>try_into_new_client(<span class="self">self</span>, client_id: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;ClientImplementation&lt;<span class="self">Self</span>&gt;, Error&gt; {
+        ClientBuilder::new(client_id).build_with_service(<span class="self">self</span>)
     }
+}
 
-    <span class="attribute">#[allow(clippy::result_large_err)]
-    </span><span class="kw">pub fn </span>add_endpoint(
+<span class="kw">impl</span>&lt;P: Platform, D: Dispatch&lt;P&gt;&gt; Service&lt;P, D&gt; {
+    <span class="kw">pub fn </span>add_endpoint(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         interchange: Responder&lt;TrussedInterchange&gt;,
-        client_ctx: <span class="kw">impl </span>Into&lt;ClientContext&gt;,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;(), ServiceEndpoint&gt; {
-        <span class="kw">let </span>client_ctx = client_ctx.into();
-        <span class="kw">if </span>client_ctx.path == PathBuf::from(<span class="string">&quot;trussed&quot;</span>) {
+        core_ctx: <span class="kw">impl </span>Into&lt;CoreContext&gt;,
+        backends: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[BackendId&lt;D::BackendId&gt;],
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
+        <span class="kw">let </span>core_ctx = core_ctx.into();
+        <span class="kw">if </span>core_ctx.path == PathBuf::from(<span class="string">&quot;trussed&quot;</span>) {
             <span class="macro">panic!</span>(<span class="string">&quot;trussed is a reserved client ID&quot;</span>);
         }
-        <span class="self">self</span>.eps.push(ServiceEndpoint {
-            interchange,
-            client_ctx,
-        })
+        <span class="self">self</span>.eps
+            .push(ServiceEndpoint {
+                interchange,
+                ctx: core_ctx.into(),
+                backends,
+            })
+            .map_err(|<span class="kw">_</span>| Error::ClientCountExceeded)
     }
 
     <span class="kw">pub fn </span>set_seed_if_uninitialized(<span class="kw-2">&amp;mut </span><span class="self">self</span>, seed: <span class="kw-2">&amp;</span>[u8; <span class="number">32</span>]) {
@@ -1584,7 +1590,23 @@
                 <span class="comment">// #[cfg(test)] println!(&quot;service got request: {:?}&quot;, &amp;request);
 
                 // resources.currently_serving = ep.client_id.clone();
-                </span><span class="kw">let </span>reply_result = resources.reply_to(<span class="kw-2">&amp;mut </span>ep.client_ctx, <span class="kw-2">&amp;</span>request);
+                </span><span class="kw">let </span><span class="kw-2">mut </span>reply_result = <span class="prelude-val">Err</span>(Error::RequestNotAvailable);
+                <span class="kw">if </span>ep.backends.is_empty() {
+                    reply_result = resources.reply_to(<span class="kw-2">&amp;mut </span>ep.ctx.core, <span class="kw-2">&amp;</span>request);
+                } <span class="kw">else </span>{
+                    <span class="kw">for </span>backend <span class="kw">in </span>ep.backends {
+                        reply_result = <span class="kw">match </span>backend {
+                            BackendId::Core =&gt; resources.reply_to(<span class="kw-2">&amp;mut </span>ep.ctx.core, <span class="kw-2">&amp;</span>request),
+                            BackendId::Custom(id) =&gt; {
+                                <span class="self">self</span>.dispatch.request(id, <span class="kw-2">&amp;mut </span>ep.ctx, <span class="kw-2">&amp;</span>request, resources)
+                            }
+                        };
+
+                        <span class="kw">if </span>reply_result != <span class="prelude-val">Err</span>(Error::RequestNotAvailable) {
+                            <span class="kw">break</span>;
+                        }
+                    }
+                }
 
                 resources
                     .platform
@@ -1617,18 +1639,20 @@
     }
 }
 
-<span class="kw">impl</span>&lt;P&gt; <span class="kw">crate</span>::client::Syscall <span class="kw">for </span><span class="kw-2">&amp;mut </span>Service&lt;P&gt;
+<span class="kw">impl</span>&lt;P, D&gt; <span class="kw">crate</span>::client::Syscall <span class="kw">for </span><span class="kw-2">&amp;mut </span>Service&lt;P, D&gt;
 <span class="kw">where
     </span>P: Platform,
+    D: Dispatch&lt;P&gt;,
 {
     <span class="kw">fn </span>syscall(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="self">self</span>.process();
     }
 }
 
-<span class="kw">impl</span>&lt;P&gt; <span class="kw">crate</span>::client::Syscall <span class="kw">for </span>Service&lt;P&gt;
+<span class="kw">impl</span>&lt;P, D&gt; <span class="kw">crate</span>::client::Syscall <span class="kw">for </span>Service&lt;P, D&gt;
 <span class="kw">where
     </span>P: Platform,
+    D: Dispatch&lt;P&gt;,
 {
     <span class="kw">fn </span>syscall(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="self">self</span>.process();

@@ -738,6 +738,84 @@
 <span id="738">738</span>
 <span id="739">739</span>
 <span id="740">740</span>
+<span id="741">741</span>
+<span id="742">742</span>
+<span id="743">743</span>
+<span id="744">744</span>
+<span id="745">745</span>
+<span id="746">746</span>
+<span id="747">747</span>
+<span id="748">748</span>
+<span id="749">749</span>
+<span id="750">750</span>
+<span id="751">751</span>
+<span id="752">752</span>
+<span id="753">753</span>
+<span id="754">754</span>
+<span id="755">755</span>
+<span id="756">756</span>
+<span id="757">757</span>
+<span id="758">758</span>
+<span id="759">759</span>
+<span id="760">760</span>
+<span id="761">761</span>
+<span id="762">762</span>
+<span id="763">763</span>
+<span id="764">764</span>
+<span id="765">765</span>
+<span id="766">766</span>
+<span id="767">767</span>
+<span id="768">768</span>
+<span id="769">769</span>
+<span id="770">770</span>
+<span id="771">771</span>
+<span id="772">772</span>
+<span id="773">773</span>
+<span id="774">774</span>
+<span id="775">775</span>
+<span id="776">776</span>
+<span id="777">777</span>
+<span id="778">778</span>
+<span id="779">779</span>
+<span id="780">780</span>
+<span id="781">781</span>
+<span id="782">782</span>
+<span id="783">783</span>
+<span id="784">784</span>
+<span id="785">785</span>
+<span id="786">786</span>
+<span id="787">787</span>
+<span id="788">788</span>
+<span id="789">789</span>
+<span id="790">790</span>
+<span id="791">791</span>
+<span id="792">792</span>
+<span id="793">793</span>
+<span id="794">794</span>
+<span id="795">795</span>
+<span id="796">796</span>
+<span id="797">797</span>
+<span id="798">798</span>
+<span id="799">799</span>
+<span id="800">800</span>
+<span id="801">801</span>
+<span id="802">802</span>
+<span id="803">803</span>
+<span id="804">804</span>
+<span id="805">805</span>
+<span id="806">806</span>
+<span id="807">807</span>
+<span id="808">808</span>
+<span id="809">809</span>
+<span id="810">810</span>
+<span id="811">811</span>
+<span id="812">812</span>
+<span id="813">813</span>
+<span id="814">814</span>
+<span id="815">815</span>
+<span id="816">816</span>
+<span id="817">817</span>
+<span id="818">818</span>
 </pre><pre class="rust"><code><span class="doccomment">//! # Client interface for applications.
 //!
 //! The API methods (such as `GenerateKey`, `Sign`, `Verify`,...) are implemented by a variety
@@ -817,11 +895,13 @@
 //!
 </span><span class="kw">use </span>core::{marker::PhantomData, task::Poll};
 
-<span class="kw">use </span>interchange::Requester;
+<span class="kw">use </span>interchange::{Interchange <span class="kw">as _</span>, Requester};
 
 <span class="kw">use </span><span class="kw">crate</span>::api::<span class="kw-2">*</span>;
+<span class="kw">use </span><span class="kw">crate</span>::backend::{BackendId, Dispatch};
 <span class="kw">use </span><span class="kw">crate</span>::error::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">crate</span>::pipe::TrussedInterchange;
+<span class="kw">use </span><span class="kw">crate</span>::service::Service;
 <span class="kw">use </span><span class="kw">crate</span>::types::<span class="kw-2">*</span>;
 
 <span class="kw">pub use </span><span class="kw">crate</span>::platform::Syscall;
@@ -1424,6 +1504,82 @@
 
     <span class="kw">fn </span>wink(<span class="kw-2">&amp;mut </span><span class="self">self</span>, duration: core::time::Duration) -&gt; ClientResult&lt;<span class="lifetime">&#39;_</span>, reply::Wink, <span class="self">Self</span>&gt; {
         <span class="self">self</span>.request(request::Wink { duration })
+    }
+}
+
+<span class="doccomment">/// Builder for [`ClientImplementation`][].
+///
+/// This builder can be used to select the backends used for the client.  If no backends are used,
+/// [`Service::try_new_client`][], [`Service::try_as_new_client`][] and
+/// [`Service::try_into_new_client`][] can be used directly.
+///
+/// The maximum number of clients that can be created is defined by the `clients-?` features.  If
+/// this number is exceeded, [`Error::ClientCountExceeded`][] is returned.
+</span><span class="kw">pub struct </span>ClientBuilder&lt;I: <span class="lifetime">&#39;static </span>= Empty&gt; {
+    id: PathBuf,
+    backends: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[BackendId&lt;I&gt;],
+}
+
+<span class="kw">impl </span>ClientBuilder {
+    <span class="doccomment">/// Creates a new client builder using the given client ID.
+    ///
+    /// Per default, the client does not support backends and always uses the Trussed core
+    /// implementation to execute requests.
+    </span><span class="kw">pub fn </span>new(id: <span class="kw">impl </span>Into&lt;PathBuf&gt;) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            id: id.into(),
+            backends: <span class="kw-2">&amp;</span>[],
+        }
+    }
+}
+
+<span class="kw">impl</span>&lt;I: <span class="lifetime">&#39;static</span>&gt; ClientBuilder&lt;I&gt; {
+    <span class="doccomment">/// Selects the backends to use for this client.
+    ///
+    /// If `backends` is empty, the Trussed core implementation is always used.
+    </span><span class="kw">pub fn </span>backends&lt;J: <span class="lifetime">&#39;static</span>&gt;(<span class="self">self</span>, backends: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[BackendId&lt;J&gt;]) -&gt; ClientBuilder&lt;J&gt; {
+        ClientBuilder {
+            id: <span class="self">self</span>.id,
+            backends,
+        }
+    }
+
+    <span class="kw">fn </span>create_endpoint&lt;P: Platform, D: Dispatch&lt;P, BackendId = I&gt;&gt;(
+        <span class="self">self</span>,
+        service: <span class="kw-2">&amp;mut </span>Service&lt;P, D&gt;,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Requester&lt;TrussedInterchange&gt;, Error&gt; {
+        <span class="kw">let </span>(requester, responder) =
+            TrussedInterchange::claim().ok_or(Error::ClientCountExceeded)<span class="question-mark">?</span>;
+        service.add_endpoint(responder, <span class="self">self</span>.id, <span class="self">self</span>.backends)<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(requester)
+    }
+
+    <span class="doccomment">/// Builds the client using a custom [`Syscall`][] implementation.
+    </span><span class="kw">pub fn </span>build&lt;P: Platform, D: Dispatch&lt;P, BackendId = I&gt;, S: Syscall&gt;(
+        <span class="self">self</span>,
+        service: <span class="kw-2">&amp;mut </span>Service&lt;P, D&gt;,
+        syscall: S,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;ClientImplementation&lt;S&gt;, Error&gt; {
+        <span class="self">self</span>.create_endpoint(service)
+            .map(|requester| ClientImplementation::new(requester, syscall))
+    }
+
+    <span class="doccomment">/// Builds the client using a [`Service`][] instance.
+    </span><span class="kw">pub fn </span>build_with_service&lt;P: Platform, D: Dispatch&lt;P, BackendId = I&gt;&gt;(
+        <span class="self">self</span>,
+        <span class="kw-2">mut </span>service: Service&lt;P, D&gt;,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;ClientImplementation&lt;Service&lt;P, D&gt;&gt;, Error&gt; {
+        <span class="self">self</span>.create_endpoint(<span class="kw-2">&amp;mut </span>service)
+            .map(|requester| ClientImplementation::new(requester, service))
+    }
+
+    <span class="doccomment">/// Builds the client using a mutable reference to a [`Service`][].
+    </span><span class="kw">pub fn </span>build_with_service_mut&lt;P: Platform, D: Dispatch&lt;P, BackendId = I&gt;&gt;(
+        <span class="self">self</span>,
+        service: <span class="kw-2">&amp;mut </span>Service&lt;P, D&gt;,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;ClientImplementation&lt;<span class="kw-2">&amp;mut </span>Service&lt;P, D&gt;&gt;, Error&gt; {
+        <span class="self">self</span>.create_endpoint(service)
+            .map(|requester| ClientImplementation::new(requester, service))
     }
 }
 

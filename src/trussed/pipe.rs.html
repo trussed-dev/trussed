@@ -79,6 +79,8 @@
 <span id="79">79</span>
 <span id="80">80</span>
 <span id="81">81</span>
+<span id="82">82</span>
+<span id="83">83</span>
 </pre><pre class="rust"><code><span class="attribute">#![allow(clippy::transmute_ptr_to_ptr)]
 </span><span class="comment">// Ignore lint caused by interchange! macro
 </span><span class="attribute">#![allow(clippy::derive_partial_eq_without_eq)]
@@ -86,8 +88,9 @@
 </span><span class="kw">use </span>interchange::Responder;
 
 <span class="kw">use </span><span class="kw">crate</span>::api::{Reply, Request};
+<span class="kw">use </span><span class="kw">crate</span>::backend::BackendId;
 <span class="kw">use </span><span class="kw">crate</span>::error::Error;
-<span class="kw">use </span><span class="kw">crate</span>::types::ClientContext;
+<span class="kw">use </span><span class="kw">crate</span>::types::Context;
 
 <span class="macro">cfg_if::cfg_if! </span>{
 
@@ -152,11 +155,12 @@
 // https://xenomai.org/documentation/xenomai-2.4/html/api/group__native__queue.html
 // https://doc.micrium.com/display/osiiidoc/Using+Message+Queues
 
-</span><span class="kw">pub struct </span>ServiceEndpoint {
+</span><span class="kw">pub struct </span>ServiceEndpoint&lt;I: <span class="lifetime">&#39;static</span>, C&gt; {
     <span class="kw">pub </span>interchange: Responder&lt;TrussedInterchange&gt;,
     <span class="comment">// service (trusted) has this, not client (untrusted)
     // used among other things to namespace cryptographic material
-    </span><span class="kw">pub </span>client_ctx: ClientContext,
+    </span><span class="kw">pub </span>ctx: Context&lt;C&gt;,
+    <span class="kw">pub </span>backends: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[BackendId&lt;I&gt;],
 }
 
 <span class="comment">// pub type ClientEndpoint = Requester&lt;TrussedInterchange&gt;;

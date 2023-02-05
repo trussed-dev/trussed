@@ -570,6 +570,33 @@
 <span id="570">570</span>
 <span id="571">571</span>
 <span id="572">572</span>
+<span id="573">573</span>
+<span id="574">574</span>
+<span id="575">575</span>
+<span id="576">576</span>
+<span id="577">577</span>
+<span id="578">578</span>
+<span id="579">579</span>
+<span id="580">580</span>
+<span id="581">581</span>
+<span id="582">582</span>
+<span id="583">583</span>
+<span id="584">584</span>
+<span id="585">585</span>
+<span id="586">586</span>
+<span id="587">587</span>
+<span id="588">588</span>
+<span id="589">589</span>
+<span id="590">590</span>
+<span id="591">591</span>
+<span id="592">592</span>
+<span id="593">593</span>
+<span id="594">594</span>
+<span id="595">595</span>
+<span id="596">596</span>
+<span id="597">597</span>
+<span id="598">598</span>
+<span id="599">599</span>
 </pre><pre class="rust"><code><span class="kw">use </span>core::marker::PhantomData;
 <span class="kw">use </span>core::ops::Deref;
 
@@ -595,6 +622,14 @@
 
 <span class="kw">pub use </span><span class="kw">crate</span>::client::FutureResult;
 <span class="kw">pub use </span><span class="kw">crate</span>::platform::Platform;
+
+<span class="doccomment">/// An empty enum that cannot be constructed.
+</span><span class="attribute">#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+</span><span class="kw">pub enum </span>Empty {}
+
+<span class="doccomment">/// An empty struct not storing any data.
+</span><span class="attribute">#[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+</span><span class="kw">pub struct </span>NoData;
 
 <span class="doccomment">/// The ID of a Trussed object.
 ///
@@ -805,17 +840,36 @@
 // pub type AeadNonce = [u8; 12];
 // pub type AeadTag = [u8; 16];
 
-// The &quot;ClientContext&quot; struct is the closest equivalent to a PCB that Trussed
+</span><span class="doccomment">/// The context for a syscall (per client).
+///
+/// The context stores the state used by the standard syscall implementations, see
+/// [`CoreContext`][].  Additionally, backends can define a custom context for their syscall
+/// implementations.
+</span><span class="kw">pub struct </span>Context&lt;B&gt; {
+    <span class="kw">pub </span>core: CoreContext,
+    <span class="kw">pub </span>backends: B,
+}
+
+<span class="kw">impl</span>&lt;B: Default&gt; From&lt;CoreContext&gt; <span class="kw">for </span>Context&lt;B&gt; {
+    <span class="kw">fn </span>from(core: CoreContext) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            core,
+            backends: B::default(),
+        }
+    }
+}
+
+<span class="comment">// The &quot;CoreContext&quot; struct is the closest equivalent to a PCB that Trussed
 // currently has. Trussed currently uses it to choose the client-specific
 // subtree in the filesystem (see docs in src/store.rs) and to maintain
 // the walker state of the directory traversal syscalls.
-</span><span class="kw">pub struct </span>ClientContext {
+</span><span class="kw">pub struct </span>CoreContext {
     <span class="kw">pub </span>path: PathBuf,
     <span class="kw">pub </span>read_dir_state: <span class="prelude-ty">Option</span>&lt;ReadDirState&gt;,
     <span class="kw">pub </span>read_dir_files_state: <span class="prelude-ty">Option</span>&lt;ReadDirFilesState&gt;,
 }
 
-<span class="kw">impl </span>ClientContext {
+<span class="kw">impl </span>CoreContext {
     <span class="kw">pub fn </span>new(path: PathBuf) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             path,
@@ -825,13 +879,13 @@
     }
 }
 
-<span class="kw">impl </span>From&lt;PathBuf&gt; <span class="kw">for </span>ClientContext {
+<span class="kw">impl </span>From&lt;PathBuf&gt; <span class="kw">for </span>CoreContext {
     <span class="kw">fn </span>from(path: PathBuf) -&gt; <span class="self">Self </span>{
         <span class="self">Self</span>::new(path)
     }
 }
 
-<span class="kw">impl </span>From&lt;<span class="kw-2">&amp;</span>str&gt; <span class="kw">for </span>ClientContext {
+<span class="kw">impl </span>From&lt;<span class="kw-2">&amp;</span>str&gt; <span class="kw">for </span>CoreContext {
     <span class="kw">fn </span>from(s: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
         <span class="self">Self</span>::new(s.into())
     }
