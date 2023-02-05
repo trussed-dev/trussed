@@ -49,11 +49,10 @@ pub const MAX_USER_ATTRIBUTE_LENGTH: usize = 256;
 
 pub const USER_ATTRIBUTE_NUMBER: u8 = 37;
 
-#[cfg(feature = "ext")]
 // request size is chosen to not exceed the largest standard syscall, Decrypt, so that the Request
 // enum does not grow from this variant
-pub const EXTENSION_REQUEST_LENGTH: usize = 2 * MAX_MESSAGE_LENGTH + 2 * MAX_SHORT_DATA_LENGTH;
-#[cfg(feature = "ext")]
+pub const SERDE_EXTENSION_REQUEST_LENGTH: usize =
+    2 * MAX_MESSAGE_LENGTH + 2 * MAX_SHORT_DATA_LENGTH;
 // reply size is chosen to not exceed the largest standard syscall, Encrypt, so that the Reply enum
 // does not grow from this variant
-pub const EXTENSION_REPLY_LENGTH: usize = MAX_MESSAGE_LENGTH + 2 * MAX_SHORT_DATA_LENGTH;
+pub const SERDE_EXTENSION_REPLY_LENGTH: usize = MAX_MESSAGE_LENGTH + 2 * MAX_SHORT_DATA_LENGTH;

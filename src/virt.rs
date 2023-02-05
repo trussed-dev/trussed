@@ -12,11 +12,11 @@ use chacha20::ChaCha8Rng;
 use rand_core::SeedableRng as _;
 
 use crate::{
-    backend::{BackendId, CoreOnly},
+    backend::{BackendId, CoreOnly, Dispatch},
     client::ClientBuilder,
     pipe::TrussedInterchange,
     platform,
-    service::{DispatchRequirement, Service},
+    service::Service,
     ClientImplementation, Interchange as _,
 };
 
@@ -90,7 +90,7 @@ impl<S: StoreProvider> Platform<S> {
         test(client)
     }
 
-    pub fn run_client_with_backends<R, D: DispatchRequirement<Self>>(
+    pub fn run_client_with_backends<R, D: Dispatch<Self>>(
         self,
         client_id: &str,
         dispatch: D,

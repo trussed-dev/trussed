@@ -80,10 +80,10 @@ use core::{marker::PhantomData, task::Poll};
 use interchange::{Interchange as _, Requester};
 
 use crate::api::*;
-use crate::backend::{BackendId, CoreOnly};
+use crate::backend::{BackendId, CoreOnly, Dispatch};
 use crate::error::*;
 use crate::pipe::TrussedInterchange;
-use crate::service::{DispatchRequirement, Service};
+use crate::service::Service;
 use crate::types::*;
 
 pub use crate::platform::Syscall;
@@ -700,7 +700,7 @@ pub trait UiClient: PollClient {
 ///
 /// The maximum number of clients that can be created is defined by the `clients-?` features.  If
 /// this number is exceeded, [`Error::ClientCountExceeded`][] is returned.
-pub struct ClientBuilder<P: Platform, D: DispatchRequirement<P> = CoreOnly> {
+pub struct ClientBuilder<P: Platform, D: Dispatch<P> = CoreOnly> {
     id: PathBuf,
     backends: &'static [BackendId<D::BackendId>],
 }
@@ -718,11 +718,11 @@ impl<P: Platform> ClientBuilder<P> {
     }
 }
 
-impl<P: Platform, D: DispatchRequirement<P>> ClientBuilder<P, D> {
+impl<P: Platform, D: Dispatch<P>> ClientBuilder<P, D> {
     /// Selects the backends to use for this client.
     ///
     /// If `backends` is empty, the Trussed core implementation is always used.
-    pub fn backends<E: DispatchRequirement<P>>(
+    pub fn backends<E: Dispatch<P>>(
         self,
         backends: &'static [BackendId<E::BackendId>],
     ) -> ClientBuilder<P, E> {
