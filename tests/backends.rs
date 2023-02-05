@@ -46,11 +46,6 @@ impl backend::Dispatch<Platform> for Dispatch {
     }
 }
 
-#[cfg(feature = "ext")]
-impl trussed::ext::ExtensionDispatch<Platform> for Dispatch {
-    type ExtensionId = trussed::backend::NoId;
-}
-
 #[derive(Default)]
 struct TestBackend;
 

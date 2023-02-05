@@ -11,7 +11,7 @@ use crate::{
     error::Error,
     platform::Platform,
     service::ServiceResources,
-    types::{Context, CoreContext, NoData},
+    types::{Context, CoreContext},
 };
 
 /// The ID of a backend.
@@ -72,9 +72,10 @@ pub trait Dispatch<P: Platform> {
 #[derive(Debug, Default)]
 pub struct CoreOnly;
 
+#[cfg(not(feature = "serde-extensions"))]
 impl<P: Platform> Dispatch<P> for CoreOnly {
     type BackendId = NoId;
-    type Context = NoData;
+    type Context = crate::types::NoData;
 }
 
 pub enum NoId {}

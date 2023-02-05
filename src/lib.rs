@@ -27,12 +27,12 @@ pub mod backend;
 pub mod client;
 pub mod config;
 pub mod error;
-#[cfg(feature = "ext")]
-pub mod ext;
 pub mod key;
 pub mod mechanisms;
 pub mod pipe;
 pub mod platform;
+#[cfg(feature = "serde-extensions")]
+pub mod serde_extensions;
 pub mod service;
 pub mod store;
 pub mod types;

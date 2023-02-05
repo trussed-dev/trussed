@@ -1,4 +1,4 @@
-#![cfg(all(feature = "ext", feature = "virt"))]
+#![cfg(all(feature = "serde-extensions", feature = "virt"))]
 
 use trussed::{
     backend::BackendId,
@@ -21,10 +21,10 @@ mod backends {
 
     use trussed::{
         api::{reply, request, Reply, Request},
-        backend::{Backend as _, BackendId, Dispatch},
+        backend::{Backend as _, BackendId},
         error::Error,
-        ext::{ExtensionDispatch, ExtensionId, ExtensionImpl},
         platform::Platform,
+        serialized_extensions::{ExtensionDispatch, ExtensionId, ExtensionImpl},
         service::ServiceResources,
         types::Context,
     };
@@ -71,11 +71,12 @@ mod backends {
         test: TestBackend,
     }
 
-    impl<P: Platform> Dispatch<P> for Backends {
+    impl<P: Platform> ExtensionDispatch<P> for Backends {
         type BackendId = Backend;
         type Context = BackendsContext;
+        type ExtensionId = Extension;
 
-        fn request(
+        fn core_request(
             &mut self,
             backend: &Self::BackendId,
             ctx: &mut Context<Self::Context>,
@@ -89,11 +90,6 @@ mod backends {
                 }
             }
         }
-    }
-
-    impl<P: Platform> ExtensionDispatch<P> for Backends {
-        type ExtensionId = Extension;
-
         fn extension_request(
             &mut self,
             backend: &Self::BackendId,
@@ -128,8 +124,8 @@ mod backend {
     use trussed::{
         backend::Backend,
         error::Error,
-        ext::ExtensionImpl,
         platform::Platform,
+        serialized_extensions::ExtensionImpl,
         service::ServiceResources,
         types::{CoreContext, ShortData},
     };
@@ -175,7 +171,7 @@ mod ext {
     use serde::{Deserialize, Serialize};
     use trussed::{
         error::Error,
-        ext::{Extension, ExtensionClient, ExtensionResult},
+        serialized_extensions::{Extension, ExtensionClient, ExtensionResult},
         types::ShortData,
     };
 
