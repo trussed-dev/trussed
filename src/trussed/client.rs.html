@@ -736,6 +736,8 @@
 <span id="736">736</span>
 <span id="737">737</span>
 <span id="738">738</span>
+<span id="739">739</span>
+<span id="740">740</span>
 </pre><pre class="rust"><code><span class="doccomment">//! # Client interface for applications.
 //!
 //! The API methods (such as `GenerateKey`, `Sign`, `Verify`,...) are implemented by a variety
@@ -848,7 +850,7 @@
 
 <span class="doccomment">/// Lowest level interface, use one of the higher level ones.
 </span><span class="kw">pub trait </span>PollClient {
-    <span class="kw">fn </span>request&lt;T: From&lt;Reply&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, req: <span class="kw">impl </span>Into&lt;Request&gt;) -&gt; ClientResult&lt;<span class="lifetime">&#39;_</span>, T, <span class="self">Self</span>&gt;;
+    <span class="kw">fn </span>request&lt;Rq: RequestVariant&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, req: Rq) -&gt; ClientResult&lt;<span class="lifetime">&#39;_</span>, Rq::Reply, <span class="self">Self</span>&gt;;
     <span class="kw">fn </span>poll(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;Reply, Error&gt;&gt;;
 }
 
@@ -862,7 +864,7 @@
 
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;c</span>, T, C&gt; FutureResult&lt;<span class="lifetime">&#39;c</span>, T, C&gt;
 <span class="kw">where
-    </span>T: From&lt;Reply&gt;,
+    </span>T: ReplyVariant,
     C: PollClient,
 {
     <span class="kw">pub fn </span>new(client: <span class="kw-2">&amp;</span><span class="lifetime">&#39;c </span><span class="kw-2">mut </span>C) -&gt; <span class="self">Self </span>{
@@ -872,7 +874,9 @@
         }
     }
     <span class="kw">pub fn </span>poll(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;T, Error&gt;&gt; {
-        <span class="self">self</span>.client.poll().map(|result| result.map(From::from))
+        <span class="self">self</span>.client
+            .poll()
+            .map(|result| result.and_then(TryFrom::try_from))
     }
 }
 
@@ -943,7 +947,7 @@
     }
 
     <span class="comment">// call with any of `crate::api::request::*`
-    </span><span class="kw">fn </span>request&lt;T: From&lt;Reply&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, req: <span class="kw">impl </span>Into&lt;Request&gt;) -&gt; ClientResult&lt;<span class="lifetime">&#39;_</span>, T, <span class="self">Self</span>&gt; {
+    </span><span class="kw">fn </span>request&lt;Rq: RequestVariant&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, req: Rq) -&gt; ClientResult&lt;<span class="lifetime">&#39;_</span>, Rq::Reply, <span class="self">Self</span>&gt; {
         <span class="comment">// TODO: handle failure
         // TODO: fail on pending (non-canceled) request)
         </span><span class="kw">if </span><span class="self">self</span>.pending.is_some() {
@@ -1327,7 +1331,7 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         location: Location,
         path: PathBuf,
-    ) -&gt; ClientResult&lt;<span class="lifetime">&#39;_</span>, reply::RemoveDirAll, <span class="self">Self</span>&gt; {
+    ) -&gt; ClientResult&lt;<span class="lifetime">&#39;_</span>, reply::RemoveDir, <span class="self">Self</span>&gt; {
         <span class="self">self</span>.request(request::RemoveDir { location, path })
     }
 
