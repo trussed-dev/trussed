@@ -149,7 +149,7 @@ impl SerializeKey for super::X255 {
         let key_id = request.key;
         let public_key = load_public_key(keystore, &key_id)?;
 
-        let mut serialized_key = Message::new();
+        let mut serialized_key = SerializedKey::new();
         match request.format {
             KeySerialization::Raw => {
                 serialized_key
