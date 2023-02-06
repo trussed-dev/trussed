@@ -356,7 +356,7 @@ pub trait CryptoClient: PollClient {
         attributes: StorageAttributes,
     ) -> ClientResult<'c, reply::DeserializeKey, Self> {
         let serialized_key =
-            Message::from_slice(serialized_key).map_err(|_| ClientError::DataTooLarge)?;
+            SerializedKey::from_slice(serialized_key).map_err(|_| ClientError::DataTooLarge)?;
         self.request(request::DeserializeKey {
             mechanism,
             serialized_key,
@@ -481,7 +481,7 @@ pub trait CryptoClient: PollClient {
     ) -> ClientResult<'_, reply::UnsafeInjectKey, Self> {
         self.request(request::UnsafeInjectKey {
             mechanism,
-            raw_key: ShortData::from_slice(raw_key).unwrap(),
+            raw_key: SerializedKey::from_slice(raw_key).unwrap(),
             attributes: StorageAttributes::new().set_persistence(persistence),
             format,
         })

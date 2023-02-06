@@ -22,7 +22,7 @@ impl SerializeKey for super::SharedSecret {
         if !key.flags.contains(key::Flags::SERIALIZABLE) {
             return Err(Error::InvalidSerializedKey);
         };
-        let mut serialized_key = Message::new();
+        let mut serialized_key = SerializedKey::new();
         serialized_key.extend_from_slice(&key.material).unwrap();
 
         Ok(reply::SerializeKey { serialized_key })

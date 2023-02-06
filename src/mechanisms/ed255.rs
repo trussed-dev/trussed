@@ -142,7 +142,7 @@ impl SerializeKey for super::Ed255 {
             }
 
             KeySerialization::Raw => {
-                let mut serialized_key = Message::new();
+                let mut serialized_key = SerializedKey::new();
                 serialized_key
                     .extend_from_slice(public_key.as_bytes())
                     .map_err(|_| Error::InternalError)?;

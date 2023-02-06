@@ -224,7 +224,7 @@ impl SerializeKey for super::P256 {
                 crate::cbor_serialize_bytes(&cose_pk).map_err(|_| Error::CborError)?
             }
             KeySerialization::Raw => {
-                let mut serialized_key = Message::new();
+                let mut serialized_key = SerializedKey::new();
                 serialized_key
                     .extend_from_slice(&public_key.x())
                     .map_err(|_| Error::InternalError)?;
@@ -234,7 +234,7 @@ impl SerializeKey for super::P256 {
                 serialized_key
             }
             KeySerialization::Sec1 => {
-                let mut serialized_key = Message::new();
+                let mut serialized_key = SerializedKey::new();
                 serialized_key
                     .extend_from_slice(&public_key.to_compressed_sec1_bytes())
                     .map_err(|_| Error::InternalError)?;

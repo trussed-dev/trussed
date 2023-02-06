@@ -13,9 +13,6 @@ pub type MAX_OBJECT_HANDLES = consts::U16;
 pub type MAX_LABEL_LENGTH = consts::U256;
 pub const MAX_MEDIUM_DATA_LENGTH: usize = 256;
 pub type MAX_PATH_LENGTH = consts::U256;
-pub const MAX_KEY_MATERIAL_LENGTH: usize = 128;
-// must be above + 4
-pub const MAX_SERIALIZED_KEY_LENGTH: usize = 132;
 cfg_if::cfg_if! {
     if #[cfg(feature = "clients-12")] {
         pub type MAX_SERVICE_CLIENTS = consts::U12;
@@ -44,7 +41,14 @@ cfg_if::cfg_if! {
     }
 }
 pub const MAX_SHORT_DATA_LENGTH: usize = 128;
-pub const MAX_SIGNATURE_LENGTH: usize = 72;
+
+pub const MAX_SIGNATURE_LENGTH: usize = 512 * 2;
+// FIXME: Value from https://stackoverflow.com/questions/5403808/private-key-length-bytes for Rsa2048 Private key
+pub const MAX_KEY_MATERIAL_LENGTH: usize = 1160 * 2 + 72;
+
+// must be MAX_KEY_MATERIAL_LENGTH + 4
+pub const MAX_SERIALIZED_KEY_LENGTH: usize = MAX_KEY_MATERIAL_LENGTH + 4;
+
 pub const MAX_USER_ATTRIBUTE_LENGTH: usize = 256;
 
 pub const USER_ATTRIBUTE_NUMBER: u8 = 37;
