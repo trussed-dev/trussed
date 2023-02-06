@@ -53,7 +53,7 @@ impl Storage for FilesystemStorage {
     const BLOCK_CYCLES: isize = -1;
 
     type CACHE_SIZE = U512;
-    type LOOKAHEADWORDS_SIZE = U16;
+    type LOOKAHEAD_SIZE = U8;
     // TODO: This can't actually be changed currently
     // type FILENAME_MAX_PLUS_ONE = U256;
     // type PATH_MAX_PLUS_ONE = U256;
