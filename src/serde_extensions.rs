@@ -1,3 +1,18 @@
+//! Extensions to the core Trussed syscalls.
+//!
+//! *Requires the `serde-extensions` feature.*
+//!
+//! This module makes it possible to add additional syscalls to Trussed by implementing the
+//! [`Extension`][] trait.  Extension requests and replies are serialized to
+//! [`Request::SerdeExtension`][] and [`Reply::SerdeExtension`][].  Backends can implement the
+//! [`ExtensionImpl`][] trait to support an extension.
+//!
+//! A runner can use multiple extensions.  To identify the extensions, the runner has to assign IDs
+//! to the extension and declare them using the [`ExtensionId`][] trait.  Runners that want to use
+//! extensions have to implement the [`ExtensionDispatch`][] trait instead of [`Dispatch`][].
+//!
+//! See `tests/serde_extensions.rs` for an example.
+
 use core::{marker::PhantomData, task::Poll};
 
 use crate::{
@@ -13,8 +28,11 @@ use crate::{
 
 use serde::{de::DeserializeOwned, Serialize};
 
+/// A Trussed API extension.
 pub trait Extension {
+    /// The requests supported by this extension.
     type Request: DeserializeOwned + Serialize;
+    /// The replies supported by this extension.
     type Reply: DeserializeOwned + Serialize;
 }
 
@@ -83,7 +101,9 @@ impl<P: Platform> ExtensionDispatch<P> for CoreOnly {
     type ExtensionId = NoId;
 }
 
+/// Implements an extension for a backend.
 pub trait ExtensionImpl<E: Extension, P: Platform>: Backend<P> {
+    /// Handles an extension request.
     fn extension_request(
         &mut self,
         core_ctx: &mut CoreContext,
@@ -92,6 +112,9 @@ pub trait ExtensionImpl<E: Extension, P: Platform>: Backend<P> {
         resources: &mut ServiceResources<P>,
     ) -> Result<E::Reply, Error>;
 
+    /// Handles an extension request and performs the necessary serialization and deserialization
+    /// between [`request::SerdeExtension`][] and [`Extension::Request`][] as well as
+    /// [`reply::SerdeExtension`][] and [`Extension::Reply`][].
     fn extension_request_serialized(
         &mut self,
         core_ctx: &mut CoreContext,
@@ -108,15 +131,27 @@ pub trait ExtensionImpl<E: Extension, P: Platform>: Backend<P> {
     }
 }
 
+/// Provides access to the extension IDs assigned by the runner.
 pub trait ExtensionId<E> {
+    /// The ID type used by the runner.
     type Id: Into<u8>;
 
+    /// The ID assigned to the `E` extension.
     const ID: Self::Id;
 }
 
+/// Executes extension requests.
+///
+/// Instead of using this trait directly, extensions should define their own traits that extend
+/// this trait and use the `extension` function to execute extension requests.
 pub trait ExtensionClient<E: Extension>: PollClient {
+    /// Returns the ID for the `E` extension as defined by the runner, see [`ExtensionId`][].
     fn id() -> u8;
 
+    /// Executes an extension request.
+    ///
+    /// Applications should not call this method directly and instead use a trait provided by the
+    /// extension.
     fn extension<Rq, Rp>(&mut self, request: Rq) -> ExtensionResult<'_, E, Rp, Self>
     where
         Rq: Into<E::Request>,
@@ -142,15 +177,17 @@ where
     }
 }
 
+/// A result returned by [`ExtensionClient`][] and clients using it.
 pub type ExtensionResult<'a, E, T, C> = Result<ExtensionFutureResult<'a, E, T, C>, ClientError>;
 
+/// A future of an [`ExtensionResult`][].
 pub struct ExtensionFutureResult<'c, E, T, C: ?Sized> {
     client: &'c mut C,
     __: PhantomData<(E, T)>,
 }
 
 impl<'c, E, T, C: ?Sized> ExtensionFutureResult<'c, E, T, C> {
-    pub fn new(client: &'c mut C) -> Self {
+    fn new(client: &'c mut C) -> Self {
         Self {
             client,
             __: PhantomData,
