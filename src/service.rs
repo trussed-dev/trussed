@@ -709,7 +709,9 @@ impl<P: Platform> Service<P> {
         client_id: &str,
         syscall: S,
     ) -> Result<ClientImplementation<S>, Error> {
-        ClientBuilder::new(client_id).build(self, syscall)
+        ClientBuilder::new(client_id)
+            .prepare(self)
+            .map(|p| p.build(syscall))
     }
 
     /// Specialization of `try_new_client`, using `self`'s implementation of `Syscall`
@@ -719,13 +721,20 @@ impl<P: Platform> Service<P> {
         &mut self,
         client_id: &str,
     ) -> Result<ClientImplementation<&mut Self>, Error> {
-        ClientBuilder::new(client_id).build_with_service_mut(self)
+        ClientBuilder::new(client_id)
+            .prepare(self)
+            .map(|p| p.build(self))
     }
 
     /// Similar to [try_as_new_client][Service::try_as_new_client] except that the returning client owns the
     /// Service and is therefore `'static`
-    pub fn try_into_new_client(self, client_id: &str) -> Result<ClientImplementation<Self>, Error> {
-        ClientBuilder::new(client_id).build_with_service(self)
+    pub fn try_into_new_client(
+        mut self,
+        client_id: &str,
+    ) -> Result<ClientImplementation<Self>, Error> {
+        ClientBuilder::new(client_id)
+            .prepare(&mut self)
+            .map(|p| p.build(self))
     }
 }
 

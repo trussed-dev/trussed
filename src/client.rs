@@ -742,32 +742,37 @@ impl<P: Platform, D: Dispatch<P>> ClientBuilder<P, D> {
         Ok(requester)
     }
 
-    /// Builds the client using a custom [`Syscall`][] implementation.
-    pub fn build<S: Syscall>(
-        self,
-        service: &mut Service<P, D>,
-        syscall: S,
-    ) -> Result<ClientImplementation<S, D>, Error> {
+    /// Prepare a client using the given service.
+    ///
+    /// This allocates a [`TrussedInterchange`][] and a
+    /// [`ServiceEndpoint`][`crate::service::ServiceEndpoint`].
+    pub fn prepare(self, service: &mut Service<P, D>) -> Result<PreparedClient<P, D>, Error> {
         self.create_endpoint(service)
-            .map(|requester| ClientImplementation::new(requester, syscall))
+            .map(|requester| PreparedClient::new(requester))
+    }
+}
+
+/// An intermediate step of the [`ClientBuilder`][].
+///
+/// This struct already has an allocated [`TrussedInterchange`][] and
+/// [`ServiceEndpoint`][`crate::service::ServiceEndpoint`] but still needs a [`Syscall`][]
+/// implementation.
+pub struct PreparedClient<P, D> {
+    requester: Requester<TrussedInterchange>,
+    _marker: PhantomData<(P, D)>,
+}
+
+impl<P, D> PreparedClient<P, D> {
+    fn new(requester: Requester<TrussedInterchange>) -> Self {
+        Self {
+            requester,
+            _marker: Default::default(),
+        }
     }
 
-    /// Builds the client using a [`Service`][] instance.
-    pub fn build_with_service(
-        self,
-        mut service: Service<P, D>,
-    ) -> Result<ClientImplementation<Service<P, D>, D>, Error> {
-        self.create_endpoint(&mut service)
-            .map(|requester| ClientImplementation::new(requester, service))
-    }
-
-    /// Builds the client using a mutable reference to a [`Service`][].
-    pub fn build_with_service_mut(
-        self,
-        service: &mut Service<P, D>,
-    ) -> Result<ClientImplementation<&mut Service<P, D>, D>, Error> {
-        self.create_endpoint(service)
-            .map(|requester| ClientImplementation::new(requester, service))
+    /// Builds the client using the given syscall implementation.
+    pub fn build<S: Syscall>(self, syscall: S) -> ClientImplementation<S, D> {
+        ClientImplementation::new(self.requester, syscall)
     }
 }
 

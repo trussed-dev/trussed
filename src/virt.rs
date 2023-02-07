@@ -97,11 +97,12 @@ impl<S: StoreProvider> Platform<S> {
         backends: &'static [BackendId<D::BackendId>],
         test: impl FnOnce(ClientImplementation<Service<Self, D>, D>) -> R,
     ) -> R {
-        let service = Service::with_dispatch(self, dispatch);
+        let mut service = Service::with_dispatch(self, dispatch);
         let client = ClientBuilder::new(client_id)
             .backends(backends)
-            .build_with_service(service)
-            .unwrap();
+            .prepare(&mut service)
+            .unwrap()
+            .build(service);
         test(client)
     }
 }
