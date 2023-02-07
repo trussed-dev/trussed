@@ -21,7 +21,7 @@ Very much WIP. Actively developed. Unstable APIs.
 ## Running tests
 
 ```bash
-cargo test --features ext,virt
+cargo test --features serde-extensions,virt
 ```
 
 #### License
