@@ -167,7 +167,7 @@ where
     pub fn poll(&mut self) -> Poll<Result<T, Error>> {
         self.client.poll().map(|result| {
             result.and_then(|reply| {
-                let reply = reply::SerdeExtension::from(reply);
+                let reply = reply::SerdeExtension::try_from(reply)?;
                 let reply: E::Reply = postcard_deserialize(&reply.reply)
                     .map_err(|_| Error::InvalidSerializedReply)?;
                 reply.try_into()
