@@ -39,3 +39,36 @@ pub struct ServiceEndpoint<I: 'static, C> {
 }
 
 // pub type ClientEndpoint = Requester<TrussedInterchange>;
+
+#[cfg(test)]
+mod tests {
+    use super::TrussedInterchange;
+    use crate::api::{Reply, Request};
+    use core::mem;
+
+    // The following checks are used to ensure that we don’t accidentally increase the interchange
+    // size.  Bumping the size is not a breaking change but should only be done if really
+    // necessary.
+
+    const MAX_SIZE: usize = 2416;
+
+    fn assert_size<T>() {
+        let size = mem::size_of::<T>();
+        assert!(size <= MAX_SIZE, "{size}");
+    }
+
+    #[test]
+    fn test_request_size() {
+        assert_size::<Request>();
+    }
+
+    #[test]
+    fn test_reply_size() {
+        assert_size::<Reply>();
+    }
+
+    #[test]
+    fn test_interchange_size() {
+        assert_size::<TrussedInterchange>();
+    }
+}
