@@ -5,6 +5,9 @@
 //! the implementation of one or more requests.  The backends used to execute a request can be
 //! selected per client when constructing a client using
 //! [`ClientBuilder::backends`][`crate::client::ClientBuilder::backends`].
+//!
+//! Backends can also implement API extensions to provide additional syscalls (see the
+//! [`serde_extensions`][`crate::serde_extensions`] module).
 
 use crate::{
     api::{Reply, Request},
@@ -78,6 +81,7 @@ impl<P: Platform> Dispatch<P> for CoreOnly {
     type Context = crate::types::NoData;
 }
 
+/// An empty ID type.
 pub enum NoId {}
 
 impl TryFrom<u8> for NoId {
