@@ -114,15 +114,26 @@
 <span id="114">114</span>
 <span id="115">115</span>
 <span id="116">116</span>
+<span id="117">117</span>
+<span id="118">118</span>
+<span id="119">119</span>
+<span id="120">120</span>
+<span id="121">121</span>
+<span id="122">122</span>
+<span id="123">123</span>
+<span id="124">124</span>
+<span id="125">125</span>
+<span id="126">126</span>
 </pre><pre class="rust"><code><span class="macro">macro_rules! </span>generate_enums {
-    ($(<span class="macro-nonterminal">$which</span>:ident: <span class="macro-nonterminal">$index</span>:literal)<span class="kw-2">*</span>) =&gt; {
+    ($($(<span class="attribute">#[<span class="macro-nonterminal">$attr</span>:meta]</span>)<span class="question-mark">? </span><span class="macro-nonterminal">$which</span>:ident: <span class="macro-nonterminal">$index</span>:literal)<span class="kw-2">*</span>) =&gt; {
 
     <span class="attribute">#[derive(Clone, Eq, PartialEq, Debug)]
     #[allow(clippy::large_enum_variant)]
     </span><span class="kw">pub enum </span>Request {
         DummyRequest, <span class="comment">// for testing
         </span>$(
-        <span class="macro-nonterminal">$which</span>(request::<span class="macro-nonterminal">$which</span>),
+        $(<span class="attribute">#[<span class="macro-nonterminal">$attr</span>]</span>)<span class="question-mark">?
+        </span><span class="macro-nonterminal">$which</span>(request::<span class="macro-nonterminal">$which</span>),
         )*
     }
 
@@ -131,7 +142,8 @@
     </span><span class="kw">pub enum </span>Reply {
         DummyReply, <span class="comment">// for testing
         </span>$(
-        <span class="macro-nonterminal">$which</span>(reply::<span class="macro-nonterminal">$which</span>),
+        $(<span class="attribute">#[<span class="macro-nonterminal">$attr</span>]</span>)<span class="question-mark">?
+        </span><span class="macro-nonterminal">$which</span>(reply::<span class="macro-nonterminal">$which</span>),
         )*
     }
 
@@ -140,7 +152,8 @@
             <span class="kw">match </span>request {
                 Request::DummyRequest =&gt; <span class="number">0</span>,
                 $(
-                Request::<span class="macro-nonterminal">$which</span>(<span class="kw">_</span>) =&gt; <span class="macro-nonterminal">$index</span>,
+                $(<span class="attribute">#[<span class="macro-nonterminal">$attr</span>]</span>)<span class="question-mark">?
+                </span>Request::<span class="macro-nonterminal">$which</span>(<span class="kw">_</span>) =&gt; <span class="macro-nonterminal">$index</span>,
                 )*
             }
         }
@@ -151,7 +164,8 @@
             <span class="kw">match </span>reply {
                 Reply::DummyReply =&gt; <span class="number">0</span>,
                 $(
-                Reply::<span class="macro-nonterminal">$which</span>(<span class="kw">_</span>) =&gt; <span class="macro-nonterminal">$index</span>,
+                $(<span class="attribute">#[<span class="macro-nonterminal">$attr</span>]</span>)<span class="question-mark">?
+                </span>Reply::<span class="macro-nonterminal">$which</span>(<span class="kw">_</span>) =&gt; <span class="macro-nonterminal">$index</span>,
                 )*
             }
         }
@@ -161,18 +175,21 @@
 
 <span class="macro">macro_rules! </span>impl_request {
     ($(
-        <span class="macro-nonterminal">$request</span>:ident:
+        $(<span class="attribute">#[<span class="macro-nonterminal">$attr</span>:meta]</span>)<span class="question-mark">?
+        </span><span class="macro-nonterminal">$request</span>:ident:
             $(- <span class="macro-nonterminal">$name</span>:tt: <span class="macro-nonterminal">$</span><span class="kw">type</span>:<span class="macro-nonterminal">path</span>)*
     )<span class="kw-2">*</span>)
         =&gt; {$(
-    <span class="attribute">#[derive(Clone, Eq, PartialEq, Debug, serde_indexed::DeserializeIndexed, serde_indexed::SerializeIndexed)]
+    $(<span class="attribute">#[<span class="macro-nonterminal">$attr</span>]</span>)<span class="question-mark">?
+    </span><span class="attribute">#[derive(Clone, Eq, PartialEq, Debug, serde_indexed::DeserializeIndexed, serde_indexed::SerializeIndexed)]
     </span><span class="kw">pub struct </span><span class="macro-nonterminal">$request </span>{
         $(
             <span class="kw">pub </span><span class="macro-nonterminal">$name</span>: <span class="macro-nonterminal">$</span><span class="kw">type</span>,
         )*
     }
 
-    <span class="kw">impl </span><span class="macro-nonterminal">From</span>&lt;<span class="macro-nonterminal">$request</span>&gt; <span class="kw">for </span>Request {
+    $(<span class="attribute">#[<span class="macro-nonterminal">$attr</span>]</span>)<span class="question-mark">?
+    </span><span class="kw">impl </span>From&lt;<span class="macro-nonterminal">$request</span>&gt; <span class="kw">for </span>Request {
         <span class="kw">fn </span>from(request: <span class="macro-nonterminal">$request</span>) -&gt; <span class="self">Self </span>{
             <span class="self">Self</span>::<span class="macro-nonterminal">$request</span>(request)
         }
@@ -196,19 +213,22 @@
 
 <span class="macro">macro_rules! </span>impl_reply {
     ($(
-        <span class="macro-nonterminal">$reply</span>:ident:
+        $(<span class="attribute">#[<span class="macro-nonterminal">$attr</span>:meta]</span>)<span class="question-mark">?
+        </span><span class="macro-nonterminal">$reply</span>:ident:
             $(- <span class="macro-nonterminal">$name</span>:tt: <span class="macro-nonterminal">$</span><span class="kw">type</span>:<span class="macro-nonterminal">ty</span>)*
     )<span class="kw-2">*</span>)
         =&gt; {$(
 
-    <span class="attribute">#[derive(Clone, Eq, PartialEq, Debug, serde_indexed::DeserializeIndexed, serde_indexed::SerializeIndexed)]
+    $(<span class="attribute">#[<span class="macro-nonterminal">$attr</span>]</span>)<span class="question-mark">?
+    </span><span class="attribute">#[derive(Clone, Eq, PartialEq, Debug, serde_indexed::DeserializeIndexed, serde_indexed::SerializeIndexed)]
     </span><span class="kw">pub struct </span><span class="macro-nonterminal">$reply </span>{
         $(
             <span class="kw">pub </span><span class="macro-nonterminal">$name</span>: <span class="macro-nonterminal">$</span><span class="kw">type</span>,
         )*
     }
 
-    <span class="kw">impl </span><span class="macro-nonterminal">core::convert::TryFrom</span>&lt;Reply&gt; <span class="kw">for </span><span class="macro-nonterminal">$reply </span>{
+    $(<span class="attribute">#[<span class="macro-nonterminal">$attr</span>]</span>)<span class="question-mark">?
+    </span><span class="kw">impl </span>core::convert::TryFrom&lt;Reply&gt; <span class="kw">for </span><span class="macro-nonterminal">$reply </span>{
         <span class="kw">type </span>Error = <span class="kw">crate</span>::Error;
         <span class="kw">fn </span>try_from(reply: Reply) -&gt; <span class="prelude-ty">Result</span>&lt;reply::<span class="macro-nonterminal">$reply</span>, <span class="self">Self</span>::Error&gt; {
             <span class="kw">match </span>reply {

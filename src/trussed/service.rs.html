@@ -828,6 +828,27 @@
 <span id="828">828</span>
 <span id="829">829</span>
 <span id="830">830</span>
+<span id="831">831</span>
+<span id="832">832</span>
+<span id="833">833</span>
+<span id="834">834</span>
+<span id="835">835</span>
+<span id="836">836</span>
+<span id="837">837</span>
+<span id="838">838</span>
+<span id="839">839</span>
+<span id="840">840</span>
+<span id="841">841</span>
+<span id="842">842</span>
+<span id="843">843</span>
+<span id="844">844</span>
+<span id="845">845</span>
+<span id="846">846</span>
+<span id="847">847</span>
+<span id="848">848</span>
+<span id="849">849</span>
+<span id="850">850</span>
+<span id="851">851</span>
 </pre><pre class="rust"><code><span class="kw">use </span>chacha20::ChaCha8Rng;
 <span class="kw">use </span>heapless_bytes::Unsigned;
 <span class="kw">use </span>interchange::Responder;
@@ -888,7 +909,7 @@
 <span class="kw">where
     </span>P: Platform,
 {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) platform: P,
+    platform: P,
     rng_state: <span class="prelude-ty">Option</span>&lt;ChaCha8Rng&gt;,
 }
 
@@ -898,6 +919,14 @@
             platform,
             rng_state: <span class="prelude-val">None</span>,
         }
+    }
+
+    <span class="kw">pub fn </span>platform(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>P {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.platform
+    }
+
+    <span class="kw">pub fn </span>platform_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>P {
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>.platform
     }
 }
 
@@ -939,6 +968,19 @@
         <span class="self">self</span>.rng()
             .map(|rng| ClientKeystore::new(ctx.path.clone(), rng, <span class="self">self</span>.platform.store()))
             .map_err(|<span class="kw">_</span>| Error::EntropyMalfunction)
+    }
+
+    <span class="kw">pub fn </span>dispatch&lt;D: Dispatch&lt;P&gt;&gt;(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        dispatch: <span class="kw-2">&amp;mut </span>D,
+        backend: <span class="kw-2">&amp;</span>BackendId&lt;D::BackendId&gt;,
+        ctx: <span class="kw-2">&amp;mut </span>Context&lt;D::Context&gt;,
+        request: <span class="kw-2">&amp;</span>Request,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Reply, Error&gt; {
+        <span class="kw">match </span>backend {
+            BackendId::Core =&gt; <span class="self">self</span>.reply_to(<span class="kw-2">&amp;mut </span>ctx.core, request),
+            BackendId::Custom(backend) =&gt; dispatch.request(backend, ctx, request, <span class="self">self</span>),
+        }
     }
 
     <span class="attribute">#[inline(never)]
@@ -1404,6 +1446,10 @@
                     .map(|id| Reply::WriteCertificate(reply::WriteCertificate { id } ))
             }
 
+            Request::SerdeExtension(<span class="kw">_</span>) =&gt; {
+                <span class="prelude-val">Err</span>(Error::RequestNotAvailable)
+            }
+
             <span class="comment">// _ =&gt; {
             //     // #[cfg(test)]
             //     // println!(&quot;todo: {:?} request!&quot;, &amp;request);
@@ -1590,23 +1636,19 @@
                 <span class="comment">// #[cfg(test)] println!(&quot;service got request: {:?}&quot;, &amp;request);
 
                 // resources.currently_serving = ep.client_id.clone();
-                </span><span class="kw">let </span><span class="kw-2">mut </span>reply_result = <span class="prelude-val">Err</span>(Error::RequestNotAvailable);
-                <span class="kw">if </span>ep.backends.is_empty() {
-                    reply_result = resources.reply_to(<span class="kw-2">&amp;mut </span>ep.ctx.core, <span class="kw-2">&amp;</span>request);
+                </span><span class="kw">let </span>reply_result = <span class="kw">if </span>ep.backends.is_empty() {
+                    resources.reply_to(<span class="kw-2">&amp;mut </span>ep.ctx.core, <span class="kw-2">&amp;</span>request)
                 } <span class="kw">else </span>{
+                    <span class="kw">let </span><span class="kw-2">mut </span>reply_result = <span class="prelude-val">Err</span>(Error::RequestNotAvailable);
                     <span class="kw">for </span>backend <span class="kw">in </span>ep.backends {
-                        reply_result = <span class="kw">match </span>backend {
-                            BackendId::Core =&gt; resources.reply_to(<span class="kw-2">&amp;mut </span>ep.ctx.core, <span class="kw-2">&amp;</span>request),
-                            BackendId::Custom(id) =&gt; {
-                                <span class="self">self</span>.dispatch.request(id, <span class="kw-2">&amp;mut </span>ep.ctx, <span class="kw-2">&amp;</span>request, resources)
-                            }
-                        };
-
+                        reply_result =
+                            resources.dispatch(<span class="kw-2">&amp;mut </span><span class="self">self</span>.dispatch, backend, <span class="kw-2">&amp;mut </span>ep.ctx, <span class="kw-2">&amp;</span>request);
                         <span class="kw">if </span>reply_result != <span class="prelude-val">Err</span>(Error::RequestNotAvailable) {
                             <span class="kw">break</span>;
                         }
                     }
-                }
+                    reply_result
+                };
 
                 resources
                     .platform

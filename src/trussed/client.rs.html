@@ -816,6 +816,12 @@
 <span id="816">816</span>
 <span id="817">817</span>
 <span id="818">818</span>
+<span id="819">819</span>
+<span id="820">820</span>
+<span id="821">821</span>
+<span id="822">822</span>
+<span id="823">823</span>
+<span id="824">824</span>
 </pre><pre class="rust"><code><span class="doccomment">//! # Client interface for applications.
 //!
 //! The API methods (such as `GenerateKey`, `Sign`, `Verify`,...) are implemented by a variety
@@ -898,7 +904,7 @@
 <span class="kw">use </span>interchange::{Interchange <span class="kw">as _</span>, Requester};
 
 <span class="kw">use </span><span class="kw">crate</span>::api::<span class="kw-2">*</span>;
-<span class="kw">use </span><span class="kw">crate</span>::backend::{BackendId, Dispatch};
+<span class="kw">use </span><span class="kw">crate</span>::backend::{BackendId, CoreOnly, Dispatch};
 <span class="kw">use </span><span class="kw">crate</span>::error::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">crate</span>::pipe::TrussedInterchange;
 <span class="kw">use </span><span class="kw">crate</span>::service::Service;
@@ -916,6 +922,7 @@
     Full,
     Pending,
     DataTooLarge,
+    SerializationFailed,
 }
 
 <span class="kw">pub type </span>ClientResult&lt;<span class="lifetime">&#39;c</span>, T, C&gt; = <span class="prelude-ty">Result</span>&lt;FutureResult&lt;<span class="lifetime">&#39;c</span>, T, C&gt;, ClientError&gt;;
@@ -926,7 +933,7 @@
 {
 }
 
-<span class="kw">impl</span>&lt;S: Syscall&gt; Client <span class="kw">for </span>ClientImplementation&lt;S&gt; {}
+<span class="kw">impl</span>&lt;S: Syscall, E&gt; Client <span class="kw">for </span>ClientImplementation&lt;S, E&gt; {}
 
 <span class="doccomment">/// Lowest level interface, use one of the higher level ones.
 </span><span class="kw">pub trait </span>PollClient {
@@ -938,7 +945,7 @@
 <span class="kw">where
     </span>C: PollClient,
 {
-    client: <span class="kw-2">&amp;</span><span class="lifetime">&#39;c </span><span class="kw-2">mut </span>C,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) client: <span class="kw-2">&amp;</span><span class="lifetime">&#39;c </span><span class="kw-2">mut </span>C,
     __: PhantomData&lt;T&gt;,
 }
 
@@ -961,7 +968,7 @@
 }
 
 <span class="doccomment">/// The client implementation client applications actually receive.
-</span><span class="kw">pub struct </span>ClientImplementation&lt;S&gt; {
+</span><span class="kw">pub struct </span>ClientImplementation&lt;S, D = CoreOnly&gt; {
     <span class="comment">// raw: RawClient&lt;Client&lt;S&gt;&gt;,
     </span>syscall: S,
 
@@ -969,6 +976,7 @@
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) interchange: Requester&lt;TrussedInterchange&gt;,
     <span class="comment">// pending: Option&lt;Discriminant&lt;Request&gt;&gt;,
     </span>pending: <span class="prelude-ty">Option</span>&lt;u8&gt;,
+    _marker: PhantomData&lt;D&gt;,
 }
 
 <span class="comment">// impl&lt;S&gt; From&lt;(RawClient, S)&gt; for Client&lt;S&gt;
@@ -979,7 +987,7 @@
 //     }
 // }
 
-</span><span class="kw">impl</span>&lt;S&gt; ClientImplementation&lt;S&gt;
+</span><span class="kw">impl</span>&lt;S, E&gt; ClientImplementation&lt;S, E&gt;
 <span class="kw">where
     </span>S: Syscall,
 {
@@ -988,11 +996,12 @@
             interchange,
             pending: <span class="prelude-val">None</span>,
             syscall,
+            _marker: Default::default(),
         }
     }
 }
 
-<span class="kw">impl</span>&lt;S&gt; PollClient <span class="kw">for </span>ClientImplementation&lt;S&gt;
+<span class="kw">impl</span>&lt;S, E&gt; PollClient <span class="kw">for </span>ClientImplementation&lt;S, E&gt;
 <span class="kw">where
     </span>S: Syscall,
 {
@@ -1046,12 +1055,12 @@
     }
 }
 
-<span class="kw">impl</span>&lt;S: Syscall&gt; CertificateClient <span class="kw">for </span>ClientImplementation&lt;S&gt; {}
-<span class="kw">impl</span>&lt;S: Syscall&gt; CryptoClient <span class="kw">for </span>ClientImplementation&lt;S&gt; {}
-<span class="kw">impl</span>&lt;S: Syscall&gt; CounterClient <span class="kw">for </span>ClientImplementation&lt;S&gt; {}
-<span class="kw">impl</span>&lt;S: Syscall&gt; FilesystemClient <span class="kw">for </span>ClientImplementation&lt;S&gt; {}
-<span class="kw">impl</span>&lt;S: Syscall&gt; ManagementClient <span class="kw">for </span>ClientImplementation&lt;S&gt; {}
-<span class="kw">impl</span>&lt;S: Syscall&gt; UiClient <span class="kw">for </span>ClientImplementation&lt;S&gt; {}
+<span class="kw">impl</span>&lt;S: Syscall, E&gt; CertificateClient <span class="kw">for </span>ClientImplementation&lt;S, E&gt; {}
+<span class="kw">impl</span>&lt;S: Syscall, E&gt; CryptoClient <span class="kw">for </span>ClientImplementation&lt;S, E&gt; {}
+<span class="kw">impl</span>&lt;S: Syscall, E&gt; CounterClient <span class="kw">for </span>ClientImplementation&lt;S, E&gt; {}
+<span class="kw">impl</span>&lt;S: Syscall, E&gt; FilesystemClient <span class="kw">for </span>ClientImplementation&lt;S, E&gt; {}
+<span class="kw">impl</span>&lt;S: Syscall, E&gt; ManagementClient <span class="kw">for </span>ClientImplementation&lt;S, E&gt; {}
+<span class="kw">impl</span>&lt;S: Syscall, E&gt; UiClient <span class="kw">for </span>ClientImplementation&lt;S, E&gt; {}
 
 <span class="doccomment">/// Read/Write + Delete certificates
 </span><span class="kw">pub trait </span>CertificateClient: PollClient {
@@ -1515,12 +1524,12 @@
 ///
 /// The maximum number of clients that can be created is defined by the `clients-?` features.  If
 /// this number is exceeded, [`Error::ClientCountExceeded`][] is returned.
-</span><span class="kw">pub struct </span>ClientBuilder&lt;I: <span class="lifetime">&#39;static </span>= Empty&gt; {
+</span><span class="kw">pub struct </span>ClientBuilder&lt;P: Platform, D: Dispatch&lt;P&gt; = CoreOnly&gt; {
     id: PathBuf,
-    backends: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[BackendId&lt;I&gt;],
+    backends: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[BackendId&lt;D::BackendId&gt;],
 }
 
-<span class="kw">impl </span>ClientBuilder {
+<span class="kw">impl</span>&lt;P: Platform&gt; ClientBuilder&lt;P&gt; {
     <span class="doccomment">/// Creates a new client builder using the given client ID.
     ///
     /// Per default, the client does not support backends and always uses the Trussed core
@@ -1533,18 +1542,21 @@
     }
 }
 
-<span class="kw">impl</span>&lt;I: <span class="lifetime">&#39;static</span>&gt; ClientBuilder&lt;I&gt; {
+<span class="kw">impl</span>&lt;P: Platform, D: Dispatch&lt;P&gt;&gt; ClientBuilder&lt;P, D&gt; {
     <span class="doccomment">/// Selects the backends to use for this client.
     ///
     /// If `backends` is empty, the Trussed core implementation is always used.
-    </span><span class="kw">pub fn </span>backends&lt;J: <span class="lifetime">&#39;static</span>&gt;(<span class="self">self</span>, backends: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[BackendId&lt;J&gt;]) -&gt; ClientBuilder&lt;J&gt; {
+    </span><span class="kw">pub fn </span>backends&lt;E: Dispatch&lt;P&gt;&gt;(
+        <span class="self">self</span>,
+        backends: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[BackendId&lt;E::BackendId&gt;],
+    ) -&gt; ClientBuilder&lt;P, E&gt; {
         ClientBuilder {
             id: <span class="self">self</span>.id,
             backends,
         }
     }
 
-    <span class="kw">fn </span>create_endpoint&lt;P: Platform, D: Dispatch&lt;P, BackendId = I&gt;&gt;(
+    <span class="kw">fn </span>create_endpoint(
         <span class="self">self</span>,
         service: <span class="kw-2">&amp;mut </span>Service&lt;P, D&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Requester&lt;TrussedInterchange&gt;, Error&gt; {
@@ -1555,29 +1567,29 @@
     }
 
     <span class="doccomment">/// Builds the client using a custom [`Syscall`][] implementation.
-    </span><span class="kw">pub fn </span>build&lt;P: Platform, D: Dispatch&lt;P, BackendId = I&gt;, S: Syscall&gt;(
+    </span><span class="kw">pub fn </span>build&lt;S: Syscall&gt;(
         <span class="self">self</span>,
         service: <span class="kw-2">&amp;mut </span>Service&lt;P, D&gt;,
         syscall: S,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;ClientImplementation&lt;S&gt;, Error&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;ClientImplementation&lt;S, D&gt;, Error&gt; {
         <span class="self">self</span>.create_endpoint(service)
             .map(|requester| ClientImplementation::new(requester, syscall))
     }
 
     <span class="doccomment">/// Builds the client using a [`Service`][] instance.
-    </span><span class="kw">pub fn </span>build_with_service&lt;P: Platform, D: Dispatch&lt;P, BackendId = I&gt;&gt;(
+    </span><span class="kw">pub fn </span>build_with_service(
         <span class="self">self</span>,
         <span class="kw-2">mut </span>service: Service&lt;P, D&gt;,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;ClientImplementation&lt;Service&lt;P, D&gt;&gt;, Error&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;ClientImplementation&lt;Service&lt;P, D&gt;, D&gt;, Error&gt; {
         <span class="self">self</span>.create_endpoint(<span class="kw-2">&amp;mut </span>service)
             .map(|requester| ClientImplementation::new(requester, service))
     }
 
     <span class="doccomment">/// Builds the client using a mutable reference to a [`Service`][].
-    </span><span class="kw">pub fn </span>build_with_service_mut&lt;P: Platform, D: Dispatch&lt;P, BackendId = I&gt;&gt;(
+    </span><span class="kw">pub fn </span>build_with_service_mut(
         <span class="self">self</span>,
         service: <span class="kw-2">&amp;mut </span>Service&lt;P, D&gt;,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;ClientImplementation&lt;<span class="kw-2">&amp;mut </span>Service&lt;P, D&gt;&gt;, Error&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;ClientImplementation&lt;<span class="kw-2">&amp;mut </span>Service&lt;P, D&gt;, D&gt;, Error&gt; {
         <span class="self">self</span>.create_endpoint(service)
             .map(|requester| ClientImplementation::new(requester, service))
     }
