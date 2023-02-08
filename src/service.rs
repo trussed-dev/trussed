@@ -82,7 +82,7 @@ impl<P: Platform> ServiceResources<P> {
 pub struct Service<P, D = CoreOnly>
 where
     P: Platform,
-    D: Dispatch<P>,
+    D: Dispatch,
 {
     eps: Vec<ServiceEndpoint<D::BackendId, D::Context>, { MAX_SERVICE_CLIENTS::USIZE }>,
     resources: ServiceResources<P>,
@@ -90,7 +90,7 @@ where
 }
 
 // need to be able to send crypto service to an interrupt handler
-unsafe impl<P: Platform, D: Dispatch<P>> Send for Service<P, D> {}
+unsafe impl<P: Platform, D: Dispatch> Send for Service<P, D> {}
 
 impl<P: Platform> ServiceResources<P> {
     pub fn certstore(&mut self, ctx: &CoreContext) -> Result<ClientCertstore<P::S>> {
@@ -119,7 +119,7 @@ impl<P: Platform> ServiceResources<P> {
             .map_err(|_| Error::EntropyMalfunction)
     }
 
-    pub fn dispatch<D: Dispatch<P>>(
+    pub fn dispatch<D: Dispatch>(
         &mut self,
         dispatch: &mut D,
         backend: &BackendId<D::BackendId>,
@@ -690,7 +690,7 @@ impl<P: Platform> Service<P> {
     }
 }
 
-impl<P: Platform, D: Dispatch<P>> Service<P, D> {
+impl<P: Platform, D: Dispatch> Service<P, D> {
     pub fn with_dispatch(platform: P, dispatch: D) -> Self {
         let resources = ServiceResources::new(platform);
         Self {
@@ -738,7 +738,7 @@ impl<P: Platform> Service<P> {
     }
 }
 
-impl<P: Platform, D: Dispatch<P>> Service<P, D> {
+impl<P: Platform, D: Dispatch> Service<P, D> {
     pub fn add_endpoint(
         &mut self,
         interchange: Responder<TrussedInterchange>,
@@ -842,7 +842,7 @@ impl<P: Platform, D: Dispatch<P>> Service<P, D> {
 impl<P, D> crate::client::Syscall for &mut Service<P, D>
 where
     P: Platform,
-    D: Dispatch<P>,
+    D: Dispatch,
 {
     fn syscall(&mut self) {
         self.process();
@@ -852,7 +852,7 @@ where
 impl<P, D> crate::client::Syscall for Service<P, D>
 where
     P: Platform,
-    D: Dispatch<P>,
+    D: Dispatch,
 {
     fn syscall(&mut self) {
         self.process();

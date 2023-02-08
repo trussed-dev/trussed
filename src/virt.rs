@@ -90,7 +90,7 @@ impl<S: StoreProvider> Platform<S> {
         test(client)
     }
 
-    pub fn run_client_with_backends<R, D: Dispatch<Self>>(
+    pub fn run_client_with_backends<R, D: Dispatch>(
         self,
         client_id: &str,
         dispatch: D,

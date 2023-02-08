@@ -236,12 +236,12 @@ mod backends {
     /// Implements TestExtension
     pub struct TestBackend;
 
-    impl<P: Platform> Backend<P> for TestBackend {
+    impl Backend for TestBackend {
         type Context = TestContext;
     }
 
-    impl<P: Platform> ExtensionImpl<TestExtension, P> for TestBackend {
-        fn extension_request(
+    impl ExtensionImpl<TestExtension> for TestBackend {
+        fn extension_request<P: Platform>(
             &mut self,
             _core_ctx: &mut CoreContext,
             backend_ctx: &mut TestContext,
@@ -273,12 +273,12 @@ mod backends {
     /// Implements SampleExtension and TestExtension
     pub struct SampleBackend;
 
-    impl<P: Platform> Backend<P> for SampleBackend {
+    impl Backend for SampleBackend {
         type Context = SampleContext;
     }
 
-    impl<P: Platform> ExtensionImpl<SampleExtension, P> for SampleBackend {
-        fn extension_request(
+    impl ExtensionImpl<SampleExtension> for SampleBackend {
+        fn extension_request<P: Platform>(
             &mut self,
             _core_ctx: &mut CoreContext,
             backend_ctx: &mut SampleContext,
@@ -301,8 +301,8 @@ mod backends {
         }
     }
 
-    impl<P: Platform> ExtensionImpl<TestExtension, P> for SampleBackend {
-        fn extension_request(
+    impl ExtensionImpl<TestExtension> for SampleBackend {
+        fn extension_request<P: Platform>(
             &mut self,
             _core_ctx: &mut CoreContext,
             backend_ctx: &mut SampleContext,
@@ -386,12 +386,12 @@ mod runner {
         sample: SampleContext,
     }
 
-    impl<P: Platform> ExtensionDispatch<P> for Backends {
+    impl ExtensionDispatch for Backends {
         type BackendId = id::Backend;
         type Context = BackendsContext;
         type ExtensionId = id::Extension;
 
-        fn core_request(
+        fn core_request<P: Platform>(
             &mut self,
             backend: &Self::BackendId,
             ctx: &mut Context<Self::Context>,
@@ -410,7 +410,7 @@ mod runner {
             }
         }
 
-        fn extension_request(
+        fn extension_request<P: Platform>(
             &mut self,
             backend: &Self::BackendId,
             extension: &Self::ExtensionId,
@@ -429,14 +429,14 @@ mod runner {
                     id::Extension::Sample => Err(Error::RequestNotAvailable),
                 },
                 id::Backend::Sample => match extension {
-                    id::Extension::Test => <SampleBackend as ExtensionImpl<TestExtension, P>>::extension_request_serialized(
+                    id::Extension::Test => <SampleBackend as ExtensionImpl<TestExtension>>::extension_request_serialized(
                         &mut self.sample,
                         &mut ctx.core,
                         &mut ctx.backends.sample,
                         request,
                         resources,
                     ),
-                    id::Extension::Sample => <SampleBackend as ExtensionImpl<SampleExtension, P>>::extension_request_serialized(
+                    id::Extension::Sample => <SampleBackend as ExtensionImpl<SampleExtension>>::extension_request_serialized(
                         &mut self.sample,
                         &mut ctx.core,
                         &mut ctx.backends.sample,

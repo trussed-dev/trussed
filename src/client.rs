@@ -700,12 +700,12 @@ pub trait UiClient: PollClient {
 ///
 /// The maximum number of clients that can be created is defined by the `clients-?` features.  If
 /// this number is exceeded, [`Error::ClientCountExceeded`][] is returned.
-pub struct ClientBuilder<P: Platform, D: Dispatch<P> = CoreOnly> {
+pub struct ClientBuilder<D: Dispatch = CoreOnly> {
     id: PathBuf,
     backends: &'static [BackendId<D::BackendId>],
 }
 
-impl<P: Platform> ClientBuilder<P> {
+impl ClientBuilder {
     /// Creates a new client builder using the given client ID.
     ///
     /// Per default, the client does not support backends and always uses the Trussed core
@@ -718,21 +718,21 @@ impl<P: Platform> ClientBuilder<P> {
     }
 }
 
-impl<P: Platform, D: Dispatch<P>> ClientBuilder<P, D> {
+impl<D: Dispatch> ClientBuilder<D> {
     /// Selects the backends to use for this client.
     ///
     /// If `backends` is empty, the Trussed core implementation is always used.
-    pub fn backends<E: Dispatch<P>>(
+    pub fn backends<E: Dispatch>(
         self,
         backends: &'static [BackendId<E::BackendId>],
-    ) -> ClientBuilder<P, E> {
+    ) -> ClientBuilder<E> {
         ClientBuilder {
             id: self.id,
             backends,
         }
     }
 
-    fn create_endpoint(
+    fn create_endpoint<P: Platform>(
         self,
         service: &mut Service<P, D>,
     ) -> Result<Requester<TrussedInterchange>, Error> {
@@ -746,7 +746,10 @@ impl<P: Platform, D: Dispatch<P>> ClientBuilder<P, D> {
     ///
     /// This allocates a [`TrussedInterchange`][] and a
     /// [`ServiceEndpoint`][`crate::service::ServiceEndpoint`].
-    pub fn prepare(self, service: &mut Service<P, D>) -> Result<PreparedClient<P, D>, Error> {
+    pub fn prepare<P: Platform>(
+        self,
+        service: &mut Service<P, D>,
+    ) -> Result<PreparedClient<D>, Error> {
         self.create_endpoint(service)
             .map(|requester| PreparedClient::new(requester))
     }
@@ -757,12 +760,12 @@ impl<P: Platform, D: Dispatch<P>> ClientBuilder<P, D> {
 /// This struct already has an allocated [`TrussedInterchange`][] and
 /// [`ServiceEndpoint`][`crate::service::ServiceEndpoint`] but still needs a [`Syscall`][]
 /// implementation.
-pub struct PreparedClient<P, D> {
+pub struct PreparedClient<D> {
     requester: Requester<TrussedInterchange>,
-    _marker: PhantomData<(P, D)>,
+    _marker: PhantomData<D>,
 }
 
-impl<P, D> PreparedClient<P, D> {
+impl<D> PreparedClient<D> {
     fn new(requester: Requester<TrussedInterchange>) -> Self {
         Self {
             requester,
