@@ -23,7 +23,7 @@ use crate::{
 pub use store::{Filesystem, Ram, StoreProvider};
 pub use ui::UserInterface;
 
-pub type Client<S, D = CoreOnly> = ClientImplementation<Service<Platform<S>, D>>;
+pub type Client<S, D = CoreOnly> = ClientImplementation<Service<Platform<S>, D>, D>;
 
 // We need this mutex to make sure that:
 // - TrussedInterchange is not used concurrently
