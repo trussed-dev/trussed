@@ -2,12 +2,12 @@
 
 use trussed::{
     api::{reply::ReadFile, Reply, Request},
-    backend::{self, Backend as _, BackendId},
+    backend::{self, BackendId},
     client::FilesystemClient as _,
     error::Error,
     platform,
     service::{Service, ServiceResources},
-    types::{Context, CoreContext, Location, Message, PathBuf},
+    types::{CoreContext, Location, Message, PathBuf},
     virt::{self, Ram},
     ClientImplementation,
 };
@@ -21,29 +21,10 @@ pub enum Backend {
     Test,
 }
 
-#[derive(Default)]
+#[derive(Default, trussed_derive::Dispatch)]
+#[dispatch(backend_id = "Backend")]
 struct Dispatch {
     test: TestBackend,
-}
-
-impl backend::Dispatch for Dispatch {
-    type BackendId = Backend;
-    type Context = ();
-
-    fn request<P: platform::Platform>(
-        &mut self,
-        backend: &Self::BackendId,
-        ctx: &mut Context<()>,
-        request: &Request,
-        resources: &mut ServiceResources<P>,
-    ) -> Result<Reply, Error> {
-        match backend {
-            Backend::Test => {
-                self.test
-                    .request(&mut ctx.core, &mut ctx.backends, request, resources)
-            }
-        }
-    }
 }
 
 #[derive(Default)]
