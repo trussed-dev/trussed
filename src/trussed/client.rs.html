@@ -827,6 +827,9 @@
 <span id="827">827</span>
 <span id="828">828</span>
 <span id="829">829</span>
+<span id="830">830</span>
+<span id="831">831</span>
+<span id="832">832</span>
 </pre><pre class="rust"><code><span class="doccomment">//! # Client interface for applications.
 //!
 //! The API methods (such as `GenerateKey`, `Sign`, `Verify`,...) are implemented by a variety
@@ -1529,12 +1532,12 @@
 ///
 /// The maximum number of clients that can be created is defined by the `clients-?` features.  If
 /// this number is exceeded, [`Error::ClientCountExceeded`][] is returned.
-</span><span class="kw">pub struct </span>ClientBuilder&lt;P: Platform, D: Dispatch&lt;P&gt; = CoreOnly&gt; {
+</span><span class="kw">pub struct </span>ClientBuilder&lt;D: Dispatch = CoreOnly&gt; {
     id: PathBuf,
     backends: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[BackendId&lt;D::BackendId&gt;],
 }
 
-<span class="kw">impl</span>&lt;P: Platform&gt; ClientBuilder&lt;P&gt; {
+<span class="kw">impl </span>ClientBuilder {
     <span class="doccomment">/// Creates a new client builder using the given client ID.
     ///
     /// Per default, the client does not support backends and always uses the Trussed core
@@ -1547,21 +1550,21 @@
     }
 }
 
-<span class="kw">impl</span>&lt;P: Platform, D: Dispatch&lt;P&gt;&gt; ClientBuilder&lt;P, D&gt; {
+<span class="kw">impl</span>&lt;D: Dispatch&gt; ClientBuilder&lt;D&gt; {
     <span class="doccomment">/// Selects the backends to use for this client.
     ///
     /// If `backends` is empty, the Trussed core implementation is always used.
-    </span><span class="kw">pub fn </span>backends&lt;E: Dispatch&lt;P&gt;&gt;(
+    </span><span class="kw">pub fn </span>backends&lt;E: Dispatch&gt;(
         <span class="self">self</span>,
         backends: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[BackendId&lt;E::BackendId&gt;],
-    ) -&gt; ClientBuilder&lt;P, E&gt; {
+    ) -&gt; ClientBuilder&lt;E&gt; {
         ClientBuilder {
             id: <span class="self">self</span>.id,
             backends,
         }
     }
 
-    <span class="kw">fn </span>create_endpoint(
+    <span class="kw">fn </span>create_endpoint&lt;P: Platform&gt;(
         <span class="self">self</span>,
         service: <span class="kw-2">&amp;mut </span>Service&lt;P, D&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Requester&lt;TrussedInterchange&gt;, Error&gt; {
@@ -1575,7 +1578,10 @@
     ///
     /// This allocates a [`TrussedInterchange`][] and a
     /// [`ServiceEndpoint`][`crate::service::ServiceEndpoint`].
-    </span><span class="kw">pub fn </span>prepare(<span class="self">self</span>, service: <span class="kw-2">&amp;mut </span>Service&lt;P, D&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;PreparedClient&lt;P, D&gt;, Error&gt; {
+    </span><span class="kw">pub fn </span>prepare&lt;P: Platform&gt;(
+        <span class="self">self</span>,
+        service: <span class="kw-2">&amp;mut </span>Service&lt;P, D&gt;,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;PreparedClient&lt;D&gt;, Error&gt; {
         <span class="self">self</span>.create_endpoint(service)
             .map(|requester| PreparedClient::new(requester))
     }
@@ -1586,12 +1592,12 @@
 /// This struct already has an allocated [`TrussedInterchange`][] and
 /// [`ServiceEndpoint`][`crate::service::ServiceEndpoint`] but still needs a [`Syscall`][]
 /// implementation.
-</span><span class="kw">pub struct </span>PreparedClient&lt;P, D&gt; {
+</span><span class="kw">pub struct </span>PreparedClient&lt;D&gt; {
     requester: Requester&lt;TrussedInterchange&gt;,
-    _marker: PhantomData&lt;(P, D)&gt;,
+    _marker: PhantomData&lt;D&gt;,
 }
 
-<span class="kw">impl</span>&lt;P, D&gt; PreparedClient&lt;P, D&gt; {
+<span class="kw">impl</span>&lt;D&gt; PreparedClient&lt;D&gt; {
     <span class="kw">fn </span>new(requester: Requester&lt;TrussedInterchange&gt;) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             requester,

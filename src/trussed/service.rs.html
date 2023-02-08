@@ -942,7 +942,7 @@
 <span class="kw">pub struct </span>Service&lt;P, D = CoreOnly&gt;
 <span class="kw">where
     </span>P: Platform,
-    D: Dispatch&lt;P&gt;,
+    D: Dispatch,
 {
     eps: Vec&lt;ServiceEndpoint&lt;D::BackendId, D::Context&gt;, { MAX_SERVICE_CLIENTS::USIZE }&gt;,
     resources: ServiceResources&lt;P&gt;,
@@ -950,7 +950,7 @@
 }
 
 <span class="comment">// need to be able to send crypto service to an interrupt handler
-</span><span class="kw">unsafe impl</span>&lt;P: Platform, D: Dispatch&lt;P&gt;&gt; Send <span class="kw">for </span>Service&lt;P, D&gt; {}
+</span><span class="kw">unsafe impl</span>&lt;P: Platform, D: Dispatch&gt; Send <span class="kw">for </span>Service&lt;P, D&gt; {}
 
 <span class="kw">impl</span>&lt;P: Platform&gt; ServiceResources&lt;P&gt; {
     <span class="kw">pub fn </span>certstore(<span class="kw-2">&amp;mut </span><span class="self">self</span>, ctx: <span class="kw-2">&amp;</span>CoreContext) -&gt; <span class="prelude-ty">Result</span>&lt;ClientCertstore&lt;P::S&gt;&gt; {
@@ -979,7 +979,7 @@
             .map_err(|<span class="kw">_</span>| Error::EntropyMalfunction)
     }
 
-    <span class="kw">pub fn </span>dispatch&lt;D: Dispatch&lt;P&gt;&gt;(
+    <span class="kw">pub fn </span>dispatch&lt;D: Dispatch&gt;(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         dispatch: <span class="kw-2">&amp;mut </span>D,
         backend: <span class="kw-2">&amp;</span>BackendId&lt;D::BackendId&gt;,
@@ -1550,7 +1550,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;P: Platform, D: Dispatch&lt;P&gt;&gt; Service&lt;P, D&gt; {
+<span class="kw">impl</span>&lt;P: Platform, D: Dispatch&gt; Service&lt;P, D&gt; {
     <span class="kw">pub fn </span>with_dispatch(platform: P, dispatch: D) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>resources = ServiceResources::new(platform);
         <span class="self">Self </span>{
@@ -1598,7 +1598,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;P: Platform, D: Dispatch&lt;P&gt;&gt; Service&lt;P, D&gt; {
+<span class="kw">impl</span>&lt;P: Platform, D: Dispatch&gt; Service&lt;P, D&gt; {
     <span class="kw">pub fn </span>add_endpoint(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         interchange: Responder&lt;TrussedInterchange&gt;,
@@ -1702,7 +1702,7 @@
 <span class="kw">impl</span>&lt;P, D&gt; <span class="kw">crate</span>::client::Syscall <span class="kw">for </span><span class="kw-2">&amp;mut </span>Service&lt;P, D&gt;
 <span class="kw">where
     </span>P: Platform,
-    D: Dispatch&lt;P&gt;,
+    D: Dispatch,
 {
     <span class="kw">fn </span>syscall(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="self">self</span>.process();
@@ -1712,7 +1712,7 @@
 <span class="kw">impl</span>&lt;P, D&gt; <span class="kw">crate</span>::client::Syscall <span class="kw">for </span>Service&lt;P, D&gt;
 <span class="kw">where
     </span>P: Platform,
-    D: Dispatch&lt;P&gt;,
+    D: Dispatch,
 {
     <span class="kw">fn </span>syscall(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="self">self</span>.process();
