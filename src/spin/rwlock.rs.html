@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/spin-0.9.4/src/rwlock.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>rwlock.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../spin/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/spin-0.9.5/src/rwlock.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>rwlock.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../spin/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -1136,20 +1136,38 @@
 <span id="1136">1136</span>
 <span id="1137">1137</span>
 <span id="1138">1138</span>
+<span id="1139">1139</span>
+<span id="1140">1140</span>
+<span id="1141">1141</span>
+<span id="1142">1142</span>
+<span id="1143">1143</span>
+<span id="1144">1144</span>
+<span id="1145">1145</span>
+<span id="1146">1146</span>
+<span id="1147">1147</span>
+<span id="1148">1148</span>
+<span id="1149">1149</span>
+<span id="1150">1150</span>
+<span id="1151">1151</span>
+<span id="1152">1152</span>
+<span id="1153">1153</span>
+<span id="1154">1154</span>
+<span id="1155">1155</span>
+<span id="1156">1156</span>
 </pre><pre class="rust"><code><span class="doccomment">//! A lock that provides data access to either one writer or many readers.
 
-</span><span class="kw">use </span>core::{
-    cell::UnsafeCell,
-    ops::{Deref, DerefMut},
-    marker::PhantomData,
-    fmt,
-    mem,
-};
-<span class="kw">use crate</span>::{
+</span><span class="kw">use crate</span>::{
     atomic::{AtomicUsize, Ordering},
-    RelaxStrategy, Spin
+    RelaxStrategy, Spin,
 };
-
+<span class="kw">use </span>core::{
+    cell::UnsafeCell,
+    fmt,
+    marker::PhantomData,
+    mem,
+    mem::ManuallyDrop,
+    ops::{Deref, DerefMut},
+};
 
 <span class="doccomment">/// A lock that provides data access to either one writer or many readers.
 ///
@@ -1220,7 +1238,7 @@
 /// potentially releasing the lock.
 </span><span class="kw">pub struct </span>RwLockReadGuard&lt;<span class="lifetime">&#39;a</span>, T: <span class="lifetime">&#39;a </span>+ <span class="question-mark">?</span>Sized&gt; {
     lock: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>AtomicUsize,
-    data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>T,
+    data: <span class="kw-2">*const </span>T,
 }
 
 <span class="doccomment">/// A guard that provides mutable data access.
@@ -1229,7 +1247,7 @@
 </span><span class="kw">pub struct </span>RwLockWriteGuard&lt;<span class="lifetime">&#39;a</span>, T: <span class="lifetime">&#39;a </span>+ <span class="question-mark">?</span>Sized, R = Spin&gt; {
     phantom: PhantomData&lt;R&gt;,
     inner: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>RwLock&lt;T, R&gt;,
-    data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>T,
+    data: <span class="kw-2">*mut </span>T,
 }
 
 <span class="doccomment">/// A guard that provides immutable data access but can be upgraded to [`RwLockWriteGuard`].
@@ -1242,7 +1260,7 @@
 </span><span class="kw">pub struct </span>RwLockUpgradableGuard&lt;<span class="lifetime">&#39;a</span>, T: <span class="lifetime">&#39;a </span>+ <span class="question-mark">?</span>Sized, R = Spin&gt; {
     phantom: PhantomData&lt;R&gt;,
     inner: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>RwLock&lt;T, R&gt;,
-    data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>T,
+    data: <span class="kw-2">*const </span>T,
 }
 
 <span class="comment">// Same unsafe impls as `std::sync::RwLock`
@@ -1389,7 +1407,7 @@
     <span class="comment">// Acquire a read lock, returning the new lock value.
     </span><span class="kw">fn </span>acquire_reader(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
         <span class="comment">// An arbitrary cap that allows us to catch overflows long before they happen
-        </span><span class="kw">const </span>MAX_READERS: usize = usize::MAX / READER / <span class="number">2</span>;
+        </span><span class="kw">const </span>MAX_READERS: usize = core::usize::MAX / READER / <span class="number">2</span>;
 
         <span class="kw">let </span>value = <span class="self">self</span>.lock.fetch_add(READER, Ordering::Acquire);
 
@@ -1554,18 +1572,18 @@
         </span>}
     }
 
-   <span class="doccomment">/// Returns a mutable reference to the underlying data.
-   ///
-   /// Since this call borrows the `RwLock` mutably, no actual locking needs to
-   /// take place -- the mutable borrow statically guarantees no locks exist.
-   ///
-   /// # Examples
-   ///
-   /// ```
-   /// let mut lock = spin::RwLock::new(0);
-   /// *lock.get_mut() = 10;
-   /// assert_eq!(*lock.read(), 10);
-   /// ```
+    <span class="doccomment">/// Returns a mutable reference to the underlying data.
+    ///
+    /// Since this call borrows the `RwLock` mutably, no actual locking needs to
+    /// take place -- the mutable borrow statically guarantees no locks exist.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let mut lock = spin::RwLock::new(0);
+    /// *lock.get_mut() = 10;
+    /// assert_eq!(*lock.read(), 10);
+    /// ```
     </span><span class="kw">pub fn </span>get_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>T {
         <span class="comment">// We know statically that there are no other references to `self`, so
         // there&#39;s no need to lock the inner lock.
@@ -1610,8 +1628,9 @@
     /// ```
     </span><span class="attribute">#[inline]
     </span><span class="kw">pub fn </span>leak(this: <span class="self">Self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;rwlock </span>T {
-        <span class="kw">let </span><span class="self">Self </span>{ data, .. } = this;
-        data
+        <span class="kw">let </span>this = ManuallyDrop::new(this);
+        <span class="comment">// Safety: We know statically that only we are referencing data
+        </span><span class="kw">unsafe </span>{ <span class="kw-2">&amp;*</span>this.data }
     }
 }
 
@@ -1736,8 +1755,9 @@
     /// ```
     </span><span class="attribute">#[inline]
     </span><span class="kw">pub fn </span>leak(this: <span class="self">Self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;rwlock </span>T {
-        <span class="kw">let </span><span class="self">Self </span>{ data, .. } = this;
-        data
+        <span class="kw">let </span>this = ManuallyDrop::new(this);
+        <span class="comment">// Safety: We know statically that only we are referencing data
+        </span><span class="kw">unsafe </span>{ <span class="kw-2">&amp;*</span>this.data }
     }
 }
 
@@ -1795,7 +1815,10 @@
     /// ```
     </span><span class="attribute">#[inline]
     </span><span class="kw">pub fn </span>downgrade_to_upgradeable(<span class="self">self</span>) -&gt; RwLockUpgradableGuard&lt;<span class="lifetime">&#39;rwlock</span>, T, R&gt; {
-        <span class="macro">debug_assert_eq!</span>(<span class="self">self</span>.inner.lock.load(Ordering::Acquire) &amp; (WRITER | UPGRADED), WRITER);
+        <span class="macro">debug_assert_eq!</span>(
+            <span class="self">self</span>.inner.lock.load(Ordering::Acquire) &amp; (WRITER | UPGRADED),
+            WRITER
+        );
 
         <span class="comment">// Reserve the read guard for ourselves
         </span><span class="self">self</span>.inner.lock.store(UPGRADED, Ordering::Release);
@@ -1826,9 +1849,9 @@
     /// ```
     </span><span class="attribute">#[inline]
     </span><span class="kw">pub fn </span>leak(this: <span class="self">Self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;rwlock </span><span class="kw-2">mut </span>T {
-        <span class="kw">let </span>data = this.data <span class="kw">as </span><span class="kw-2">*mut </span><span class="kw">_</span>; <span class="comment">// Keep it in pointer form temporarily to avoid double-aliasing
-        </span>core::mem::forget(this);
-        <span class="kw">unsafe </span>{ <span class="kw-2">&amp;mut *</span>data }
+        <span class="kw">let </span><span class="kw-2">mut </span>this = ManuallyDrop::new(this);
+        <span class="comment">// Safety: We know statically that only we are referencing data
+        </span><span class="kw">unsafe </span>{ <span class="kw-2">&amp;mut *</span>this.data }
     }
 }
 
@@ -1848,7 +1871,8 @@
     <span class="kw">type </span>Target = T;
 
     <span class="kw">fn </span>deref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>T {
-        <span class="self">self</span>.data
+        <span class="comment">// Safety: We know statically that only we are referencing data
+        </span><span class="kw">unsafe </span>{ <span class="kw-2">&amp;*</span><span class="self">self</span>.data }
     }
 }
 
@@ -1856,7 +1880,8 @@
     <span class="kw">type </span>Target = T;
 
     <span class="kw">fn </span>deref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>T {
-        <span class="self">self</span>.data
+        <span class="comment">// Safety: We know statically that only we are referencing data
+        </span><span class="kw">unsafe </span>{ <span class="kw-2">&amp;*</span><span class="self">self</span>.data }
     }
 }
 
@@ -1864,13 +1889,15 @@
     <span class="kw">type </span>Target = T;
 
     <span class="kw">fn </span>deref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>T {
-        <span class="self">self</span>.data
+        <span class="comment">// Safety: We know statically that only we are referencing data
+        </span><span class="kw">unsafe </span>{ <span class="kw-2">&amp;*</span><span class="self">self</span>.data }
     }
 }
 
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;rwlock</span>, T: <span class="question-mark">?</span>Sized, R&gt; DerefMut <span class="kw">for </span>RwLockWriteGuard&lt;<span class="lifetime">&#39;rwlock</span>, T, R&gt; {
     <span class="kw">fn </span>deref_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>T {
-        <span class="self">self</span>.data
+        <span class="comment">// Safety: We know statically that only we are referencing data
+        </span><span class="kw">unsafe </span>{ <span class="kw-2">&amp;mut *</span><span class="self">self</span>.data }
     }
 }
 
@@ -1897,7 +1924,9 @@
 
         <span class="comment">// Writer is responsible for clearing both WRITER and UPGRADED bits.
         // The UPGRADED bit may be set if an upgradeable lock attempts an upgrade while this lock is held.
-        </span><span class="self">self</span>.inner.lock.fetch_and(!(WRITER | UPGRADED), Ordering::Release);
+        </span><span class="self">self</span>.inner
+            .lock
+            .fetch_and(!(WRITER | UPGRADED), Ordering::Release);
     }
 }
 
@@ -1981,7 +2010,9 @@
     <span class="attribute">#[inline(always)]
     </span><span class="kw">fn </span>try_lock_upgradable(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
         <span class="comment">// Prevent guard destructor running
-        </span><span class="self">self</span>.try_upgradeable_read().map(|g| core::mem::forget(g)).is_some()
+        </span><span class="self">self</span>.try_upgradeable_read()
+            .map(|g| core::mem::forget(g))
+            .is_some()
     }
 
     <span class="attribute">#[inline(always)]
@@ -2010,7 +2041,10 @@
             data: <span class="kw-2">&amp;</span>(),
             phantom: PhantomData,
         };
-        tmp_guard.try_upgrade().map(|g| core::mem::forget(g)).is_ok()
+        tmp_guard
+            .try_upgrade()
+            .map(|g| core::mem::forget(g))
+            .is_ok()
     }
 }
 
@@ -2103,7 +2137,7 @@
         <span class="kw">let </span>arc2 = arc.clone();
         <span class="kw">let </span>(tx, rx) = channel();
 
-        thread::spawn(<span class="kw">move </span>|| {
+        <span class="kw">let </span>t = thread::spawn(<span class="kw">move </span>|| {
             <span class="kw">let </span><span class="kw-2">mut </span>lock = arc2.write();
             <span class="kw">for _ in </span><span class="number">0</span>..<span class="number">10 </span>{
                 <span class="kw">let </span>tmp = <span class="kw-2">*</span>lock;
@@ -2133,6 +2167,8 @@
         </span>rx.recv().unwrap();
         <span class="kw">let </span>lock = arc.read();
         <span class="macro">assert_eq!</span>(<span class="kw-2">*</span>lock, <span class="number">10</span>);
+
+        <span class="macro">assert!</span>(t.join().is_ok());
     }
 
     <span class="attribute">#[test]
