@@ -37,7 +37,7 @@ pub trait Extension {
 }
 
 /// Dispatches extension requests to custom backends.
-pub trait ExtensionDispatch<P: Platform> {
+pub trait ExtensionDispatch {
     /// The ID type for the custom backends used by this dispatch implementation.
     type BackendId: 'static;
     /// The context type used by this dispatch.
@@ -47,7 +47,7 @@ pub trait ExtensionDispatch<P: Platform> {
 
     /// Executes a request using a backend or returns [`Error::RequestNotAvailable`][] if it is not
     /// supported by the backend.
-    fn core_request(
+    fn core_request<P: Platform>(
         &mut self,
         backend: &Self::BackendId,
         ctx: &mut Context<Self::Context>,
@@ -59,7 +59,7 @@ pub trait ExtensionDispatch<P: Platform> {
     }
     /// Executes an extension request using a backend or returns [`Error::RequestNotAvailable`][]
     /// if it is not supported by the backend.
-    fn extension_request(
+    fn extension_request<P: Platform>(
         &mut self,
         backend: &Self::BackendId,
         extension: &Self::ExtensionId,
@@ -72,11 +72,11 @@ pub trait ExtensionDispatch<P: Platform> {
     }
 }
 
-impl<P: Platform, T: ExtensionDispatch<P>> Dispatch<P> for T {
+impl<T: ExtensionDispatch> Dispatch for T {
     type BackendId = T::BackendId;
     type Context = T::Context;
 
-    fn request(
+    fn request<P: Platform>(
         &mut self,
         backend: &Self::BackendId,
         ctx: &mut Context<Self::Context>,
@@ -95,16 +95,16 @@ impl<P: Platform, T: ExtensionDispatch<P>> Dispatch<P> for T {
     }
 }
 
-impl<P: Platform> ExtensionDispatch<P> for CoreOnly {
+impl ExtensionDispatch for CoreOnly {
     type BackendId = NoId;
     type Context = types::NoData;
     type ExtensionId = NoId;
 }
 
 /// Implements an extension for a backend.
-pub trait ExtensionImpl<E: Extension, P: Platform>: Backend<P> {
+pub trait ExtensionImpl<E: Extension>: Backend {
     /// Handles an extension request.
-    fn extension_request(
+    fn extension_request<P: Platform>(
         &mut self,
         core_ctx: &mut CoreContext,
         backend_ctx: &mut Self::Context,
@@ -115,7 +115,7 @@ pub trait ExtensionImpl<E: Extension, P: Platform>: Backend<P> {
     /// Handles an extension request and performs the necessary serialization and deserialization
     /// between [`request::SerdeExtension`][] and [`Extension::Request`][] as well as
     /// [`reply::SerdeExtension`][] and [`Extension::Reply`][].
-    fn extension_request_serialized(
+    fn extension_request_serialized<P: Platform>(
         &mut self,
         core_ctx: &mut CoreContext,
         backend_ctx: &mut Self::Context,

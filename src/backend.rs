@@ -27,13 +27,13 @@ pub enum BackendId<I> {
 }
 
 /// A custom backend that can override the core request implementations.
-pub trait Backend<P: Platform> {
+pub trait Backend {
     /// The context for requests handled by this backend.
     type Context: Default;
 
     /// Executes a request using this backend or returns [`Error::RequestNotAvailable`][] if it is
     /// not supported by this backend.
-    fn request(
+    fn request<P: Platform>(
         &mut self,
         core_ctx: &mut CoreContext,
         backend_ctx: &mut Self::Context,
@@ -51,7 +51,7 @@ pub trait Backend<P: Platform> {
 /// Otherwise it can provide an implementation of this trait that defines which backends are
 /// supported.  The backends that are used to execute a request can be selected when constructing a
 /// client using [`ClientBuilder::backends`][`crate::client::ClientBuilder::backends`].
-pub trait Dispatch<P: Platform> {
+pub trait Dispatch {
     /// The ID type for the custom backends used by this dispatch implementation.
     type BackendId: 'static;
     /// The context type used by this dispatch.
@@ -59,7 +59,7 @@ pub trait Dispatch<P: Platform> {
 
     /// Executes a request using a backend or returns [`Error::RequestNotAvailable`][] if it is not
     /// supported by the backend.
-    fn request(
+    fn request<P: Platform>(
         &mut self,
         backend: &Self::BackendId,
         ctx: &mut Context<Self::Context>,
@@ -76,7 +76,7 @@ pub trait Dispatch<P: Platform> {
 pub struct CoreOnly;
 
 #[cfg(not(feature = "serde-extensions"))]
-impl<P: Platform> Dispatch<P> for CoreOnly {
+impl Dispatch for CoreOnly {
     type BackendId = NoId;
     type Context = crate::types::NoData;
 }

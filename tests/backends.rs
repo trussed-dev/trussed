@@ -26,16 +26,16 @@ struct Dispatch {
     test: TestBackend,
 }
 
-impl backend::Dispatch<Platform> for Dispatch {
+impl backend::Dispatch for Dispatch {
     type BackendId = Backend;
     type Context = ();
 
-    fn request(
+    fn request<P: platform::Platform>(
         &mut self,
         backend: &Self::BackendId,
         ctx: &mut Context<()>,
         request: &Request,
-        resources: &mut ServiceResources<Platform>,
+        resources: &mut ServiceResources<P>,
     ) -> Result<Reply, Error> {
         match backend {
             Backend::Test => {
@@ -49,10 +49,10 @@ impl backend::Dispatch<Platform> for Dispatch {
 #[derive(Default)]
 struct TestBackend;
 
-impl<P: platform::Platform> backend::Backend<P> for TestBackend {
+impl backend::Backend for TestBackend {
     type Context = ();
 
-    fn request(
+    fn request<P: platform::Platform>(
         &mut self,
         _core_ctx: &mut CoreContext,
         _backend_ctx: &mut Self::Context,
