@@ -11,7 +11,7 @@ pub use littlefs2::{
     driver::Storage as LfsStorage,
     fs::{DirEntry, Filesystem, Metadata},
     io::Result as LfsResult,
-    path::PathBuf,
+    path::{Path, PathBuf},
 };
 
 use rand_core::{CryptoRng, RngCore};
