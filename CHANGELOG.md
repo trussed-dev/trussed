@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added support for custom backends in `backend` module.
 - Added optional support for API extensions in `serde_extensions` module
   behind the `serde-extensions` feature.
+- Added `types::Path` re-export of `littlefs2::path::Path`.
 
 ### Changed
 
@@ -30,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `PollClient::syscall`.
 - Upgrade the `interchange` dependency to version 0.3.0 ([#99][])
   - As a consequence the type `pipe::TrussedInterchange` becomes a const`pipe::TRUSSED_INTERCHANGE`
+- Updated `littlefs2` to 0.4.0.
 
 ### Fixed
 
