@@ -822,6 +822,11 @@
 <span id="822">822</span>
 <span id="823">823</span>
 <span id="824">824</span>
+<span id="825">825</span>
+<span id="826">826</span>
+<span id="827">827</span>
+<span id="828">828</span>
+<span id="829">829</span>
 </pre><pre class="rust"><code><span class="doccomment">//! # Client interface for applications.
 //!
 //! The API methods (such as `GenerateKey`, `Sign`, `Verify`,...) are implemented by a variety
@@ -1566,32 +1571,37 @@
         <span class="prelude-val">Ok</span>(requester)
     }
 
-    <span class="doccomment">/// Builds the client using a custom [`Syscall`][] implementation.
-    </span><span class="kw">pub fn </span>build&lt;S: Syscall&gt;(
-        <span class="self">self</span>,
-        service: <span class="kw-2">&amp;mut </span>Service&lt;P, D&gt;,
-        syscall: S,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;ClientImplementation&lt;S, D&gt;, Error&gt; {
+    <span class="doccomment">/// Prepare a client using the given service.
+    ///
+    /// This allocates a [`TrussedInterchange`][] and a
+    /// [`ServiceEndpoint`][`crate::service::ServiceEndpoint`].
+    </span><span class="kw">pub fn </span>prepare(<span class="self">self</span>, service: <span class="kw-2">&amp;mut </span>Service&lt;P, D&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;PreparedClient&lt;P, D&gt;, Error&gt; {
         <span class="self">self</span>.create_endpoint(service)
-            .map(|requester| ClientImplementation::new(requester, syscall))
+            .map(|requester| PreparedClient::new(requester))
+    }
+}
+
+<span class="doccomment">/// An intermediate step of the [`ClientBuilder`][].
+///
+/// This struct already has an allocated [`TrussedInterchange`][] and
+/// [`ServiceEndpoint`][`crate::service::ServiceEndpoint`] but still needs a [`Syscall`][]
+/// implementation.
+</span><span class="kw">pub struct </span>PreparedClient&lt;P, D&gt; {
+    requester: Requester&lt;TrussedInterchange&gt;,
+    _marker: PhantomData&lt;(P, D)&gt;,
+}
+
+<span class="kw">impl</span>&lt;P, D&gt; PreparedClient&lt;P, D&gt; {
+    <span class="kw">fn </span>new(requester: Requester&lt;TrussedInterchange&gt;) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            requester,
+            _marker: Default::default(),
+        }
     }
 
-    <span class="doccomment">/// Builds the client using a [`Service`][] instance.
-    </span><span class="kw">pub fn </span>build_with_service(
-        <span class="self">self</span>,
-        <span class="kw-2">mut </span>service: Service&lt;P, D&gt;,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;ClientImplementation&lt;Service&lt;P, D&gt;, D&gt;, Error&gt; {
-        <span class="self">self</span>.create_endpoint(<span class="kw-2">&amp;mut </span>service)
-            .map(|requester| ClientImplementation::new(requester, service))
-    }
-
-    <span class="doccomment">/// Builds the client using a mutable reference to a [`Service`][].
-    </span><span class="kw">pub fn </span>build_with_service_mut(
-        <span class="self">self</span>,
-        service: <span class="kw-2">&amp;mut </span>Service&lt;P, D&gt;,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;ClientImplementation&lt;<span class="kw-2">&amp;mut </span>Service&lt;P, D&gt;, D&gt;, Error&gt; {
-        <span class="self">self</span>.create_endpoint(service)
-            .map(|requester| ClientImplementation::new(requester, service))
+    <span class="doccomment">/// Builds the client using the given syscall implementation.
+    </span><span class="kw">pub fn </span>build&lt;S: Syscall&gt;(<span class="self">self</span>, syscall: S) -&gt; ClientImplementation&lt;S, D&gt; {
+        ClientImplementation::new(<span class="self">self</span>.requester, syscall)
     }
 }
 

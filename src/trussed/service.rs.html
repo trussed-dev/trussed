@@ -849,6 +849,15 @@
 <span id="849">849</span>
 <span id="850">850</span>
 <span id="851">851</span>
+<span id="852">852</span>
+<span id="853">853</span>
+<span id="854">854</span>
+<span id="855">855</span>
+<span id="856">856</span>
+<span id="857">857</span>
+<span id="858">858</span>
+<span id="859">859</span>
+<span id="860">860</span>
 </pre><pre class="rust"><code><span class="kw">use </span>chacha20::ChaCha8Rng;
 <span class="kw">use </span>heapless_bytes::Unsigned;
 <span class="kw">use </span>interchange::Responder;
@@ -1560,7 +1569,9 @@
         client_id: <span class="kw-2">&amp;</span>str,
         syscall: S,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;ClientImplementation&lt;S&gt;, Error&gt; {
-        ClientBuilder::new(client_id).build(<span class="self">self</span>, syscall)
+        ClientBuilder::new(client_id)
+            .prepare(<span class="self">self</span>)
+            .map(|p| p.build(syscall))
     }
 
     <span class="doccomment">/// Specialization of `try_new_client`, using `self`&#39;s implementation of `Syscall`
@@ -1570,13 +1581,20 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         client_id: <span class="kw-2">&amp;</span>str,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;ClientImplementation&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, Error&gt; {
-        ClientBuilder::new(client_id).build_with_service_mut(<span class="self">self</span>)
+        ClientBuilder::new(client_id)
+            .prepare(<span class="self">self</span>)
+            .map(|p| p.build(<span class="self">self</span>))
     }
 
     <span class="doccomment">/// Similar to [try_as_new_client][Service::try_as_new_client] except that the returning client owns the
     /// Service and is therefore `&#39;static`
-    </span><span class="kw">pub fn </span>try_into_new_client(<span class="self">self</span>, client_id: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;ClientImplementation&lt;<span class="self">Self</span>&gt;, Error&gt; {
-        ClientBuilder::new(client_id).build_with_service(<span class="self">self</span>)
+    </span><span class="kw">pub fn </span>try_into_new_client(
+        <span class="kw-2">mut </span><span class="self">self</span>,
+        client_id: <span class="kw-2">&amp;</span>str,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;ClientImplementation&lt;<span class="self">Self</span>&gt;, Error&gt; {
+        ClientBuilder::new(client_id)
+            .prepare(<span class="kw-2">&amp;mut </span><span class="self">self</span>)
+            .map(|p| p.build(<span class="self">self</span>))
     }
 }
 
