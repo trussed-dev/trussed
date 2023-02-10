@@ -4,7 +4,6 @@ use chacha20::ChaCha20;
 use crate::types::*;
 use crate::*;
 use entropy::shannon_entropy;
-use interchange::Interchange;
 use littlefs2::const_ram_storage;
 use littlefs2::fs::{Allocation, Filesystem};
 
@@ -178,12 +177,9 @@ macro_rules! setup {
         let platform = $platform::new(rng, store, pc_interface);
         let mut trussed: crate::Service<$platform> = crate::service::Service::new(platform);
 
-        unsafe {
-            crate::pipe::TrussedInterchange::reset_claims();
-        }
-        let (test_trussed_requester, test_trussed_responder) =
-            crate::pipe::TrussedInterchange::claim()
-                .expect("could not setup TEST TrussedInterchange");
+        let (test_trussed_requester, test_trussed_responder) = crate::pipe::TRUSSED_INTERCHANGE
+            .claim()
+            .expect("could not setup TEST TrussedInterchange");
         let test_client_id = "TEST";
 
         assert!(trussed

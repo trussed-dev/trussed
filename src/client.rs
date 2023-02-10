@@ -77,12 +77,10 @@
 //!
 use core::{marker::PhantomData, task::Poll};
 
-use interchange::{Interchange as _, Requester};
-
 use crate::api::*;
 use crate::backend::{BackendId, CoreOnly, Dispatch};
 use crate::error::*;
-use crate::pipe::TrussedInterchange;
+use crate::pipe::{TrussedRequester, TRUSSED_INTERCHANGE};
 use crate::service::Service;
 use crate::types::*;
 
@@ -149,7 +147,7 @@ pub struct ClientImplementation<S, D = CoreOnly> {
     syscall: S,
 
     // RawClient:
-    pub(crate) interchange: Requester<TrussedInterchange>,
+    pub(crate) interchange: TrussedRequester,
     // pending: Option<Discriminant<Request>>,
     pending: Option<u8>,
     _marker: PhantomData<D>,
@@ -167,7 +165,7 @@ impl<S, E> ClientImplementation<S, E>
 where
     S: Syscall,
 {
-    pub fn new(interchange: Requester<TrussedInterchange>, syscall: S) -> Self {
+    pub fn new(interchange: TrussedRequester, syscall: S) -> Self {
         Self {
             interchange,
             pending: None,
@@ -225,7 +223,7 @@ where
         // in particular, can unwrap
         let request = req.into();
         self.pending = Some(u8::from(&request));
-        self.interchange.request(&request).map_err(drop).unwrap();
+        self.interchange.request(request).map_err(drop).unwrap();
         self.syscall.syscall();
         Ok(FutureResult::new(self))
     }
@@ -735,16 +733,17 @@ impl<D: Dispatch> ClientBuilder<D> {
     fn create_endpoint<P: Platform>(
         self,
         service: &mut Service<P, D>,
-    ) -> Result<Requester<TrussedInterchange>, Error> {
-        let (requester, responder) =
-            TrussedInterchange::claim().ok_or(Error::ClientCountExceeded)?;
+    ) -> Result<TrussedRequester, Error> {
+        let (requester, responder) = TRUSSED_INTERCHANGE
+            .claim()
+            .ok_or(Error::ClientCountExceeded)?;
         service.add_endpoint(responder, self.id, self.backends)?;
         Ok(requester)
     }
 
     /// Prepare a client using the given service.
     ///
-    /// This allocates a [`TrussedInterchange`][] and a
+    /// This allocates a [`TrussedInterchange`][`crate::pipe::TrussedInterchange`] and a
     /// [`ServiceEndpoint`][`crate::service::ServiceEndpoint`].
     pub fn prepare<P: Platform>(
         self,
@@ -757,16 +756,16 @@ impl<D: Dispatch> ClientBuilder<D> {
 
 /// An intermediate step of the [`ClientBuilder`][].
 ///
-/// This struct already has an allocated [`TrussedInterchange`][] and
+/// This struct already has an allocated [`TrussedInterchange`][`crate::pipe::TrussedInterchange`] and
 /// [`ServiceEndpoint`][`crate::service::ServiceEndpoint`] but still needs a [`Syscall`][]
 /// implementation.
 pub struct PreparedClient<D> {
-    requester: Requester<TrussedInterchange>,
+    requester: TrussedRequester,
     _marker: PhantomData<D>,
 }
 
 impl<D> PreparedClient<D> {
-    fn new(requester: Requester<TrussedInterchange>) -> Self {
+    fn new(requester: TrussedRequester) -> Self {
         Self {
             requester,
             _marker: Default::default(),
