@@ -14,10 +14,9 @@ use rand_core::SeedableRng as _;
 use crate::{
     backend::{BackendId, CoreOnly, Dispatch},
     client::ClientBuilder,
-    pipe::TrussedInterchange,
     platform,
     service::Service,
-    ClientImplementation, Interchange as _,
+    ClientImplementation,
 };
 
 pub use store::{Filesystem, Ram, StoreProvider};
@@ -26,7 +25,7 @@ pub use ui::UserInterface;
 pub type Client<S, D = CoreOnly> = ClientImplementation<Service<Platform<S>, D>, D>;
 
 // We need this mutex to make sure that:
-// - TrussedInterchange is not used concurrently
+// - TrussedInterchange is not used concurrently (panics if violated)
 // - the Store is not used concurrently
 static MUTEX: Mutex<()> = Mutex::new(());
 
@@ -37,7 +36,6 @@ where
 {
     let _guard = MUTEX.lock().unwrap_or_else(|err| err.into_inner());
     unsafe {
-        TrussedInterchange::reset_claims();
         store.reset();
     }
     // causing a regression again
