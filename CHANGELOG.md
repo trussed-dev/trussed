@@ -28,6 +28,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Replaced the client ID with a `ClientContext` struct.
 - Always trigger syscall in `PollClient::request` and remove
   `PollClient::syscall`.
+- Upgrade the `interchange` dependency to version 0.3.0 ([#99][])
+  - As a consequence the type `pipe::TrussedInterchange` becomes a const`pipe::TRUSSED_INTERCHANGE`
 
 ### Fixed
 
@@ -39,6 +41,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [#64]: https://github.com/trussed-dev/trussed/issues/64
 [#65]: https://github.com/trussed-dev/trussed/issues/65
+[#99]: https://github.com/trussed-dev/trussed/issues/99
 
 ## [0.1.0] - 2022-01-26
 
