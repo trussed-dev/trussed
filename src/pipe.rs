@@ -2,23 +2,18 @@
 // Ignore lint caused by interchange! macro
 #![allow(clippy::derive_partial_eq_without_eq)]
 
-use interchange::{Interchange, InterchangeRef, Requester, Responder};
+use interchange::{Interchange, Requester, Responder};
 
 use crate::api::{Reply, Request};
 use crate::backend::BackendId;
-use crate::config;
 use crate::error::Error;
 use crate::types::Context;
 
-type TrussedInterchangeInner =
-    Interchange<Request, Result<Reply, Error>, { config::MAX_SERVICE_CLIENTS }>;
-static TRUSSED_INTERCHANGE_INNER: TrussedInterchangeInner = Interchange::new();
+pub type TrussedInterchange<const MAX_CLIENTS: usize> =
+    Interchange<Request, Result<Reply, Error>, { MAX_CLIENTS }>;
 
-pub type TrussedInterchange = InterchangeRef<'static, Request, Result<Reply, Error>>;
-pub static TRUSSED_INTERCHANGE: TrussedInterchange = TRUSSED_INTERCHANGE_INNER.as_interchange_ref();
-
-pub type TrussedResponder = Responder<'static, Request, Result<Reply, Error>>;
-pub type TrussedRequester = Requester<'static, Request, Result<Reply, Error>>;
+pub type TrussedResponder<'pipe> = Responder<'pipe, Request, Result<Reply, Error>>;
+pub type TrussedRequester<'pipe> = Requester<'pipe, Request, Result<Reply, Error>>;
 
 // pub use interchange::TrussedInterchange;
 
@@ -30,8 +25,8 @@ pub type TrussedRequester = Requester<'static, Request, Result<Reply, Error>>;
 // https://xenomai.org/documentation/xenomai-2.4/html/api/group__native__queue.html
 // https://doc.micrium.com/display/osiiidoc/Using+Message+Queues
 
-pub struct ServiceEndpoint<I: 'static, C> {
-    pub interchange: TrussedResponder,
+pub struct ServiceEndpoint<'pipe, I: 'static, C> {
+    pub interchange: TrussedResponder<'pipe>,
     // service (trusted) has this, not client (untrusted)
     // used among other things to namespace cryptographic material
     pub ctx: Context<C>,
