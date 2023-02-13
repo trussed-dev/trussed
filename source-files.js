@@ -37,7 +37,7 @@ var sourcesIndex = JSON.parse('{\
 "heapless_bytes":["",[],["lib.rs"]],\
 "hex_literal":["",[],["comments.rs","lib.rs"]],\
 "hmac":["",[],["lib.rs"]],\
-"interchange":["",[],["lib.rs","macros.rs"]],\
+"interchange":["",[],["lib.rs"]],\
 "littlefs2":["",[["io",[],["prelude.rs"]]],["consts.rs","driver.rs","fs.rs","io.rs","lib.rs","macros.rs","path.rs"]],\
 "littlefs2_sys":["",[],["lib.rs"]],\
 "lock_api":["",[],["lib.rs","mutex.rs","remutex.rs","rwlock.rs"]],\

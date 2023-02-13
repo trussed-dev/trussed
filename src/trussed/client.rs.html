@@ -829,7 +829,6 @@
 <span id="829">829</span>
 <span id="830">830</span>
 <span id="831">831</span>
-<span id="832">832</span>
 </pre><pre class="rust"><code><span class="doccomment">//! # Client interface for applications.
 //!
 //! The API methods (such as `GenerateKey`, `Sign`, `Verify`,...) are implemented by a variety
@@ -909,12 +908,10 @@
 //!
 </span><span class="kw">use </span>core::{marker::PhantomData, task::Poll};
 
-<span class="kw">use </span>interchange::{Interchange <span class="kw">as _</span>, Requester};
-
 <span class="kw">use </span><span class="kw">crate</span>::api::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">crate</span>::backend::{BackendId, CoreOnly, Dispatch};
 <span class="kw">use </span><span class="kw">crate</span>::error::<span class="kw-2">*</span>;
-<span class="kw">use </span><span class="kw">crate</span>::pipe::TrussedInterchange;
+<span class="kw">use </span><span class="kw">crate</span>::pipe::{TrussedRequester, TRUSSED_INTERCHANGE};
 <span class="kw">use </span><span class="kw">crate</span>::service::Service;
 <span class="kw">use </span><span class="kw">crate</span>::types::<span class="kw-2">*</span>;
 
@@ -981,7 +978,7 @@
     </span>syscall: S,
 
     <span class="comment">// RawClient:
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) interchange: Requester&lt;TrussedInterchange&gt;,
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) interchange: TrussedRequester,
     <span class="comment">// pending: Option&lt;Discriminant&lt;Request&gt;&gt;,
     </span>pending: <span class="prelude-ty">Option</span>&lt;u8&gt;,
     _marker: PhantomData&lt;D&gt;,
@@ -999,7 +996,7 @@
 <span class="kw">where
     </span>S: Syscall,
 {
-    <span class="kw">pub fn </span>new(interchange: Requester&lt;TrussedInterchange&gt;, syscall: S) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>new(interchange: TrussedRequester, syscall: S) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             interchange,
             pending: <span class="prelude-val">None</span>,
@@ -1057,7 +1054,7 @@
         // in particular, can unwrap
         </span><span class="kw">let </span>request = req.into();
         <span class="self">self</span>.pending = <span class="prelude-val">Some</span>(u8::from(<span class="kw-2">&amp;</span>request));
-        <span class="self">self</span>.interchange.request(<span class="kw-2">&amp;</span>request).map_err(drop).unwrap();
+        <span class="self">self</span>.interchange.request(request).map_err(drop).unwrap();
         <span class="self">self</span>.syscall.syscall();
         <span class="prelude-val">Ok</span>(FutureResult::new(<span class="self">self</span>))
     }
@@ -1567,16 +1564,17 @@
     <span class="kw">fn </span>create_endpoint&lt;P: Platform&gt;(
         <span class="self">self</span>,
         service: <span class="kw-2">&amp;mut </span>Service&lt;P, D&gt;,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Requester&lt;TrussedInterchange&gt;, Error&gt; {
-        <span class="kw">let </span>(requester, responder) =
-            TrussedInterchange::claim().ok_or(Error::ClientCountExceeded)<span class="question-mark">?</span>;
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;TrussedRequester, Error&gt; {
+        <span class="kw">let </span>(requester, responder) = TRUSSED_INTERCHANGE
+            .claim()
+            .ok_or(Error::ClientCountExceeded)<span class="question-mark">?</span>;
         service.add_endpoint(responder, <span class="self">self</span>.id, <span class="self">self</span>.backends)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(requester)
     }
 
     <span class="doccomment">/// Prepare a client using the given service.
     ///
-    /// This allocates a [`TrussedInterchange`][] and a
+    /// This allocates a [`TrussedInterchange`][`crate::pipe::TrussedInterchange`] and a
     /// [`ServiceEndpoint`][`crate::service::ServiceEndpoint`].
     </span><span class="kw">pub fn </span>prepare&lt;P: Platform&gt;(
         <span class="self">self</span>,
@@ -1589,16 +1587,16 @@
 
 <span class="doccomment">/// An intermediate step of the [`ClientBuilder`][].
 ///
-/// This struct already has an allocated [`TrussedInterchange`][] and
+/// This struct already has an allocated [`TrussedInterchange`][`crate::pipe::TrussedInterchange`] and
 /// [`ServiceEndpoint`][`crate::service::ServiceEndpoint`] but still needs a [`Syscall`][]
 /// implementation.
 </span><span class="kw">pub struct </span>PreparedClient&lt;D&gt; {
-    requester: Requester&lt;TrussedInterchange&gt;,
+    requester: TrussedRequester,
     _marker: PhantomData&lt;D&gt;,
 }
 
 <span class="kw">impl</span>&lt;D&gt; PreparedClient&lt;D&gt; {
-    <span class="kw">fn </span>new(requester: Requester&lt;TrussedInterchange&gt;) -&gt; <span class="self">Self </span>{
+    <span class="kw">fn </span>new(requester: TrussedRequester) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             requester,
             _marker: Default::default(),

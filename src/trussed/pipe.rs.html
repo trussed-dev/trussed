@@ -39,111 +39,27 @@
 <span id="39">39</span>
 <span id="40">40</span>
 <span id="41">41</span>
-<span id="42">42</span>
-<span id="43">43</span>
-<span id="44">44</span>
-<span id="45">45</span>
-<span id="46">46</span>
-<span id="47">47</span>
-<span id="48">48</span>
-<span id="49">49</span>
-<span id="50">50</span>
-<span id="51">51</span>
-<span id="52">52</span>
-<span id="53">53</span>
-<span id="54">54</span>
-<span id="55">55</span>
-<span id="56">56</span>
-<span id="57">57</span>
-<span id="58">58</span>
-<span id="59">59</span>
-<span id="60">60</span>
-<span id="61">61</span>
-<span id="62">62</span>
-<span id="63">63</span>
-<span id="64">64</span>
-<span id="65">65</span>
-<span id="66">66</span>
-<span id="67">67</span>
-<span id="68">68</span>
-<span id="69">69</span>
-<span id="70">70</span>
-<span id="71">71</span>
-<span id="72">72</span>
-<span id="73">73</span>
-<span id="74">74</span>
-<span id="75">75</span>
-<span id="76">76</span>
-<span id="77">77</span>
-<span id="78">78</span>
-<span id="79">79</span>
-<span id="80">80</span>
-<span id="81">81</span>
-<span id="82">82</span>
-<span id="83">83</span>
 </pre><pre class="rust"><code><span class="attribute">#![allow(clippy::transmute_ptr_to_ptr)]
 </span><span class="comment">// Ignore lint caused by interchange! macro
 </span><span class="attribute">#![allow(clippy::derive_partial_eq_without_eq)]
 
-</span><span class="kw">use </span>interchange::Responder;
+</span><span class="kw">use </span>interchange::{Interchange, InterchangeRef, Requester, Responder};
 
 <span class="kw">use </span><span class="kw">crate</span>::api::{Reply, Request};
 <span class="kw">use </span><span class="kw">crate</span>::backend::BackendId;
+<span class="kw">use </span><span class="kw">crate</span>::config;
 <span class="kw">use </span><span class="kw">crate</span>::error::Error;
 <span class="kw">use </span><span class="kw">crate</span>::types::Context;
 
-<span class="macro">cfg_if::cfg_if! </span>{
+<span class="kw">type </span>TrussedInterchangeInner =
+    Interchange&lt;Request, <span class="prelude-ty">Result</span>&lt;Reply, Error&gt;, { config::MAX_SERVICE_CLIENTS }&gt;;
+<span class="kw">static </span>TRUSSED_INTERCHANGE_INNER: TrussedInterchangeInner = Interchange::new();
 
-    <span class="kw">if </span><span class="attribute">#[cfg(feature = <span class="string">&quot;clients-12&quot;</span>)] </span>{
-        <span class="macro">interchange::interchange! </span>{
-            TrussedInterchange: (Request, <span class="prelude-ty">Result</span>&lt;Reply, Error&gt;, <span class="number">12</span>)
-        }
-    } <span class="kw">else if </span><span class="attribute">#[cfg(feature = <span class="string">&quot;clients-11&quot;</span>)] </span>{
-        <span class="macro">interchange::interchange! </span>{
-            TrussedInterchange: (Request, <span class="prelude-ty">Result</span>&lt;Reply, Error&gt;, <span class="number">11</span>)
-        }
-    } <span class="kw">else if </span><span class="attribute">#[cfg(feature = <span class="string">&quot;clients-10&quot;</span>)] </span>{
-        <span class="macro">interchange::interchange! </span>{
-            TrussedInterchange: (Request, <span class="prelude-ty">Result</span>&lt;Reply, Error&gt;, <span class="number">10</span>)
-        }
-    } <span class="kw">else if </span><span class="attribute">#[cfg(feature = <span class="string">&quot;clients-9&quot;</span>)] </span>{
-        <span class="macro">interchange::interchange! </span>{
-            TrussedInterchange: (Request, <span class="prelude-ty">Result</span>&lt;Reply, Error&gt;, <span class="number">9</span>)
-        }
-    } <span class="kw">else if </span><span class="attribute">#[cfg(feature = <span class="string">&quot;clients-8&quot;</span>)] </span>{
-        <span class="macro">interchange::interchange! </span>{
-            TrussedInterchange: (Request, <span class="prelude-ty">Result</span>&lt;Reply, Error&gt;, <span class="number">8</span>)
-        }
-    } <span class="kw">else if </span><span class="attribute">#[cfg(feature = <span class="string">&quot;clients-7&quot;</span>)] </span>{
-        <span class="macro">interchange::interchange! </span>{
-            TrussedInterchange: (Request, <span class="prelude-ty">Result</span>&lt;Reply, Error&gt;, <span class="number">7</span>)
-        }
-    } <span class="kw">else if </span><span class="attribute">#[cfg(feature = <span class="string">&quot;clients-6&quot;</span>)] </span>{
-        <span class="macro">interchange::interchange! </span>{
-            TrussedInterchange: (Request, <span class="prelude-ty">Result</span>&lt;Reply, Error&gt;, <span class="number">6</span>)
-        }
-    } <span class="kw">else if </span><span class="attribute">#[cfg(feature = <span class="string">&quot;clients-5&quot;</span>)] </span>{
-        <span class="macro">interchange::interchange! </span>{
-            TrussedInterchange: (Request, <span class="prelude-ty">Result</span>&lt;Reply, Error&gt;, <span class="number">5</span>)
-        }
-    } <span class="kw">else if </span><span class="attribute">#[cfg(feature = <span class="string">&quot;clients-4&quot;</span>)] </span>{
-        <span class="macro">interchange::interchange! </span>{
-            TrussedInterchange: (Request, <span class="prelude-ty">Result</span>&lt;Reply, Error&gt;, <span class="number">4</span>)
-        }
-    } <span class="kw">else if </span><span class="attribute">#[cfg(feature = <span class="string">&quot;clients-3&quot;</span>)] </span>{
-        <span class="macro">interchange::interchange! </span>{
-            TrussedInterchange: (Request, <span class="prelude-ty">Result</span>&lt;Reply, Error&gt;, <span class="number">3</span>)
-        }
-    } <span class="kw">else if </span><span class="attribute">#[cfg(feature = <span class="string">&quot;clients-2&quot;</span>)] </span>{
-        <span class="macro">interchange::interchange! </span>{
-            TrussedInterchange: (Request, <span class="prelude-ty">Result</span>&lt;Reply, Error&gt;, <span class="number">2</span>)
-        }
-    } <span class="kw">else if </span><span class="attribute">#[cfg(feature = <span class="string">&quot;clients-1&quot;</span>)] </span>{
-        <span class="macro">interchange::interchange! </span>{
-            TrussedInterchange: (Request, <span class="prelude-ty">Result</span>&lt;Reply, Error&gt;, <span class="number">1</span>)
-        }
-    }
-}
+<span class="kw">pub type </span>TrussedInterchange = InterchangeRef&lt;<span class="lifetime">&#39;static</span>, Request, <span class="prelude-ty">Result</span>&lt;Reply, Error&gt;&gt;;
+<span class="kw">pub static </span>TRUSSED_INTERCHANGE: TrussedInterchange = TRUSSED_INTERCHANGE_INNER.as_interchange_ref();
+
+<span class="kw">pub type </span>TrussedResponder = Responder&lt;<span class="lifetime">&#39;static</span>, Request, <span class="prelude-ty">Result</span>&lt;Reply, Error&gt;&gt;;
+<span class="kw">pub type </span>TrussedRequester = Requester&lt;<span class="lifetime">&#39;static</span>, Request, <span class="prelude-ty">Result</span>&lt;Reply, Error&gt;&gt;;
 
 <span class="comment">// pub use interchange::TrussedInterchange;
 
@@ -156,7 +72,7 @@
 // https://doc.micrium.com/display/osiiidoc/Using+Message+Queues
 
 </span><span class="kw">pub struct </span>ServiceEndpoint&lt;I: <span class="lifetime">&#39;static</span>, C&gt; {
-    <span class="kw">pub </span>interchange: Responder&lt;TrussedInterchange&gt;,
+    <span class="kw">pub </span>interchange: TrussedResponder,
     <span class="comment">// service (trusted) has this, not client (untrusted)
     // used among other things to namespace cryptographic material
     </span><span class="kw">pub </span>ctx: Context&lt;C&gt;,
