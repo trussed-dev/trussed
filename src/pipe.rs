@@ -37,7 +37,7 @@ pub struct ServiceEndpoint<'pipe, I: 'static, C> {
 
 #[cfg(test)]
 mod tests {
-    use super::TrussedInterchange;
+    use super::{TrussedRequester, TrussedResponder};
     use crate::api::{Reply, Request};
     use core::mem;
 
@@ -64,6 +64,7 @@ mod tests {
 
     #[test]
     fn test_interchange_size() {
-        assert_size::<TrussedInterchange>();
+        use interchange::Channel;
+        assert_size::<Channel<Request, Reply>>();
     }
 }

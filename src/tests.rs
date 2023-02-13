@@ -175,23 +175,17 @@ macro_rules! setup {
         let pc_interface: UserInterface = Default::default();
 
         let platform = $platform::new(rng, store, pc_interface);
-        let mut trussed: crate::Service<$platform> = crate::service::Service::new(platform);
 
-        let (test_trussed_requester, test_trussed_responder) = crate::pipe::TRUSSED_INTERCHANGE
-            .claim()
-            .expect("could not setup TEST TrussedInterchange");
+        let pipe = interchange::Interchange::new();
         let test_client_id = "TEST";
-
-        assert!(trussed
-            .add_endpoint(test_trussed_responder, test_client_id, &[])
-            .is_ok());
+        let mut trussed: crate::Service<$platform, 1> =
+            crate::service::Service::new(platform, &pipe);
 
         trussed.set_seed_if_uninitialized(&$seed);
-        let mut $client = {
-            pub type TestClient<'a> =
-                crate::ClientImplementation<&'a mut crate::Service<$platform>>;
-            TestClient::new(test_trussed_requester, &mut trussed)
-        };
+        let mut $client = crate::client::ClientBuilder::new(test_client_id)
+            .prepare(&mut trussed)
+            .expect("Preparing the client should not fail")
+            .build(&mut trussed);
     };
 }
 
