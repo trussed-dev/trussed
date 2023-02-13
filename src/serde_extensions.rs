@@ -166,7 +166,7 @@ pub trait ExtensionClient<E: Extension>: PollClient {
     }
 }
 
-impl<E, S, I> ExtensionClient<E> for ClientImplementation<S, I>
+impl<'pipe, E, S, I> ExtensionClient<E> for ClientImplementation<'pipe, S, I>
 where
     E: Extension,
     S: Syscall,

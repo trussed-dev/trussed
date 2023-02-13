@@ -37,7 +37,7 @@ use trussed::{
 use runner::Backends;
 
 type Platform = virt::Platform<Ram>;
-type Client = ClientImplementation<Service<Platform, Backends>, Backends>;
+type Client<'pipe> = ClientImplementation<'pipe, Service<'pipe, Platform, 1, Backends>, Backends>;
 
 mod extensions {
     use serde::{Deserialize, Serialize};
