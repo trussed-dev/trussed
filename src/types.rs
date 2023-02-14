@@ -564,6 +564,20 @@ pub enum Mechanism {
     X255,
     /// Used to serialize the output of a diffie-hellman
     SharedSecret,
+
+    /// Exposes the Raw RSA encryption/decryption primitive. Be aware this is dangerous.
+    /// Not having any padding can allow an attacker to obtain plaintexts and forge signatures.
+    /// It should only be used if absolutely necessary.
+    Rsa2048Raw,
+    /// Exposes the Raw RSA encryption/decryption primitive. Be aware this is dangerous.
+    /// Not having any padding can allow an attacker to obtain plaintexts and forge signatures.
+    /// It should only be used if absolutely necessary.
+    Rsa3072Raw,
+    /// Exposes the Raw RSA encryption/decryption primitive. Be aware this is dangerous.
+    /// Not having any padding can allow an attacker to obtain plaintexts and forge signatures.
+    /// It should only be used if absolutely necessary.
+    Rsa4096Raw,
+
     Rsa2048Pkcs1v15,
     Rsa3072Pkcs1v15,
     Rsa4096Pkcs1v15,
