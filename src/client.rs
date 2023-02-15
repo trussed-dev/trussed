@@ -223,7 +223,7 @@ where
         // in particular, can unwrap
         let request = req.into();
         self.pending = Some(u8::from(&request));
-        self.interchange.request(request).map_err(drop).unwrap();
+        self.interchange.request(request).unwrap();
         self.syscall.syscall();
         Ok(FutureResult::new(self))
     }
