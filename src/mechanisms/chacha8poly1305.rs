@@ -70,12 +70,13 @@ impl Decrypt for super::Chacha8Poly1305 {
         use chacha20poly1305::aead::{AeadInPlace, NewAead};
         use chacha20poly1305::ChaCha8Poly1305;
 
-        let serialized_material = keystore
-            .load_key(key::Secrecy::Secret, Some(KIND_NONCE), &request.key)?
-            .material;
-        let serialized = serialized_material.as_slice();
+        let key = keystore.load_key(key::Secrecy::Secret, None, &request.key)?;
+        if !matches!(key.kind, KIND | KIND_NONCE) {
+            return Err(Error::WrongKeyKind);
+        }
+        let serialized = key.material.as_slice();
 
-        assert!(serialized.len() == TOTAL_LEN);
+        assert!(serialized.len() == TOTAL_LEN || serialized.len() == KEY_LEN);
 
         let symmetric_key = &serialized[..KEY_LEN];
 
@@ -115,37 +116,34 @@ impl Encrypt for super::Chacha8Poly1305 {
         // load key and nonce
         let secrecy = key::Secrecy::Secret;
         let key_id = &request.key;
-        let mut serialized_material = keystore
-            .load_key(secrecy, Some(KIND_NONCE), key_id)?
-            .material;
+        let mut key = keystore.load_key(secrecy, None, key_id)?;
 
-        let serialized: &mut [u8] = serialized_material.as_mut();
-
-        assert!(serialized.len() == TOTAL_LEN);
-
-        // no panic by above early return
-        let location = keystore.location(secrecy, key_id).unwrap();
-        {
-            let nonce = &mut serialized[KEY_LEN..];
-            increment_nonce(nonce)?;
+        let serialized: &mut [u8] = key.material.as_mut();
+        let symmetric_key: [u8; KEY_LEN] = serialized[..KEY_LEN].try_into().unwrap();
+        let mut nonce = [0; NONCE_LEN];
+        match (&request.nonce, key.kind) {
+            (Some(n), KIND | KIND_NONCE) if n.len() == NONCE_LEN => {
+                nonce.copy_from_slice(n);
+            }
+            (None, KIND) => {
+                keystore.rng().fill_bytes(&mut nonce);
+            }
+            (None, KIND_NONCE) => {
+                increment_nonce(&mut serialized[KEY_LEN..])?;
+                nonce.copy_from_slice(&serialized[KEY_LEN..]);
+                let location = keystore.location(secrecy, key_id).unwrap();
+                keystore.overwrite_key(location, secrecy, KIND_NONCE, key_id, serialized)?;
+            }
+            (Some(_), KIND | KIND_NONCE) => return Err(Error::MechanismParamInvalid),
+            _ => return Err(Error::WrongKeyKind),
         }
 
-        keystore.overwrite_key(location, secrecy, KIND_NONCE, key_id, serialized)?;
-
-        let (symmetric_key, generated_nonce) = serialized.split_at_mut(KEY_LEN);
-
-        let nonce = match request.nonce.as_ref() {
-            Some(nonce) => nonce.as_ref(),
-            None => generated_nonce,
-        };
-
-        // keep in state?
-        let aead = ChaCha8Poly1305::new(&GenericArray::clone_from_slice(symmetric_key));
+        let aead = ChaCha8Poly1305::new(&GenericArray::from(symmetric_key));
 
         let mut ciphertext = request.message.clone();
-        let tag: [u8; 16] = aead
+        let tag: [u8; TAG_LEN] = aead
             .encrypt_in_place_detached(
-                &GenericArray::clone_from_slice(nonce),
+                &GenericArray::from(nonce),
                 &request.associated_data,
                 &mut ciphertext,
             )
@@ -154,7 +152,7 @@ impl Encrypt for super::Chacha8Poly1305 {
             .try_into()
             .unwrap();
 
-        let nonce = ShortData::from_slice(nonce).unwrap();
+        let nonce = ShortData::from_slice(&nonce).unwrap();
         let tag = ShortData::from_slice(&tag).unwrap();
 
         // let ciphertext = Message::from_slice(&ciphertext).unwrap();
