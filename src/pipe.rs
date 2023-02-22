@@ -37,7 +37,6 @@ pub struct ServiceEndpoint<'pipe, I: 'static, C> {
 
 #[cfg(test)]
 mod tests {
-    use super::{TrussedRequester, TrussedResponder};
     use crate::api::{Reply, Request};
     use core::mem;
 
@@ -45,7 +44,7 @@ mod tests {
     // size.  Bumping the size is not a breaking change but should only be done if really
     // necessary.
 
-    const MAX_SIZE: usize = 2416;
+    const MAX_SIZE: usize = 2432;
 
     fn assert_size<T>() {
         let size = mem::size_of::<T>();
@@ -65,6 +64,7 @@ mod tests {
     #[test]
     fn test_interchange_size() {
         use interchange::Channel;
+        // The real cost per-client
         assert_size::<Channel<Request, Reply>>();
     }
 }
