@@ -24,7 +24,7 @@ fn run_test(data: u8) {
 
         // ensure that no other client is messing with our filesystem
         while syscall!(client.uptime()).uptime < Duration::from_secs(1) {
-            syscall!(client.write_file(location, path.clone(), write_data.clone(), None));
+            syscall!(client.write_file(location, path.clone(), write_data.clone()));
             let read_data = syscall!(client.read_file(location, path.clone())).data;
             assert_eq!(write_data, read_data);
         }

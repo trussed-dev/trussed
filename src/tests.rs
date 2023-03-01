@@ -528,12 +528,7 @@ fn filesystem() {
 
     let data = Bytes::from_slice(&[0; 20]).unwrap();
     block!(client
-        .write_file(
-            Location::Internal,
-            PathBuf::from("test_file"),
-            data.clone(),
-            None
-        )
+        .write_file(Location::Internal, PathBuf::from("test_file"), data.clone())
         .expect("no client error"))
     .expect("no errors");
 

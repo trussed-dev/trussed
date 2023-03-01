@@ -2,7 +2,7 @@ use crate::{
     error::{Error, Result},
     // service::ReadDirState,
     store::{self, Store},
-    types::{Location, Message, UserAttribute},
+    types::{Location, Message},
     Bytes,
 };
 
@@ -17,7 +17,6 @@ pub struct ReadDirFilesState {
     real_dir: PathBuf,
     last: usize,
     location: Location,
-    user_attribute: Option<UserAttribute>,
 }
 
 use littlefs2::{
@@ -119,7 +118,6 @@ pub trait Filestore {
         &mut self,
         clients_dir: &PathBuf,
         location: Location,
-        user_attribute: Option<UserAttribute>,
     ) -> Result<Option<(Option<Message>, ReadDirFilesState)>>;
 
     /// Continuation of `read_dir_files_first`.
@@ -271,7 +269,6 @@ impl<S: Store> Filestore for ClientFilestore<S> {
         &mut self,
         clients_dir: &PathBuf,
         location: Location,
-        user_attribute: Option<UserAttribute>,
     ) -> Result<Option<(Option<Message>, ReadDirFilesState)>> {
         if location != Location::Internal {
             return Err(Error::RequestNotAvailable);
@@ -289,35 +286,13 @@ impl<S: Store> Filestore for ClientFilestore<S> {
                     //
                     // Option<usize, Result<DirEntry>> -> ??
                     .map(|(i, entry)| (i, entry.unwrap()))
-                    // skip over directories (including `.` and `..`)
-                    .filter(|(_, entry)| entry.file_type().is_file())
-                    // take first entry that meets requirements
-                    .find(|(_, entry)| {
-                        if let Some(user_attribute) = user_attribute.as_ref() {
-                            let mut path = dir.clone();
-                            path.push(entry.file_name());
-                            let attribute = fs
-                                .attribute(&path, crate::config::USER_ATTRIBUTE_NUMBER)
-                                .unwrap();
-
-                            if let Some(attribute) = attribute {
-                                user_attribute == attribute.data()
-                            } else {
-                                false
-                            }
-                        } else {
-                            true
-                        }
-                    })
-                    // if there is an entry, construct the state that needs storing out of it,
-                    // and return the file's contents.
-                    // the client, and return both the entry and the state
+                    // skip over directories (including `.` and `..`) and take first file
+                    .find(|(_, entry)| entry.file_type().is_file())
                     .map(|(i, entry)| {
                         let read_dir_files_state = ReadDirFilesState {
                             real_dir: dir.clone(),
                             last: i,
                             location,
-                            user_attribute,
                         };
                         // The semantics is that for a non-existent file, we return None (not an error)
                         let data = store::read(self.store, location, entry.path()).ok();
@@ -340,7 +315,6 @@ impl<S: Store> Filestore for ClientFilestore<S> {
             real_dir,
             last,
             location,
-            user_attribute,
         } = state;
         let fs = self.store.ifs();
 
@@ -353,31 +327,13 @@ impl<S: Store> Filestore for ClientFilestore<S> {
                     .skip(last + 1)
                     // entry is still a Result :/ (see question in `read_dir_first`)
                     .map(|(i, entry)| (i, entry.unwrap()))
-                    // skip over directories (including `.` and `..`)
-                    .filter(|(_, entry)| entry.file_type().is_file())
-                    // take first entry that meets requirements
-                    .find(|(_, entry)| {
-                        if let Some(user_attribute) = user_attribute.as_ref() {
-                            let mut path = real_dir.clone();
-                            path.push(entry.file_name());
-                            let attribute = fs
-                                .attribute(&path, crate::config::USER_ATTRIBUTE_NUMBER)
-                                .unwrap();
-                            if let Some(attribute) = attribute {
-                                user_attribute == attribute.data()
-                            } else {
-                                false
-                            }
-                        } else {
-                            true
-                        }
-                    })
+                    // skip over directories (including `.` and `..`) and take first file
+                    .find(|(_, entry)| entry.file_type().is_file())
                     .map(|(i, entry)| {
                         let read_dir_files_state = ReadDirFilesState {
                             real_dir: real_dir.clone(),
                             last: i,
                             location,
-                            user_attribute,
                         };
                         // The semantics is that for a non-existent file, we return None (not an error)
                         let data = store::read(self.store, location, entry.path()).ok();

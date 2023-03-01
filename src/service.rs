@@ -378,7 +378,7 @@ impl<P: Platform> ServiceResources<P> {
             }
 
             Request::ReadDirFilesFirst(request) => {
-                let maybe_data = match filestore.read_dir_files_first(&request.dir, request.location, request.user_attribute.clone())? {
+                let maybe_data = match filestore.read_dir_files_first(&request.dir, request.location)? {
                     Some((data, state)) => {
                         ctx.read_dir_files_state = Some(state);
                         data

@@ -577,13 +577,8 @@ pub trait FilesystemClient: PollClient {
         &mut self,
         location: Location,
         dir: PathBuf,
-        user_attribute: Option<UserAttribute>,
     ) -> ClientResult<'_, reply::ReadDirFilesFirst, Self> {
-        self.request(request::ReadDirFilesFirst {
-            dir,
-            location,
-            user_attribute,
-        })
+        self.request(request::ReadDirFilesFirst { dir, location })
     }
 
     fn read_dir_files_next(&mut self) -> ClientResult<'_, reply::ReadDirFilesNext, Self> {
@@ -651,13 +646,11 @@ pub trait FilesystemClient: PollClient {
         location: Location,
         path: PathBuf,
         data: LargeMessage,
-        user_attribute: Option<UserAttribute>,
     ) -> ClientResult<'_, reply::WriteFile, Self> {
         self.request(request::WriteFile {
             location,
             path,
             data,
-            user_attribute,
         })
     }
 }

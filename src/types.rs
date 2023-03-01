@@ -616,5 +616,3 @@ pub enum SignatureSerialization {
     Raw,
     // Sec1,
 }
-
-pub type UserAttribute = Bytes<MAX_USER_ATTRIBUTE_LENGTH>;

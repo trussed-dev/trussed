@@ -227,7 +227,6 @@ pub mod request {
         ReadDirFilesFirst:
           - location: Location
           - dir: PathBuf
-          - user_attribute: Option<UserAttribute>
 
         ReadDirFilesNext:
 
@@ -279,7 +278,6 @@ pub mod request {
         WriteFile:
           - location: Location
           - path: PathBuf
-          - user_attribute: Option<UserAttribute>
           - data: LargeMessage
 
         UnsafeInjectKey:
