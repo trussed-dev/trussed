@@ -2,13 +2,14 @@ use crate::{
     error::{Error, Result},
     // service::ReadDirState,
     store::{self, Store},
-    types::{Location, Message, UserAttribute},
+    types::{LfsStorage, Location, Message, UserAttribute},
     Bytes,
 };
 
 #[derive(Clone)]
 pub struct ReadDirState {
     real_dir: PathBuf,
+    location: Location,
     last: usize,
 }
 
@@ -24,6 +25,8 @@ use littlefs2::{
     fs::{DirEntry, Metadata},
     path::{Path, PathBuf},
 };
+
+use super::Fs;
 pub type ClientId = PathBuf;
 
 pub struct ClientFilestore<S>
@@ -129,6 +132,219 @@ pub trait Filestore {
     ) -> Result<Option<(Option<Message>, ReadDirFilesState)>>;
 }
 
+/// Generic implementation allowing the use of any filesystem.
+impl<S: Store> ClientFilestore<S> {
+    fn read_dir_first_impl<F: LfsStorage + 'static>(
+        &mut self,
+        clients_dir: &PathBuf,
+        location: Location,
+        not_before: Option<&PathBuf>,
+        fs: &'static Fs<F>,
+    ) -> Result<Option<(DirEntry, ReadDirState)>> {
+        let dir = self.actual_path(clients_dir)?;
+
+        Ok(fs
+            .read_dir_and_then(&dir, |it| {
+                // this is an iterator with Item = (usize, Result<DirEntry>)
+                it.enumerate()
+                    // skip over `.` and `..`
+                    .skip(2)
+                    // todo: try ?-ing out of this (the API matches std::fs, where read/write errors
+                    // can occur during operation)
+                    //
+                    // Option<usize, Result<DirEntry>> -> ??
+                    .map(|(i, entry)| (i, entry.unwrap()))
+                    // if there is a "not_before" entry, skip all entries before it.
+                    .find(|(_, entry)| {
+                        if let Some(not_before) = not_before {
+                            entry.file_name() == not_before.as_ref()
+                        } else {
+                            true
+                        }
+                    })
+                    // if there is an entry, construct the state that needs storing out of it,
+                    // remove the prefix from the entry's path to not leak implementation details to
+                    // the client, and return both the entry and the state
+                    .map(|(i, mut entry)| {
+                        let read_dir_state = ReadDirState {
+                            real_dir: dir.clone(),
+                            last: i,
+                            location,
+                        };
+                        let entry_client_path = self.client_path(entry.path());
+                        // trace_now!("converted path {} to client path {}", &entry.path(), &entry_client_path);
+                        // This is a hidden function which allows us to modify `entry.path`.
+                        // In regular use, `DirEntry` is not supposed to be constructable by the user
+                        // (only by querying the filesystem), which is why the function is both
+                        // hidden and tagged "unsafe" to discourage use. Our use case here is precisely
+                        // the reason for its existence :)
+                        *unsafe { entry.path_buf_mut() } = entry_client_path;
+                        (entry, read_dir_state)
+
+                        // the `ok_or` dummy error followed by the `ok` in the next line is because
+                        // `read_dir_and_then` wants to see Results (although we naturally have an Option
+                        // at this point)
+                    })
+                    .ok_or(littlefs2::io::Error::Io)
+            })
+            .ok())
+    }
+    fn read_dir_next_impl<F: LfsStorage + 'static>(
+        &mut self,
+        state: ReadDirState,
+        fs: &'static Fs<F>,
+    ) -> Result<Option<(DirEntry, ReadDirState)>> {
+        let ReadDirState {
+            real_dir,
+            last,
+            location,
+        } = state;
+
+        // all we want to do here is skip just past the previously found entry
+        // in the directory iterator, then return it (plus state to continue on next call)
+        Ok(fs
+            .read_dir_and_then(&real_dir, |it| {
+                // skip over previous
+                it.enumerate()
+                    .nth(last + 1)
+                    // entry is still a Result :/ (see question in `read_dir_first`)
+                    .map(|(i, entry)| (i, entry.unwrap()))
+                    // convert Option into Result, again because `read_dir_and_then` expects this
+                    .map(|(i, mut entry)| {
+                        let read_dir_state = ReadDirState {
+                            real_dir: real_dir.clone(),
+                            last: i,
+                            location,
+                        };
+
+                        let entry_client_path = self.client_path(entry.path());
+                        *unsafe { entry.path_buf_mut() } = entry_client_path;
+
+                        (entry, read_dir_state)
+                    })
+                    .ok_or(littlefs2::io::Error::Io)
+            })
+            .ok())
+    }
+    fn read_dir_files_first_impl<F: LfsStorage + 'static>(
+        &mut self,
+        clients_dir: &PathBuf,
+        location: Location,
+        user_attribute: Option<UserAttribute>,
+        fs: &'static Fs<F>,
+    ) -> Result<Option<(Option<Message>, ReadDirFilesState)>> {
+        let dir = self.actual_path(clients_dir)?;
+
+        Ok(fs
+            .read_dir_and_then(&dir, |it| {
+                // this is an iterator with Item = (usize, Result<DirEntry>)
+                it.enumerate()
+                    // todo: try ?-ing out of this (the API matches std::fs, where read/write errors
+                    // can occur during operation)
+                    //
+                    // Option<usize, Result<DirEntry>> -> ??
+                    .map(|(i, entry)| (i, entry.unwrap()))
+                    // skip over directories (including `.` and `..`)
+                    .filter(|(_, entry)| entry.file_type().is_file())
+                    // take first entry that meets requirements
+                    .find(|(_, entry)| {
+                        if let Some(user_attribute) = user_attribute.as_ref() {
+                            let mut path = dir.clone();
+                            path.push(entry.file_name());
+                            let attribute = fs
+                                .attribute(&path, crate::config::USER_ATTRIBUTE_NUMBER)
+                                .unwrap();
+
+                            if let Some(attribute) = attribute {
+                                user_attribute == attribute.data()
+                            } else {
+                                false
+                            }
+                        } else {
+                            true
+                        }
+                    })
+                    // if there is an entry, construct the state that needs storing out of it,
+                    // and return the file's contents.
+                    // the client, and return both the entry and the state
+                    .map(|(i, entry)| {
+                        let read_dir_files_state = ReadDirFilesState {
+                            real_dir: dir.clone(),
+                            last: i,
+                            location,
+                            user_attribute,
+                        };
+                        // The semantics is that for a non-existent file, we return None (not an error)
+                        let data = store::read(self.store, location, entry.path()).ok();
+                        (data, read_dir_files_state)
+
+                        // the `ok_or` dummy error followed by the `ok` in the next line is because
+                        // `read_dir_and_then` wants to see Results (although we naturally have an Option
+                        // at this point)
+                    })
+                    .ok_or(littlefs2::io::Error::Io)
+            })
+            .ok())
+    }
+
+    fn read_dir_files_next_impl<F: LfsStorage + 'static>(
+        &mut self,
+        state: ReadDirFilesState,
+        fs: &'static Fs<F>,
+    ) -> Result<Option<(Option<Message>, ReadDirFilesState)>> {
+        let ReadDirFilesState {
+            real_dir,
+            last,
+            location,
+            user_attribute,
+        } = state;
+
+        // all we want to do here is skip just past the previously found entry
+        // in the directory iterator, then return it (plus state to continue on next call)
+        Ok(fs
+            .read_dir_and_then(&real_dir, |it| {
+                // skip over previous
+                it.enumerate()
+                    .skip(last + 1)
+                    // entry is still a Result :/ (see question in `read_dir_first`)
+                    .map(|(i, entry)| (i, entry.unwrap()))
+                    // skip over directories (including `.` and `..`)
+                    .filter(|(_, entry)| entry.file_type().is_file())
+                    // take first entry that meets requirements
+                    .find(|(_, entry)| {
+                        if let Some(user_attribute) = user_attribute.as_ref() {
+                            let mut path = real_dir.clone();
+                            path.push(entry.file_name());
+                            let attribute = fs
+                                .attribute(&path, crate::config::USER_ATTRIBUTE_NUMBER)
+                                .unwrap();
+                            if let Some(attribute) = attribute {
+                                user_attribute == attribute.data()
+                            } else {
+                                false
+                            }
+                        } else {
+                            true
+                        }
+                    })
+                    .map(|(i, entry)| {
+                        let read_dir_files_state = ReadDirFilesState {
+                            real_dir: real_dir.clone(),
+                            last: i,
+                            location,
+                            user_attribute,
+                        };
+                        // The semantics is that for a non-existent file, we return None (not an error)
+                        let data = store::read(self.store, location, entry.path()).ok();
+                        (data, read_dir_files_state)
+                    })
+                    // convert Option into Result, again because `read_dir_and_then` expects this
+                    .ok_or(littlefs2::io::Error::Io)
+            })
+            .ok())
+    }
+}
+
 impl<S: Store> Filestore for ClientFilestore<S> {
     fn read<const N: usize>(&mut self, path: &PathBuf, location: Location) -> Result<Bytes<N>> {
         let path = self.actual_path(path)?;
@@ -184,87 +400,25 @@ impl<S: Store> Filestore for ClientFilestore<S> {
         location: Location,
         not_before: Option<&PathBuf>,
     ) -> Result<Option<(DirEntry, ReadDirState)>> {
-        if location != Location::Internal {
-            return Err(Error::RequestNotAvailable);
+        match location {
+            Location::Internal => {
+                self.read_dir_first_impl(clients_dir, location, not_before, self.store.ifs())
+            }
+            Location::External => {
+                self.read_dir_first_impl(clients_dir, location, not_before, self.store.efs())
+            }
+            Location::Volatile => {
+                self.read_dir_first_impl(clients_dir, location, not_before, self.store.vfs())
+            }
         }
-        let fs = self.store.ifs();
-
-        let dir = self.actual_path(clients_dir)?;
-
-        Ok(fs
-            .read_dir_and_then(&dir, |it| {
-                // this is an iterator with Item = (usize, Result<DirEntry>)
-                it.enumerate()
-                    // skip over `.` and `..`
-                    .skip(2)
-                    // todo: try ?-ing out of this (the API matches std::fs, where read/write errors
-                    // can occur during operation)
-                    //
-                    // Option<usize, Result<DirEntry>> -> ??
-                    .map(|(i, entry)| (i, entry.unwrap()))
-                    // if there is a "not_before" entry, skip all entries before it.
-                    .find(|(_, entry)| {
-                        if let Some(not_before) = not_before {
-                            entry.file_name() == not_before.as_ref()
-                        } else {
-                            true
-                        }
-                    })
-                    // if there is an entry, construct the state that needs storing out of it,
-                    // remove the prefix from the entry's path to not leak implementation details to
-                    // the client, and return both the entry and the state
-                    .map(|(i, mut entry)| {
-                        let read_dir_state = ReadDirState {
-                            real_dir: dir.clone(),
-                            last: i,
-                        };
-                        let entry_client_path = self.client_path(entry.path());
-                        // trace_now!("converted path {} to client path {}", &entry.path(), &entry_client_path);
-                        // This is a hidden function which allows us to modify `entry.path`.
-                        // In regular use, `DirEntry` is not supposed to be constructable by the user
-                        // (only by querying the filesystem), which is why the function is both
-                        // hidden and tagged "unsafe" to discourage use. Our use case here is precisely
-                        // the reason for its existence :)
-                        *unsafe { entry.path_buf_mut() } = entry_client_path;
-                        (entry, read_dir_state)
-
-                        // the `ok_or` dummy error followed by the `ok` in the next line is because
-                        // `read_dir_and_then` wants to see Results (although we naturally have an Option
-                        // at this point)
-                    })
-                    .ok_or(littlefs2::io::Error::Io)
-            })
-            .ok())
     }
 
     fn read_dir_next(&mut self, state: ReadDirState) -> Result<Option<(DirEntry, ReadDirState)>> {
-        let ReadDirState { real_dir, last } = state;
-        let fs = self.store.ifs();
-
-        // all we want to do here is skip just past the previously found entry
-        // in the directory iterator, then return it (plus state to continue on next call)
-        Ok(fs
-            .read_dir_and_then(&real_dir, |it| {
-                // skip over previous
-                it.enumerate()
-                    .nth(last + 1)
-                    // entry is still a Result :/ (see question in `read_dir_first`)
-                    .map(|(i, entry)| (i, entry.unwrap()))
-                    // convert Option into Result, again because `read_dir_and_then` expects this
-                    .map(|(i, mut entry)| {
-                        let read_dir_state = ReadDirState {
-                            real_dir: real_dir.clone(),
-                            last: i,
-                        };
-
-                        let entry_client_path = self.client_path(entry.path());
-                        *unsafe { entry.path_buf_mut() } = entry_client_path;
-
-                        (entry, read_dir_state)
-                    })
-                    .ok_or(littlefs2::io::Error::Io)
-            })
-            .ok())
+        match state.location {
+            Location::Internal => self.read_dir_next_impl(state, self.store.ifs()),
+            Location::External => self.read_dir_next_impl(state, self.store.efs()),
+            Location::Volatile => self.read_dir_next_impl(state, self.store.vfs()),
+        }
     }
 
     fn read_dir_files_first(
@@ -273,120 +427,37 @@ impl<S: Store> Filestore for ClientFilestore<S> {
         location: Location,
         user_attribute: Option<UserAttribute>,
     ) -> Result<Option<(Option<Message>, ReadDirFilesState)>> {
-        if location != Location::Internal {
-            return Err(Error::RequestNotAvailable);
+        match location {
+            Location::Internal => self.read_dir_files_first_impl(
+                clients_dir,
+                location,
+                user_attribute,
+                self.store.ifs(),
+            ),
+            Location::External => self.read_dir_files_first_impl(
+                clients_dir,
+                location,
+                user_attribute,
+                self.store.efs(),
+            ),
+            Location::Volatile => self.read_dir_files_first_impl(
+                clients_dir,
+                location,
+                user_attribute,
+                self.store.vfs(),
+            ),
         }
-        let fs = self.store.ifs();
-
-        let dir = self.actual_path(clients_dir)?;
-
-        Ok(fs
-            .read_dir_and_then(&dir, |it| {
-                // this is an iterator with Item = (usize, Result<DirEntry>)
-                it.enumerate()
-                    // todo: try ?-ing out of this (the API matches std::fs, where read/write errors
-                    // can occur during operation)
-                    //
-                    // Option<usize, Result<DirEntry>> -> ??
-                    .map(|(i, entry)| (i, entry.unwrap()))
-                    // skip over directories (including `.` and `..`)
-                    .filter(|(_, entry)| entry.file_type().is_file())
-                    // take first entry that meets requirements
-                    .find(|(_, entry)| {
-                        if let Some(user_attribute) = user_attribute.as_ref() {
-                            let mut path = dir.clone();
-                            path.push(entry.file_name());
-                            let attribute = fs
-                                .attribute(&path, crate::config::USER_ATTRIBUTE_NUMBER)
-                                .unwrap();
-
-                            if let Some(attribute) = attribute {
-                                user_attribute == attribute.data()
-                            } else {
-                                false
-                            }
-                        } else {
-                            true
-                        }
-                    })
-                    // if there is an entry, construct the state that needs storing out of it,
-                    // and return the file's contents.
-                    // the client, and return both the entry and the state
-                    .map(|(i, entry)| {
-                        let read_dir_files_state = ReadDirFilesState {
-                            real_dir: dir.clone(),
-                            last: i,
-                            location,
-                            user_attribute,
-                        };
-                        // The semantics is that for a non-existent file, we return None (not an error)
-                        let data = store::read(self.store, location, entry.path()).ok();
-                        (data, read_dir_files_state)
-
-                        // the `ok_or` dummy error followed by the `ok` in the next line is because
-                        // `read_dir_and_then` wants to see Results (although we naturally have an Option
-                        // at this point)
-                    })
-                    .ok_or(littlefs2::io::Error::Io)
-            })
-            .ok())
     }
 
     fn read_dir_files_next(
         &mut self,
         state: ReadDirFilesState,
     ) -> Result<Option<(Option<Message>, ReadDirFilesState)>> {
-        let ReadDirFilesState {
-            real_dir,
-            last,
-            location,
-            user_attribute,
-        } = state;
-        let fs = self.store.ifs();
-
-        // all we want to do here is skip just past the previously found entry
-        // in the directory iterator, then return it (plus state to continue on next call)
-        Ok(fs
-            .read_dir_and_then(&real_dir, |it| {
-                // skip over previous
-                it.enumerate()
-                    .skip(last + 1)
-                    // entry is still a Result :/ (see question in `read_dir_first`)
-                    .map(|(i, entry)| (i, entry.unwrap()))
-                    // skip over directories (including `.` and `..`)
-                    .filter(|(_, entry)| entry.file_type().is_file())
-                    // take first entry that meets requirements
-                    .find(|(_, entry)| {
-                        if let Some(user_attribute) = user_attribute.as_ref() {
-                            let mut path = real_dir.clone();
-                            path.push(entry.file_name());
-                            let attribute = fs
-                                .attribute(&path, crate::config::USER_ATTRIBUTE_NUMBER)
-                                .unwrap();
-                            if let Some(attribute) = attribute {
-                                user_attribute == attribute.data()
-                            } else {
-                                false
-                            }
-                        } else {
-                            true
-                        }
-                    })
-                    .map(|(i, entry)| {
-                        let read_dir_files_state = ReadDirFilesState {
-                            real_dir: real_dir.clone(),
-                            last: i,
-                            location,
-                            user_attribute,
-                        };
-                        // The semantics is that for a non-existent file, we return None (not an error)
-                        let data = store::read(self.store, location, entry.path()).ok();
-                        (data, read_dir_files_state)
-                    })
-                    // convert Option into Result, again because `read_dir_and_then` expects this
-                    .ok_or(littlefs2::io::Error::Io)
-            })
-            .ok())
+        match state.location {
+            Location::Internal => self.read_dir_files_next_impl(state, self.store.ifs()),
+            Location::External => self.read_dir_files_next_impl(state, self.store.efs()),
+            Location::Volatile => self.read_dir_files_next_impl(state, self.store.vfs()),
+        }
     }
 
     fn locate_file(
