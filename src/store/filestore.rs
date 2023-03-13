@@ -11,19 +11,19 @@ use littlefs2::path;
 pub struct ReadDirState {
     real_dir: PathBuf,
     location: Location,
-    last: usize,
+    position: DirIterationTell,
 }
 
 #[derive(Clone)]
 pub struct ReadDirFilesState {
     real_dir: PathBuf,
-    last: usize,
+    position: DirIterationTell,
     location: Location,
     user_attribute: Option<UserAttribute>,
 }
 
 use littlefs2::{
-    fs::{DirEntry, Metadata},
+    fs::{DirEntry, DirIterationTell, Metadata},
     path::{Path, PathBuf},
 };
 
@@ -151,18 +151,18 @@ impl<S: Store> ClientFilestore<S> {
         let dir = self.actual_path(clients_dir)?;
 
         Ok(fs
-            .read_dir_and_then(&dir, |it| {
+            .read_dir_and_then(&dir, |mut it| {
                 // this is an iterator with Item = (usize, Result<DirEntry>)
-                it.enumerate()
+                (&mut it)
                     // skip over `.` and `..`
                     .skip(2)
                     // todo: try ?-ing out of this (the API matches std::fs, where read/write errors
                     // can occur during operation)
                     //
                     // Option<usize, Result<DirEntry>> -> ??
-                    .map(|(i, entry)| (i, entry.unwrap()))
+                    .map(Result::unwrap)
                     // if there is a "not_before" entry, skip all entries before it.
-                    .find(|(_, entry)| {
+                    .find(|entry| {
                         if let Some(not_before) = not_before {
                             entry.file_name() == not_before.as_ref()
                         } else {
@@ -172,10 +172,10 @@ impl<S: Store> ClientFilestore<S> {
                     // if there is an entry, construct the state that needs storing out of it,
                     // remove the prefix from the entry's path to not leak implementation details to
                     // the client, and return both the entry and the state
-                    .map(|(i, mut entry)| {
+                    .map(|mut entry| {
                         let read_dir_state = ReadDirState {
                             real_dir: dir.clone(),
-                            last: i,
+                            position: it.tell().unwrap(),
                             location,
                         };
                         let entry_client_path = self.client_path(entry.path());
@@ -203,24 +203,25 @@ impl<S: Store> ClientFilestore<S> {
     ) -> Result<Option<(DirEntry, ReadDirState)>> {
         let ReadDirState {
             real_dir,
-            last,
+            position,
             location,
         } = state;
 
         // all we want to do here is skip just past the previously found entry
         // in the directory iterator, then return it (plus state to continue on next call)
         Ok(fs
-            .read_dir_and_then(&real_dir, |it| {
+            .read_dir_and_then(&real_dir, |mut it| {
                 // skip over previous
-                it.enumerate()
-                    .nth(last + 1)
+                it.seek(position)?;
+                (&mut it)
+                    .next()
                     // entry is still a Result :/ (see question in `read_dir_first`)
-                    .map(|(i, entry)| (i, entry.unwrap()))
+                    .map(Result::unwrap)
                     // convert Option into Result, again because `read_dir_and_then` expects this
-                    .map(|(i, mut entry)| {
+                    .map(|mut entry| {
                         let read_dir_state = ReadDirState {
                             real_dir: real_dir.clone(),
-                            last: i,
+                            position: it.tell().unwrap(),
                             location,
                         };
 
@@ -243,18 +244,18 @@ impl<S: Store> ClientFilestore<S> {
         let dir = self.actual_path(clients_dir)?;
 
         Ok(fs
-            .read_dir_and_then(&dir, |it| {
+            .read_dir_and_then(&dir, |mut it| {
                 // this is an iterator with Item = (usize, Result<DirEntry>)
-                it.enumerate()
+                (&mut it)
                     // todo: try ?-ing out of this (the API matches std::fs, where read/write errors
                     // can occur during operation)
                     //
                     // Option<usize, Result<DirEntry>> -> ??
-                    .map(|(i, entry)| (i, entry.unwrap()))
+                    .map(Result::unwrap)
                     // skip over directories (including `.` and `..`)
-                    .filter(|(_, entry)| entry.file_type().is_file())
+                    .filter(|entry| entry.file_type().is_file())
                     // take first entry that meets requirements
-                    .find(|(_, entry)| {
+                    .find(|entry| {
                         if let Some(user_attribute) = user_attribute.as_ref() {
                             let mut path = dir.clone();
                             path.push(entry.file_name());
@@ -274,10 +275,10 @@ impl<S: Store> ClientFilestore<S> {
                     // if there is an entry, construct the state that needs storing out of it,
                     // and return the file's contents.
                     // the client, and return both the entry and the state
-                    .map(|(i, entry)| {
+                    .map(|entry| {
                         let read_dir_files_state = ReadDirFilesState {
                             real_dir: dir.clone(),
-                            last: i,
+                            position: it.tell().unwrap(),
                             location,
                             user_attribute,
                         };
@@ -301,7 +302,7 @@ impl<S: Store> ClientFilestore<S> {
     ) -> Result<Option<(Option<Message>, ReadDirFilesState)>> {
         let ReadDirFilesState {
             real_dir,
-            last,
+            position,
             location,
             user_attribute,
         } = state;
@@ -309,16 +310,16 @@ impl<S: Store> ClientFilestore<S> {
         // all we want to do here is skip just past the previously found entry
         // in the directory iterator, then return it (plus state to continue on next call)
         Ok(fs
-            .read_dir_and_then(&real_dir, |it| {
+            .read_dir_and_then(&real_dir, |mut it| {
                 // skip over previous
-                it.enumerate()
-                    .skip(last + 1)
+                it.seek(position)?;
+                (&mut it)
                     // entry is still a Result :/ (see question in `read_dir_first`)
-                    .map(|(i, entry)| (i, entry.unwrap()))
+                    .map(Result::unwrap)
                     // skip over directories (including `.` and `..`)
-                    .filter(|(_, entry)| entry.file_type().is_file())
+                    .filter(|entry| entry.file_type().is_file())
                     // take first entry that meets requirements
-                    .find(|(_, entry)| {
+                    .find(|entry| {
                         if let Some(user_attribute) = user_attribute.as_ref() {
                             let mut path = real_dir.clone();
                             path.push(entry.file_name());
@@ -334,10 +335,10 @@ impl<S: Store> ClientFilestore<S> {
                             true
                         }
                     })
-                    .map(|(i, entry)| {
+                    .map(|entry| {
                         let read_dir_files_state = ReadDirFilesState {
                             real_dir: real_dir.clone(),
-                            last: i,
+                            position: it.tell().unwrap(),
                             location,
                             user_attribute,
                         };
