@@ -41,6 +41,7 @@ generate_enums! {
     Hash: 12
     // TODO: add ReadDir{First,Next}, not loading data, if needed for efficiency
     ReadDirFilesFirst: 13
+    ReadDirFilesNth: 31
     ReadDirFilesNext: 14
     ReadFile: 15
     Metadata: 26
@@ -63,6 +64,7 @@ generate_enums! {
 
     // // CreateDir,    <-- implied by WriteFile
     ReadDirFirst: 31 //      <-- gets Option<FileType> to restrict to just dir/file DirEntries,
+    ReadDirNth: 31
     ReadDirNext: 32 //      <-- gets Option<FileType> to restrict to just dir/file DirEntries,
     //                   // returns simplified Metadata
     // // ReadDirFilesFirst: 23 // <-- returns contents
@@ -229,12 +231,23 @@ pub mod request {
           - dir: PathBuf
           - user_attribute: Option<UserAttribute>
 
+        ReadDirFilesNth:
+          - location: Location
+          - dir: PathBuf
+          - start_at: usize
+          - user_attribute: Option<UserAttribute>
+
         ReadDirFilesNext:
 
         ReadDirFirst:
           - location: Location
           - dir: PathBuf
           - not_before_filename: Option<PathBuf>
+
+        ReadDirNth:
+          - location: Location
+          - dir: PathBuf
+          - start_at: usize
 
         ReadDirNext:
 
@@ -419,11 +432,17 @@ pub mod reply {
         ReadDirFilesFirst:
           - data: Option<Message>
 
+        ReadDirFilesNth:
+          - data: Option<Message>
+
         ReadDirFilesNext:
           - data: Option<Message>
 
         ReadDirFirst:
           - entry: Option<DirEntry>
+
+        ReadDirNth:
+          - data: Option<Message>
 
         ReadDirNext:
           - entry: Option<DirEntry>

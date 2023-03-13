@@ -100,6 +100,19 @@ pub trait Filestore {
     ///
     /// This function is modeled after `std::fs::read_dir`, within the limitations of our setup.
     ///
+    /// In case an entry was found, the returned option also contains state, so the expected
+    /// call to `read_dir_next` can resume operation.
+    fn read_dir_nth(
+        &mut self,
+        dir: &PathBuf,
+        location: Location,
+        start_at: usize,
+    ) -> Result<Option<(DirEntry, ReadDirState)>>;
+
+    /// Iterate over entries of a directory (both file and directory entries).
+    ///
+    /// This function is modeled after `std::fs::read_dir`, within the limitations of our setup.
+    ///
     /// The `not_before` parameter is an optimization for users to locate a specifically named
     /// file in one call - if the filename exists (e.g., `my-data.txt`), then return it directly.
     ///
@@ -132,6 +145,21 @@ pub trait Filestore {
         user_attribute: Option<UserAttribute>,
     ) -> Result<Option<(Option<Message>, ReadDirFilesState)>>;
 
+    /// Iterate over contents of files inside a directory.
+    ///
+    /// This has no equivalent in `std::fs`, it is an optimization to avoid duplicate
+    /// calls and a more complicated state machine (interspersing read_dir_first/next calls
+    /// with some sort of "fetch data").
+    ///
+    /// Additionally, files may optionally be filtered via attributes.
+    fn read_dir_files_nth(
+        &mut self,
+        clients_dir: &PathBuf,
+        location: Location,
+        start_at: usize,
+        user_attribute: Option<UserAttribute>,
+    ) -> Result<Option<(Option<Message>, ReadDirFilesState)>>;
+
     /// Continuation of `read_dir_files_first`.
     fn read_dir_files_next(
         &mut self,
@@ -146,6 +174,7 @@ impl<S: Store> ClientFilestore<S> {
         clients_dir: &Path,
         location: Location,
         not_before: Option<&Path>,
+        start_at: usize,
         fs: &'static Fs<F>,
     ) -> Result<Option<(DirEntry, ReadDirState)>> {
         let dir = self.actual_path(clients_dir)?;
@@ -155,7 +184,7 @@ impl<S: Store> ClientFilestore<S> {
                 // this is an iterator with Item = (usize, Result<DirEntry>)
                 (&mut it)
                     // skip over `.` and `..`
-                    .skip(2)
+                    .skip(2 + start_at)
                     // todo: try ?-ing out of this (the API matches std::fs, where read/write errors
                     // can occur during operation)
                     //
@@ -239,6 +268,7 @@ impl<S: Store> ClientFilestore<S> {
         clients_dir: &Path,
         location: Location,
         user_attribute: Option<UserAttribute>,
+        start_at: usize,
         fs: &'static Fs<F>,
     ) -> Result<Option<(Option<Message>, ReadDirFilesState)>> {
         let dir = self.actual_path(clients_dir)?;
@@ -254,8 +284,7 @@ impl<S: Store> ClientFilestore<S> {
                     .map(Result::unwrap)
                     // skip over directories (including `.` and `..`)
                     .filter(|entry| entry.file_type().is_file())
-                    // take first entry that meets requirements
-                    .find(|entry| {
+                    .filter(|entry| {
                         if let Some(user_attribute) = user_attribute.as_ref() {
                             let mut path = dir.clone();
                             path.push(entry.file_name());
@@ -264,14 +293,16 @@ impl<S: Store> ClientFilestore<S> {
                                 .unwrap();
 
                             if let Some(attribute) = attribute {
-                                user_attribute == attribute.data()
+                                user_attribute != attribute.data()
                             } else {
-                                false
+                                true
                             }
                         } else {
                             true
                         }
                     })
+                    // take nth entry that meets requirements
+                    .nth(start_at)
                     // if there is an entry, construct the state that needs storing out of it,
                     // and return the file's contents.
                     // the client, and return both the entry and the state
@@ -421,13 +452,32 @@ impl<S: Store> Filestore for ClientFilestore<S> {
     ) -> Result<Option<(DirEntry, ReadDirState)>> {
         match location {
             Location::Internal => {
-                self.read_dir_first_impl(clients_dir, location, not_before, self.store.ifs())
+                self.read_dir_first_impl(clients_dir, location, not_before, 0, self.store.ifs())
             }
             Location::External => {
-                self.read_dir_first_impl(clients_dir, location, not_before, self.store.efs())
+                self.read_dir_first_impl(clients_dir, location, not_before, 0, self.store.efs())
             }
             Location::Volatile => {
-                self.read_dir_first_impl(clients_dir, location, not_before, self.store.vfs())
+                self.read_dir_first_impl(clients_dir, location, not_before, 0, self.store.vfs())
+            }
+        }
+    }
+
+    fn read_dir_nth(
+        &mut self,
+        clients_dir: &PathBuf,
+        location: Location,
+        start_at: usize,
+    ) -> Result<Option<(DirEntry, ReadDirState)>> {
+        match location {
+            Location::Internal => {
+                self.read_dir_first_impl(clients_dir, location, None, start_at, self.store.ifs())
+            }
+            Location::External => {
+                self.read_dir_first_impl(clients_dir, location, None, start_at, self.store.efs())
+            }
+            Location::Volatile => {
+                self.read_dir_first_impl(clients_dir, location, None, start_at, self.store.vfs())
             }
         }
     }
@@ -451,18 +501,53 @@ impl<S: Store> Filestore for ClientFilestore<S> {
                 clients_dir,
                 location,
                 user_attribute,
+                0,
                 self.store.ifs(),
             ),
             Location::External => self.read_dir_files_first_impl(
                 clients_dir,
                 location,
                 user_attribute,
+                0,
                 self.store.efs(),
             ),
             Location::Volatile => self.read_dir_files_first_impl(
                 clients_dir,
                 location,
                 user_attribute,
+                0,
+                self.store.vfs(),
+            ),
+        }
+    }
+
+    fn read_dir_files_nth(
+        &mut self,
+        clients_dir: &PathBuf,
+        location: Location,
+        start_at: usize,
+        user_attribute: Option<UserAttribute>,
+    ) -> Result<Option<(Option<Message>, ReadDirFilesState)>> {
+        match location {
+            Location::Internal => self.read_dir_files_first_impl(
+                clients_dir,
+                location,
+                user_attribute,
+                start_at,
+                self.store.ifs(),
+            ),
+            Location::External => self.read_dir_files_first_impl(
+                clients_dir,
+                location,
+                user_attribute,
+                start_at,
+                self.store.efs(),
+            ),
+            Location::Volatile => self.read_dir_files_first_impl(
+                clients_dir,
+                location,
+                user_attribute,
+                start_at,
                 self.store.vfs(),
             ),
         }

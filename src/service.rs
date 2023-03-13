@@ -355,6 +355,20 @@ impl<P: Platform> ServiceResources<P> {
                 };
                 Ok(Reply::ReadDirFirst(reply::ReadDirFirst { entry: maybe_entry } ))
             }
+            Request::ReadDirNth(request) => {
+                let maybe_entry = match filestore.read_dir_nth(&request.dir, request.location, request.start_at)? {
+                    Some((entry, read_dir_state)) => {
+                        ctx.read_dir_state = Some(read_dir_state);
+                        Some(entry)
+                    }
+                    None => {
+                        ctx.read_dir_state = None;
+                        None
+
+                    }
+                };
+                Ok(Reply::ReadDirFirst(reply::ReadDirFirst { entry: maybe_entry } ))
+            }
 
             Request::ReadDirNext(_request) => {
                 // ensure next call has nothing to work with, unless we store state again
@@ -381,6 +395,20 @@ impl<P: Platform> ServiceResources<P> {
 
             Request::ReadDirFilesFirst(request) => {
                 let maybe_data = match filestore.read_dir_files_first(&request.dir, request.location, request.user_attribute.clone())? {
+                    Some((data, state)) => {
+                        ctx.read_dir_files_state = Some(state);
+                        data
+                    }
+                    None => {
+                        ctx.read_dir_files_state = None;
+                        None
+                    }
+                };
+                Ok(Reply::ReadDirFilesFirst(reply::ReadDirFilesFirst { data: maybe_data } ))
+            }
+
+            Request::ReadDirFilesNth(request) => {
+                let maybe_data = match filestore.read_dir_files_nth(&request.dir, request.location, request.start_at, request.user_attribute.clone())? {
                     Some((data, state)) => {
                         ctx.read_dir_files_state = Some(state);
                         data
