@@ -7,14 +7,14 @@ use crate::{
 };
 use littlefs2::path;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ReadDirState {
     real_dir: PathBuf,
     location: Location,
     position: DirIterationTell,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ReadDirFilesState {
     real_dir: PathBuf,
     position: DirIterationTell,

@@ -367,7 +367,7 @@ impl<P: Platform> ServiceResources<P> {
 
                     }
                 };
-                Ok(Reply::ReadDirFirst(reply::ReadDirFirst { entry: maybe_entry } ))
+                Ok(Reply::ReadDirNth(reply::ReadDirNth { entry: maybe_entry } ))
             }
 
             Request::ReadDirNext(_request) => {
@@ -418,7 +418,7 @@ impl<P: Platform> ServiceResources<P> {
                         None
                     }
                 };
-                Ok(Reply::ReadDirFilesFirst(reply::ReadDirFilesFirst { data: maybe_data } ))
+                Ok(Reply::ReadDirFilesNth(reply::ReadDirFilesNth { data: maybe_data } ))
             }
 
             Request::ReadDirFilesNext(_request) => {

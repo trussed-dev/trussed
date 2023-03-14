@@ -55,34 +55,52 @@ fn escape_namespace_root() {
 }
 
 fn iterating(location: Location) {
-    client::get(|client| {
-        syscall!(client.write_file(
-            location,
-            PathBuf::from("foo"),
-            Bytes::from_slice(b"foo").unwrap(),
-            None
-        ));
-        syscall!(client.write_file(
-            location,
-            PathBuf::from("bar"),
-            Bytes::from_slice(b"bar").unwrap(),
-            None
-        ));
-        let first_entry = syscall!(client.read_dir_first(location, PathBuf::from(""), None))
-            .entry
-            .unwrap();
-        assert_eq!(first_entry.file_name(), "bar");
+    for count in [0, 1, 10, 20] {
+        let files: Vec<_> = (0..count).map(|i| format!("file{i:04}")).collect();
+        client::get(|client| {
+            // Setup filesystem
+            for file in &files {
+                syscall!(client.write_file(
+                    location,
+                    PathBuf::from(&**file),
+                    Bytes::from_slice(file.as_bytes()).unwrap(),
+                    None
+                ));
+            }
 
-        let next_entry = syscall!(client.read_dir_next()).entry.unwrap();
-        assert_eq!(next_entry.file_name(), "foo");
+            // Iteration over entries (filenames)
+            for i in 0..count {
+                if let Some(f) = files.get(i) {
+                    let entry = syscall!(client.read_dir_nth(location, PathBuf::new(), i))
+                        .entry
+                        .unwrap();
+                    assert_eq!(entry.path().as_ref(), f);
+                }
 
-        let first_data = syscall!(client.read_dir_files_first(location, PathBuf::from(""), None))
-            .data
-            .unwrap();
-        assert_eq!(first_data, b"bar");
-        let next_data = syscall!(client.read_dir_files_next()).data.unwrap();
-        assert_eq!(next_data, b"foo");
-    });
+                for j in i + 1..count {
+                    let entry = syscall!(client.read_dir_next()).entry.unwrap();
+                    assert_eq!(entry.path().as_ref(), &files[j]);
+                }
+                assert!(syscall!(client.read_dir_next()).entry.is_none());
+            }
+
+            for i in 0..count {
+                if let Some(f) = files.get(i) {
+                    let data =
+                        syscall!(client.read_dir_files_nth(location, PathBuf::new(), i, None))
+                            .data
+                            .unwrap();
+                    assert_eq!(data, f.as_bytes());
+                }
+
+                for j in i + 1..count {
+                    let data = syscall!(client.read_dir_files_next()).data.unwrap();
+                    assert_eq!(data, files[j].as_bytes());
+                }
+                assert!(syscall!(client.read_dir_files_next()).data.is_none());
+            }
+        });
+    }
 }
 
 #[test]
