@@ -523,7 +523,7 @@ pub trait CryptoClient: PollClient {
         associated_data: &[u8],
     ) -> ClientResult<'_, reply::WrapKey, Self> {
         let associated_data =
-            Message::from_slice(associated_data).map_err(|_| ClientError::DataTooLarge)?;
+            Bytes::from_slice(associated_data).map_err(|_| ClientError::DataTooLarge)?;
         self.request(request::WrapKey {
             mechanism,
             wrapping_key,
