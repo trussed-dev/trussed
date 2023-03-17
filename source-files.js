@@ -51,7 +51,7 @@ var sourcesIndex = JSON.parse('{\
 "poly1305":["",[["backend",[["avx2",[],["helpers.rs"]]],["autodetect.rs","avx2.rs","soft.rs"]]],["backend.rs","lib.rs"]],\
 "postcard":["",[["de",[],["deserializer.rs","mod.rs"]],["ser",[],["flavors.rs","mod.rs","serializer.rs"]]],["accumulator.rs","error.rs","lib.rs","varint.rs"]],\
 "postcard_cobs":["",[],["dec.rs","enc.rs","lib.rs"]],\
-"proc_macro2":["",[],["detection.rs","fallback.rs","lib.rs","marker.rs","parse.rs","rcvec.rs","wrapper.rs"]],\
+"proc_macro2":["",[],["detection.rs","extra.rs","fallback.rs","lib.rs","marker.rs","parse.rs","rcvec.rs","wrapper.rs"]],\
 "quote":["",[],["ext.rs","format.rs","ident_fragment.rs","lib.rs","runtime.rs","spanned.rs","to_tokens.rs"]],\
 "rand_core":["",[],["block.rs","error.rs","impls.rs","le.rs","lib.rs"]],\
 "salty":["",[["field",[],["tweetnacl.rs"]]],["agreement.rs","constants.rs","edwards.rs","field.rs","hash.rs","lib.rs","montgomery.rs","scalar.rs","scalar29.rs","signature.rs"]],\

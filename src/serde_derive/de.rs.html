@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/serde_derive-1.0.152/src/de.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>de.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../serde_derive/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/serde_derive-1.0.156/src/de.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>de.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../serde_derive/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -3140,6 +3140,10 @@
 <span id="3140">3140</span>
 <span id="3141">3141</span>
 <span id="3142">3142</span>
+<span id="3143">3143</span>
+<span id="3144">3144</span>
+<span id="3145">3145</span>
+<span id="3146">3146</span>
 </pre><pre class="rust"><code><span class="kw">use </span>proc_macro2::{Literal, Span, TokenStream};
 <span class="kw">use </span>quote::ToTokens;
 <span class="kw">use </span>syn::punctuated::Punctuated;
@@ -4096,6 +4100,7 @@
             lifetime: _serde::__private::PhantomData,
         }
     };
+    <span class="kw">let </span>need_seed = deserializer.is_none();
     <span class="kw">let </span>dispatch = <span class="kw">if let </span><span class="prelude-val">Some</span>(deserializer) = deserializer {
         <span class="macro">quote! </span>{
             _serde::Deserializer::deserialize_any(#deserializer, #visitor_expr)
@@ -4141,14 +4146,14 @@
         <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
     };
 
-    <span class="kw">let </span>visitor_seed = <span class="kw">if </span>is_enum &amp;&amp; cattrs.has_flatten() {
+    <span class="kw">let </span>visitor_seed = <span class="kw">if </span>need_seed &amp;&amp; is_enum &amp;&amp; cattrs.has_flatten() {
         <span class="prelude-val">Some</span>(<span class="macro">quote! </span>{
             <span class="kw">impl </span>#de_impl_generics _serde::de::DeserializeSeed&lt;#delife&gt; <span class="kw">for </span>__Visitor #de_ty_generics #where_clause {
                 <span class="kw">type </span>Value = #this_type #ty_generics;
 
                 <span class="kw">fn </span>deserialize&lt;__D&gt;(<span class="self">self</span>, __deserializer: __D) -&gt; _serde::__private::Result&lt;<span class="self">Self</span>::Value, __D::Error&gt;
                 <span class="kw">where
-                    </span>__D: _serde::Deserializer&lt;<span class="lifetime">&#39;de</span>&gt;,
+                    </span>__D: _serde::Deserializer&lt;#delife&gt;,
                 {
                     _serde::Deserializer::deserialize_map(__deserializer, <span class="self">self</span>)
                 }
@@ -4398,7 +4403,7 @@
         <span class="comment">// This is an empty enum like `enum Impossible {}` or an enum in which
         // all variants have `#[serde(skip_deserializing)]`.
         </span><span class="macro">quote! </span>{
-            <span class="comment">// FIXME: Once we drop support for Rust 1.15:
+            <span class="comment">// FIXME: Once feature(exhaustive_patterns) is stable:
             // let _serde::__private::Err(__err) = _serde::de::EnumAccess::variant::&lt;__Field&gt;(__data);
             // _serde::__private::Err(__err)
             </span>_serde::__private::Result::map(
@@ -5542,7 +5547,10 @@
         .collect();
 
     <span class="kw">let </span>fields_stmt = {
-        <span class="kw">let </span>field_names = field_names_idents.iter().map(|(name, <span class="kw">_</span>, <span class="kw">_</span>)| name);
+        <span class="kw">let </span>field_names = field_names_idents
+            .iter()
+            .flat_map(|(<span class="kw">_</span>, <span class="kw">_</span>, aliases)| aliases);
+
         <span class="macro">quote_block! </span>{
             <span class="kw">const </span>FIELDS: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str] = <span class="kw-2">&amp;</span>[ #(#field_names),* ];
         }
@@ -5677,7 +5685,7 @@
     <span class="kw">let </span>all_skipped = fields.iter().all(|field| field.attrs.skip_deserializing());
     <span class="kw">let </span>match_keys = <span class="kw">if </span>cattrs.deny_unknown_fields() &amp;&amp; all_skipped {
         <span class="macro">quote! </span>{
-            <span class="comment">// FIXME: Once we drop support for Rust 1.15:
+            <span class="comment">// FIXME: Once feature(exhaustive_patterns) is stable:
             // let _serde::__private::None::&lt;__Field&gt; = try!(_serde::de::MapAccess::next_key(&amp;mut __map));
             </span>_serde::__private::Option::map(
                 <span class="macro">try!</span>(_serde::de::MapAccess::next_key::&lt;__Field&gt;(<span class="kw-2">&amp;mut </span>__map)),
@@ -5910,7 +5918,7 @@
 
     <span class="kw">let </span>match_keys = <span class="kw">if </span>cattrs.deny_unknown_fields() &amp;&amp; all_skipped {
         <span class="macro">quote! </span>{
-            <span class="comment">// FIXME: Once we drop support for Rust 1.15:
+            <span class="comment">// FIXME: Once feature(exhaustive_patterns) is stable:
             // let _serde::__private::None::&lt;__Field&gt; = try!(_serde::de::MapAccess::next_key(&amp;mut __map));
             </span>_serde::__private::Option::map(
                 <span class="macro">try!</span>(_serde::de::MapAccess::next_key::&lt;__Field&gt;(<span class="kw-2">&amp;mut </span>__map)),

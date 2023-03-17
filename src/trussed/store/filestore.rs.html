@@ -436,17 +436,89 @@
 <span id="436">436</span>
 <span id="437">437</span>
 <span id="438">438</span>
+<span id="439">439</span>
+<span id="440">440</span>
+<span id="441">441</span>
+<span id="442">442</span>
+<span id="443">443</span>
+<span id="444">444</span>
+<span id="445">445</span>
+<span id="446">446</span>
+<span id="447">447</span>
+<span id="448">448</span>
+<span id="449">449</span>
+<span id="450">450</span>
+<span id="451">451</span>
+<span id="452">452</span>
+<span id="453">453</span>
+<span id="454">454</span>
+<span id="455">455</span>
+<span id="456">456</span>
+<span id="457">457</span>
+<span id="458">458</span>
+<span id="459">459</span>
+<span id="460">460</span>
+<span id="461">461</span>
+<span id="462">462</span>
+<span id="463">463</span>
+<span id="464">464</span>
+<span id="465">465</span>
+<span id="466">466</span>
+<span id="467">467</span>
+<span id="468">468</span>
+<span id="469">469</span>
+<span id="470">470</span>
+<span id="471">471</span>
+<span id="472">472</span>
+<span id="473">473</span>
+<span id="474">474</span>
+<span id="475">475</span>
+<span id="476">476</span>
+<span id="477">477</span>
+<span id="478">478</span>
+<span id="479">479</span>
+<span id="480">480</span>
+<span id="481">481</span>
+<span id="482">482</span>
+<span id="483">483</span>
+<span id="484">484</span>
+<span id="485">485</span>
+<span id="486">486</span>
+<span id="487">487</span>
+<span id="488">488</span>
+<span id="489">489</span>
+<span id="490">490</span>
+<span id="491">491</span>
+<span id="492">492</span>
+<span id="493">493</span>
+<span id="494">494</span>
+<span id="495">495</span>
+<span id="496">496</span>
+<span id="497">497</span>
+<span id="498">498</span>
+<span id="499">499</span>
+<span id="500">500</span>
+<span id="501">501</span>
+<span id="502">502</span>
+<span id="503">503</span>
+<span id="504">504</span>
+<span id="505">505</span>
+<span id="506">506</span>
+<span id="507">507</span>
+<span id="508">508</span>
+<span id="509">509</span>
 </pre><pre class="rust"><code><span class="kw">use crate</span>::{
     error::{Error, <span class="prelude-ty">Result</span>},
     <span class="comment">// service::ReadDirState,
     </span>store::{<span class="self">self</span>, Store},
-    types::{Location, Message, UserAttribute},
+    types::{LfsStorage, Location, Message, UserAttribute},
     Bytes,
 };
 
 <span class="attribute">#[derive(Clone)]
 </span><span class="kw">pub struct </span>ReadDirState {
     real_dir: PathBuf,
+    location: Location,
     last: usize,
 }
 
@@ -462,6 +534,8 @@
     fs::{DirEntry, Metadata},
     path::{Path, PathBuf},
 };
+
+<span class="kw">use </span><span class="kw">super</span>::Fs;
 <span class="kw">pub type </span>ClientId = PathBuf;
 
 <span class="kw">pub struct </span>ClientFilestore&lt;S&gt;
@@ -567,6 +641,219 @@
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;(<span class="prelude-ty">Option</span>&lt;Message&gt;, ReadDirFilesState)&gt;&gt;;
 }
 
+<span class="doccomment">/// Generic implementation allowing the use of any filesystem.
+</span><span class="kw">impl</span>&lt;S: Store&gt; ClientFilestore&lt;S&gt; {
+    <span class="kw">fn </span>read_dir_first_impl&lt;F: LfsStorage + <span class="lifetime">&#39;static</span>&gt;(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        clients_dir: <span class="kw-2">&amp;</span>PathBuf,
+        location: Location,
+        not_before: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>PathBuf&gt;,
+        fs: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Fs&lt;F&gt;,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;(DirEntry, ReadDirState)&gt;&gt; {
+        <span class="kw">let </span>dir = <span class="self">self</span>.actual_path(clients_dir)<span class="question-mark">?</span>;
+
+        <span class="prelude-val">Ok</span>(fs
+            .read_dir_and_then(<span class="kw-2">&amp;</span>dir, |it| {
+                <span class="comment">// this is an iterator with Item = (usize, Result&lt;DirEntry&gt;)
+                </span>it.enumerate()
+                    <span class="comment">// skip over `.` and `..`
+                    </span>.skip(<span class="number">2</span>)
+                    <span class="comment">// todo: try ?-ing out of this (the API matches std::fs, where read/write errors
+                    // can occur during operation)
+                    //
+                    // Option&lt;usize, Result&lt;DirEntry&gt;&gt; -&gt; ??
+                    </span>.map(|(i, entry)| (i, entry.unwrap()))
+                    <span class="comment">// if there is a &quot;not_before&quot; entry, skip all entries before it.
+                    </span>.find(|(<span class="kw">_</span>, entry)| {
+                        <span class="kw">if let </span><span class="prelude-val">Some</span>(not_before) = not_before {
+                            entry.file_name() == not_before.as_ref()
+                        } <span class="kw">else </span>{
+                            <span class="bool-val">true
+                        </span>}
+                    })
+                    <span class="comment">// if there is an entry, construct the state that needs storing out of it,
+                    // remove the prefix from the entry&#39;s path to not leak implementation details to
+                    // the client, and return both the entry and the state
+                    </span>.map(|(i, <span class="kw-2">mut </span>entry)| {
+                        <span class="kw">let </span>read_dir_state = ReadDirState {
+                            real_dir: dir.clone(),
+                            last: i,
+                            location,
+                        };
+                        <span class="kw">let </span>entry_client_path = <span class="self">self</span>.client_path(entry.path());
+                        <span class="comment">// trace_now!(&quot;converted path {} to client path {}&quot;, &amp;entry.path(), &amp;entry_client_path);
+                        // This is a hidden function which allows us to modify `entry.path`.
+                        // In regular use, `DirEntry` is not supposed to be constructable by the user
+                        // (only by querying the filesystem), which is why the function is both
+                        // hidden and tagged &quot;unsafe&quot; to discourage use. Our use case here is precisely
+                        // the reason for its existence :)
+                        </span><span class="kw-2">*</span><span class="kw">unsafe </span>{ entry.path_buf_mut() } = entry_client_path;
+                        (entry, read_dir_state)
+
+                        <span class="comment">// the `ok_or` dummy error followed by the `ok` in the next line is because
+                        // `read_dir_and_then` wants to see Results (although we naturally have an Option
+                        // at this point)
+                    </span>})
+                    .ok_or(littlefs2::io::Error::Io)
+            })
+            .ok())
+    }
+    <span class="kw">fn </span>read_dir_next_impl&lt;F: LfsStorage + <span class="lifetime">&#39;static</span>&gt;(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        state: ReadDirState,
+        fs: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Fs&lt;F&gt;,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;(DirEntry, ReadDirState)&gt;&gt; {
+        <span class="kw">let </span>ReadDirState {
+            real_dir,
+            last,
+            location,
+        } = state;
+
+        <span class="comment">// all we want to do here is skip just past the previously found entry
+        // in the directory iterator, then return it (plus state to continue on next call)
+        </span><span class="prelude-val">Ok</span>(fs
+            .read_dir_and_then(<span class="kw-2">&amp;</span>real_dir, |it| {
+                <span class="comment">// skip over previous
+                </span>it.enumerate()
+                    .nth(last + <span class="number">1</span>)
+                    <span class="comment">// entry is still a Result :/ (see question in `read_dir_first`)
+                    </span>.map(|(i, entry)| (i, entry.unwrap()))
+                    <span class="comment">// convert Option into Result, again because `read_dir_and_then` expects this
+                    </span>.map(|(i, <span class="kw-2">mut </span>entry)| {
+                        <span class="kw">let </span>read_dir_state = ReadDirState {
+                            real_dir: real_dir.clone(),
+                            last: i,
+                            location,
+                        };
+
+                        <span class="kw">let </span>entry_client_path = <span class="self">self</span>.client_path(entry.path());
+                        <span class="kw-2">*</span><span class="kw">unsafe </span>{ entry.path_buf_mut() } = entry_client_path;
+
+                        (entry, read_dir_state)
+                    })
+                    .ok_or(littlefs2::io::Error::Io)
+            })
+            .ok())
+    }
+    <span class="kw">fn </span>read_dir_files_first_impl&lt;F: LfsStorage + <span class="lifetime">&#39;static</span>&gt;(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        clients_dir: <span class="kw-2">&amp;</span>PathBuf,
+        location: Location,
+        user_attribute: <span class="prelude-ty">Option</span>&lt;UserAttribute&gt;,
+        fs: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Fs&lt;F&gt;,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;(<span class="prelude-ty">Option</span>&lt;Message&gt;, ReadDirFilesState)&gt;&gt; {
+        <span class="kw">let </span>dir = <span class="self">self</span>.actual_path(clients_dir)<span class="question-mark">?</span>;
+
+        <span class="prelude-val">Ok</span>(fs
+            .read_dir_and_then(<span class="kw-2">&amp;</span>dir, |it| {
+                <span class="comment">// this is an iterator with Item = (usize, Result&lt;DirEntry&gt;)
+                </span>it.enumerate()
+                    <span class="comment">// todo: try ?-ing out of this (the API matches std::fs, where read/write errors
+                    // can occur during operation)
+                    //
+                    // Option&lt;usize, Result&lt;DirEntry&gt;&gt; -&gt; ??
+                    </span>.map(|(i, entry)| (i, entry.unwrap()))
+                    <span class="comment">// skip over directories (including `.` and `..`)
+                    </span>.filter(|(<span class="kw">_</span>, entry)| entry.file_type().is_file())
+                    <span class="comment">// take first entry that meets requirements
+                    </span>.find(|(<span class="kw">_</span>, entry)| {
+                        <span class="kw">if let </span><span class="prelude-val">Some</span>(user_attribute) = user_attribute.as_ref() {
+                            <span class="kw">let </span><span class="kw-2">mut </span>path = dir.clone();
+                            path.push(entry.file_name());
+                            <span class="kw">let </span>attribute = fs
+                                .attribute(<span class="kw-2">&amp;</span>path, <span class="kw">crate</span>::config::USER_ATTRIBUTE_NUMBER)
+                                .unwrap();
+
+                            <span class="kw">if let </span><span class="prelude-val">Some</span>(attribute) = attribute {
+                                user_attribute == attribute.data()
+                            } <span class="kw">else </span>{
+                                <span class="bool-val">false
+                            </span>}
+                        } <span class="kw">else </span>{
+                            <span class="bool-val">true
+                        </span>}
+                    })
+                    <span class="comment">// if there is an entry, construct the state that needs storing out of it,
+                    // and return the file&#39;s contents.
+                    // the client, and return both the entry and the state
+                    </span>.map(|(i, entry)| {
+                        <span class="kw">let </span>read_dir_files_state = ReadDirFilesState {
+                            real_dir: dir.clone(),
+                            last: i,
+                            location,
+                            user_attribute,
+                        };
+                        <span class="comment">// The semantics is that for a non-existent file, we return None (not an error)
+                        </span><span class="kw">let </span>data = store::read(<span class="self">self</span>.store, location, entry.path()).ok();
+                        (data, read_dir_files_state)
+
+                        <span class="comment">// the `ok_or` dummy error followed by the `ok` in the next line is because
+                        // `read_dir_and_then` wants to see Results (although we naturally have an Option
+                        // at this point)
+                    </span>})
+                    .ok_or(littlefs2::io::Error::Io)
+            })
+            .ok())
+    }
+
+    <span class="kw">fn </span>read_dir_files_next_impl&lt;F: LfsStorage + <span class="lifetime">&#39;static</span>&gt;(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        state: ReadDirFilesState,
+        fs: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Fs&lt;F&gt;,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;(<span class="prelude-ty">Option</span>&lt;Message&gt;, ReadDirFilesState)&gt;&gt; {
+        <span class="kw">let </span>ReadDirFilesState {
+            real_dir,
+            last,
+            location,
+            user_attribute,
+        } = state;
+
+        <span class="comment">// all we want to do here is skip just past the previously found entry
+        // in the directory iterator, then return it (plus state to continue on next call)
+        </span><span class="prelude-val">Ok</span>(fs
+            .read_dir_and_then(<span class="kw-2">&amp;</span>real_dir, |it| {
+                <span class="comment">// skip over previous
+                </span>it.enumerate()
+                    .skip(last + <span class="number">1</span>)
+                    <span class="comment">// entry is still a Result :/ (see question in `read_dir_first`)
+                    </span>.map(|(i, entry)| (i, entry.unwrap()))
+                    <span class="comment">// skip over directories (including `.` and `..`)
+                    </span>.filter(|(<span class="kw">_</span>, entry)| entry.file_type().is_file())
+                    <span class="comment">// take first entry that meets requirements
+                    </span>.find(|(<span class="kw">_</span>, entry)| {
+                        <span class="kw">if let </span><span class="prelude-val">Some</span>(user_attribute) = user_attribute.as_ref() {
+                            <span class="kw">let </span><span class="kw-2">mut </span>path = real_dir.clone();
+                            path.push(entry.file_name());
+                            <span class="kw">let </span>attribute = fs
+                                .attribute(<span class="kw-2">&amp;</span>path, <span class="kw">crate</span>::config::USER_ATTRIBUTE_NUMBER)
+                                .unwrap();
+                            <span class="kw">if let </span><span class="prelude-val">Some</span>(attribute) = attribute {
+                                user_attribute == attribute.data()
+                            } <span class="kw">else </span>{
+                                <span class="bool-val">false
+                            </span>}
+                        } <span class="kw">else </span>{
+                            <span class="bool-val">true
+                        </span>}
+                    })
+                    .map(|(i, entry)| {
+                        <span class="kw">let </span>read_dir_files_state = ReadDirFilesState {
+                            real_dir: real_dir.clone(),
+                            last: i,
+                            location,
+                            user_attribute,
+                        };
+                        <span class="comment">// The semantics is that for a non-existent file, we return None (not an error)
+                        </span><span class="kw">let </span>data = store::read(<span class="self">self</span>.store, location, entry.path()).ok();
+                        (data, read_dir_files_state)
+                    })
+                    <span class="comment">// convert Option into Result, again because `read_dir_and_then` expects this
+                    </span>.ok_or(littlefs2::io::Error::Io)
+            })
+            .ok())
+    }
+}
+
 <span class="kw">impl</span>&lt;S: Store&gt; Filestore <span class="kw">for </span>ClientFilestore&lt;S&gt; {
     <span class="kw">fn </span>read&lt;<span class="kw">const </span>N: usize&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>PathBuf, location: Location) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&lt;N&gt;&gt; {
         <span class="kw">let </span>path = <span class="self">self</span>.actual_path(path)<span class="question-mark">?</span>;
@@ -622,87 +909,25 @@
         location: Location,
         not_before: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>PathBuf&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;(DirEntry, ReadDirState)&gt;&gt; {
-        <span class="kw">if </span>location != Location::Internal {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::RequestNotAvailable);
+        <span class="kw">match </span>location {
+            Location::Internal =&gt; {
+                <span class="self">self</span>.read_dir_first_impl(clients_dir, location, not_before, <span class="self">self</span>.store.ifs())
+            }
+            Location::External =&gt; {
+                <span class="self">self</span>.read_dir_first_impl(clients_dir, location, not_before, <span class="self">self</span>.store.efs())
+            }
+            Location::Volatile =&gt; {
+                <span class="self">self</span>.read_dir_first_impl(clients_dir, location, not_before, <span class="self">self</span>.store.vfs())
+            }
         }
-        <span class="kw">let </span>fs = <span class="self">self</span>.store.ifs();
-
-        <span class="kw">let </span>dir = <span class="self">self</span>.actual_path(clients_dir)<span class="question-mark">?</span>;
-
-        <span class="prelude-val">Ok</span>(fs
-            .read_dir_and_then(<span class="kw-2">&amp;</span>dir, |it| {
-                <span class="comment">// this is an iterator with Item = (usize, Result&lt;DirEntry&gt;)
-                </span>it.enumerate()
-                    <span class="comment">// skip over `.` and `..`
-                    </span>.skip(<span class="number">2</span>)
-                    <span class="comment">// todo: try ?-ing out of this (the API matches std::fs, where read/write errors
-                    // can occur during operation)
-                    //
-                    // Option&lt;usize, Result&lt;DirEntry&gt;&gt; -&gt; ??
-                    </span>.map(|(i, entry)| (i, entry.unwrap()))
-                    <span class="comment">// if there is a &quot;not_before&quot; entry, skip all entries before it.
-                    </span>.find(|(<span class="kw">_</span>, entry)| {
-                        <span class="kw">if let </span><span class="prelude-val">Some</span>(not_before) = not_before {
-                            entry.file_name() == not_before.as_ref()
-                        } <span class="kw">else </span>{
-                            <span class="bool-val">true
-                        </span>}
-                    })
-                    <span class="comment">// if there is an entry, construct the state that needs storing out of it,
-                    // remove the prefix from the entry&#39;s path to not leak implementation details to
-                    // the client, and return both the entry and the state
-                    </span>.map(|(i, <span class="kw-2">mut </span>entry)| {
-                        <span class="kw">let </span>read_dir_state = ReadDirState {
-                            real_dir: dir.clone(),
-                            last: i,
-                        };
-                        <span class="kw">let </span>entry_client_path = <span class="self">self</span>.client_path(entry.path());
-                        <span class="comment">// trace_now!(&quot;converted path {} to client path {}&quot;, &amp;entry.path(), &amp;entry_client_path);
-                        // This is a hidden function which allows us to modify `entry.path`.
-                        // In regular use, `DirEntry` is not supposed to be constructable by the user
-                        // (only by querying the filesystem), which is why the function is both
-                        // hidden and tagged &quot;unsafe&quot; to discourage use. Our use case here is precisely
-                        // the reason for its existence :)
-                        </span><span class="kw-2">*</span><span class="kw">unsafe </span>{ entry.path_buf_mut() } = entry_client_path;
-                        (entry, read_dir_state)
-
-                        <span class="comment">// the `ok_or` dummy error followed by the `ok` in the next line is because
-                        // `read_dir_and_then` wants to see Results (although we naturally have an Option
-                        // at this point)
-                    </span>})
-                    .ok_or(littlefs2::io::Error::Io)
-            })
-            .ok())
     }
 
     <span class="kw">fn </span>read_dir_next(<span class="kw-2">&amp;mut </span><span class="self">self</span>, state: ReadDirState) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;(DirEntry, ReadDirState)&gt;&gt; {
-        <span class="kw">let </span>ReadDirState { real_dir, last } = state;
-        <span class="kw">let </span>fs = <span class="self">self</span>.store.ifs();
-
-        <span class="comment">// all we want to do here is skip just past the previously found entry
-        // in the directory iterator, then return it (plus state to continue on next call)
-        </span><span class="prelude-val">Ok</span>(fs
-            .read_dir_and_then(<span class="kw-2">&amp;</span>real_dir, |it| {
-                <span class="comment">// skip over previous
-                </span>it.enumerate()
-                    .nth(last + <span class="number">1</span>)
-                    <span class="comment">// entry is still a Result :/ (see question in `read_dir_first`)
-                    </span>.map(|(i, entry)| (i, entry.unwrap()))
-                    <span class="comment">// convert Option into Result, again because `read_dir_and_then` expects this
-                    </span>.map(|(i, <span class="kw-2">mut </span>entry)| {
-                        <span class="kw">let </span>read_dir_state = ReadDirState {
-                            real_dir: real_dir.clone(),
-                            last: i,
-                        };
-
-                        <span class="kw">let </span>entry_client_path = <span class="self">self</span>.client_path(entry.path());
-                        <span class="kw-2">*</span><span class="kw">unsafe </span>{ entry.path_buf_mut() } = entry_client_path;
-
-                        (entry, read_dir_state)
-                    })
-                    .ok_or(littlefs2::io::Error::Io)
-            })
-            .ok())
+        <span class="kw">match </span>state.location {
+            Location::Internal =&gt; <span class="self">self</span>.read_dir_next_impl(state, <span class="self">self</span>.store.ifs()),
+            Location::External =&gt; <span class="self">self</span>.read_dir_next_impl(state, <span class="self">self</span>.store.efs()),
+            Location::Volatile =&gt; <span class="self">self</span>.read_dir_next_impl(state, <span class="self">self</span>.store.vfs()),
+        }
     }
 
     <span class="kw">fn </span>read_dir_files_first(
@@ -711,120 +936,37 @@
         location: Location,
         user_attribute: <span class="prelude-ty">Option</span>&lt;UserAttribute&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;(<span class="prelude-ty">Option</span>&lt;Message&gt;, ReadDirFilesState)&gt;&gt; {
-        <span class="kw">if </span>location != Location::Internal {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::RequestNotAvailable);
+        <span class="kw">match </span>location {
+            Location::Internal =&gt; <span class="self">self</span>.read_dir_files_first_impl(
+                clients_dir,
+                location,
+                user_attribute,
+                <span class="self">self</span>.store.ifs(),
+            ),
+            Location::External =&gt; <span class="self">self</span>.read_dir_files_first_impl(
+                clients_dir,
+                location,
+                user_attribute,
+                <span class="self">self</span>.store.efs(),
+            ),
+            Location::Volatile =&gt; <span class="self">self</span>.read_dir_files_first_impl(
+                clients_dir,
+                location,
+                user_attribute,
+                <span class="self">self</span>.store.vfs(),
+            ),
         }
-        <span class="kw">let </span>fs = <span class="self">self</span>.store.ifs();
-
-        <span class="kw">let </span>dir = <span class="self">self</span>.actual_path(clients_dir)<span class="question-mark">?</span>;
-
-        <span class="prelude-val">Ok</span>(fs
-            .read_dir_and_then(<span class="kw-2">&amp;</span>dir, |it| {
-                <span class="comment">// this is an iterator with Item = (usize, Result&lt;DirEntry&gt;)
-                </span>it.enumerate()
-                    <span class="comment">// todo: try ?-ing out of this (the API matches std::fs, where read/write errors
-                    // can occur during operation)
-                    //
-                    // Option&lt;usize, Result&lt;DirEntry&gt;&gt; -&gt; ??
-                    </span>.map(|(i, entry)| (i, entry.unwrap()))
-                    <span class="comment">// skip over directories (including `.` and `..`)
-                    </span>.filter(|(<span class="kw">_</span>, entry)| entry.file_type().is_file())
-                    <span class="comment">// take first entry that meets requirements
-                    </span>.find(|(<span class="kw">_</span>, entry)| {
-                        <span class="kw">if let </span><span class="prelude-val">Some</span>(user_attribute) = user_attribute.as_ref() {
-                            <span class="kw">let </span><span class="kw-2">mut </span>path = dir.clone();
-                            path.push(entry.file_name());
-                            <span class="kw">let </span>attribute = fs
-                                .attribute(<span class="kw-2">&amp;</span>path, <span class="kw">crate</span>::config::USER_ATTRIBUTE_NUMBER)
-                                .unwrap();
-
-                            <span class="kw">if let </span><span class="prelude-val">Some</span>(attribute) = attribute {
-                                user_attribute == attribute.data()
-                            } <span class="kw">else </span>{
-                                <span class="bool-val">false
-                            </span>}
-                        } <span class="kw">else </span>{
-                            <span class="bool-val">true
-                        </span>}
-                    })
-                    <span class="comment">// if there is an entry, construct the state that needs storing out of it,
-                    // and return the file&#39;s contents.
-                    // the client, and return both the entry and the state
-                    </span>.map(|(i, entry)| {
-                        <span class="kw">let </span>read_dir_files_state = ReadDirFilesState {
-                            real_dir: dir.clone(),
-                            last: i,
-                            location,
-                            user_attribute,
-                        };
-                        <span class="comment">// The semantics is that for a non-existent file, we return None (not an error)
-                        </span><span class="kw">let </span>data = store::read(<span class="self">self</span>.store, location, entry.path()).ok();
-                        (data, read_dir_files_state)
-
-                        <span class="comment">// the `ok_or` dummy error followed by the `ok` in the next line is because
-                        // `read_dir_and_then` wants to see Results (although we naturally have an Option
-                        // at this point)
-                    </span>})
-                    .ok_or(littlefs2::io::Error::Io)
-            })
-            .ok())
     }
 
     <span class="kw">fn </span>read_dir_files_next(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         state: ReadDirFilesState,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;(<span class="prelude-ty">Option</span>&lt;Message&gt;, ReadDirFilesState)&gt;&gt; {
-        <span class="kw">let </span>ReadDirFilesState {
-            real_dir,
-            last,
-            location,
-            user_attribute,
-        } = state;
-        <span class="kw">let </span>fs = <span class="self">self</span>.store.ifs();
-
-        <span class="comment">// all we want to do here is skip just past the previously found entry
-        // in the directory iterator, then return it (plus state to continue on next call)
-        </span><span class="prelude-val">Ok</span>(fs
-            .read_dir_and_then(<span class="kw-2">&amp;</span>real_dir, |it| {
-                <span class="comment">// skip over previous
-                </span>it.enumerate()
-                    .skip(last + <span class="number">1</span>)
-                    <span class="comment">// entry is still a Result :/ (see question in `read_dir_first`)
-                    </span>.map(|(i, entry)| (i, entry.unwrap()))
-                    <span class="comment">// skip over directories (including `.` and `..`)
-                    </span>.filter(|(<span class="kw">_</span>, entry)| entry.file_type().is_file())
-                    <span class="comment">// take first entry that meets requirements
-                    </span>.find(|(<span class="kw">_</span>, entry)| {
-                        <span class="kw">if let </span><span class="prelude-val">Some</span>(user_attribute) = user_attribute.as_ref() {
-                            <span class="kw">let </span><span class="kw-2">mut </span>path = real_dir.clone();
-                            path.push(entry.file_name());
-                            <span class="kw">let </span>attribute = fs
-                                .attribute(<span class="kw-2">&amp;</span>path, <span class="kw">crate</span>::config::USER_ATTRIBUTE_NUMBER)
-                                .unwrap();
-                            <span class="kw">if let </span><span class="prelude-val">Some</span>(attribute) = attribute {
-                                user_attribute == attribute.data()
-                            } <span class="kw">else </span>{
-                                <span class="bool-val">false
-                            </span>}
-                        } <span class="kw">else </span>{
-                            <span class="bool-val">true
-                        </span>}
-                    })
-                    .map(|(i, entry)| {
-                        <span class="kw">let </span>read_dir_files_state = ReadDirFilesState {
-                            real_dir: real_dir.clone(),
-                            last: i,
-                            location,
-                            user_attribute,
-                        };
-                        <span class="comment">// The semantics is that for a non-existent file, we return None (not an error)
-                        </span><span class="kw">let </span>data = store::read(<span class="self">self</span>.store, location, entry.path()).ok();
-                        (data, read_dir_files_state)
-                    })
-                    <span class="comment">// convert Option into Result, again because `read_dir_and_then` expects this
-                    </span>.ok_or(littlefs2::io::Error::Io)
-            })
-            .ok())
+        <span class="kw">match </span>state.location {
+            Location::Internal =&gt; <span class="self">self</span>.read_dir_files_next_impl(state, <span class="self">self</span>.store.ifs()),
+            Location::External =&gt; <span class="self">self</span>.read_dir_files_next_impl(state, <span class="self">self</span>.store.efs()),
+            Location::Volatile =&gt; <span class="self">self</span>.read_dir_files_next_impl(state, <span class="self">self</span>.store.vfs()),
+        }
     }
 
     <span class="kw">fn </span>locate_file(
