@@ -511,6 +511,22 @@ impl<P: Platform> ServiceResources<P> {
 
                 }.map(Reply::WrapKey)
             },
+            Request::WrapToFile(request) => {
+                match request.mechanism {
+                    #[cfg(feature = "chacha8-poly1305")]
+                    Mechanism::Chacha8Poly1305 => mechanisms::Chacha8Poly1305::wrap_to_file(keystore, filestore, request),
+                    _ => Err(Error::MechanismNotAvailable),
+
+                }.map(Reply::WrapToFile)
+            },
+            Request::UnwrapFromFile(request) => {
+                match request.mechanism {
+                    #[cfg(feature = "chacha8-poly1305")]
+                    Mechanism::Chacha8Poly1305 => mechanisms::Chacha8Poly1305::unwrap_from_file(keystore, filestore, request),
+                    _ => Err(Error::MechanismNotAvailable),
+
+                }.map(Reply::UnwrapFromFile)
+            },
 
             Request::RequestUserConsent(request) => {
                 // assert_eq!(request.level, consent::Level::Normal);

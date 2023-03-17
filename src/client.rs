@@ -531,6 +531,54 @@ pub trait CryptoClient: PollClient {
             associated_data,
         })
     }
+
+    /// Wrap a key to a file
+    /// This enables wrapping keys that don't fit in the buffers used by
+    /// [`write_file`](FilesystemClient::write_file) and [`read_file`](FilesystemClient::read_file)
+    fn wrap_to_file(
+        &mut self,
+        mechanism: Mechanism,
+        wrapping_key: KeyId,
+        key: KeyId,
+        path: PathBuf,
+        location: Location,
+        associated_data: &[u8],
+    ) -> ClientResult<'_, reply::WrapToFile, Self> {
+        let associated_data =
+            Bytes::from_slice(associated_data).map_err(|_| ClientError::DataTooLarge)?;
+        self.request(request::WrapToFile {
+            mechanism,
+            wrapping_key,
+            key,
+            path,
+            location,
+            associated_data,
+        })
+    }
+
+    /// Wrap a key to a file
+    /// This enables wrapping keys that don't fit in the buffers used by
+    /// [`write_file`](FilesystemClient::write_file) and [`read_file`](FilesystemClient::read_file)
+    fn unwrap_from_file(
+        &mut self,
+        mechanism: Mechanism,
+        key: KeyId,
+        path: PathBuf,
+        file_location: Location,
+        key_location: Location,
+        associated_data: &[u8],
+    ) -> ClientResult<'_, reply::UnwrapFromFile, Self> {
+        let associated_data =
+            Bytes::from_slice(associated_data).map_err(|_| ClientError::DataTooLarge)?;
+        self.request(request::UnwrapFromFile {
+            mechanism,
+            key,
+            path,
+            file_location,
+            key_location,
+            associated_data,
+        })
+    }
 }
 
 /// Create counters, increment existing counters.

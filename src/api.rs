@@ -52,8 +52,10 @@ generate_enums! {
     UnsafeInjectKey: 20
     UnsafeInjectSharedKey: 21
     UnwrapKey: 22
+    UnwrapFromFile: 70
     Verify: 23
     WrapKey: 24
+    WrapToFile: 71
 
     Attest: 0xFF
 
@@ -313,6 +315,23 @@ pub mod request {
           - key: KeyId
           - associated_data: ShortData
 
+        // this should always be an AEAD algorithm
+        WrapToFile:
+          - mechanism: Mechanism
+          - wrapping_key: KeyId
+          - key: KeyId
+          - path: PathBuf
+          - location: Location
+          - associated_data: Message
+
+        UnwrapFromFile:
+          - mechanism: Mechanism
+          - key: KeyId
+          - path: PathBuf
+          - file_location: Location
+          - key_location: Location
+          - associated_data: Message
+
         RequestUserConsent:
           - level: consent::Level
           - timeout_milliseconds: u32
@@ -467,8 +486,14 @@ pub mod reply {
         UnwrapKey:
             - key: Option<KeyId>
 
+        UnwrapFromFile:
+          - key: Option<KeyId>
+
         WrapKey:
             - wrapped_key: Message
+
+        // this should always be an AEAD algorithm
+        WrapToFile:
 
         // UI
         RequestUserConsent:
