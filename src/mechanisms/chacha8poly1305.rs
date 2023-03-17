@@ -63,7 +63,12 @@ impl super::Chacha8Poly1305 {
         use chacha20poly1305::ChaCha8Poly1305;
         let mut data: Bytes<WRAPPED_TO_FILE_LEN> =
             filestore.read(&request.path, request.file_location)?;
+
         let data_len = data.len();
+        if data_len < TAG_LEN + NONCE_LEN {
+            error!("Attempt to unwrap file that doesn't contain a key");
+            return Err(Error::InvalidSerializedKey);
+        }
         let (tmp, tag) = data.split_at_mut(data_len - TAG_LEN);
         let tmp_len = tmp.len();
         let (material, nonce) = tmp.split_at_mut(tmp_len - NONCE_LEN);
