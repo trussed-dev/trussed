@@ -637,7 +637,8 @@ fn filesystem() {
     .metadata
     .is_none(),);
 
-    let data = Bytes::from_slice(&[0; 20]).unwrap();
+    let data = Bytes::from_slice(b"test data").unwrap();
+    let more_data = Bytes::from_slice(b"there's more").unwrap();
     block!(client
         .write_file(
             Location::Internal,
@@ -654,6 +655,59 @@ fn filesystem() {
     .expect("no errors")
     .data;
     assert_eq!(data, recv_data);
+
+    let partial_data = block!(client
+        .read_file_chunk(
+            Location::Internal,
+            PathBuf::from("test_file"),
+            OpenSeekFrom::Start(data.len() as u32)
+        )
+        .unwrap())
+    .unwrap();
+    assert_eq!(&partial_data.data, &[]);
+    assert_eq!(partial_data.len, data.len());
+
+    let partial_data = block!(client
+        .read_file_chunk(
+            Location::Internal,
+            PathBuf::from("test_file"),
+            OpenSeekFrom::Start(3)
+        )
+        .unwrap())
+    .unwrap();
+    assert_eq!(&partial_data.data, &data[3..]);
+    assert_eq!(partial_data.len, data.len());
+
+    let partial_data = block!(client
+        .read_file_chunk(
+            Location::Internal,
+            PathBuf::from("test_file"),
+            OpenSeekFrom::Start(data.len() as u32)
+        )
+        .unwrap())
+    .unwrap();
+    assert_eq!(&partial_data.data, &[]);
+    assert_eq!(partial_data.len, data.len());
+
+    block!(client
+        .write_file_chunk(
+            Location::Internal,
+            PathBuf::from("test_file"),
+            more_data.clone(),
+            OpenSeekFrom::Start(data.len() as u32)
+        )
+        .unwrap())
+    .unwrap();
+    let partial_data = block!(client
+        .read_file_chunk(
+            Location::Internal,
+            PathBuf::from("test_file"),
+            OpenSeekFrom::Start(data.len() as u32)
+        )
+        .unwrap())
+    .unwrap();
+    assert_eq!(&partial_data.data, &more_data);
+    assert_eq!(partial_data.len, data.len() + more_data.len());
 
     let metadata = block!(client
         .entry_metadata(Location::Internal, PathBuf::from("test_file"))

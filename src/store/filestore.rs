@@ -2,7 +2,7 @@ use crate::{
     error::{Error, Result},
     // service::ReadDirState,
     store::{self, Store},
-    types::{LfsStorage, Location, Message, UserAttribute},
+    types::{LfsStorage, Location, Message, OpenSeekFrom, UserAttribute},
     Bytes,
 };
 
@@ -76,7 +76,20 @@ impl<S: Store> ClientFilestore<S> {
 
 pub trait Filestore {
     fn read<const N: usize>(&mut self, path: &PathBuf, location: Location) -> Result<Bytes<N>>;
+    fn read_chunk<const N: usize>(
+        &mut self,
+        path: &PathBuf,
+        location: Location,
+        pos: OpenSeekFrom,
+    ) -> Result<(Bytes<N>, usize)>;
     fn write(&mut self, path: &PathBuf, location: Location, data: &[u8]) -> Result<()>;
+    fn write_chunk(
+        &mut self,
+        path: &PathBuf,
+        location: Location,
+        data: &[u8],
+        pos: OpenSeekFrom,
+    ) -> Result<()>;
     fn exists(&mut self, path: &PathBuf, location: Location) -> bool;
     fn metadata(&mut self, path: &PathBuf, location: Location) -> Result<Option<Metadata>>;
     fn remove_file(&mut self, path: &PathBuf, location: Location) -> Result<()>;
@@ -351,10 +364,31 @@ impl<S: Store> Filestore for ClientFilestore<S> {
 
         store::read(self.store, location, &path)
     }
+    fn read_chunk<const N: usize>(
+        &mut self,
+        path: &PathBuf,
+        location: Location,
+        pos: OpenSeekFrom,
+    ) -> Result<(Bytes<N>, usize)> {
+        let path = self.actual_path(path)?;
+
+        store::read_chunk(self.store, location, &path, pos)
+    }
 
     fn write(&mut self, path: &PathBuf, location: Location, data: &[u8]) -> Result<()> {
         let path = self.actual_path(path)?;
         store::store(self.store, location, &path, data)
+    }
+
+    fn write_chunk(
+        &mut self,
+        path: &PathBuf,
+        location: Location,
+        data: &[u8],
+        pos: OpenSeekFrom,
+    ) -> Result<()> {
+        let path = self.actual_path(path)?;
+        store::write_chunk(self.store, location, &path, data, pos)
     }
 
     fn exists(&mut self, path: &PathBuf, location: Location) -> bool {

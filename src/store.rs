@@ -76,6 +76,7 @@ use crate::types::*;
 #[allow(unused_imports)]
 #[cfg(feature = "semihosting")]
 use cortex_m_semihosting::hprintln;
+use littlefs2::fs::File;
 use littlefs2::path::Path;
 
 pub mod certstore;
@@ -520,6 +521,38 @@ pub fn read<const N: usize>(
     .map_err(|_| Error::FilesystemReadFailure)
 }
 
+pub fn fs_read_chunk<Storage: LfsStorage, const N: usize>(
+    fs: &Filesystem<Storage>,
+    path: &Path,
+    pos: OpenSeekFrom,
+) -> Result<(Bytes<N>, usize), Error> {
+    let mut contents = Bytes::default();
+    contents.resize_default(contents.capacity()).unwrap();
+    let file_len = File::open_and_then(fs, path, |file| {
+        file.seek(pos.into())?;
+        let read_n = file.read(&mut contents)?;
+        contents.truncate(read_n);
+        file.len()
+    })
+    .map_err(|_| Error::FilesystemReadFailure)?;
+    Ok((contents, file_len))
+}
+/// Reads contents from path in location of store.
+#[inline(never)]
+pub fn read_chunk<const N: usize>(
+    store: impl Store,
+    location: Location,
+    path: &Path,
+    pos: OpenSeekFrom,
+) -> Result<(Bytes<N>, usize), Error> {
+    debug_now!("reading chunk {},{:?}", &path, pos);
+    match location {
+        Location::Internal => fs_read_chunk(store.ifs(), path, pos),
+        Location::External => fs_read_chunk(store.efs(), path, pos),
+        Location::Volatile => fs_read_chunk(store.vfs(), path, pos),
+    }
+}
+
 /// Writes contents to path in location of store.
 #[inline(never)]
 pub fn write(
@@ -533,6 +566,42 @@ pub fn write(
         Location::Internal => store.ifs().write(path, contents),
         Location::External => store.efs().write(path, contents),
         Location::Volatile => store.vfs().write(path, contents),
+    }
+    .map_err(|_| Error::FilesystemWriteFailure)
+}
+
+pub fn fs_write_chunk<Storage: LfsStorage>(
+    fs: &Filesystem<Storage>,
+    path: &Path,
+    contents: &[u8],
+    pos: OpenSeekFrom,
+) -> Result<(), Error> {
+    File::<Storage>::with_options()
+        .read(true)
+        .write(true)
+        .open_and_then(fs, path, |file| {
+            use littlefs2::io::Write;
+            file.seek(pos.into())?;
+            file.write_all(contents)
+        })
+        .map_err(|_| Error::FilesystemReadFailure)?;
+    Ok(())
+}
+
+/// Writes contents to path in location of store.
+#[inline(never)]
+pub fn write_chunk(
+    store: impl Store,
+    location: Location,
+    path: &Path,
+    contents: &[u8],
+    pos: OpenSeekFrom,
+) -> Result<(), Error> {
+    debug_now!("writing {}", &path);
+    match location {
+        Location::Internal => fs_write_chunk(store.ifs(), path, contents, pos),
+        Location::External => fs_write_chunk(store.efs(), path, contents, pos),
+        Location::Volatile => fs_write_chunk(store.vfs(), path, contents, pos),
     }
     .map_err(|_| Error::FilesystemWriteFailure)
 }

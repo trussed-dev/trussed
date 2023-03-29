@@ -4,6 +4,7 @@ use core::ops::Deref;
 pub use generic_array::GenericArray;
 
 pub use heapless::{String, Vec};
+use littlefs2::io::SeekFrom;
 
 pub use crate::Bytes;
 
@@ -617,3 +618,21 @@ pub enum SignatureSerialization {
 }
 
 pub type UserAttribute = Bytes<MAX_USER_ATTRIBUTE_LENGTH>;
+
+/// Enumeration of possible methods to seek within an file that was just opened
+/// Used in the [`read_chunk`](crate::store::read_chunk) and [`write_chunk`](crate::store::write_chunk) calls,
+/// Where [`SeekFrom::Current`](littlefs2::io::SeekFrom::Current) would not make sense.
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
+pub enum OpenSeekFrom {
+    Start(u32),
+    End(i32),
+}
+
+impl From<OpenSeekFrom> for SeekFrom {
+    fn from(value: OpenSeekFrom) -> Self {
+        match value {
+            OpenSeekFrom::Start(o) => Self::Start(o),
+            OpenSeekFrom::End(o) => Self::End(o),
+        }
+    }
+}

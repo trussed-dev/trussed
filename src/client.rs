@@ -622,6 +622,19 @@ pub trait FilesystemClient: PollClient {
         self.request(request::ReadFile { location, path })
     }
 
+    fn read_file_chunk(
+        &mut self,
+        location: Location,
+        path: PathBuf,
+        pos: OpenSeekFrom,
+    ) -> ClientResult<'_, reply::ReadChunk, Self> {
+        self.request(request::ReadChunk {
+            location,
+            path,
+            pos,
+        })
+    }
+
     /// Fetch the Metadata for a file or directory
     ///
     /// If the file doesn't exists, return None
@@ -658,6 +671,21 @@ pub trait FilesystemClient: PollClient {
             path,
             data,
             user_attribute,
+        })
+    }
+
+    fn write_file_chunk(
+        &mut self,
+        location: Location,
+        path: PathBuf,
+        data: Message,
+        pos: OpenSeekFrom,
+    ) -> ClientResult<'_, reply::WriteChunk, Self> {
+        self.request(request::WriteChunk {
+            location,
+            path,
+            data,
+            pos,
         })
     }
 }

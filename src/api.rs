@@ -43,12 +43,14 @@ generate_enums! {
     ReadDirFilesFirst: 13
     ReadDirFilesNext: 14
     ReadFile: 15
+    ReadChunk: 65
     Metadata: 26
     // ReadCounter: 7
     RandomBytes: 16
     SerializeKey: 17
     Sign: 18
     WriteFile: 19
+    WriteChunk: 66
     UnsafeInjectKey: 20
     UnsafeInjectSharedKey: 21
     UnwrapKey: 22
@@ -241,6 +243,10 @@ pub mod request {
         ReadFile:
           - location: Location
           - path: PathBuf
+        ReadChunk:
+          - location: Location
+          - pos: OpenSeekFrom
+          - path: PathBuf
 
         Metadata:
           - location: Location
@@ -281,6 +287,12 @@ pub mod request {
           - path: PathBuf
           - data: Message
           - user_attribute: Option<UserAttribute>
+
+        WriteChunk:
+          - location: Location
+          - pos: OpenSeekFrom
+          - path: PathBuf
+          - data: Message
 
         UnsafeInjectKey:
           - mechanism: Mechanism        // -> implies key type
@@ -430,6 +442,9 @@ pub mod reply {
 
         ReadFile:
           - data: Message
+        ReadChunk:
+          - data: Message
+          - len: usize
 
         Metadata:
           - metadata: Option<crate::types::Metadata>
@@ -454,6 +469,7 @@ pub mod reply {
             - signature: Signature
 
         WriteFile:
+        WriteChunk:
 
         Verify:
             - valid: bool

@@ -433,6 +433,14 @@ impl<P: Platform> ServiceResources<P> {
                 }))
             }
 
+            Request::ReadChunk(request) => {
+                let (data,len) = filestore.read_chunk(&request.path,request.location,request.pos)?;
+                Ok(Reply::ReadChunk(reply::ReadChunk {
+                    data,
+                    len,
+                }))
+            }
+
             Request::Metadata(request) => {
                 Ok(Reply::Metadata(reply::Metadata{
                     metadata: filestore.metadata(&request.path, request.location)?
@@ -481,6 +489,10 @@ impl<P: Platform> ServiceResources<P> {
             Request::WriteFile(request) => {
                 filestore.write(&request.path, request.location, &request.data)?;
                 Ok(Reply::WriteFile(reply::WriteFile {} ))
+            }
+            Request::WriteChunk(request) => {
+                 filestore.write_chunk(&request.path, request.location, &request.data,request.pos)?;
+                Ok(Reply::WriteChunk(reply::WriteChunk {} ))
             }
 
             Request::UnwrapKey(request) => {
