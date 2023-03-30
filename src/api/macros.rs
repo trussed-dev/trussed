@@ -21,6 +21,19 @@ macro_rules! generate_enums {
         )*
     }
 
+    const _: () = {
+        // Compile failure if a request ID is reused
+        fn _check_request_id_conflicts() {
+            match 0u8 {
+                0 => unreachable!(),
+                $(
+                    $index => unreachable!(),
+                )*
+                _ => todo!()
+            }
+        }
+    };
+
     impl From<&Request> for u8 {
         fn from(request: &Request) -> u8 {
             match request {
