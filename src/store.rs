@@ -480,10 +480,7 @@ macro_rules! store {
 }
 
 // TODO: replace this with "fs.create_dir_all(path.parent())"
-pub fn create_directories<'s, S: LfsStorage>(
-    fs: &Filesystem<'s, S>,
-    path: &Path,
-) -> Result<(), Error> {
+pub fn create_directories<S: LfsStorage>(fs: &Filesystem<S>, path: &Path) -> Result<(), Error> {
     // hprintln!("preparing {:?}", core::str::from_utf8(path).unwrap()).ok();
     let path_bytes = path.as_ref().as_bytes();
 
