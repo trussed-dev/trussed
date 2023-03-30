@@ -307,6 +307,7 @@ impl<P: Platform> ServiceResources<P> {
 
             // This is now preferably done using littlefs-fuse (when device is not yet locked),
             // and should be removed from firmware completely
+            #[cfg(debug_dump_store)]
             Request::DebugDumpStore(_request) => {
 
                 info_now!(":: PERSISTENT");
@@ -344,6 +345,9 @@ impl<P: Platform> ServiceResources<P> {
                 Ok(Reply::DebugDumpStore(reply::DebugDumpStore {}) )
 
             }
+
+            #[cfg(not(debug_dump_store))]
+            Request::DebugDumpStore(_request) => Err(Error::RequestNotAvailable),
 
             Request::ReadDirFirst(request) => {
                 let maybe_entry = match filestore.read_dir_first(&request.dir, request.location, request.not_before_filename.as_deref())? {
