@@ -312,6 +312,9 @@ impl<P: Platform> ServiceResources<P> {
                 info_now!(":: PERSISTENT");
                 recursively_list(self.platform.store().ifs(), path!("/"));
 
+                info_now!(":: EXTERNAL");
+                recursively_list(self.platform.store().efs(), PathBuf::from("/"));
+
                 info_now!(":: VOLATILE");
                 recursively_list(self.platform.store().vfs(), path!("/"));
 
