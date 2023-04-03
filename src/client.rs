@@ -674,6 +674,21 @@ pub trait FilesystemClient: PollClient {
         })
     }
 
+    fn start_chunked_write(
+        &mut self,
+        location: Location,
+        path: PathBuf,
+        data: Message,
+        user_attribute: Option<UserAttribute>,
+    ) -> ClientResult<'_, reply::StartChunkedWrite, Self> {
+        self.request(request::StartChunkedWrite {
+            location,
+            path,
+            data,
+            user_attribute,
+        })
+    }
+
     fn write_file_chunk(
         &mut self,
         location: Location,
@@ -687,6 +702,21 @@ pub trait FilesystemClient: PollClient {
             data,
             pos,
         })
+    }
+    fn flush_chunks(
+        &mut self,
+        location: Location,
+        path: PathBuf,
+    ) -> ClientResult<'_, reply::FlushChunks, Self> {
+        self.request(request::FlushChunks { location, path })
+    }
+
+    fn abort_chunked_write(
+        &mut self,
+        location: Location,
+        path: PathBuf,
+    ) -> ClientResult<'_, reply::AbortChunkedWrite, Self> {
+        self.request(request::AbortChunkedWrite { location, path })
     }
 }
 

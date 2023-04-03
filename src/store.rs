@@ -606,6 +606,21 @@ pub fn write_chunk(
     .map_err(|_| Error::FilesystemWriteFailure)
 }
 
+pub fn rename(
+    store: impl Store,
+    location: Location,
+    from_path: &Path,
+    to_path: &Path,
+) -> Result<(), Error> {
+    debug_now!("renaming {} to {}", from_path, to_path);
+    match location {
+        Location::Internal => store.ifs().rename(from_path, to_path),
+        Location::External => store.efs().rename(from_path, to_path),
+        Location::Volatile => store.vfs().rename(from_path, to_path),
+    }
+    .map_err(|_| Error::FilesystemWriteFailure)
+}
+
 /// Creates parent directory if necessary, then writes.
 #[inline(never)]
 pub fn store(

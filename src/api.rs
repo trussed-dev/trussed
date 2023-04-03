@@ -50,7 +50,10 @@ generate_enums! {
     SerializeKey: 17
     Sign: 18
     WriteFile: 19
-    WriteChunk: 66
+    StartChunkedWrite: 66
+    WriteChunk: 67
+    FlushChunks: 68
+    AbortChunkedWrite: 69
     UnsafeInjectKey: 20
     UnsafeInjectSharedKey: 21
     UnwrapKey: 22
@@ -288,11 +291,23 @@ pub mod request {
           - data: Message
           - user_attribute: Option<UserAttribute>
 
+        StartChunkedWrite:
+          - location: Location
+          - path: PathBuf
+          - data: Message
+          - user_attribute: Option<UserAttribute>
+
         WriteChunk:
           - location: Location
           - pos: OpenSeekFrom
           - path: PathBuf
           - data: Message
+        FlushChunks:
+          - location: Location
+          - path: PathBuf
+        AbortChunkedWrite:
+          - location: Location
+          - path: PathBuf
 
         UnsafeInjectKey:
           - mechanism: Mechanism        // -> implies key type
@@ -469,7 +484,11 @@ pub mod reply {
             - signature: Signature
 
         WriteFile:
+        StartChunkedWrite:
         WriteChunk:
+        FlushChunks:
+        AbortChunkedWrite:
+            - aborted: bool
 
         Verify:
             - valid: bool
