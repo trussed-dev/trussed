@@ -679,6 +679,8 @@ pub trait FilesystemClient: PollClient {
     ///
     /// More chunks can be written with [`write_file_chunk`](FilesystemClient::write_file_chunk).
     /// Before the data becomes readable, it needs to be flushed with [`flush_chunks`](FilesystemClient::flush_chunks), or aborted with [`abort_chunked_write`](FilesystemClient::abort_chunked_write)
+    ///
+    /// Chunked writes are buffered in memory. Failing to abort or flush a chunked write will lead to a memory leak, that can be solved by a power cycle.
     fn start_chunked_write(
         &mut self,
         location: Location,
