@@ -57,7 +57,7 @@ impl<S: Store> ClientFilestore<S> {
     }
 
     /// Partially written client files are store below `/<client_id>/part/`.
-    pub fn chunks_path(&self, client_path: &PathBuf) -> Result<PathBuf> {
+    pub fn chunks_path(&self, client_path: &PathBuf, location: Location) -> Result<PathBuf> {
         // Clients must not escape their namespace
         if client_path.as_ref().contains("..") {
             return Err(Error::InvalidPath);
@@ -65,7 +65,11 @@ impl<S: Store> ClientFilestore<S> {
 
         let mut path = PathBuf::new();
         path.push(&self.client_id);
-        path.push(&PathBuf::from("part"));
+        match location {
+            Location::Volatile => path.push(&PathBuf::from("vfs-part")),
+            Location::External => path.push(&PathBuf::from("efs-part")),
+            Location::Internal => path.push(&PathBuf::from("ifs-part")),
+        }
         path.push(client_path);
         Ok(path)
     }
@@ -408,8 +412,8 @@ impl<S: Store> Filestore for ClientFilestore<S> {
         location: Location,
         data: &[u8],
     ) -> Result<()> {
-        let path = self.chunks_path(path)?;
-        store::store(self.store, location, &path, data)
+        let path = self.chunks_path(path, location)?;
+        store::store(self.store, Location::Volatile, &path, data)
     }
 
     fn write_chunk(
@@ -419,21 +423,27 @@ impl<S: Store> Filestore for ClientFilestore<S> {
         data: &[u8],
         pos: OpenSeekFrom,
     ) -> Result<()> {
-        let path = self.chunks_path(path)?;
-        store::write_chunk(self.store, location, &path, data, pos)
+        let path = self.chunks_path(path, location)?;
+        store::write_chunk(self.store, Location::Volatile, &path, data, pos)
     }
 
     fn abort_chunked_write(&mut self, path: &PathBuf, location: Location) -> bool {
-        let Ok(path) = self.chunks_path(path) else {
+        let Ok(path) = self.chunks_path(path, location) else {
             return false;
         };
-        store::delete(self.store, location, &path)
+        store::delete(self.store, Location::Volatile, &path)
     }
 
     fn flush_chunks(&mut self, path: &PathBuf, location: Location) -> Result<()> {
-        let chunk_path = self.chunks_path(path)?;
+        let chunk_path = self.chunks_path(path, location)?;
         let client_path = self.actual_path(path)?;
-        store::rename(self.store, location, &chunk_path, &client_path)
+        store::move_file(
+            self.store,
+            Location::Volatile,
+            &chunk_path,
+            location,
+            &client_path,
+        )
     }
 
     fn exists(&mut self, path: &PathBuf, location: Location) -> bool {

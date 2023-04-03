@@ -77,6 +77,7 @@ use crate::types::*;
 #[cfg(feature = "semihosting")]
 use cortex_m_semihosting::hprintln;
 use littlefs2::fs::File;
+use littlefs2::io::Write;
 use littlefs2::path::Path;
 
 pub mod certstore;
@@ -580,7 +581,6 @@ pub fn fs_write_chunk<Storage: LfsStorage>(
         .read(true)
         .write(true)
         .open_and_then(fs, path, |file| {
-            use littlefs2::io::Write;
             file.seek(pos.into())?;
             file.write_all(contents)
         })
@@ -619,6 +619,108 @@ pub fn rename(
         Location::Volatile => store.vfs().rename(from_path, to_path),
     }
     .map_err(|_| Error::FilesystemWriteFailure)
+}
+
+pub fn move_file(
+    store: impl Store,
+    from_location: Location,
+    from_path: &Path,
+    to_location: Location,
+    to_path: &Path,
+) -> Result<(), Error> {
+    debug_now!(
+        "Moving {:?}({}) to {:?}({})",
+        from_location,
+        from_path,
+        to_location,
+        to_path
+    );
+
+    match to_location {
+        Location::Internal => create_directories(store.ifs(), to_path),
+        Location::External => create_directories(store.efs(), to_path),
+        Location::Volatile => create_directories(store.vfs(), to_path),
+    }
+    .map_err(|_err| {
+        error!("Failed to create directories chunks: {:?}", _err);
+        Error::FilesystemWriteFailure
+    })?;
+
+    let on_fail = |_err| {
+        error!("Failed to rename file: {:?}", _err);
+        Error::FilesystemWriteFailure
+    };
+    // Fast path for same-filesystem
+    match (from_location, to_location) {
+        (Location::Internal, Location::Internal) => {
+            return store.ifs().rename(from_path, to_path).map_err(on_fail)
+        }
+        (Location::External, Location::External) => {
+            return store.efs().rename(from_path, to_path).map_err(on_fail)
+        }
+        (Location::Volatile, Location::Volatile) => {
+            return store.vfs().rename(from_path, to_path).map_err(on_fail)
+        }
+        _ => {}
+    }
+
+    match from_location {
+        Location::Internal => {
+            move_file_step1(store, &**store.ifs(), from_path, to_location, to_path)
+        }
+        Location::External => {
+            move_file_step1(store, &**store.efs(), from_path, to_location, to_path)
+        }
+        Location::Volatile => {
+            move_file_step1(store, &**store.vfs(), from_path, to_location, to_path)
+        }
+    }
+}
+
+// Separate generic function to avoid having 9 times the same code because the filesystem types are not the same.
+fn move_file_step1<S: LfsStorage>(
+    store: impl Store,
+    from_fs: &Filesystem<S>,
+    from_path: &Path,
+    to_location: Location,
+    to_path: &Path,
+) -> Result<(), Error> {
+    match to_location {
+        Location::Internal => move_file_step2(from_fs, from_path, &**store.ifs(), to_path),
+        Location::External => move_file_step2(from_fs, from_path, &**store.efs(), to_path),
+        Location::Volatile => move_file_step2(from_fs, from_path, &**store.vfs(), to_path),
+    }
+}
+
+// Separate generic function to avoid having 9 times the same code because the filesystem types are not the same.
+fn move_file_step2<S1: LfsStorage, S2: LfsStorage>(
+    from_fs: &Filesystem<S1>,
+    from_path: &Path,
+    to_fs: &Filesystem<S2>,
+    to_path: &Path,
+) -> Result<(), Error> {
+    File::open_and_then(from_fs, from_path, |from_file| {
+        File::create_and_then(to_fs, to_path, |to_file| copy_file_data(from_file, to_file))
+    })
+    .map_err(|_err| {
+        error!("Failed to flush chunks: {:?}", _err);
+        Error::FilesystemWriteFailure
+    })
+}
+
+fn copy_file_data<S1: LfsStorage, S2: LfsStorage>(
+    from: &File<S1>,
+    to: &File<S2>,
+) -> Result<(), littlefs2::io::Error> {
+    let mut buf = [0; 1024];
+    loop {
+        let read = from.read(&mut buf)?;
+        if read == 0 {
+            return Ok(());
+        }
+
+        to.write_all(&buf[..read])?;
+    }
 }
 
 /// Creates parent directory if necessary, then writes.
