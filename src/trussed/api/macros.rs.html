@@ -124,6 +124,19 @@
 <span id="124">124</span>
 <span id="125">125</span>
 <span id="126">126</span>
+<span id="127">127</span>
+<span id="128">128</span>
+<span id="129">129</span>
+<span id="130">130</span>
+<span id="131">131</span>
+<span id="132">132</span>
+<span id="133">133</span>
+<span id="134">134</span>
+<span id="135">135</span>
+<span id="136">136</span>
+<span id="137">137</span>
+<span id="138">138</span>
+<span id="139">139</span>
 </pre><pre class="rust"><code><span class="macro">macro_rules! </span>generate_enums {
     ($($(<span class="attribute">#[<span class="macro-nonterminal">$attr</span>:meta]</span>)<span class="question-mark">? </span><span class="macro-nonterminal">$which</span>:ident: <span class="macro-nonterminal">$index</span>:literal)<span class="kw-2">*</span>) =&gt; {
 
@@ -146,6 +159,19 @@
         </span><span class="macro-nonterminal">$which</span>(reply::<span class="macro-nonterminal">$which</span>),
         )*
     }
+
+    <span class="kw">const _</span>: () = {
+        <span class="comment">// Compile failure if a request ID is reused
+        </span><span class="kw">fn </span>_check_request_id_conflicts() {
+            <span class="kw">match </span><span class="number">0u8 </span>{
+                <span class="number">0 </span>=&gt; <span class="macro">unreachable!</span>(),
+                $(
+                    <span class="macro-nonterminal">$index </span>=&gt; <span class="macro">unreachable!</span>(),
+                )*
+                <span class="kw">_ </span>=&gt; <span class="macro">todo!</span>()
+            }
+        }
+    };
 
     <span class="kw">impl </span>From&lt;<span class="kw-2">&amp;</span>Request&gt; <span class="kw">for </span>u8 {
         <span class="kw">fn </span>from(request: <span class="kw-2">&amp;</span>Request) -&gt; u8 {

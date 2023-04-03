@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/serde_repr-0.1.11/src/parse.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>parse.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../serde_repr/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/serde_repr-0.1.12/src/parse.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>parse.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../serde_repr/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -112,9 +112,9 @@
 <span id="112">112</span>
 <span id="113">113</span>
 <span id="114">114</span>
-</pre><pre class="rust"><code><span class="kw">use </span>proc_macro2::Span;
-<span class="kw">use </span>syn::parse::{Error, Parse, ParseStream, Parser, <span class="prelude-ty">Result</span>};
-<span class="kw">use </span>syn::{parenthesized, Data, DeriveInput, Fields, Ident, Meta, NestedMeta};
+</pre><pre class="rust"><code><span class="kw">use </span>proc_macro2::{Span, TokenTree};
+<span class="kw">use </span>syn::parse::{Error, Parse, ParseStream, <span class="prelude-ty">Result</span>};
+<span class="kw">use </span>syn::{token, Attribute, Data, DeriveInput, Expr, Fields, Ident, Meta, Token};
 
 <span class="kw">pub struct </span>Input {
     <span class="kw">pub </span>ident: Ident,
@@ -134,26 +134,29 @@
     <span class="kw">pub </span>is_default: bool,
 }
 
-<span class="kw">fn </span>parse_meta(attrs: <span class="kw-2">&amp;mut </span>VariantAttrs, meta: <span class="kw-2">&amp;</span>Meta) {
-    <span class="kw">if let </span>Meta::List(value) = meta {
-        <span class="kw">for </span>meta <span class="kw">in </span><span class="kw-2">&amp;</span>value.nested {
-            <span class="kw">if let </span>NestedMeta::Meta(Meta::Path(path)) = meta {
-                <span class="kw">if </span>path.is_ident(<span class="string">&quot;other&quot;</span>) {
-                    attrs.is_default = <span class="bool-val">true</span>;
-                }
+<span class="kw">fn </span>parse_serde_attr(attrs: <span class="kw-2">&amp;mut </span>VariantAttrs, attr: <span class="kw-2">&amp;</span>Attribute) {
+    <span class="kw">if let </span>Meta::List(<span class="kw">_</span>) = attr.meta {
+        <span class="kw">let _ </span>= attr.parse_nested_meta(|meta| {
+            <span class="kw">if </span>meta.input.peek(<span class="macro">Token!</span>[=]) {
+                <span class="kw">let </span>_value: Expr = meta.value()<span class="question-mark">?</span>.parse()<span class="question-mark">?</span>;
+            } <span class="kw">else if </span>meta.input.peek(token::Paren) {
+                <span class="kw">let </span>_group: TokenTree = meta.input.parse()<span class="question-mark">?</span>;
+            } <span class="kw">else if </span>meta.path.is_ident(<span class="string">&quot;other&quot;</span>) {
+                attrs.is_default = <span class="bool-val">true</span>;
             }
-        }
+            <span class="prelude-val">Ok</span>(())
+        });
     }
 }
 
-<span class="kw">fn </span>parse_attrs(variant: <span class="kw-2">&amp;</span>syn::Variant) -&gt; <span class="prelude-ty">Result</span>&lt;VariantAttrs&gt; {
+<span class="kw">fn </span>parse_attrs(variant: <span class="kw-2">&amp;</span>syn::Variant) -&gt; VariantAttrs {
     <span class="kw">let </span><span class="kw-2">mut </span>attrs = VariantAttrs { is_default: <span class="bool-val">false </span>};
     <span class="kw">for </span>attr <span class="kw">in </span><span class="kw-2">&amp;</span>variant.attrs {
-        <span class="kw">if </span>attr.path.is_ident(<span class="string">&quot;serde&quot;</span>) {
-            parse_meta(<span class="kw-2">&amp;mut </span>attrs, <span class="kw-2">&amp;</span>attr.parse_meta()<span class="question-mark">?</span>);
+        <span class="kw">if </span>attr.path().is_ident(<span class="string">&quot;serde&quot;</span>) {
+            parse_serde_attr(<span class="kw-2">&amp;mut </span>attrs, attr);
         }
     }
-    <span class="prelude-val">Ok</span>(attrs)
+    attrs
 }
 
 <span class="kw">impl </span>Parse <span class="kw">for </span>Input {
@@ -173,7 +176,7 @@
             .into_iter()
             .map(|variant| <span class="kw">match </span>variant.fields {
                 Fields::Unit =&gt; {
-                    <span class="kw">let </span>attrs = parse_attrs(<span class="kw-2">&amp;</span>variant)<span class="question-mark">?</span>;
+                    <span class="kw">let </span>attrs = parse_attrs(<span class="kw-2">&amp;</span>variant);
                     <span class="prelude-val">Ok</span>(Variant {
                         ident: variant.ident,
                         attrs,
@@ -196,15 +199,12 @@
 
         <span class="kw">let </span><span class="kw-2">mut </span>repr = <span class="prelude-val">None</span>;
         <span class="kw">for </span>attr <span class="kw">in </span>derive_input.attrs {
-            <span class="kw">if </span>attr.path.is_ident(<span class="string">&quot;repr&quot;</span>) {
-                <span class="kw">fn </span>repr_arg(input: ParseStream) -&gt; <span class="prelude-ty">Result</span>&lt;Ident&gt; {
-                    <span class="kw">let </span>content;
-                    <span class="macro">parenthesized!</span>(content <span class="kw">in </span>input);
-                    content.parse()
+            <span class="kw">if </span>attr.path().is_ident(<span class="string">&quot;repr&quot;</span>) {
+                <span class="kw">if let </span>Meta::List(<span class="kw">_</span>) = <span class="kw-2">&amp;</span>attr.meta {
+                    <span class="kw">let </span>ty: Ident = attr.parse_args()<span class="question-mark">?</span>;
+                    repr = <span class="prelude-val">Some</span>(ty);
+                    <span class="kw">break</span>;
                 }
-                <span class="kw">let </span>ty = repr_arg.parse2(attr.tokens)<span class="question-mark">?</span>;
-                repr = <span class="prelude-val">Some</span>(ty);
-                <span class="kw">break</span>;
             }
         }
         <span class="kw">let </span>repr = repr.ok_or_else(|| Error::new(call_site, <span class="string">&quot;missing #[repr(...)] attribute&quot;</span>))<span class="question-mark">?</span>;
