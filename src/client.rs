@@ -622,6 +622,7 @@ pub trait FilesystemClient: PollClient {
         self.request(request::ReadFile { location, path })
     }
 
+    // Read part of a file, up to 1KiB starting at `pos`
     fn read_file_chunk(
         &mut self,
         location: Location,
@@ -674,6 +675,10 @@ pub trait FilesystemClient: PollClient {
         })
     }
 
+    /// Begin writing a file that can be larger than 1KiB
+    ///
+    /// More chunks can be written with [`write_file_chunk`](FilesystemClient::write_file_chunk).
+    /// Before the data becomes readable, it needs to be flushed with [`flush_chunks`](FilesystemClient::flush_chunks), or aborted with [`abort_chunked_write`](FilesystemClient::abort_chunked_write)
     fn start_chunked_write(
         &mut self,
         location: Location,
@@ -689,6 +694,9 @@ pub trait FilesystemClient: PollClient {
         })
     }
 
+    /// Write part of a file
+    ///
+    /// See [`start_chunked_write`](FilesystemClient::start_chunked_write).
     fn write_file_chunk(
         &mut self,
         location: Location,
@@ -703,6 +711,9 @@ pub trait FilesystemClient: PollClient {
             pos,
         })
     }
+
+    /// Flush a file opened with [`start_chunked_write`](FilesystemClient::start_chunked_write).
+    /// Only after this will the content of the file be readable
     fn flush_chunks(
         &mut self,
         location: Location,
@@ -711,6 +722,7 @@ pub trait FilesystemClient: PollClient {
         self.request(request::FlushChunks { location, path })
     }
 
+    /// Abort writes to a file opened with [`start_chunked_write`](FilesystemClient::start_chunked_write).
     fn abort_chunked_write(
         &mut self,
         location: Location,
