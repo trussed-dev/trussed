@@ -36,6 +36,7 @@ pub mod serde_extensions;
 pub mod service;
 pub mod store;
 pub mod types;
+pub mod utils;
 
 #[cfg(feature = "virt")]
 #[cfg_attr(docsrs, doc(cfg(feature = "virt")))]

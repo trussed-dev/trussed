@@ -4,7 +4,8 @@ use trussed::{
     client::{CryptoClient, FilesystemClient},
     error::Error,
     syscall, try_syscall,
-    types::{Bytes, Location, Mechanism, PathBuf, StorageAttributes},
+    types::{Bytes, Location, Mechanism, OpenSeekFrom, PathBuf, StorageAttributes},
+    utils,
 };
 
 mod client;
@@ -96,4 +97,39 @@ fn iterating_external() {
 #[test]
 fn iterating_volatile() {
     iterating(Location::Volatile);
+}
+
+fn test_write_all(location: Location) {
+    client::get(|client| {
+        let path = PathBuf::from("foo");
+        utils::write_all(client, location, path.clone(), &[48; 1234], None).unwrap();
+
+        let data =
+            syscall!(client.read_file_chunk(location, path.clone(), OpenSeekFrom::Start(0))).data;
+        assert_eq!(&data, &[48; 1024]);
+        let data = syscall!(client.read_file_chunk(location, path, OpenSeekFrom::Start(1024))).data;
+        assert_eq!(&data, &[48; 1234 - 1024]);
+    });
+}
+
+fn test_write_all_small(location: Location) {
+    client::get(|client| {
+        let path = PathBuf::from("foo2");
+        utils::write_all(client, location, path.clone(), &[48; 1023], None).unwrap();
+
+        let data = syscall!(client.read_file_chunk(location, path, OpenSeekFrom::Start(0))).data;
+        assert_eq!(&data, &[48; 1023]);
+    });
+}
+
+#[test]
+fn write_all_volatile() {
+    test_write_all(Location::Volatile);
+    test_write_all_small(Location::Volatile);
+}
+
+#[test]
+fn write_all_internal() {
+    test_write_all(Location::Internal);
+    test_write_all_small(Location::Internal);
 }
