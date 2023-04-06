@@ -82,6 +82,7 @@ generate_enums! {
     Reboot: 42
     Uptime: 43
     Wink: 44
+    SetCustomStatus: 45
 
     //////////////
     // Counters //
@@ -325,6 +326,9 @@ pub mod request {
         Wink:
           - duration: core::time::Duration
 
+        SetCustomStatus:
+          - status: u8
+
         CreateCounter:
           - location: Location
 
@@ -480,6 +484,8 @@ pub mod reply {
           - uptime: Duration
 
         Wink:
+
+        SetCustomStatus:
 
         CreateCounter:
           - id: CounterId
