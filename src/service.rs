@@ -21,6 +21,7 @@ pub use crate::store::{
     filestore::{ClientFilestore, Filestore, ReadDirFilesState, ReadDirState},
     keystore::{ClientKeystore, Keystore},
 };
+use crate::types::ui::Status;
 use crate::types::*;
 use crate::Bytes;
 
@@ -567,6 +568,11 @@ impl<P: Platform> ServiceResources<P> {
             Request::Wink(request) => {
                 self.platform.user_interface().wink(request.duration);
                 Ok(Reply::Wink(reply::Wink {}))
+            }
+
+            Request::SetCustomStatus(request) => {
+                self.platform.user_interface().set_status(Status::Custom(request.status));
+                Ok(Reply::SetCustomStatus(reply::SetCustomStatus {}))
             }
 
             Request::CreateCounter(request) => {

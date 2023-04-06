@@ -688,6 +688,10 @@ pub trait UiClient: PollClient {
     fn wink(&mut self, duration: core::time::Duration) -> ClientResult<'_, reply::Wink, Self> {
         self.request(request::Wink { duration })
     }
+
+    fn set_custom_status(&mut self, status: u8) -> ClientResult<'_, reply::SetCustomStatus, Self> {
+        self.request(request::SetCustomStatus { status })
+    }
 }
 
 /// Builder for [`ClientImplementation`][].
