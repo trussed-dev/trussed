@@ -1,6 +1,7 @@
 #![cfg(test)]
 use chacha20::ChaCha20;
 
+use crate::pipe::TrussedInterchange;
 use crate::types::*;
 use crate::*;
 use entropy::shannon_entropy;
@@ -147,6 +148,21 @@ macro_rules! create_memory {
     }};
 }
 
+fn test_client<P: Platform>(
+    platform: P,
+    pipe: &TrussedInterchange<1>,
+    seed: [u8; 32],
+) -> ClientImplementation<'_, Service<'_, P, 1>> {
+    let test_client_id = "TEST";
+    let mut trussed: crate::Service<P, 1> = crate::service::Service::new(platform, pipe);
+
+    trussed.set_seed_if_uninitialized(&seed);
+    crate::client::ClientBuilder::new(test_client_id)
+        .prepare(&mut trussed)
+        .expect("Preparing the client should not fail")
+        .build(trussed)
+}
+
 // TODO: what's going on here? Duplicates code in `tests/client/mod.rs`.
 // Might make sense as a trussed::fixture submodule activated via feature flag.
 macro_rules! setup {
@@ -175,23 +191,9 @@ macro_rules! setup {
         let pc_interface: UserInterface = Default::default();
 
         let platform = $platform::new(rng, store, pc_interface);
-        let mut trussed: crate::Service<$platform> = crate::service::Service::new(platform);
 
-        let (test_trussed_requester, test_trussed_responder) = crate::pipe::TRUSSED_INTERCHANGE
-            .claim()
-            .expect("could not setup TEST TrussedInterchange");
-        let test_client_id = "TEST";
-
-        assert!(trussed
-            .add_endpoint(test_trussed_responder, test_client_id, &[])
-            .is_ok());
-
-        trussed.set_seed_if_uninitialized(&$seed);
-        let mut $client = {
-            pub type TestClient<'a> =
-                crate::ClientImplementation<&'a mut crate::Service<$platform>>;
-            TestClient::new(test_trussed_requester, &mut trussed)
-        };
+        let pipe = interchange::Interchange::new();
+        let mut $client = test_client(platform, &pipe, $seed);
     };
 }
 

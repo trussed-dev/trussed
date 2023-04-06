@@ -80,7 +80,7 @@ use core::{marker::PhantomData, task::Poll};
 use crate::api::*;
 use crate::backend::{BackendId, CoreOnly, Dispatch};
 use crate::error::*;
-use crate::pipe::{TrussedRequester, TRUSSED_INTERCHANGE};
+use crate::pipe::TrussedRequester;
 use crate::service::Service;
 use crate::types::*;
 
@@ -107,7 +107,7 @@ pub trait Client:
 {
 }
 
-impl<S: Syscall, E> Client for ClientImplementation<S, E> {}
+impl<'pipe, S: Syscall, E> Client for ClientImplementation<'pipe, S, E> {}
 
 /// Lowest level interface, use one of the higher level ones.
 pub trait PollClient {
@@ -142,12 +142,12 @@ where
 }
 
 /// The client implementation client applications actually receive.
-pub struct ClientImplementation<S, D = CoreOnly> {
+pub struct ClientImplementation<'pipe, S, D = CoreOnly> {
     // raw: RawClient<Client<S>>,
     syscall: S,
 
     // RawClient:
-    pub(crate) interchange: TrussedRequester,
+    pub(crate) interchange: TrussedRequester<'pipe>,
     // pending: Option<Discriminant<Request>>,
     pending: Option<u8>,
     _marker: PhantomData<D>,
@@ -161,11 +161,11 @@ pub struct ClientImplementation<S, D = CoreOnly> {
 //     }
 // }
 
-impl<S, E> ClientImplementation<S, E>
+impl<'pipe, S, E> ClientImplementation<'pipe, S, E>
 where
     S: Syscall,
 {
-    pub fn new(interchange: TrussedRequester, syscall: S) -> Self {
+    pub fn new(interchange: TrussedRequester<'pipe>, syscall: S) -> Self {
         Self {
             interchange,
             pending: None,
@@ -175,7 +175,7 @@ where
     }
 }
 
-impl<S, E> PollClient for ClientImplementation<S, E>
+impl<'pipe, S, E> PollClient for ClientImplementation<'pipe, S, E>
 where
     S: Syscall,
 {
@@ -229,12 +229,12 @@ where
     }
 }
 
-impl<S: Syscall, E> CertificateClient for ClientImplementation<S, E> {}
-impl<S: Syscall, E> CryptoClient for ClientImplementation<S, E> {}
-impl<S: Syscall, E> CounterClient for ClientImplementation<S, E> {}
-impl<S: Syscall, E> FilesystemClient for ClientImplementation<S, E> {}
-impl<S: Syscall, E> ManagementClient for ClientImplementation<S, E> {}
-impl<S: Syscall, E> UiClient for ClientImplementation<S, E> {}
+impl<'pipe, S: Syscall, E> CertificateClient for ClientImplementation<'pipe, S, E> {}
+impl<'pipe, S: Syscall, E> CryptoClient for ClientImplementation<'pipe, S, E> {}
+impl<'pipe, S: Syscall, E> CounterClient for ClientImplementation<'pipe, S, E> {}
+impl<'pipe, S: Syscall, E> FilesystemClient for ClientImplementation<'pipe, S, E> {}
+impl<'pipe, S: Syscall, E> ManagementClient for ClientImplementation<'pipe, S, E> {}
+impl<'pipe, S: Syscall, E> UiClient for ClientImplementation<'pipe, S, E> {}
 
 /// Read/Write + Delete certificates
 pub trait CertificateClient: PollClient {
@@ -730,13 +730,11 @@ impl<D: Dispatch> ClientBuilder<D> {
         }
     }
 
-    fn create_endpoint<P: Platform>(
+    fn create_endpoint<'pipe, P: Platform, const MAX_CLIENTS: usize>(
         self,
-        service: &mut Service<P, D>,
-    ) -> Result<TrussedRequester, Error> {
-        let (requester, responder) = TRUSSED_INTERCHANGE
-            .claim()
-            .ok_or(Error::ClientCountExceeded)?;
+        service: &mut Service<'pipe, P, MAX_CLIENTS, D>,
+    ) -> Result<TrussedRequester<'pipe>, Error> {
+        let (requester, responder) = service.pipe().claim().ok_or(Error::ClientCountExceeded)?;
         service.add_endpoint(responder, self.id, self.backends)?;
         Ok(requester)
     }
@@ -745,10 +743,10 @@ impl<D: Dispatch> ClientBuilder<D> {
     ///
     /// This allocates a [`TrussedInterchange`][`crate::pipe::TrussedInterchange`] and a
     /// [`ServiceEndpoint`][`crate::service::ServiceEndpoint`].
-    pub fn prepare<P: Platform>(
+    pub fn prepare<'pipe, P: Platform, const MAX_CLIENTS: usize>(
         self,
-        service: &mut Service<P, D>,
-    ) -> Result<PreparedClient<D>, Error> {
+        service: &mut Service<'pipe, P, MAX_CLIENTS, D>,
+    ) -> Result<PreparedClient<'pipe, D>, Error> {
         self.create_endpoint(service)
             .map(|requester| PreparedClient::new(requester))
     }
@@ -759,13 +757,13 @@ impl<D: Dispatch> ClientBuilder<D> {
 /// This struct already has an allocated [`TrussedInterchange`][`crate::pipe::TrussedInterchange`] and
 /// [`ServiceEndpoint`][`crate::service::ServiceEndpoint`] but still needs a [`Syscall`][]
 /// implementation.
-pub struct PreparedClient<D> {
-    requester: TrussedRequester,
+pub struct PreparedClient<'pipe, D> {
+    requester: TrussedRequester<'pipe>,
     _marker: PhantomData<D>,
 }
 
-impl<D> PreparedClient<D> {
-    fn new(requester: TrussedRequester) -> Self {
+impl<'pipe, D> PreparedClient<'pipe, D> {
+    fn new(requester: TrussedRequester<'pipe>) -> Self {
         Self {
             requester,
             _marker: Default::default(),
@@ -773,7 +771,7 @@ impl<D> PreparedClient<D> {
     }
 
     /// Builds the client using the given syscall implementation.
-    pub fn build<S: Syscall>(self, syscall: S) -> ClientImplementation<S, D> {
+    pub fn build<S: Syscall>(self, syscall: S) -> ClientImplementation<'pipe, S, D> {
         ClientImplementation::new(self.requester, syscall)
     }
 }

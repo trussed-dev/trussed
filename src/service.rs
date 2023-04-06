@@ -3,7 +3,6 @@ use chacha20::ChaCha8Rng;
 use littlefs2::path::PathBuf;
 pub use rand_core::{RngCore, SeedableRng};
 
-use crate::api::*;
 use crate::backend::{BackendId, CoreOnly, Dispatch};
 use crate::client::{ClientBuilder, ClientImplementation};
 use crate::config::*;
@@ -11,7 +10,7 @@ use crate::error::{Error, Result};
 pub use crate::key;
 use crate::mechanisms;
 pub use crate::pipe::ServiceEndpoint;
-use crate::pipe::TrussedResponder;
+use crate::pipe::{TrussedInterchange, TrussedResponder};
 use crate::platform::*;
 pub use crate::store::{
     certstore::{Certstore as _, ClientCertstore},
@@ -21,6 +20,7 @@ pub use crate::store::{
 };
 use crate::types::*;
 use crate::Bytes;
+use crate::{api::*, pipe};
 
 pub mod attest;
 
@@ -78,18 +78,22 @@ impl<P: Platform> ServiceResources<P> {
     }
 }
 
-pub struct Service<P, D = CoreOnly>
+pub struct Service<'pipe, P, const MAX_CLIENTS: usize, D = CoreOnly>
 where
     P: Platform,
     D: Dispatch,
 {
-    eps: Vec<ServiceEndpoint<D::BackendId, D::Context>, { MAX_SERVICE_CLIENTS }>,
+    eps: Vec<ServiceEndpoint<'pipe, D::BackendId, D::Context>, { MAX_CLIENTS }>,
+    pipe: &'pipe pipe::TrussedInterchange<MAX_CLIENTS>,
     resources: ServiceResources<P>,
     dispatch: D,
 }
 
 // need to be able to send crypto service to an interrupt handler
-unsafe impl<P: Platform, D: Dispatch> Send for Service<P, D> {}
+unsafe impl<'pipe, P: Platform, D: Dispatch, const MAX_CLIENTS: usize> Send
+    for Service<'pipe, P, MAX_CLIENTS, D>
+{
+}
 
 impl<P: Platform> ServiceResources<P> {
     pub fn certstore(&mut self, ctx: &CoreContext) -> Result<ClientCertstore<P::S>> {
@@ -683,24 +687,32 @@ impl<P: Platform> ServiceResources<P> {
     }
 }
 
-impl<P: Platform> Service<P> {
-    pub fn new(platform: P) -> Self {
-        Self::with_dispatch(platform, Default::default())
+impl<'pipe, P: Platform, const MAX_CLIENTS: usize> Service<'pipe, P, MAX_CLIENTS> {
+    pub fn new(platform: P, pipe: &'pipe TrussedInterchange<MAX_CLIENTS>) -> Self {
+        Self::with_dispatch(platform, pipe, Default::default())
     }
 }
 
-impl<P: Platform, D: Dispatch> Service<P, D> {
-    pub fn with_dispatch(platform: P, dispatch: D) -> Self {
+impl<'pipe, P: Platform, D: Dispatch, const MAX_CLIENTS: usize> Service<'pipe, P, MAX_CLIENTS, D> {
+    pub fn with_dispatch(
+        platform: P,
+        pipe: &'pipe TrussedInterchange<MAX_CLIENTS>,
+        dispatch: D,
+    ) -> Self {
         let resources = ServiceResources::new(platform);
         Self {
             eps: Vec::new(),
             resources,
             dispatch,
+            pipe,
         }
+    }
+    pub fn pipe(&self) -> &'pipe TrussedInterchange<MAX_CLIENTS> {
+        self.pipe
     }
 }
 
-impl<P: Platform> Service<P> {
+impl<'pipe, P: Platform, const MAX_CLIENTS: usize> Service<'pipe, P, MAX_CLIENTS> {
     /// Add a new client, claiming one of the statically configured
     /// interchange pairs.
     pub fn try_new_client<S: Syscall>(
@@ -730,17 +742,17 @@ impl<P: Platform> Service<P> {
     pub fn try_into_new_client(
         mut self,
         client_id: &str,
-    ) -> Result<ClientImplementation<Self>, Error> {
+    ) -> Result<ClientImplementation<'pipe, Self>, Error> {
         ClientBuilder::new(client_id)
             .prepare(&mut self)
             .map(|p| p.build(self))
     }
 }
 
-impl<P: Platform, D: Dispatch> Service<P, D> {
+impl<'pipe, P: Platform, D: Dispatch, const MAX_CLIENTS: usize> Service<'pipe, P, MAX_CLIENTS, D> {
     pub fn add_endpoint(
         &mut self,
-        interchange: TrussedResponder,
+        interchange: TrussedResponder<'pipe>,
         core_ctx: impl Into<CoreContext>,
         backends: &'static [BackendId<D::BackendId>],
     ) -> Result<(), Error> {
@@ -838,7 +850,8 @@ impl<P: Platform, D: Dispatch> Service<P, D> {
     }
 }
 
-impl<P, D> crate::client::Syscall for &mut Service<P, D>
+impl<'pipe, P, D, const MAX_CLIENTS: usize> crate::client::Syscall
+    for &mut Service<'pipe, P, MAX_CLIENTS, D>
 where
     P: Platform,
     D: Dispatch,
@@ -848,7 +861,8 @@ where
     }
 }
 
-impl<P, D> crate::client::Syscall for Service<P, D>
+impl<'pipe, P, D, const MAX_CLIENTS: usize> crate::client::Syscall
+    for Service<'pipe, P, MAX_CLIENTS, D>
 where
     P: Platform,
     D: Dispatch,
