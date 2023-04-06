@@ -77,9 +77,9 @@ fn iterating(location: Location) {
                     assert_eq!(entry.path().as_ref(), f);
                 }
 
-                for j in i + 1..count {
+                for file in &files[i + 1..count] {
                     let entry = syscall!(client.read_dir_next()).entry.unwrap();
-                    assert_eq!(entry.path().as_ref(), &files[j]);
+                    assert_eq!(entry.path().as_ref(), file);
                 }
                 assert!(syscall!(client.read_dir_next()).entry.is_none());
             }
@@ -93,9 +93,9 @@ fn iterating(location: Location) {
                     assert_eq!(data, f.as_bytes());
                 }
 
-                for j in i + 1..count {
+                for file in &files[i + 1..count] {
                     let data = syscall!(client.read_dir_files_next()).data.unwrap();
-                    assert_eq!(data, files[j].as_bytes());
+                    assert_eq!(data, file.as_bytes());
                 }
                 assert!(syscall!(client.read_dir_files_next()).data.is_none());
             }
