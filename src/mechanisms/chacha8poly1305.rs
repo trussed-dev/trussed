@@ -20,11 +20,11 @@ const WRAPPED_TO_FILE_LEN: usize = MAX_SERIALIZED_KEY_LENGTH + NONCE_LEN + TAG_L
 
 #[cfg(feature = "chacha8-poly1305")]
 impl super::Chacha8Poly1305 {
-    pub fn wrap_to_file(
+    pub fn wrap_key_to_file(
         keystore: &mut impl Keystore,
         filestore: &mut impl Filestore,
-        request: &request::WrapToFile,
-    ) -> Result<reply::WrapToFile, Error> {
+        request: &request::WrapKeyToFile,
+    ) -> Result<reply::WrapKeyToFile, Error> {
         use chacha20poly1305::aead::{AeadMutInPlace, KeyInit};
         use chacha20poly1305::ChaCha8Poly1305;
         use rand_core::RngCore as _;
@@ -51,14 +51,14 @@ impl super::Chacha8Poly1305 {
             .unwrap();
         data.extend_from_slice(&tag).unwrap();
         filestore.write(&request.path, request.location, &data)?;
-        Ok(reply::WrapToFile {})
+        Ok(reply::WrapKeyToFile {})
     }
 
-    pub fn unwrap_from_file(
+    pub fn unwrap_key_from_file(
         keystore: &mut impl Keystore,
         filestore: &mut impl Filestore,
-        request: &request::UnwrapFromFile,
-    ) -> Result<reply::UnwrapFromFile, Error> {
+        request: &request::UnwrapKeyFromFile,
+    ) -> Result<reply::UnwrapKeyFromFile, Error> {
         use chacha20poly1305::aead::{AeadMutInPlace, KeyInit};
         use chacha20poly1305::ChaCha8Poly1305;
         let mut data: Bytes<WRAPPED_TO_FILE_LEN> =
@@ -89,7 +89,7 @@ impl super::Chacha8Poly1305 {
             )
             .is_err()
         {
-            return Ok(reply::UnwrapFromFile { key: None });
+            return Ok(reply::UnwrapKeyFromFile { key: None });
         }
         let key = key::Key::try_deserialize(material)?;
         let info = key::Info {
@@ -102,7 +102,7 @@ impl super::Chacha8Poly1305 {
             info,
             &key.material,
         )?;
-        Ok(reply::UnwrapFromFile { key: Some(key) })
+        Ok(reply::UnwrapKeyFromFile { key: Some(key) })
     }
 }
 

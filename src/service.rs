@@ -511,21 +511,21 @@ impl<P: Platform> ServiceResources<P> {
 
                 }.map(Reply::WrapKey)
             },
-            Request::WrapToFile(request) => {
+            Request::WrapKeyToFile(request) => {
                 match request.mechanism {
                     #[cfg(feature = "chacha8-poly1305")]
-                    Mechanism::Chacha8Poly1305 => mechanisms::Chacha8Poly1305::wrap_to_file(keystore, filestore, request),
+                    Mechanism::Chacha8Poly1305 => mechanisms::Chacha8Poly1305::wrap_key_to_file(keystore, filestore, request),
                     _ => Err(Error::MechanismNotAvailable),
 
-                }.map(Reply::WrapToFile)
+                }.map(Reply::WrapKeyToFile)
             },
-            Request::UnwrapFromFile(request) => {
+            Request::UnwrapKeyFromFile(request) => {
                 match request.mechanism {
                     #[cfg(feature = "chacha8-poly1305")]
-                    Mechanism::Chacha8Poly1305 => mechanisms::Chacha8Poly1305::unwrap_from_file(keystore, filestore, request),
+                    Mechanism::Chacha8Poly1305 => mechanisms::Chacha8Poly1305::unwrap_key_from_file(keystore, filestore, request),
                     _ => Err(Error::MechanismNotAvailable),
 
-                }.map(Reply::UnwrapFromFile)
+                }.map(Reply::UnwrapKeyFromFile)
             },
 
             Request::RequestUserConsent(request) => {

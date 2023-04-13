@@ -94,7 +94,7 @@ fn chacha_wraptofile() {
 
         let key2 = syscall!(client.generate_secret_key(32, Volatile)).key;
 
-        syscall!(client.wrap_to_file(
+        syscall!(client.wrap_key_to_file(
             Mechanism::Chacha8Poly1305,
             key,
             key2,
@@ -103,7 +103,7 @@ fn chacha_wraptofile() {
             &[],
         ));
 
-        let unwrapped = syscall!(client.unwrap_from_file(
+        let unwrapped = syscall!(client.unwrap_key_from_file(
             Mechanism::Chacha8Poly1305,
             key,
             path.clone(),
@@ -115,7 +115,7 @@ fn chacha_wraptofile() {
         .unwrap();
         assert_key_eq(key2, unwrapped, client);
 
-        syscall!(client.wrap_to_file(
+        syscall!(client.wrap_key_to_file(
             Mechanism::Chacha8Poly1305,
             key,
             key2,
@@ -124,7 +124,7 @@ fn chacha_wraptofile() {
             b"some ad",
         ));
 
-        assert!(syscall!(client.unwrap_from_file(
+        assert!(syscall!(client.unwrap_key_from_file(
             Mechanism::Chacha8Poly1305,
             key,
             path.clone(),
@@ -135,7 +135,7 @@ fn chacha_wraptofile() {
         .key
         .is_none());
 
-        let unwrapped = syscall!(client.unwrap_from_file(
+        let unwrapped = syscall!(client.unwrap_key_from_file(
             Mechanism::Chacha8Poly1305,
             key,
             path,
