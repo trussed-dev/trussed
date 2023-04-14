@@ -25,7 +25,7 @@ impl super::Chacha8Poly1305 {
         filestore: &mut impl Filestore,
         request: &request::WrapKeyToFile,
     ) -> Result<reply::WrapKeyToFile, Error> {
-        use chacha20poly1305::aead::{AeadMutInPlace, KeyInit};
+        use chacha20poly1305::aead::{AeadMutInPlace, NewAead};
         use chacha20poly1305::ChaCha8Poly1305;
         use rand_core::RngCore as _;
 
@@ -59,7 +59,7 @@ impl super::Chacha8Poly1305 {
         filestore: &mut impl Filestore,
         request: &request::UnwrapKeyFromFile,
     ) -> Result<reply::UnwrapKeyFromFile, Error> {
-        use chacha20poly1305::aead::{AeadMutInPlace, KeyInit};
+        use chacha20poly1305::aead::{AeadMutInPlace, NewAead};
         use chacha20poly1305::ChaCha8Poly1305;
         let mut data: Bytes<WRAPPED_TO_FILE_LEN> =
             filestore.read(&request.path, request.file_location)?;
