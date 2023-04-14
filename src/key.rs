@@ -1,6 +1,8 @@
+use core::ptr::write_volatile;
+use core::sync::atomic;
+
 use heapless::Vec;
-use serde::{Deserialize, Serialize};
-use serde_indexed::{DeserializeIndexed, SerializeIndexed};
+use serde::{de::Visitor, ser::SerializeMap, Deserialize, Serialize};
 use zeroize::Zeroize;
 
 pub use crate::Bytes;
@@ -72,7 +74,7 @@ pub enum Kind {
 }
 
 bitflags::bitflags! {
-    #[derive(DeserializeIndexed, SerializeIndexed, Zeroize)]
+    #[derive(Debug, Eq, PartialEq, Clone, Copy)]
     /// All non-used bits are RFU.
     ///
     /// In particular, top bit is intended to be used to accomodate breaking format changes,
@@ -144,6 +146,59 @@ impl Default for Flags {
     }
 }
 
+impl Zeroize for Flags {
+    fn zeroize(&mut self) {
+        // Safety: We have a mutable reference, and Flags is `Copy` and therefore does not need to be dropped
+        unsafe {
+            write_volatile(self, Flags::empty());
+        }
+        atomic::compiler_fence(atomic::Ordering::SeqCst);
+    }
+}
+
+/// Manual implementation to keep compatibility with version 0.1.0 that used `serde_indexed`
+/// serde_indexed cannot be used anymore for compatiblity with bitflags 2.0
+impl Serialize for Flags {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        let mut map = serializer.serialize_map(Some(1))?;
+        map.serialize_key(&0usize)?;
+        map.serialize_value(&self.bits())?;
+        map.end()
+    }
+}
+
+/// Manual implementation to keep compatibility with version 0.1.0 that used `serde_indexed`
+impl<'de> Deserialize<'de> for Flags {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        struct FlagsVisitor;
+        impl<'vis_de> Visitor<'vis_de> for FlagsVisitor {
+            type Value = Flags;
+            fn expecting(&self, formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
+                write!(formatter, "A flag structure")
+            }
+            fn visit_map<A>(self, mut map: A) -> Result<Self::Value, A::Error>
+            where
+                A: serde::de::MapAccess<'vis_de>,
+            {
+                if !matches!(map.next_key()?, Some(0usize)) {
+                    return Err(serde::de::Error::missing_field("bits"));
+                }
+                let bits = map.next_value()?;
+                let flags = Flags::from_bits(bits)
+                    .ok_or_else(|| serde::de::Error::custom("Wrong bit layout"))?;
+                Ok(flags)
+            }
+        }
+        deserializer.deserialize_map(FlagsVisitor)
+    }
+}
+
 impl Kind {
     pub fn code(self) -> u16 {
         match self {
@@ -183,7 +238,7 @@ mod tests {
     #[test]
     fn keyflags_format() {
         assert_tokens(
-            &Flags { bits: 0 },
+            &Flags::empty(),
             &[
                 Token::Map { len: Some(1) },
                 Token::U64(0),
