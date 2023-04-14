@@ -174,3 +174,76 @@ impl Kind {
         })
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_test::{assert_tokens, Token};
+
+    #[test]
+    fn keyflags_format() {
+        assert_tokens(
+            &Flags { bits: 0 },
+            &[
+                Token::Map { len: Some(1) },
+                Token::U64(0),
+                Token::U16(0),
+                Token::MapEnd,
+            ],
+        );
+        assert_tokens(
+            &Flags::LOCAL,
+            &[
+                Token::Map { len: Some(1) },
+                Token::U64(0),
+                Token::U16(0b1),
+                Token::MapEnd,
+            ],
+        );
+        assert_tokens(
+            &(Flags::LOCAL | Flags::SENSITIVE),
+            &[
+                Token::Map { len: Some(1) },
+                Token::U64(0),
+                Token::U16(0b11),
+                Token::MapEnd,
+            ],
+        );
+        assert_tokens(
+            &(Flags::LOCAL | Flags::SENSITIVE | Flags::SERIALIZABLE),
+            &[
+                Token::Map { len: Some(1) },
+                Token::U64(0),
+                Token::U16(0b10011),
+                Token::MapEnd,
+            ],
+        );
+        assert_tokens(
+            &Flags::SENSITIVE,
+            &[
+                Token::Map { len: Some(1) },
+                Token::U64(0),
+                Token::U16(0b10),
+                Token::MapEnd,
+            ],
+        );
+        assert_tokens(
+            &(Flags::SENSITIVE | Flags::SERIALIZABLE),
+            &[
+                Token::Map { len: Some(1) },
+                Token::U64(0),
+                Token::U16(0b10010),
+                Token::MapEnd,
+            ],
+        );
+        assert_tokens(
+            &Flags::SERIALIZABLE,
+            &[
+                Token::Map { len: Some(1) },
+                Token::U64(0),
+                Token::U16(0b10000),
+                Token::MapEnd,
+            ],
+        );
+    }
+}
