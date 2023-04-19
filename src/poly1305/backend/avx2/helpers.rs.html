@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/poly1305-0.7.2/src/backend/avx2/helpers.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>helpers.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-1f7d512b176f0f72.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Bold-124a1ca42af929b6.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-93196c7a1c3542a8.css" id="mainThemeStyle"><link rel="stylesheet" id="themeStyle" href="../../../../static.files/light-4743e13df3dfe8c4.css"><link rel="stylesheet" disabled href="../../../../static.files/dark-0e1b889528bd466b.css"><link rel="stylesheet" disabled href="../../../../static.files/ayu-65289d5d067c7c66.css"><script id="default-settings" ></script><script src="../../../../static.files/storage-d43fa987303ecbbb.js"></script><script defer src="../../../../static.files/source-script-ea63cb6500f71309.js"></script><script defer src="../../../../source-files.js"></script><script defer src="../../../../static.files/main-3367e395607fafc1.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="icon" href="https://raw.githubusercontent.com/RustCrypto/media/8f1a9894/logo.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../../poly1305/index.html">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/poly1305-0.8.0/src/backend/avx2/helpers.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>helpers.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-1f7d512b176f0f72.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Bold-124a1ca42af929b6.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-93196c7a1c3542a8.css" id="mainThemeStyle"><link rel="stylesheet" id="themeStyle" href="../../../../static.files/light-4743e13df3dfe8c4.css"><link rel="stylesheet" disabled href="../../../../static.files/dark-0e1b889528bd466b.css"><link rel="stylesheet" disabled href="../../../../static.files/ayu-65289d5d067c7c66.css"><script id="default-settings" ></script><script src="../../../../static.files/storage-d43fa987303ecbbb.js"></script><script defer src="../../../../static.files/source-script-ea63cb6500f71309.js"></script><script defer src="../../../../source-files.js"></script><script defer src="../../../../static.files/main-3367e395607fafc1.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="icon" href="https://raw.githubusercontent.com/RustCrypto/media/8f1a9894/logo.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../../poly1305/index.html">
                         <img src="https://raw.githubusercontent.com/RustCrypto/media/8f1a9894/logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-5ec35bf9ca753509.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
@@ -1978,6 +1978,18 @@
 <a href="#1977" id="1977">1977</a>
 <a href="#1978" id="1978">1978</a>
 <a href="#1979" id="1979">1979</a>
+<a href="#1980" id="1980">1980</a>
+<a href="#1981" id="1981">1981</a>
+<a href="#1982" id="1982">1982</a>
+<a href="#1983" id="1983">1983</a>
+<a href="#1984" id="1984">1984</a>
+<a href="#1985" id="1985">1985</a>
+<a href="#1986" id="1986">1986</a>
+<a href="#1987" id="1987">1987</a>
+<a href="#1988" id="1988">1988</a>
+<a href="#1989" id="1989">1989</a>
+<a href="#1990" id="1990">1990</a>
+<a href="#1991" id="1991">1991</a>
 </pre><pre class="rust"><code><span class="doccomment">//! AVX2 helpers for implementing Poly1305 using 26-bit limbs.
 
 </span><span class="kw">use </span>core::fmt;
@@ -1988,6 +2000,7 @@
 <span class="attr">#[cfg(target_arch = <span class="string">&quot;x86_64&quot;</span>)]
 </span><span class="kw">use </span>core::arch::x86_64::<span class="kw-2">*</span>;
 
+<span class="kw">use </span><span class="kw">super</span>::ParBlocks;
 <span class="kw">use crate</span>::{Block, Key};
 
 <span class="kw">const fn </span>set02(x3: u8, x2: u8, x1: u8, x0: u8) -&gt; i32 {
@@ -2056,8 +2069,6 @@
 
 <span class="kw">impl </span>fmt::Display <span class="kw">for </span>Aligned130 {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        <span class="kw">use </span>core::convert::TryInto;
-
         <span class="kw">let </span><span class="kw-2">mut </span>v0 = [<span class="number">0u8</span>; <span class="number">32</span>];
         <span class="kw">unsafe </span>{
             _mm256_storeu_si256(v0.as_mut_ptr() <span class="kw">as </span><span class="kw-2">*mut </span><span class="kw">_</span>, <span class="self">self</span>.<span class="number">0</span>);
@@ -2396,8 +2407,6 @@
 
 <span class="kw">impl </span>fmt::Display <span class="kw">for </span>Unreduced130 {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        <span class="kw">use </span>core::convert::TryInto;
-
         <span class="kw">let </span><span class="kw-2">mut </span>v0 = [<span class="number">0u8</span>; <span class="number">32</span>];
         <span class="kw">let </span><span class="kw-2">mut </span>v1 = [<span class="number">0u8</span>; <span class="number">32</span>];
         <span class="kw">unsafe </span>{
@@ -2877,8 +2886,6 @@
 
 <span class="kw">impl </span>fmt::Display <span class="kw">for </span>Aligned4x130 {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        <span class="kw">use </span>core::convert::TryInto;
-
         <span class="kw">let </span><span class="kw-2">mut </span>v0 = [<span class="number">0u8</span>; <span class="number">32</span>];
         <span class="kw">let </span><span class="kw-2">mut </span>v1 = [<span class="number">0u8</span>; <span class="number">32</span>];
         <span class="kw">let </span><span class="kw-2">mut </span>v2 = [<span class="number">0u8</span>; <span class="number">32</span>];
@@ -2950,26 +2957,45 @@
     /// Panics if `src.len() &lt; 64`.
     </span><span class="attr">#[target_feature(enable = <span class="string">&quot;avx2&quot;</span>)]
     </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">unsafe fn </span>from_blocks(src: <span class="kw-2">&amp;</span>[Block; <span class="number">4</span>]) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>(lo, hi) = src.split_at(<span class="number">2</span>);
+        <span class="kw">let </span>blocks_23 = _mm256_loadu_si256(hi.as_ptr() <span class="kw">as </span><span class="kw-2">*const </span><span class="kw">_</span>);
+        <span class="kw">let </span>blocks_01 = _mm256_loadu_si256(lo.as_ptr() <span class="kw">as </span><span class="kw-2">*const </span><span class="kw">_</span>);
+
+        <span class="self">Self</span>::from_loaded_blocks(blocks_01, blocks_23)
+    }
+
+    <span class="doccomment">/// Aligns four 16-byte Poly1305 blocks at 26-bit boundaries within 32-bit words, and
+    /// sets the high bit for each block.
+    </span><span class="attr">#[target_feature(enable = <span class="string">&quot;avx2&quot;</span>)]
+    </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">unsafe fn </span>from_par_blocks(src: <span class="kw-2">&amp;</span>ParBlocks) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>(lo, hi) = src.split_at(<span class="number">2</span>);
+        <span class="kw">let </span>blocks_23 = _mm256_loadu_si256(hi.as_ptr() <span class="kw">as </span><span class="kw-2">*const </span><span class="kw">_</span>);
+        <span class="kw">let </span>blocks_01 = _mm256_loadu_si256(lo.as_ptr() <span class="kw">as </span><span class="kw-2">*const </span><span class="kw">_</span>);
+
+        <span class="self">Self</span>::from_loaded_blocks(blocks_01, blocks_23)
+    }
+
+    <span class="doccomment">/// Aligns four 16-byte Poly1305 blocks at 26-bit boundaries within 32-bit words, and
+    /// sets the high bit for each block.
+    ///
+    /// The four blocks must be in the following 32-bit word layout:
+    ///      [b33, b32, b31, b30, b23, b22, b21, b20]
+    ///      [b13, b12, b11, b10, b03, b02, b01, b00]
+    </span><span class="attr">#[target_feature(enable = <span class="string">&quot;avx2&quot;</span>)]
+    </span><span class="kw">unsafe fn </span>from_loaded_blocks(blocks_01: __m256i, blocks_23: __m256i) -&gt; <span class="self">Self </span>{
         <span class="comment">// 26-bit mask on each 32-bit word.
         </span><span class="kw">let </span>mask_26 = _mm256_set1_epi32(<span class="number">0x3ffffff</span>);
         <span class="comment">// Sets bit 24 of each 32-bit word.
         </span><span class="kw">let </span>set_hibit = _mm256_set1_epi32(<span class="number">1 </span>&lt;&lt; <span class="number">24</span>);
 
-        <span class="comment">// - Load the four blocks into the following 32-bit word layout:
-        //      [b33, b32, b31, b30, b23, b22, b21, b20]
-        //      [b13, b12, b11, b10, b03, b02, b01, b00]
-        //
-        // - Unpack the upper and lower 64 bits:
+        <span class="comment">// - Unpack the upper and lower 64 bits:
         //      [b33, b32, b13, b12, b23, b22, b03, b02]
         //      [b31, b30, b11, b10, b21, b20, b01, b00]
         //
         // - Swap the middle two 64-bit words:
         // a0 = [b33, b32, b23, b22, b13, b12, b03, b02]
         // a1 = [b31, b30, b21, b20, b11, b10, b01, b00]
-        </span><span class="kw">let </span>(lo, hi) = src.split_at(<span class="number">2</span>);
-        <span class="kw">let </span>blocks_23 = _mm256_loadu_si256(hi.as_ptr() <span class="kw">as </span><span class="kw-2">*const </span><span class="kw">_</span>);
-        <span class="kw">let </span>blocks_01 = _mm256_loadu_si256(lo.as_ptr() <span class="kw">as </span><span class="kw-2">*const </span><span class="kw">_</span>);
-        <span class="kw">let </span>a0 = _mm256_permute4x64_epi64(
+        </span><span class="kw">let </span>a0 = _mm256_permute4x64_epi64(
             _mm256_unpackhi_epi64(blocks_01, blocks_23),
             set02(<span class="number">3</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">0</span>),
         );
@@ -3557,8 +3583,6 @@
 
 <span class="kw">impl </span>fmt::Display <span class="kw">for </span>Unreduced4x130 {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        <span class="kw">use </span>core::convert::TryInto;
-
         <span class="kw">let </span><span class="kw-2">mut </span>v0 = [<span class="number">0u8</span>; <span class="number">32</span>];
         <span class="kw">let </span><span class="kw-2">mut </span>v1 = [<span class="number">0u8</span>; <span class="number">32</span>];
         <span class="kw">let </span><span class="kw-2">mut </span>v2 = [<span class="number">0u8</span>; <span class="number">32</span>];

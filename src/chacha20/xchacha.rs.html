@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/chacha20-0.7.3/src/xchacha.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>xchacha.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-1f7d512b176f0f72.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-124a1ca42af929b6.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-93196c7a1c3542a8.css" id="mainThemeStyle"><link rel="stylesheet" id="themeStyle" href="../../static.files/light-4743e13df3dfe8c4.css"><link rel="stylesheet" disabled href="../../static.files/dark-0e1b889528bd466b.css"><link rel="stylesheet" disabled href="../../static.files/ayu-65289d5d067c7c66.css"><script id="default-settings" ></script><script src="../../static.files/storage-d43fa987303ecbbb.js"></script><script defer src="../../static.files/source-script-ea63cb6500f71309.js"></script><script defer src="../../source-files.js"></script><script defer src="../../static.files/main-3367e395607fafc1.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="icon" href="https://raw.githubusercontent.com/RustCrypto/media/8f1a9894/logo.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../chacha20/index.html">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/chacha20-0.9.1/src/xchacha.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>xchacha.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-1f7d512b176f0f72.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-124a1ca42af929b6.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-93196c7a1c3542a8.css" id="mainThemeStyle"><link rel="stylesheet" id="themeStyle" href="../../static.files/light-4743e13df3dfe8c4.css"><link rel="stylesheet" disabled href="../../static.files/dark-0e1b889528bd466b.css"><link rel="stylesheet" disabled href="../../static.files/ayu-65289d5d067c7c66.css"><script id="default-settings" ></script><script src="../../static.files/storage-d43fa987303ecbbb.js"></script><script defer src="../../static.files/source-script-ea63cb6500f71309.js"></script><script defer src="../../source-files.js"></script><script defer src="../../static.files/main-3367e395607fafc1.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="icon" href="https://raw.githubusercontent.com/RustCrypto/media/8f1a9894/logo.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../chacha20/index.html">
                         <img src="https://raw.githubusercontent.com/RustCrypto/media/8f1a9894/logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-5ec35bf9ca753509.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
@@ -187,31 +187,32 @@
 <a href="#186" id="186">186</a>
 <a href="#187" id="187">187</a>
 <a href="#188" id="188">188</a>
+<a href="#189" id="189">189</a>
+<a href="#190" id="190">190</a>
+<a href="#191" id="191">191</a>
+<a href="#192" id="192">192</a>
+<a href="#193" id="193">193</a>
+<a href="#194" id="194">194</a>
 </pre><pre class="rust"><code><span class="doccomment">//! XChaCha is an extended nonce variant of ChaCha
 
-</span><span class="kw">use crate</span>::{
-    backend::soft::quarter_round,
-    chacha::Key,
-    max_blocks::C64,
-    rounds::{Rounds, R12, R20, R8},
-    ChaCha, CONSTANTS,
-};
+</span><span class="kw">use super</span>::{ChaChaCore, Key, Nonce, CONSTANTS, STATE_WORDS};
 <span class="kw">use </span>cipher::{
-    consts::{U16, U24, U32},
-    errors::{LoopError, OverflowError},
-    generic_array::GenericArray,
-    NewCipher, SeekNum, StreamCipher, StreamCipherSeek,
+    consts::{U10, U16, U24, U32, U4, U6, U64},
+    generic_array::{typenum::Unsigned, GenericArray},
+    BlockSizeUser, IvSizeUser, KeyIvInit, KeySizeUser, StreamCipherCore, StreamCipherCoreWrapper,
+    StreamCipherSeekCore, StreamClosure,
 };
-<span class="kw">use </span>core::convert::TryInto;
 
-<span class="doccomment">/// EXtended ChaCha20 nonce (192-bits/24-bytes)
-</span><span class="attr">#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;xchacha&quot;</span>)))]
-</span><span class="kw">pub type </span>XNonce = cipher::Nonce&lt;XChaCha20&gt;;
+<span class="attr">#[cfg(feature = <span class="string">&quot;zeroize&quot;</span>)]
+</span><span class="kw">use </span>cipher::zeroize::ZeroizeOnDrop;
 
-<span class="doccomment">/// XChaCha20 is a ChaCha20 variant with an extended 192-bit (24-byte) nonce.
+<span class="doccomment">/// Nonce type used by XChaCha variants.
+</span><span class="kw">pub type </span>XNonce = GenericArray&lt;u8, U24&gt;;
+
+<span class="doccomment">/// XChaCha is a ChaCha20 variant with an extended 192-bit (24-byte) nonce.
 ///
 /// The construction is an adaptation of the same techniques used by
-/// XSalsa20 as described in the paper &quot;Extending the Salsa20 Nonce&quot;,
+/// XChaCha as described in the paper &quot;Extending the Salsa20 Nonce&quot;,
 /// applied to the 96-bit nonce variant of ChaCha20, and derive a
 /// separate subkey/nonce for each extended nonce:
 ///
@@ -223,67 +224,65 @@
 /// and is documented in an (expired) IETF draft:
 ///
 /// &lt;https://tools.ietf.org/html/draft-arciszewski-xchacha-03&gt;
-///
-/// The `xchacha` Cargo feature must be enabled in order to use this
-/// (which it is by default).
-</span><span class="attr">#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;xchacha&quot;</span>)))]
-</span><span class="kw">pub type </span>XChaCha20 = XChaCha&lt;R20&gt;;
-
+</span><span class="kw">pub type </span>XChaCha20 = StreamCipherCoreWrapper&lt;XChaChaCore&lt;U10&gt;&gt;;
 <span class="doccomment">/// XChaCha12 stream cipher (reduced-round variant of [`XChaCha20`] with 12 rounds)
-///
-/// The `xchacha` Cargo feature must be enabled in order to use this
-/// (which it is by default).
-</span><span class="attr">#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;xchacha&quot;</span>)))]
-</span><span class="kw">pub type </span>XChaCha12 = XChaCha&lt;R12&gt;;
-
+</span><span class="kw">pub type </span>XChaCha12 = StreamCipherCoreWrapper&lt;XChaChaCore&lt;U6&gt;&gt;;
 <span class="doccomment">/// XChaCha8 stream cipher (reduced-round variant of [`XChaCha20`] with 8 rounds)
-///
-/// The `xchacha` Cargo feature must be enabled in order to use this
-/// (which it is by default).
-</span><span class="attr">#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;xchacha&quot;</span>)))]
-</span><span class="kw">pub type </span>XChaCha8 = XChaCha&lt;R8&gt;;
+</span><span class="kw">pub type </span>XChaCha8 = StreamCipherCoreWrapper&lt;XChaChaCore&lt;U4&gt;&gt;;
 
-<span class="doccomment">/// XChaCha family stream cipher, generic around a number of rounds.
-///
-/// Use the [`XChaCha8`], [`XChaCha12`], or [`XChaCha20`] type aliases to select
-/// a specific number of rounds.
-///
-/// Generally [`XChaCha20`] is preferred.
-</span><span class="attr">#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;xchacha&quot;</span>)))]
-</span><span class="kw">pub struct </span>XChaCha&lt;R: Rounds&gt;(ChaCha&lt;R, C64&gt;);
+<span class="doccomment">/// The XChaCha core function.
+</span><span class="kw">pub struct </span>XChaChaCore&lt;R: Unsigned&gt;(ChaChaCore&lt;R&gt;);
 
-<span class="kw">impl</span>&lt;R: Rounds&gt; NewCipher <span class="kw">for </span>XChaCha&lt;R&gt; {
-    <span class="doccomment">/// Key size in bytes
-    </span><span class="kw">type </span>KeySize = U32;
+<span class="kw">impl</span>&lt;R: Unsigned&gt; KeySizeUser <span class="kw">for </span>XChaChaCore&lt;R&gt; {
+    <span class="kw">type </span>KeySize = U32;
+}
 
-    <span class="doccomment">/// Nonce size in bytes
-    </span><span class="kw">type </span>NonceSize = U24;
+<span class="kw">impl</span>&lt;R: Unsigned&gt; IvSizeUser <span class="kw">for </span>XChaChaCore&lt;R&gt; {
+    <span class="kw">type </span>IvSize = U24;
+}
 
-    <span class="attr">#[allow(unused_mut, clippy::let_and_return)]
-    </span><span class="kw">fn </span>new(key: <span class="kw-2">&amp;</span>Key, nonce: <span class="kw-2">&amp;</span>XNonce) -&gt; <span class="self">Self </span>{
-        <span class="comment">// TODO(tarcieri): zeroize subkey
-        </span><span class="kw">let </span>subkey = hchacha::&lt;R&gt;(key, nonce[..<span class="number">16</span>].as_ref().into());
-        <span class="kw">let </span><span class="kw-2">mut </span>padded_iv = GenericArray::default();
-        padded_iv[<span class="number">4</span>..].copy_from_slice(<span class="kw-2">&amp;</span>nonce[<span class="number">16</span>..]);
-        XChaCha(ChaCha::new(<span class="kw-2">&amp;</span>subkey, <span class="kw-2">&amp;</span>padded_iv))
+<span class="kw">impl</span>&lt;R: Unsigned&gt; BlockSizeUser <span class="kw">for </span>XChaChaCore&lt;R&gt; {
+    <span class="kw">type </span>BlockSize = U64;
+}
+
+<span class="kw">impl</span>&lt;R: Unsigned&gt; KeyIvInit <span class="kw">for </span>XChaChaCore&lt;R&gt; {
+    <span class="kw">fn </span>new(key: <span class="kw-2">&amp;</span>Key, iv: <span class="kw-2">&amp;</span>XNonce) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>subkey = hchacha::&lt;R&gt;(key, iv[..<span class="number">16</span>].as_ref().into());
+        <span class="kw">let </span><span class="kw-2">mut </span>padded_iv = Nonce::default();
+        padded_iv[<span class="number">4</span>..].copy_from_slice(<span class="kw-2">&amp;</span>iv[<span class="number">16</span>..]);
+        XChaChaCore(ChaChaCore::new(<span class="kw-2">&amp;</span>subkey, <span class="kw-2">&amp;</span>padded_iv))
     }
 }
 
-<span class="kw">impl</span>&lt;R: Rounds&gt; StreamCipher <span class="kw">for </span>XChaCha&lt;R&gt; {
-    <span class="kw">fn </span>try_apply_keystream(<span class="kw-2">&amp;mut </span><span class="self">self</span>, data: <span class="kw-2">&amp;mut </span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;(), LoopError&gt; {
-        <span class="self">self</span>.<span class="number">0</span>.try_apply_keystream(data)
+<span class="kw">impl</span>&lt;R: Unsigned&gt; StreamCipherCore <span class="kw">for </span>XChaChaCore&lt;R&gt; {
+    <span class="attr">#[inline(always)]
+    </span><span class="kw">fn </span>remaining_blocks(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;usize&gt; {
+        <span class="self">self</span>.<span class="number">0</span>.remaining_blocks()
+    }
+
+    <span class="attr">#[inline(always)]
+    </span><span class="kw">fn </span>process_with_backend(<span class="kw-2">&amp;mut </span><span class="self">self</span>, f: <span class="kw">impl </span>StreamClosure&lt;BlockSize = <span class="self">Self</span>::BlockSize&gt;) {
+        <span class="self">self</span>.<span class="number">0</span>.process_with_backend(f);
     }
 }
 
-<span class="kw">impl</span>&lt;R: Rounds&gt; StreamCipherSeek <span class="kw">for </span>XChaCha&lt;R&gt; {
-    <span class="kw">fn </span>try_current_pos&lt;T: SeekNum&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;T, OverflowError&gt; {
-        <span class="self">self</span>.<span class="number">0</span>.try_current_pos()
+<span class="kw">impl</span>&lt;R: Unsigned&gt; StreamCipherSeekCore <span class="kw">for </span>XChaChaCore&lt;R&gt; {
+    <span class="kw">type </span>Counter = u32;
+
+    <span class="attr">#[inline(always)]
+    </span><span class="kw">fn </span>get_block_pos(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u32 {
+        <span class="self">self</span>.<span class="number">0</span>.get_block_pos()
     }
 
-    <span class="kw">fn </span>try_seek&lt;T: SeekNum&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, pos: T) -&gt; <span class="prelude-ty">Result</span>&lt;(), LoopError&gt; {
-        <span class="self">self</span>.<span class="number">0</span>.try_seek(pos)
+    <span class="attr">#[inline(always)]
+    </span><span class="kw">fn </span>set_block_pos(<span class="kw-2">&amp;mut </span><span class="self">self</span>, pos: u32) {
+        <span class="self">self</span>.<span class="number">0</span>.set_block_pos(pos);
     }
 }
+
+<span class="attr">#[cfg(feature = <span class="string">&quot;zeroize&quot;</span>)]
+#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;zeroize&quot;</span>)))]
+</span><span class="kw">impl</span>&lt;R: Unsigned&gt; ZeroizeOnDrop <span class="kw">for </span>XChaChaCore&lt;R&gt; {}
 
 <span class="doccomment">/// The HChaCha function: adapts the ChaCha core function in the same
 /// manner that HSalsa adapts the Salsa function.
@@ -299,21 +298,21 @@
 /// For more information on HSalsa on which HChaCha is based, see:
 ///
 /// &lt;http://cr.yp.to/snuffle/xsalsa-20110204.pdf&gt;
-</span><span class="attr">#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;hchacha&quot;</span>)))]
-</span><span class="kw">pub fn </span>hchacha&lt;R: Rounds&gt;(key: <span class="kw-2">&amp;</span>Key, input: <span class="kw-2">&amp;</span>GenericArray&lt;u8, U16&gt;) -&gt; GenericArray&lt;u8, U32&gt; {
-    <span class="kw">let </span><span class="kw-2">mut </span>state = [<span class="number">0u32</span>; <span class="number">16</span>];
+</span><span class="kw">pub fn </span>hchacha&lt;R: Unsigned&gt;(key: <span class="kw-2">&amp;</span>Key, input: <span class="kw-2">&amp;</span>GenericArray&lt;u8, U16&gt;) -&gt; GenericArray&lt;u8, U32&gt; {
+    <span class="kw">let </span><span class="kw-2">mut </span>state = [<span class="number">0u32</span>; STATE_WORDS];
     state[..<span class="number">4</span>].copy_from_slice(<span class="kw-2">&amp;</span>CONSTANTS);
 
-    <span class="kw">for </span>(i, chunk) <span class="kw">in </span>key.chunks(<span class="number">4</span>).take(<span class="number">8</span>).enumerate() {
-        state[<span class="number">4 </span>+ i] = u32::from_le_bytes(chunk.try_into().unwrap());
+    <span class="kw">let </span>key_chunks = key.chunks_exact(<span class="number">4</span>);
+    <span class="kw">for </span>(v, chunk) <span class="kw">in </span>state[<span class="number">4</span>..<span class="number">12</span>].iter_mut().zip(key_chunks) {
+        <span class="kw-2">*</span>v = u32::from_le_bytes(chunk.try_into().unwrap());
     }
-
-    <span class="kw">for </span>(i, chunk) <span class="kw">in </span>input.chunks(<span class="number">4</span>).enumerate() {
-        state[<span class="number">12 </span>+ i] = u32::from_le_bytes(chunk.try_into().unwrap());
+    <span class="kw">let </span>input_chunks = input.chunks_exact(<span class="number">4</span>);
+    <span class="kw">for </span>(v, chunk) <span class="kw">in </span>state[<span class="number">12</span>..<span class="number">16</span>].iter_mut().zip(input_chunks) {
+        <span class="kw-2">*</span>v = u32::from_le_bytes(chunk.try_into().unwrap());
     }
 
     <span class="comment">// R rounds consisting of R/2 column rounds and R/2 diagonal rounds
-    </span><span class="kw">for _ in </span><span class="number">0</span>..(R::COUNT / <span class="number">2</span>) {
+    </span><span class="kw">for _ in </span><span class="number">0</span>..R::USIZE {
         <span class="comment">// column rounds
         </span>quarter_round(<span class="number">0</span>, <span class="number">4</span>, <span class="number">8</span>, <span class="number">12</span>, <span class="kw-2">&amp;mut </span>state);
         quarter_round(<span class="number">1</span>, <span class="number">5</span>, <span class="number">9</span>, <span class="number">13</span>, <span class="kw-2">&amp;mut </span>state);
@@ -329,46 +328,59 @@
 
     <span class="kw">let </span><span class="kw-2">mut </span>output = GenericArray::default();
 
-    <span class="kw">for </span>(i, chunk) <span class="kw">in </span>output.chunks_mut(<span class="number">4</span>).take(<span class="number">4</span>).enumerate() {
-        chunk.copy_from_slice(<span class="kw-2">&amp;</span>state[i].to_le_bytes());
+    <span class="kw">for </span>(chunk, val) <span class="kw">in </span>output[..<span class="number">16</span>].chunks_exact_mut(<span class="number">4</span>).zip(<span class="kw-2">&amp;</span>state[..<span class="number">4</span>]) {
+        chunk.copy_from_slice(<span class="kw-2">&amp;</span>val.to_le_bytes());
     }
 
-    <span class="kw">for </span>(i, chunk) <span class="kw">in </span>output.chunks_mut(<span class="number">4</span>).skip(<span class="number">4</span>).enumerate() {
-        chunk.copy_from_slice(<span class="kw-2">&amp;</span>state[i + <span class="number">12</span>].to_le_bytes());
+    <span class="kw">for </span>(chunk, val) <span class="kw">in </span>output[<span class="number">16</span>..].chunks_exact_mut(<span class="number">4</span>).zip(<span class="kw-2">&amp;</span>state[<span class="number">12</span>..]) {
+        chunk.copy_from_slice(<span class="kw-2">&amp;</span>val.to_le_bytes());
     }
 
     output
 }
 
+<span class="doccomment">/// The ChaCha20 quarter round function
+</span><span class="comment">// for simplicity this function is copied from the software backend
+</span><span class="kw">fn </span>quarter_round(a: usize, b: usize, c: usize, d: usize, state: <span class="kw-2">&amp;mut </span>[u32; STATE_WORDS]) {
+    state[a] = state[a].wrapping_add(state[b]);
+    state[d] ^= state[a];
+    state[d] = state[d].rotate_left(<span class="number">16</span>);
+
+    state[c] = state[c].wrapping_add(state[d]);
+    state[b] ^= state[c];
+    state[b] = state[b].rotate_left(<span class="number">12</span>);
+
+    state[a] = state[a].wrapping_add(state[b]);
+    state[d] ^= state[a];
+    state[d] = state[d].rotate_left(<span class="number">8</span>);
+
+    state[c] = state[c].wrapping_add(state[d]);
+    state[b] ^= state[c];
+    state[b] = state[b].rotate_left(<span class="number">7</span>);
+}
+
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>hchacha20_tests {
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
+    <span class="kw">use </span>hex_literal::hex;
 
-    <span class="comment">//
-    // Test vectors from:
-    // https://tools.ietf.org/id/draft-arciszewski-xchacha-03.html#rfc.section.2.2.1
-    //
-
-    </span><span class="kw">const </span>KEY: [u8; <span class="number">32</span>] = [
-        <span class="number">0x00</span>, <span class="number">0x01</span>, <span class="number">0x02</span>, <span class="number">0x03</span>, <span class="number">0x04</span>, <span class="number">0x05</span>, <span class="number">0x06</span>, <span class="number">0x07</span>, <span class="number">0x08</span>, <span class="number">0x09</span>, <span class="number">0x0a</span>, <span class="number">0x0b</span>, <span class="number">0x0c</span>, <span class="number">0x0d</span>, <span class="number">0x0e</span>,
-        <span class="number">0x0f</span>, <span class="number">0x10</span>, <span class="number">0x11</span>, <span class="number">0x12</span>, <span class="number">0x13</span>, <span class="number">0x14</span>, <span class="number">0x15</span>, <span class="number">0x16</span>, <span class="number">0x17</span>, <span class="number">0x18</span>, <span class="number">0x19</span>, <span class="number">0x1a</span>, <span class="number">0x1b</span>, <span class="number">0x1c</span>, <span class="number">0x1d</span>,
-        <span class="number">0x1e</span>, <span class="number">0x1f</span>,
-    ];
-
-    <span class="kw">const </span>INPUT: [u8; <span class="number">16</span>] = [
-        <span class="number">0x00</span>, <span class="number">0x00</span>, <span class="number">0x00</span>, <span class="number">0x09</span>, <span class="number">0x00</span>, <span class="number">0x00</span>, <span class="number">0x00</span>, <span class="number">0x4a</span>, <span class="number">0x00</span>, <span class="number">0x00</span>, <span class="number">0x00</span>, <span class="number">0x00</span>, <span class="number">0x31</span>, <span class="number">0x41</span>, <span class="number">0x59</span>,
-        <span class="number">0x27</span>,
-    ];
-
-    <span class="kw">const </span>OUTPUT: [u8; <span class="number">32</span>] = [
-        <span class="number">0x82</span>, <span class="number">0x41</span>, <span class="number">0x3b</span>, <span class="number">0x42</span>, <span class="number">0x27</span>, <span class="number">0xb2</span>, <span class="number">0x7b</span>, <span class="number">0xfe</span>, <span class="number">0xd3</span>, <span class="number">0xe</span>, <span class="number">0x42</span>, <span class="number">0x50</span>, <span class="number">0x8a</span>, <span class="number">0x87</span>, <span class="number">0x7d</span>,
-        <span class="number">0x73</span>, <span class="number">0xa0</span>, <span class="number">0xf9</span>, <span class="number">0xe4</span>, <span class="number">0xd5</span>, <span class="number">0x8a</span>, <span class="number">0x74</span>, <span class="number">0xa8</span>, <span class="number">0x53</span>, <span class="number">0xc1</span>, <span class="number">0x2e</span>, <span class="number">0xc4</span>, <span class="number">0x13</span>, <span class="number">0x26</span>, <span class="number">0xd3</span>,
-        <span class="number">0xec</span>, <span class="number">0xdc</span>,
-    ];
-
-    <span class="attr">#[test]
+    <span class="doccomment">/// Test vectors from:
+    /// https://tools.ietf.org/id/draft-arciszewski-xchacha-03.html#rfc.section.2.2.1
+    </span><span class="attr">#[test]
     </span><span class="kw">fn </span>test_vector() {
-        <span class="kw">let </span>actual = hchacha::&lt;R20&gt;(
+        <span class="kw">const </span>KEY: [u8; <span class="number">32</span>] = <span class="macro">hex!</span>(
+            <span class="string">&quot;000102030405060708090a0b0c0d0e0f&quot;
+            &quot;101112131415161718191a1b1c1d1e1f&quot;
+        </span>);
+
+        <span class="kw">const </span>INPUT: [u8; <span class="number">16</span>] = <span class="macro">hex!</span>(<span class="string">&quot;000000090000004a0000000031415927&quot;</span>);
+
+        <span class="kw">const </span>OUTPUT: [u8; <span class="number">32</span>] = <span class="macro">hex!</span>(
+            <span class="string">&quot;82413b4227b27bfed30e42508a877d73&quot;
+            &quot;a0f9e4d58a74a853c12ec41326d3ecdc&quot;
+        </span>);
+
+        <span class="kw">let </span>actual = hchacha::&lt;U10&gt;(
             GenericArray::from_slice(<span class="kw-2">&amp;</span>KEY),
             <span class="kw-2">&amp;</span>GenericArray::from_slice(<span class="kw-2">&amp;</span>INPUT),
         );

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/poly1305-0.7.2/src/backend/avx2.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>avx2.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-1f7d512b176f0f72.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-124a1ca42af929b6.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-93196c7a1c3542a8.css" id="mainThemeStyle"><link rel="stylesheet" id="themeStyle" href="../../../static.files/light-4743e13df3dfe8c4.css"><link rel="stylesheet" disabled href="../../../static.files/dark-0e1b889528bd466b.css"><link rel="stylesheet" disabled href="../../../static.files/ayu-65289d5d067c7c66.css"><script id="default-settings" ></script><script src="../../../static.files/storage-d43fa987303ecbbb.js"></script><script defer src="../../../static.files/source-script-ea63cb6500f71309.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../static.files/main-3367e395607fafc1.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="icon" href="https://raw.githubusercontent.com/RustCrypto/media/8f1a9894/logo.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../poly1305/index.html">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/poly1305-0.8.0/src/backend/avx2.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>avx2.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-1f7d512b176f0f72.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-124a1ca42af929b6.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-93196c7a1c3542a8.css" id="mainThemeStyle"><link rel="stylesheet" id="themeStyle" href="../../../static.files/light-4743e13df3dfe8c4.css"><link rel="stylesheet" disabled href="../../../static.files/dark-0e1b889528bd466b.css"><link rel="stylesheet" disabled href="../../../static.files/ayu-65289d5d067c7c66.css"><script id="default-settings" ></script><script src="../../../static.files/storage-d43fa987303ecbbb.js"></script><script defer src="../../../static.files/source-script-ea63cb6500f71309.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../static.files/main-3367e395607fafc1.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="icon" href="https://raw.githubusercontent.com/RustCrypto/media/8f1a9894/logo.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../poly1305/index.html">
                         <img src="https://raw.githubusercontent.com/RustCrypto/media/8f1a9894/logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-5ec35bf9ca753509.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
@@ -157,6 +157,57 @@
 <a href="#156" id="156">156</a>
 <a href="#157" id="157">157</a>
 <a href="#158" id="158">158</a>
+<a href="#159" id="159">159</a>
+<a href="#160" id="160">160</a>
+<a href="#161" id="161">161</a>
+<a href="#162" id="162">162</a>
+<a href="#163" id="163">163</a>
+<a href="#164" id="164">164</a>
+<a href="#165" id="165">165</a>
+<a href="#166" id="166">166</a>
+<a href="#167" id="167">167</a>
+<a href="#168" id="168">168</a>
+<a href="#169" id="169">169</a>
+<a href="#170" id="170">170</a>
+<a href="#171" id="171">171</a>
+<a href="#172" id="172">172</a>
+<a href="#173" id="173">173</a>
+<a href="#174" id="174">174</a>
+<a href="#175" id="175">175</a>
+<a href="#176" id="176">176</a>
+<a href="#177" id="177">177</a>
+<a href="#178" id="178">178</a>
+<a href="#179" id="179">179</a>
+<a href="#180" id="180">180</a>
+<a href="#181" id="181">181</a>
+<a href="#182" id="182">182</a>
+<a href="#183" id="183">183</a>
+<a href="#184" id="184">184</a>
+<a href="#185" id="185">185</a>
+<a href="#186" id="186">186</a>
+<a href="#187" id="187">187</a>
+<a href="#188" id="188">188</a>
+<a href="#189" id="189">189</a>
+<a href="#190" id="190">190</a>
+<a href="#191" id="191">191</a>
+<a href="#192" id="192">192</a>
+<a href="#193" id="193">193</a>
+<a href="#194" id="194">194</a>
+<a href="#195" id="195">195</a>
+<a href="#196" id="196">196</a>
+<a href="#197" id="197">197</a>
+<a href="#198" id="198">198</a>
+<a href="#199" id="199">199</a>
+<a href="#200" id="200">200</a>
+<a href="#201" id="201">201</a>
+<a href="#202" id="202">202</a>
+<a href="#203" id="203">203</a>
+<a href="#204" id="204">204</a>
+<a href="#205" id="205">205</a>
+<a href="#206" id="206">206</a>
+<a href="#207" id="207">207</a>
+<a href="#208" id="208">208</a>
+<a href="#209" id="209">209</a>
 </pre><pre class="rust"><code><span class="doccomment">//! AVX2 implementation of the Poly1305 state machine.
 
 </span><span class="comment">// The State struct and its logic was originally derived from Goll and Gueron&#39;s AVX2 C
@@ -174,13 +225,20 @@
 // optimisations provided by Bhattacharyya and Sarkar. The latter require the message
 // length to be known, which is incompatible with the streaming API of UniversalHash.
 
-</span><span class="kw">use </span>core::convert::TryInto;
-<span class="kw">use </span>universal_hash::generic_array::GenericArray;
+</span><span class="kw">use </span>universal_hash::{
+    consts::{U16, U4},
+    crypto_common::{BlockSizeUser, ParBlocksSizeUser},
+    generic_array::GenericArray,
+    UhfBackend,
+};
 
 <span class="kw">use crate</span>::{Block, Key, Tag};
 
 <span class="kw">mod </span>helpers;
 <span class="kw">use </span><span class="self">self</span>::helpers::<span class="kw-2">*</span>;
+
+<span class="doccomment">/// Four Poly1305 blocks (64-bytes)
+</span><span class="kw">type </span>ParBlocks = universal_hash::ParBlocks&lt;State&gt;;
 
 <span class="attr">#[derive(Copy, Clone)]
 </span><span class="kw">struct </span>Initialized {
@@ -220,10 +278,13 @@
         }
     }
 
-    <span class="doccomment">/// Reset internal state
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>reset(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
-        <span class="self">self</span>.initialized = <span class="prelude-val">None</span>;
-        <span class="self">self</span>.num_cached_blocks = <span class="number">0</span>;
+    <span class="doccomment">/// Process four Poly1305 blocks at once.
+    </span><span class="attr">#[target_feature(enable = <span class="string">&quot;avx2&quot;</span>)]
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">unsafe fn </span>compute_par_blocks(<span class="kw-2">&amp;mut </span><span class="self">self</span>, blocks: <span class="kw-2">&amp;</span>ParBlocks) {
+        <span class="macro">assert!</span>(<span class="self">self</span>.partial_block.is_none());
+        <span class="macro">assert_eq!</span>(<span class="self">self</span>.num_cached_blocks, <span class="number">0</span>);
+
+        <span class="self">self</span>.process_blocks(Aligned4x130::from_par_blocks(blocks));
     }
 
     <span class="doccomment">/// Compute a Poly1305 block
@@ -244,13 +305,18 @@
             <span class="self">self</span>.num_cached_blocks = <span class="number">0</span>;
         }
 
+        <span class="self">self</span>.process_blocks(Aligned4x130::from_blocks(<span class="kw-2">&amp;</span><span class="self">self</span>.cached_blocks));
+    }
+
+    <span class="doccomment">/// Compute a Poly1305 block
+    </span><span class="attr">#[target_feature(enable = <span class="string">&quot;avx2&quot;</span>)]
+    </span><span class="kw">unsafe fn </span>process_blocks(<span class="kw-2">&amp;mut </span><span class="self">self</span>, blocks: Aligned4x130) {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(inner) = <span class="kw-2">&amp;mut </span><span class="self">self</span>.initialized {
             <span class="comment">// P &lt;-- R^4 * P + blocks
-            </span>inner.p =
-                (<span class="kw-2">&amp;</span>inner.p * inner.r4).reduce() + Aligned4x130::from_blocks(<span class="kw-2">&amp;</span><span class="self">self</span>.cached_blocks);
+            </span>inner.p = (<span class="kw-2">&amp;</span>inner.p * inner.r4).reduce() + blocks;
         } <span class="kw">else </span>{
             <span class="comment">// Initialize the polynomial.
-            </span><span class="kw">let </span>p = Aligned4x130::from_blocks(<span class="kw-2">&amp;</span><span class="self">self</span>.cached_blocks);
+            </span><span class="kw">let </span>p = blocks;
 
             <span class="comment">// Initialize the multiplier (used to merge down the polynomial during
             // finalization).
@@ -312,7 +378,43 @@
         };
         tag_int.write(tag.as_mut_slice());
 
-        Tag::new(tag)
+        tag
+    }
+}
+
+<span class="kw">impl </span>BlockSizeUser <span class="kw">for </span>State {
+    <span class="kw">type </span>BlockSize = U16;
+}
+
+<span class="kw">impl </span>ParBlocksSizeUser <span class="kw">for </span>State {
+    <span class="kw">type </span>ParBlocksSize = U4;
+}
+
+<span class="kw">impl </span>UhfBackend <span class="kw">for </span>State {
+    <span class="kw">fn </span>proc_block(<span class="kw-2">&amp;mut </span><span class="self">self</span>, block: <span class="kw-2">&amp;</span>Block) {
+        <span class="kw">unsafe </span>{ <span class="self">self</span>.compute_block(block, <span class="bool-val">false</span>) };
+    }
+
+    <span class="kw">fn </span>proc_par_blocks(<span class="kw-2">&amp;mut </span><span class="self">self</span>, blocks: <span class="kw-2">&amp;</span>ParBlocks) {
+        <span class="kw">if </span><span class="self">self</span>.num_cached_blocks == <span class="number">0 </span>{
+            <span class="comment">// Fast path.
+            </span><span class="kw">unsafe </span>{ <span class="self">self</span>.compute_par_blocks(blocks) };
+        } <span class="kw">else </span>{
+            <span class="comment">// We are unaligned; use the slow fallback.
+            </span><span class="kw">for </span>block <span class="kw">in </span>blocks {
+                <span class="self">self</span>.proc_block(block);
+            }
+        }
+    }
+
+    <span class="kw">fn </span>blocks_needed_to_align(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
+        <span class="kw">if </span><span class="self">self</span>.num_cached_blocks == <span class="number">0 </span>{
+            <span class="comment">// There are no cached blocks; fast path is available.
+            </span><span class="number">0
+        </span>} <span class="kw">else </span>{
+            <span class="comment">// There are cached blocks; report how many more we need.
+            </span><span class="self">self</span>.cached_blocks.len() - <span class="self">self</span>.num_cached_blocks
+        }
     }
 }
 </code></pre></div>

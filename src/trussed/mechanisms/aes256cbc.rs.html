@@ -188,15 +188,13 @@
         keystore: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Keystore,
         request: <span class="kw-2">&amp;</span>request::Encrypt,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;reply::Encrypt, Error&gt; {
-        <span class="kw">use </span>block_modes::{BlockMode, Cbc};
-        <span class="comment">// use block_modes::Cbc;
-        </span><span class="kw">use </span>aes::Aes256;
-        <span class="kw">use </span>block_modes::block_padding::ZeroPadding;
+        <span class="kw">use </span>aes::Aes256;
+        <span class="kw">use </span>cbc::cipher::{block_padding::ZeroPadding, BlockEncryptMut, KeyIvInit};
 
+        <span class="kw">type </span>Aes256CbcEnc = cbc::Encryptor&lt;Aes256&gt;;
         <span class="comment">// TODO: perhaps use NoPadding and have client pad, to emphasize spec-conformance?
-        </span><span class="kw">type </span>Aes256Cbc = Cbc&lt;Aes256, ZeroPadding&gt;;
 
-        <span class="kw">let </span>key_id = request.key;
+        </span><span class="kw">let </span>key_id = request.key;
         <span class="kw">let </span>key = keystore.load_key(key::Secrecy::Secret, <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span>key_id)<span class="question-mark">?</span>;
         <span class="kw">if </span>!<span class="macro">matches!</span>(key.kind, key::Kind::Symmetric(AES256_KEY_SIZE)) {
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::WrongKeyKind);
@@ -209,7 +207,7 @@
             .map_err(|<span class="kw">_</span>| Error::InternalError)<span class="question-mark">?</span>;
 
         <span class="kw">let </span>zero_iv = [<span class="number">0u8</span>; <span class="number">16</span>];
-        <span class="kw">let </span>cipher = Aes256Cbc::new_from_slices(<span class="kw-2">&amp;</span>symmetric_key, <span class="kw-2">&amp;</span>zero_iv).unwrap();
+        <span class="kw">let </span>cipher = Aes256CbcEnc::new_from_slices(<span class="kw-2">&amp;</span>symmetric_key, <span class="kw-2">&amp;</span>zero_iv).unwrap();
 
         <span class="comment">// buffer must have enough space for message+padding
         </span><span class="kw">let </span><span class="kw-2">mut </span>buffer = request.message.clone();
@@ -222,7 +220,9 @@
         // Encrypt message in-place.
         // &amp;buffer[..pos] is used as a message and &amp;buffer[pos..] as a reserved space for padding.
         // The padding space should be big enough for padding, otherwise method will return Err(BlockModeError).
-        </span><span class="kw">let </span>ciphertext = cipher.encrypt(<span class="kw-2">&amp;mut </span>buffer, l).unwrap();
+        </span><span class="kw">let </span>ciphertext = cipher
+            .encrypt_padded_mut::&lt;ZeroPadding&gt;(<span class="kw-2">&amp;mut </span>buffer, l)
+            .unwrap();
 
         <span class="kw">let </span>ciphertext = Message::from_slice(ciphertext).unwrap();
         <span class="prelude-val">Ok</span>(reply::Encrypt {
@@ -274,13 +274,11 @@
         keystore: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Keystore,
         request: <span class="kw-2">&amp;</span>request::Decrypt,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;reply::Decrypt, Error&gt; {
-        <span class="kw">use </span>block_modes::{BlockMode, Cbc};
-        <span class="comment">// use block_modes::Cbc;
-        </span><span class="kw">use </span>aes::Aes256;
-        <span class="kw">use </span>block_modes::block_padding::ZeroPadding;
+        <span class="kw">use </span>aes::Aes256;
+        <span class="kw">use </span>cbc::cipher::{block_padding::ZeroPadding, BlockDecryptMut, KeyIvInit};
 
         <span class="comment">// TODO: perhaps use NoPadding and have client pad, to emphasize spec-conformance?
-        </span><span class="kw">type </span>Aes256Cbc = Cbc&lt;Aes256, ZeroPadding&gt;;
+        </span><span class="kw">type </span>Aes256CbcDec = cbc::Decryptor&lt;Aes256&gt;;
 
         <span class="kw">let </span>key_id = request.key;
         <span class="kw">let </span>key = keystore.load_key(key::Secrecy::Secret, <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span>key_id)<span class="question-mark">?</span>;
@@ -295,7 +293,7 @@
             .map_err(|<span class="kw">_</span>| Error::InternalError)<span class="question-mark">?</span>;
 
         <span class="kw">let </span>zero_iv = [<span class="number">0u8</span>; <span class="number">16</span>];
-        <span class="kw">let </span>cipher = Aes256Cbc::new_from_slices(<span class="kw-2">&amp;</span>symmetric_key, <span class="kw-2">&amp;</span>zero_iv).unwrap();
+        <span class="kw">let </span>cipher = Aes256CbcDec::new_from_slices(<span class="kw-2">&amp;</span>symmetric_key, <span class="kw-2">&amp;</span>zero_iv).unwrap();
 
         <span class="comment">// buffer must have enough space for message+padding
         </span><span class="kw">let </span><span class="kw-2">mut </span>buffer = request.message.clone();
@@ -309,7 +307,9 @@
         // if after decoding message has malformed padding.
         // hprintln!(&quot;encrypted: {:?}&quot;, &amp;buffer).ok();
         // hprintln!(&quot;symmetric key: {:?}&quot;, &amp;symmetric_key).ok();
-        </span><span class="kw">let </span>plaintext = cipher.decrypt(<span class="kw-2">&amp;mut </span>buffer).unwrap();
+        </span><span class="kw">let </span>plaintext = cipher
+            .decrypt_padded_mut::&lt;ZeroPadding&gt;(<span class="kw-2">&amp;mut </span>buffer)
+            .unwrap();
         <span class="comment">// hprintln!(&quot;decrypted: {:?}&quot;, &amp;plaintext).ok();
         </span><span class="kw">let </span>plaintext = Message::from_slice(plaintext).unwrap();
 

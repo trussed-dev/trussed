@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["Sha1","Structure representing the state of a SHA-1 computation"]],"trait":[["Digest","The `Digest` trait specifies an interface common for digest functions."]]};
+window.SIDEBAR_ITEMS = {"struct":[["Sha1Core","Core SHA-1 hasher state."]],"trait":[["Digest","Convenience wrapper trait covering functionality of cryptographic hash functions with fixed output size."]],"type":[["Sha1","SHA-1 hasher state."]]};
