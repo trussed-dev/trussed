@@ -40,6 +40,8 @@ cfg_if::cfg_if! {
         pub const MAX_SERVICE_CLIENTS: usize = 2;
     } else if #[cfg(feature = "clients-1")] {
         pub const MAX_SERVICE_CLIENTS: usize = 1;
+    } else {
+        pub const MAX_SERVICE_CLIENTS: usize = 0;
     }
 }
 pub const MAX_SHORT_DATA_LENGTH: usize = 128;
