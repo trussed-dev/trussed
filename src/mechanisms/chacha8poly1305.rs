@@ -245,8 +245,12 @@ impl UnwrapKey for super::Chacha8Poly1305 {
 }
 
 #[cfg(not(feature = "chacha8-poly1305"))]
-impl<P: Platform> Decrypt<P> for super::Chacha8Poly1305 {}
+impl Decrypt for super::Chacha8Poly1305 {}
 #[cfg(not(feature = "chacha8-poly1305"))]
-impl<P: Platform> Encrypt<P> for super::Chacha8Poly1305 {}
+impl Encrypt for super::Chacha8Poly1305 {}
 #[cfg(not(feature = "chacha8-poly1305"))]
-impl<P: Platform> GenerateKey<P> for super::Chacha8Poly1305 {}
+impl WrapKey for super::Chacha8Poly1305 {}
+#[cfg(not(feature = "chacha8-poly1305"))]
+impl UnwrapKey for super::Chacha8Poly1305 {}
+#[cfg(not(feature = "chacha8-poly1305"))]
+impl GenerateKey for super::Chacha8Poly1305 {}

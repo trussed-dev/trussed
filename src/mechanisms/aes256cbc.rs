@@ -167,9 +167,9 @@ impl UnsafeInjectKey for super::Aes256Cbc {
 
 #[cfg(not(feature = "aes256-cbc"))]
 impl UnsafeInjectKey for super::Aes256Cbc {}
-
 #[cfg(not(feature = "aes256-cbc"))]
 impl Decrypt for super::Aes256Cbc {}
-
 #[cfg(not(feature = "aes256-cbc"))]
 impl Encrypt for super::Aes256Cbc {}
+#[cfg(not(feature = "aes256-cbc"))]
+impl WrapKey for super::Aes256Cbc {}

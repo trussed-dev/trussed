@@ -266,12 +266,16 @@ impl UnsafeInjectKey for super::Ed255 {
 }
 
 #[cfg(not(feature = "ed255"))]
+impl Exists for super::Ed255 {}
+#[cfg(not(feature = "ed255"))]
 impl DeriveKey for super::Ed255 {}
 #[cfg(not(feature = "ed255"))]
 impl GenerateKey for super::Ed255 {}
 #[cfg(not(feature = "ed255"))]
+impl SerializeKey for super::Ed255 {}
+#[cfg(not(feature = "ed255"))]
+impl DeserializeKey for super::Ed255 {}
+#[cfg(not(feature = "ed255"))]
 impl Sign for super::Ed255 {}
 #[cfg(not(feature = "ed255"))]
 impl Verify for super::Ed255 {}
-#[cfg(not(feature = "ed255"))]
-impl UnsafeInjectKey for super::ed255 {}

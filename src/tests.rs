@@ -202,6 +202,7 @@ fn dummy() {
     setup!(_client);
 }
 
+#[cfg(feature = "ed255")]
 #[test]
 #[serial]
 fn sign_ed255() {
@@ -255,6 +256,7 @@ fn sign_ed255() {
     assert_eq!(Err(Error::WrongSignatureLength), reply);
 }
 
+#[cfg(feature = "p255")]
 #[test]
 #[serial]
 fn sign_p256() {
@@ -294,6 +296,7 @@ fn sign_p256() {
     assert!(valid);
 }
 
+#[cfg(feature = "p255")]
 #[test]
 #[serial]
 fn agree_p256() {
@@ -376,6 +379,7 @@ fn agree_p256() {
     .signature;
 }
 
+#[cfg(feature = "chacha8-poly1305")]
 #[test]
 #[serial]
 fn aead_rng_nonce() {
@@ -412,6 +416,7 @@ fn aead_rng_nonce() {
     assert_eq!(&message[..], plaintext.unwrap().as_ref());
 }
 
+#[cfg(feature = "chacha8-poly1305")]
 #[test]
 #[serial]
 fn aead_given_nonce() {
@@ -450,6 +455,7 @@ fn aead_given_nonce() {
 }
 
 // Same as before but key generated with a nonce
+#[cfg(feature = "chacha8-poly1305")]
 #[test]
 #[serial]
 fn aead_given_nonce_2() {
@@ -487,6 +493,7 @@ fn aead_given_nonce_2() {
     assert_eq!(&message[..], plaintext.unwrap().as_ref());
 }
 
+#[cfg(feature = "chacha8-poly1305")]
 #[test]
 #[serial]
 fn aead() {

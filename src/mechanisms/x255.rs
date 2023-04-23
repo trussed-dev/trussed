@@ -235,10 +235,8 @@ impl GenerateKey for super::X255 {}
 #[cfg(not(feature = "x255"))]
 impl Exists for super::X255 {}
 #[cfg(not(feature = "x255"))]
-impl Derive for super::X255 {}
+impl DeriveKey for super::X255 {}
 #[cfg(not(feature = "x255"))]
 impl SerializeKey for super::X255 {}
 #[cfg(not(feature = "x255"))]
 impl DeserializeKey for super::X255 {}
-#[cfg(not(feature = "x255"))]
-impl UnsafeInjectKey for super::X255 {}

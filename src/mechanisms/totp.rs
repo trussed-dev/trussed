@@ -9,11 +9,13 @@ const TOTP_KEY_SIZE: usize = 20;
 
 // https://tools.ietf.org/html/rfc4226#section-5.3
 
+#[cfg(feature = "totp")]
 #[inline(never)]
 fn hotp_raw(key: &[u8], counter: u64, digits: u32) -> u64 {
     hmac_and_truncate(key, &counter.to_be_bytes(), digits)
 }
 
+#[cfg(feature = "totp")]
 #[inline(never)]
 fn hmac_and_truncate(key: &[u8], message: &[u8], digits: u32) -> u64 {
     use hmac::{Hmac, Mac};
@@ -91,7 +93,12 @@ impl Exists for super::Totp {
     }
 }
 
-#[cfg(test)]
+#[cfg(not(feature = "totp"))]
+impl Sign for super::Totp {}
+#[cfg(not(feature = "totp"))]
+impl Exists for super::Totp {}
+
+#[cfg(all(test, feature = "totp"))]
 mod tests {
     use super::*;
 

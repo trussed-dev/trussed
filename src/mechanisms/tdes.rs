@@ -6,6 +6,7 @@
 // use cortex_m_semihosting::{dbg, hprintln};
 
 // needed to even get ::new() from des...
+#[cfg(feature = "tdes")]
 use des::cipher::{BlockDecrypt, BlockEncrypt, KeyInit};
 
 use crate::api::*;
@@ -109,3 +110,9 @@ impl UnsafeInjectKey for super::Tdes {
         Ok(reply::UnsafeInjectKey { key: key_id })
     }
 }
+
+#[cfg(not(feature = "tdes"))]
+impl Encrypt for super::Tdes {}
+
+#[cfg(not(feature = "tdes"))]
+impl Decrypt for super::Tdes {}

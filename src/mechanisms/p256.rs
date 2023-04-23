@@ -373,12 +373,18 @@ impl UnsafeInjectKey for super::P256 {
 #[cfg(not(feature = "p256"))]
 impl Agree for super::P256 {}
 #[cfg(not(feature = "p256"))]
+impl Exists for super::P256 {}
+#[cfg(not(feature = "p256"))]
 impl DeriveKey for super::P256 {}
 #[cfg(not(feature = "p256"))]
 impl GenerateKey for super::P256 {}
 #[cfg(not(feature = "p256"))]
+impl DeserializeKey for super::P256 {}
+#[cfg(not(feature = "p256"))]
+impl SerializeKey for super::P256 {}
+#[cfg(not(feature = "p256"))]
 impl Sign for super::P256 {}
 #[cfg(not(feature = "p256"))]
-impl Verify for super::P256 {}
+impl Sign for super::P256Prehashed {}
 #[cfg(not(feature = "p256"))]
-impl UnsafeInjectKey for super::P256 {}
+impl Verify for super::P256 {}
