@@ -3,7 +3,7 @@ use rand_chacha::ChaCha8Rng;
 pub use rand_core::{RngCore, SeedableRng};
 
 use crate::api::*;
-use crate::backend::{BackendId, CoreOnly, Dispatch};
+use crate::backend::{BackendId, BackendResources, CoreOnly, Dispatch};
 use crate::client::{ClientBuilder, ClientImplementation};
 use crate::config::*;
 use crate::error::{Error, Result};
@@ -91,6 +91,10 @@ where
 unsafe impl<P: Platform, D: Dispatch> Send for Service<P, D> {}
 
 impl<P: Platform> ServiceResources<P> {
+    pub fn backend<'a>(&'a mut self, id: &str) -> BackendResources<'a, P> {
+        BackendResources::new(self, id)
+    }
+
     pub fn certstore(&mut self, ctx: &CoreContext) -> Result<ClientCertstore<P::S>> {
         self.rng()
             .map(|rng| ClientCertstore::new(ctx.path.clone(), rng, self.platform.store()))
