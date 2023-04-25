@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"trait":[["Watchdog","Feeds an existing watchdog to ensure the processor isn’t reset. Sometimes commonly referred to as “kicking” or “refreshing”."],["WatchdogDisable","Disables a running watchdog timer so the processor won’t be reset."],["WatchdogEnable","Enables A watchdog timer to reset the processor if software is frozen or stalled."]]};
+window.SIDEBAR_ITEMS = {"trait":["Watchdog","WatchdogDisable","WatchdogEnable"]};

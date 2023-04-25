@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":[["can","Blocking CAN API"],["delay","Delays"],["i2c","Blocking I2C API"],["rng","Blocking hardware random number generator"],["serial","Blocking serial API"],["spi","Blocking SPI API"]]};
+window.SIDEBAR_ITEMS = {"mod":["can","delay","i2c","rng","serial","spi"]};

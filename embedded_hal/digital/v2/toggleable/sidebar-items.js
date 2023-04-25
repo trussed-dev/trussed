@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"trait":[["Default","Software-driven `toggle()` implementation."]]};
+window.SIDEBAR_ITEMS = {"trait":["Default"]};

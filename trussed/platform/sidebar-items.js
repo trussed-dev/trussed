@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"trait":[["CryptoRng","A marker trait used to indicate that an [`RngCore`] or `BlockRngCore` implementation is supposed to be cryptographically secure."],["Platform",""],["RngCore","The core of a random number generator."],["Syscall","Trussed client will call this method when making a Trussed request. This is intended to trigger a secure context on the platform."],["UserInterface",""]]};
+window.SIDEBAR_ITEMS = {"trait":["CryptoRng","Platform","RngCore","Syscall","UserInterface"]};

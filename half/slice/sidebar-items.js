@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"trait":[["HalfBitsSliceExt","Extensions to `[u16]` slices to support reinterpret operations."],["HalfFloatSliceExt","Extensions to `[f16]` and `[bf16]` slices to support conversion and reinterpret operations."]]};
+window.SIDEBAR_ITEMS = {"trait":["HalfBitsSliceExt","HalfFloatSliceExt"]};

@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":[["State","State of the RPC interchange"]],"struct":[["Channel","Channel used for Request/Response mechanism."],["Error",""],["Interchange","Set of `N` channels"],["InterchangeRef","Interchange witout the `const N: usize` generic parameter Obtained using `Interchange::as_interchange_ref`"],["Requester","Requester end of a channel"],["Responder","Responder end of a channel"]]};
+window.SIDEBAR_ITEMS = {"enum":["State"],"struct":["Channel","Error","Interchange","InterchangeRef","Requester","Responder"]};

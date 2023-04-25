@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["Error","Signature errors."]],"type":[["DerSignature","ECDSA/P-256 signature (ASN.1 DER encoded)"],["Signature","ECDSA/P-256 signature (fixed-size)"],["SigningKey","ECDSA/P-256 signing key"],["VerifyingKey","ECDSA/P-256 verification key (i.e. public key)"]]};
+window.SIDEBAR_ITEMS = {"struct":["Error"],"type":["DerSignature","Signature","SigningKey","VerifyingKey"]};

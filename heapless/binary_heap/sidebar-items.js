@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":[["Max","Max-heap"],["Min","Min-heap"]],"struct":[["BinaryHeap","A priority queue implemented with a binary heap."],["PeekMut","Structure wrapping a mutable reference to the greatest item on a `BinaryHeap`."]],"trait":[["Kind","The binary heap kind: min-heap or max-heap"]]};
+window.SIDEBAR_ITEMS = {"enum":["Max","Min"],"struct":["BinaryHeap","PeekMut"],"trait":["Kind"]};

@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"trait":[["Add","The addition operator `+`."],["AddAssign","The addition assignment operator `+=`."],["Invert","Perform an inversion on a field element (i.e. base field element or scalar)"],["Mul","The multiplication operator `*`."],["Neg","The unary negation operator `-`."],["Sub","The subtraction operator `-`."],["SubAssign","The subtraction assignment operator `-=`."]]};
+window.SIDEBAR_ITEMS = {"trait":["Add","AddAssign","Invert","Mul","Neg","Sub","SubAssign"]};

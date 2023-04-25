@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"trait":[["Curve","Marker trait for elliptic curves in short Weierstrass form."],["DecompactPoint","Attempt to decompact an elliptic curve point from an x-coordinate"],["DecompressPoint","Attempt to decompress an elliptic curve point from its x-coordinate and a boolean flag indicating whether or not the y-coordinate is odd."],["PointCompaction","Point compaction settings"],["PointCompression","Point compression settings."]]};
+window.SIDEBAR_ITEMS = {"trait":["Curve","DecompactPoint","DecompressPoint","PointCompaction","PointCompression"]};

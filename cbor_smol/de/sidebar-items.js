@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":[["from_bytes","Deserialize a message of type `T` from a byte slice. The unused portion (if any) of the byte slice is returned for further usage"],["take_from_bytes","Deserialize a message of type `T` from a byte slice. The unused portion (if any) of the byte slice is returned for further usage"]],"struct":[["Deserializer","A structure for deserializing a cbor-smol message."]]};
+window.SIDEBAR_ITEMS = {"fn":["from_bytes","take_from_bytes"],"struct":["Deserializer"]};

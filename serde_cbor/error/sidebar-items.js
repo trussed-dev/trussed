@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":[["Category","Categorizes the cause of a `serde_cbor::Error`."]],"struct":[["Error","This type represents all possible errors that can occur when serializing or deserializing CBOR data."]],"type":[["Result","Alias for a `Result` with the error type `serde_cbor::Error`."]]};
+window.SIDEBAR_ITEMS = {"enum":["Category"],"struct":["Error"],"type":["Result"]};

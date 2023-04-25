@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":[["Error","Errors that arise from converting byte buffers into paths"]],"struct":[["Path","A path"],["PathBuf","An owned, mutable path"]],"type":[["Result","Result type that has its Error variant set to `path::Error`"]]};
+window.SIDEBAR_ITEMS = {"enum":["Error"],"struct":["Path","PathBuf"],"type":["Result"]};

@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"macro":[["cstr","Generate a [CStr] at compile time that is guaranteed to be correct. The given argument should be a string literal with no `\\0` bytes."]],"struct":[["CStr","Representation of a borrowed C string."],["FromBytesWithNulError","An error indicating that a nul byte was not in the expected position."]],"type":[["c_char","Re-export c_char"]]};
+window.SIDEBAR_ITEMS = {"macro":["cstr"],"struct":["CStr","FromBytesWithNulError"],"type":["c_char"]};

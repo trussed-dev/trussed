@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["Des","Data Encryption Standard (DES) block cipher."],["TdesEde2","Triple DES (3DES) block cipher."],["TdesEde3","Triple DES (3DES) block cipher."],["TdesEee2","Triple DES (3DES) block cipher."],["TdesEee3","Triple DES (3DES) block cipher."]]};
+window.SIDEBAR_ITEMS = {"struct":["Des","TdesEde2","TdesEde3","TdesEee2","TdesEee3"]};

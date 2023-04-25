@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["ClientCounterstore",""]],"trait":[["Counterstore","Trait intended for use by mechanism implementations."]],"type":[["Counter",""]]};
+window.SIDEBAR_ITEMS = {"struct":["ClientCounterstore"],"trait":["Counterstore"],"type":["Counter"]};
