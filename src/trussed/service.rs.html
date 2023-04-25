@@ -856,7 +856,13 @@
 <a href="#856" id="856">856</a>
 <a href="#857" id="857">857</a>
 <a href="#858" id="858">858</a>
-</pre><pre class="rust"><code><span class="kw">use </span>littlefs2::path::PathBuf;
+<a href="#859" id="859">859</a>
+<a href="#860" id="860">860</a>
+<a href="#861" id="861">861</a>
+</pre><pre class="rust"><code><span class="kw">use </span>littlefs2::{
+    path,
+    path::{Path, PathBuf},
+};
 <span class="kw">use </span>rand_chacha::ChaCha8Rng;
 <span class="kw">pub use </span>rand_core::{RngCore, SeedableRng};
 
@@ -1154,7 +1160,7 @@
             },
 
             Request::LocateFile(request) =&gt; {
-                <span class="kw">let </span>path = filestore.locate_file(request.location, request.dir.clone(), request.filename.clone())<span class="question-mark">?</span>;
+                <span class="kw">let </span>path = filestore.locate_file(request.location, request.dir.as_deref(), <span class="kw-2">&amp;</span>request.filename)<span class="question-mark">?</span>;
 
                 <span class="prelude-val">Ok</span>(Reply::LocateFile(reply::LocateFile { path }) )
             }
@@ -1164,14 +1170,14 @@
             </span>Request::DebugDumpStore(_request) =&gt; {
 
                 <span class="macro">info_now!</span>(<span class="string">&quot;:: PERSISTENT&quot;</span>);
-                recursively_list(<span class="self">self</span>.platform.store().ifs(), PathBuf::from(<span class="string">&quot;/&quot;</span>));
+                recursively_list(<span class="self">self</span>.platform.store().ifs(), <span class="macro">path!</span>(<span class="string">&quot;/&quot;</span>));
 
                 <span class="macro">info_now!</span>(<span class="string">&quot;:: VOLATILE&quot;</span>);
-                recursively_list(<span class="self">self</span>.platform.store().vfs(), PathBuf::from(<span class="string">&quot;/&quot;</span>));
+                recursively_list(<span class="self">self</span>.platform.store().vfs(), <span class="macro">path!</span>(<span class="string">&quot;/&quot;</span>));
 
-                <span class="kw">fn </span>recursively_list&lt;S: <span class="lifetime">&#39;static </span>+ <span class="kw">crate</span>::types::LfsStorage&gt;(fs: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw">crate</span>::store::Fs&lt;S&gt;, path: PathBuf) {
+                <span class="kw">fn </span>recursively_list&lt;S: <span class="lifetime">&#39;static </span>+ <span class="kw">crate</span>::types::LfsStorage&gt;(fs: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw">crate</span>::store::Fs&lt;S&gt;, path: <span class="kw-2">&amp;</span>Path) {
                     <span class="comment">// let fs = store.vfs();
-                    </span>fs.read_dir_and_then(<span class="kw-2">&amp;</span>path, |dir| {
+                    </span>fs.read_dir_and_then(path, |dir| {
                         <span class="kw">for </span>(i, entry) <span class="kw">in </span>dir.enumerate() {
                             <span class="kw">let </span>entry = entry.unwrap();
                             <span class="kw">if </span>i &lt; <span class="number">2 </span>{
@@ -1180,7 +1186,7 @@
                             }
                             <span class="macro">info_now!</span>(<span class="string">&quot;{:?} p({:?})&quot;</span>, entry.path(), <span class="kw-2">&amp;</span>path);
                             <span class="kw">if </span>entry.file_type().is_dir() {
-                                recursively_list(fs, PathBuf::from(entry.path()));
+                                recursively_list(fs, entry.path());
                             }
                             <span class="kw">if </span>entry.file_type().is_file() {
                                 <span class="kw">let </span>_contents: Vec&lt;u8, <span class="number">256</span>&gt; = fs.read(entry.path()).unwrap();
@@ -1197,7 +1203,7 @@
             }
 
             Request::ReadDirFirst(request) =&gt; {
-                <span class="kw">let </span>maybe_entry = <span class="kw">match </span>filestore.read_dir_first(<span class="kw-2">&amp;</span>request.dir, request.location, request.not_before_filename.as_ref())<span class="question-mark">? </span>{
+                <span class="kw">let </span>maybe_entry = <span class="kw">match </span>filestore.read_dir_first(<span class="kw-2">&amp;</span>request.dir, request.location, request.not_before_filename.as_deref())<span class="question-mark">? </span>{
                     <span class="prelude-val">Some</span>((entry, read_dir_state)) =&gt; {
                         ctx.read_dir_state = <span class="prelude-val">Some</span>(read_dir_state);
                         <span class="prelude-val">Some</span>(entry)
@@ -1472,15 +1478,15 @@
             <span class="prelude-val">None </span>=&gt; {
                 <span class="kw">let </span><span class="kw-2">mut </span>filestore = <span class="self">self</span>.trussed_filestore();
 
-                <span class="kw">let </span>path = PathBuf::from(<span class="string">&quot;rng-state.bin&quot;</span>);
+                <span class="kw">let </span>path = <span class="macro">path!</span>(<span class="string">&quot;rng-state.bin&quot;</span>);
 
                 <span class="comment">// Load previous seed, e.g., externally injected entropy on first run.
                 // Else, default to zeros - will mix in new HW RNG entropy next
-                </span><span class="kw">let </span>mixin_seed = <span class="kw">if </span>!filestore.exists(<span class="kw-2">&amp;</span>path, Location::Internal) {
+                </span><span class="kw">let </span>mixin_seed = <span class="kw">if </span>!filestore.exists(path, Location::Internal) {
                     [<span class="number">0u8</span>; <span class="number">32</span>]
                 } <span class="kw">else </span>{
                     <span class="comment">// Use the last saved state.
-                    </span><span class="kw">let </span>mixin_bytes: Bytes&lt;<span class="number">32</span>&gt; = filestore.read(<span class="kw-2">&amp;</span>path, Location::Internal)<span class="question-mark">?</span>;
+                    </span><span class="kw">let </span>mixin_bytes: Bytes&lt;<span class="number">32</span>&gt; = filestore.read(path, Location::Internal)<span class="question-mark">?</span>;
                     <span class="kw">let </span><span class="kw-2">mut </span>mixin_seed = [<span class="number">0u8</span>; <span class="number">32</span>];
                     mixin_seed.clone_from_slice(<span class="kw-2">&amp;</span>mixin_bytes);
                     mixin_seed
@@ -1520,7 +1526,7 @@
                 </span><span class="kw">let </span><span class="kw-2">mut </span>seed_to_store = [<span class="number">0u8</span>; <span class="number">32</span>];
                 rng.fill_bytes(<span class="kw-2">&amp;mut </span>seed_to_store);
                 filestore
-                    .write(<span class="kw-2">&amp;</span>path, Location::Internal, seed_to_store.as_ref())
+                    .write(path, Location::Internal, seed_to_store.as_ref())
                     .unwrap();
 
                 <span class="comment">// 5. Finish
@@ -1602,7 +1608,7 @@
         backends: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[BackendId&lt;D::BackendId&gt;],
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
         <span class="kw">let </span>core_ctx = core_ctx.into();
-        <span class="kw">if </span>core_ctx.path == PathBuf::from(<span class="string">&quot;trussed&quot;</span>) {
+        <span class="kw">if </span><span class="kw-2">&amp;*</span>core_ctx.path == <span class="macro">path!</span>(<span class="string">&quot;trussed&quot;</span>) {
             <span class="macro">panic!</span>(<span class="string">&quot;trussed is a reserved client ID&quot;</span>);
         }
         <span class="self">self</span>.eps
@@ -1616,10 +1622,10 @@
 
     <span class="kw">pub fn </span>set_seed_if_uninitialized(<span class="kw-2">&amp;mut </span><span class="self">self</span>, seed: <span class="kw-2">&amp;</span>[u8; <span class="number">32</span>]) {
         <span class="kw">let </span><span class="kw-2">mut </span>filestore = <span class="self">self</span>.resources.trussed_filestore();
-        <span class="kw">let </span>path = PathBuf::from(<span class="string">&quot;rng-state.bin&quot;</span>);
-        <span class="kw">if </span>!filestore.exists(<span class="kw-2">&amp;</span>path, Location::Internal) {
+        <span class="kw">let </span>path = <span class="macro">path!</span>(<span class="string">&quot;rng-state.bin&quot;</span>);
+        <span class="kw">if </span>!filestore.exists(path, Location::Internal) {
             filestore
-                .write(<span class="kw-2">&amp;</span>path, Location::Internal, seed.as_ref())
+                .write(path, Location::Internal, seed.as_ref())
                 .unwrap();
         }
     }
