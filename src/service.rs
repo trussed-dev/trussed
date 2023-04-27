@@ -815,7 +815,7 @@ impl<P: Platform, D: Dispatch> Service<P, D> {
         let resources = &mut self.resources;
 
         for ep in eps.iter_mut() {
-            if let Some(request) = ep.interchange.take_request() {
+            if let Ok(request) = ep.interchange.request() {
                 resources
                     .platform
                     .user_interface()
@@ -824,12 +824,12 @@ impl<P: Platform, D: Dispatch> Service<P, D> {
 
                 // resources.currently_serving = ep.client_id.clone();
                 let reply_result = if ep.backends.is_empty() {
-                    resources.reply_to(&mut ep.ctx.core, &request)
+                    resources.reply_to(&mut ep.ctx.core, request)
                 } else {
                     let mut reply_result = Err(Error::RequestNotAvailable);
                     for backend in ep.backends {
                         reply_result =
-                            resources.dispatch(&mut self.dispatch, backend, &mut ep.ctx, &request);
+                            resources.dispatch(&mut self.dispatch, backend, &mut ep.ctx, request);
                         if reply_result != Err(Error::RequestNotAvailable) {
                             break;
                         }
