@@ -83,6 +83,12 @@ pub trait Filestore {
     fn remove_file(&mut self, path: &Path, location: Location) -> Result<()>;
     fn remove_dir(&mut self, path: &Path, location: Location) -> Result<()>;
     fn remove_dir_all(&mut self, path: &Path, location: Location) -> Result<usize>;
+    fn remove_dir_all_where(
+        &mut self,
+        path: &Path,
+        location: Location,
+        predicate: impl Fn(&DirEntry) -> bool,
+    ) -> Result<usize>;
     fn locate_file(
         &mut self,
         location: Location,
@@ -392,6 +398,17 @@ impl<S: Store> Filestore for ClientFilestore<S> {
         let path = self.actual_path(path)?;
 
         store::remove_dir_all_where(self.store, location, &path, |_| true)
+            .map_err(|_| Error::InternalError)
+    }
+    fn remove_dir_all_where(
+        &mut self,
+        path: &Path,
+        location: Location,
+        predicate: impl Fn(&DirEntry) -> bool,
+    ) -> Result<usize> {
+        let path = self.actual_path(path)?;
+
+        store::remove_dir_all_where(self.store, location, &path, predicate)
             .map_err(|_| Error::InternalError)
     }
 
