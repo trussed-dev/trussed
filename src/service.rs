@@ -106,8 +106,8 @@ impl<P: Platform> ServiceResources<P> {
             .map_err(|_| Error::EntropyMalfunction)
     }
 
-    pub fn filestore(&mut self, ctx: &CoreContext) -> ClientFilestore<P::S> {
-        ClientFilestore::new(ctx.path.clone(), self.platform.store())
+    pub fn filestore(&mut self, client_id: PathBuf) -> ClientFilestore<P::S> {
+        ClientFilestore::new(client_id, self.platform.store())
     }
 
     pub fn trussed_filestore(&mut self) -> ClientFilestore<P::S> {
@@ -143,7 +143,7 @@ impl<P: Platform> ServiceResources<P> {
         let keystore = &mut self.keystore(ctx)?;
         let certstore = &mut self.certstore(ctx)?;
         let counterstore = &mut self.counterstore(ctx)?;
-        let filestore = &mut self.filestore(ctx);
+        let filestore = &mut self.filestore(ctx.path.clone());
 
         debug_now!("TRUSSED {:?}", request);
         match request {
