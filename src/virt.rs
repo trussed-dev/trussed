@@ -84,7 +84,7 @@ impl<S: StoreProvider> Platform<S> {
         test: impl FnOnce(ClientImplementation<Service<Self>>) -> R,
     ) -> R {
         let service = Service::new(self);
-        let client = service.try_into_new_client(client_id).unwrap();
+        let client = service.try_into_new_client(client_id, None).unwrap();
         test(client)
     }
 

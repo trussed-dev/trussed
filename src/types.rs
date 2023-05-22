@@ -18,8 +18,8 @@ use rand_core::{CryptoRng, RngCore};
 use serde::{Deserialize, Serialize};
 
 use crate::config::*;
-use crate::key::Secrecy;
 use crate::store::filestore::{ReadDirFilesState, ReadDirState};
+use crate::{interrupt::InterruptFlag, key::Secrecy};
 
 pub use crate::client::FutureResult;
 pub use crate::platform::Platform;
@@ -267,6 +267,7 @@ pub struct CoreContext {
     pub path: PathBuf,
     pub read_dir_state: Option<ReadDirState>,
     pub read_dir_files_state: Option<ReadDirFilesState>,
+    pub interrupt: Option<&'static InterruptFlag>,
 }
 
 impl CoreContext {
@@ -275,6 +276,16 @@ impl CoreContext {
             path,
             read_dir_state: None,
             read_dir_files_state: None,
+            interrupt: None,
+        }
+    }
+
+    pub fn with_interrupt(path: PathBuf, interrupt: Option<&'static InterruptFlag>) -> Self {
+        Self {
+            path,
+            read_dir_state: None,
+            read_dir_files_state: None,
+            interrupt,
         }
     }
 }

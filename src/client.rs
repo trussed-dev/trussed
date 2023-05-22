@@ -80,6 +80,7 @@ use core::{marker::PhantomData, task::Poll};
 use crate::api::*;
 use crate::backend::{BackendId, CoreOnly, Dispatch};
 use crate::error::*;
+use crate::interrupt::InterruptFlag;
 use crate::pipe::{TrussedRequester, TRUSSED_INTERCHANGE};
 use crate::service::Service;
 use crate::types::*;
@@ -113,6 +114,9 @@ impl<S: Syscall, E> Client for ClientImplementation<S, E> {}
 pub trait PollClient {
     fn request<Rq: RequestVariant>(&mut self, req: Rq) -> ClientResult<'_, Rq::Reply, Self>;
     fn poll(&mut self) -> Poll<Result<Reply, Error>>;
+    fn interrupt(&self) -> Option<&'static InterruptFlag> {
+        None
+    }
 }
 
 pub struct FutureResult<'c, T, C: ?Sized>
@@ -148,6 +152,7 @@ pub struct ClientImplementation<S, D = CoreOnly> {
 
     // RawClient:
     pub(crate) interchange: TrussedRequester,
+    pub(crate) interrupt: Option<&'static InterruptFlag>,
     // pending: Option<Discriminant<Request>>,
     pending: Option<u8>,
     _marker: PhantomData<D>,
@@ -165,11 +170,16 @@ impl<S, E> ClientImplementation<S, E>
 where
     S: Syscall,
 {
-    pub fn new(interchange: TrussedRequester, syscall: S) -> Self {
+    pub fn new(
+        interchange: TrussedRequester,
+        syscall: S,
+        interrupt: Option<&'static InterruptFlag>,
+    ) -> Self {
         Self {
             interchange,
             pending: None,
             syscall,
+            interrupt,
             _marker: Default::default(),
         }
     }
@@ -205,7 +215,14 @@ where
                     }
                 }
             }
-            None => Poll::Pending,
+            None => {
+                debug_assert_ne!(
+                    self.interchange.state(),
+                    interchange::State::Idle,
+                    "requests can't be cancelled"
+                );
+                Poll::Pending
+            }
         }
     }
 
@@ -226,6 +243,10 @@ where
         self.interchange.request(request).unwrap();
         self.syscall.syscall();
         Ok(FutureResult::new(self))
+    }
+
+    fn interrupt(&self) -> Option<&'static InterruptFlag> {
+        self.interrupt
     }
 }
 
@@ -701,6 +722,7 @@ pub trait UiClient: PollClient {
 pub struct ClientBuilder<D: Dispatch = CoreOnly> {
     id: PathBuf,
     backends: &'static [BackendId<D::BackendId>],
+    interrupt: Option<&'static InterruptFlag>,
 }
 
 impl ClientBuilder {
@@ -712,6 +734,7 @@ impl ClientBuilder {
         Self {
             id: id.into(),
             backends: &[],
+            interrupt: None,
         }
     }
 }
@@ -727,7 +750,12 @@ impl<D: Dispatch> ClientBuilder<D> {
         ClientBuilder {
             id: self.id,
             backends,
+            interrupt: self.interrupt,
         }
+    }
+
+    pub fn interrupt(self, interrupt: Option<&'static InterruptFlag>) -> Self {
+        Self { interrupt, ..self }
     }
 
     fn create_endpoint<P: Platform>(
@@ -737,7 +765,7 @@ impl<D: Dispatch> ClientBuilder<D> {
         let (requester, responder) = TRUSSED_INTERCHANGE
             .claim()
             .ok_or(Error::ClientCountExceeded)?;
-        service.add_endpoint(responder, self.id, self.backends)?;
+        service.add_endpoint(responder, self.id, self.backends, self.interrupt)?;
         Ok(requester)
     }
 
@@ -749,8 +777,9 @@ impl<D: Dispatch> ClientBuilder<D> {
         self,
         service: &mut Service<P, D>,
     ) -> Result<PreparedClient<D>, Error> {
+        let interrupt = self.interrupt;
         self.create_endpoint(service)
-            .map(|requester| PreparedClient::new(requester))
+            .map(|requester| PreparedClient::new(requester, interrupt))
     }
 }
 
@@ -761,20 +790,22 @@ impl<D: Dispatch> ClientBuilder<D> {
 /// implementation.
 pub struct PreparedClient<D> {
     requester: TrussedRequester,
+    interrupt: Option<&'static InterruptFlag>,
     _marker: PhantomData<D>,
 }
 
 impl<D> PreparedClient<D> {
-    fn new(requester: TrussedRequester) -> Self {
+    fn new(requester: TrussedRequester, interrupt: Option<&'static InterruptFlag>) -> Self {
         Self {
             requester,
+            interrupt,
             _marker: Default::default(),
         }
     }
 
     /// Builds the client using the given syscall implementation.
     pub fn build<S: Syscall>(self, syscall: S) -> ClientImplementation<S, D> {
-        ClientImplementation::new(self.requester, syscall)
+        ClientImplementation::new(self.requester, syscall, self.interrupt)
     }
 }
 
