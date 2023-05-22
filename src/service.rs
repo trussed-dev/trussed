@@ -5,7 +5,6 @@ use littlefs2::{
 use rand_chacha::ChaCha8Rng;
 pub use rand_core::{RngCore, SeedableRng};
 
-use crate::api::*;
 use crate::backend::{BackendId, CoreOnly, Dispatch};
 use crate::client::{ClientBuilder, ClientImplementation};
 use crate::config::*;
@@ -23,6 +22,7 @@ pub use crate::store::{
 };
 use crate::types::*;
 use crate::Bytes;
+use crate::{api::*, interrupt::InterruptFlag};
 
 pub mod attest;
 
@@ -523,6 +523,12 @@ impl<P: Platform> ServiceResources<P> {
                 let previous_status = self.platform.user_interface().status();
                 self.platform.user_interface().set_status(ui::Status::WaitingForUserPresence);
                 loop {
+                    if ctx.interrupt.map(|i|i.is_interrupted()) == Some(true) {
+                        // Error does not matter as it will be dropped anyway
+                        info_now!("User presence request cancelled");
+                        return Ok(reply::RequestUserConsent{result: Err(consent::Error::Interrupted)}.into());
+                    }
+
                     self.platform.user_interface().refresh();
                     let nowtime = self.platform.user_interface().uptime();
                     if (nowtime - starttime) > timeout {
@@ -709,8 +715,10 @@ impl<P: Platform> Service<P> {
         &mut self,
         client_id: &str,
         syscall: S,
+        interrupt: Option<&'static InterruptFlag>,
     ) -> Result<ClientImplementation<S>, Error> {
         ClientBuilder::new(client_id)
+            .interrupt(interrupt)
             .prepare(self)
             .map(|p| p.build(syscall))
     }
@@ -721,8 +729,10 @@ impl<P: Platform> Service<P> {
     pub fn try_as_new_client(
         &mut self,
         client_id: &str,
+        interrupt: Option<&'static InterruptFlag>,
     ) -> Result<ClientImplementation<&mut Self>, Error> {
         ClientBuilder::new(client_id)
+            .interrupt(interrupt)
             .prepare(self)
             .map(|p| p.build(self))
     }
@@ -732,8 +742,10 @@ impl<P: Platform> Service<P> {
     pub fn try_into_new_client(
         mut self,
         client_id: &str,
+        interrupt: Option<&'static InterruptFlag>,
     ) -> Result<ClientImplementation<Self>, Error> {
         ClientBuilder::new(client_id)
+            .interrupt(interrupt)
             .prepare(&mut self)
             .map(|p| p.build(self))
     }
@@ -743,10 +755,11 @@ impl<P: Platform, D: Dispatch> Service<P, D> {
     pub fn add_endpoint(
         &mut self,
         interchange: TrussedResponder,
-        core_ctx: impl Into<CoreContext>,
+        client: impl Into<PathBuf>,
         backends: &'static [BackendId<D::BackendId>],
+        interrupt: Option<&'static InterruptFlag>,
     ) -> Result<(), Error> {
-        let core_ctx = core_ctx.into();
+        let core_ctx = CoreContext::with_interrupt(client.into(), interrupt);
         if &*core_ctx.path == path!("trussed") {
             panic!("trussed is a reserved client ID");
         }
