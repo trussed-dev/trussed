@@ -184,14 +184,14 @@ macro_rules! setup {
         let test_client_id = "TEST";
 
         assert!(trussed
-            .add_endpoint(test_trussed_responder, test_client_id, &[])
+            .add_endpoint(test_trussed_responder, test_client_id, &[], None)
             .is_ok());
 
         trussed.set_seed_if_uninitialized(&$seed);
         let mut $client = {
             pub type TestClient<'a> =
                 crate::ClientImplementation<&'a mut crate::Service<$platform>>;
-            TestClient::new(test_trussed_requester, &mut trussed)
+            TestClient::new(test_trussed_requester, &mut trussed, None)
         };
     };
 }
