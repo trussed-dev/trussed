@@ -9,12 +9,18 @@
 //! Backends can also implement API extensions to provide additional syscalls (see the
 //! [`serde_extensions`][`crate::serde_extensions`] module).
 
+use littlefs2::consts::PATH_MAX_PLUS_ONE;
+
 use crate::{
     api::{Reply, Request},
-    error::Error,
+    error::{Error, Result},
     platform::Platform,
     service::ServiceResources,
-    types::{Context, CoreContext},
+    store::{
+        certstore::ClientCertstore, counterstore::ClientCounterstore, filestore::ClientFilestore,
+        keystore::ClientKeystore,
+    },
+    types::{Context, CoreContext, PathBuf},
 };
 
 /// The ID of a backend.
@@ -89,5 +95,72 @@ impl TryFrom<u8> for NoId {
 
     fn try_from(_: u8) -> Result<Self, Self::Error> {
         Err(Error::InternalError)
+    }
+}
+
+/// Global and per-client resources for a backend.
+///
+/// This struct provides access to the store implementations for a backend, similar to
+/// [`ServiceResources`][].  It adds the backend ID to all paths so that the global stores are
+/// located at `backend-<id>/<store>` and the client stores are located at
+/// `<client>/backend-<id>/<store>`.
+pub struct BackendResources<'a, P: Platform> {
+    resources: &'a mut ServiceResources<P>,
+    global_ctx: CoreContext,
+}
+
+impl<'a, P: Platform> BackendResources<'a, P> {
+    pub fn new(resources: &'a mut ServiceResources<P>, id: &str) -> Self {
+        const PREFIX: &[u8] = "backend-".as_bytes();
+
+        let id = id.as_bytes();
+        let n = PREFIX.len();
+        let m = id.len();
+        let mut path = [0; PATH_MAX_PLUS_ONE];
+        path[..n].copy_from_slice(PREFIX);
+        path[n..n + m].copy_from_slice(id);
+
+        Self {
+            resources,
+            global_ctx: CoreContext::new(PathBuf::from(&path[..n + m])),
+        }
+    }
+
+    pub fn global_certstore(&mut self) -> Result<ClientCertstore<P::S>> {
+        self.resources.certstore(&self.global_ctx)
+    }
+
+    pub fn global_counterstore(&mut self) -> Result<ClientCounterstore<P::S>> {
+        self.resources.counterstore(&self.global_ctx)
+    }
+
+    pub fn global_filestore(&mut self) -> ClientFilestore<P::S> {
+        self.resources.filestore(&self.global_ctx)
+    }
+
+    pub fn global_keystore(&mut self) -> Result<ClientKeystore<P::S>> {
+        self.resources.keystore(&self.global_ctx)
+    }
+
+    fn client_ctx(&self, ctx: &CoreContext) -> CoreContext {
+        let mut path = ctx.path.clone();
+        path.push(&self.global_ctx.path);
+        CoreContext::new(path)
+    }
+
+    pub fn client_certstore(&mut self, ctx: &CoreContext) -> Result<ClientCertstore<P::S>> {
+        self.resources.certstore(&self.client_ctx(ctx))
+    }
+
+    pub fn client_counterstore(&mut self, ctx: &CoreContext) -> Result<ClientCounterstore<P::S>> {
+        self.resources.counterstore(&self.client_ctx(ctx))
+    }
+
+    pub fn client_filestore(&mut self, ctx: &CoreContext) -> ClientFilestore<P::S> {
+        self.resources.filestore(&self.client_ctx(ctx))
+    }
+
+    pub fn client_keystore(&mut self, ctx: &CoreContext) -> Result<ClientKeystore<P::S>> {
+        self.resources.keystore(&self.client_ctx(ctx))
     }
 }
