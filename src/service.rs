@@ -515,36 +515,43 @@ impl<P: Platform> ServiceResources<P> {
             },
 
             Request::RequestUserConsent(request) => {
+
                 // assert_eq!(request.level, consent::Level::Normal);
 
                 let starttime = self.platform.user_interface().uptime();
-                let timeout = core::time::Duration::from_millis(request.timeout_milliseconds as u64);
+                let timeout =
+                    core::time::Duration::from_millis(request.timeout_milliseconds as u64);
 
                 let previous_status = self.platform.user_interface().status();
-                self.platform.user_interface().set_status(ui::Status::WaitingForUserPresence);
+                self.platform
+                    .user_interface()
+                    .set_status(ui::Status::WaitingForUserPresence);
                 loop {
-                    if ctx.interrupt.map(|i|i.is_interrupted()) == Some(true) {
-                        // Error does not matter as it will be dropped anyway
+                    if ctx.interrupt.map(|i| i.is_interrupted()) == Some(true) {
                         info_now!("User presence request cancelled");
-                        return Ok(reply::RequestUserConsent{result: Err(consent::Error::Interrupted)}.into());
+                        return Ok(reply::RequestUserConsent {
+                            result: Err(consent::Error::Interrupted),
+                        }
+                        .into());
                     }
 
                     self.platform.user_interface().refresh();
                     let nowtime = self.platform.user_interface().uptime();
                     if (nowtime - starttime) > timeout {
                         let result = Err(consent::Error::TimedOut);
-                        return Ok(Reply::RequestUserConsent(reply::RequestUserConsent { result } ));
+                        return Ok(Reply::RequestUserConsent(reply::RequestUserConsent {
+                            result,
+                        }));
                     }
                     let up = self.platform.user_interface().check_user_presence();
                     match request.level {
                         // If Normal level consent is request, then both Strong and Normal
                         // indications will result in success.
                         consent::Level::Normal => {
-                            if up == consent::Level::Normal ||
-                                up == consent::Level::Strong {
-                                    break;
-                                }
-                        },
+                            if up == consent::Level::Normal || up == consent::Level::Strong {
+                                break;
+                            }
+                        }
                         // Otherwise, only strong level indication will work.
                         consent::Level::Strong => {
                             if up == consent::Level::Strong {
@@ -559,7 +566,9 @@ impl<P: Platform> ServiceResources<P> {
                 self.platform.user_interface().set_status(previous_status);
 
                 let result = Ok(());
-                Ok(Reply::RequestUserConsent(reply::RequestUserConsent { result } ))
+                Ok(Reply::RequestUserConsent(reply::RequestUserConsent {
+                    result,
+                }))
             }
 
             Request::Reboot(request) => {
