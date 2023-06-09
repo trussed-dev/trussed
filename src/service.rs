@@ -826,14 +826,9 @@ impl<P: Platform, D: Dispatch> Service<P, D> {
                     .platform
                     .user_interface()
                     .set_status(ui::Status::Idle);
-                match ep.interchange.respond(reply_result) {
-                    Ok(()) => {}
-                    Err(_) => {
-                        info!("Cancelled request");
-                        if ep.interchange.is_canceled() {
-                            ep.interchange.acknowledge_cancel().ok();
-                        }
-                    }
+                if ep.interchange.respond(reply_result).is_err() && ep.interchange.is_canceled() {
+                    info!("Cancelled request");
+                    ep.interchange.acknowledge_cancel().ok();
                 };
             }
         }

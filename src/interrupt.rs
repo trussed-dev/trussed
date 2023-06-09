@@ -11,14 +11,17 @@ pub enum InterruptState {
     Interrupted = 2,
 }
 
+#[derive(Default, Debug, PartialEq, Eq, Clone)]
+pub struct FromU8Error;
+
 impl TryFrom<u8> for InterruptState {
-    type Error = ();
+    type Error = FromU8Error;
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
             0 => Ok(Self::Idle),
             1 => Ok(Self::Working),
             2 => Ok(Self::Interrupted),
-            _ => Err(()),
+            _ => Err(FromU8Error),
         }
     }
 }
