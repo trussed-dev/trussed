@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":["cbor_deserialize","cbor_serialize_bytes"],"macro":["block","platform","store","syscall","try_syscall"],"mod":["api","backend","client","config","error","key","mechanisms","pipe","platform","service","store","types"],"struct":["Bytes","Interchange"]};
+window.SIDEBAR_ITEMS = {"fn":["cbor_deserialize","cbor_serialize_bytes"],"macro":["block","platform","store","syscall","try_syscall"],"mod":["api","backend","client","config","error","interrupt","key","mechanisms","pipe","platform","service","store","types"],"struct":["Bytes","Interchange"]};

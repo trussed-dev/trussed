@@ -71,7 +71,7 @@ var sourcesIndex = JSON.parse('{\
 "stable_deref_trait":["",[],["lib.rs"]],\
 "subtle":["",[],["lib.rs"]],\
 "synstructure":["",[],["lib.rs","macros.rs"]],\
-"trussed":["",[["api",[],["macros.rs"]],["client",[],["mechanisms.rs"]],["mechanisms",[],["aes256cbc.rs","chacha8poly1305.rs","ed255.rs","hmacsha1.rs","hmacsha256.rs","p256.rs","sha256.rs","shared_secret.rs","tdes.rs","totp.rs","trng.rs","x255.rs"]],["service",[],["attest.rs"]],["store",[],["certstore.rs","counterstore.rs","filestore.rs","keystore.rs"]]],["api.rs","backend.rs","client.rs","config.rs","error.rs","key.rs","lib.rs","mechanisms.rs","pipe.rs","platform.rs","service.rs","store.rs","types.rs"]],\
+"trussed":["",[["api",[],["macros.rs"]],["client",[],["mechanisms.rs"]],["mechanisms",[],["aes256cbc.rs","chacha8poly1305.rs","ed255.rs","hmacsha1.rs","hmacsha256.rs","p256.rs","sha256.rs","shared_secret.rs","tdes.rs","totp.rs","trng.rs","x255.rs"]],["service",[],["attest.rs"]],["store",[],["certstore.rs","counterstore.rs","filestore.rs","keystore.rs"]]],["api.rs","backend.rs","client.rs","config.rs","error.rs","interrupt.rs","key.rs","lib.rs","mechanisms.rs","pipe.rs","platform.rs","service.rs","store.rs","types.rs"]],\
 "typenum":["",[],["array.rs","bit.rs","int.rs","lib.rs","marker_traits.rs","operator_aliases.rs","private.rs","type_operators.rs","uint.rs"]],\
 "unicode_ident":["",[],["lib.rs","tables.rs"]],\
 "unicode_xid":["",[],["lib.rs","tables.rs"]],\

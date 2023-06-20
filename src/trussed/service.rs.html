@@ -859,6 +859,31 @@
 <a href="#859" id="859">859</a>
 <a href="#860" id="860">860</a>
 <a href="#861" id="861">861</a>
+<a href="#862" id="862">862</a>
+<a href="#863" id="863">863</a>
+<a href="#864" id="864">864</a>
+<a href="#865" id="865">865</a>
+<a href="#866" id="866">866</a>
+<a href="#867" id="867">867</a>
+<a href="#868" id="868">868</a>
+<a href="#869" id="869">869</a>
+<a href="#870" id="870">870</a>
+<a href="#871" id="871">871</a>
+<a href="#872" id="872">872</a>
+<a href="#873" id="873">873</a>
+<a href="#874" id="874">874</a>
+<a href="#875" id="875">875</a>
+<a href="#876" id="876">876</a>
+<a href="#877" id="877">877</a>
+<a href="#878" id="878">878</a>
+<a href="#879" id="879">879</a>
+<a href="#880" id="880">880</a>
+<a href="#881" id="881">881</a>
+<a href="#882" id="882">882</a>
+<a href="#883" id="883">883</a>
+<a href="#884" id="884">884</a>
+<a href="#885" id="885">885</a>
+<a href="#886" id="886">886</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>littlefs2::{
     path,
     path::{Path, PathBuf},
@@ -866,7 +891,6 @@
 <span class="kw">use </span>rand_chacha::ChaCha8Rng;
 <span class="kw">pub use </span>rand_core::{RngCore, SeedableRng};
 
-<span class="kw">use </span><span class="kw">crate</span>::api::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">crate</span>::backend::{BackendId, CoreOnly, Dispatch};
 <span class="kw">use </span><span class="kw">crate</span>::client::{ClientBuilder, ClientImplementation};
 <span class="kw">use </span><span class="kw">crate</span>::config::<span class="kw-2">*</span>;
@@ -884,6 +908,7 @@
 };
 <span class="kw">use </span><span class="kw">crate</span>::types::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">crate</span>::Bytes;
+<span class="kw">use crate</span>::{api::<span class="kw-2">*</span>, interrupt::InterruptFlag};
 
 <span class="kw">pub mod </span>attest;
 
@@ -967,8 +992,8 @@
             .map_err(|<span class="kw">_</span>| Error::EntropyMalfunction)
     }
 
-    <span class="kw">pub fn </span>filestore(<span class="kw-2">&amp;mut </span><span class="self">self</span>, ctx: <span class="kw-2">&amp;</span>CoreContext) -&gt; ClientFilestore&lt;P::S&gt; {
-        ClientFilestore::new(ctx.path.clone(), <span class="self">self</span>.platform.store())
+    <span class="kw">pub fn </span>filestore(<span class="kw-2">&amp;mut </span><span class="self">self</span>, client_id: PathBuf) -&gt; ClientFilestore&lt;P::S&gt; {
+        ClientFilestore::new(client_id, <span class="self">self</span>.platform.store())
     }
 
     <span class="kw">pub fn </span>trussed_filestore(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; ClientFilestore&lt;P::S&gt; {
@@ -1004,7 +1029,7 @@
         <span class="kw">let </span>keystore = <span class="kw-2">&amp;mut </span><span class="self">self</span>.keystore(ctx)<span class="question-mark">?</span>;
         <span class="kw">let </span>certstore = <span class="kw-2">&amp;mut </span><span class="self">self</span>.certstore(ctx)<span class="question-mark">?</span>;
         <span class="kw">let </span>counterstore = <span class="kw-2">&amp;mut </span><span class="self">self</span>.counterstore(ctx)<span class="question-mark">?</span>;
-        <span class="kw">let </span>filestore = <span class="kw-2">&amp;mut </span><span class="self">self</span>.filestore(ctx);
+        <span class="kw">let </span>filestore = <span class="kw-2">&amp;mut </span><span class="self">self</span>.filestore(ctx.path.clone());
 
         <span class="macro">debug_now!</span>(<span class="string">&quot;TRUSSED {:?}&quot;</span>, request);
         <span class="kw">match </span>request {
@@ -1376,30 +1401,43 @@
             },
 
             Request::RequestUserConsent(request) =&gt; {
+
                 <span class="comment">// assert_eq!(request.level, consent::Level::Normal);
 
                 </span><span class="kw">let </span>starttime = <span class="self">self</span>.platform.user_interface().uptime();
-                <span class="kw">let </span>timeout = core::time::Duration::from_millis(request.timeout_milliseconds <span class="kw">as </span>u64);
+                <span class="kw">let </span>timeout =
+                    core::time::Duration::from_millis(request.timeout_milliseconds <span class="kw">as </span>u64);
 
                 <span class="kw">let </span>previous_status = <span class="self">self</span>.platform.user_interface().status();
-                <span class="self">self</span>.platform.user_interface().set_status(ui::Status::WaitingForUserPresence);
+                <span class="self">self</span>.platform
+                    .user_interface()
+                    .set_status(ui::Status::WaitingForUserPresence);
                 <span class="kw">loop </span>{
+                    <span class="kw">if </span>ctx.interrupt.map(|i| i.is_interrupted()) == <span class="prelude-val">Some</span>(<span class="bool-val">true</span>) {
+                        <span class="macro">info_now!</span>(<span class="string">&quot;User presence request cancelled&quot;</span>);
+                        <span class="kw">return </span><span class="prelude-val">Ok</span>(reply::RequestUserConsent {
+                            result: <span class="prelude-val">Err</span>(consent::Error::Interrupted),
+                        }
+                        .into());
+                    }
+
                     <span class="self">self</span>.platform.user_interface().refresh();
                     <span class="kw">let </span>nowtime = <span class="self">self</span>.platform.user_interface().uptime();
                     <span class="kw">if </span>(nowtime - starttime) &gt; timeout {
                         <span class="kw">let </span>result = <span class="prelude-val">Err</span>(consent::Error::TimedOut);
-                        <span class="kw">return </span><span class="prelude-val">Ok</span>(Reply::RequestUserConsent(reply::RequestUserConsent { result } ));
+                        <span class="kw">return </span><span class="prelude-val">Ok</span>(Reply::RequestUserConsent(reply::RequestUserConsent {
+                            result,
+                        }));
                     }
                     <span class="kw">let </span>up = <span class="self">self</span>.platform.user_interface().check_user_presence();
                     <span class="kw">match </span>request.level {
                         <span class="comment">// If Normal level consent is request, then both Strong and Normal
                         // indications will result in success.
                         </span>consent::Level::Normal =&gt; {
-                            <span class="kw">if </span>up == consent::Level::Normal ||
-                                up == consent::Level::Strong {
-                                    <span class="kw">break</span>;
-                                }
-                        },
+                            <span class="kw">if </span>up == consent::Level::Normal || up == consent::Level::Strong {
+                                <span class="kw">break</span>;
+                            }
+                        }
                         <span class="comment">// Otherwise, only strong level indication will work.
                         </span>consent::Level::Strong =&gt; {
                             <span class="kw">if </span>up == consent::Level::Strong {
@@ -1414,7 +1452,9 @@
                 <span class="self">self</span>.platform.user_interface().set_status(previous_status);
 
                 <span class="kw">let </span>result = <span class="prelude-val">Ok</span>(());
-                <span class="prelude-val">Ok</span>(Reply::RequestUserConsent(reply::RequestUserConsent { result } ))
+                <span class="prelude-val">Ok</span>(Reply::RequestUserConsent(reply::RequestUserConsent {
+                    result,
+                }))
             }
 
             Request::Reboot(request) =&gt; {
@@ -1570,8 +1610,10 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         client_id: <span class="kw-2">&amp;</span>str,
         syscall: S,
+        interrupt: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>InterruptFlag&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;ClientImplementation&lt;S&gt;, Error&gt; {
         ClientBuilder::new(client_id)
+            .interrupt(interrupt)
             .prepare(<span class="self">self</span>)
             .map(|p| p.build(syscall))
     }
@@ -1582,8 +1624,10 @@
     </span><span class="kw">pub fn </span>try_as_new_client(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         client_id: <span class="kw-2">&amp;</span>str,
+        interrupt: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>InterruptFlag&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;ClientImplementation&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, Error&gt; {
         ClientBuilder::new(client_id)
+            .interrupt(interrupt)
             .prepare(<span class="self">self</span>)
             .map(|p| p.build(<span class="self">self</span>))
     }
@@ -1593,8 +1637,10 @@
     </span><span class="kw">pub fn </span>try_into_new_client(
         <span class="kw-2">mut </span><span class="self">self</span>,
         client_id: <span class="kw-2">&amp;</span>str,
+        interrupt: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>InterruptFlag&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;ClientImplementation&lt;<span class="self">Self</span>&gt;, Error&gt; {
         ClientBuilder::new(client_id)
+            .interrupt(interrupt)
             .prepare(<span class="kw-2">&amp;mut </span><span class="self">self</span>)
             .map(|p| p.build(<span class="self">self</span>))
     }
@@ -1604,10 +1650,11 @@
     <span class="kw">pub fn </span>add_endpoint(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         interchange: TrussedResponder,
-        core_ctx: <span class="kw">impl </span>Into&lt;CoreContext&gt;,
+        client: <span class="kw">impl </span>Into&lt;PathBuf&gt;,
         backends: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[BackendId&lt;D::BackendId&gt;],
+        interrupt: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>InterruptFlag&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
-        <span class="kw">let </span>core_ctx = core_ctx.into();
+        <span class="kw">let </span>core_ctx = CoreContext::with_interrupt(client.into(), interrupt);
         <span class="kw">if </span><span class="kw-2">&amp;*</span>core_ctx.path == <span class="macro">path!</span>(<span class="string">&quot;trussed&quot;</span>) {
             <span class="macro">panic!</span>(<span class="string">&quot;trussed is a reserved client ID&quot;</span>);
         }
@@ -1674,7 +1721,10 @@
                     .platform
                     .user_interface()
                     .set_status(ui::Status::Idle);
-                ep.interchange.respond(reply_result).ok();
+                <span class="kw">if </span>ep.interchange.respond(reply_result).is_err() &amp;&amp; ep.interchange.is_canceled() {
+                    <span class="macro">info!</span>(<span class="string">&quot;Cancelled request&quot;</span>);
+                    ep.interchange.acknowledge_cancel().ok();
+                };
             }
         }
         <span class="macro">debug_now!</span>(
