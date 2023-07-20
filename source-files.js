@@ -61,7 +61,7 @@ var sourcesIndex = JSON.parse('{\
 "scopeguard":["",[],["lib.rs"]],\
 "serde":["",[["de",[],["format.rs","ignored_any.rs","impls.rs","mod.rs","seed.rs","utf8.rs","value.rs"]],["private",[],["de.rs","doc.rs","mod.rs","ser.rs","size_hint.rs"]],["ser",[],["fmt.rs","impls.rs","impossible.rs","mod.rs"]]],["integer128.rs","lib.rs","macros.rs","std_error.rs"]],\
 "serde_cbor":["",[],["de.rs","error.rs","lib.rs","read.rs","ser.rs","tags.rs","write.rs"]],\
-"serde_derive":["",[["internals",[],["ast.rs","attr.rs","case.rs","check.rs","ctxt.rs","mod.rs","receiver.rs","respan.rs","symbol.rs"]]],["bound.rs","de.rs","dummy.rs","fragment.rs","lib.rs","pretend.rs","ser.rs","this.rs","try.rs"]],\
+"serde_derive":["",[],["buffer.rs","bytecode.rs","lib.rs","lib_precompiled.rs"]],\
 "serde_indexed":["",[],["lib.rs","parse.rs"]],\
 "serde_repr":["",[],["lib.rs","parse.rs"]],\
 "sha1":["",[["compress",[],["soft.rs","x86.rs"]]],["compress.rs","lib.rs"]],\
