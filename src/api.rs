@@ -31,6 +31,11 @@ generate_enums! {
     DeserializeKey: 5
     Encrypt: 6
     Delete: 7
+    // Clear private data from the key
+    // This will not always delete all metadata from storage.
+    // Other backends can retain metadata required for `unwrap_key` to work properly
+    // and delete this metadata only once `delete` is called.
+    Clear: 63
     DeleteAllKeys: 25
     Exists: 8
     // DeriveKeypair: 3
@@ -148,6 +153,9 @@ pub mod request {
           - tag: ShortData
 
         Delete:
+          - key: KeyId
+
+        Clear:
           - key: KeyId
 
         DeleteAllKeys:
@@ -381,6 +389,9 @@ pub mod reply {
             - plaintext: Option<Message>
 
         Delete:
+            - success: bool
+
+        Clear:
             - success: bool
 
         DeleteAllKeys:
