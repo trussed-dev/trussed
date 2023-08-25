@@ -347,6 +347,18 @@ pub trait CryptoClient: PollClient {
         })
     }
 
+    /// Clear private data from the key
+    ///
+    /// This will not delete all metadata from storage.
+    /// Other backends can retain metadata required for `unwrap_key` to work properly
+    /// and delete this metadata only once `delete` is called.
+    fn clear(&mut self, key: KeyId) -> ClientResult<'_, reply::Clear, Self> {
+        self.request(request::Clear {
+            key,
+            // mechanism,
+        })
+    }
+
     /// Skips deleting read-only / manufacture keys (currently, "low ID").
     fn delete_all(&mut self, location: Location) -> ClientResult<'_, reply::DeleteAllKeys, Self> {
         self.request(request::DeleteAllKeys { location })

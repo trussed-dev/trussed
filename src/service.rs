@@ -225,6 +225,11 @@ impl<P: Platform> ServiceResources<P> {
                 Ok(Reply::Delete(reply::Delete { success } ))
             },
 
+            Request::Clear(request) => {
+                let success = keystore.clear_key(&request.key);
+                Ok(Reply::Clear(reply::Clear { success } ))
+            },
+
             Request::DeleteAllKeys(request) => {
                 let count = keystore.delete_all(request.location)?;
                 Ok(Reply::DeleteAllKeys(reply::DeleteAllKeys { count } ))

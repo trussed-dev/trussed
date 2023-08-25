@@ -52,6 +52,7 @@ pub trait Keystore {
     /// Return Header of key, if it exists
     fn key_info(&self, secrecy: key::Secrecy, id: &KeyId) -> Option<key::Info>;
     fn delete_key(&self, id: &KeyId) -> bool;
+    fn clear_key(&self, id: &KeyId) -> bool;
     fn delete_all(&self, location: Location) -> Result<usize>;
     fn load_key(
         &self,
@@ -150,6 +151,10 @@ impl<S: Store> Keystore for ClientKeystore<S> {
                 .iter()
                 .any(|location| store::delete(self.store, *location, &path))
         })
+    }
+
+    fn clear_key(&self, id: &KeyId) -> bool {
+        self.delete_key(id)
     }
 
     /// TODO: This uses the predicate "filename.len() >= 4"
