@@ -115,9 +115,9 @@ impl<P: Platform> ServiceResources<P> {
         ClientFilestore::new(PathBuf::from("trussed"), self.platform.store())
     }
 
-    pub fn keystore(&mut self, ctx: &CoreContext) -> Result<ClientKeystore<P::S>> {
+    pub fn keystore(&mut self, client_id: PathBuf) -> Result<ClientKeystore<P::S>> {
         self.rng()
-            .map(|rng| ClientKeystore::new(ctx.path.clone(), rng, self.platform.store()))
+            .map(|rng| ClientKeystore::new(client_id, rng, self.platform.store()))
             .map_err(|_| Error::EntropyMalfunction)
     }
 
@@ -141,7 +141,7 @@ impl<P: Platform> ServiceResources<P> {
 
         let full_store = self.platform.store();
 
-        let keystore = &mut self.keystore(ctx)?;
+        let keystore = &mut self.keystore(ctx.path.clone())?;
         let certstore = &mut self.certstore(ctx)?;
         let counterstore = &mut self.counterstore(ctx)?;
         let filestore = &mut self.filestore(ctx.path.clone());
