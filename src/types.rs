@@ -169,6 +169,11 @@ impl KeyId {
     pub fn from_value(value: u128) -> Self {
         Self(Id(value))
     }
+
+    #[doc(hidden)]
+    pub fn value(&self) -> u128 {
+        self.0 .0
+    }
 }
 
 // TODO: decide whether this is good idea.
