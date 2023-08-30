@@ -45,11 +45,7 @@ impl Eq for Id {}
 
 impl core::fmt::Debug for Id {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        write!(f, "Id(")?;
-        for ch in &self.hex() {
-            write!(f, "{}", &(*ch as char))?;
-        }
-        write!(f, ")")
+        write!(f, "Id({})", &self.hex_clean())
     }
 }
 
@@ -78,12 +74,27 @@ impl Id {
 
         for i in 0..array.len() {
             if array[i] == 0 && i != (array.len() - 1) {
-                // Skip leading zeros.
+                // This actually skips all zeroes, not only leading ones
+                // This is kept for backward compatibility with already serialized KeyIds
                 continue;
             }
 
             buffer.push(HEX_CHARS[(array[i] >> 4) as usize]).unwrap();
             buffer.push(HEX_CHARS[(array[i] & 0xf) as usize]).unwrap();
+        }
+        buffer
+    }
+
+    /// skips leading zeros
+    pub fn hex_clean(&self) -> String<32> {
+        const HEX_CHARS: &[u8] = b"0123456789abcdef";
+        let mut buffer = String::new();
+        let array = self.0.to_be_bytes();
+
+        // skip leading zeros
+        for v in array.into_iter().skip_while(|v| *v == 0) {
+            buffer.push(HEX_CHARS[(v >> 4) as usize] as char).unwrap();
+            buffer.push(HEX_CHARS[(v & 0xf) as usize] as char).unwrap();
         }
 
         buffer
