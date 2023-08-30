@@ -158,6 +158,19 @@ macro_rules! impl_id {
 impl_id!(CertId);
 impl_id!(CounterId);
 impl_id!(KeyId);
+
+impl KeyId {
+    /// Create a KeyId from a given value instead of at random.
+    ///
+    /// This can be useful for backends which can use it to encode additional information inside of the KeyId itself (128 bits is a lot)
+    ///
+    /// This is already possible to acheive through the serde implementation, so this doesn't really add any unavailable functionality.
+    #[doc(hidden)]
+    pub fn from_value(value: u128) -> Self {
+        Self(Id(value))
+    }
+}
+
 // TODO: decide whether this is good idea.
 // It would allow using the same underlying u128 ID for the public key of the private
 // key in a keypair. However, DeleteKey and others would need to be adjusted.
