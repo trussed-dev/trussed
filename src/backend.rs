@@ -21,6 +21,7 @@ use crate::{
 ///
 /// This ID can refer to the core backend provided by the Trussed crate, or to a custom backend
 /// defined by the runner.  The custom ID type is defined by [`Dispatch::BackendId`][].
+#[derive(Debug, Clone)]
 pub enum BackendId<I> {
     Core,
     Custom(I),
