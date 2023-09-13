@@ -1,7 +1,7 @@
 var sourcesIndex = JSON.parse('{\
 "aead":["",[],["lib.rs"]],\
 "aes":["",[["ni",[],["aes128.rs","aes192.rs","aes256.rs","utils.rs"]],["soft",[],["fixslice64.rs"]]],["autodetect.rs","lib.rs","ni.rs","soft.rs"]],\
-"bitflags":["",[],["lib.rs"]],\
+"bitflags":["",[],["external.rs","internal.rs","iter.rs","lib.rs","parser.rs","public.rs","traits.rs"]],\
 "block_buffer":["",[],["lib.rs","sealed.rs"]],\
 "block_padding":["",[],["lib.rs"]],\
 "byteorder":["",[],["lib.rs"]],\
@@ -42,8 +42,8 @@ var sourcesIndex = JSON.parse('{\
 "littlefs2":["",[["io",[],["prelude.rs"]]],["consts.rs","driver.rs","fs.rs","io.rs","lib.rs","macros.rs","path.rs"]],\
 "littlefs2_sys":["",[],["lib.rs"]],\
 "lock_api":["",[],["lib.rs","mutex.rs","remutex.rs","rwlock.rs"]],\
-"log":["",[],["lib.rs","macros.rs"]],\
-"memchr":["",[["memchr",[["x86",[],["mod.rs","sse2.rs"]]],["fallback.rs","iter.rs","mod.rs","naive.rs"]],["memmem",[["prefilter",[["x86",[],["mod.rs","sse.rs"]]],["fallback.rs","genericsimd.rs","mod.rs"]],["x86",[],["avx.rs","mod.rs","sse.rs"]]],["byte_frequencies.rs","genericsimd.rs","mod.rs","rabinkarp.rs","rarebytes.rs","twoway.rs","util.rs","vector.rs"]]],["cow.rs","lib.rs"]],\
+"log":["",[],["__private_api.rs","lib.rs","macros.rs"]],\
+"memchr":["",[["arch",[["all",[["packedpair",[],["default_rank.rs","mod.rs"]]],["memchr.rs","mod.rs","rabinkarp.rs","twoway.rs"]],["generic",[],["memchr.rs","mod.rs","packedpair.rs"]],["x86_64",[["avx2",[],["memchr.rs","mod.rs","packedpair.rs"]],["sse2",[],["memchr.rs","mod.rs","packedpair.rs"]]],["memchr.rs","mod.rs"]]],["mod.rs"]],["memmem",[],["mod.rs","searcher.rs"]]],["cow.rs","ext.rs","lib.rs","macros.rs","memchr.rs","vector.rs"]],\
 "nb":["",[],["lib.rs"]],\
 "opaque_debug":["",[],["lib.rs"]],\
 "p256":["",[["arithmetic",[["scalar",[],["blinding.rs"]]],["affine.rs","field.rs","projective.rs","scalar.rs","util.rs"]]],["arithmetic.rs","ecdh.rs","ecdsa.rs","lib.rs"]],\
@@ -59,9 +59,9 @@ var sourcesIndex = JSON.parse('{\
 "rand_core":["",[],["block.rs","error.rs","impls.rs","le.rs","lib.rs"]],\
 "salty":["",[["field",[],["tweetnacl.rs"]]],["agreement.rs","constants.rs","edwards.rs","field.rs","hash.rs","lib.rs","montgomery.rs","scalar.rs","scalar29.rs","signature.rs"]],\
 "scopeguard":["",[],["lib.rs"]],\
-"serde":["",[["de",[],["format.rs","ignored_any.rs","impls.rs","mod.rs","seed.rs","utf8.rs","value.rs"]],["private",[],["de.rs","doc.rs","mod.rs","ser.rs","size_hint.rs"]],["ser",[],["fmt.rs","impls.rs","impossible.rs","mod.rs"]]],["integer128.rs","lib.rs","macros.rs","std_error.rs"]],\
+"serde":["",[["de",[],["format.rs","ignored_any.rs","impls.rs","mod.rs","seed.rs","size_hint.rs","value.rs"]],["private",[],["de.rs","doc.rs","mod.rs","ser.rs"]],["ser",[],["fmt.rs","impls.rs","impossible.rs","mod.rs"]]],["integer128.rs","lib.rs","macros.rs","std_error.rs"]],\
 "serde_cbor":["",[],["de.rs","error.rs","lib.rs","read.rs","ser.rs","tags.rs","write.rs"]],\
-"serde_derive":["",[],["buffer.rs","bytecode.rs","lib.rs","lib_precompiled.rs"]],\
+"serde_derive":["",[["internals",[],["ast.rs","attr.rs","case.rs","check.rs","ctxt.rs","mod.rs","receiver.rs","respan.rs","symbol.rs"]]],["bound.rs","de.rs","dummy.rs","fragment.rs","lib.rs","pretend.rs","ser.rs","this.rs"]],\
 "serde_indexed":["",[],["lib.rs","parse.rs"]],\
 "serde_repr":["",[],["lib.rs","parse.rs"]],\
 "sha1":["",[["compress",[],["soft.rs","x86.rs"]]],["compress.rs","lib.rs"]],\
