@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added optional support for API extensions in `serde_extensions` module
   behind the `serde-extensions` feature.
 - Added `types::Path` re-export of `littlefs2::path::Path`.
+- Reduced stack usage of `Service::process`.
 
 ### Changed
 
