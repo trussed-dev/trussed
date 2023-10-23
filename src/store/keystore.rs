@@ -155,14 +155,17 @@ impl<S: Store> Keystore for ClientKeystore<S> {
     /// TODO: This uses the predicate "filename.len() >= 4"
     /// Be more principled :)
     fn delete_all(&self, location: Location) -> Result<usize> {
-        let path = self.key_directory(key::Secrecy::Secret);
-        store::remove_dir_all_where(self.store, location, &path, |dir_entry| {
-            dir_entry.file_name().as_ref().len() >= 4
-        })?;
-        let path = self.key_directory(key::Secrecy::Public);
-        store::remove_dir_all_where(self.store, location, &path, |dir_entry| {
-            dir_entry.file_name().as_ref().len() >= 4
-        })
+        let secret_path = self.key_directory(key::Secrecy::Secret);
+        let secret_deleted =
+            store::remove_dir_all_where(self.store, location, &secret_path, |dir_entry| {
+                dir_entry.file_name().as_ref().len() >= 4
+            })?;
+        let public_path = self.key_directory(key::Secrecy::Public);
+        let public_deleted =
+            store::remove_dir_all_where(self.store, location, &public_path, |dir_entry| {
+                dir_entry.file_name().as_ref().len() >= 4
+            })?;
+        Ok(secret_deleted + public_deleted)
     }
 
     fn load_key(
