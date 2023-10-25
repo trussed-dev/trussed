@@ -1,4 +1,4 @@
-var sourcesIndex = JSON.parse('{\
+var srcIndex = JSON.parse('{\
 "aead":["",[],["lib.rs"]],\
 "aes":["",[["ni",[],["aes128.rs","aes192.rs","aes256.rs","utils.rs"]],["soft",[],["fixslice64.rs"]]],["autodetect.rs","lib.rs","ni.rs","soft.rs"]],\
 "bitflags":["",[],["external.rs","internal.rs","iter.rs","lib.rs","parser.rs","public.rs","traits.rs"]],\
@@ -80,4 +80,4 @@ var sourcesIndex = JSON.parse('{\
 "zeroize":["",[],["lib.rs","x86.rs"]],\
 "zeroize_derive":["",[],["lib.rs"]]\
 }');
-createSourceSidebar();
+createSrcSidebar();
