@@ -41,3 +41,15 @@ fn x255_agree() {
             syscall!(client.serialize_key(Mechanism::SharedSecret, secret2, KeySerialization::Raw));
     })
 }
+
+#[test]
+fn x255_non_canonical() {
+    client::get(|client| {
+        let _pk1 = syscall!(client.deserialize_key(
+            Mechanism::X255,
+            &[0xFF; 32],
+            KeySerialization::Raw,
+            StorageAttributes::new().set_serializable(true)
+        ));
+    })
+}

@@ -1,4 +1,4 @@
-use core::convert::{TryFrom, TryInto};
+use core::convert::TryInto;
 
 use crate::api::*;
 // use crate::config::*;
@@ -20,8 +20,7 @@ fn load_public_key(
         .try_into()
         .map_err(|_| Error::InternalError)?;
 
-    let public_key =
-        agreement::PublicKey::try_from(public_bytes).map_err(|_| Error::InternalError)?;
+    let public_key = public_bytes.into();
 
     Ok(public_key)
 }
@@ -186,8 +185,8 @@ impl DeserializeKey for super::X255 {
         }
 
         let serialized_key: [u8; 32] = request.serialized_key[..32].try_into().unwrap();
-        let public_key = salty::agreement::PublicKey::try_from(serialized_key)
-            .map_err(|_| Error::InvalidSerializedKey)?;
+        // This will make it store the canonical encoding
+        let public_key: agreement::PublicKey = serialized_key.into();
 
         let public_id = keystore.store_key(
             request.attributes.persistence,
