@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/salty-0.2.0/src/field/tweetnacl.rs`."><title>tweetnacl.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-cb6f1f67f1bcd037.css" id="mainThemeStyle"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="salty" data-themes="" data-resource-suffix="" data-rustdoc-version="1.73.0 (cc66ad468 2023-10-03)" data-channel="1.73.0" data-search-js="search-6dfdfced5eff6596.js" data-settings-js="settings-de11bff964e9d4e5.js" data-settings-css="settings-8c76f75bfb6bd192.css" data-theme-light-css="light-1596385f77d47ef2.css" data-theme-dark-css="dark-0a43001d3fc2282c.css" data-theme-ayu-css="ayu-fd19013d6ce078bf.css" ><script src="../../../static.files/storage-db41da1a38ea3cb8.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-0795b7d26be81095.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../../static.files/light-1596385f77d47ef2.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../../static.files/dark-0a43001d3fc2282c.css"><link rel="stylesheet" href="../../../static.files/noscript-cffde32267a19fd6.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../salty/index.html"><img class="rust-logo" src="../../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/salty-0.3.0/src/field/tweetnacl.rs`."><title>tweetnacl.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-cb6f1f67f1bcd037.css" id="mainThemeStyle"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="salty" data-themes="" data-resource-suffix="" data-rustdoc-version="1.73.0 (cc66ad468 2023-10-03)" data-channel="1.73.0" data-search-js="search-6dfdfced5eff6596.js" data-settings-js="settings-de11bff964e9d4e5.js" data-settings-css="settings-8c76f75bfb6bd192.css" data-theme-light-css="light-1596385f77d47ef2.css" data-theme-dark-css="dark-0a43001d3fc2282c.css" data-theme-ayu-css="ayu-fd19013d6ce078bf.css" ><script src="../../../static.files/storage-db41da1a38ea3cb8.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-0795b7d26be81095.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../../static.files/light-1596385f77d47ef2.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../../static.files/dark-0a43001d3fc2282c.css"><link rel="stylesheet" href="../../../static.files/noscript-cffde32267a19fd6.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../salty/index.html"><img class="rust-logo" src="../../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -412,80 +412,17 @@
 <a href="#412" id="412">412</a>
 <a href="#413" id="413">413</a>
 <a href="#414" id="414">414</a>
-<a href="#415" id="415">415</a>
-<a href="#416" id="416">416</a>
-<a href="#417" id="417">417</a>
-<a href="#418" id="418">418</a>
-<a href="#419" id="419">419</a>
-<a href="#420" id="420">420</a>
-<a href="#421" id="421">421</a>
-<a href="#422" id="422">422</a>
-<a href="#423" id="423">423</a>
-<a href="#424" id="424">424</a>
-<a href="#425" id="425">425</a>
-<a href="#426" id="426">426</a>
-<a href="#427" id="427">427</a>
-<a href="#428" id="428">428</a>
-<a href="#429" id="429">429</a>
-<a href="#430" id="430">430</a>
-<a href="#431" id="431">431</a>
-<a href="#432" id="432">432</a>
-<a href="#433" id="433">433</a>
-<a href="#434" id="434">434</a>
-<a href="#435" id="435">435</a>
-<a href="#436" id="436">436</a>
-<a href="#437" id="437">437</a>
-<a href="#438" id="438">438</a>
-<a href="#439" id="439">439</a>
-<a href="#440" id="440">440</a>
-<a href="#441" id="441">441</a>
-<a href="#442" id="442">442</a>
-<a href="#443" id="443">443</a>
-<a href="#444" id="444">444</a>
-<a href="#445" id="445">445</a>
-<a href="#446" id="446">446</a>
-<a href="#447" id="447">447</a>
-<a href="#448" id="448">448</a>
-<a href="#449" id="449">449</a>
-<a href="#450" id="450">450</a>
-<a href="#451" id="451">451</a>
-<a href="#452" id="452">452</a>
-<a href="#453" id="453">453</a>
-<a href="#454" id="454">454</a>
-<a href="#455" id="455">455</a>
-<a href="#456" id="456">456</a>
-<a href="#457" id="457">457</a>
-<a href="#458" id="458">458</a>
-<a href="#459" id="459">459</a>
-<a href="#460" id="460">460</a>
-<a href="#461" id="461">461</a>
-<a href="#462" id="462">462</a>
-<a href="#463" id="463">463</a>
-<a href="#464" id="464">464</a>
-<a href="#465" id="465">465</a>
-<a href="#466" id="466">466</a>
-</pre></div><pre class="rust"><code><span class="kw">use </span>core::ops::{
-    Add,
-    AddAssign,
-    Neg,
-    Sub,
-    SubAssign,
-    Mul,
-    MulAssign,
-};
+</pre></div><pre class="rust"><code><span class="kw">use </span>core::ops::{Add, AddAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
-<span class="kw">use </span>subtle::{
-    Choice,
-    ConditionallySelectable,
-    ConstantTimeEq,
-};
+<span class="kw">use </span>subtle::{Choice, ConditionallySelectable, ConstantTimeEq};
+<span class="kw">use </span>zeroize::Zeroize;
 
 <span class="kw">use </span><span class="kw">super</span>::FieldImplementation;
 
 <span class="kw">pub type </span>Limbs = [i64; <span class="number">16</span>];
 
 <span class="doccomment">/// Element of the base field of the elliptic curve
-</span><span class="attr">#[derive(Clone,Copy,Debug,Default)]
+</span><span class="attr">#[derive(Clone, Copy, Debug, Default, Zeroize)]
 </span><span class="kw">pub struct </span>FieldElement(<span class="kw">pub </span>Limbs);
 
 <span class="kw">impl </span>ConditionallySelectable <span class="kw">for </span>FieldElement {
@@ -516,72 +453,42 @@
 <span class="kw">impl </span>FieldImplementation <span class="kw">for </span>FieldElement {
     <span class="kw">type </span>Limbs = Limbs;
 
-    <span class="kw">const </span>ZERO: <span class="self">Self </span>= <span class="self">Self</span>([
-        <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,
-        <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,
-        <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,
-        <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,
-    ]);
+    <span class="kw">const </span>ZERO: <span class="self">Self </span>= <span class="self">Self</span>([<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>]);
 
-    <span class="kw">const </span>ONE: <span class="self">Self </span>= <span class="self">Self</span>([
-        <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,
-        <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,
-        <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,
-        <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,
-    ]);
+    <span class="kw">const </span>ONE: <span class="self">Self </span>= <span class="self">Self</span>([<span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>]);
 
     <span class="kw">const </span>D: <span class="self">Self </span>= <span class="self">Self</span>([
-        <span class="number">0x78a3</span>, <span class="number">0x1359</span>, <span class="number">0x4dca</span>, <span class="number">0x75eb</span>,
-        <span class="number">0xd8ab</span>, <span class="number">0x4141</span>, <span class="number">0x0a4d</span>, <span class="number">0x0070</span>,
-        <span class="number">0xe898</span>, <span class="number">0x7779</span>, <span class="number">0x4079</span>, <span class="number">0x8cc7</span>,
-        <span class="number">0xfe73</span>, <span class="number">0x2b6f</span>, <span class="number">0x6cee</span>, <span class="number">0x5203</span>,
+        <span class="number">0x78a3</span>, <span class="number">0x1359</span>, <span class="number">0x4dca</span>, <span class="number">0x75eb</span>, <span class="number">0xd8ab</span>, <span class="number">0x4141</span>, <span class="number">0x0a4d</span>, <span class="number">0x0070</span>, <span class="number">0xe898</span>, <span class="number">0x7779</span>, <span class="number">0x4079</span>,
+        <span class="number">0x8cc7</span>, <span class="number">0xfe73</span>, <span class="number">0x2b6f</span>, <span class="number">0x6cee</span>, <span class="number">0x5203</span>,
     ]);
 
     <span class="kw">const </span>D2: <span class="self">Self </span>= <span class="self">Self</span>([
-        <span class="number">0xf159</span>, <span class="number">0x26b2</span>, <span class="number">0x9b94</span>, <span class="number">0xebd6</span>,
-        <span class="number">0xb156</span>, <span class="number">0x8283</span>, <span class="number">0x149a</span>, <span class="number">0x00e0</span>,
-        <span class="number">0xd130</span>, <span class="number">0xeef3</span>, <span class="number">0x80f2</span>, <span class="number">0x198e</span>,
-        <span class="number">0xfce7</span>, <span class="number">0x56df</span>, <span class="number">0xd9dc</span>, <span class="number">0x2406</span>,
+        <span class="number">0xf159</span>, <span class="number">0x26b2</span>, <span class="number">0x9b94</span>, <span class="number">0xebd6</span>, <span class="number">0xb156</span>, <span class="number">0x8283</span>, <span class="number">0x149a</span>, <span class="number">0x00e0</span>, <span class="number">0xd130</span>, <span class="number">0xeef3</span>, <span class="number">0x80f2</span>,
+        <span class="number">0x198e</span>, <span class="number">0xfce7</span>, <span class="number">0x56df</span>, <span class="number">0xd9dc</span>, <span class="number">0x2406</span>,
     ]);
 
     <span class="kw">const </span>EDWARDS_BASEPOINT_X: <span class="self">Self </span>= <span class="self">Self</span>([
-        <span class="number">0xd51a</span>, <span class="number">0x8f25</span>, <span class="number">0x2d60</span>, <span class="number">0xc956</span>,
-        <span class="number">0xa7b2</span>, <span class="number">0x9525</span>, <span class="number">0xc760</span>, <span class="number">0x692c</span>,
-        <span class="number">0xdc5c</span>, <span class="number">0xfdd6</span>, <span class="number">0xe231</span>, <span class="number">0xc0a4</span>,
-        <span class="number">0x53fe</span>, <span class="number">0xcd6e</span>, <span class="number">0x36d3</span>, <span class="number">0x2169</span>,
+        <span class="number">0xd51a</span>, <span class="number">0x8f25</span>, <span class="number">0x2d60</span>, <span class="number">0xc956</span>, <span class="number">0xa7b2</span>, <span class="number">0x9525</span>, <span class="number">0xc760</span>, <span class="number">0x692c</span>, <span class="number">0xdc5c</span>, <span class="number">0xfdd6</span>, <span class="number">0xe231</span>,
+        <span class="number">0xc0a4</span>, <span class="number">0x53fe</span>, <span class="number">0xcd6e</span>, <span class="number">0x36d3</span>, <span class="number">0x2169</span>,
     ]);
 
     <span class="kw">const </span>EDWARDS_BASEPOINT_Y: <span class="self">Self </span>= <span class="self">Self</span>([
-        <span class="number">0x6658</span>, <span class="number">0x6666</span>, <span class="number">0x6666</span>, <span class="number">0x6666</span>,
-        <span class="number">0x6666</span>, <span class="number">0x6666</span>, <span class="number">0x6666</span>, <span class="number">0x6666</span>,
-        <span class="number">0x6666</span>, <span class="number">0x6666</span>, <span class="number">0x6666</span>, <span class="number">0x6666</span>,
-        <span class="number">0x6666</span>, <span class="number">0x6666</span>, <span class="number">0x6666</span>, <span class="number">0x6666</span>,
+        <span class="number">0x6658</span>, <span class="number">0x6666</span>, <span class="number">0x6666</span>, <span class="number">0x6666</span>, <span class="number">0x6666</span>, <span class="number">0x6666</span>, <span class="number">0x6666</span>, <span class="number">0x6666</span>, <span class="number">0x6666</span>, <span class="number">0x6666</span>, <span class="number">0x6666</span>,
+        <span class="number">0x6666</span>, <span class="number">0x6666</span>, <span class="number">0x6666</span>, <span class="number">0x6666</span>, <span class="number">0x6666</span>,
     ]);
 
     <span class="kw">const </span>I: <span class="self">Self </span>= <span class="self">Self</span>([
-        <span class="number">0xa0b0</span>, <span class="number">0x4a0e</span>, <span class="number">0x1b27</span>, <span class="number">0xc4ee</span>,
-        <span class="number">0xe478</span>, <span class="number">0xad2f</span>, <span class="number">0x1806</span>, <span class="number">0x2f43</span>,
-        <span class="number">0xd7a7</span>, <span class="number">0x3dfb</span>, <span class="number">0x0099</span>, <span class="number">0x2b4d</span>,
-        <span class="number">0xdf0b</span>, <span class="number">0x4fc1</span>, <span class="number">0x2480</span>, <span class="number">0x2b83</span>,
+        <span class="number">0xa0b0</span>, <span class="number">0x4a0e</span>, <span class="number">0x1b27</span>, <span class="number">0xc4ee</span>, <span class="number">0xe478</span>, <span class="number">0xad2f</span>, <span class="number">0x1806</span>, <span class="number">0x2f43</span>, <span class="number">0xd7a7</span>, <span class="number">0x3dfb</span>, <span class="number">0x0099</span>,
+        <span class="number">0x2b4d</span>, <span class="number">0xdf0b</span>, <span class="number">0x4fc1</span>, <span class="number">0x2480</span>, <span class="number">0x2b83</span>,
     ]);
 
-    <span class="kw">const </span>APLUS2_OVER_FOUR: <span class="self">Self </span>= <span class="self">Self</span>([
-        <span class="number">121666</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,
-        <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,
-        <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,
-        <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,
-    ]);
+    <span class="kw">const </span>APLUS2_OVER_FOUR: <span class="self">Self </span>= <span class="self">Self</span>([<span class="number">121666</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>]);
 
-    <span class="kw">const </span>MONTGOMERY_BASEPOINT_U: <span class="self">Self </span>= <span class="self">Self</span>([
-        <span class="number">9</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,
-        <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,
-        <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,
-        <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,
-    ]);
+    <span class="kw">const </span>MONTGOMERY_BASEPOINT_U: <span class="self">Self </span>= <span class="self">Self</span>([<span class="number">9</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>]);
 
     <span class="kw">fn </span>to_bytes(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; [u8; <span class="number">32</span>] {
         <span class="comment">// make our own private copy
-        </span><span class="kw">let </span><span class="kw-2">mut </span>fe = <span class="self">self</span>.clone();
+        </span><span class="kw">let </span><span class="kw-2">mut </span>fe = <span class="kw-2">*</span><span class="self">self</span>;
 
         <span class="comment">// three times&#39; the charm??
         // TODO: figure out why :)
@@ -645,14 +552,14 @@
         <span class="comment">// TODO: possibly assert! that fe != 0?
 
         // make our own private copy
-        </span><span class="kw">let </span><span class="kw-2">mut </span>inverse = <span class="self">self</span>.clone();
+        </span><span class="kw">let </span><span class="kw-2">mut </span>inverse = <span class="kw-2">*</span><span class="self">self</span>;
 
         <span class="comment">// exponentiate with 2**255 - 21,
         // which by Fermat&#39;s little theorem is the same as inversion
         </span><span class="kw">for </span>i <span class="kw">in </span>(<span class="number">0</span>..=<span class="number">253</span>).rev() {
             inverse = inverse.squared();
             <span class="kw">if </span>i != <span class="number">2 </span>&amp;&amp; i != <span class="number">4 </span>{
-                inverse = <span class="kw-2">&amp;</span>inverse * <span class="kw-2">&amp;</span><span class="self">self</span>;
+                inverse = <span class="kw-2">&amp;</span>inverse * <span class="self">self</span>;
             }
         }
 
@@ -676,13 +583,12 @@
     // }
     </span><span class="doccomment">/// TODO: figure out why this doesn&#39;t pass the test at the end
     </span><span class="kw">fn </span>pow2523(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; FieldElement {
-
-        <span class="kw">let </span><span class="kw-2">mut </span>sqrt = <span class="self">self</span>.clone();
+        <span class="kw">let </span><span class="kw-2">mut </span>sqrt = <span class="kw-2">*</span><span class="self">self</span>;
 
         <span class="kw">for </span>i <span class="kw">in </span>(<span class="number">0</span>..=<span class="number">250</span>).rev() {
             sqrt = sqrt.squared();
             <span class="kw">if </span>i != <span class="number">1 </span>{
-                sqrt = <span class="kw-2">&amp;</span>sqrt * <span class="kw-2">&amp;</span><span class="self">self</span>;
+                sqrt = <span class="kw-2">&amp;</span>sqrt * <span class="self">self</span>;
             }
         }
 
@@ -705,14 +611,13 @@
     }
 }
 
-
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>&gt; Add&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span>FieldElement&gt; <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>FieldElement {
     <span class="kw">type </span>Output = FieldElement;
 
     <span class="comment">// TODO: TweetNaCl doesn&#39;t do any reduction here, why not?
     </span><span class="doccomment">/// Addition of field elements
     </span><span class="kw">fn </span>add(<span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span>FieldElement) -&gt; FieldElement {
-        <span class="kw">let </span><span class="kw-2">mut </span>sum = <span class="self">self</span>.clone();
+        <span class="kw">let </span><span class="kw-2">mut </span>sum = <span class="kw-2">*</span><span class="self">self</span>;
         sum += other;
         sum
     }
@@ -731,7 +636,7 @@
 
     <span class="doccomment">/// Subition of field elements
     </span><span class="kw">fn </span>neg(<span class="self">self</span>) -&gt; FieldElement {
-        <span class="kw">let </span><span class="kw-2">mut </span>negation = <span class="self">self</span>.clone();
+        <span class="kw">let </span><span class="kw-2">mut </span>negation = <span class="kw-2">*</span><span class="self">self</span>;
         <span class="kw">for </span>(i, xi) <span class="kw">in </span><span class="self">self</span>.<span class="number">0</span>.iter().enumerate() {
             negation.<span class="number">0</span>[i] = -xi;
         }
@@ -745,7 +650,7 @@
     <span class="comment">// TODO: TweetNaCl doesn&#39;t do any reduction here, why not?
     </span><span class="doccomment">/// Subition of field elements
     </span><span class="kw">fn </span>sub(<span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span>FieldElement) -&gt; FieldElement {
-        <span class="kw">let </span><span class="kw-2">mut </span>difference = <span class="self">self</span>.clone();
+        <span class="kw">let </span><span class="kw-2">mut </span>difference = <span class="kw-2">*</span><span class="self">self</span>;
         difference -= other;
         difference
     }
@@ -784,7 +689,7 @@
         // also: really hope the initialization of `product`
         // is optimized away...
         </span><span class="kw">let </span><span class="kw-2">mut </span>product: Limbs = Default::default();
-        product.copy_from_slice(<span class="kw-2">&amp;mut </span>pre_product[..<span class="number">16</span>]);
+        product.copy_from_slice(<span class="kw-2">&amp;</span>pre_product[..<span class="number">16</span>]);
 
         <span class="kw">let </span><span class="kw-2">mut </span>fe = FieldElement(product);
         <span class="comment">// normalize such that all limbs lie in [0, 2^16)
@@ -798,11 +703,10 @@
 
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;b</span>&gt; MulAssign&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span>FieldElement&gt; <span class="kw">for </span>FieldElement {
     <span class="kw">fn </span>mul_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span>FieldElement) {
-        <span class="kw">let </span>result = (<span class="kw-2">&amp;</span><span class="self">self </span><span class="kw">as </span><span class="kw-2">&amp;</span>FieldElement) * other;
+        <span class="kw">let </span>result = (<span class="self">self </span><span class="kw">as </span><span class="kw-2">&amp;</span>FieldElement) * other;
         <span class="self">self</span>.<span class="number">0 </span>= result.<span class="number">0</span>;
     }
 }
-
 
 <span class="kw">impl </span>FieldElement {
     <span class="kw">fn </span>carry(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
@@ -828,14 +732,13 @@
             </span><span class="self">self</span>.<span class="number">0</span>[i] -= carry &lt;&lt; <span class="number">16</span>;
         }
     }
-
 }
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
 
-    <span class="kw">use </span><span class="kw">crate</span>::field::FieldImplementation;
     <span class="kw">use </span><span class="kw">super</span>::FieldElement;
+    <span class="kw">use </span><span class="kw">crate</span>::field::FieldImplementation;
     <span class="kw">use </span>subtle::ConstantTimeEq;
 
     <span class="attr">#[test]
@@ -843,17 +746,11 @@
         <span class="kw">let </span>one = FieldElement::ONE;
         <span class="kw">let </span>two = <span class="kw-2">&amp;</span>one + <span class="kw-2">&amp;</span>one;
 
-        <span class="kw">let </span>expected = FieldElement([
-            <span class="number">2</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,
-            <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,
-            <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,
-            <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,
-        ]);
+        <span class="kw">let </span>expected = FieldElement([<span class="number">2</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>]);
 
         <span class="comment">// TODO: Implement PartialEq (hopefully in constant time!)
         </span><span class="macro">assert_eq!</span>(two.<span class="number">0</span>, expected.<span class="number">0</span>);
         <span class="macro">assert!</span>(bool::from(two.ct_eq(<span class="kw-2">&amp;</span>expected)))
-
     }
 
     <span class="attr">#[test]
@@ -866,7 +763,6 @@
         <span class="comment">// TODO: Implement PartialEq (hopefully in constant time!)
         </span><span class="macro">assert_eq!</span>(result.<span class="number">0</span>, zero.<span class="number">0</span>);
         <span class="macro">assert!</span>(bool::from(result.ct_eq(<span class="kw-2">&amp;</span>zero)))
-
     }
 
     <span class="attr">#[test]
@@ -877,11 +773,12 @@
 
         <span class="kw">let </span>two_times_three = <span class="kw-2">&amp;</span>two * <span class="kw-2">&amp;</span>three;
         <span class="comment">// no multiplications, just sum up ONEs
-        </span><span class="kw">let </span>six = (<span class="number">1</span>..=<span class="number">6</span>).fold(FieldElement::ZERO, |partial_sum, <span class="kw">_</span>| <span class="kw-2">&amp;</span>partial_sum + <span class="kw-2">&amp;</span>FieldElement::ONE);
+        </span><span class="kw">let </span>six = (<span class="number">1</span>..=<span class="number">6</span>).fold(FieldElement::ZERO, |partial_sum, <span class="kw">_</span>| {
+            <span class="kw-2">&amp;</span>partial_sum + <span class="kw-2">&amp;</span>FieldElement::ONE
+        });
 
         <span class="macro">assert_eq!</span>(two_times_three.to_bytes(), six.to_bytes());
         <span class="macro">assert!</span>(bool::from(two_times_three.ct_eq(<span class="kw-2">&amp;</span>six)));
-
     }
 
     <span class="attr">#[test]
@@ -928,6 +825,5 @@
         <span class="kw">let </span>sqrt_nine = <span class="kw-2">&amp;</span>nine.pow2523() * <span class="kw-2">&amp;</span>nine;
         <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>sqrt_nine * <span class="kw-2">&amp;</span>sqrt_nine, nine);
     }
-
 }
 </code></pre></div></section></main></body></html>

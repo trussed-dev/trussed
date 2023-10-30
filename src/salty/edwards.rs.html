@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/salty-0.2.0/src/edwards.rs`."><title>edwards.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-cb6f1f67f1bcd037.css" id="mainThemeStyle"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="salty" data-themes="" data-resource-suffix="" data-rustdoc-version="1.73.0 (cc66ad468 2023-10-03)" data-channel="1.73.0" data-search-js="search-6dfdfced5eff6596.js" data-settings-js="settings-de11bff964e9d4e5.js" data-settings-css="settings-8c76f75bfb6bd192.css" data-theme-light-css="light-1596385f77d47ef2.css" data-theme-dark-css="dark-0a43001d3fc2282c.css" data-theme-ayu-css="ayu-fd19013d6ce078bf.css" ><script src="../../static.files/storage-db41da1a38ea3cb8.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-0795b7d26be81095.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../static.files/light-1596385f77d47ef2.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../static.files/dark-0a43001d3fc2282c.css"><link rel="stylesheet" href="../../static.files/noscript-cffde32267a19fd6.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../salty/index.html"><img class="rust-logo" src="../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/salty-0.3.0/src/edwards.rs`."><title>edwards.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-cb6f1f67f1bcd037.css" id="mainThemeStyle"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="salty" data-themes="" data-resource-suffix="" data-rustdoc-version="1.73.0 (cc66ad468 2023-10-03)" data-channel="1.73.0" data-search-js="search-6dfdfced5eff6596.js" data-settings-js="settings-de11bff964e9d4e5.js" data-settings-css="settings-8c76f75bfb6bd192.css" data-theme-light-css="light-1596385f77d47ef2.css" data-theme-dark-css="dark-0a43001d3fc2282c.css" data-theme-ayu-css="ayu-fd19013d6ce078bf.css" ><script src="../../static.files/storage-db41da1a38ea3cb8.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-0795b7d26be81095.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../static.files/light-1596385f77d47ef2.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../static.files/dark-0a43001d3fc2282c.css"><link rel="stylesheet" href="../../static.files/noscript-cffde32267a19fd6.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../salty/index.html"><img class="rust-logo" src="../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -395,80 +395,37 @@
 <a href="#395" id="395">395</a>
 <a href="#396" id="396">396</a>
 <a href="#397" id="397">397</a>
-<a href="#398" id="398">398</a>
-<a href="#399" id="399">399</a>
-<a href="#400" id="400">400</a>
-<a href="#401" id="401">401</a>
-<a href="#402" id="402">402</a>
-<a href="#403" id="403">403</a>
-<a href="#404" id="404">404</a>
-<a href="#405" id="405">405</a>
-<a href="#406" id="406">406</a>
-<a href="#407" id="407">407</a>
-<a href="#408" id="408">408</a>
-<a href="#409" id="409">409</a>
-<a href="#410" id="410">410</a>
-<a href="#411" id="411">411</a>
-<a href="#412" id="412">412</a>
-<a href="#413" id="413">413</a>
-<a href="#414" id="414">414</a>
-<a href="#415" id="415">415</a>
-<a href="#416" id="416">416</a>
-<a href="#417" id="417">417</a>
-<a href="#418" id="418">418</a>
-<a href="#419" id="419">419</a>
-<a href="#420" id="420">420</a>
-<a href="#421" id="421">421</a>
-<a href="#422" id="422">422</a>
-<a href="#423" id="423">423</a>
-<a href="#424" id="424">424</a>
-<a href="#425" id="425">425</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>core::{
     cmp::PartialEq,
-    ops::{
-        Add,
-        Neg,
-        Mul,
-    }
+    ops::{Add, Mul, Neg},
 };
 
-<span class="kw">use </span>subtle::{
-    Choice,
-    ConditionallySelectable,
-    ConstantTimeEq,
-};
+<span class="kw">use </span>subtle::{Choice, ConditionallySelectable, ConstantTimeEq};
 
 <span class="kw">use crate</span>::{
-    Error,
-    <span class="prelude-ty">Result</span>,
     constants::COMPRESSED_Y_LENGTH,
-    field::{
-        FieldImplementation,
-        FieldElement,
-    },
+    field::{FieldElement, FieldImplementation},
     montgomery::MontgomeryPoint,
     scalar::Scalar,
+    Error, <span class="prelude-ty">Result</span>,
 };
 
-
 <span class="doccomment">/// These represent the (X,Y,Z,T) coordinates
-</span><span class="attr">#[derive(Clone,Copy,Debug,Default)]
-</span><span class="kw">pub struct </span>EdwardsPoint (
+</span><span class="attr">#[derive(Clone, Copy, Debug, Default)]
+</span><span class="kw">pub struct </span>EdwardsPoint(
     <span class="comment">// TODO: maybe label them properly
-    </span>[FieldElement; <span class="number">4</span>]
+    </span>[FieldElement; <span class="number">4</span>],
 );
 
 <span class="doccomment">/// &quot;Compressed&quot; form of a `EdwardsPoint`, whereby
 /// the sign of the x-coordinate is stuffed in a
 /// spare bit of the y-coordinate
-</span><span class="attr">#[derive(Clone,Copy,Debug,Default)]
-</span><span class="kw">pub struct </span>CompressedY(
-    <span class="kw">pub </span>[u8; <span class="number">32</span>])
-;
+</span><span class="attr">#[derive(Clone, Copy, Debug, Default)]
+</span><span class="kw">pub struct </span>CompressedY(<span class="kw">pub </span>[u8; <span class="number">32</span>]);
 
 <span class="kw">impl </span>From&lt;<span class="kw-2">&amp;</span>[u8; COMPRESSED_Y_LENGTH]&gt; <span class="kw">for </span>CompressedY {
     <span class="kw">fn </span>from(bytes: <span class="kw-2">&amp;</span>[u8; COMPRESSED_Y_LENGTH]) -&gt; CompressedY {
-        CompressedY(bytes.clone())
+        CompressedY(<span class="kw-2">*</span>bytes)
     }
 }
 
@@ -497,15 +454,15 @@
         <span class="kw">let </span>Z = FieldElement::ONE;
         <span class="kw">let </span>Y_squared = Y.squared();
 
-        <span class="kw">let </span>u = <span class="kw-2">&amp;</span>Y_squared - <span class="kw-2">&amp;</span>Z;  <span class="comment">// aka num[erator], y**2 - 1
-        </span><span class="kw">let </span>v = <span class="kw-2">&amp;</span>(<span class="kw-2">&amp;</span>Y_squared * <span class="kw-2">&amp;</span>FieldElement::D) + <span class="kw-2">&amp;</span>Z;  <span class="comment">// aka den[ominator], dy**2 + 1
+        <span class="kw">let </span>u = <span class="kw-2">&amp;</span>Y_squared - <span class="kw-2">&amp;</span>Z; <span class="comment">// aka num[erator], y**2 - 1
+        </span><span class="kw">let </span>v = <span class="kw-2">&amp;</span>(<span class="kw-2">&amp;</span>Y_squared * <span class="kw-2">&amp;</span>FieldElement::D) + <span class="kw-2">&amp;</span>Z; <span class="comment">// aka den[ominator], dy**2 + 1
 
         </span><span class="kw">let </span>v2 = v.squared();
         <span class="kw">let </span>v4 = v2.squared();
         <span class="kw">let </span>v7 = <span class="kw-2">&amp;</span>(<span class="kw-2">&amp;</span>v4 * <span class="kw-2">&amp;</span>v2) * <span class="kw-2">&amp;</span>v;
 
         <span class="kw">let </span>t = <span class="kw-2">&amp;</span>v7 * <span class="kw-2">&amp;</span>u; <span class="comment">// term: t = uv**7
-        </span><span class="kw">let </span><span class="kw-2">mut </span>X = <span class="kw-2">&amp;</span>(<span class="kw-2">&amp;</span>(<span class="kw-2">&amp;</span>t.pow2523() * <span class="kw-2">&amp;</span>u) * <span class="kw-2">&amp;</span>v2) * <span class="kw-2">&amp;</span>v;  <span class="comment">// aka `beta`
+        </span><span class="kw">let </span><span class="kw-2">mut </span>X = <span class="kw-2">&amp;</span>(<span class="kw-2">&amp;</span>(<span class="kw-2">&amp;</span>t.pow2523() * <span class="kw-2">&amp;</span>u) * <span class="kw-2">&amp;</span>v2) * <span class="kw-2">&amp;</span>v; <span class="comment">// aka `beta`
 
         </span><span class="kw">let </span>chk = <span class="kw-2">&amp;</span>X.squared() * <span class="kw-2">&amp;</span>v;
         <span class="kw">if </span>chk != u {
@@ -566,10 +523,10 @@
 <span class="kw">impl </span>EdwardsPoint {
     <span class="kw">pub fn </span>basepoint() -&gt; EdwardsPoint {
         EdwardsPoint([
-             FieldElement::EDWARDS_BASEPOINT_X,
-             FieldElement::EDWARDS_BASEPOINT_Y,
-             FieldElement::ONE,
-             <span class="kw-2">&amp;</span>FieldElement::EDWARDS_BASEPOINT_X * <span class="kw-2">&amp;</span>FieldElement::EDWARDS_BASEPOINT_Y,
+            FieldElement::EDWARDS_BASEPOINT_X,
+            FieldElement::EDWARDS_BASEPOINT_Y,
+            FieldElement::ONE,
+            <span class="kw-2">&amp;</span>FieldElement::EDWARDS_BASEPOINT_X * <span class="kw-2">&amp;</span>FieldElement::EDWARDS_BASEPOINT_Y,
         ])
     }
 
@@ -583,11 +540,10 @@
     }
 
     <span class="kw">pub fn </span>compressed(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; CompressedY {
-
         <span class="comment">// normalize X, Y to Z = 1
         </span><span class="kw">let </span>z_inverse = <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>[<span class="number">2</span>].inverse();
-        <span class="kw">let </span>x = <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>[<span class="number">0</span>] * <span class="kw-2">&amp;</span>z_inverse;
-        <span class="kw">let </span>y = <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>[<span class="number">1</span>] * <span class="kw-2">&amp;</span>z_inverse;
+        <span class="kw">let </span>x = <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>[<span class="number">0</span>] * z_inverse;
+        <span class="kw">let </span>y = <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>[<span class="number">1</span>] * z_inverse;
 
         <span class="comment">// normalized Y coordinate
         </span><span class="kw">let </span><span class="kw-2">mut </span>r = y.to_bytes();
@@ -623,62 +579,55 @@
     <span class="doccomment">/// The x-coordinate of the point
     </span><span class="kw">pub fn </span>x(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; FieldElement {
         <span class="kw">let </span>z_inverse = <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>[<span class="number">2</span>].inverse();
-        <span class="kw">let </span>x = <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>[<span class="number">0</span>] * <span class="kw-2">&amp;</span>z_inverse;
-        x
+
+        <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>[<span class="number">0</span>] * z_inverse
     }
 
     <span class="doccomment">/// The y-coordinate of the point
     </span><span class="kw">pub fn </span>y(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; FieldElement {
         <span class="kw">let </span>z_inverse = <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>[<span class="number">2</span>].inverse();
-        <span class="kw">let </span>y = <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>[<span class="number">1</span>] * <span class="kw-2">&amp;</span>z_inverse;
-        y
+
+        <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>[<span class="number">1</span>] * z_inverse
     }
 
     <span class="doccomment">/// The u-coordinate of the X25519 point
     </span><span class="kw">pub fn </span>u(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; FieldElement {
         <span class="kw">let </span>y = <span class="self">self</span>.y();
         <span class="kw">let </span>one = FieldElement::ONE;
-        <span class="kw">let </span>u = <span class="kw-2">&amp;</span>(<span class="kw-2">&amp;</span>y + <span class="kw-2">&amp;</span>one) * <span class="kw-2">&amp;</span>(<span class="kw-2">&amp;</span>one - <span class="kw-2">&amp;</span>y).inverse();
-        u
+
+        <span class="kw-2">&amp;</span>(<span class="kw-2">&amp;</span>y + <span class="kw-2">&amp;</span>one) * <span class="kw-2">&amp;</span>(<span class="kw-2">&amp;</span>one - <span class="kw-2">&amp;</span>y).inverse()
     }
 }
 
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>&gt; Add&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span>EdwardsPoint&gt; <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>EdwardsPoint {
-
     <span class="kw">type </span>Output = EdwardsPoint;
 
     <span class="kw">fn </span>add(<span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span>EdwardsPoint) -&gt; <span class="self">Self</span>::Output {
-
         <span class="kw">let </span>p = <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>;
         <span class="kw">let </span>q = <span class="kw-2">&amp;</span>other.<span class="number">0</span>;
 
         <span class="kw">let </span>a = <span class="kw-2">&amp;</span>p[<span class="number">1</span>] - <span class="kw-2">&amp;</span>p[<span class="number">0</span>];
         <span class="kw">let </span>t = <span class="kw-2">&amp;</span>q[<span class="number">1</span>] - <span class="kw-2">&amp;</span>q[<span class="number">0</span>];
-        <span class="kw">let </span>a = <span class="kw-2">&amp;</span>a * <span class="kw-2">&amp;</span>t;        <span class="comment">// A &lt;- (Y1 - X1)(Y2 - X2)
+        <span class="kw">let </span>a = <span class="kw-2">&amp;</span>a * <span class="kw-2">&amp;</span>t; <span class="comment">// A &lt;- (Y1 - X1)(Y2 - X2)
 
         // let mut b = &amp;p[0] + &amp;p[1];
         </span><span class="kw">let </span>b = <span class="kw-2">&amp;</span>p[<span class="number">0</span>] + <span class="kw-2">&amp;</span>p[<span class="number">1</span>];
         <span class="kw">let </span>t = <span class="kw-2">&amp;</span>q[<span class="number">0</span>] + <span class="kw-2">&amp;</span>q[<span class="number">1</span>];
-        <span class="kw">let </span>b = <span class="kw-2">&amp;</span>b * <span class="kw-2">&amp;</span>t;        <span class="comment">// B &lt;- (Y1 + X1)*(Y2 + X2)
-        // b *= &amp;t;
+        <span class="kw">let </span>b = <span class="kw-2">&amp;</span>b * <span class="kw-2">&amp;</span>t; <span class="comment">// B &lt;- (Y1 + X1)*(Y2 + X2)
+                         // b *= &amp;t;
 
         </span><span class="kw">let </span>c = <span class="kw-2">&amp;</span>p[<span class="number">3</span>] * <span class="kw-2">&amp;</span>q[<span class="number">3</span>];
-        <span class="kw">let </span>c = <span class="kw-2">&amp;</span>c * <span class="kw-2">&amp;</span>FieldElement::D2;       <span class="comment">// C &lt;- k*T1*T2  with k = 2d&#39; =
+        <span class="kw">let </span>c = <span class="kw-2">&amp;</span>c * <span class="kw-2">&amp;</span>FieldElement::D2; <span class="comment">// C &lt;- k*T1*T2  with k = 2d&#39; =
 
         </span><span class="kw">let </span>d = <span class="kw-2">&amp;</span>p[<span class="number">2</span>] * <span class="kw-2">&amp;</span>q[<span class="number">2</span>];
-        <span class="kw">let </span>d = <span class="kw-2">&amp;</span>d + <span class="kw-2">&amp;</span>d;       <span class="comment">// D &lt;- 2*Z1*Z2
+        <span class="kw">let </span>d = <span class="kw-2">&amp;</span>d + <span class="kw-2">&amp;</span>d; <span class="comment">// D &lt;- 2*Z1*Z2
 
         </span><span class="kw">let </span>e = <span class="kw-2">&amp;</span>b - <span class="kw-2">&amp;</span>a;
         <span class="kw">let </span>f = <span class="kw-2">&amp;</span>d - <span class="kw-2">&amp;</span>c;
         <span class="kw">let </span>g = <span class="kw-2">&amp;</span>d + <span class="kw-2">&amp;</span>c;
         <span class="kw">let </span>h = <span class="kw-2">&amp;</span>b + <span class="kw-2">&amp;</span>a;
 
-        <span class="kw">let </span>coordinates = [
-            <span class="kw-2">&amp;</span>e * <span class="kw-2">&amp;</span>f,
-            <span class="kw-2">&amp;</span>h * <span class="kw-2">&amp;</span>g,
-            <span class="kw-2">&amp;</span>g * <span class="kw-2">&amp;</span>f,
-            <span class="kw-2">&amp;</span>e * <span class="kw-2">&amp;</span>h,
-        ];
+        <span class="kw">let </span>coordinates = [<span class="kw-2">&amp;</span>e * <span class="kw-2">&amp;</span>f, <span class="kw-2">&amp;</span>h * <span class="kw-2">&amp;</span>g, <span class="kw-2">&amp;</span>g * <span class="kw-2">&amp;</span>f, <span class="kw-2">&amp;</span>e * <span class="kw-2">&amp;</span>h];
 
         EdwardsPoint(coordinates)
     }
@@ -694,22 +643,21 @@
 }
 
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>&gt; Mul&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span>EdwardsPoint&gt; <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Scalar {
-
     <span class="kw">type </span>Output = EdwardsPoint;
 
     <span class="kw">fn </span>mul(<span class="self">self</span>, point: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span>EdwardsPoint) -&gt; EdwardsPoint {
         <span class="kw">let </span><span class="kw-2">mut </span>p = EdwardsPoint([
-            FieldElement::ZERO.clone(),
-            FieldElement::ONE.clone(),
-            FieldElement::ONE.clone(),
-            FieldElement::ZERO.clone(),
+            FieldElement::ZERO,
+            FieldElement::ONE,
+            FieldElement::ONE,
+            FieldElement::ZERO,
         ]);
 
-        <span class="kw">let </span><span class="kw-2">mut </span>q = point.clone();
+        <span class="kw">let </span><span class="kw-2">mut </span>q = <span class="kw-2">*</span>point;
         <span class="kw">let </span>scalar = <span class="self">self</span>;
 
         <span class="kw">for </span>i <span class="kw">in </span>(<span class="number">0</span>..=<span class="number">255</span>).rev() {
-            <span class="kw">let </span>b = (((scalar.<span class="number">0</span>[i / <span class="number">8</span>] &gt;&gt; (i &amp; <span class="number">7</span>)) &amp; <span class="number">1</span>) <span class="kw">as </span>u8).into();
+            <span class="kw">let </span>b = ((scalar.<span class="number">0</span>[i / <span class="number">8</span>] &gt;&gt; (i &amp; <span class="number">7</span>)) &amp; <span class="number">1</span>).into();
             EdwardsPoint::conditional_swap(<span class="kw-2">&amp;mut </span>p, <span class="kw-2">&amp;mut </span>q, b);
 
             q = <span class="kw-2">&amp;</span>q + <span class="kw-2">&amp;</span>p;
@@ -784,10 +732,8 @@
     </span><span class="kw">fn </span>test_neutral_is_neutral() {
         <span class="kw">let </span>n = <span class="number">42</span>;
         <span class="kw">let </span>s = Scalar::from_bytes(<span class="kw-2">&amp;</span>[
-            n, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,
-            <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,
-            <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,
-            <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,
+            n, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,
+            <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,
         ]);
         <span class="kw">let </span>ne = EdwardsPoint::neutral_element();
         <span class="macro">assert_eq!</span>(ne, <span class="kw-2">&amp;</span>s * <span class="kw-2">&amp;</span>ne);
@@ -795,14 +741,11 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_addition_vs_multiplication() {
-
         <span class="kw">let </span>p = EdwardsPoint::basepoint();
         <span class="kw">let </span>p_plus_p = <span class="kw-2">&amp;</span>p + <span class="kw-2">&amp;</span>p;
         <span class="kw">let </span>two = Scalar::from_bytes(<span class="kw-2">&amp;</span>[
-            <span class="number">2u8</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,
-            <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,
-            <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,
-            <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,
+            <span class="number">2u8</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,
+            <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,
         ]);
 
         <span class="kw">let </span>two_times_p = <span class="kw-2">&amp;</span>two * <span class="kw-2">&amp;</span>p;
@@ -814,10 +757,8 @@
     </span><span class="kw">fn </span>test_some_more() {
         <span class="kw">let </span>n = <span class="number">37</span>;
         <span class="kw">let </span>s = Scalar::from_bytes(<span class="kw-2">&amp;</span>[
-            n, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,
-            <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,
-            <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,
-            <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,
+            n, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,
+            <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,
         ]);
         <span class="kw">let </span>bp = EdwardsPoint::basepoint();
         <span class="kw">let </span>ne = EdwardsPoint::neutral_element();
@@ -845,7 +786,10 @@
         <span class="macro">assert_eq!</span>(edwards_basepoint.to_montgomery(), montgomery_basepoint);
 
         <span class="kw">let </span>scalar = Scalar::from(<span class="number">123456</span>);
-        <span class="macro">assert_eq!</span>((<span class="kw-2">&amp;</span>scalar * <span class="kw-2">&amp;</span>edwards_basepoint).to_montgomery(), <span class="kw-2">&amp;</span>scalar * <span class="kw-2">&amp;</span>montgomery_basepoint);
+        <span class="macro">assert_eq!</span>(
+            (<span class="kw-2">&amp;</span>scalar * <span class="kw-2">&amp;</span>edwards_basepoint).to_montgomery(),
+            <span class="kw-2">&amp;</span>scalar * <span class="kw-2">&amp;</span>montgomery_basepoint
+        );
     }
 }
 </code></pre></div></section></main></body></html>

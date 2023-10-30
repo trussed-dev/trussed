@@ -239,8 +239,7 @@
 <a href="#239" id="239">239</a>
 <a href="#240" id="240">240</a>
 <a href="#241" id="241">241</a>
-<a href="#242" id="242">242</a>
-</pre></div><pre class="rust"><code><span class="kw">use </span>core::convert::{TryFrom, TryInto};
+</pre></div><pre class="rust"><code><span class="kw">use </span>core::convert::TryInto;
 
 <span class="kw">use </span><span class="kw">crate</span>::api::<span class="kw-2">*</span>;
 <span class="comment">// use crate::config::*;
@@ -262,8 +261,7 @@
         .try_into()
         .map_err(|<span class="kw">_</span>| Error::InternalError)<span class="question-mark">?</span>;
 
-    <span class="kw">let </span>public_key =
-        agreement::PublicKey::try_from(public_bytes).map_err(|<span class="kw">_</span>| Error::InternalError)<span class="question-mark">?</span>;
+    <span class="kw">let </span>public_key = public_bytes.into();
 
     <span class="prelude-val">Ok</span>(public_key)
 }
@@ -428,8 +426,8 @@
         }
 
         <span class="kw">let </span>serialized_key: [u8; <span class="number">32</span>] = request.serialized_key[..<span class="number">32</span>].try_into().unwrap();
-        <span class="kw">let </span>public_key = salty::agreement::PublicKey::try_from(serialized_key)
-            .map_err(|<span class="kw">_</span>| Error::InvalidSerializedKey)<span class="question-mark">?</span>;
+        <span class="comment">// This will make it store the canonical encoding
+        </span><span class="kw">let </span>public_key: agreement::PublicKey = serialized_key.into();
 
         <span class="kw">let </span>public_id = keystore.store_key(
             request.attributes.persistence,

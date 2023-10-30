@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":["make_255_bit","x25519"],"struct":["PublicKey","SecretKey","SharedSecret"]};
+window.SIDEBAR_ITEMS = {"fn":["x25519"],"struct":["PublicKey","SecretKey","SharedSecret"]};

@@ -23,7 +23,7 @@ var srcIndex = JSON.parse('{\
 "des":["",[],["consts.rs","des.rs","lib.rs","tdes.rs"]],\
 "digest":["",[["core_api",[],["ct_variable.rs","rt_variable.rs","wrapper.rs","xof_reader.rs"]]],["core_api.rs","digest.rs","lib.rs","mac.rs"]],\
 "ecdsa":["",[],["der.rs","hazmat.rs","lib.rs","rfc6979.rs","sign.rs","verify.rs"]],\
-"ed25519":["",[],["lib.rs"]],\
+"ed25519":["",[],["hex.rs","lib.rs"]],\
 "elliptic_curve":["",[["scalar",[],["bytes.rs","non_zero.rs"]]],["arithmetic.rs","ecdh.rs","error.rs","lib.rs","ops.rs","public_key.rs","scalar.rs","sec1.rs","secret_key.rs","weierstrass.rs"]],\
 "embedded_hal":["",[["blocking",[],["can.rs","delay.rs","i2c.rs","mod.rs","rng.rs","serial.rs","spi.rs"]],["can",[],["id.rs","mod.rs","nb.rs"]],["digital",[],["mod.rs","v1.rs","v1_compat.rs","v2.rs","v2_compat.rs"]]],["adc.rs","fmt.rs","lib.rs","prelude.rs","serial.rs","spi.rs","timer.rs","watchdog.rs"]],\
 "ff":["",[],["batch.rs","lib.rs"]],\
@@ -66,7 +66,7 @@ var srcIndex = JSON.parse('{\
 "serde_repr":["",[],["lib.rs","parse.rs"]],\
 "sha1":["",[["compress",[],["soft.rs","x86.rs"]]],["compress.rs","lib.rs"]],\
 "sha2":["",[["sha256",[],["soft.rs","x86.rs"]],["sha512",[],["soft.rs","x86.rs"]]],["consts.rs","core_api.rs","lib.rs","sha256.rs","sha512.rs"]],\
-"signature":["",[],["error.rs","lib.rs","signature.rs","signer.rs","verifier.rs"]],\
+"signature":["",[],["encoding.rs","error.rs","hazmat.rs","keypair.rs","lib.rs","signer.rs","verifier.rs"]],\
 "spin":["",[["mutex",[],["spin.rs"]]],["barrier.rs","lazy.rs","lib.rs","mutex.rs","once.rs","relax.rs","rwlock.rs"]],\
 "stable_deref_trait":["",[],["lib.rs"]],\
 "subtle":["",[],["lib.rs"]],\
