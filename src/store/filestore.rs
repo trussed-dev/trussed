@@ -80,6 +80,7 @@ pub trait Filestore {
     fn write(&mut self, path: &Path, location: Location, data: &[u8]) -> Result<()>;
     fn exists(&mut self, path: &Path, location: Location) -> bool;
     fn metadata(&mut self, path: &Path, location: Location) -> Result<Option<Metadata>>;
+    fn rename(&mut self, from: &Path, to: &Path, location: Location) -> Result<()>;
     fn remove_file(&mut self, path: &Path, location: Location) -> Result<()>;
     fn remove_dir(&mut self, path: &Path, location: Location) -> Result<()>;
     fn remove_dir_all(&mut self, path: &Path, location: Location) -> Result<usize>;
@@ -374,6 +375,12 @@ impl<S: Store> Filestore for ClientFilestore<S> {
     fn metadata(&mut self, path: &Path, location: Location) -> Result<Option<Metadata>> {
         let path = self.actual_path(path)?;
         store::metadata(self.store, location, &path)
+    }
+
+    fn rename(&mut self, from: &Path, to: &Path, location: Location) -> Result<()> {
+        let from = self.actual_path(from)?;
+        let to = self.actual_path(to)?;
+        store::rename(self.store, location, &from, &to)
     }
 
     fn remove_file(&mut self, path: &Path, location: Location) -> Result<()> {

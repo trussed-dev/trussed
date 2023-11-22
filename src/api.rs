@@ -44,6 +44,7 @@ generate_enums! {
     ReadDirFilesNext: 14
     ReadFile: 15
     Metadata: 26
+    Rename: 27
     // ReadCounter: 7
     RandomBytes: 16
     SerializeKey: 17
@@ -247,6 +248,11 @@ pub mod request {
           - location: Location
           - path: PathBuf
 
+        Rename:
+          - location: Location
+          - from: PathBuf
+          - to: PathBuf
+
         RemoveFile:
           - location: Location
           - path: PathBuf
@@ -437,6 +443,8 @@ pub mod reply {
 
         Metadata:
           - metadata: Option<crate::types::Metadata>
+
+        Rename:
 
         RemoveDir:
 
