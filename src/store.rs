@@ -595,6 +595,17 @@ pub fn metadata(
 }
 
 #[inline(never)]
+pub fn rename(store: impl Store, location: Location, from: &Path, to: &Path) -> Result<(), Error> {
+    debug_now!("renaming {} to {}", &from, &to);
+    match location {
+        Location::Internal => store.ifs().rename(from, to),
+        Location::External => store.efs().rename(from, to),
+        Location::Volatile => store.vfs().rename(from, to),
+    }
+    .map_err(|_| Error::FilesystemWriteFailure)
+}
+
+#[inline(never)]
 pub fn remove_dir(store: impl Store, location: Location, path: &Path) -> bool {
     debug_now!("remove_dir'ing {}", &path);
     let outcome = match location {

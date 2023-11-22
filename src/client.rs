@@ -666,6 +666,19 @@ pub trait FilesystemClient: PollClient {
         self.request(request::Metadata { location, path })
     }
 
+    /// Rename a file or directory.
+    ///
+    /// If `to` exists, it must be the same type as `from` (i. e., both must be files or both must
+    /// be directories).  If `to` is a directory, it must be empty.
+    fn rename(
+        &mut self,
+        location: Location,
+        from: PathBuf,
+        to: PathBuf,
+    ) -> ClientResult<'_, reply::Rename, Self> {
+        self.request(request::Rename { location, from, to })
+    }
+
     fn locate_file(
         &mut self,
         location: Location,

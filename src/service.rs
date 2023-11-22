@@ -447,6 +447,11 @@ impl<P: Platform> ServiceResources<P> {
                 }))
             }
 
+            Request::Rename(request) => {
+                filestore.rename(&request.from, &request.to, request.location)?;
+                Ok(Reply::Rename(reply::Rename {}))
+            }
+
             Request::RandomBytes(request) => {
                 if request.count <= MAX_MESSAGE_LENGTH {
                     let mut bytes = Message::new();
