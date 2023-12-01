@@ -900,6 +900,13 @@
 <a href="#900" id="900">900</a>
 <a href="#901" id="901">901</a>
 <a href="#902" id="902">902</a>
+<a href="#903" id="903">903</a>
+<a href="#904" id="904">904</a>
+<a href="#905" id="905">905</a>
+<a href="#906" id="906">906</a>
+<a href="#907" id="907">907</a>
+<a href="#908" id="908">908</a>
+<a href="#909" id="909">909</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>littlefs2::{
     path,
     path::{Path, PathBuf},
@@ -1041,11 +1048,19 @@
         <span class="comment">// TODO: what we want to do here is map an enum to a generic type
         // Is there a nicer way to do this?
 
-        </span><span class="kw">let </span>full_store = <span class="self">self</span>.platform.store();
+        </span><span class="doccomment">/// Coerce an FnMut into a FnOnce to ensure the stores are not created twice by mistake
+        </span><span class="kw">fn </span>once&lt;R, P&gt;(
+            generator: <span class="kw">impl </span>FnMut(<span class="kw-2">&amp;mut </span>ServiceResources&lt;P&gt;, <span class="kw-2">&amp;mut </span>CoreContext) -&gt; R,
+        ) -&gt; <span class="kw">impl </span>FnOnce(<span class="kw-2">&amp;mut </span>ServiceResources&lt;P&gt;, <span class="kw-2">&amp;mut </span>CoreContext) -&gt; R {
+            generator
+        }
 
-        <span class="kw">let </span>keystore = <span class="kw-2">&amp;mut </span><span class="self">self</span>.keystore(ctx.path.clone())<span class="question-mark">?</span>;
-        <span class="kw">let </span>certstore = <span class="kw-2">&amp;mut </span><span class="self">self</span>.certstore(ctx)<span class="question-mark">?</span>;
-        <span class="kw">let </span>counterstore = <span class="kw-2">&amp;mut </span><span class="self">self</span>.counterstore(ctx)<span class="question-mark">?</span>;
+        <span class="kw">let </span>full_store = <span class="self">self</span>.platform.store();
+
+        <span class="kw">let </span>keystore = once(|this, ctx| this.keystore(ctx.path.clone()));
+        <span class="kw">let </span>certstore = once(|this, ctx| this.certstore(ctx));
+        <span class="kw">let </span>counterstore = once(|this, ctx| this.counterstore(ctx));
+
         <span class="kw">let </span>filestore = <span class="kw-2">&amp;mut </span><span class="self">self</span>.filestore(ctx.path.clone());
 
         <span class="macro">debug_now!</span>(<span class="string">&quot;TRUSSED {:?}&quot;</span>, request);
@@ -1057,8 +1072,8 @@
             Request::Agree(request) =&gt; {
                 <span class="kw">match </span>request.mechanism {
 
-                    Mechanism::P256 =&gt; mechanisms::P256::agree(keystore, request),
-                    Mechanism::X255 =&gt; mechanisms::X255::agree(keystore, request),
+                    Mechanism::P256 =&gt; mechanisms::P256::agree(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
+                    Mechanism::X255 =&gt; mechanisms::X255::agree(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
                     <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(Error::MechanismNotAvailable),
 
                 }.map(Reply::Agree)
@@ -1070,15 +1085,15 @@
                     <span class="self">self</span>.rng().map_err(|<span class="kw">_</span>| Error::EntropyMalfunction)<span class="question-mark">?</span>,
                     full_store,
                 );
-                attest::try_attest(<span class="kw-2">&amp;mut </span>attn_keystore, certstore, keystore, request).map(Reply::Attest)
+                attest::try_attest(<span class="kw-2">&amp;mut </span>attn_keystore, <span class="kw-2">&amp;mut </span>certstore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, <span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request).map(Reply::Attest)
             }
 
             Request::Decrypt(request) =&gt; {
                 <span class="kw">match </span>request.mechanism {
 
-                    Mechanism::Aes256Cbc =&gt; mechanisms::Aes256Cbc::decrypt(keystore, request),
-                    Mechanism::Chacha8Poly1305 =&gt; mechanisms::Chacha8Poly1305::decrypt(keystore, request),
-                    Mechanism::Tdes =&gt; mechanisms::Tdes::decrypt(keystore, request),
+                    Mechanism::Aes256Cbc =&gt; mechanisms::Aes256Cbc::decrypt(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
+                    Mechanism::Chacha8Poly1305 =&gt; mechanisms::Chacha8Poly1305::decrypt(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
+                    Mechanism::Tdes =&gt; mechanisms::Tdes::decrypt(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
                     <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(Error::MechanismNotAvailable),
 
                 }.map(Reply::Decrypt)
@@ -1087,14 +1102,14 @@
             Request::DeriveKey(request) =&gt; {
                 <span class="kw">match </span>request.mechanism {
 
-                    Mechanism::HmacBlake2s =&gt; mechanisms::HmacBlake2s::derive_key(keystore, request),
-                    Mechanism::HmacSha1 =&gt; mechanisms::HmacSha1::derive_key(keystore, request),
-                    Mechanism::HmacSha256 =&gt; mechanisms::HmacSha256::derive_key(keystore, request),
-                    Mechanism::HmacSha512 =&gt; mechanisms::HmacSha512::derive_key(keystore, request),
-                    Mechanism::Ed255 =&gt; mechanisms::Ed255::derive_key(keystore, request),
-                    Mechanism::P256 =&gt; mechanisms::P256::derive_key(keystore, request),
-                    Mechanism::Sha256 =&gt; mechanisms::Sha256::derive_key(keystore, request),
-                    Mechanism::X255 =&gt; mechanisms::X255::derive_key(keystore, request),
+                    Mechanism::HmacBlake2s =&gt; mechanisms::HmacBlake2s::derive_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
+                    Mechanism::HmacSha1 =&gt; mechanisms::HmacSha1::derive_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
+                    Mechanism::HmacSha256 =&gt; mechanisms::HmacSha256::derive_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
+                    Mechanism::HmacSha512 =&gt; mechanisms::HmacSha512::derive_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
+                    Mechanism::Ed255 =&gt; mechanisms::Ed255::derive_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
+                    Mechanism::P256 =&gt; mechanisms::P256::derive_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
+                    Mechanism::Sha256 =&gt; mechanisms::Sha256::derive_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
+                    Mechanism::X255 =&gt; mechanisms::X255::derive_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
                     <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(Error::MechanismNotAvailable),
 
                 }.map(Reply::DeriveKey)
@@ -1103,9 +1118,9 @@
             Request::DeserializeKey(request) =&gt; {
                 <span class="kw">match </span>request.mechanism {
 
-                    Mechanism::Ed255 =&gt; mechanisms::Ed255::deserialize_key(keystore, request),
-                    Mechanism::P256 =&gt; mechanisms::P256::deserialize_key(keystore, request),
-                    Mechanism::X255 =&gt; mechanisms::X255::deserialize_key(keystore, request),
+                    Mechanism::Ed255 =&gt; mechanisms::Ed255::deserialize_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
+                    Mechanism::P256 =&gt; mechanisms::P256::deserialize_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
+                    Mechanism::X255 =&gt; mechanisms::X255::deserialize_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
                     <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(Error::MechanismNotAvailable),
 
                 }.map(Reply::DeserializeKey)
@@ -1114,36 +1129,36 @@
             Request::Encrypt(request) =&gt; {
                 <span class="kw">match </span>request.mechanism {
 
-                    Mechanism::Aes256Cbc =&gt; mechanisms::Aes256Cbc::encrypt(keystore, request),
-                    Mechanism::Chacha8Poly1305 =&gt; mechanisms::Chacha8Poly1305::encrypt(keystore, request),
-                    Mechanism::Tdes =&gt; mechanisms::Tdes::encrypt(keystore, request),
+                    Mechanism::Aes256Cbc =&gt; mechanisms::Aes256Cbc::encrypt(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
+                    Mechanism::Chacha8Poly1305 =&gt; mechanisms::Chacha8Poly1305::encrypt(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
+                    Mechanism::Tdes =&gt; mechanisms::Tdes::encrypt(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
                     <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(Error::MechanismNotAvailable),
 
                 }.map(Reply::Encrypt)
             },
 
             Request::Delete(request) =&gt; {
-                <span class="kw">let </span>success = keystore.delete_key(<span class="kw-2">&amp;</span>request.key);
+                <span class="kw">let </span>success = keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>.delete_key(<span class="kw-2">&amp;</span>request.key);
                 <span class="prelude-val">Ok</span>(Reply::Delete(reply::Delete { success } ))
             },
 
             Request::Clear(request) =&gt; {
-                <span class="kw">let </span>success = keystore.clear_key(<span class="kw-2">&amp;</span>request.key);
+                <span class="kw">let </span>success = keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>.clear_key(<span class="kw-2">&amp;</span>request.key);
                 <span class="prelude-val">Ok</span>(Reply::Clear(reply::Clear { success } ))
             },
 
             Request::DeleteAllKeys(request) =&gt; {
-                <span class="kw">let </span>count = keystore.delete_all(request.location)<span class="question-mark">?</span>;
+                <span class="kw">let </span>count = keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>.delete_all(request.location)<span class="question-mark">?</span>;
                 <span class="prelude-val">Ok</span>(Reply::DeleteAllKeys(reply::DeleteAllKeys { count } ))
             },
 
             Request::Exists(request) =&gt; {
                 <span class="kw">match </span>request.mechanism {
 
-                    Mechanism::Ed255 =&gt; mechanisms::Ed255::exists(keystore, request),
-                    Mechanism::P256 =&gt; mechanisms::P256::exists(keystore, request),
-                    Mechanism::Totp =&gt; mechanisms::Totp::exists(keystore, request),
-                    Mechanism::X255 =&gt; mechanisms::X255::exists(keystore, request),
+                    Mechanism::Ed255 =&gt; mechanisms::Ed255::exists(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
+                    Mechanism::P256 =&gt; mechanisms::P256::exists(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
+                    Mechanism::Totp =&gt; mechanisms::Totp::exists(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
+                    Mechanism::X255 =&gt; mechanisms::X255::exists(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
                     <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(Error::MechanismNotAvailable),
 
                 }.map(Reply::Exists)
@@ -1151,10 +1166,10 @@
 
             Request::GenerateKey(request) =&gt; {
                 <span class="kw">match </span>request.mechanism {
-                    Mechanism::Chacha8Poly1305 =&gt; mechanisms::Chacha8Poly1305::generate_key(keystore, request),
-                    Mechanism::Ed255 =&gt; mechanisms::Ed255::generate_key(keystore, request),
-                    Mechanism::P256 =&gt; mechanisms::P256::generate_key(keystore, request),
-                    Mechanism::X255 =&gt; mechanisms::X255::generate_key(keystore, request),
+                    Mechanism::Chacha8Poly1305 =&gt; mechanisms::Chacha8Poly1305::generate_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
+                    Mechanism::Ed255 =&gt; mechanisms::Ed255::generate_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
+                    Mechanism::P256 =&gt; mechanisms::P256::generate_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
+                    Mechanism::X255 =&gt; mechanisms::X255::generate_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
                     <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(Error::MechanismNotAvailable),
                 }.map(Reply::GenerateKey)
             },
@@ -1162,6 +1177,7 @@
             Request::GenerateSecretKey(request) =&gt; {
                 <span class="kw">let </span><span class="kw-2">mut </span>secret_key = MediumData::new();
                 <span class="kw">let </span>size = request.size;
+                <span class="kw">let </span><span class="kw-2">mut </span>keystore = keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>;
                 secret_key.resize_default(request.size).map_err(|<span class="kw">_</span>| Error::ImplementationError)<span class="question-mark">?</span>;
                 keystore.rng().fill_bytes(<span class="kw-2">&amp;mut </span>secret_key[..size]);
                 <span class="kw">let </span>key_id = keystore.store_key(
@@ -1176,18 +1192,18 @@
             <span class="comment">// deprecated
             </span>Request::UnsafeInjectKey(request) =&gt; {
                 <span class="kw">match </span>request.mechanism {
-                    Mechanism::P256 =&gt; mechanisms::P256::unsafe_inject_key(keystore,request),
-                    Mechanism::X255 =&gt; mechanisms::X255::unsafe_inject_key(keystore,request),
-                    Mechanism::Ed255 =&gt; mechanisms::Ed255::unsafe_inject_key(keystore,request),
-                    Mechanism::SharedSecret =&gt; mechanisms::SharedSecret::unsafe_inject_key(keystore, request),
-                    Mechanism::Aes256Cbc =&gt; mechanisms::Aes256Cbc::unsafe_inject_key(keystore, request),
-                    Mechanism::Tdes =&gt; mechanisms::Tdes::unsafe_inject_key(keystore, request),
+                    Mechanism::P256 =&gt; mechanisms::P256::unsafe_inject_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>,request),
+                    Mechanism::X255 =&gt; mechanisms::X255::unsafe_inject_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>,request),
+                    Mechanism::Ed255 =&gt; mechanisms::Ed255::unsafe_inject_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>,request),
+                    Mechanism::SharedSecret =&gt; mechanisms::SharedSecret::unsafe_inject_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
+                    Mechanism::Aes256Cbc =&gt; mechanisms::Aes256Cbc::unsafe_inject_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
+                    Mechanism::Tdes =&gt; mechanisms::Tdes::unsafe_inject_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
                     <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(Error::MechanismNotAvailable)
                 }.map(Reply::UnsafeInjectKey)
             },
 
             Request::UnsafeInjectSharedKey(request) =&gt; {
-                <span class="kw">let </span>key_id = keystore.store_key(
+                <span class="kw">let </span>key_id = keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>.store_key(
                     request.location,
                     key::Secrecy::Secret,
                     key::Kind::Shared(request.raw_key.len()),
@@ -1200,7 +1216,7 @@
             Request::Hash(request) =&gt; {
                 <span class="kw">match </span>request.mechanism {
 
-                    Mechanism::Sha256 =&gt; mechanisms::Sha256::hash(keystore, request),
+                    Mechanism::Sha256 =&gt; mechanisms::Sha256::hash(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
                     <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(Error::MechanismNotAvailable),
 
                 }.map(Reply::Hash)
@@ -1368,10 +1384,10 @@
             Request::SerializeKey(request) =&gt; {
                 <span class="kw">match </span>request.mechanism {
 
-                    Mechanism::Ed255 =&gt; mechanisms::Ed255::serialize_key(keystore, request),
-                    Mechanism::P256 =&gt; mechanisms::P256::serialize_key(keystore, request),
-                    Mechanism::X255 =&gt; mechanisms::X255::serialize_key(keystore, request),
-                    Mechanism::SharedSecret =&gt; mechanisms::SharedSecret::serialize_key(keystore, request),
+                    Mechanism::Ed255 =&gt; mechanisms::Ed255::serialize_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
+                    Mechanism::P256 =&gt; mechanisms::P256::serialize_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
+                    Mechanism::X255 =&gt; mechanisms::X255::serialize_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
+                    Mechanism::SharedSecret =&gt; mechanisms::SharedSecret::serialize_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
                     <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(Error::MechanismNotAvailable),
 
                 }.map(Reply::SerializeKey)
@@ -1380,14 +1396,14 @@
             Request::Sign(request) =&gt; {
                 <span class="kw">match </span>request.mechanism {
 
-                    Mechanism::Ed255 =&gt; mechanisms::Ed255::sign(keystore, request),
-                    Mechanism::HmacBlake2s =&gt; mechanisms::HmacBlake2s::sign(keystore, request),
-                    Mechanism::HmacSha1 =&gt; mechanisms::HmacSha1::sign(keystore, request),
-                    Mechanism::HmacSha256 =&gt; mechanisms::HmacSha256::sign(keystore, request),
-                    Mechanism::HmacSha512 =&gt; mechanisms::HmacSha512::sign(keystore, request),
-                    Mechanism::P256 =&gt; mechanisms::P256::sign(keystore, request),
-                    Mechanism::P256Prehashed =&gt; mechanisms::P256Prehashed::sign(keystore, request),
-                    Mechanism::Totp =&gt; mechanisms::Totp::sign(keystore, request),
+                    Mechanism::Ed255 =&gt; mechanisms::Ed255::sign(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
+                    Mechanism::HmacBlake2s =&gt; mechanisms::HmacBlake2s::sign(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
+                    Mechanism::HmacSha1 =&gt; mechanisms::HmacSha1::sign(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
+                    Mechanism::HmacSha256 =&gt; mechanisms::HmacSha256::sign(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
+                    Mechanism::HmacSha512 =&gt; mechanisms::HmacSha512::sign(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
+                    Mechanism::P256 =&gt; mechanisms::P256::sign(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
+                    Mechanism::P256Prehashed =&gt; mechanisms::P256Prehashed::sign(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
+                    Mechanism::Totp =&gt; mechanisms::Totp::sign(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
                     <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(Error::MechanismNotAvailable),
 
                 }.map(Reply::Sign)
@@ -1401,7 +1417,7 @@
             Request::UnwrapKey(request) =&gt; {
                 <span class="kw">match </span>request.mechanism {
 
-                    Mechanism::Chacha8Poly1305 =&gt; mechanisms::Chacha8Poly1305::unwrap_key(keystore, request),
+                    Mechanism::Chacha8Poly1305 =&gt; mechanisms::Chacha8Poly1305::unwrap_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
                     <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(Error::MechanismNotAvailable),
 
                 }.map(Reply::UnwrapKey)
@@ -1410,8 +1426,8 @@
             Request::Verify(request) =&gt; {
                 <span class="kw">match </span>request.mechanism {
 
-                    Mechanism::Ed255 =&gt; mechanisms::Ed255::verify(keystore, request),
-                    Mechanism::P256 =&gt; mechanisms::P256::verify(keystore, request),
+                    Mechanism::Ed255 =&gt; mechanisms::Ed255::verify(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
+                    Mechanism::P256 =&gt; mechanisms::P256::verify(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
                     <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(Error::MechanismNotAvailable),
 
                 }.map(Reply::Verify)
@@ -1420,8 +1436,8 @@
             Request::WrapKey(request) =&gt; {
                 <span class="kw">match </span>request.mechanism {
 
-                    Mechanism::Aes256Cbc =&gt; mechanisms::Aes256Cbc::wrap_key(keystore, request),
-                    Mechanism::Chacha8Poly1305 =&gt; mechanisms::Chacha8Poly1305::wrap_key(keystore, request),
+                    Mechanism::Aes256Cbc =&gt; mechanisms::Aes256Cbc::wrap_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
+                    Mechanism::Chacha8Poly1305 =&gt; mechanisms::Chacha8Poly1305::wrap_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
                     <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(Error::MechanismNotAvailable),
 
                 }.map(Reply::WrapKey)
@@ -1503,29 +1519,27 @@
             }
 
             Request::CreateCounter(request) =&gt; {
-                counterstore.create(request.location)
+                counterstore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>.create(request.location)
                     .map(|id| Reply::CreateCounter(reply::CreateCounter { id } ))
             }
 
             Request::IncrementCounter(request) =&gt; {
-                counterstore.increment(request.id)
+                counterstore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>.increment(request.id)
                     .map(|counter| Reply::IncrementCounter(reply::IncrementCounter { counter } ))
             }
 
             Request::DeleteCertificate(request) =&gt; {
-                certstore.delete_certificate(request.id)
+                 certstore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>.delete_certificate(request.id)
                     .map(|<span class="kw">_</span>| Reply::DeleteCertificate(reply::DeleteCertificate {} ))
-
             }
 
             Request::ReadCertificate(request) =&gt; {
-                certstore.read_certificate(request.id)
+                 certstore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>.read_certificate(request.id)
                     .map(|der| Reply::ReadCertificate(reply::ReadCertificate { der } ))
-
             }
 
             Request::WriteCertificate(request) =&gt; {
-                certstore.write_certificate(request.location, <span class="kw-2">&amp;</span>request.der)
+                 certstore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>.write_certificate(request.location, <span class="kw-2">&amp;</span>request.der)
                     .map(|id| Reply::WriteCertificate(reply::WriteCertificate { id } ))
             }
 
