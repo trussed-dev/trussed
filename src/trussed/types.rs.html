@@ -633,6 +633,35 @@
 <a href="#633" id="633">633</a>
 <a href="#634" id="634">634</a>
 <a href="#635" id="635">635</a>
+<a href="#636" id="636">636</a>
+<a href="#637" id="637">637</a>
+<a href="#638" id="638">638</a>
+<a href="#639" id="639">639</a>
+<a href="#640" id="640">640</a>
+<a href="#641" id="641">641</a>
+<a href="#642" id="642">642</a>
+<a href="#643" id="643">643</a>
+<a href="#644" id="644">644</a>
+<a href="#645" id="645">645</a>
+<a href="#646" id="646">646</a>
+<a href="#647" id="647">647</a>
+<a href="#648" id="648">648</a>
+<a href="#649" id="649">649</a>
+<a href="#650" id="650">650</a>
+<a href="#651" id="651">651</a>
+<a href="#652" id="652">652</a>
+<a href="#653" id="653">653</a>
+<a href="#654" id="654">654</a>
+<a href="#655" id="655">655</a>
+<a href="#656" id="656">656</a>
+<a href="#657" id="657">657</a>
+<a href="#658" id="658">658</a>
+<a href="#659" id="659">659</a>
+<a href="#660" id="660">660</a>
+<a href="#661" id="661">661</a>
+<a href="#662" id="662">662</a>
+<a href="#663" id="663">663</a>
+<a href="#664" id="664">664</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>core::marker::PhantomData;
 <span class="kw">use </span>core::ops::Deref;
 
@@ -680,11 +709,7 @@
 
 <span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>Id {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; core::fmt::Result {
-        <span class="macro">write!</span>(f, <span class="string">&quot;Id(&quot;</span>)<span class="question-mark">?</span>;
-        <span class="kw">for </span>ch <span class="kw">in </span><span class="kw-2">&amp;</span><span class="self">self</span>.hex() {
-            <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, <span class="kw-2">&amp;</span>(<span class="kw-2">*</span>ch <span class="kw">as </span>char))<span class="question-mark">?</span>;
-        }
-        <span class="macro">write!</span>(f, <span class="string">&quot;)&quot;</span>)
+        <span class="macro">write!</span>(f, <span class="string">&quot;Id({})&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.hex_clean())
     }
 }
 
@@ -713,12 +738,27 @@
 
         <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..array.len() {
             <span class="kw">if </span>array[i] == <span class="number">0 </span>&amp;&amp; i != (array.len() - <span class="number">1</span>) {
-                <span class="comment">// Skip leading zeros.
+                <span class="comment">// This actually skips all zeroes, not only leading ones
+                // This is kept for backward compatibility with already serialized KeyIds
                 </span><span class="kw">continue</span>;
             }
 
             buffer.push(HEX_CHARS[(array[i] &gt;&gt; <span class="number">4</span>) <span class="kw">as </span>usize]).unwrap();
             buffer.push(HEX_CHARS[(array[i] &amp; <span class="number">0xf</span>) <span class="kw">as </span>usize]).unwrap();
+        }
+        buffer
+    }
+
+    <span class="doccomment">/// skips leading zeros
+    </span><span class="kw">pub fn </span>hex_clean(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; String&lt;<span class="number">32</span>&gt; {
+        <span class="kw">const </span>HEX_CHARS: <span class="kw-2">&amp;</span>[u8] = <span class="string">b&quot;0123456789abcdef&quot;</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>buffer = String::new();
+        <span class="kw">let </span>array = <span class="self">self</span>.<span class="number">0</span>.to_be_bytes();
+
+        <span class="comment">// skip leading zeros
+        </span><span class="kw">for </span>v <span class="kw">in </span>array.into_iter().skip_while(|v| <span class="kw-2">*</span>v == <span class="number">0</span>) {
+            buffer.push(HEX_CHARS[(v &gt;&gt; <span class="number">4</span>) <span class="kw">as </span>usize] <span class="kw">as </span>char).unwrap();
+            buffer.push(HEX_CHARS[(v &amp; <span class="number">0xf</span>) <span class="kw">as </span>usize] <span class="kw">as </span>char).unwrap();
         }
 
         buffer
@@ -793,6 +833,24 @@
 <span class="macro">impl_id!</span>(CertId);
 <span class="macro">impl_id!</span>(CounterId);
 <span class="macro">impl_id!</span>(KeyId);
+
+<span class="kw">impl </span>KeyId {
+    <span class="doccomment">/// Create a KeyId from a given value instead of at random.
+    ///
+    /// This can be useful for backends which can use it to encode additional information inside of the KeyId itself (128 bits is a lot)
+    ///
+    /// This is already possible to acheive through the serde implementation, so this doesn&#39;t really add any unavailable functionality.
+    </span><span class="attr">#[doc(hidden)]
+    </span><span class="kw">pub fn </span>from_value(value: u128) -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>(Id(value))
+    }
+
+    <span class="attr">#[doc(hidden)]
+    </span><span class="kw">pub fn </span>value(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u128 {
+        <span class="self">self</span>.<span class="number">0 </span>.<span class="number">0
+    </span>}
+}
+
 <span class="comment">// TODO: decide whether this is good idea.
 // It would allow using the same underlying u128 ID for the public key of the private
 // key in a keypair. However, DeleteKey and others would need to be adjusted.
