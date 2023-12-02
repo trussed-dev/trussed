@@ -1,7 +1,4 @@
-use littlefs2::{
-    path,
-    path::{Path, PathBuf},
-};
+use littlefs2::{path, path::PathBuf};
 use rand_chacha::ChaCha8Rng;
 
 use crate::{

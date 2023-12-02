@@ -2,17 +2,19 @@ macro_rules! generate_enums {
     ($($(#[$attr:meta])? $which:ident: $index:literal)*) => {
 
     #[derive(Clone, Eq, PartialEq, Debug)]
+    #[repr(u8)]
     #[allow(clippy::large_enum_variant)]
     #[non_exhaustive]
     pub enum Request {
-        DummyRequest, // for testing
+        DummyRequest = 0, // for testing
         $(
         $(#[$attr])?
-        $which(request::$which),
+        $which(request::$which) = $index,
         )*
     }
 
     #[derive(Clone, Eq, PartialEq, Debug)]
+    #[repr(u8)]
     #[allow(clippy::large_enum_variant)]
     #[non_exhaustive]
     pub enum Reply {

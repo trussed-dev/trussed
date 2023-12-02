@@ -602,6 +602,19 @@ pub trait FilesystemClient: PollClient {
         })
     }
 
+    fn read_dir_nth(
+        &mut self,
+        location: Location,
+        dir: PathBuf,
+        start_at: usize,
+    ) -> ClientResult<'_, reply::ReadDirNth, Self> {
+        self.request(request::ReadDirNth {
+            location,
+            dir,
+            start_at,
+        })
+    }
+
     fn read_dir_next(&mut self) -> ClientResult<'_, reply::ReadDirNext, Self> {
         self.request(request::ReadDirNext {})
     }
@@ -615,6 +628,21 @@ pub trait FilesystemClient: PollClient {
         self.request(request::ReadDirFilesFirst {
             dir,
             location,
+            user_attribute,
+        })
+    }
+
+    fn read_dir_files_nth(
+        &mut self,
+        location: Location,
+        dir: PathBuf,
+        start_at: usize,
+        user_attribute: Option<UserAttribute>,
+    ) -> ClientResult<'_, reply::ReadDirFilesNth, Self> {
+        self.request(request::ReadDirFilesNth {
+            dir,
+            location,
+            start_at,
             user_attribute,
         })
     }
