@@ -1,4 +1,5 @@
 #![cfg(feature = "virt")]
+#![cfg(feature = "counter-client")]
 
 mod client;
 mod store;

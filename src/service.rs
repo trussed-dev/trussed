@@ -150,6 +150,7 @@ impl<P: Platform> ServiceResources<P> {
 
         let keystore = once(|this, ctx| this.keystore(ctx.path.clone()));
         let certstore = once(|this, ctx| this.certstore(ctx));
+        #[cfg(feature = "counter-client")]
         let counterstore = once(|this, ctx| this.counterstore(ctx));
 
         let filestore = &mut self.filestore(ctx.path.clone());
@@ -170,6 +171,7 @@ impl<P: Platform> ServiceResources<P> {
                 }.map(Reply::Agree)
             },
 
+            #[cfg(feature = "crypto-client-attest")]
             Request::Attest(request) => {
                 let mut attn_keystore: ClientKeystore<P::S> = ClientKeystore::new(
                     PathBuf::from("attn"),
@@ -178,6 +180,9 @@ impl<P: Platform> ServiceResources<P> {
                 );
                 attest::try_attest(&mut attn_keystore, &mut certstore(self, ctx)?, &mut keystore(self, ctx)?, request).map(Reply::Attest)
             }
+
+            #[cfg(not(feature = "crypto-client-attest"))]
+            Request::Attest(_) => Err(Error::RequestNotAvailable),
 
             Request::Decrypt(request) => {
                 match request.mechanism {
@@ -609,15 +614,23 @@ impl<P: Platform> ServiceResources<P> {
                 Ok(Reply::SetCustomStatus(reply::SetCustomStatus {}))
             }
 
+            #[cfg(feature = "counter-client")]
             Request::CreateCounter(request) => {
                 counterstore(self, ctx)?.create(request.location)
                     .map(|id| Reply::CreateCounter(reply::CreateCounter { id } ))
             }
 
+            #[cfg(not(feature = "counter-client"))]
+            Request::CreateCounter(_) => Err(Error::RequestNotAvailable),
+
+            #[cfg(feature = "counter-client")]
             Request::IncrementCounter(request) => {
                 counterstore(self, ctx)?.increment(request.id)
                     .map(|counter| Reply::IncrementCounter(reply::IncrementCounter { counter } ))
             }
+
+            #[cfg(not(feature = "counter-client"))]
+            Request::IncrementCounter(_) => Err(Error::RequestNotAvailable),
 
             Request::DeleteCertificate(request) => {
                  certstore(self, ctx)?.delete_certificate(request.id)

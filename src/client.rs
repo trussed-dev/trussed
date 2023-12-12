@@ -305,6 +305,7 @@ pub trait CryptoClient: PollClient {
         })
     }
 
+    #[cfg(feature = "crypto-client-attest")]
     fn attest(
         &mut self,
         signing_mechanism: Mechanism,
@@ -568,6 +569,7 @@ pub trait CryptoClient: PollClient {
 
 /// Create counters, increment existing counters.
 pub trait CounterClient: PollClient {
+    #[cfg(feature = "counter-client")]
     fn create_counter(
         &mut self,
         location: Location,
@@ -575,6 +577,7 @@ pub trait CounterClient: PollClient {
         self.request(request::CreateCounter { location })
     }
 
+    #[cfg(feature = "counter-client")]
     fn increment_counter(
         &mut self,
         id: CounterId,
