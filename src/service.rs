@@ -15,10 +15,12 @@ pub use crate::pipe::ServiceEndpoint;
 use crate::pipe::TrussedResponder;
 use crate::platform::*;
 pub use crate::store::{
+    self,
     certstore::{Certstore as _, ClientCertstore},
     counterstore::{ClientCounterstore, Counterstore as _},
     filestore::{ClientFilestore, Filestore, ReadDirFilesState, ReadDirState},
     keystore::{ClientKeystore, Keystore},
+    DynFilesystem,
 };
 use crate::types::ui::Status;
 use crate::types::*;
@@ -329,14 +331,14 @@ impl<P: Platform> ServiceResources<P> {
             Request::DebugDumpStore(_request) => {
 
                 info_now!(":: PERSISTENT");
-                recursively_list(self.platform.store().ifs(), path!("/"));
+                recursively_list(self.platform.store().fs(Location::Internal), path!("/"));
 
                 info_now!(":: VOLATILE");
-                recursively_list(self.platform.store().vfs(), path!("/"));
+                recursively_list(self.platform.store().fs(Location::Volatile), path!("/"));
 
-                fn recursively_list<S: 'static + crate::types::LfsStorage>(fs: &'static crate::store::Fs<S>, path: &Path) {
+                fn recursively_list(fs: &dyn DynFilesystem, path: &Path) {
                     // let fs = store.vfs();
-                    fs.read_dir_and_then(path, |dir| {
+                    fs.read_dir_and_then(path, &mut |dir| {
                         for (i, entry) in dir.enumerate() {
                             let entry = entry.unwrap();
                             if i < 2 {
@@ -348,7 +350,7 @@ impl<P: Platform> ServiceResources<P> {
                                 recursively_list(fs, entry.path());
                             }
                             if entry.file_type().is_file() {
-                                let _contents: Vec<u8, 256> = fs.read(entry.path()).unwrap();
+                                let _contents = fs.read::<256>(entry.path()).unwrap();
                                 // info_now!("{} ?= {}", entry.metadata().len(), contents.len()).ok();
                                 // info_now!("{:?}", &contents).ok();
                             }
@@ -882,19 +884,19 @@ impl<P: Platform, D: Dispatch> Service<P, D> {
             self.resources
                 .platform
                 .store()
-                .ifs()
+                .fs(Location::Internal)
                 .available_blocks()
                 .unwrap(),
             self.resources
                 .platform
                 .store()
-                .efs()
+                .fs(Location::External)
                 .available_blocks()
                 .unwrap(),
             self.resources
                 .platform
                 .store()
-                .vfs()
+                .fs(Location::Volatile)
                 .available_blocks()
                 .unwrap(),
         );
