@@ -1,7 +1,4 @@
-use littlefs2::{
-    path,
-    path::{Path, PathBuf},
-};
+use littlefs2::{path, path::PathBuf};
 use rand_chacha::ChaCha8Rng;
 
 use crate::{
@@ -162,12 +159,12 @@ impl<S: Store> Keystore for ClientKeystore<S> {
     fn delete_all(&self, location: Location) -> Result<usize> {
         let secret_path = self.key_directory(key::Secrecy::Secret);
         let secret_deleted =
-            store::remove_dir_all_where(self.store, location, &secret_path, |dir_entry| {
+            store::remove_dir_all_where(self.store, location, &secret_path, &|dir_entry| {
                 dir_entry.file_name().as_ref().len() >= 4
             })?;
         let public_path = self.key_directory(key::Secrecy::Public);
         let public_deleted =
-            store::remove_dir_all_where(self.store, location, &public_path, |dir_entry| {
+            store::remove_dir_all_where(self.store, location, &public_path, &|dir_entry| {
                 dir_entry.file_name().as_ref().len() >= 4
             })?;
         Ok(secret_deleted + public_deleted)
@@ -223,18 +220,8 @@ impl<S: Store> Keystore for ClientKeystore<S> {
     fn location(&self, secrecy: key::Secrecy, id: &KeyId) -> Option<Location> {
         let path = self.key_path(secrecy, id);
 
-        if path.exists(self.store.vfs()) {
-            return Some(Location::Volatile);
-        }
-
-        if path.exists(self.store.ifs()) {
-            return Some(Location::Internal);
-        }
-
-        if path.exists(self.store.efs()) {
-            return Some(Location::External);
-        }
-
-        None
+        [Location::Volatile, Location::Internal, Location::External]
+            .into_iter()
+            .find(|&location| self.store.fs(location).exists(&path))
     }
 }
