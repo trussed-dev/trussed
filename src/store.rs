@@ -76,7 +76,12 @@ use crate::types::*;
 #[allow(unused_imports)]
 #[cfg(feature = "semihosting")]
 use cortex_m_semihosting::hprintln;
-use littlefs2::path::Path;
+use littlefs2::{
+    fs::{DirEntry, Metadata},
+    path::Path,
+};
+
+pub use littlefs2::object_safe::{DynFile, DynFilesystem, DynStorage};
 
 pub mod certstore;
 pub mod counterstore;
@@ -128,6 +133,13 @@ pub unsafe trait Store: Copy {
     fn ifs(self) -> &'static Fs<Self::I>;
     fn efs(self) -> &'static Fs<Self::E>;
     fn vfs(self) -> &'static Fs<Self::V>;
+    fn fs(&self, location: Location) -> &dyn DynFilesystem {
+        match location {
+            Location::Internal => self.ifs().fs,
+            Location::External => self.efs().fs,
+            Location::Volatile => self.vfs().fs,
+        }
+    }
 }
 
 pub struct Fs<S: 'static + LfsStorage> {
@@ -480,7 +492,7 @@ macro_rules! store {
 }
 
 // TODO: replace this with "fs.create_dir_all(path.parent())"
-pub fn create_directories<S: LfsStorage>(fs: &Filesystem<S>, path: &Path) -> Result<(), Error> {
+pub fn create_directories(fs: &dyn DynFilesystem, path: &Path) -> Result<(), Error> {
     // hprintln!("preparing {:?}", core::str::from_utf8(path).unwrap()).ok();
     let path_bytes = path.as_ref().as_bytes();
 
@@ -511,13 +523,11 @@ pub fn read<const N: usize>(
     path: &Path,
 ) -> Result<Bytes<N>, Error> {
     debug_now!("reading {}", &path);
-    match location {
-        Location::Internal => store.ifs().read(path),
-        Location::External => store.efs().read(path),
-        Location::Volatile => store.vfs().read(path),
-    }
-    .map(Bytes::from)
-    .map_err(|_| Error::FilesystemReadFailure)
+    store
+        .fs(location)
+        .read(path)
+        .map(From::from)
+        .map_err(|_| Error::FilesystemReadFailure)
 }
 
 /// Writes contents to path in location of store.
@@ -529,12 +539,10 @@ pub fn write(
     contents: &[u8],
 ) -> Result<(), Error> {
     debug_now!("writing {}", &path);
-    match location {
-        Location::Internal => store.ifs().write(path, contents),
-        Location::External => store.efs().write(path, contents),
-        Location::Volatile => store.vfs().write(path, contents),
-    }
-    .map_err(|_| Error::FilesystemWriteFailure)
+    store
+        .fs(location)
+        .write(path, contents)
+        .map_err(|_| Error::FilesystemWriteFailure)
 }
 
 /// Creates parent directory if necessary, then writes.
@@ -546,33 +554,23 @@ pub fn store(
     contents: &[u8],
 ) -> Result<(), Error> {
     debug_now!("storing {}", &path);
-    match location {
-        Location::Internal => create_directories(store.ifs(), path)?,
-        Location::External => create_directories(store.efs(), path)?,
-        Location::Volatile => create_directories(store.vfs(), path)?,
-    }
-    write(store, location, path, contents)
+    create_directories(store.fs(location), path)?;
+    store
+        .fs(location)
+        .write(path, contents)
+        .map_err(|_| Error::FilesystemWriteFailure)
 }
 
 #[inline(never)]
 pub fn delete(store: impl Store, location: Location, path: &Path) -> bool {
     debug_now!("deleting {}", &path);
-    let outcome = match location {
-        Location::Internal => store.ifs().remove(path),
-        Location::External => store.efs().remove(path),
-        Location::Volatile => store.vfs().remove(path),
-    };
-    outcome.is_ok()
+    store.fs(location).remove(path).is_ok()
 }
 
 #[inline(never)]
 pub fn exists(store: impl Store, location: Location, path: &Path) -> bool {
     debug_now!("checking existence of {}", &path);
-    match location {
-        Location::Internal => path.exists(store.ifs()),
-        Location::External => path.exists(store.efs()),
-        Location::Volatile => path.exists(store.vfs()),
-    }
+    store.fs(location).exists(path)
 }
 
 #[inline(never)]
@@ -582,12 +580,7 @@ pub fn metadata(
     path: &Path,
 ) -> Result<Option<Metadata>, Error> {
     debug_now!("checking existence of {}", &path);
-    let result = match location {
-        Location::Internal => store.ifs().metadata(path),
-        Location::External => store.efs().metadata(path),
-        Location::Volatile => store.vfs().metadata(path),
-    };
-    match result {
+    match store.fs(location).metadata(path) {
         Ok(metadata) => Ok(Some(metadata)),
         Err(littlefs2::io::Error::NoSuchEntry) => Ok(None),
         Err(_) => Err(Error::FilesystemReadFailure),
@@ -597,42 +590,30 @@ pub fn metadata(
 #[inline(never)]
 pub fn rename(store: impl Store, location: Location, from: &Path, to: &Path) -> Result<(), Error> {
     debug_now!("renaming {} to {}", &from, &to);
-    match location {
-        Location::Internal => store.ifs().rename(from, to),
-        Location::External => store.efs().rename(from, to),
-        Location::Volatile => store.vfs().rename(from, to),
-    }
-    .map_err(|_| Error::FilesystemWriteFailure)
+    store
+        .fs(location)
+        .rename(from, to)
+        .map_err(|_| Error::FilesystemWriteFailure)
 }
 
 #[inline(never)]
 pub fn remove_dir(store: impl Store, location: Location, path: &Path) -> bool {
     debug_now!("remove_dir'ing {}", &path);
-    let outcome = match location {
-        Location::Internal => store.ifs().remove_dir(path),
-        Location::External => store.efs().remove_dir(path),
-        Location::Volatile => store.vfs().remove_dir(path),
-    };
-    outcome.is_ok()
+    store.fs(location).remove_dir(path).is_ok()
 }
 
 #[inline(never)]
-pub fn remove_dir_all_where<P>(
+pub fn remove_dir_all_where(
     store: impl Store,
     location: Location,
     path: &Path,
-    predicate: P,
-) -> Result<usize, Error>
-where
-    P: Fn(&DirEntry) -> bool,
-{
+    predicate: &dyn Fn(&DirEntry) -> bool,
+) -> Result<usize, Error> {
     debug_now!("remove_dir'ing {}", &path);
-    let outcome = match location {
-        Location::Internal => store.ifs().remove_dir_all_where(path, &predicate),
-        Location::External => store.efs().remove_dir_all_where(path, &predicate),
-        Location::Volatile => store.vfs().remove_dir_all_where(path, &predicate),
-    };
-    outcome.map_err(|_| Error::FilesystemWriteFailure)
+    store
+        .fs(location)
+        .remove_dir_all_where(path, predicate)
+        .map_err(|_| Error::FilesystemWriteFailure)
 }
 
 // pub fn delete_volatile(store: impl Store, handle: &ObjectHandle) -> bool {
