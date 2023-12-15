@@ -127,19 +127,7 @@ pub mod keystore;
 //
 // This makes everything using it *much* more ergonomic.
 pub unsafe trait Store: Copy {
-    type I: 'static + LfsStorage;
-    type E: 'static + LfsStorage;
-    type V: 'static + LfsStorage;
-    fn ifs(self) -> &'static Fs<Self::I>;
-    fn efs(self) -> &'static Fs<Self::E>;
-    fn vfs(self) -> &'static Fs<Self::V>;
-    fn fs(&self, location: Location) -> &dyn DynFilesystem {
-        match location {
-            Location::Internal => self.ifs().fs,
-            Location::External => self.efs().fs,
-            Location::Volatile => self.vfs().fs,
-        }
-    }
+    fn fs(&self, location: Location) -> &dyn DynFilesystem;
 }
 
 pub struct Fs<S: 'static + LfsStorage> {
@@ -174,18 +162,15 @@ macro_rules! store {
         }
 
         unsafe impl $crate::store::Store for $store {
-            type I = $Ifs;
-            type E = $Efs;
-            type V = $Vfs;
-
-            fn ifs(self) -> &'static $crate::store::Fs<$Ifs> {
-                unsafe { &*Self::ifs_ptr() }
-            }
-            fn efs(self) -> &'static $crate::store::Fs<$Efs> {
-                unsafe { &*Self::efs_ptr() }
-            }
-            fn vfs(self) -> &'static $crate::store::Fs<$Vfs> {
-                unsafe { &*Self::vfs_ptr() }
+            fn fs(&self, location: $crate::types::Location) -> &dyn $crate::store::DynFilesystem {
+                use core::ops::Deref as _;
+                unsafe {
+                    match location {
+                        $crate::types::Location::Internal => (*Self::ifs_ptr()).deref(),
+                        $crate::types::Location::External => (*Self::efs_ptr()).deref(),
+                        $crate::types::Location::Volatile => (*Self::vfs_ptr()).deref(),
+                    }
+                }
             }
         }
 
