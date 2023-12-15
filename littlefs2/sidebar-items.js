@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":["version"],"macro":["const_ram_storage","path","ram_storage"],"mod":["consts","driver","fs","io","macros","path"],"struct":["Version"]};
+window.SIDEBAR_ITEMS = {"fn":["version"],"macro":["const_ram_storage","path","ram_storage"],"mod":["consts","driver","fs","io","macros","object_safe","path"],"struct":["Version"]};

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/littlefs2-0.4.0/src/fs.rs`."><title>fs.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-fa3bb1812debf86c.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="littlefs2" data-themes="" data-resource-suffix="" data-rustdoc-version="1.74.1 (a28077b28 2023-12-04)" data-channel="1.74.1" data-search-js="search-8be46b629f5f14a8.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-c5bd66d33317d69f.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../littlefs2/index.html"><img class="rust-logo" src="../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/git/checkouts/littlefs2-155f0c452fc35ac6/ebd27e4/src/fs.rs`."><title>fs.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-fa3bb1812debf86c.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="littlefs2" data-themes="" data-resource-suffix="" data-rustdoc-version="1.74.1 (a28077b28 2023-12-04)" data-channel="1.74.1" data-search-js="search-8be46b629f5f14a8.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-c5bd66d33317d69f.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../littlefs2/index.html"><img class="rust-logo" src="../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1558,6 +1558,8 @@
 <a href="#1558" id="1558">1558</a>
 <a href="#1559" id="1559">1559</a>
 <a href="#1560" id="1560">1560</a>
+<a href="#1561" id="1561">1561</a>
+<a href="#1562" id="1562">1562</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Experimental Filesystem version using closures.
 
 </span><span class="kw">use </span>core::{cell::RefCell, cmp, mem, slice};
@@ -1571,9 +1573,10 @@
 </span><span class="kw">pub type </span>Bytes&lt;SIZE&gt; = generic_array::GenericArray&lt;u8, SIZE&gt;;
 
 <span class="kw">use crate</span>::{
-    io::{<span class="self">self</span>, <span class="prelude-ty">Result</span>},
-    path::{Path, PathBuf},
     driver,
+    io::{<span class="self">self</span>, OpenSeekFrom, <span class="prelude-ty">Result</span>},
+    path,
+    path::{Path, PathBuf},
 };
 
 <span class="kw">struct </span>Cache&lt;Storage: driver::Storage&gt; {
@@ -1613,7 +1616,6 @@
     }
 }
 <span class="kw">impl</span>&lt;Storage: driver::Storage&gt; Allocation&lt;Storage&gt; {
-
     <span class="kw">pub fn </span>new() -&gt; Allocation&lt;Storage&gt; {
         <span class="kw">let </span>read_size: u32 = Storage::READ_SIZE <span class="kw">as _</span>;
         <span class="kw">let </span>write_size: u32 = Storage::WRITE_SIZE <span class="kw">as _</span>;
@@ -1629,7 +1631,7 @@
 
         <span class="macro">debug_assert!</span>(read_size &gt; <span class="number">0</span>);
         <span class="macro">debug_assert!</span>(write_size &gt; <span class="number">0</span>);
-        <span class="comment">// https://github.com/ARMmbed/littlefs/issues/264
+        <span class="comment">// https://github.com/littlefs-project/littlefs/issues/264
         // Technically, 104 is enough.
         </span><span class="macro">debug_assert!</span>(block_size &gt;= <span class="number">128</span>);
         <span class="macro">debug_assert!</span>(cache_size &gt; <span class="number">0</span>);
@@ -1651,9 +1653,9 @@
 
         <span class="kw">let </span>filename_max_plus_one: u32 = <span class="kw">crate</span>::consts::FILENAME_MAX_PLUS_ONE;
         <span class="macro">debug_assert!</span>(filename_max_plus_one &gt; <span class="number">1</span>);
-        <span class="macro">debug_assert!</span>(filename_max_plus_one &lt;= <span class="number">1_022</span>+<span class="number">1</span>);
+        <span class="macro">debug_assert!</span>(filename_max_plus_one &lt;= <span class="number">1_022 </span>+ <span class="number">1</span>);
         <span class="comment">// limitation of ll-bindings
-        </span><span class="macro">debug_assert!</span>(filename_max_plus_one == <span class="number">255</span>+<span class="number">1</span>);
+        </span><span class="macro">debug_assert!</span>(filename_max_plus_one == <span class="number">255 </span>+ <span class="number">1</span>);
         <span class="kw">let </span>path_max_plus_one: u32 = <span class="kw">crate</span>::consts::PATH_MAX_PLUS_ONE <span class="kw">as _</span>;
         <span class="comment">// TODO: any upper limit?
         </span><span class="macro">debug_assert!</span>(path_max_plus_one &gt;= filename_max_plus_one);
@@ -1701,7 +1703,6 @@
             config,
         }
     }
-
 }
 
 <span class="comment">// pub struct Filesystem&lt;&#39;alloc, &#39;storage, Storage: driver::Storage&gt; {
@@ -1717,7 +1718,7 @@
 }
 
 <span class="doccomment">/// Regular file vs directory
-</span><span class="attr">#[derive(Clone,Copy,Debug,Eq,Hash,PartialEq,Serialize,Deserialize)]
+</span><span class="attr">#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serialize, Deserialize)]
 </span><span class="kw">pub enum </span>FileType {
     File,
     Dir,
@@ -1736,14 +1737,13 @@
 }
 
 <span class="doccomment">/// File type (regular vs directory) and size of a file.
-</span><span class="attr">#[derive(Clone,Debug,Eq,PartialEq,Serialize,Deserialize)]
+</span><span class="attr">#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 </span><span class="kw">pub struct </span>Metadata {
     file_type: FileType,
     size: usize,
 }
 
-<span class="kw">impl </span>Metadata
-{
+<span class="kw">impl </span>Metadata {
     <span class="kw">pub fn </span>file_type(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; FileType {
         <span class="self">self</span>.file_type
     }
@@ -1765,13 +1765,14 @@
     </span>}
 }
 
-<span class="kw">impl </span>From&lt;ll::lfs_info&gt; <span class="kw">for </span>Metadata
-{
+<span class="kw">impl </span>From&lt;ll::lfs_info&gt; <span class="kw">for </span>Metadata {
     <span class="kw">fn </span>from(info: ll::lfs_info) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>file_type = <span class="kw">match </span>info.type_ <span class="kw">as </span>u32 {
+        <span class="kw">let </span>file_type = <span class="kw">match </span>info.type_ <span class="kw">as </span>ll::lfs_type {
             ll::lfs_type_LFS_TYPE_DIR =&gt; FileType::Dir,
             ll::lfs_type_LFS_TYPE_REG =&gt; FileType::File,
-            <span class="kw">_ </span>=&gt; { <span class="macro">unreachable!</span>(); }
+            <span class="kw">_ </span>=&gt; {
+                <span class="macro">unreachable!</span>();
+            }
         };
 
         Metadata {
@@ -1781,14 +1782,17 @@
     }
 }
 
-<span class="kw">impl</span>&lt;Storage: driver::Storage&gt; Filesystem&lt;<span class="lifetime">&#39;_</span>, Storage&gt; {
+<span class="kw">struct </span>RemoveDirAllProgress {
+    files_removed: usize,
+    skipped_any: bool,
+}
 
+<span class="kw">impl</span>&lt;Storage: driver::Storage&gt; Filesystem&lt;<span class="lifetime">&#39;_</span>, Storage&gt; {
     <span class="kw">pub fn </span>allocate() -&gt; Allocation&lt;Storage&gt; {
         Allocation::new()
     }
 
     <span class="kw">pub fn </span>format(storage: <span class="kw-2">&amp;mut </span>Storage) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-
         <span class="kw">let </span>alloc = <span class="kw-2">&amp;mut </span>Allocation::new();
         <span class="kw">let </span>fs = Filesystem::new(alloc, storage);
         <span class="kw">let </span><span class="kw-2">mut </span>alloc = fs.alloc.borrow_mut();
@@ -1799,7 +1803,7 @@
     <span class="comment">// TODO: check if this is equivalent to `is_formatted`.
     </span><span class="kw">pub fn </span>is_mountable(storage: <span class="kw-2">&amp;mut </span>Storage) -&gt; bool {
         <span class="kw">let </span>alloc = <span class="kw-2">&amp;mut </span>Allocation::new();
-        <span class="macro">matches!</span>(Filesystem::mount(alloc, storage), <span class="prelude-val">Ok</span>(<span class="kw">_</span>))
+        Filesystem::mount(alloc, storage).is_ok()
     }
 
     <span class="comment">// Can BorrowMut be implemented &quot;unsafely&quot; instead?
@@ -1814,7 +1818,6 @@
         storage: <span class="kw-2">&amp;mut </span>Storage,
         f: <span class="kw">impl </span>FnOnce(<span class="kw-2">&amp;</span>Filesystem&lt;<span class="lifetime">&#39;_</span>, Storage&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;R&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;R&gt; {
-
         <span class="kw">let </span><span class="kw-2">mut </span>alloc = Allocation::new();
         <span class="kw">let </span>fs = Filesystem::mount(<span class="kw-2">&amp;mut </span>alloc, storage)<span class="question-mark">?</span>;
         f(<span class="kw-2">&amp;</span>fs)
@@ -1839,8 +1842,9 @@
     /// So it would seem that there are *at least* the number of blocks returned
     /// by this method available, at any given time.
     </span><span class="kw">pub fn </span>available_blocks(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
-        <span class="kw">let </span>return_code = <span class="kw">unsafe </span>{ ll::lfs_fs_size( <span class="kw-2">&amp;mut </span><span class="self">self</span>.alloc.borrow_mut().state) };
-        io::result_from(return_code, return_code).map(|blocks| <span class="self">self</span>.total_blocks() - blocks <span class="kw">as </span>usize)
+        <span class="kw">let </span>return_code = <span class="kw">unsafe </span>{ ll::lfs_fs_size(<span class="kw-2">&amp;mut </span><span class="self">self</span>.alloc.borrow_mut().state) };
+        io::result_from(return_code, return_code)
+            .map(|blocks| <span class="self">self</span>.total_blocks() - blocks <span class="kw">as </span>usize)
     }
 
     <span class="doccomment">/// Available number of unused bytes in the filesystem
@@ -1849,15 +1853,14 @@
     /// explained in [`available_blocks`](struct.Filesystem.html#method.available_blocks).
     /// Second, files may be inlined.
     </span><span class="kw">pub fn </span>available_space(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
-        <span class="self">self</span>.available_blocks().map(|blocks| blocks * Storage::BLOCK_SIZE)
+        <span class="self">self</span>.available_blocks()
+            .map(|blocks| blocks * Storage::BLOCK_SIZE)
     }
 
     <span class="doccomment">/// Remove a file or directory.
     </span><span class="kw">pub fn </span>remove(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>Path) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>return_code = <span class="kw">unsafe </span>{ ll::lfs_remove(
-            <span class="kw-2">&amp;mut </span><span class="self">self</span>.alloc.borrow_mut().state,
-            path.as_ptr(),
-        ) };
+        <span class="kw">let </span>return_code =
+            <span class="kw">unsafe </span>{ ll::lfs_remove(<span class="kw-2">&amp;mut </span><span class="self">self</span>.alloc.borrow_mut().state, path.as_ptr()) };
         io::result_from((), return_code)
     }
 
@@ -1873,14 +1876,21 @@
         <span class="self">self</span>.remove_dir_all_where(path, <span class="kw-2">&amp;</span>|<span class="kw">_</span>| <span class="bool-val">true</span>).map(|<span class="kw">_</span>| ())
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;dir-entry-path&quot;</span>)]
-    </span><span class="kw">pub fn </span>remove_dir_all_where&lt;P&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>Path, predicate: <span class="kw-2">&amp;</span>P) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt;
+    <span class="doccomment">/// Returns number of deleted files + whether the directory was fully deleted or not
+    </span><span class="kw">fn </span>remove_dir_all_where_inner&lt;P&gt;(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        path: <span class="kw-2">&amp;</span>Path,
+        predicate: <span class="kw-2">&amp;</span>P,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;RemoveDirAllProgress&gt;
     <span class="kw">where
         </span>P: Fn(<span class="kw-2">&amp;</span>DirEntry) -&gt; bool,
     {
         <span class="kw">if </span>!path.exists(<span class="self">self</span>) {
             <span class="macro">debug_now!</span>(<span class="string">&quot;no such directory {}, early return&quot;</span>, path);
-            <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="number">0</span>);
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(RemoveDirAllProgress {
+                files_removed: <span class="number">0</span>,
+                skipped_any: <span class="bool-val">false</span>,
+            });
         }
         <span class="kw">let </span><span class="kw-2">mut </span>skipped_any = <span class="bool-val">false</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>files_removed = <span class="number">0</span>;
@@ -1903,28 +1913,44 @@
                 }
                 <span class="kw">if </span>entry.file_type().is_dir() {
                     <span class="macro">debug_now!</span>(<span class="string">&quot;recursing into directory {}&quot;</span>, <span class="kw-2">&amp;</span>entry.path());
-                    files_removed += <span class="self">self</span>.remove_dir_all_where(entry.path(), predicate)<span class="question-mark">?</span>;
+                    <span class="kw">let </span>progress = <span class="self">self</span>.remove_dir_all_where_inner(entry.path(), predicate)<span class="question-mark">?</span>;
+                    files_removed += progress.files_removed;
+                    skipped_any |= progress.skipped_any;
                     <span class="macro">debug_now!</span>(<span class="string">&quot;...back&quot;</span>);
                 }
             }
             <span class="prelude-val">Ok</span>(())
         })<span class="question-mark">?</span>;
-        <span class="kw">if </span>!skipped_any {
+        <span class="kw">if </span>!skipped_any &amp;&amp; path != <span class="macro">path!</span>(<span class="string">&quot;&quot;</span>) &amp;&amp; path != <span class="macro">path!</span>(<span class="string">&quot;/&quot;</span>) {
             <span class="macro">debug_now!</span>(<span class="string">&quot;removing directory {} too&quot;</span>, <span class="kw-2">&amp;</span>path);
             <span class="self">self</span>.remove_dir(path)<span class="question-mark">?</span>;
             <span class="macro">debug_now!</span>(<span class="string">&quot;..worked&quot;</span>);
         }
-        <span class="prelude-val">Ok</span>(files_removed)
+        <span class="prelude-val">Ok</span>(RemoveDirAllProgress {
+            files_removed,
+            skipped_any,
+        })
+    }
+
+    <span class="attr">#[cfg(feature = <span class="string">&quot;dir-entry-path&quot;</span>)]
+    </span><span class="kw">pub fn </span>remove_dir_all_where&lt;P&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>Path, predicate: <span class="kw-2">&amp;</span>P) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt;
+    <span class="kw">where
+        </span>P: Fn(<span class="kw-2">&amp;</span>DirEntry) -&gt; bool,
+    {
+        <span class="self">self</span>.remove_dir_all_where_inner(path, predicate)
+            .map(|progress| progress.files_removed)
     }
 
     <span class="doccomment">/// Rename or move a file or directory.
     </span><span class="kw">pub fn </span>rename(<span class="kw-2">&amp;</span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>Path, to: <span class="kw-2">&amp;</span>Path) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>return_code = <span class="kw">unsafe </span>{ ll::lfs_rename(
-            <span class="kw-2">&amp;mut </span><span class="self">self</span>.alloc.borrow_mut().state,
-            from.as_ptr(),
-            to.as_ptr(),
-        ) };
-        io::result_from((),return_code)
+        <span class="kw">let </span>return_code = <span class="kw">unsafe </span>{
+            ll::lfs_rename(
+                <span class="kw-2">&amp;mut </span><span class="self">self</span>.alloc.borrow_mut().state,
+                from.as_ptr(),
+                to.as_ptr(),
+            )
+        };
+        io::result_from((), return_code)
     }
 
     <span class="doccomment">/// Given a path, query the filesystem to get information about a file or directory.
@@ -1932,7 +1958,6 @@
     /// To read user attributes, use
     /// [`Filesystem::attribute`](struct.Filesystem.html#method.attribute)
     </span><span class="kw">pub fn </span>metadata(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>Path) -&gt; <span class="prelude-ty">Result</span>&lt;Metadata&gt; {
-
         <span class="comment">// do *not* not call assume_init here and pass into the unsafe block.
         // strange things happen ;)
 
@@ -1940,13 +1965,8 @@
         // I think it&#39;s fine, as we immediately copy out the data
         // to our own structure.
         </span><span class="kw">let </span><span class="kw-2">mut </span>info: ll::lfs_info = <span class="kw">unsafe </span>{ mem::MaybeUninit::zeroed().assume_init() };
-        <span class="kw">let </span>return_code = <span class="kw">unsafe </span>{
-            ll::lfs_stat(
-                <span class="kw-2">&amp;mut </span><span class="self">self</span>.alloc.borrow_mut().state,
-                path.as_ptr(),
-                <span class="kw-2">&amp;mut </span>info,
-            )
-        };
+        <span class="kw">let </span>return_code =
+            <span class="kw">unsafe </span>{ ll::lfs_stat(<span class="kw-2">&amp;mut </span><span class="self">self</span>.alloc.borrow_mut().state, path.as_ptr(), <span class="kw-2">&amp;mut </span>info) };
 
         io::result_from((), return_code).map(|<span class="kw">_</span>| info.into())
     }
@@ -1955,9 +1975,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         path: <span class="kw-2">&amp;</span>Path,
         f: <span class="kw">impl </span>FnOnce(<span class="kw-2">&amp;</span>File&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, Storage&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;R&gt;,
-    ) -&gt;
-        <span class="prelude-ty">Result</span>&lt;R&gt;
-    {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;R&gt; {
         File::create_and_then(<span class="self">self</span>, path, f)
     }
 
@@ -1965,9 +1983,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         path: <span class="kw-2">&amp;</span>Path,
         f: <span class="kw">impl </span>FnOnce(<span class="kw-2">&amp;</span>File&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, Storage&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;R&gt;,
-    ) -&gt;
-        <span class="prelude-ty">Result</span>&lt;R&gt;
-    {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;R&gt; {
         File::open_and_then(<span class="self">self</span>, path, f)
     }
 
@@ -1980,38 +1996,32 @@
         o: <span class="kw">impl </span>FnOnce(<span class="kw-2">&amp;mut </span>OpenOptions) -&gt; <span class="kw-2">&amp;</span>OpenOptions,
         path: <span class="kw-2">&amp;</span>Path,
         f: <span class="kw">impl </span>FnOnce(<span class="kw-2">&amp;</span>File&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, Storage&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;R&gt;,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;R&gt;
-    {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;R&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>options = OpenOptions::new();
         o(<span class="kw-2">&amp;mut </span>options).open_and_then(<span class="self">self</span>, path, f)
     }
 
-
     <span class="doccomment">/// Read attribute.
-    </span><span class="kw">pub fn </span>attribute(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        path: <span class="kw-2">&amp;</span>Path,
-        id: u8,
-    ) -&gt;
-        <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Attribute&gt;&gt;
-    {
+    </span><span class="kw">pub fn </span>attribute(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>Path, id: u8) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Attribute&gt;&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>attribute = Attribute::new(id);
         <span class="kw">let </span>attr_max = <span class="kw">crate</span>::consts::ATTRBYTES_MAX;
 
-        <span class="kw">let </span>return_code = <span class="kw">unsafe </span>{ ll::lfs_getattr(
-            <span class="kw-2">&amp;mut </span><span class="self">self</span>.alloc.borrow_mut().state,
-            path.as_ptr(),
-            id,
-            <span class="kw-2">&amp;mut </span>attribute.data <span class="kw">as </span><span class="kw-2">*mut </span><span class="kw">_ as </span><span class="kw-2">*mut </span>cty::c_void,
-            attr_max,
-        ) };
+        <span class="kw">let </span>return_code = <span class="kw">unsafe </span>{
+            ll::lfs_getattr(
+                <span class="kw-2">&amp;mut </span><span class="self">self</span>.alloc.borrow_mut().state,
+                path.as_ptr(),
+                id,
+                <span class="kw-2">&amp;mut </span>attribute.data <span class="kw">as </span><span class="kw-2">*mut </span><span class="kw">_ as </span><span class="kw-2">*mut </span>cty::c_void,
+                attr_max,
+            )
+        };
 
         <span class="kw">if </span>return_code &gt;= <span class="number">0 </span>{
             attribute.size = cmp::min(attr_max, return_code <span class="kw">as </span>u32) <span class="kw">as </span>usize;
             <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(attribute));
         }
         <span class="kw">if </span>return_code == ll::lfs_error_LFS_ERR_NOATTR {
-            <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>)
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>);
         }
 
         io::result_from((), return_code)<span class="question-mark">?</span>;
@@ -2020,38 +2030,26 @@
     }
 
     <span class="doccomment">/// Remove attribute.
-    </span><span class="kw">pub fn </span>remove_attribute(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        path: <span class="kw-2">&amp;</span>Path,
-        id: u8,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>return_code = <span class="kw">unsafe </span>{ ll::lfs_removeattr(
-            <span class="kw-2">&amp;mut </span><span class="self">self</span>.alloc.borrow_mut().state,
-            path.as_ptr(),
-            id,
-        ) };
+    </span><span class="kw">pub fn </span>remove_attribute(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>Path, id: u8) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">let </span>return_code =
+            <span class="kw">unsafe </span>{ ll::lfs_removeattr(<span class="kw-2">&amp;mut </span><span class="self">self</span>.alloc.borrow_mut().state, path.as_ptr(), id) };
         io::result_from((), return_code)
     }
 
     <span class="doccomment">/// Set attribute.
-    </span><span class="kw">pub fn </span>set_attribute(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        path: <span class="kw-2">&amp;</span>Path,
-        attribute: <span class="kw-2">&amp;</span>Attribute,
-    ) -&gt;
-        <span class="prelude-ty">Result</span>&lt;()&gt;
-    {
-        <span class="kw">let </span>return_code = <span class="kw">unsafe </span>{ ll::lfs_setattr(
-            <span class="kw-2">&amp;mut </span><span class="self">self</span>.alloc.borrow_mut().state,
-            path.as_ptr(),
-            attribute.id,
-            <span class="kw-2">&amp;</span>attribute.data <span class="kw">as </span><span class="kw-2">*const </span><span class="kw">_ as </span><span class="kw-2">*const </span>cty::c_void,
-            attribute.size <span class="kw">as </span>u32,
-        ) };
+    </span><span class="kw">pub fn </span>set_attribute(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>Path, attribute: <span class="kw-2">&amp;</span>Attribute) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">let </span>return_code = <span class="kw">unsafe </span>{
+            ll::lfs_setattr(
+                <span class="kw-2">&amp;mut </span><span class="self">self</span>.alloc.borrow_mut().state,
+                path.as_ptr(),
+                attribute.id,
+                <span class="kw-2">&amp;</span>attribute.data <span class="kw">as </span><span class="kw-2">*const </span><span class="kw">_ as </span><span class="kw-2">*const </span>cty::c_void,
+                attribute.size <span class="kw">as </span>u32,
+            )
+        };
 
         io::result_from((), return_code)
     }
-
 
     <span class="doccomment">/// C callback interface used by LittleFS to read data with the lower level system below the
     /// filesystem.
@@ -2094,15 +2092,12 @@
 
     <span class="doccomment">/// C callback interface used by LittleFS to erase data with the lower level system below the
     /// filesystem.
-    </span><span class="kw">extern </span><span class="string">&quot;C&quot; </span><span class="kw">fn </span>lfs_config_erase(
-        c: <span class="kw-2">*const </span>ll::lfs_config,
-        block: ll::lfs_block_t,
-    ) -&gt; cty::c_int {
+    </span><span class="kw">extern </span><span class="string">&quot;C&quot; </span><span class="kw">fn </span>lfs_config_erase(c: <span class="kw-2">*const </span>ll::lfs_config, block: ll::lfs_block_t) -&gt; cty::c_int {
         <span class="comment">// println!(&quot;in lfs_config_erase&quot;);
         </span><span class="kw">let </span>storage = <span class="kw">unsafe </span>{ <span class="kw-2">&amp;mut *</span>((<span class="kw-2">*</span>c).context <span class="kw">as </span><span class="kw-2">*mut </span>Storage) };
-        <span class="kw">let </span>off = block <span class="kw">as </span>usize * Storage::BLOCK_SIZE <span class="kw">as </span>usize;
+        <span class="kw">let </span>off = block <span class="kw">as </span>usize * Storage::BLOCK_SIZE;
 
-        io::error_code_from(storage.erase(off, Storage::BLOCK_SIZE <span class="kw">as </span>usize))
+        io::error_code_from(storage.erase(off, Storage::BLOCK_SIZE))
     }
 
     <span class="doccomment">/// C callback interface used by LittleFS to sync data with the lower level interface below the
@@ -2112,10 +2107,9 @@
         // Do nothing; we presume that data is synchronized.
         </span><span class="number">0
     </span>}
-
 }
 
-<span class="attr">#[derive(Clone,Debug,Eq,PartialEq)]
+<span class="attr">#[derive(Clone, Debug, Eq, PartialEq)]
 </span><span class="doccomment">/// Custom user attribute that can be set on files and directories.
 ///
 /// Consists of an numerical identifier between 0 and 255, and arbitrary
@@ -2184,8 +2178,7 @@
 }
 
 <span class="doccomment">/// The state of a `File`. Pre-allocate with `File::allocate`.
-</span><span class="kw">pub struct </span>FileAllocation&lt;S: driver::Storage&gt;
-{
+</span><span class="kw">pub struct </span>FileAllocation&lt;S: driver::Storage&gt; {
     cache: Bytes&lt;S::CACHE_SIZE&gt;,
     state: ll::lfs_file_t,
     config: ll::lfs_file_config,
@@ -2205,14 +2198,12 @@
     }
 }
 
-<span class="kw">pub struct </span>File&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>, S: driver::Storage&gt;
-{
+<span class="kw">pub struct </span>File&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>, S: driver::Storage&gt; {
     alloc: RefCell&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span><span class="kw-2">mut </span>FileAllocation&lt;S&gt;&gt;,
     fs: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span>Filesystem&lt;<span class="lifetime">&#39;a</span>, S&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>, Storage: driver::Storage&gt; File&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>, Storage&gt;
-{
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>, Storage: driver::Storage&gt; File&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>, Storage&gt; {
     <span class="kw">pub fn </span>allocate() -&gt; FileAllocation&lt;Storage&gt; {
         FileAllocation::new()
     }
@@ -2232,34 +2223,24 @@
     <span class="kw">pub unsafe fn </span>open(
         fs: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span>Filesystem&lt;<span class="lifetime">&#39;a</span>, Storage&gt;,
         alloc: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span><span class="kw-2">mut </span>FileAllocation&lt;Storage&gt;,
-        path:  <span class="kw-2">&amp;</span>Path,
-    ) -&gt;
-        <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt;
-    {
-        OpenOptions::new()
-            .read(<span class="bool-val">true</span>)
-            .open(fs, alloc, path)
+        path: <span class="kw-2">&amp;</span>Path,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
+        OpenOptions::new().read(<span class="bool-val">true</span>).open(fs, alloc, path)
     }
 
     <span class="kw">pub fn </span>open_and_then&lt;R&gt;(
         fs: <span class="kw-2">&amp;</span>Filesystem&lt;<span class="lifetime">&#39;a</span>, Storage&gt;,
         path: <span class="kw-2">&amp;</span>Path,
         f: <span class="kw">impl </span>FnOnce(<span class="kw-2">&amp;</span>File&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, Storage&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;R&gt;,
-    ) -&gt;
-        <span class="prelude-ty">Result</span>&lt;R&gt;
-    {
-        OpenOptions::new()
-            .read(<span class="bool-val">true</span>)
-            .open_and_then(fs, path, f)
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;R&gt; {
+        OpenOptions::new().read(<span class="bool-val">true</span>).open_and_then(fs, path, f)
     }
 
     <span class="kw">pub unsafe fn </span>create(
         fs: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span>Filesystem&lt;<span class="lifetime">&#39;a</span>, Storage&gt;,
         alloc: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span><span class="kw-2">mut </span>FileAllocation&lt;Storage&gt;,
-        path:  <span class="kw-2">&amp;</span>Path,
-    ) -&gt;
-        <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt;
-    {
+        path: <span class="kw-2">&amp;</span>Path,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
         OpenOptions::new()
             .write(<span class="bool-val">true</span>)
             .create(<span class="bool-val">true</span>)
@@ -2271,9 +2252,7 @@
         fs: <span class="kw-2">&amp;</span>Filesystem&lt;<span class="lifetime">&#39;a</span>, Storage&gt;,
         path: <span class="kw-2">&amp;</span>Path,
         f: <span class="kw">impl </span>FnOnce(<span class="kw-2">&amp;</span>File&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, Storage&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;R&gt;,
-    ) -&gt;
-        <span class="prelude-ty">Result</span>&lt;R&gt;
-    {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;R&gt; {
         OpenOptions::new()
             .write(<span class="bool-val">true</span>)
             .create(<span class="bool-val">true</span>)
@@ -2283,7 +2262,7 @@
 
     <span class="comment">// Safety-hatch to experiment with missing parts of API
     </span><span class="kw">pub unsafe fn </span>borrow_filesystem&lt;<span class="lifetime">&#39;c</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;c </span><span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;c </span>Filesystem&lt;<span class="lifetime">&#39;a</span>, Storage&gt; {
-        <span class="kw-2">&amp;</span><span class="self">self</span>.fs
+        <span class="self">self</span>.fs
     }
 
     <span class="doccomment">/// Sync the file and drop it from the internal linked list.
@@ -2292,15 +2271,14 @@
     /// TODO: check if this can be closed &gt;1 times, if so make it safe
     ///
     /// Update: It seems like there&#39;s an assertion on a flag called `LFS_F_OPENED`:
-    /// https://github.com/ARMmbed/littlefs/blob/4c9146ea539f72749d6cc3ea076372a81b12cb11/lfs.c#L2549
-    /// https://github.com/ARMmbed/littlefs/blob/4c9146ea539f72749d6cc3ea076372a81b12cb11/lfs.c#L2566
+    /// https://github.com/littlefs-project/littlefs/blob/4c9146ea539f72749d6cc3ea076372a81b12cb11/lfs.c#L2549
+    /// https://github.com/littlefs-project/littlefs/blob/4c9146ea539f72749d6cc3ea076372a81b12cb11/lfs.c#L2566
     ///
     /// - On second call, shouldn&#39;t find ourselves in the &quot;mlist of mdirs&quot;
     /// - Since we don&#39;t have dynamically allocated buffers, at least we don&#39;t hit the double-free.
     /// - Not sure what happens in `lfs_file_sync`, but it should be easy to just error on
     ///   not LFS_F_OPENED...
-    </span><span class="kw">pub unsafe fn </span>close(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt;
-    {
+    </span><span class="kw">pub unsafe fn </span>close(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>return_code = ll::lfs_file_close(
             <span class="kw-2">&amp;mut </span><span class="self">self</span>.fs.alloc.borrow_mut().state,
             <span class="kw-2">&amp;mut </span><span class="self">self</span>.alloc.borrow_mut().state,
@@ -2310,20 +2288,28 @@
 
     <span class="doccomment">/// Synchronize file contents to storage.
     </span><span class="kw">pub fn </span>sync(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>return_code = <span class="kw">unsafe </span>{ ll::lfs_file_sync(
-            <span class="kw-2">&amp;mut </span><span class="self">self</span>.fs.alloc.borrow_mut().state,
-            <span class="kw-2">&amp;mut </span><span class="self">self</span>.alloc.borrow_mut().state,
-        ) };
+        <span class="kw">let </span>return_code = <span class="kw">unsafe </span>{
+            ll::lfs_file_sync(
+                <span class="kw-2">&amp;mut </span><span class="self">self</span>.fs.alloc.borrow_mut().state,
+                <span class="kw-2">&amp;mut </span><span class="self">self</span>.alloc.borrow_mut().state,
+            )
+        };
         io::result_from((), return_code)
     }
 
     <span class="doccomment">/// Size of the file in bytes.
     </span><span class="kw">pub fn </span>len(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
-        <span class="kw">let </span>return_code = <span class="kw">unsafe </span>{ ll::lfs_file_size(
-            <span class="kw-2">&amp;mut </span><span class="self">self</span>.fs.alloc.borrow_mut().state,
-            <span class="kw-2">&amp;mut </span><span class="self">self</span>.alloc.borrow_mut().state
-        ) };
+        <span class="kw">let </span>return_code = <span class="kw">unsafe </span>{
+            ll::lfs_file_size(
+                <span class="kw-2">&amp;mut </span><span class="self">self</span>.fs.alloc.borrow_mut().state,
+                <span class="kw-2">&amp;mut </span><span class="self">self</span>.alloc.borrow_mut().state,
+            )
+        };
         io::result_from(return_code <span class="kw">as </span>usize, return_code)
+    }
+
+    <span class="kw">pub fn </span>is_empty(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;bool&gt; {
+        <span class="self">self</span>.len().map(|l| l == <span class="number">0</span>)
     }
 
     <span class="doccomment">/// Truncates or extends the underlying file, updating the size of this file to become size.
@@ -2332,18 +2318,20 @@
     /// greater than the current file&#39;s size, then the file will be extended to size and have all
     /// of the intermediate data filled in with 0s.
     </span><span class="kw">pub fn </span>set_len(<span class="kw-2">&amp;</span><span class="self">self</span>, size: usize) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>return_code = <span class="kw">unsafe </span>{ ll::lfs_file_truncate(
-            <span class="kw-2">&amp;mut </span><span class="self">self</span>.fs.alloc.borrow_mut().state,
-            <span class="kw-2">&amp;mut </span><span class="self">self</span>.alloc.borrow_mut().state,
-            size <span class="kw">as </span>u32,
-        ) };
+        <span class="kw">let </span>return_code = <span class="kw">unsafe </span>{
+            ll::lfs_file_truncate(
+                <span class="kw-2">&amp;mut </span><span class="self">self</span>.fs.alloc.borrow_mut().state,
+                <span class="kw-2">&amp;mut </span><span class="self">self</span>.alloc.borrow_mut().state,
+                size <span class="kw">as </span>u32,
+            )
+        };
         io::result_from((), return_code)
     }
 
     <span class="comment">// This belongs in `io::Read` but really don&#39;t want that to have a generic parameter
     </span><span class="kw">pub fn </span>read_to_end&lt;<span class="kw">const </span>N: usize&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, buf: <span class="kw-2">&amp;mut </span>heapless::Vec&lt;u8, N&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="comment">// My understanding of
-        // https://github.com/ARMmbed/littlefs/blob/4c9146ea539f72749d6cc3ea076372a81b12cb11/lfs.c#L2816
+        // https://github.com/littlefs-project/littlefs/blob/4c9146ea539f72749d6cc3ea076372a81b12cb11/lfs.c#L2816
         // is that littlefs keeps reading until either the buffer is full, or the file is exhausted
 
         </span><span class="kw">let </span>had = buf.len();
@@ -2369,7 +2357,6 @@
     }
 }
 
-
 <span class="doccomment">/// Options and flags which can be used to configure how a file is opened.
 ///
 /// This builder exposes the ability to configure how a File is opened and what operations
@@ -2377,8 +2364,8 @@
 /// for commonly used options using this builder.
 ///
 /// Consider `File::with_options()` to avoid having to `use` OpenOptions.
-</span><span class="attr">#[derive(Clone,Debug,Eq,PartialEq)]
-</span><span class="kw">pub struct </span>OpenOptions (FileOpenFlags);
+</span><span class="attr">#[derive(Clone, Debug, Eq, PartialEq)]
+</span><span class="kw">pub struct </span>OpenOptions(FileOpenFlags);
 
 <span class="kw">impl </span>Default <span class="kw">for </span>OpenOptions {
     <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
@@ -2387,7 +2374,6 @@
 }
 
 <span class="kw">impl </span>OpenOptions {
-
     <span class="doccomment">/// Open the file with the options previously specified, keeping references.
     ///
     /// unsafe since UB can arise if files are not closed (see below).
@@ -2404,17 +2390,15 @@
         fs: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span>Filesystem&lt;<span class="lifetime">&#39;a</span>, S&gt;,
         alloc: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span><span class="kw-2">mut </span>FileAllocation&lt;S&gt;,
         path: <span class="kw-2">&amp;</span>Path,
-    ) -&gt;
-        <span class="prelude-ty">Result</span>&lt;File&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>, S&gt;&gt;
-    {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;File&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>, S&gt;&gt; {
         alloc.config.buffer = <span class="kw-2">&amp;mut </span>alloc.cache <span class="kw">as </span><span class="kw-2">*mut </span><span class="kw">_ as </span><span class="kw-2">*mut </span>cty::c_void;
 
         <span class="kw">let </span>return_code = ll::lfs_file_opencfg(
-                <span class="kw-2">&amp;mut </span>fs.alloc.borrow_mut().state,
-                <span class="kw-2">&amp;mut </span>alloc.state,
-                path.as_ptr(),
-                <span class="self">self</span>.<span class="number">0</span>.bits() <span class="kw">as </span>i32,
-                <span class="kw-2">&amp;</span>alloc.config,
+            <span class="kw-2">&amp;mut </span>fs.alloc.borrow_mut().state,
+            <span class="kw-2">&amp;mut </span>alloc.state,
+            path.as_ptr(),
+            <span class="self">self</span>.<span class="number">0</span>.bits() <span class="kw">as </span>i32,
+            <span class="kw-2">&amp;</span>alloc.config,
         );
 
         <span class="kw">let </span>file = File {
@@ -2431,9 +2415,7 @@
         fs: <span class="kw-2">&amp;</span>Filesystem&lt;<span class="lifetime">&#39;a</span>, S&gt;,
         path: <span class="kw-2">&amp;</span>Path,
         f: <span class="kw">impl </span>FnOnce(<span class="kw-2">&amp;</span>File&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;_</span>, S&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;R&gt;,
-    )
-        -&gt; <span class="prelude-ty">Result</span>&lt;R&gt;
-    {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;R&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>alloc = FileAllocation::new(); <span class="comment">// lifetime &#39;c
         </span><span class="kw">let </span><span class="kw-2">mut </span>file = <span class="kw">unsafe </span>{ <span class="self">self</span>.open(fs, <span class="kw-2">&amp;mut </span>alloc, path)<span class="question-mark">? </span>};
         <span class="comment">// Q: what is the actually correct behaviour?
@@ -2454,7 +2436,8 @@
             <span class="self">self</span>.<span class="number">0</span>.insert(FileOpenFlags::READ)
         } <span class="kw">else </span>{
             <span class="self">self</span>.<span class="number">0</span>.remove(FileOpenFlags::READ)
-        }; <span class="self">self
+        };
+        <span class="self">self
     </span>}
 
     <span class="kw">pub fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, write: bool) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
@@ -2462,7 +2445,8 @@
             <span class="self">self</span>.<span class="number">0</span>.insert(FileOpenFlags::WRITE)
         } <span class="kw">else </span>{
             <span class="self">self</span>.<span class="number">0</span>.remove(FileOpenFlags::WRITE)
-        }; <span class="self">self
+        };
+        <span class="self">self
     </span>}
 
     <span class="kw">pub fn </span>append(<span class="kw-2">&amp;mut </span><span class="self">self</span>, append: bool) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
@@ -2470,7 +2454,8 @@
             <span class="self">self</span>.<span class="number">0</span>.insert(FileOpenFlags::APPEND)
         } <span class="kw">else </span>{
             <span class="self">self</span>.<span class="number">0</span>.remove(FileOpenFlags::APPEND)
-        }; <span class="self">self
+        };
+        <span class="self">self
     </span>}
 
     <span class="kw">pub fn </span>create(<span class="kw-2">&amp;mut </span><span class="self">self</span>, create: bool) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
@@ -2478,7 +2463,8 @@
             <span class="self">self</span>.<span class="number">0</span>.insert(FileOpenFlags::CREATE)
         } <span class="kw">else </span>{
             <span class="self">self</span>.<span class="number">0</span>.remove(FileOpenFlags::CREATE)
-        }; <span class="self">self
+        };
+        <span class="self">self
     </span>}
 
     <span class="kw">pub fn </span>create_new(<span class="kw-2">&amp;mut </span><span class="self">self</span>, create_new: bool) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
@@ -2488,7 +2474,8 @@
         } <span class="kw">else </span>{
             <span class="self">self</span>.<span class="number">0</span>.remove(FileOpenFlags::EXCL);
             <span class="self">self</span>.<span class="number">0</span>.remove(FileOpenFlags::CREATE);
-        }; <span class="self">self
+        };
+        <span class="self">self
     </span>}
 
     <span class="kw">pub fn </span>truncate(<span class="kw-2">&amp;mut </span><span class="self">self</span>, truncate: bool) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
@@ -2496,53 +2483,58 @@
             <span class="self">self</span>.<span class="number">0</span>.insert(FileOpenFlags::TRUNCATE)
         } <span class="kw">else </span>{
             <span class="self">self</span>.<span class="number">0</span>.remove(FileOpenFlags::TRUNCATE)
-        }; <span class="self">self
+        };
+        <span class="self">self
     </span>}
-
 }
 
-<span class="kw">impl</span>&lt;S: driver::Storage&gt; io::Read <span class="kw">for </span>File&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, S&gt;
-{
+<span class="kw">impl</span>&lt;S: driver::Storage&gt; io::Read <span class="kw">for </span>File&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, S&gt; {
     <span class="kw">fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, buf: <span class="kw-2">&amp;mut </span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
-        <span class="kw">let </span>return_code = <span class="kw">unsafe </span>{ ll::lfs_file_read(
-            <span class="kw-2">&amp;mut </span><span class="self">self</span>.fs.alloc.borrow_mut().state,
-            <span class="kw-2">&amp;mut </span><span class="self">self</span>.alloc.borrow_mut().state,
-            buf.as_mut_ptr() <span class="kw">as </span><span class="kw-2">*mut </span>cty::c_void,
-            buf.len() <span class="kw">as </span>u32,
-        ) };
+        <span class="kw">let </span>return_code = <span class="kw">unsafe </span>{
+            ll::lfs_file_read(
+                <span class="kw-2">&amp;mut </span><span class="self">self</span>.fs.alloc.borrow_mut().state,
+                <span class="kw-2">&amp;mut </span><span class="self">self</span>.alloc.borrow_mut().state,
+                buf.as_mut_ptr() <span class="kw">as </span><span class="kw-2">*mut </span>cty::c_void,
+                buf.len() <span class="kw">as </span>u32,
+            )
+        };
         io::result_from(return_code <span class="kw">as </span>usize, return_code)
     }
 }
 
-<span class="kw">impl</span>&lt;S: driver::Storage&gt; io::Seek <span class="kw">for </span>File&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, S&gt;
-{
+<span class="kw">impl</span>&lt;S: driver::Storage&gt; io::Seek <span class="kw">for </span>File&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, S&gt; {
     <span class="kw">fn </span>seek(<span class="kw-2">&amp;</span><span class="self">self</span>, pos: io::SeekFrom) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
-        <span class="kw">let </span>return_code = <span class="kw">unsafe </span>{ ll::lfs_file_seek(
-            <span class="kw-2">&amp;mut </span><span class="self">self</span>.fs.alloc.borrow_mut().state,
-            <span class="kw-2">&amp;mut </span><span class="self">self</span>.alloc.borrow_mut().state,
-            pos.off(),
-            pos.whence(),
-        ) };
+        <span class="kw">let </span>return_code = <span class="kw">unsafe </span>{
+            ll::lfs_file_seek(
+                <span class="kw-2">&amp;mut </span><span class="self">self</span>.fs.alloc.borrow_mut().state,
+                <span class="kw-2">&amp;mut </span><span class="self">self</span>.alloc.borrow_mut().state,
+                pos.off(),
+                pos.whence(),
+            )
+        };
         io::result_from(return_code <span class="kw">as </span>usize, return_code)
     }
 }
 
-<span class="kw">impl</span>&lt;S: driver::Storage&gt; io::Write <span class="kw">for </span>File&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, S&gt;
-{
+<span class="kw">impl</span>&lt;S: driver::Storage&gt; io::Write <span class="kw">for </span>File&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, S&gt; {
     <span class="kw">fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, buf: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
-        <span class="kw">let </span>return_code = <span class="kw">unsafe </span>{ ll::lfs_file_write(
-            <span class="kw-2">&amp;mut </span><span class="self">self</span>.fs.alloc.borrow_mut().state,
-            <span class="kw-2">&amp;mut </span><span class="self">self</span>.alloc.borrow_mut().state,
-            buf.as_ptr() <span class="kw">as </span><span class="kw-2">*const </span>cty::c_void,
-            buf.len() <span class="kw">as </span>u32,
-        ) };
+        <span class="kw">let </span>return_code = <span class="kw">unsafe </span>{
+            ll::lfs_file_write(
+                <span class="kw-2">&amp;mut </span><span class="self">self</span>.fs.alloc.borrow_mut().state,
+                <span class="kw-2">&amp;mut </span><span class="self">self</span>.alloc.borrow_mut().state,
+                buf.as_ptr() <span class="kw">as </span><span class="kw-2">*const </span>cty::c_void,
+                buf.len() <span class="kw">as </span>u32,
+            )
+        };
         io::result_from(return_code <span class="kw">as </span>usize, return_code)
     }
 
-    <span class="kw">fn </span>flush(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; { <span class="prelude-val">Ok</span>(()) }
+    <span class="kw">fn </span>flush(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="prelude-val">Ok</span>(())
+    }
 }
 
-<span class="attr">#[derive(Clone,Debug,PartialEq,Eq,Serialize,Deserialize)]
+<span class="attr">#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 </span><span class="kw">pub struct </span>DirEntry {
     file_name: PathBuf,
     metadata: Metadata,
@@ -2584,7 +2576,6 @@
     </span><span class="kw">pub unsafe fn </span>path_buf_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>PathBuf {
         <span class="kw-2">&amp;mut </span><span class="self">self</span>.path
     }
-
 }
 
 <span class="kw">pub struct </span>ReadDirAllocation {
@@ -2603,24 +2594,20 @@
     }
 }
 
-<span class="kw">pub struct </span>ReadDir&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>, S: driver::Storage&gt;
-{
+<span class="kw">pub struct </span>ReadDir&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>, S: driver::Storage&gt; {
     alloc: RefCell&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span><span class="kw-2">mut </span>ReadDirAllocation&gt;,
     fs: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span>Filesystem&lt;<span class="lifetime">&#39;a</span>, S&gt;,
     <span class="attr">#[cfg(feature = <span class="string">&quot;dir-entry-path&quot;</span>)]
     </span>path: PathBuf,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>, S: driver::Storage&gt; Iterator <span class="kw">for </span>ReadDir&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>, S&gt;
-{
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>, S: driver::Storage&gt; Iterator <span class="kw">for </span>ReadDir&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>, S&gt; {
     <span class="kw">type </span>Item = <span class="prelude-ty">Result</span>&lt;DirEntry&gt;;
 
     <span class="comment">// remove this allowance again, once path overflow is properly handled
     </span><span class="attr">#[allow(unreachable_code)]
     </span><span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>info: ll::lfs_info = <span class="kw">unsafe </span>{
-            mem::MaybeUninit::zeroed().assume_init()
-        };
+        <span class="kw">let </span><span class="kw-2">mut </span>info: ll::lfs_info = <span class="kw">unsafe </span>{ mem::MaybeUninit::zeroed().assume_init() };
 
         <span class="kw">let </span>return_code = <span class="kw">unsafe </span>{
             ll::lfs_dir_read(
@@ -2648,18 +2635,17 @@
         }
 
         <span class="kw">if </span>return_code == <span class="number">0 </span>{
-            <span class="kw">return </span><span class="prelude-val">None
-        </span>}
+            <span class="kw">return </span><span class="prelude-val">None</span>;
+        }
 
         <span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(io::result_from((), return_code).unwrap_err()))
     }
 }
 
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>, S: driver::Storage&gt; ReadDir&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>, S&gt; {
-
     <span class="comment">// Safety-hatch to experiment with missing parts of API
     </span><span class="kw">pub unsafe fn </span>borrow_filesystem&lt;<span class="lifetime">&#39;c</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;c </span><span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;c </span>Filesystem&lt;<span class="lifetime">&#39;a</span>, S&gt; {
-        <span class="kw-2">&amp;</span><span class="self">self</span>.fs
+        <span class="self">self</span>.fs
     }
 }
 
@@ -2671,26 +2657,24 @@
     // Although I guess if the compiler reuses the ReadDirAllocation, and we still
     // have an (unsafely genereated) ReadDir with that handle; on the other hand
     // as long as ReadDir is not Copy.
-    </span><span class="kw">pub </span><span class="comment">/* unsafe */ </span><span class="kw">fn </span>close(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt;
-    {
-        <span class="kw">let </span>return_code = <span class="kw">unsafe </span>{ ll::lfs_dir_close(
-            <span class="kw-2">&amp;mut </span><span class="self">self</span>.fs.alloc.borrow_mut().state,
-            <span class="kw-2">&amp;mut </span><span class="self">self</span>.alloc.borrow_mut().state,
-        ) };
+    </span><span class="kw">pub fn </span>close(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">let </span>return_code = <span class="kw">unsafe </span>{
+            ll::lfs_dir_close(
+                <span class="kw-2">&amp;mut </span><span class="self">self</span>.fs.alloc.borrow_mut().state,
+                <span class="kw-2">&amp;mut </span><span class="self">self</span>.alloc.borrow_mut().state,
+            )
+        };
         io::result_from((), return_code)
     }
 }
 
-
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, Storage: driver::Storage&gt; Filesystem&lt;<span class="lifetime">&#39;a</span>, Storage&gt; {
-
     <span class="kw">pub fn </span>read_dir_and_then&lt;R&gt;(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         path: <span class="kw-2">&amp;</span>Path,
         <span class="comment">// *not* &amp;ReadDir, as Iterator takes &amp;mut
         </span>f: <span class="kw">impl </span>FnOnce(<span class="kw-2">&amp;mut </span>ReadDir&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, Storage&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;R&gt;,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;R&gt;
-    {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;R&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>alloc = ReadDirAllocation::new();
         <span class="kw">let </span><span class="kw-2">mut </span>read_dir = <span class="kw">unsafe </span>{ <span class="self">self</span>.read_dir(<span class="kw-2">&amp;mut </span>alloc, path)<span class="question-mark">? </span>};
         <span class="kw">let </span>res = f(<span class="kw-2">&amp;mut </span>read_dir);
@@ -2699,16 +2683,14 @@
         res
     }
 
-	<span class="doccomment">/// Returns a pseudo-iterator over the entries within a directory.
+    <span class="doccomment">/// Returns a pseudo-iterator over the entries within a directory.
     ///
     /// This is unsafe since it can induce UB just like File::open.
-	</span><span class="kw">pub unsafe fn </span>read_dir&lt;<span class="lifetime">&#39;b</span>&gt;(
+    </span><span class="kw">pub unsafe fn </span>read_dir&lt;<span class="lifetime">&#39;b</span>&gt;(
         <span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span><span class="self">self</span>,
         alloc: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span><span class="kw-2">mut </span>ReadDirAllocation,
         path: <span class="kw-2">&amp;</span>Path,
-    ) -&gt;
-        <span class="prelude-ty">Result</span>&lt;ReadDir&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>, Storage&gt;&gt;
-    {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;ReadDir&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>, Storage&gt;&gt; {
         <span class="kw">let </span>return_code = ll::lfs_dir_open(
             <span class="kw-2">&amp;mut </span><span class="self">self</span>.alloc.borrow_mut().state,
             <span class="kw-2">&amp;mut </span>alloc.state,
@@ -2724,16 +2706,10 @@
 
         io::result_from(read_dir, return_code)
     }
-
 }
 
-
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, Storage: driver::Storage&gt; Filesystem&lt;<span class="lifetime">&#39;a</span>, Storage&gt; {
-
-    <span class="kw">pub fn </span>mount(
-        alloc: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>Allocation&lt;Storage&gt;,
-        storage: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>Storage,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
+    <span class="kw">pub fn </span>mount(alloc: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>Allocation&lt;Storage&gt;, storage: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>Storage) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span>fs = <span class="self">Self</span>::new(alloc, storage);
         <span class="kw">let </span><span class="kw-2">mut </span>alloc = fs.alloc.borrow_mut();
         <span class="kw">let </span>return_code = <span class="kw">unsafe </span>{ ll::lfs_mount(<span class="kw-2">&amp;mut </span>alloc.state, <span class="kw-2">&amp;</span>alloc.config) };
@@ -2743,14 +2719,16 @@
 
     <span class="comment">// Not public, user should use `mount`, possibly after `format`
     </span><span class="kw">fn </span>new(alloc: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>Allocation&lt;Storage&gt;, storage: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>Storage) -&gt; <span class="self">Self </span>{
-
         alloc.config.context = storage <span class="kw">as </span><span class="kw-2">*mut </span><span class="kw">_ as </span><span class="kw-2">*mut </span>cty::c_void;
 
         alloc.config.read_buffer = <span class="kw-2">&amp;mut </span>alloc.cache.read <span class="kw">as </span><span class="kw-2">*mut </span><span class="kw">_ as </span><span class="kw-2">*mut </span>cty::c_void;
         alloc.config.prog_buffer = <span class="kw-2">&amp;mut </span>alloc.cache.write <span class="kw">as </span><span class="kw-2">*mut </span><span class="kw">_ as </span><span class="kw-2">*mut </span>cty::c_void;
         alloc.config.lookahead_buffer = <span class="kw-2">&amp;mut </span>alloc.cache.lookahead <span class="kw">as </span><span class="kw-2">*mut </span><span class="kw">_ as </span><span class="kw-2">*mut </span>cty::c_void;
 
-        Filesystem { alloc: RefCell::new(alloc), storage }
+        Filesystem {
+            alloc: RefCell::new(alloc),
+            storage,
+        }
     }
 
     <span class="doccomment">/// Deconstruct `Filesystem`, intention is to allow access to
@@ -2763,13 +2741,10 @@
 
     <span class="doccomment">/// Creates a new, empty directory at the provided path.
     </span><span class="kw">pub fn </span>create_dir(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>Path) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-
         <span class="attr">#[cfg(test)]
         </span><span class="macro">println!</span>(<span class="string">&quot;creating {:?}&quot;</span>, path);
-        <span class="kw">let </span>return_code = <span class="kw">unsafe </span>{ ll::lfs_mkdir(
-            <span class="kw-2">&amp;mut </span><span class="self">self</span>.alloc.borrow_mut().state,
-            path.as_ptr(),
-        ) };
+        <span class="kw">let </span>return_code =
+            <span class="kw">unsafe </span>{ ll::lfs_mkdir(<span class="kw-2">&amp;mut </span><span class="self">self</span>.alloc.borrow_mut().state, path.as_ptr()) };
         io::result_from((), return_code)
     }
 
@@ -2789,14 +2764,18 @@
                 <span class="kw">match </span><span class="self">self</span>.create_dir(<span class="kw-2">&amp;</span>dir) {
                     <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; {}
                     <span class="prelude-val">Err</span>(io::Error::EntryAlreadyExisted) =&gt; {}
-                    error =&gt; { <span class="macro">panic!</span>(<span class="string">&quot;{:?}&quot;</span>, <span class="kw-2">&amp;</span>error); }
+                    error =&gt; {
+                        <span class="macro">panic!</span>(<span class="string">&quot;{:?}&quot;</span>, <span class="kw-2">&amp;</span>error);
+                    }
                 }
             }
         }
         <span class="kw">match </span><span class="self">self</span>.create_dir(path) {
             <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; {}
             <span class="prelude-val">Err</span>(io::Error::EntryAlreadyExisted) =&gt; {}
-            error =&gt; { <span class="macro">panic!</span>(<span class="string">&quot;{:?}&quot;</span>, <span class="kw-2">&amp;</span>error); }
+            error =&gt; {
+                <span class="macro">panic!</span>(<span class="string">&quot;{:?}&quot;</span>, <span class="kw-2">&amp;</span>error);
+            }
         }
         <span class="prelude-val">Ok</span>(())
 
@@ -2819,17 +2798,11 @@
         //     Ok(()) =&gt; return Ok(()),
         //     Err(e) =&gt; return Err(e),
         // }
-
     </span>}
 
     <span class="doccomment">/// Read the entire contents of a file into a bytes vector.
-    </span><span class="kw">pub fn </span>read&lt;<span class="kw">const </span>N: usize&gt;(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        path: <span class="kw-2">&amp;</span>Path,
-    )
-        -&gt; <span class="prelude-ty">Result</span>&lt;heapless::Vec&lt;u8, N&gt;&gt;
-    {
-        <span class="kw">let </span><span class="kw-2">mut </span>contents: heapless::Vec::&lt;u8, N&gt; = Default::default();
+    </span><span class="kw">pub fn </span>read&lt;<span class="kw">const </span>N: usize&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>Path) -&gt; <span class="prelude-ty">Result</span>&lt;heapless::Vec&lt;u8, N&gt;&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>contents: heapless::Vec&lt;u8, N&gt; = Default::default();
         File::open_and_then(<span class="self">self</span>, path, |file| {
             <span class="comment">// use io::Read;
             </span><span class="kw">let </span>len = file.read_to_end(<span class="kw-2">&amp;mut </span>contents)<span class="question-mark">?</span>;
@@ -2838,16 +2811,29 @@
         <span class="prelude-val">Ok</span>(contents)
     }
 
+    <span class="doccomment">/// Read a chunk of a file into a bytes vector
+    /// Returns the data and the size of the file
+    </span><span class="kw">pub fn </span>read_chunk&lt;<span class="kw">const </span>N: usize&gt;(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        path: <span class="kw-2">&amp;</span>Path,
+        pos: OpenSeekFrom,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;(heapless::Vec&lt;u8, N&gt;, usize)&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>contents: heapless::Vec&lt;u8, N&gt; = Default::default();
+        contents.resize_default(contents.capacity()).unwrap();
+        <span class="kw">let </span>file_len = File::open_and_then(<span class="self">self</span>, path, |file| {
+            file.seek(pos.into())<span class="question-mark">?</span>;
+            <span class="kw">let </span>read_n = file.read(<span class="kw-2">&amp;mut </span>contents)<span class="question-mark">?</span>;
+            contents.truncate(read_n);
+            file.len()
+        })<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>((contents, file_len))
+    }
+
     <span class="doccomment">/// Write a slice as the entire contents of a file.
     ///
     /// This function will create a file if it does not exist,
     /// and will entirely replace its contents if it does.
-    </span><span class="kw">pub fn </span>write(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        path: <span class="kw-2">&amp;</span>Path,
-        contents: <span class="kw-2">&amp;</span>[u8],
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt;
-    {
+    </span><span class="kw">pub fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>Path, contents: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="attr">#[cfg(test)]
         </span><span class="macro">println!</span>(<span class="string">&quot;writing {:?}&quot;</span>, path);
         File::create_and_then(<span class="self">self</span>, path, |file| {
@@ -2857,6 +2843,24 @@
         <span class="prelude-val">Ok</span>(())
     }
 
+    <span class="doccomment">/// Write a slice as a chunk of a file.
+    ///
+    /// This function will not create a file if it does not exist,
+    /// it will fail if the file is not already large enough with regard to the `pos` parameter
+    </span><span class="kw">pub fn </span>write_chunk(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>Path, contents: <span class="kw-2">&amp;</span>[u8], pos: OpenSeekFrom) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="attr">#[cfg(test)]
+        </span><span class="macro">println!</span>(<span class="string">&quot;writing {:?}&quot;</span>, path);
+        OpenOptions::new()
+            .read(<span class="bool-val">true</span>)
+            .write(<span class="bool-val">true</span>)
+            .truncate(<span class="bool-val">false</span>)
+            .open_and_then(<span class="self">self</span>, path, |file| {
+                <span class="kw">use </span>io::Write;
+                file.seek(pos.into())<span class="question-mark">?</span>;
+                file.write_all(contents)
+            })<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(())
+    }
 }
 
 <span class="attr">#[cfg(test)]
@@ -2876,7 +2880,6 @@
 
         Filesystem::format(<span class="kw-2">&amp;mut </span>test_storage).unwrap();
         Filesystem::mount_and_then(<span class="kw-2">&amp;mut </span>test_storage, |fs| {
-
             <span class="macro">println!</span>(<span class="string">&quot;blocks going in: {}&quot;</span>, fs.available_blocks()<span class="question-mark">?</span>);
             fs.create_dir_all(<span class="string">b&quot;/tmp/test\0&quot;</span>.try_into().unwrap())<span class="question-mark">?</span>;
             <span class="macro">println!</span>(<span class="string">&quot;dir done&quot;</span>);
@@ -2915,7 +2918,8 @@
                 <span class="kw">for </span>entry <span class="kw">in </span>read_dir {
                     <span class="kw">let </span>entry = entry<span class="question-mark">?</span>;
                     <span class="macro">println!</span>(<span class="string">&quot;entry: {:?}&quot;</span>, entry.file_name());
-                    <span class="attr">#[cfg(feature = <span class="string">&quot;dir-entry-path&quot;</span>)] </span>{
+                    <span class="attr">#[cfg(feature = <span class="string">&quot;dir-entry-path&quot;</span>)]
+                    </span>{
                         <span class="macro">println!</span>(<span class="string">&quot;path: {:?}&quot;</span>, entry.path());
 
                         <span class="kw">let </span><span class="kw-2">mut </span>attribute = Attribute::new(<span class="number">37</span>);
@@ -2939,14 +2943,17 @@
                     <span class="macro">println!</span>(<span class="string">&quot;\nfile {}: {:?}&quot;</span>, i, entry.file_name());
 
                     <span class="kw">if </span>entry.file_type().is_file() {
-                        <span class="kw">let </span>content: heapless::Vec::&lt;u8, <span class="number">256</span>&gt; = fs.read(entry.path())<span class="question-mark">?</span>;
+                        <span class="kw">let </span>content: heapless::Vec&lt;u8, <span class="number">256</span>&gt; = fs.read(entry.path())<span class="question-mark">?</span>;
                         <span class="macro">println!</span>(<span class="string">&quot;content:\n{:?}&quot;</span>, core::str::from_utf8(<span class="kw-2">&amp;</span>content).unwrap());
                         <span class="comment">// println!(&quot;and now the removal&quot;);
                         // fs.remove(entry.path())?;
                     </span>}
 
                     <span class="kw">if let </span><span class="prelude-val">Some</span>(attribute) = fs.attribute(entry.path(), <span class="number">37</span>)<span class="question-mark">? </span>{
-                        <span class="macro">println!</span>(<span class="string">&quot;attribute 37: {:?}&quot;</span>, core::str::from_utf8(attribute.data()).unwrap());
+                        <span class="macro">println!</span>(
+                            <span class="string">&quot;attribute 37: {:?}&quot;</span>,
+                            core::str::from_utf8(attribute.data()).unwrap()
+                        );
                     }
 
                     <span class="comment">// deleting (self) file while iterating!
@@ -2967,12 +2974,12 @@
                         <span class="macro">println!</span>(<span class="string">&quot;writing new file&quot;</span>);
                         fs.write(<span class="string">b&quot;/tmp/test/out-of-nowhere.txt\0&quot;</span>.try_into().unwrap(), <span class="kw-2">&amp;</span>[])<span class="question-mark">?</span>;
                     }
-
                 }
                 <span class="prelude-val">Ok</span>(())
             })<span class="question-mark">?</span>;
 
-            <span class="attr">#[cfg(feature = <span class="string">&quot;dir-entry-path&quot;</span>)] </span>{
+            <span class="attr">#[cfg(feature = <span class="string">&quot;dir-entry-path&quot;</span>)]
+            </span>{
                 <span class="macro">println!</span>(<span class="string">&quot;\nDELETION SPREE\n&quot;</span>);
                 <span class="comment">// behaves veeryweirldy
                 // (...)
@@ -2984,12 +2991,13 @@
             }
 
             <span class="prelude-val">Ok</span>(())
-        }).unwrap();
+        })
+        .unwrap();
 
         <span class="kw">let </span><span class="kw-2">mut </span>alloc = Allocation::new();
         <span class="kw">let </span>fs = Filesystem::mount(<span class="kw-2">&amp;mut </span>alloc, <span class="kw-2">&amp;mut </span>test_storage).unwrap();
         <span class="comment">// fs.write(b&quot;/z.txt\0&quot;.try_into().unwrap(), &amp;jackson5).unwrap();
-        </span>fs.write(<span class="kw-2">&amp;</span>PathBuf::from(<span class="string">&quot;z.txt&quot;</span>), <span class="kw-2">&amp;</span>jackson5).unwrap();
+        </span>fs.write(<span class="kw-2">&amp;</span>PathBuf::from(<span class="string">&quot;z.txt&quot;</span>), jackson5).unwrap();
     }
 
     <span class="attr">#[cfg(feature = <span class="string">&quot;dir-entry-path&quot;</span>)]
@@ -3001,7 +3009,6 @@
 
         Filesystem::format(<span class="kw-2">&amp;mut </span>test_storage).unwrap();
         Filesystem::mount_and_then(<span class="kw-2">&amp;mut </span>test_storage, |fs| {
-
             fs.create_dir_all(<span class="string">b&quot;/tmp/test\0&quot;</span>.try_into().unwrap())<span class="question-mark">?</span>;
             fs.write(<span class="string">b&quot;/tmp/test/a.txt\0&quot;</span>.try_into().unwrap(), jackson5)<span class="question-mark">?</span>;
             fs.write(<span class="string">b&quot;/tmp/test/b.txt\0&quot;</span>.try_into().unwrap(), jackson5)<span class="question-mark">?</span>;
@@ -3011,7 +3018,8 @@
             fs.remove_dir_all(<span class="string">b&quot;/tmp\0&quot;</span>.try_into().unwrap())<span class="question-mark">?</span>;
 
             <span class="prelude-val">Ok</span>(())
-        }).unwrap();
+        })
+        .unwrap();
     }
 
     <span class="attr">#[test]
@@ -3037,14 +3045,15 @@
                     file.write(<span class="string">b&quot;second part&quot;</span>)<span class="question-mark">?</span>;
 
                     <span class="prelude-val">Ok</span>(())
-                }
+                },
             )<span class="question-mark">?</span>;
 
             <span class="kw">let </span>content: heapless::Vec&lt;<span class="kw">_</span>, <span class="number">256</span>&gt; = fs.read(filename)<span class="question-mark">?</span>;
             <span class="macro">assert_eq!</span>(content, <span class="string">b&quot;first part - second part&quot;</span>);
             <span class="comment">// println!(&quot;content: {:?}&quot;, core::str::from_utf8(&amp;content).unwrap());
             </span><span class="prelude-val">Ok</span>(())
-        }).unwrap();
+        })
+        .unwrap();
     }
 
     <span class="attr">#[test]
@@ -3053,7 +3062,6 @@
 
         Filesystem::format(<span class="kw-2">&amp;mut </span>test_storage).unwrap();
         Filesystem::mount_and_then(<span class="kw-2">&amp;mut </span>test_storage, |fs| {
-
             fs.write(<span class="string">b&quot;a.txt\0&quot;</span>.try_into().unwrap(), <span class="kw-2">&amp;</span>[])<span class="question-mark">?</span>;
             fs.write(<span class="string">b&quot;b.txt\0&quot;</span>.try_into().unwrap(), <span class="kw-2">&amp;</span>[])<span class="question-mark">?</span>;
             fs.write(<span class="string">b&quot;c.txt\0&quot;</span>.try_into().unwrap(), <span class="kw-2">&amp;</span>[])<span class="question-mark">?</span>;
@@ -3068,19 +3076,16 @@
                     // One usecase is to read data from the files iterated over.
                     //
                     </span><span class="kw">if </span>entry.metadata.is_file() {
-                        fs.write(
-                            <span class="kw-2">&amp;</span>entry.file_name(),
-                            <span class="string">b&quot;wowee zowie&quot;
-                        </span>)<span class="question-mark">?</span>;
+                        fs.write(entry.file_name(), <span class="string">b&quot;wowee zowie&quot;</span>)<span class="question-mark">?</span>;
                     }
                 }
                 <span class="prelude-val">Ok</span>(())
             })<span class="question-mark">?</span>;
 
             <span class="prelude-val">Ok</span>(())
-        }).unwrap();
+        })
+        .unwrap();
     }
-
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>issue_3_original_report() {
@@ -3088,7 +3093,6 @@
 
         Filesystem::format(<span class="kw-2">&amp;mut </span>test_storage).unwrap();
         Filesystem::mount_and_then(<span class="kw-2">&amp;mut </span>test_storage, |fs| {
-
             fs.write(<span class="string">b&quot;a.txt\0&quot;</span>.try_into().unwrap(), <span class="kw-2">&amp;</span>[])<span class="question-mark">?</span>;
             fs.write(<span class="string">b&quot;b.txt\0&quot;</span>.try_into().unwrap(), <span class="kw-2">&amp;</span>[])<span class="question-mark">?</span>;
             fs.write(<span class="string">b&quot;c.txt\0&quot;</span>.try_into().unwrap(), <span class="kw-2">&amp;</span>[])<span class="question-mark">?</span>;
@@ -3102,20 +3106,20 @@
                 <span class="prelude-val">Ok</span>(())
             })<span class="question-mark">?</span>;
 
-
             <span class="kw">let </span><span class="kw-2">mut </span>a1 = File::allocate();
-            <span class="kw">let </span>f1 = <span class="kw">unsafe </span>{ File::open(<span class="kw-2">&amp;</span>fs, <span class="kw-2">&amp;mut </span>a1, <span class="string">b&quot;a.txt\0&quot;</span>.try_into().unwrap())<span class="question-mark">? </span>};
+            <span class="kw">let </span>f1 = <span class="kw">unsafe </span>{ File::create(fs, <span class="kw-2">&amp;mut </span>a1, <span class="string">b&quot;a.txt\0&quot;</span>.try_into().unwrap())<span class="question-mark">? </span>};
             f1.write(<span class="string">b&quot;some text&quot;</span>)<span class="question-mark">?</span>;
 
             <span class="kw">let </span><span class="kw-2">mut </span>a2 = File::allocate();
-            <span class="kw">let </span>f2 = <span class="kw">unsafe </span>{ File::open(<span class="kw-2">&amp;</span>fs, <span class="kw-2">&amp;mut </span>a2, <span class="string">b&quot;b.txt\0&quot;</span>.try_into().unwrap())<span class="question-mark">? </span>};
+            <span class="kw">let </span>f2 = <span class="kw">unsafe </span>{ File::create(fs, <span class="kw-2">&amp;mut </span>a2, <span class="string">b&quot;b.txt\0&quot;</span>.try_into().unwrap())<span class="question-mark">? </span>};
             f2.write(<span class="string">b&quot;more text&quot;</span>)<span class="question-mark">?</span>;
 
             <span class="kw">unsafe </span>{ f1.close()<span class="question-mark">? </span>}; <span class="comment">// program hangs here
             </span><span class="kw">unsafe </span>{ f2.close()<span class="question-mark">? </span>}; <span class="comment">// this statement is never reached
 
             </span><span class="prelude-val">Ok</span>(())
-        }).unwrap();
+        })
+        .unwrap();
     }
 }
 </code></pre></div></section></main></body></html>

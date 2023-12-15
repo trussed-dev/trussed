@@ -920,6 +920,8 @@
 <a href="#920" id="920">920</a>
 <a href="#921" id="921">921</a>
 <a href="#922" id="922">922</a>
+<a href="#923" id="923">923</a>
+<a href="#924" id="924">924</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>littlefs2::{
     path,
     path::{Path, PathBuf},
@@ -937,10 +939,12 @@
 <span class="kw">use </span><span class="kw">crate</span>::pipe::TrussedResponder;
 <span class="kw">use </span><span class="kw">crate</span>::platform::<span class="kw-2">*</span>;
 <span class="kw">pub use </span><span class="kw">crate</span>::store::{
+    <span class="self">self</span>,
     certstore::{Certstore <span class="kw">as _</span>, ClientCertstore},
     counterstore::{ClientCounterstore, Counterstore <span class="kw">as _</span>},
     filestore::{ClientFilestore, Filestore, ReadDirFilesState, ReadDirState},
     keystore::{ClientKeystore, Keystore},
+    DynFilesystem,
 };
 <span class="kw">use </span><span class="kw">crate</span>::types::ui::Status;
 <span class="kw">use </span><span class="kw">crate</span>::types::<span class="kw-2">*</span>;
@@ -1251,14 +1255,14 @@
             </span>Request::DebugDumpStore(_request) =&gt; {
 
                 <span class="macro">info_now!</span>(<span class="string">&quot;:: PERSISTENT&quot;</span>);
-                recursively_list(<span class="self">self</span>.platform.store().ifs(), <span class="macro">path!</span>(<span class="string">&quot;/&quot;</span>));
+                recursively_list(<span class="self">self</span>.platform.store().fs(Location::Internal), <span class="macro">path!</span>(<span class="string">&quot;/&quot;</span>));
 
                 <span class="macro">info_now!</span>(<span class="string">&quot;:: VOLATILE&quot;</span>);
-                recursively_list(<span class="self">self</span>.platform.store().vfs(), <span class="macro">path!</span>(<span class="string">&quot;/&quot;</span>));
+                recursively_list(<span class="self">self</span>.platform.store().fs(Location::Volatile), <span class="macro">path!</span>(<span class="string">&quot;/&quot;</span>));
 
-                <span class="kw">fn </span>recursively_list&lt;S: <span class="lifetime">&#39;static </span>+ <span class="kw">crate</span>::types::LfsStorage&gt;(fs: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw">crate</span>::store::Fs&lt;S&gt;, path: <span class="kw-2">&amp;</span>Path) {
+                <span class="kw">fn </span>recursively_list(fs: <span class="kw-2">&amp;</span><span class="kw">dyn </span>DynFilesystem, path: <span class="kw-2">&amp;</span>Path) {
                     <span class="comment">// let fs = store.vfs();
-                    </span>fs.read_dir_and_then(path, |dir| {
+                    </span>fs.read_dir_and_then(path, <span class="kw-2">&amp;mut </span>|dir| {
                         <span class="kw">for </span>(i, entry) <span class="kw">in </span>dir.enumerate() {
                             <span class="kw">let </span>entry = entry.unwrap();
                             <span class="kw">if </span>i &lt; <span class="number">2 </span>{
@@ -1270,7 +1274,7 @@
                                 recursively_list(fs, entry.path());
                             }
                             <span class="kw">if </span>entry.file_type().is_file() {
-                                <span class="kw">let </span>_contents: Vec&lt;u8, <span class="number">256</span>&gt; = fs.read(entry.path()).unwrap();
+                                <span class="kw">let </span>_contents = fs.read::&lt;<span class="number">256</span>&gt;(entry.path()).unwrap();
                                 <span class="comment">// info_now!(&quot;{} ?= {}&quot;, entry.metadata().len(), contents.len()).ok();
                                 // info_now!(&quot;{:?}&quot;, &amp;contents).ok();
                             </span>}
@@ -1804,19 +1808,19 @@
             <span class="self">self</span>.resources
                 .platform
                 .store()
-                .ifs()
+                .fs(Location::Internal)
                 .available_blocks()
                 .unwrap(),
             <span class="self">self</span>.resources
                 .platform
                 .store()
-                .efs()
+                .fs(Location::External)
                 .available_blocks()
                 .unwrap(),
             <span class="self">self</span>.resources
                 .platform
                 .store()
-                .vfs()
+                .fs(Location::Volatile)
                 .available_blocks()
                 .unwrap(),
         );

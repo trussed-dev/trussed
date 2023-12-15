@@ -501,42 +501,11 @@
 <a href="#501" id="501">501</a>
 <a href="#502" id="502">502</a>
 <a href="#503" id="503">503</a>
-<a href="#504" id="504">504</a>
-<a href="#505" id="505">505</a>
-<a href="#506" id="506">506</a>
-<a href="#507" id="507">507</a>
-<a href="#508" id="508">508</a>
-<a href="#509" id="509">509</a>
-<a href="#510" id="510">510</a>
-<a href="#511" id="511">511</a>
-<a href="#512" id="512">512</a>
-<a href="#513" id="513">513</a>
-<a href="#514" id="514">514</a>
-<a href="#515" id="515">515</a>
-<a href="#516" id="516">516</a>
-<a href="#517" id="517">517</a>
-<a href="#518" id="518">518</a>
-<a href="#519" id="519">519</a>
-<a href="#520" id="520">520</a>
-<a href="#521" id="521">521</a>
-<a href="#522" id="522">522</a>
-<a href="#523" id="523">523</a>
-<a href="#524" id="524">524</a>
-<a href="#525" id="525">525</a>
-<a href="#526" id="526">526</a>
-<a href="#527" id="527">527</a>
-<a href="#528" id="528">528</a>
-<a href="#529" id="529">529</a>
-<a href="#530" id="530">530</a>
-<a href="#531" id="531">531</a>
-<a href="#532" id="532">532</a>
-<a href="#533" id="533">533</a>
-<a href="#534" id="534">534</a>
 </pre></div><pre class="rust"><code><span class="kw">use crate</span>::{
     error::{Error, <span class="prelude-ty">Result</span>},
     <span class="comment">// service::ReadDirState,
-    </span>store::{<span class="self">self</span>, Store},
-    types::{LfsStorage, Location, Message, UserAttribute},
+    </span>store::{<span class="self">self</span>, DynFilesystem, Store},
+    types::{Location, Message, UserAttribute},
     Bytes,
 };
 <span class="kw">use </span>littlefs2::path;
@@ -561,7 +530,6 @@
     path::{Path, PathBuf},
 };
 
-<span class="kw">use </span><span class="kw">super</span>::Fs;
 <span class="kw">pub type </span>ClientId = PathBuf;
 
 <span class="kw">pub struct </span>ClientFilestore&lt;S&gt;
@@ -676,17 +644,17 @@
 
 <span class="doccomment">/// Generic implementation allowing the use of any filesystem.
 </span><span class="kw">impl</span>&lt;S: Store&gt; ClientFilestore&lt;S&gt; {
-    <span class="kw">fn </span>read_dir_first_impl&lt;F: LfsStorage + <span class="lifetime">&#39;static</span>&gt;(
+    <span class="kw">fn </span>read_dir_first_impl(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         clients_dir: <span class="kw-2">&amp;</span>Path,
         location: Location,
         not_before: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>Path&gt;,
-        fs: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Fs&lt;F&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;(DirEntry, ReadDirState)&gt;&gt; {
+        <span class="kw">let </span>fs = <span class="self">self</span>.store.fs(location);
         <span class="kw">let </span>dir = <span class="self">self</span>.actual_path(clients_dir)<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(fs
-            .read_dir_and_then(<span class="kw-2">&amp;</span>dir, |it| {
+            .read_dir_and_then(<span class="kw-2">&amp;</span>dir, <span class="kw-2">&amp;mut </span>|it| {
                 <span class="comment">// this is an iterator with Item = (usize, Result&lt;DirEntry&gt;)
                 </span>it.enumerate()
                     <span class="comment">// skip over `.` and `..`
@@ -731,21 +699,21 @@
             })
             .ok())
     }
-    <span class="kw">fn </span>read_dir_next_impl&lt;F: LfsStorage + <span class="lifetime">&#39;static</span>&gt;(
+    <span class="kw">fn </span>read_dir_next_impl(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         state: ReadDirState,
-        fs: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Fs&lt;F&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;(DirEntry, ReadDirState)&gt;&gt; {
         <span class="kw">let </span>ReadDirState {
             real_dir,
             last,
             location,
         } = state;
+        <span class="kw">let </span>fs = <span class="self">self</span>.store.fs(location);
 
         <span class="comment">// all we want to do here is skip just past the previously found entry
         // in the directory iterator, then return it (plus state to continue on next call)
         </span><span class="prelude-val">Ok</span>(fs
-            .read_dir_and_then(<span class="kw-2">&amp;</span>real_dir, |it| {
+            .read_dir_and_then(<span class="kw-2">&amp;</span>real_dir, <span class="kw-2">&amp;mut </span>|it| {
                 <span class="comment">// skip over previous
                 </span>it.enumerate()
                     .nth(last + <span class="number">1</span>)
@@ -768,17 +736,17 @@
             })
             .ok())
     }
-    <span class="kw">fn </span>read_dir_files_first_impl&lt;F: LfsStorage + <span class="lifetime">&#39;static</span>&gt;(
+    <span class="kw">fn </span>read_dir_files_first_impl(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         clients_dir: <span class="kw-2">&amp;</span>Path,
         location: Location,
         user_attribute: <span class="prelude-ty">Option</span>&lt;UserAttribute&gt;,
-        fs: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Fs&lt;F&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;(<span class="prelude-ty">Option</span>&lt;Message&gt;, ReadDirFilesState)&gt;&gt; {
+        <span class="kw">let </span>fs = <span class="self">self</span>.store.fs(location);
         <span class="kw">let </span>dir = <span class="self">self</span>.actual_path(clients_dir)<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(fs
-            .read_dir_and_then(<span class="kw-2">&amp;</span>dir, |it| {
+            .read_dir_and_then(<span class="kw-2">&amp;</span>dir, <span class="kw-2">&amp;mut </span>|it| {
                 <span class="comment">// this is an iterator with Item = (usize, Result&lt;DirEntry&gt;)
                 </span>it.enumerate()
                     <span class="comment">// todo: try ?-ing out of this (the API matches std::fs, where read/write errors
@@ -810,15 +778,9 @@
                     // and return the file&#39;s contents.
                     // the client, and return both the entry and the state
                     </span>.map(|(i, entry)| {
-                        <span class="kw">let </span>read_dir_files_state = ReadDirFilesState {
-                            real_dir: dir.clone(),
-                            last: i,
-                            location,
-                            user_attribute,
-                        };
                         <span class="comment">// The semantics is that for a non-existent file, we return None (not an error)
                         </span><span class="kw">let </span>data = store::read(<span class="self">self</span>.store, location, entry.path()).ok();
-                        (data, read_dir_files_state)
+                        (i, data)
 
                         <span class="comment">// the `ok_or` dummy error followed by the `ok` in the next line is because
                         // `read_dir_and_then` wants to see Results (although we naturally have an Option
@@ -826,13 +788,21 @@
                     </span>})
                     .ok_or(littlefs2::io::Error::Io)
             })
-            .ok())
+            .ok()
+            .map(|(i, data)| {
+                <span class="kw">let </span>read_dir_files_state = ReadDirFilesState {
+                    real_dir: dir,
+                    last: i,
+                    location,
+                    user_attribute,
+                };
+                (data, read_dir_files_state)
+            }))
     }
 
-    <span class="kw">fn </span>read_dir_files_next_impl&lt;F: LfsStorage + <span class="lifetime">&#39;static</span>&gt;(
+    <span class="kw">fn </span>read_dir_files_next_impl(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         state: ReadDirFilesState,
-        fs: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Fs&lt;F&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;(<span class="prelude-ty">Option</span>&lt;Message&gt;, ReadDirFilesState)&gt;&gt; {
         <span class="kw">let </span>ReadDirFilesState {
             real_dir,
@@ -840,11 +810,12 @@
             location,
             user_attribute,
         } = state;
+        <span class="kw">let </span>fs = <span class="self">self</span>.store.fs(location);
 
         <span class="comment">// all we want to do here is skip just past the previously found entry
         // in the directory iterator, then return it (plus state to continue on next call)
         </span><span class="prelude-val">Ok</span>(fs
-            .read_dir_and_then(<span class="kw-2">&amp;</span>real_dir, |it| {
+            .read_dir_and_then(<span class="kw-2">&amp;</span>real_dir, <span class="kw-2">&amp;mut </span>|it| {
                 <span class="comment">// skip over previous
                 </span>it.enumerate()
                     .skip(last + <span class="number">1</span>)
@@ -870,20 +841,24 @@
                         </span>}
                     })
                     .map(|(i, entry)| {
-                        <span class="kw">let </span>read_dir_files_state = ReadDirFilesState {
-                            real_dir: real_dir.clone(),
-                            last: i,
-                            location,
-                            user_attribute,
-                        };
                         <span class="comment">// The semantics is that for a non-existent file, we return None (not an error)
                         </span><span class="kw">let </span>data = store::read(<span class="self">self</span>.store, location, entry.path()).ok();
-                        (data, read_dir_files_state)
+                        (i, data)
                     })
                     <span class="comment">// convert Option into Result, again because `read_dir_and_then` expects this
                     </span>.ok_or(littlefs2::io::Error::Io)
             })
-            .ok())
+            .ok()
+            .map(|(i, data)| {
+                <span class="kw">let </span>read_dir_files_state = ReadDirFilesState {
+                    real_dir,
+                    last: i,
+                    location,
+                    <span class="comment">// TODO: check if we can avoid that clone
+                    </span>user_attribute: user_attribute.clone(),
+                };
+                (data, read_dir_files_state)
+            }))
     }
 }
 
@@ -938,7 +913,7 @@
     <span class="kw">fn </span>remove_dir_all(<span class="kw-2">&amp;mut </span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>Path, location: Location) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="kw">let </span>path = <span class="self">self</span>.actual_path(path)<span class="question-mark">?</span>;
 
-        store::remove_dir_all_where(<span class="self">self</span>.store, location, <span class="kw-2">&amp;</span>path, |<span class="kw">_</span>| <span class="bool-val">true</span>)
+        store::remove_dir_all_where(<span class="self">self</span>.store, location, <span class="kw-2">&amp;</span>path, <span class="kw-2">&amp;</span>|<span class="kw">_</span>| <span class="bool-val">true</span>)
             .map_err(|<span class="kw">_</span>| Error::InternalError)
     }
     <span class="kw">fn </span>remove_dir_all_where(
@@ -949,7 +924,7 @@
     ) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="kw">let </span>path = <span class="self">self</span>.actual_path(path)<span class="question-mark">?</span>;
 
-        store::remove_dir_all_where(<span class="self">self</span>.store, location, <span class="kw-2">&amp;</span>path, predicate)
+        store::remove_dir_all_where(<span class="self">self</span>.store, location, <span class="kw-2">&amp;</span>path, <span class="kw-2">&amp;</span>predicate)
             .map_err(|<span class="kw">_</span>| Error::InternalError)
     }
 
@@ -959,25 +934,11 @@
         location: Location,
         not_before: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>Path&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;(DirEntry, ReadDirState)&gt;&gt; {
-        <span class="kw">match </span>location {
-            Location::Internal =&gt; {
-                <span class="self">self</span>.read_dir_first_impl(clients_dir, location, not_before, <span class="self">self</span>.store.ifs())
-            }
-            Location::External =&gt; {
-                <span class="self">self</span>.read_dir_first_impl(clients_dir, location, not_before, <span class="self">self</span>.store.efs())
-            }
-            Location::Volatile =&gt; {
-                <span class="self">self</span>.read_dir_first_impl(clients_dir, location, not_before, <span class="self">self</span>.store.vfs())
-            }
-        }
+        <span class="self">self</span>.read_dir_first_impl(clients_dir, location, not_before)
     }
 
     <span class="kw">fn </span>read_dir_next(<span class="kw-2">&amp;mut </span><span class="self">self</span>, state: ReadDirState) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;(DirEntry, ReadDirState)&gt;&gt; {
-        <span class="kw">match </span>state.location {
-            Location::Internal =&gt; <span class="self">self</span>.read_dir_next_impl(state, <span class="self">self</span>.store.ifs()),
-            Location::External =&gt; <span class="self">self</span>.read_dir_next_impl(state, <span class="self">self</span>.store.efs()),
-            Location::Volatile =&gt; <span class="self">self</span>.read_dir_next_impl(state, <span class="self">self</span>.store.vfs()),
-        }
+        <span class="self">self</span>.read_dir_next_impl(state)
     }
 
     <span class="kw">fn </span>read_dir_files_first(
@@ -986,37 +947,14 @@
         location: Location,
         user_attribute: <span class="prelude-ty">Option</span>&lt;UserAttribute&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;(<span class="prelude-ty">Option</span>&lt;Message&gt;, ReadDirFilesState)&gt;&gt; {
-        <span class="kw">match </span>location {
-            Location::Internal =&gt; <span class="self">self</span>.read_dir_files_first_impl(
-                clients_dir,
-                location,
-                user_attribute,
-                <span class="self">self</span>.store.ifs(),
-            ),
-            Location::External =&gt; <span class="self">self</span>.read_dir_files_first_impl(
-                clients_dir,
-                location,
-                user_attribute,
-                <span class="self">self</span>.store.efs(),
-            ),
-            Location::Volatile =&gt; <span class="self">self</span>.read_dir_files_first_impl(
-                clients_dir,
-                location,
-                user_attribute,
-                <span class="self">self</span>.store.vfs(),
-            ),
-        }
+        <span class="self">self</span>.read_dir_files_first_impl(clients_dir, location, user_attribute)
     }
 
     <span class="kw">fn </span>read_dir_files_next(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         state: ReadDirFilesState,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;(<span class="prelude-ty">Option</span>&lt;Message&gt;, ReadDirFilesState)&gt;&gt; {
-        <span class="kw">match </span>state.location {
-            Location::Internal =&gt; <span class="self">self</span>.read_dir_files_next_impl(state, <span class="self">self</span>.store.ifs()),
-            Location::External =&gt; <span class="self">self</span>.read_dir_files_next_impl(state, <span class="self">self</span>.store.efs()),
-            Location::Volatile =&gt; <span class="self">self</span>.read_dir_files_next_impl(state, <span class="self">self</span>.store.vfs()),
-        }
+        <span class="self">self</span>.read_dir_files_next_impl(state)
     }
 
     <span class="kw">fn </span>locate_file(
@@ -1031,16 +969,16 @@
 
         <span class="kw">let </span>clients_dir = underneath.unwrap_or_else(|| <span class="macro">path!</span>(<span class="string">&quot;/&quot;</span>));
         <span class="kw">let </span>dir = <span class="self">self</span>.actual_path(clients_dir)<span class="question-mark">?</span>;
-        <span class="kw">let </span>fs = <span class="self">self</span>.store.ifs();
+        <span class="kw">let </span>fs = <span class="self">self</span>.store.fs(Location::Internal);
 
         <span class="macro">info_now!</span>(<span class="string">&quot;base dir {:?}&quot;</span>, <span class="kw-2">&amp;</span>dir);
 
-        <span class="kw">fn </span>recursively_locate&lt;S: <span class="lifetime">&#39;static </span>+ <span class="kw">crate</span>::types::LfsStorage&gt;(
-            fs: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw">crate</span>::store::Fs&lt;S&gt;,
+        <span class="kw">fn </span>recursively_locate(
+            fs: <span class="kw-2">&amp;</span><span class="kw">dyn </span>DynFilesystem,
             dir: <span class="kw-2">&amp;</span>Path,
             filename: <span class="kw-2">&amp;</span>Path,
         ) -&gt; <span class="prelude-ty">Option</span>&lt;PathBuf&gt; {
-            fs.read_dir_and_then(dir, |it| {
+            fs.read_dir_and_then(dir, <span class="kw-2">&amp;mut </span>|it| {
                 it.map(|entry| entry.unwrap())
                     .skip(<span class="number">2</span>)
                     .filter_map(|entry| {

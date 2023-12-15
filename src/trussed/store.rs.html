@@ -651,25 +651,6 @@
 <a href="#651" id="651">651</a>
 <a href="#652" id="652">652</a>
 <a href="#653" id="653">653</a>
-<a href="#654" id="654">654</a>
-<a href="#655" id="655">655</a>
-<a href="#656" id="656">656</a>
-<a href="#657" id="657">657</a>
-<a href="#658" id="658">658</a>
-<a href="#659" id="659">659</a>
-<a href="#660" id="660">660</a>
-<a href="#661" id="661">661</a>
-<a href="#662" id="662">662</a>
-<a href="#663" id="663">663</a>
-<a href="#664" id="664">664</a>
-<a href="#665" id="665">665</a>
-<a href="#666" id="666">666</a>
-<a href="#667" id="667">667</a>
-<a href="#668" id="668">668</a>
-<a href="#669" id="669">669</a>
-<a href="#670" id="670">670</a>
-<a href="#671" id="671">671</a>
-<a href="#672" id="672">672</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! `store` presents a combined interface to three littlefs2 filesystems:
 //! internal flash, external flash, volatile/RAM.
 //!
@@ -748,7 +729,12 @@
 <span class="attr">#[allow(unused_imports)]
 #[cfg(feature = <span class="string">&quot;semihosting&quot;</span>)]
 </span><span class="kw">use </span>cortex_m_semihosting::hprintln;
-<span class="kw">use </span>littlefs2::path::Path;
+<span class="kw">use </span>littlefs2::{
+    fs::{DirEntry, Metadata},
+    path::Path,
+};
+
+<span class="kw">pub use </span>littlefs2::object_safe::{DynFile, DynFilesystem, DynStorage};
 
 <span class="kw">pub mod </span>certstore;
 <span class="kw">pub mod </span>counterstore;
@@ -800,6 +786,13 @@
     <span class="kw">fn </span>ifs(<span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Fs&lt;<span class="self">Self</span>::I&gt;;
     <span class="kw">fn </span>efs(<span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Fs&lt;<span class="self">Self</span>::E&gt;;
     <span class="kw">fn </span>vfs(<span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Fs&lt;<span class="self">Self</span>::V&gt;;
+    <span class="kw">fn </span>fs(<span class="kw-2">&amp;</span><span class="self">self</span>, location: Location) -&gt; <span class="kw-2">&amp;</span><span class="kw">dyn </span>DynFilesystem {
+        <span class="kw">match </span>location {
+            Location::Internal =&gt; <span class="self">self</span>.ifs().fs,
+            Location::External =&gt; <span class="self">self</span>.efs().fs,
+            Location::Volatile =&gt; <span class="self">self</span>.vfs().fs,
+        }
+    }
 }
 
 <span class="kw">pub struct </span>Fs&lt;S: <span class="lifetime">&#39;static </span>+ LfsStorage&gt; {
@@ -1152,7 +1145,7 @@
 }
 
 <span class="comment">// TODO: replace this with &quot;fs.create_dir_all(path.parent())&quot;
-</span><span class="kw">pub fn </span>create_directories&lt;S: LfsStorage&gt;(fs: <span class="kw-2">&amp;</span>Filesystem&lt;S&gt;, path: <span class="kw-2">&amp;</span>Path) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
+</span><span class="kw">pub fn </span>create_directories(fs: <span class="kw-2">&amp;</span><span class="kw">dyn </span>DynFilesystem, path: <span class="kw-2">&amp;</span>Path) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
     <span class="comment">// hprintln!(&quot;preparing {:?}&quot;, core::str::from_utf8(path).unwrap()).ok();
     </span><span class="kw">let </span>path_bytes = path.as_ref().as_bytes();
 
@@ -1183,13 +1176,11 @@
     path: <span class="kw-2">&amp;</span>Path,
 ) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&lt;N&gt;, Error&gt; {
     <span class="macro">debug_now!</span>(<span class="string">&quot;reading {}&quot;</span>, <span class="kw-2">&amp;</span>path);
-    <span class="kw">match </span>location {
-        Location::Internal =&gt; store.ifs().read(path),
-        Location::External =&gt; store.efs().read(path),
-        Location::Volatile =&gt; store.vfs().read(path),
-    }
-    .map(Bytes::from)
-    .map_err(|<span class="kw">_</span>| Error::FilesystemReadFailure)
+    store
+        .fs(location)
+        .read(path)
+        .map(From::from)
+        .map_err(|<span class="kw">_</span>| Error::FilesystemReadFailure)
 }
 
 <span class="doccomment">/// Writes contents to path in location of store.
@@ -1201,12 +1192,10 @@
     contents: <span class="kw-2">&amp;</span>[u8],
 ) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
     <span class="macro">debug_now!</span>(<span class="string">&quot;writing {}&quot;</span>, <span class="kw-2">&amp;</span>path);
-    <span class="kw">match </span>location {
-        Location::Internal =&gt; store.ifs().write(path, contents),
-        Location::External =&gt; store.efs().write(path, contents),
-        Location::Volatile =&gt; store.vfs().write(path, contents),
-    }
-    .map_err(|<span class="kw">_</span>| Error::FilesystemWriteFailure)
+    store
+        .fs(location)
+        .write(path, contents)
+        .map_err(|<span class="kw">_</span>| Error::FilesystemWriteFailure)
 }
 
 <span class="doccomment">/// Creates parent directory if necessary, then writes.
@@ -1218,33 +1207,23 @@
     contents: <span class="kw-2">&amp;</span>[u8],
 ) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
     <span class="macro">debug_now!</span>(<span class="string">&quot;storing {}&quot;</span>, <span class="kw-2">&amp;</span>path);
-    <span class="kw">match </span>location {
-        Location::Internal =&gt; create_directories(store.ifs(), path)<span class="question-mark">?</span>,
-        Location::External =&gt; create_directories(store.efs(), path)<span class="question-mark">?</span>,
-        Location::Volatile =&gt; create_directories(store.vfs(), path)<span class="question-mark">?</span>,
-    }
-    write(store, location, path, contents)
+    create_directories(store.fs(location), path)<span class="question-mark">?</span>;
+    store
+        .fs(location)
+        .write(path, contents)
+        .map_err(|<span class="kw">_</span>| Error::FilesystemWriteFailure)
 }
 
 <span class="attr">#[inline(never)]
 </span><span class="kw">pub fn </span>delete(store: <span class="kw">impl </span>Store, location: Location, path: <span class="kw-2">&amp;</span>Path) -&gt; bool {
     <span class="macro">debug_now!</span>(<span class="string">&quot;deleting {}&quot;</span>, <span class="kw-2">&amp;</span>path);
-    <span class="kw">let </span>outcome = <span class="kw">match </span>location {
-        Location::Internal =&gt; store.ifs().remove(path),
-        Location::External =&gt; store.efs().remove(path),
-        Location::Volatile =&gt; store.vfs().remove(path),
-    };
-    outcome.is_ok()
+    store.fs(location).remove(path).is_ok()
 }
 
 <span class="attr">#[inline(never)]
 </span><span class="kw">pub fn </span>exists(store: <span class="kw">impl </span>Store, location: Location, path: <span class="kw-2">&amp;</span>Path) -&gt; bool {
     <span class="macro">debug_now!</span>(<span class="string">&quot;checking existence of {}&quot;</span>, <span class="kw-2">&amp;</span>path);
-    <span class="kw">match </span>location {
-        Location::Internal =&gt; path.exists(store.ifs()),
-        Location::External =&gt; path.exists(store.efs()),
-        Location::Volatile =&gt; path.exists(store.vfs()),
-    }
+    store.fs(location).exists(path)
 }
 
 <span class="attr">#[inline(never)]
@@ -1254,12 +1233,7 @@
     path: <span class="kw-2">&amp;</span>Path,
 ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Metadata&gt;, Error&gt; {
     <span class="macro">debug_now!</span>(<span class="string">&quot;checking existence of {}&quot;</span>, <span class="kw-2">&amp;</span>path);
-    <span class="kw">let </span>result = <span class="kw">match </span>location {
-        Location::Internal =&gt; store.ifs().metadata(path),
-        Location::External =&gt; store.efs().metadata(path),
-        Location::Volatile =&gt; store.vfs().metadata(path),
-    };
-    <span class="kw">match </span>result {
+    <span class="kw">match </span>store.fs(location).metadata(path) {
         <span class="prelude-val">Ok</span>(metadata) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(metadata)),
         <span class="prelude-val">Err</span>(littlefs2::io::Error::NoSuchEntry) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
         <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">Err</span>(Error::FilesystemReadFailure),
@@ -1269,42 +1243,30 @@
 <span class="attr">#[inline(never)]
 </span><span class="kw">pub fn </span>rename(store: <span class="kw">impl </span>Store, location: Location, from: <span class="kw-2">&amp;</span>Path, to: <span class="kw-2">&amp;</span>Path) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
     <span class="macro">debug_now!</span>(<span class="string">&quot;renaming {} to {}&quot;</span>, <span class="kw-2">&amp;</span>from, <span class="kw-2">&amp;</span>to);
-    <span class="kw">match </span>location {
-        Location::Internal =&gt; store.ifs().rename(from, to),
-        Location::External =&gt; store.efs().rename(from, to),
-        Location::Volatile =&gt; store.vfs().rename(from, to),
-    }
-    .map_err(|<span class="kw">_</span>| Error::FilesystemWriteFailure)
+    store
+        .fs(location)
+        .rename(from, to)
+        .map_err(|<span class="kw">_</span>| Error::FilesystemWriteFailure)
 }
 
 <span class="attr">#[inline(never)]
 </span><span class="kw">pub fn </span>remove_dir(store: <span class="kw">impl </span>Store, location: Location, path: <span class="kw-2">&amp;</span>Path) -&gt; bool {
     <span class="macro">debug_now!</span>(<span class="string">&quot;remove_dir&#39;ing {}&quot;</span>, <span class="kw-2">&amp;</span>path);
-    <span class="kw">let </span>outcome = <span class="kw">match </span>location {
-        Location::Internal =&gt; store.ifs().remove_dir(path),
-        Location::External =&gt; store.efs().remove_dir(path),
-        Location::Volatile =&gt; store.vfs().remove_dir(path),
-    };
-    outcome.is_ok()
+    store.fs(location).remove_dir(path).is_ok()
 }
 
 <span class="attr">#[inline(never)]
-</span><span class="kw">pub fn </span>remove_dir_all_where&lt;P&gt;(
+</span><span class="kw">pub fn </span>remove_dir_all_where(
     store: <span class="kw">impl </span>Store,
     location: Location,
     path: <span class="kw-2">&amp;</span>Path,
-    predicate: P,
-) -&gt; <span class="prelude-ty">Result</span>&lt;usize, Error&gt;
-<span class="kw">where
-    </span>P: Fn(<span class="kw-2">&amp;</span>DirEntry) -&gt; bool,
-{
+    predicate: <span class="kw-2">&amp;</span><span class="kw">dyn </span>Fn(<span class="kw-2">&amp;</span>DirEntry) -&gt; bool,
+) -&gt; <span class="prelude-ty">Result</span>&lt;usize, Error&gt; {
     <span class="macro">debug_now!</span>(<span class="string">&quot;remove_dir&#39;ing {}&quot;</span>, <span class="kw-2">&amp;</span>path);
-    <span class="kw">let </span>outcome = <span class="kw">match </span>location {
-        Location::Internal =&gt; store.ifs().remove_dir_all_where(path, <span class="kw-2">&amp;</span>predicate),
-        Location::External =&gt; store.efs().remove_dir_all_where(path, <span class="kw-2">&amp;</span>predicate),
-        Location::Volatile =&gt; store.vfs().remove_dir_all_where(path, <span class="kw-2">&amp;</span>predicate),
-    };
-    outcome.map_err(|<span class="kw">_</span>| Error::FilesystemWriteFailure)
+    store
+        .fs(location)
+        .remove_dir_all_where(path, predicate)
+        .map_err(|<span class="kw">_</span>| Error::FilesystemWriteFailure)
 }
 
 <span class="comment">// pub fn delete_volatile(store: impl Store, handle: &amp;ObjectHandle) -&gt; bool {

@@ -39,7 +39,7 @@ var srcIndex = JSON.parse('{\
 "hmac":["",[],["lib.rs","optim.rs","simple.rs"]],\
 "inout":["",[],["errors.rs","inout.rs","inout_buf.rs","lib.rs","reserved.rs"]],\
 "interchange":["",[],["lib.rs"]],\
-"littlefs2":["",[["io",[],["prelude.rs"]]],["consts.rs","driver.rs","fs.rs","io.rs","lib.rs","macros.rs","path.rs"]],\
+"littlefs2":["",[["io",[],["prelude.rs"]]],["consts.rs","driver.rs","fs.rs","io.rs","lib.rs","macros.rs","object_safe.rs","path.rs"]],\
 "littlefs2_sys":["",[],["lib.rs"]],\
 "lock_api":["",[],["lib.rs","mutex.rs","remutex.rs","rwlock.rs"]],\
 "log":["",[],["__private_api.rs","lib.rs","macros.rs"]],\
