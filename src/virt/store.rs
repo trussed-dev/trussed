@@ -6,7 +6,7 @@ use std::{
 };
 
 use generic_array::typenum::{U512, U8};
-use littlefs2::{const_ram_storage, driver::Storage, fs::Allocation};
+use littlefs2::{const_ram_storage, driver::Storage, fs::Allocation, object_safe::DynStorage};
 
 use crate::{
     store,
@@ -17,7 +17,7 @@ use crate::{
 pub trait StoreProvider {
     type Store: Store;
 
-    unsafe fn ifs() -> &'static mut <Self::Store as Store>::I;
+    unsafe fn ifs() -> &'static mut dyn DynStorage;
 
     unsafe fn store() -> Self::Store;
 
@@ -132,7 +132,7 @@ impl Filesystem {
 impl StoreProvider for Filesystem {
     type Store = FilesystemStore;
 
-    unsafe fn ifs() -> &'static mut FilesystemStorage {
+    unsafe fn ifs() -> &'static mut dyn DynStorage {
         INTERNAL_FILESYSTEM_STORAGE
             .as_mut()
             .expect("ifs not initialized")
@@ -175,7 +175,7 @@ pub struct Ram {}
 impl StoreProvider for Ram {
     type Store = RamStore;
 
-    unsafe fn ifs() -> &'static mut InternalStorage {
+    unsafe fn ifs() -> &'static mut dyn DynStorage {
         INTERNAL_RAM_STORAGE.as_mut().expect("ifs not initialized")
     }
 

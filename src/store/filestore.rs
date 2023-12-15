@@ -1,8 +1,8 @@
 use crate::{
     error::{Error, Result},
     // service::ReadDirState,
-    store::{self, Store},
-    types::{LfsStorage, Location, Message, UserAttribute},
+    store::{self, DynFilesystem, Store},
+    types::{Location, Message, UserAttribute},
     Bytes,
 };
 use littlefs2::path;
@@ -27,7 +27,6 @@ use littlefs2::{
     path::{Path, PathBuf},
 };
 
-use super::Fs;
 pub type ClientId = PathBuf;
 
 pub struct ClientFilestore<S>
@@ -142,17 +141,17 @@ pub trait Filestore {
 
 /// Generic implementation allowing the use of any filesystem.
 impl<S: Store> ClientFilestore<S> {
-    fn read_dir_first_impl<F: LfsStorage + 'static>(
+    fn read_dir_first_impl(
         &mut self,
         clients_dir: &Path,
         location: Location,
         not_before: Option<&Path>,
-        fs: &'static Fs<F>,
     ) -> Result<Option<(DirEntry, ReadDirState)>> {
+        let fs = self.store.fs(location);
         let dir = self.actual_path(clients_dir)?;
 
         Ok(fs
-            .read_dir_and_then(&dir, |it| {
+            .read_dir_and_then(&dir, &mut |it| {
                 // this is an iterator with Item = (usize, Result<DirEntry>)
                 it.enumerate()
                     // skip over `.` and `..`
@@ -197,21 +196,22 @@ impl<S: Store> ClientFilestore<S> {
             })
             .ok())
     }
-    fn read_dir_next_impl<F: LfsStorage + 'static>(
+    fn read_dir_next_impl(
         &mut self,
         state: ReadDirState,
-        fs: &'static Fs<F>,
     ) -> Result<Option<(DirEntry, ReadDirState)>> {
+        // TODO: check what happens (or used to happen) for FS != IFS
         let ReadDirState {
             real_dir,
             last,
             location,
         } = state;
+        let fs = self.store.fs(location);
 
         // all we want to do here is skip just past the previously found entry
         // in the directory iterator, then return it (plus state to continue on next call)
         Ok(fs
-            .read_dir_and_then(&real_dir, |it| {
+            .read_dir_and_then(&real_dir, &mut |it| {
                 // skip over previous
                 it.enumerate()
                     .nth(last + 1)
@@ -234,17 +234,17 @@ impl<S: Store> ClientFilestore<S> {
             })
             .ok())
     }
-    fn read_dir_files_first_impl<F: LfsStorage + 'static>(
+    fn read_dir_files_first_impl(
         &mut self,
         clients_dir: &Path,
         location: Location,
         user_attribute: Option<UserAttribute>,
-        fs: &'static Fs<F>,
     ) -> Result<Option<(Option<Message>, ReadDirFilesState)>> {
+        let fs = self.store.fs(location);
         let dir = self.actual_path(clients_dir)?;
 
         Ok(fs
-            .read_dir_and_then(&dir, |it| {
+            .read_dir_and_then(&dir, &mut |it| {
                 // this is an iterator with Item = (usize, Result<DirEntry>)
                 it.enumerate()
                     // todo: try ?-ing out of this (the API matches std::fs, where read/write errors
@@ -280,7 +280,8 @@ impl<S: Store> ClientFilestore<S> {
                             real_dir: dir.clone(),
                             last: i,
                             location,
-                            user_attribute,
+                            // TODO: check if we can avoid that clone
+                            user_attribute: user_attribute.clone(),
                         };
                         // The semantics is that for a non-existent file, we return None (not an error)
                         let data = store::read(self.store, location, entry.path()).ok();
@@ -295,22 +296,23 @@ impl<S: Store> ClientFilestore<S> {
             .ok())
     }
 
-    fn read_dir_files_next_impl<F: LfsStorage + 'static>(
+    fn read_dir_files_next_impl(
         &mut self,
         state: ReadDirFilesState,
-        fs: &'static Fs<F>,
     ) -> Result<Option<(Option<Message>, ReadDirFilesState)>> {
+        // TODO: check what happens (or used to happen) for FS != IFS
         let ReadDirFilesState {
             real_dir,
             last,
             location,
             user_attribute,
         } = state;
+        let fs = self.store.fs(location);
 
         // all we want to do here is skip just past the previously found entry
         // in the directory iterator, then return it (plus state to continue on next call)
         Ok(fs
-            .read_dir_and_then(&real_dir, |it| {
+            .read_dir_and_then(&real_dir, &mut |it| {
                 // skip over previous
                 it.enumerate()
                     .skip(last + 1)
@@ -340,7 +342,8 @@ impl<S: Store> ClientFilestore<S> {
                             real_dir: real_dir.clone(),
                             last: i,
                             location,
-                            user_attribute,
+                            // TODO: check if we can avoid that clone
+                            user_attribute: user_attribute.clone(),
                         };
                         // The semantics is that for a non-existent file, we return None (not an error)
                         let data = store::read(self.store, location, entry.path()).ok();
@@ -404,7 +407,7 @@ impl<S: Store> Filestore for ClientFilestore<S> {
     fn remove_dir_all(&mut self, path: &Path, location: Location) -> Result<usize> {
         let path = self.actual_path(path)?;
 
-        store::remove_dir_all_where(self.store, location, &path, |_| true)
+        store::remove_dir_all_where(self.store, location, &path, &|_| true)
             .map_err(|_| Error::InternalError)
     }
     fn remove_dir_all_where(
@@ -415,7 +418,7 @@ impl<S: Store> Filestore for ClientFilestore<S> {
     ) -> Result<usize> {
         let path = self.actual_path(path)?;
 
-        store::remove_dir_all_where(self.store, location, &path, predicate)
+        store::remove_dir_all_where(self.store, location, &path, &predicate)
             .map_err(|_| Error::InternalError)
     }
 
@@ -425,25 +428,11 @@ impl<S: Store> Filestore for ClientFilestore<S> {
         location: Location,
         not_before: Option<&Path>,
     ) -> Result<Option<(DirEntry, ReadDirState)>> {
-        match location {
-            Location::Internal => {
-                self.read_dir_first_impl(clients_dir, location, not_before, self.store.ifs())
-            }
-            Location::External => {
-                self.read_dir_first_impl(clients_dir, location, not_before, self.store.efs())
-            }
-            Location::Volatile => {
-                self.read_dir_first_impl(clients_dir, location, not_before, self.store.vfs())
-            }
-        }
+        self.read_dir_first_impl(clients_dir, location, not_before)
     }
 
     fn read_dir_next(&mut self, state: ReadDirState) -> Result<Option<(DirEntry, ReadDirState)>> {
-        match state.location {
-            Location::Internal => self.read_dir_next_impl(state, self.store.ifs()),
-            Location::External => self.read_dir_next_impl(state, self.store.efs()),
-            Location::Volatile => self.read_dir_next_impl(state, self.store.vfs()),
-        }
+        self.read_dir_next_impl(state)
     }
 
     fn read_dir_files_first(
@@ -452,37 +441,14 @@ impl<S: Store> Filestore for ClientFilestore<S> {
         location: Location,
         user_attribute: Option<UserAttribute>,
     ) -> Result<Option<(Option<Message>, ReadDirFilesState)>> {
-        match location {
-            Location::Internal => self.read_dir_files_first_impl(
-                clients_dir,
-                location,
-                user_attribute,
-                self.store.ifs(),
-            ),
-            Location::External => self.read_dir_files_first_impl(
-                clients_dir,
-                location,
-                user_attribute,
-                self.store.efs(),
-            ),
-            Location::Volatile => self.read_dir_files_first_impl(
-                clients_dir,
-                location,
-                user_attribute,
-                self.store.vfs(),
-            ),
-        }
+        self.read_dir_files_first_impl(clients_dir, location, user_attribute)
     }
 
     fn read_dir_files_next(
         &mut self,
         state: ReadDirFilesState,
     ) -> Result<Option<(Option<Message>, ReadDirFilesState)>> {
-        match state.location {
-            Location::Internal => self.read_dir_files_next_impl(state, self.store.ifs()),
-            Location::External => self.read_dir_files_next_impl(state, self.store.efs()),
-            Location::Volatile => self.read_dir_files_next_impl(state, self.store.vfs()),
-        }
+        self.read_dir_files_next_impl(state)
     }
 
     fn locate_file(
@@ -497,16 +463,16 @@ impl<S: Store> Filestore for ClientFilestore<S> {
 
         let clients_dir = underneath.unwrap_or_else(|| path!("/"));
         let dir = self.actual_path(clients_dir)?;
-        let fs = self.store.ifs();
+        let fs = self.store.fs(Location::Internal);
 
         info_now!("base dir {:?}", &dir);
 
-        fn recursively_locate<S: 'static + crate::types::LfsStorage>(
-            fs: &'static crate::store::Fs<S>,
+        fn recursively_locate(
+            fs: &dyn DynFilesystem,
             dir: &Path,
             filename: &Path,
         ) -> Option<PathBuf> {
-            fs.read_dir_and_then(dir, |it| {
+            fs.read_dir_and_then(dir, &mut |it| {
                 it.map(|entry| entry.unwrap())
                     .skip(2)
                     .filter_map(|entry| {
