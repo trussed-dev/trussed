@@ -26,11 +26,7 @@ impl DeriveKey for super::HmacBlake2s {
         if let Some(additional_data) = &request.additional_data {
             mac.update(additional_data);
         }
-        let derived_key: [u8; 32] = mac
-            .finalize()
-            .into_bytes()
-            .try_into()
-            .map_err(|_| Error::InternalError)?;
+        let derived_key: [u8; 32] = mac.finalize().into_bytes().into();
         let key = keystore.store_key(
             request.attributes.persistence,
             key::Secrecy::Secret,
