@@ -148,6 +148,7 @@ impl<P: Platform> ServiceResources<P> {
             generator
         }
 
+        #[cfg(feature = "crypto-client-attest")]
         let full_store = self.platform.store();
 
         let keystore = once(|this, ctx| this.keystore(ctx.path.clone()));
