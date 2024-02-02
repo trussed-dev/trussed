@@ -244,7 +244,7 @@ pub mod request {
         ReadDirFirst:
           - location: Location
           - dir: PathBuf
-          - not_before_filename: Option<PathBuf>
+          - not_before: Option<(PathBuf, bool)>
 
         ReadDirNext:
 

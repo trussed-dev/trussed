@@ -598,6 +598,9 @@ pub trait FilesystemClient: PollClient {
         self.request(request::DebugDumpStore {})
     }
 
+    /// Open a directory for iteration with `read_dir_next`
+    ///
+    /// For optimization, not_before_filename can be passed to begin the iteration at that file.
     fn read_dir_first(
         &mut self,
         location: Location,
@@ -607,7 +610,27 @@ pub trait FilesystemClient: PollClient {
         self.request(request::ReadDirFirst {
             location,
             dir,
-            not_before_filename,
+            not_before: not_before_filename.map(|p| (p, true)),
+        })
+    }
+
+    /// Open a directory for iteration with `read_dir_next`
+    ///
+    /// For optimization, not_before_filename can be passed to begin the iteration after the first file that is "alphabetically" before the original file
+    ///
+    /// <div class="warning">
+    /// The notion used here for "alphabetical" does not correspond to the order of iteration yielded by littlefs. This function should be used with caution. If `not_before_filename` was yielded from a previous use of read_dir, it can lead to entries being repeated.
+    /// </div>
+    fn read_dir_first_alphabetical(
+        &mut self,
+        location: Location,
+        dir: PathBuf,
+        not_before_filename: Option<PathBuf>,
+    ) -> ClientResult<'_, reply::ReadDirFirst, Self> {
+        self.request(request::ReadDirFirst {
+            location,
+            dir,
+            not_before: not_before_filename.map(|p| (p, false)),
         })
     }
 

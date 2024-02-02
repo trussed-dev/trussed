@@ -1,3 +1,5 @@
+use core::cmp::Ordering;
+
 use crate::{
     error::{Error, Result},
     // service::ReadDirState,
@@ -109,7 +111,7 @@ pub trait Filestore {
         &mut self,
         dir: &Path,
         location: Location,
-        not_before: Option<&Path>,
+        not_before: Option<(&Path, bool)>,
     ) -> Result<Option<(DirEntry, ReadDirState)>>;
 
     /// Continue iterating over entries of a directory.
@@ -145,7 +147,7 @@ impl<S: Store> ClientFilestore<S> {
         &mut self,
         clients_dir: &Path,
         location: Location,
-        not_before: Option<&Path>,
+        not_before: Option<(&Path, bool)>,
     ) -> Result<Option<(DirEntry, ReadDirState)>> {
         let fs = self.store.fs(location);
         let dir = self.actual_path(clients_dir)?;
@@ -163,8 +165,15 @@ impl<S: Store> ClientFilestore<S> {
                     .map(|(i, entry)| (i, entry.unwrap()))
                     // if there is a "not_before" entry, skip all entries before it.
                     .find(|(_, entry)| {
-                        if let Some(not_before) = not_before {
-                            entry.file_name() == not_before.as_ref()
+                        if let Some((not_before, require_equal)) = not_before {
+                            if require_equal {
+                                entry.file_name() == not_before
+                            } else {
+                                match entry.file_name().cmp_str(not_before) {
+                                    Ordering::Less => false,
+                                    Ordering::Equal | Ordering::Greater => true,
+                                }
+                            }
                         } else {
                             true
                         }
@@ -429,7 +438,7 @@ impl<S: Store> Filestore for ClientFilestore<S> {
         &mut self,
         clients_dir: &Path,
         location: Location,
-        not_before: Option<&Path>,
+        not_before: Option<(&Path, bool)>,
     ) -> Result<Option<(DirEntry, ReadDirState)>> {
         self.read_dir_first_impl(clients_dir, location, not_before)
     }
