@@ -26,11 +26,7 @@ impl DeriveKey for super::HmacSha1 {
         if let Some(additional_data) = &request.additional_data {
             mac.update(additional_data);
         }
-        let derived_key: [u8; 20] = mac
-            .finalize()
-            .into_bytes()
-            .try_into()
-            .map_err(|_| Error::InternalError)?;
+        let derived_key: [u8; 20] = mac.finalize().into_bytes().into();
         let key_id = keystore.store_key(
             request.attributes.persistence,
             key::Secrecy::Secret,

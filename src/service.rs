@@ -148,6 +148,7 @@ impl<P: Platform> ServiceResources<P> {
             generator
         }
 
+        #[cfg(feature = "crypto-client-attest")]
         let full_store = self.platform.store();
 
         let keystore = once(|this, ctx| this.keystore(ctx.path.clone()));
@@ -159,19 +160,14 @@ impl<P: Platform> ServiceResources<P> {
 
         debug_now!("TRUSSED {:?}", request);
         match request {
-            Request::DummyRequest => {
-                Ok(Reply::DummyReply)
-            },
+            Request::DummyRequest => Ok(Reply::DummyReply),
 
-            Request::Agree(request) => {
-                match request.mechanism {
-
-                    Mechanism::P256 => mechanisms::P256::agree(&mut keystore(self, ctx)?, request),
-                    Mechanism::X255 => mechanisms::X255::agree(&mut keystore(self, ctx)?, request),
-                    _ => Err(Error::MechanismNotAvailable),
-
-                }.map(Reply::Agree)
-            },
+            Request::Agree(request) => match request.mechanism {
+                Mechanism::P256 => mechanisms::P256::agree(&mut keystore(self, ctx)?, request),
+                Mechanism::X255 => mechanisms::X255::agree(&mut keystore(self, ctx)?, request),
+                _ => Err(Error::MechanismNotAvailable),
+            }
+            .map(Reply::Agree),
 
             #[cfg(feature = "crypto-client-attest")]
             Request::Attest(request) => {
@@ -180,103 +176,129 @@ impl<P: Platform> ServiceResources<P> {
                     self.rng().map_err(|_| Error::EntropyMalfunction)?,
                     full_store,
                 );
-                attest::try_attest(&mut attn_keystore, &mut certstore(self, ctx)?, &mut keystore(self, ctx)?, request).map(Reply::Attest)
+                attest::try_attest(
+                    &mut attn_keystore,
+                    &mut certstore(self, ctx)?,
+                    &mut keystore(self, ctx)?,
+                    request,
+                )
+                .map(Reply::Attest)
             }
 
             #[cfg(not(feature = "crypto-client-attest"))]
             Request::Attest(_) => Err(Error::RequestNotAvailable),
 
-            Request::Decrypt(request) => {
-                match request.mechanism {
-
-                    Mechanism::Aes256Cbc => mechanisms::Aes256Cbc::decrypt(&mut keystore(self, ctx)?, request),
-                    Mechanism::Chacha8Poly1305 => mechanisms::Chacha8Poly1305::decrypt(&mut keystore(self, ctx)?, request),
-                    Mechanism::Tdes => mechanisms::Tdes::decrypt(&mut keystore(self, ctx)?, request),
-                    _ => Err(Error::MechanismNotAvailable),
-
-                }.map(Reply::Decrypt)
-            },
-
-            Request::DeriveKey(request) => {
-                match request.mechanism {
-
-                    Mechanism::HmacBlake2s => mechanisms::HmacBlake2s::derive_key(&mut keystore(self, ctx)?, request),
-                    Mechanism::HmacSha1 => mechanisms::HmacSha1::derive_key(&mut keystore(self, ctx)?, request),
-                    Mechanism::HmacSha256 => mechanisms::HmacSha256::derive_key(&mut keystore(self, ctx)?, request),
-                    Mechanism::HmacSha512 => mechanisms::HmacSha512::derive_key(&mut keystore(self, ctx)?, request),
-                    Mechanism::Ed255 => mechanisms::Ed255::derive_key(&mut keystore(self, ctx)?, request),
-                    Mechanism::P256 => mechanisms::P256::derive_key(&mut keystore(self, ctx)?, request),
-                    Mechanism::Sha256 => mechanisms::Sha256::derive_key(&mut keystore(self, ctx)?, request),
-                    Mechanism::X255 => mechanisms::X255::derive_key(&mut keystore(self, ctx)?, request),
-                    _ => Err(Error::MechanismNotAvailable),
-
-                }.map(Reply::DeriveKey)
-            },
-
-            Request::DeserializeKey(request) => {
-                match request.mechanism {
-
-                    Mechanism::Ed255 => mechanisms::Ed255::deserialize_key(&mut keystore(self, ctx)?, request),
-                    Mechanism::P256 => mechanisms::P256::deserialize_key(&mut keystore(self, ctx)?, request),
-                    Mechanism::X255 => mechanisms::X255::deserialize_key(&mut keystore(self, ctx)?, request),
-                    _ => Err(Error::MechanismNotAvailable),
-
-                }.map(Reply::DeserializeKey)
+            Request::Decrypt(request) => match request.mechanism {
+                Mechanism::Aes256Cbc => {
+                    mechanisms::Aes256Cbc::decrypt(&mut keystore(self, ctx)?, request)
+                }
+                Mechanism::Chacha8Poly1305 => {
+                    mechanisms::Chacha8Poly1305::decrypt(&mut keystore(self, ctx)?, request)
+                }
+                Mechanism::Tdes => mechanisms::Tdes::decrypt(&mut keystore(self, ctx)?, request),
+                _ => Err(Error::MechanismNotAvailable),
             }
+            .map(Reply::Decrypt),
 
-            Request::Encrypt(request) => {
-                match request.mechanism {
+            Request::DeriveKey(request) => match request.mechanism {
+                Mechanism::HmacBlake2s => {
+                    mechanisms::HmacBlake2s::derive_key(&mut keystore(self, ctx)?, request)
+                }
+                Mechanism::HmacSha1 => {
+                    mechanisms::HmacSha1::derive_key(&mut keystore(self, ctx)?, request)
+                }
+                Mechanism::HmacSha256 => {
+                    mechanisms::HmacSha256::derive_key(&mut keystore(self, ctx)?, request)
+                }
+                Mechanism::HmacSha512 => {
+                    mechanisms::HmacSha512::derive_key(&mut keystore(self, ctx)?, request)
+                }
+                Mechanism::Ed255 => {
+                    mechanisms::Ed255::derive_key(&mut keystore(self, ctx)?, request)
+                }
+                Mechanism::P256 => mechanisms::P256::derive_key(&mut keystore(self, ctx)?, request),
+                Mechanism::Sha256 => {
+                    mechanisms::Sha256::derive_key(&mut keystore(self, ctx)?, request)
+                }
+                Mechanism::X255 => mechanisms::X255::derive_key(&mut keystore(self, ctx)?, request),
+                _ => Err(Error::MechanismNotAvailable),
+            }
+            .map(Reply::DeriveKey),
 
-                    Mechanism::Aes256Cbc => mechanisms::Aes256Cbc::encrypt(&mut keystore(self, ctx)?, request),
-                    Mechanism::Chacha8Poly1305 => mechanisms::Chacha8Poly1305::encrypt(&mut keystore(self, ctx)?, request),
-                    Mechanism::Tdes => mechanisms::Tdes::encrypt(&mut keystore(self, ctx)?, request),
-                    _ => Err(Error::MechanismNotAvailable),
+            Request::DeserializeKey(request) => match request.mechanism {
+                Mechanism::Ed255 => {
+                    mechanisms::Ed255::deserialize_key(&mut keystore(self, ctx)?, request)
+                }
+                Mechanism::P256 => {
+                    mechanisms::P256::deserialize_key(&mut keystore(self, ctx)?, request)
+                }
+                Mechanism::X255 => {
+                    mechanisms::X255::deserialize_key(&mut keystore(self, ctx)?, request)
+                }
+                _ => Err(Error::MechanismNotAvailable),
+            }
+            .map(Reply::DeserializeKey),
 
-                }.map(Reply::Encrypt)
-            },
+            Request::Encrypt(request) => match request.mechanism {
+                Mechanism::Aes256Cbc => {
+                    mechanisms::Aes256Cbc::encrypt(&mut keystore(self, ctx)?, request)
+                }
+                Mechanism::Chacha8Poly1305 => {
+                    mechanisms::Chacha8Poly1305::encrypt(&mut keystore(self, ctx)?, request)
+                }
+                Mechanism::Tdes => mechanisms::Tdes::encrypt(&mut keystore(self, ctx)?, request),
+                _ => Err(Error::MechanismNotAvailable),
+            }
+            .map(Reply::Encrypt),
 
             Request::Delete(request) => {
                 let success = keystore(self, ctx)?.delete_key(&request.key);
-                Ok(Reply::Delete(reply::Delete { success } ))
-            },
+                Ok(Reply::Delete(reply::Delete { success }))
+            }
 
             Request::Clear(request) => {
                 let success = keystore(self, ctx)?.clear_key(&request.key);
-                Ok(Reply::Clear(reply::Clear { success } ))
-            },
+                Ok(Reply::Clear(reply::Clear { success }))
+            }
 
             Request::DeleteAllKeys(request) => {
                 let count = keystore(self, ctx)?.delete_all(request.location)?;
-                Ok(Reply::DeleteAllKeys(reply::DeleteAllKeys { count } ))
-            },
+                Ok(Reply::DeleteAllKeys(reply::DeleteAllKeys { count }))
+            }
 
-            Request::Exists(request) => {
-                match request.mechanism {
+            Request::Exists(request) => match request.mechanism {
+                Mechanism::Ed255 => mechanisms::Ed255::exists(&mut keystore(self, ctx)?, request),
+                Mechanism::P256 => mechanisms::P256::exists(&mut keystore(self, ctx)?, request),
+                Mechanism::Totp => mechanisms::Totp::exists(&mut keystore(self, ctx)?, request),
+                Mechanism::X255 => mechanisms::X255::exists(&mut keystore(self, ctx)?, request),
+                _ => Err(Error::MechanismNotAvailable),
+            }
+            .map(Reply::Exists),
 
-                    Mechanism::Ed255 => mechanisms::Ed255::exists(&mut keystore(self, ctx)?, request),
-                    Mechanism::P256 => mechanisms::P256::exists(&mut keystore(self, ctx)?, request),
-                    Mechanism::Totp => mechanisms::Totp::exists(&mut keystore(self, ctx)?, request),
-                    Mechanism::X255 => mechanisms::X255::exists(&mut keystore(self, ctx)?, request),
-                    _ => Err(Error::MechanismNotAvailable),
-
-                }.map(Reply::Exists)
-            },
-
-            Request::GenerateKey(request) => {
-                match request.mechanism {
-                    Mechanism::Chacha8Poly1305 => mechanisms::Chacha8Poly1305::generate_key(&mut keystore(self, ctx)?, request),
-                    Mechanism::Ed255 => mechanisms::Ed255::generate_key(&mut keystore(self, ctx)?, request),
-                    Mechanism::P256 => mechanisms::P256::generate_key(&mut keystore(self, ctx)?, request),
-                    Mechanism::X255 => mechanisms::X255::generate_key(&mut keystore(self, ctx)?, request),
-                    _ => Err(Error::MechanismNotAvailable),
-                }.map(Reply::GenerateKey)
-            },
+            Request::GenerateKey(request) => match request.mechanism {
+                Mechanism::Chacha8Poly1305 => {
+                    mechanisms::Chacha8Poly1305::generate_key(&mut keystore(self, ctx)?, request)
+                }
+                Mechanism::Ed255 => {
+                    mechanisms::Ed255::generate_key(&mut keystore(self, ctx)?, request)
+                }
+                Mechanism::P256 => {
+                    mechanisms::P256::generate_key(&mut keystore(self, ctx)?, request)
+                }
+                Mechanism::X255 => {
+                    mechanisms::X255::generate_key(&mut keystore(self, ctx)?, request)
+                }
+                _ => Err(Error::MechanismNotAvailable),
+            }
+            .map(Reply::GenerateKey),
 
             Request::GenerateSecretKey(request) => {
                 let mut secret_key = MediumData::new();
                 let size = request.size;
                 let mut keystore = keystore(self, ctx)?;
-                secret_key.resize_default(request.size).map_err(|_| Error::ImplementationError)?;
+                secret_key
+                    .resize_default(request.size)
+                    .map_err(|_| Error::ImplementationError)?;
                 keystore.rng().fill_bytes(&mut secret_key[..size]);
                 let key_id = keystore.store_key(
                     request.attributes.persistence,
@@ -284,21 +306,34 @@ impl<P: Platform> ServiceResources<P> {
                     key::Kind::Symmetric(size),
                     &secret_key[..size],
                 )?;
-                Ok(Reply::GenerateSecretKey(reply::GenerateSecretKey { key: key_id }))
-            },
+                Ok(Reply::GenerateSecretKey(reply::GenerateSecretKey {
+                    key: key_id,
+                }))
+            }
 
             // deprecated
-            Request::UnsafeInjectKey(request) => {
-                match request.mechanism {
-                    Mechanism::P256 => mechanisms::P256::unsafe_inject_key(&mut keystore(self, ctx)?,request),
-                    Mechanism::X255 => mechanisms::X255::unsafe_inject_key(&mut keystore(self, ctx)?,request),
-                    Mechanism::Ed255 => mechanisms::Ed255::unsafe_inject_key(&mut keystore(self, ctx)?,request),
-                    Mechanism::SharedSecret => mechanisms::SharedSecret::unsafe_inject_key(&mut keystore(self, ctx)?, request),
-                    Mechanism::Aes256Cbc => mechanisms::Aes256Cbc::unsafe_inject_key(&mut keystore(self, ctx)?, request),
-                    Mechanism::Tdes => mechanisms::Tdes::unsafe_inject_key(&mut keystore(self, ctx)?, request),
-                    _ => Err(Error::MechanismNotAvailable)
-                }.map(Reply::UnsafeInjectKey)
-            },
+            Request::UnsafeInjectKey(request) => match request.mechanism {
+                Mechanism::P256 => {
+                    mechanisms::P256::unsafe_inject_key(&mut keystore(self, ctx)?, request)
+                }
+                Mechanism::X255 => {
+                    mechanisms::X255::unsafe_inject_key(&mut keystore(self, ctx)?, request)
+                }
+                Mechanism::Ed255 => {
+                    mechanisms::Ed255::unsafe_inject_key(&mut keystore(self, ctx)?, request)
+                }
+                Mechanism::SharedSecret => {
+                    mechanisms::SharedSecret::unsafe_inject_key(&mut keystore(self, ctx)?, request)
+                }
+                Mechanism::Aes256Cbc => {
+                    mechanisms::Aes256Cbc::unsafe_inject_key(&mut keystore(self, ctx)?, request)
+                }
+                Mechanism::Tdes => {
+                    mechanisms::Tdes::unsafe_inject_key(&mut keystore(self, ctx)?, request)
+                }
+                _ => Err(Error::MechanismNotAvailable),
+            }
+            .map(Reply::UnsafeInjectKey),
 
             Request::UnsafeInjectSharedKey(request) => {
                 let key_id = keystore(self, ctx)?.store_key(
@@ -308,28 +343,30 @@ impl<P: Platform> ServiceResources<P> {
                     &request.raw_key,
                 )?;
 
-                Ok(Reply::UnsafeInjectSharedKey(reply::UnsafeInjectSharedKey { key: key_id } ))
-            },
+                Ok(Reply::UnsafeInjectSharedKey(reply::UnsafeInjectSharedKey {
+                    key: key_id,
+                }))
+            }
 
-            Request::Hash(request) => {
-                match request.mechanism {
-
-                    Mechanism::Sha256 => mechanisms::Sha256::hash(&mut keystore(self, ctx)?, request),
-                    _ => Err(Error::MechanismNotAvailable),
-
-                }.map(Reply::Hash)
-            },
+            Request::Hash(request) => match request.mechanism {
+                Mechanism::Sha256 => mechanisms::Sha256::hash(&mut keystore(self, ctx)?, request),
+                _ => Err(Error::MechanismNotAvailable),
+            }
+            .map(Reply::Hash),
 
             Request::LocateFile(request) => {
-                let path = filestore.locate_file(request.location, request.dir.as_deref(), &request.filename)?;
+                let path = filestore.locate_file(
+                    request.location,
+                    request.dir.as_deref(),
+                    &request.filename,
+                )?;
 
-                Ok(Reply::LocateFile(reply::LocateFile { path }) )
+                Ok(Reply::LocateFile(reply::LocateFile { path }))
             }
 
             // This is now preferably done using littlefs-fuse (when device is not yet locked),
             // and should be removed from firmware completely
             Request::DebugDumpStore(_request) => {
-
                 info_now!(":: PERSISTENT");
                 recursively_list(self.platform.store().fs(Location::Internal), path!("/"));
 
@@ -356,15 +393,19 @@ impl<P: Platform> ServiceResources<P> {
                             }
                         }
                         Ok(())
-                    }).unwrap();
+                    })
+                    .unwrap();
                 }
 
-                Ok(Reply::DebugDumpStore(reply::DebugDumpStore {}) )
-
+                Ok(Reply::DebugDumpStore(reply::DebugDumpStore {}))
             }
 
             Request::ReadDirFirst(request) => {
-                let maybe_entry = match filestore.read_dir_first(&request.dir, request.location, request.not_before_filename.as_deref())? {
+                let maybe_entry = match filestore.read_dir_first(
+                    &request.dir,
+                    request.location,
+                    request.not_before_filename.as_deref(),
+                )? {
                     Some((entry, read_dir_state)) => {
                         ctx.read_dir_state = Some(read_dir_state);
                         Some(entry)
@@ -372,10 +413,11 @@ impl<P: Platform> ServiceResources<P> {
                     None => {
                         ctx.read_dir_state = None;
                         None
-
                     }
                 };
-                Ok(Reply::ReadDirFirst(reply::ReadDirFirst { entry: maybe_entry } ))
+                Ok(Reply::ReadDirFirst(reply::ReadDirFirst {
+                    entry: maybe_entry,
+                }))
             }
 
             Request::ReadDirNext(_request) => {
@@ -384,25 +426,29 @@ impl<P: Platform> ServiceResources<P> {
 
                 let maybe_entry = match read_dir_state {
                     None => None,
-                    Some(state) => {
-                        match filestore.read_dir_next(state)? {
-                            Some((entry, read_dir_state)) => {
-                                ctx.read_dir_state = Some(read_dir_state);
-                                Some(entry)
-                            }
-                            None => {
-                                ctx.read_dir_state = None;
-                                None
-                            }
+                    Some(state) => match filestore.read_dir_next(state)? {
+                        Some((entry, read_dir_state)) => {
+                            ctx.read_dir_state = Some(read_dir_state);
+                            Some(entry)
                         }
-                    }
+                        None => {
+                            ctx.read_dir_state = None;
+                            None
+                        }
+                    },
                 };
 
-                Ok(Reply::ReadDirNext(reply::ReadDirNext { entry: maybe_entry } ))
+                Ok(Reply::ReadDirNext(reply::ReadDirNext {
+                    entry: maybe_entry,
+                }))
             }
 
             Request::ReadDirFilesFirst(request) => {
-                let maybe_data = match filestore.read_dir_files_first(&request.dir, request.location, request.user_attribute.clone())? {
+                let maybe_data = match filestore.read_dir_files_first(
+                    &request.dir,
+                    request.location,
+                    request.user_attribute.clone(),
+                )? {
                     Some((data, state)) => {
                         ctx.read_dir_files_state = Some(state);
                         data
@@ -412,7 +458,9 @@ impl<P: Platform> ServiceResources<P> {
                         None
                     }
                 };
-                Ok(Reply::ReadDirFilesFirst(reply::ReadDirFilesFirst { data: maybe_data } ))
+                Ok(Reply::ReadDirFilesFirst(reply::ReadDirFilesFirst {
+                    data: maybe_data,
+                }))
             }
 
             Request::ReadDirFilesNext(_request) => {
@@ -420,48 +468,44 @@ impl<P: Platform> ServiceResources<P> {
 
                 let maybe_data = match read_dir_files_state {
                     None => None,
-                    Some(state) => {
-                        match filestore.read_dir_files_next(state)? {
-                            Some((data, state)) => {
-                                ctx.read_dir_files_state = Some(state);
-                                data
-                            }
-                            None => {
-                                ctx.read_dir_files_state = None;
-                                None
-                            }
+                    Some(state) => match filestore.read_dir_files_next(state)? {
+                        Some((data, state)) => {
+                            ctx.read_dir_files_state = Some(state);
+                            data
                         }
-                    }
+                        None => {
+                            ctx.read_dir_files_state = None;
+                            None
+                        }
+                    },
                 };
-                Ok(Reply::ReadDirFilesNext(reply::ReadDirFilesNext { data: maybe_data } ))
+                Ok(Reply::ReadDirFilesNext(reply::ReadDirFilesNext {
+                    data: maybe_data,
+                }))
             }
 
             Request::RemoveDir(request) => {
                 filestore.remove_dir(&request.path, request.location)?;
-                Ok(Reply::RemoveDir(reply::RemoveDir {} ))
+                Ok(Reply::RemoveDir(reply::RemoveDir {}))
             }
 
             Request::RemoveDirAll(request) => {
                 let count = filestore.remove_dir_all(&request.path, request.location)?;
-                Ok(Reply::RemoveDirAll(reply::RemoveDirAll { count } ))
+                Ok(Reply::RemoveDirAll(reply::RemoveDirAll { count }))
             }
 
             Request::RemoveFile(request) => {
                 filestore.remove_file(&request.path, request.location)?;
-                Ok(Reply::RemoveFile(reply::RemoveFile {} ))
+                Ok(Reply::RemoveFile(reply::RemoveFile {}))
             }
 
-            Request::ReadFile(request) => {
-                Ok(Reply::ReadFile(reply::ReadFile {
-                    data: filestore.read(&request.path, request.location)?
-                }))
-            }
+            Request::ReadFile(request) => Ok(Reply::ReadFile(reply::ReadFile {
+                data: filestore.read(&request.path, request.location)?,
+            })),
 
-            Request::Metadata(request) => {
-                Ok(Reply::Metadata(reply::Metadata{
-                    metadata: filestore.metadata(&request.path, request.location)?
-                }))
-            }
+            Request::Metadata(request) => Ok(Reply::Metadata(reply::Metadata {
+                metadata: filestore.metadata(&request.path, request.location)?,
+            })),
 
             Request::Rename(request) => {
                 filestore.rename(&request.from, &request.to, request.location)?;
@@ -473,76 +517,84 @@ impl<P: Platform> ServiceResources<P> {
                     let mut bytes = Message::new();
                     bytes.resize_default(request.count).unwrap();
                     self.rng()?.fill_bytes(&mut bytes);
-                    Ok(Reply::RandomBytes(reply::RandomBytes { bytes } ))
+                    Ok(Reply::RandomBytes(reply::RandomBytes { bytes }))
                 } else {
                     Err(Error::MechanismNotAvailable)
                 }
             }
 
-            Request::SerializeKey(request) => {
-                match request.mechanism {
-
-                    Mechanism::Ed255 => mechanisms::Ed255::serialize_key(&mut keystore(self, ctx)?, request),
-                    Mechanism::P256 => mechanisms::P256::serialize_key(&mut keystore(self, ctx)?, request),
-                    Mechanism::X255 => mechanisms::X255::serialize_key(&mut keystore(self, ctx)?, request),
-                    Mechanism::SharedSecret => mechanisms::SharedSecret::serialize_key(&mut keystore(self, ctx)?, request),
-                    _ => Err(Error::MechanismNotAvailable),
-
-                }.map(Reply::SerializeKey)
+            Request::SerializeKey(request) => match request.mechanism {
+                Mechanism::Ed255 => {
+                    mechanisms::Ed255::serialize_key(&mut keystore(self, ctx)?, request)
+                }
+                Mechanism::P256 => {
+                    mechanisms::P256::serialize_key(&mut keystore(self, ctx)?, request)
+                }
+                Mechanism::X255 => {
+                    mechanisms::X255::serialize_key(&mut keystore(self, ctx)?, request)
+                }
+                Mechanism::SharedSecret => {
+                    mechanisms::SharedSecret::serialize_key(&mut keystore(self, ctx)?, request)
+                }
+                _ => Err(Error::MechanismNotAvailable),
             }
+            .map(Reply::SerializeKey),
 
-            Request::Sign(request) => {
-                match request.mechanism {
-
-                    Mechanism::Ed255 => mechanisms::Ed255::sign(&mut keystore(self, ctx)?, request),
-                    Mechanism::HmacBlake2s => mechanisms::HmacBlake2s::sign(&mut keystore(self, ctx)?, request),
-                    Mechanism::HmacSha1 => mechanisms::HmacSha1::sign(&mut keystore(self, ctx)?, request),
-                    Mechanism::HmacSha256 => mechanisms::HmacSha256::sign(&mut keystore(self, ctx)?, request),
-                    Mechanism::HmacSha512 => mechanisms::HmacSha512::sign(&mut keystore(self, ctx)?, request),
-                    Mechanism::P256 => mechanisms::P256::sign(&mut keystore(self, ctx)?, request),
-                    Mechanism::P256Prehashed => mechanisms::P256Prehashed::sign(&mut keystore(self, ctx)?, request),
-                    Mechanism::Totp => mechanisms::Totp::sign(&mut keystore(self, ctx)?, request),
-                    _ => Err(Error::MechanismNotAvailable),
-
-                }.map(Reply::Sign)
-            },
+            Request::Sign(request) => match request.mechanism {
+                Mechanism::Ed255 => mechanisms::Ed255::sign(&mut keystore(self, ctx)?, request),
+                Mechanism::HmacBlake2s => {
+                    mechanisms::HmacBlake2s::sign(&mut keystore(self, ctx)?, request)
+                }
+                Mechanism::HmacSha1 => {
+                    mechanisms::HmacSha1::sign(&mut keystore(self, ctx)?, request)
+                }
+                Mechanism::HmacSha256 => {
+                    mechanisms::HmacSha256::sign(&mut keystore(self, ctx)?, request)
+                }
+                Mechanism::HmacSha512 => {
+                    mechanisms::HmacSha512::sign(&mut keystore(self, ctx)?, request)
+                }
+                Mechanism::P256 => mechanisms::P256::sign(&mut keystore(self, ctx)?, request),
+                Mechanism::P256Prehashed => {
+                    mechanisms::P256Prehashed::sign(&mut keystore(self, ctx)?, request)
+                }
+                Mechanism::Totp => mechanisms::Totp::sign(&mut keystore(self, ctx)?, request),
+                _ => Err(Error::MechanismNotAvailable),
+            }
+            .map(Reply::Sign),
 
             Request::WriteFile(request) => {
                 filestore.write(&request.path, request.location, &request.data)?;
-                Ok(Reply::WriteFile(reply::WriteFile {} ))
+                Ok(Reply::WriteFile(reply::WriteFile {}))
             }
 
-            Request::UnwrapKey(request) => {
-                match request.mechanism {
-
-                    Mechanism::Chacha8Poly1305 => mechanisms::Chacha8Poly1305::unwrap_key(&mut keystore(self, ctx)?, request),
-                    _ => Err(Error::MechanismNotAvailable),
-
-                }.map(Reply::UnwrapKey)
+            Request::UnwrapKey(request) => match request.mechanism {
+                Mechanism::Chacha8Poly1305 => {
+                    mechanisms::Chacha8Poly1305::unwrap_key(&mut keystore(self, ctx)?, request)
+                }
+                _ => Err(Error::MechanismNotAvailable),
             }
+            .map(Reply::UnwrapKey),
 
-            Request::Verify(request) => {
-                match request.mechanism {
+            Request::Verify(request) => match request.mechanism {
+                Mechanism::Ed255 => mechanisms::Ed255::verify(&mut keystore(self, ctx)?, request),
+                Mechanism::P256 => mechanisms::P256::verify(&mut keystore(self, ctx)?, request),
+                _ => Err(Error::MechanismNotAvailable),
+            }
+            .map(Reply::Verify),
 
-                    Mechanism::Ed255 => mechanisms::Ed255::verify(&mut keystore(self, ctx)?, request),
-                    Mechanism::P256 => mechanisms::P256::verify(&mut keystore(self, ctx)?, request),
-                    _ => Err(Error::MechanismNotAvailable),
-
-                }.map(Reply::Verify)
-            },
-
-            Request::WrapKey(request) => {
-                match request.mechanism {
-
-                    Mechanism::Aes256Cbc => mechanisms::Aes256Cbc::wrap_key(&mut keystore(self, ctx)?, request),
-                    Mechanism::Chacha8Poly1305 => mechanisms::Chacha8Poly1305::wrap_key(&mut keystore(self, ctx)?, request),
-                    _ => Err(Error::MechanismNotAvailable),
-
-                }.map(Reply::WrapKey)
-            },
+            Request::WrapKey(request) => match request.mechanism {
+                Mechanism::Aes256Cbc => {
+                    mechanisms::Aes256Cbc::wrap_key(&mut keystore(self, ctx)?, request)
+                }
+                Mechanism::Chacha8Poly1305 => {
+                    mechanisms::Chacha8Poly1305::wrap_key(&mut keystore(self, ctx)?, request)
+                }
+                _ => Err(Error::MechanismNotAvailable),
+            }
+            .map(Reply::WrapKey),
 
             Request::RequestUserConsent(request) => {
-
                 // assert_eq!(request.level, consent::Level::Normal);
 
                 let starttime = self.platform.user_interface().uptime();
@@ -602,9 +654,9 @@ impl<P: Platform> ServiceResources<P> {
                 self.platform.user_interface().reboot(request.to);
             }
 
-            Request::Uptime(_request) => {
-                Ok(Reply::Uptime(reply::Uptime { uptime: self.platform.user_interface().uptime() }))
-            }
+            Request::Uptime(_request) => Ok(Reply::Uptime(reply::Uptime {
+                uptime: self.platform.user_interface().uptime(),
+            })),
 
             Request::Wink(request) => {
                 self.platform.user_interface().wink(request.duration);
@@ -612,47 +664,41 @@ impl<P: Platform> ServiceResources<P> {
             }
 
             Request::SetCustomStatus(request) => {
-                self.platform.user_interface().set_status(Status::Custom(request.status));
+                self.platform
+                    .user_interface()
+                    .set_status(Status::Custom(request.status));
                 Ok(Reply::SetCustomStatus(reply::SetCustomStatus {}))
             }
 
             #[cfg(feature = "counter-client")]
-            Request::CreateCounter(request) => {
-                counterstore(self, ctx)?.create(request.location)
-                    .map(|id| Reply::CreateCounter(reply::CreateCounter { id } ))
-            }
+            Request::CreateCounter(request) => counterstore(self, ctx)?
+                .create(request.location)
+                .map(|id| Reply::CreateCounter(reply::CreateCounter { id })),
 
             #[cfg(not(feature = "counter-client"))]
             Request::CreateCounter(_) => Err(Error::RequestNotAvailable),
 
             #[cfg(feature = "counter-client")]
-            Request::IncrementCounter(request) => {
-                counterstore(self, ctx)?.increment(request.id)
-                    .map(|counter| Reply::IncrementCounter(reply::IncrementCounter { counter } ))
-            }
+            Request::IncrementCounter(request) => counterstore(self, ctx)?
+                .increment(request.id)
+                .map(|counter| Reply::IncrementCounter(reply::IncrementCounter { counter })),
 
             #[cfg(not(feature = "counter-client"))]
             Request::IncrementCounter(_) => Err(Error::RequestNotAvailable),
 
-            Request::DeleteCertificate(request) => {
-                 certstore(self, ctx)?.delete_certificate(request.id)
-                    .map(|_| Reply::DeleteCertificate(reply::DeleteCertificate {} ))
-            }
+            Request::DeleteCertificate(request) => certstore(self, ctx)?
+                .delete_certificate(request.id)
+                .map(|_| Reply::DeleteCertificate(reply::DeleteCertificate {})),
 
-            Request::ReadCertificate(request) => {
-                 certstore(self, ctx)?.read_certificate(request.id)
-                    .map(|der| Reply::ReadCertificate(reply::ReadCertificate { der } ))
-            }
+            Request::ReadCertificate(request) => certstore(self, ctx)?
+                .read_certificate(request.id)
+                .map(|der| Reply::ReadCertificate(reply::ReadCertificate { der })),
 
-            Request::WriteCertificate(request) => {
-                 certstore(self, ctx)?.write_certificate(request.location, &request.der)
-                    .map(|id| Reply::WriteCertificate(reply::WriteCertificate { id } ))
-            }
+            Request::WriteCertificate(request) => certstore(self, ctx)?
+                .write_certificate(request.location, &request.der)
+                .map(|id| Reply::WriteCertificate(reply::WriteCertificate { id })),
 
-            Request::SerdeExtension(_) => {
-                Err(Error::RequestNotAvailable)
-            }
-
+            Request::SerdeExtension(_) => Err(Error::RequestNotAvailable),
             // _ => {
             //     // #[cfg(test)]
             //     // println!("todo: {:?} request!", &request);
