@@ -27,19 +27,29 @@ use littlefs2::{
     path::{Path, PathBuf},
 };
 
-pub type ClientId = PathBuf;
-
 pub struct ClientFilestore<S>
 where
     S: Store,
 {
-    client_id: ClientId,
+    base: PathBuf,
     store: S,
 }
 
 impl<S: Store> ClientFilestore<S> {
-    pub fn new(client_id: ClientId, store: S) -> Self {
-        Self { client_id, store }
+    /// Create a filestore that stores files in `<client_id>/dat/<file_path>`
+    pub fn new(client_id: PathBuf, store: S) -> Self {
+        let mut base = client_id;
+        base.push(path!("dat"));
+        Self { base, store }
+    }
+
+    /// Create a filestore that stores files in `<client_id>/<file_path>`
+    ///
+    /// Unlike [`ClientFilestore::new`](), it does not have the `dat` intermediary.
+    /// It is meant to be used by custom backends to save space in case the `dat` folder is not used and only wastes a littlefs block.
+    pub fn new_raw(client_id: PathBuf, store: S) -> Self {
+        let base = client_id;
+        Self { base, store }
     }
 
     /// Client files are store below `/<client_id>/dat/`.
@@ -49,9 +59,7 @@ impl<S: Store> ClientFilestore<S> {
             return Err(Error::InvalidPath);
         }
 
-        let mut path = PathBuf::new();
-        path.push(&self.client_id);
-        path.push(path!("dat"));
+        let mut path = self.base.clone();
         path.push(client_path);
         Ok(path)
     }
