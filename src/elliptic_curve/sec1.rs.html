@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/elliptic-curve-0.10.4/src/sec1.rs`."><title>sec1.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-fa3bb1812debf86c.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="elliptic_curve" data-themes="" data-resource-suffix="" data-rustdoc-version="1.74.1 (a28077b28 2023-12-04)" data-channel="1.74.1" data-search-js="search-8be46b629f5f14a8.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-c5bd66d33317d69f.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="icon" href="https://raw.githubusercontent.com/RustCrypto/media/8f1a9894/logo.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../elliptic_curve/index.html"><img src="https://raw.githubusercontent.com/RustCrypto/media/8f1a9894/logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/elliptic-curve-0.10.4/src/sec1.rs`."><title>sec1.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="elliptic_curve" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="icon" href="https://raw.githubusercontent.com/RustCrypto/media/8f1a9894/logo.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><a class="sub-logo-container" href="../../elliptic_curve/index.html"><img src="https://raw.githubusercontent.com/RustCrypto/media/8f1a9894/logo.svg" alt="elliptic_curve"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -787,19 +788,19 @@
 <span class="kw">use </span>generic_array::{typenum::U1, ArrayLength, GenericArray};
 <span class="kw">use </span>subtle::{Choice, ConditionallySelectable};
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
 </span><span class="kw">use </span>alloc::boxed::Box;
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;arithmetic&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"arithmetic"</span>)]
 </span><span class="kw">use crate</span>::{weierstrass::DecompressPoint, AffinePoint, ProjectiveArithmetic};
 
-<span class="attr">#[cfg(all(feature = <span class="string">&quot;arithmetic&quot;</span>, feature = <span class="string">&quot;zeroize&quot;</span>))]
+<span class="attr">#[cfg(all(feature = <span class="string">"arithmetic"</span>, feature = <span class="string">"zeroize"</span>))]
 </span><span class="kw">use crate</span>::{
     group::{Curve <span class="kw">as _</span>, Group},
     Scalar,
 };
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;zeroize&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"zeroize"</span>)]
 </span><span class="kw">use crate</span>::{secret_key::SecretKey, zeroize::Zeroize};
 
 <span class="doccomment">/// Size of a compressed point for the given elliptic curve when encoded
@@ -893,9 +894,9 @@
     /// [`SecretKey`].
     ///
     /// The `compress` flag requests point compression.
-    </span><span class="attr">#[cfg(all(feature = <span class="string">&quot;arithmetic&quot;</span>, feature = <span class="string">&quot;zeroize&quot;</span>))]
-    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;arithmetic&quot;</span>)))]
-    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;zeroize&quot;</span>)))]
+    </span><span class="attr">#[cfg(all(feature = <span class="string">"arithmetic"</span>, feature = <span class="string">"zeroize"</span>))]
+    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"arithmetic"</span>)))]
+    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"zeroize"</span>)))]
     </span><span class="kw">pub fn </span>from_secret_key(secret_key: <span class="kw-2">&amp;</span>SecretKey&lt;C&gt;, compress: bool) -&gt; <span class="self">Self
     </span><span class="kw">where
         </span>C: Curve + ProjectiveArithmetic,
@@ -924,16 +925,16 @@
     }
 
     <span class="doccomment">/// Get boxed byte slice containing the serialized [`EncodedPoint`]
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
-    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;alloc&quot;</span>)))]
+    </span><span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
+    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"alloc"</span>)))]
     </span><span class="kw">pub fn </span>to_bytes(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Box&lt;[u8]&gt; {
         <span class="self">self</span>.as_bytes().to_vec().into_boxed_slice()
     }
 
     <span class="doccomment">/// Serialize point as raw uncompressed coordinates without tag byte, i.e.
     /// encoded as the concatenated `x || y` coordinates.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;arithmetic&quot;</span>)]
-    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;arithmetic&quot;</span>)))]
+    </span><span class="attr">#[cfg(feature = <span class="string">"arithmetic"</span>)]
+    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"arithmetic"</span>)))]
     </span><span class="kw">pub fn </span>to_untagged_bytes(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;GenericArray&lt;u8, UntaggedPointSize&lt;C&gt;&gt;&gt;
     <span class="kw">where
         </span>C: Curve + ProjectiveArithmetic,
@@ -972,8 +973,8 @@
     }
 
     <span class="doccomment">/// Decompress this [`EncodedPoint`], returning a new [`EncodedPoint`].
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;arithmetic&quot;</span>)]
-    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;arithmetic&quot;</span>)))]
+    </span><span class="attr">#[cfg(feature = <span class="string">"arithmetic"</span>)]
+    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"arithmetic"</span>)))]
     </span><span class="kw">pub fn </span>decompress(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt;
     <span class="kw">where
         </span>C: Curve + ProjectiveArithmetic,
@@ -1009,12 +1010,12 @@
     <span class="doccomment">/// Get the SEC1 tag for this [`EncodedPoint`]
     </span><span class="kw">pub fn </span>tag(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Tag {
         <span class="comment">// Tag is ensured valid by the constructor
-        </span>Tag::from_u8(<span class="self">self</span>.bytes[<span class="number">0</span>]).expect(<span class="string">&quot;invalid tag&quot;</span>)
+        </span>Tag::from_u8(<span class="self">self</span>.bytes[<span class="number">0</span>]).expect(<span class="string">"invalid tag"</span>)
     }
 
     <span class="doccomment">/// Get the [`Coordinates`] for this [`EncodedPoint`].
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>coordinates(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Coordinates&lt;<span class="lifetime">&#39;_</span>, C&gt; {
+    </span><span class="kw">pub fn </span>coordinates(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Coordinates&lt;<span class="lifetime">'_</span>, C&gt; {
         <span class="kw">if </span><span class="self">self</span>.is_identity() {
             <span class="kw">return </span>Coordinates::Identity;
         }
@@ -1105,12 +1106,12 @@
     UntaggedPointSize&lt;C&gt;: Add&lt;U1&gt; + ArrayLength&lt;u8&gt;,
     UncompressedPointSize&lt;C&gt;: ArrayLength&lt;u8&gt;,
 {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        <span class="macro">write!</span>(f, <span class="string">&quot;EncodedPoint&lt;{:?}&gt;({:?})&quot;</span>, C::default(), <span class="kw-2">&amp;</span><span class="self">self</span>.bytes)
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        <span class="macro">write!</span>(f, <span class="string">"EncodedPoint&lt;{:?}&gt;({:?})"</span>, C::default(), <span class="kw-2">&amp;</span><span class="self">self</span>.bytes)
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;zeroize&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"zeroize"</span>)]
 </span><span class="kw">impl</span>&lt;C&gt; Zeroize <span class="kw">for </span>EncodedPoint&lt;C&gt;
 <span class="kw">where
     </span>C: Curve,
@@ -1125,20 +1126,20 @@
 <span class="doccomment">/// Enum representing the coordinates of either compressed or uncompressed
 /// SEC1-encoded elliptic curve points.
 </span><span class="attr">#[derive(Copy, Clone, Debug, Eq, PartialEq)]
-</span><span class="kw">pub enum </span>Coordinates&lt;<span class="lifetime">&#39;a</span>, C: Curve&gt; {
+</span><span class="kw">pub enum </span>Coordinates&lt;<span class="lifetime">'a</span>, C: Curve&gt; {
     <span class="doccomment">/// Identity point (a.k.a. point at infinity)
     </span>Identity,
 
     <span class="doccomment">/// Compact curve point
     </span>Compact {
         <span class="doccomment">/// x-coordinate
-        </span>x: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>FieldBytes&lt;C&gt;,
+        </span>x: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>FieldBytes&lt;C&gt;,
     },
 
     <span class="doccomment">/// Compressed curve point
     </span>Compressed {
         <span class="doccomment">/// x-coordinate
-        </span>x: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>FieldBytes&lt;C&gt;,
+        </span>x: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>FieldBytes&lt;C&gt;,
 
         <span class="doccomment">/// Is the y-coordinate odd?
         </span>y_is_odd: bool,
@@ -1147,14 +1148,14 @@
     <span class="doccomment">/// Uncompressed curve point
     </span>Uncompressed {
         <span class="doccomment">/// x-coordinate
-        </span>x: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>FieldBytes&lt;C&gt;,
+        </span>x: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>FieldBytes&lt;C&gt;,
 
         <span class="doccomment">/// y-coordinate
-        </span>y: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>FieldBytes&lt;C&gt;,
+        </span>y: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>FieldBytes&lt;C&gt;,
     },
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, C: Curve&gt; Coordinates&lt;<span class="lifetime">&#39;a</span>, C&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, C: Curve&gt; Coordinates&lt;<span class="lifetime">'a</span>, C&gt; {
     <span class="doccomment">/// Get the tag octet needed to encode this set of [`Coordinates`]
     </span><span class="kw">pub fn </span>tag(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Tag {
         <span class="kw">match </span><span class="self">self </span>{
@@ -1235,7 +1236,7 @@
     <span class="doccomment">/// Compress the given y-coordinate, returning a `Tag::Compressed*` value
     </span><span class="kw">fn </span>compress_y(y: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="self">Self </span>{
         <span class="comment">// Is the y-coordinate odd in the SEC1 sense: `self mod 2 == 1`?
-        </span><span class="kw">if </span>y.as_ref().last().expect(<span class="string">&quot;empty y-coordinate&quot;</span>) &amp; <span class="number">1 </span>== <span class="number">1 </span>{
+        </span><span class="kw">if </span>y.as_ref().last().expect(<span class="string">"empty y-coordinate"</span>) &amp; <span class="number">1 </span>== <span class="number">1 </span>{
             Tag::CompressedOddY
         } <span class="kw">else </span>{
             Tag::CompressedEvenY
@@ -1259,7 +1260,7 @@
     UntaggedPointSize&lt;C&gt;: Add&lt;U1&gt; + ArrayLength&lt;u8&gt;,
     UncompressedPointSize&lt;C&gt;: ArrayLength&lt;u8&gt;,
 {
-    <span class="doccomment">/// Deserialize the type this trait is impl&#39;d on from an [`EncodedPoint`].
+    <span class="doccomment">/// Deserialize the type this trait is impl'd on from an [`EncodedPoint`].
     ///
     /// # Returns
     ///
@@ -1300,8 +1301,8 @@
 ///
 /// Curve implementations which also impl [`ProjectiveArithmetic`] will receive
 /// a blanket default impl of this trait.
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;zeroize&quot;</span>)]
-#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;zeroize&quot;</span>)))]
+</span><span class="attr">#[cfg(feature = <span class="string">"zeroize"</span>)]
+#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"zeroize"</span>)))]
 </span><span class="kw">pub trait </span>ValidatePublicKey
 <span class="kw">where
     </span><span class="self">Self</span>: Curve,
@@ -1315,7 +1316,7 @@
         secret_key: <span class="kw-2">&amp;</span>SecretKey&lt;<span class="self">Self</span>&gt;,
         public_key: <span class="kw-2">&amp;</span>EncodedPoint&lt;<span class="self">Self</span>&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="comment">// Provide a default &quot;always succeeds&quot; implementation.
+        <span class="comment">// Provide a default "always succeeds" implementation.
         // This is the intended default for curve implementations which
         // do not provide an arithmetic implementation, since they have no
         // way to verify this.
@@ -1326,7 +1327,7 @@
     }
 }
 
-<span class="attr">#[cfg(all(feature = <span class="string">&quot;arithmetic&quot;</span>, feature = <span class="string">&quot;zeroize&quot;</span>))]
+<span class="attr">#[cfg(all(feature = <span class="string">"arithmetic"</span>, feature = <span class="string">"zeroize"</span>))]
 </span><span class="kw">impl</span>&lt;C&gt; ValidatePublicKey <span class="kw">for </span>C
 <span class="kw">where
     </span>C: Curve + ProjectiveArithmetic,
@@ -1348,7 +1349,7 @@
     }
 }
 
-<span class="attr">#[cfg(all(test, feature = <span class="string">&quot;dev&quot;</span>))]
+<span class="attr">#[cfg(all(test, feature = <span class="string">"dev"</span>))]
 </span><span class="kw">mod </span>tests {
     <span class="kw">use super</span>::{Coordinates, Tag};
     <span class="kw">use </span><span class="kw">crate</span>::dev::MockCurve;
@@ -1362,17 +1363,17 @@
     </span><span class="kw">const </span>IDENTITY_BYTES: [u8; <span class="number">1</span>] = [<span class="number">0</span>];
 
     <span class="doccomment">/// Example uncompressed point
-    </span><span class="kw">const </span>UNCOMPRESSED_BYTES: [u8; <span class="number">65</span>] = <span class="macro">hex!</span>(<span class="string">&quot;0411111111111111111111111111111111111111111111111111111111111111112222222222222222222222222222222222222222222222222222222222222222&quot;</span>);
+    </span><span class="kw">const </span>UNCOMPRESSED_BYTES: [u8; <span class="number">65</span>] = <span class="macro">hex!</span>(<span class="string">"0411111111111111111111111111111111111111111111111111111111111111112222222222222222222222222222222222222222222222222222222222222222"</span>);
 
     <span class="doccomment">/// Example compressed point: `UNCOMPRESSED_BYTES` after point compression
     </span><span class="kw">const </span>COMPRESSED_BYTES: [u8; <span class="number">33</span>] =
-        <span class="macro">hex!</span>(<span class="string">&quot;021111111111111111111111111111111111111111111111111111111111111111&quot;</span>);
+        <span class="macro">hex!</span>(<span class="string">"021111111111111111111111111111111111111111111111111111111111111111"</span>);
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>decode_compressed_point() {
         <span class="comment">// Even y-coordinate
         </span><span class="kw">let </span>compressed_even_y_bytes =
-            <span class="macro">hex!</span>(<span class="string">&quot;020100000000000000000000000000000000000000000000000000000000000000&quot;</span>);
+            <span class="macro">hex!</span>(<span class="string">"020100000000000000000000000000000000000000000000000000000000000000"</span>);
 
         <span class="kw">let </span>compressed_even_y = EncodedPoint::from_bytes(<span class="kw-2">&amp;</span>compressed_even_y_bytes[..]).unwrap();
 
@@ -1384,20 +1385,20 @@
         <span class="macro">assert_eq!</span>(
             compressed_even_y.coordinates(),
             Coordinates::Compressed {
-                x: <span class="kw-2">&amp;</span><span class="macro">hex!</span>(<span class="string">&quot;0100000000000000000000000000000000000000000000000000000000000000&quot;</span>).into(),
+                x: <span class="kw-2">&amp;</span><span class="macro">hex!</span>(<span class="string">"0100000000000000000000000000000000000000000000000000000000000000"</span>).into(),
                 y_is_odd: <span class="bool-val">false
             </span>}
         );
 
         <span class="macro">assert_eq!</span>(
             compressed_even_y.x().unwrap(),
-            <span class="kw-2">&amp;</span><span class="macro">hex!</span>(<span class="string">&quot;0100000000000000000000000000000000000000000000000000000000000000&quot;</span>).into()
+            <span class="kw-2">&amp;</span><span class="macro">hex!</span>(<span class="string">"0100000000000000000000000000000000000000000000000000000000000000"</span>).into()
         );
         <span class="macro">assert_eq!</span>(compressed_even_y.y(), <span class="prelude-val">None</span>);
 
         <span class="comment">// Odd y-coordinate
         </span><span class="kw">let </span>compressed_odd_y_bytes =
-            <span class="macro">hex!</span>(<span class="string">&quot;030200000000000000000000000000000000000000000000000000000000000000&quot;</span>);
+            <span class="macro">hex!</span>(<span class="string">"030200000000000000000000000000000000000000000000000000000000000000"</span>);
 
         <span class="kw">let </span>compressed_odd_y = EncodedPoint::from_bytes(<span class="kw-2">&amp;</span>compressed_odd_y_bytes[..]).unwrap();
 
@@ -1409,14 +1410,14 @@
         <span class="macro">assert_eq!</span>(
             compressed_odd_y.coordinates(),
             Coordinates::Compressed {
-                x: <span class="kw-2">&amp;</span><span class="macro">hex!</span>(<span class="string">&quot;0200000000000000000000000000000000000000000000000000000000000000&quot;</span>).into(),
+                x: <span class="kw-2">&amp;</span><span class="macro">hex!</span>(<span class="string">"0200000000000000000000000000000000000000000000000000000000000000"</span>).into(),
                 y_is_odd: <span class="bool-val">true
             </span>}
         );
 
         <span class="macro">assert_eq!</span>(
             compressed_odd_y.x().unwrap(),
-            <span class="kw-2">&amp;</span><span class="macro">hex!</span>(<span class="string">&quot;0200000000000000000000000000000000000000000000000000000000000000&quot;</span>).into()
+            <span class="kw-2">&amp;</span><span class="macro">hex!</span>(<span class="string">"0200000000000000000000000000000000000000000000000000000000000000"</span>).into()
         );
         <span class="macro">assert_eq!</span>(compressed_odd_y.y(), <span class="prelude-val">None</span>);
     }
@@ -1433,18 +1434,18 @@
         <span class="macro">assert_eq!</span>(
             uncompressed_point.coordinates(),
             Coordinates::Uncompressed {
-                x: <span class="kw-2">&amp;</span><span class="macro">hex!</span>(<span class="string">&quot;1111111111111111111111111111111111111111111111111111111111111111&quot;</span>).into(),
-                y: <span class="kw-2">&amp;</span><span class="macro">hex!</span>(<span class="string">&quot;2222222222222222222222222222222222222222222222222222222222222222&quot;</span>).into()
+                x: <span class="kw-2">&amp;</span><span class="macro">hex!</span>(<span class="string">"1111111111111111111111111111111111111111111111111111111111111111"</span>).into(),
+                y: <span class="kw-2">&amp;</span><span class="macro">hex!</span>(<span class="string">"2222222222222222222222222222222222222222222222222222222222222222"</span>).into()
             }
         );
 
         <span class="macro">assert_eq!</span>(
             uncompressed_point.x().unwrap(),
-            <span class="kw-2">&amp;</span><span class="macro">hex!</span>(<span class="string">&quot;1111111111111111111111111111111111111111111111111111111111111111&quot;</span>).into()
+            <span class="kw-2">&amp;</span><span class="macro">hex!</span>(<span class="string">"1111111111111111111111111111111111111111111111111111111111111111"</span>).into()
         );
         <span class="macro">assert_eq!</span>(
             uncompressed_point.y().unwrap(),
-            <span class="kw-2">&amp;</span><span class="macro">hex!</span>(<span class="string">&quot;2222222222222222222222222222222222222222222222222222222222222222&quot;</span>).into()
+            <span class="kw-2">&amp;</span><span class="macro">hex!</span>(<span class="string">"2222222222222222222222222222222222222222222222222222222222222222"</span>).into()
         );
     }
 
@@ -1491,7 +1492,7 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>from_untagged_point() {
-        <span class="kw">let </span>untagged_bytes = <span class="macro">hex!</span>(<span class="string">&quot;11111111111111111111111111111111111111111111111111111111111111112222222222222222222222222222222222222222222222222222222222222222&quot;</span>);
+        <span class="kw">let </span>untagged_bytes = <span class="macro">hex!</span>(<span class="string">"11111111111111111111111111111111111111111111111111111111111111112222222222222222222222222222222222222222222222222222222222222222"</span>);
         <span class="kw">let </span>uncompressed_point =
             EncodedPoint::from_untagged_bytes(GenericArray::from_slice(<span class="kw-2">&amp;</span>untagged_bytes[..]));
         <span class="macro">assert_eq!</span>(uncompressed_point.as_bytes(), <span class="kw-2">&amp;</span>UNCOMPRESSED_BYTES[..]);
@@ -1499,8 +1500,8 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>from_affine_coordinates() {
-        <span class="kw">let </span>x = <span class="macro">hex!</span>(<span class="string">&quot;1111111111111111111111111111111111111111111111111111111111111111&quot;</span>);
-        <span class="kw">let </span>y = <span class="macro">hex!</span>(<span class="string">&quot;2222222222222222222222222222222222222222222222222222222222222222&quot;</span>);
+        <span class="kw">let </span>x = <span class="macro">hex!</span>(<span class="string">"1111111111111111111111111111111111111111111111111111111111111111"</span>);
+        <span class="kw">let </span>y = <span class="macro">hex!</span>(<span class="string">"2222222222222222222222222222222222222222222222222222222222222222"</span>);
 
         <span class="kw">let </span>uncompressed_point = EncodedPoint::from_affine_coordinates(<span class="kw-2">&amp;</span>x.into(), <span class="kw-2">&amp;</span>y.into(), <span class="bool-val">false</span>);
         <span class="macro">assert_eq!</span>(uncompressed_point.as_bytes(), <span class="kw-2">&amp;</span>UNCOMPRESSED_BYTES[..]);
@@ -1539,7 +1540,7 @@
         </span><span class="macro">assert_eq!</span>(identity_point, EncodedPoint::default());
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
     #[test]
     </span><span class="kw">fn </span>to_bytes() {
         <span class="kw">let </span>uncompressed_point = EncodedPoint::from_bytes(<span class="kw-2">&amp;</span>UNCOMPRESSED_BYTES[..]).unwrap();

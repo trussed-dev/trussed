@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/der-0.4.5/src/encoder.rs`."><title>encoder.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-fa3bb1812debf86c.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="der" data-themes="" data-resource-suffix="" data-rustdoc-version="1.74.1 (a28077b28 2023-12-04)" data-channel="1.74.1" data-search-js="search-8be46b629f5f14a8.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-c5bd66d33317d69f.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="icon" href="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../der/index.html"><img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/der-0.4.5/src/encoder.rs`."><title>encoder.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="der" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="icon" href="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><a class="sub-logo-container" href="../../der/index.html"><img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="der"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -258,17 +259,17 @@
 
 <span class="doccomment">/// DER encoder.
 </span><span class="attr">#[derive(Debug)]
-</span><span class="kw">pub struct </span>Encoder&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub struct </span>Encoder&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Buffer into which DER-encoded message is written
-    </span>bytes: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>[u8]&gt;,
+    </span>bytes: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>[u8]&gt;,
 
     <span class="doccomment">/// Total number of bytes written to buffer so far
     </span>position: Length,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Encoder&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Encoder&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Create a new encoder with the given byte slice as a backing buffer.
-    </span><span class="kw">pub fn </span>new(bytes: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>[u8]) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>new(bytes: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>[u8]) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             bytes: <span class="prelude-val">Some</span>(bytes),
             position: Length::ZERO,
@@ -309,7 +310,7 @@
 
     <span class="doccomment">/// Finish encoding to the buffer, returning a slice containing the data
     /// written to the buffer.
-    </span><span class="kw">pub fn </span>finish(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]&gt; {
+    </span><span class="kw">pub fn </span>finish(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]&gt; {
         <span class="kw">let </span>pos = <span class="self">self</span>.position;
         <span class="kw">let </span>range = ..usize::try_from(<span class="self">self</span>.position)<span class="question-mark">?</span>;
 
@@ -320,7 +321,7 @@
     }
 
     <span class="doccomment">/// Encode the provided value as an ASN.1 `BIT STRING`
-    </span><span class="kw">pub fn </span>bit_string(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: <span class="kw">impl </span>TryInto&lt;BitString&lt;<span class="lifetime">&#39;a</span>&gt;&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    </span><span class="kw">pub fn </span>bit_string(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: <span class="kw">impl </span>TryInto&lt;BitString&lt;<span class="lifetime">'a</span>&gt;&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         value
             .try_into()
             .map_err(|<span class="kw">_</span>| <span class="self">self</span>.value_error(Tag::BitString))
@@ -336,7 +337,7 @@
     }
 
     <span class="doccomment">/// Encode the provided value as an ASN.1 `IA5String`
-    </span><span class="kw">pub fn </span>ia5_string(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: <span class="kw">impl </span>TryInto&lt;Ia5String&lt;<span class="lifetime">&#39;a</span>&gt;&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    </span><span class="kw">pub fn </span>ia5_string(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: <span class="kw">impl </span>TryInto&lt;Ia5String&lt;<span class="lifetime">'a</span>&gt;&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         value
             .try_into()
             .map_err(|<span class="kw">_</span>| <span class="self">self</span>.value_error(Tag::Ia5String))
@@ -363,7 +364,7 @@
     }
 
     <span class="doccomment">/// Encode the provided value as an ASN.1 `OCTET STRING`
-    </span><span class="kw">pub fn </span>octet_string(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: <span class="kw">impl </span>TryInto&lt;OctetString&lt;<span class="lifetime">&#39;a</span>&gt;&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    </span><span class="kw">pub fn </span>octet_string(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: <span class="kw">impl </span>TryInto&lt;OctetString&lt;<span class="lifetime">'a</span>&gt;&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         value
             .try_into()
             .map_err(|<span class="kw">_</span>| <span class="self">self</span>.value_error(Tag::OctetString))
@@ -371,8 +372,8 @@
     }
 
     <span class="doccomment">/// Encode an ASN.1 [`ObjectIdentifier`]
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;oid&quot;</span>)]
-    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;oid&quot;</span>)))]
+    </span><span class="attr">#[cfg(feature = <span class="string">"oid"</span>)]
+    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"oid"</span>)))]
     </span><span class="kw">pub fn </span>oid(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: <span class="kw">impl </span>TryInto&lt;ObjectIdentifier&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         value
             .try_into()
@@ -381,7 +382,7 @@
     }
 
     <span class="doccomment">/// Encode the provided value as an ASN.1 `PrintableString`
-    </span><span class="kw">pub fn </span>printable_string(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: <span class="kw">impl </span>TryInto&lt;PrintableString&lt;<span class="lifetime">&#39;a</span>&gt;&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    </span><span class="kw">pub fn </span>printable_string(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: <span class="kw">impl </span>TryInto&lt;PrintableString&lt;<span class="lifetime">'a</span>&gt;&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         value
             .try_into()
             .map_err(|<span class="kw">_</span>| <span class="self">self</span>.value_error(Tag::PrintableString))
@@ -394,7 +395,7 @@
     /// specified length upon completion.
     </span><span class="kw">pub fn </span>sequence&lt;F&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, length: Length, f: F) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt;
     <span class="kw">where
-        </span>F: FnOnce(<span class="kw-2">&amp;mut </span>Encoder&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt;,
+        </span>F: FnOnce(<span class="kw-2">&amp;mut </span>Encoder&lt;<span class="lifetime">'_</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt;,
     {
         Header::new(Tag::Sequence, length).and_then(|header| header.encode(<span class="self">self</span>))<span class="question-mark">?</span>;
 
@@ -417,7 +418,7 @@
     }
 
     <span class="doccomment">/// Encode the provided value as an ASN.1 `Utf8String`
-    </span><span class="kw">pub fn </span>utf8_string(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: <span class="kw">impl </span>TryInto&lt;Utf8String&lt;<span class="lifetime">&#39;a</span>&gt;&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    </span><span class="kw">pub fn </span>utf8_string(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: <span class="kw">impl </span>TryInto&lt;Utf8String&lt;<span class="lifetime">'a</span>&gt;&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         value
             .try_into()
             .map_err(|<span class="kw">_</span>| <span class="self">self</span>.value_error(Tag::Utf8String))
@@ -447,7 +448,7 @@
         // Unfortunately tainting the buffer on error is tricky to do when
         // potentially holding a reference to the buffer, and failure to taint
         // it would not uphold the invariant that any errors should taint it.
-        </span><span class="kw">let </span>slice = <span class="kw-2">&amp;mut </span><span class="self">self</span>.bytes.as_mut().expect(<span class="string">&quot;DER encoder tainted&quot;</span>)[range];
+        </span><span class="kw">let </span>slice = <span class="kw-2">&amp;mut </span><span class="self">self</span>.bytes.as_mut().expect(<span class="string">"DER encoder tainted"</span>)[range];
         <span class="kw-2">*</span>position = end;
 
         <span class="prelude-val">Ok</span>(slice)

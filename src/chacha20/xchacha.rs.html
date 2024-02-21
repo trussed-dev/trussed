@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/chacha20-0.9.1/src/xchacha.rs`."><title>xchacha.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-fa3bb1812debf86c.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="chacha20" data-themes="" data-resource-suffix="" data-rustdoc-version="1.74.1 (a28077b28 2023-12-04)" data-channel="1.74.1" data-search-js="search-8be46b629f5f14a8.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-c5bd66d33317d69f.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="icon" href="https://raw.githubusercontent.com/RustCrypto/media/8f1a9894/logo.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../chacha20/index.html"><img src="https://raw.githubusercontent.com/RustCrypto/media/8f1a9894/logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/chacha20-0.9.1/src/xchacha.rs`."><title>xchacha.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="chacha20" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="icon" href="https://raw.githubusercontent.com/RustCrypto/media/8f1a9894/logo.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><a class="sub-logo-container" href="../../chacha20/index.html"><img src="https://raw.githubusercontent.com/RustCrypto/media/8f1a9894/logo.svg" alt="chacha20"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -202,7 +203,7 @@
     StreamCipherSeekCore, StreamClosure,
 };
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;zeroize&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"zeroize"</span>)]
 </span><span class="kw">use </span>cipher::zeroize::ZeroizeOnDrop;
 
 <span class="doccomment">/// Nonce type used by XChaCha variants.
@@ -211,14 +212,14 @@
 <span class="doccomment">/// XChaCha is a ChaCha20 variant with an extended 192-bit (24-byte) nonce.
 ///
 /// The construction is an adaptation of the same techniques used by
-/// XChaCha as described in the paper &quot;Extending the Salsa20 Nonce&quot;,
+/// XChaCha as described in the paper "Extending the Salsa20 Nonce",
 /// applied to the 96-bit nonce variant of ChaCha20, and derive a
 /// separate subkey/nonce for each extended nonce:
 ///
 /// &lt;https://cr.yp.to/snuffle/xsalsa-20081128.pdf&gt;
 ///
 /// No authoritative specification exists for XChaCha20, however the
-/// construction has &quot;rough consensus and running code&quot; in the form of
+/// construction has "rough consensus and running code" in the form of
 /// several interoperable libraries and protocols (e.g. libsodium, WireGuard)
 /// and is documented in an (expired) IETF draft:
 ///
@@ -279,8 +280,8 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;zeroize&quot;</span>)]
-#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;zeroize&quot;</span>)))]
+<span class="attr">#[cfg(feature = <span class="string">"zeroize"</span>)]
+#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"zeroize"</span>)))]
 </span><span class="kw">impl</span>&lt;R: Unsigned&gt; ZeroizeOnDrop <span class="kw">for </span>XChaChaCore&lt;R&gt; {}
 
 <span class="doccomment">/// The HChaCha function: adapts the ChaCha core function in the same
@@ -368,15 +369,15 @@
     </span><span class="attr">#[test]
     </span><span class="kw">fn </span>test_vector() {
         <span class="kw">const </span>KEY: [u8; <span class="number">32</span>] = <span class="macro">hex!</span>(
-            <span class="string">&quot;000102030405060708090a0b0c0d0e0f&quot;
-            &quot;101112131415161718191a1b1c1d1e1f&quot;
+            <span class="string">"000102030405060708090a0b0c0d0e0f"
+            "101112131415161718191a1b1c1d1e1f"
         </span>);
 
-        <span class="kw">const </span>INPUT: [u8; <span class="number">16</span>] = <span class="macro">hex!</span>(<span class="string">&quot;000000090000004a0000000031415927&quot;</span>);
+        <span class="kw">const </span>INPUT: [u8; <span class="number">16</span>] = <span class="macro">hex!</span>(<span class="string">"000000090000004a0000000031415927"</span>);
 
         <span class="kw">const </span>OUTPUT: [u8; <span class="number">32</span>] = <span class="macro">hex!</span>(
-            <span class="string">&quot;82413b4227b27bfed30e42508a877d73&quot;
-            &quot;a0f9e4d58a74a853c12ec41326d3ecdc&quot;
+            <span class="string">"82413b4227b27bfed30e42508a877d73"
+            "a0f9e4d58a74a853c12ec41326d3ecdc"
         </span>);
 
         <span class="kw">let </span>actual = hchacha::&lt;U10&gt;(

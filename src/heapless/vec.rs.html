@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/heapless-0.7.17/src/vec.rs`."><title>vec.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-fa3bb1812debf86c.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="heapless" data-themes="" data-resource-suffix="" data-rustdoc-version="1.74.1 (a28077b28 2023-12-04)" data-channel="1.74.1" data-search-js="search-8be46b629f5f14a8.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-c5bd66d33317d69f.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../heapless/index.html"><img class="rust-logo" src="../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/heapless-0.7.17/src/vec.rs`."><title>vec.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="heapless" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1629,7 +1630,7 @@
 /// vec.extend([1, 2, 3].iter().cloned());
 ///
 /// for x in &amp;vec {
-///     println!(&quot;{}&quot;, x);
+///     println!("{}", x);
 /// }
 /// assert_eq!(*vec, [7, 1, 2, 3]);
 /// ```
@@ -1750,7 +1751,7 @@
             <span class="comment">// This is how the unstable `MaybeUninit::array_assume_init` method does it
             </span><span class="kw">let </span>array = <span class="kw">unsafe </span>{ (<span class="kw-2">&amp;</span><span class="self">self</span>.buffer <span class="kw">as </span><span class="kw-2">*const </span><span class="kw">_ as </span><span class="kw-2">*const </span>[T; M]).read() };
 
-            <span class="comment">// We don&#39;t want `self`&#39;s destructor to be called because that would drop all the
+            <span class="comment">// We don't want `self`'s destructor to be called because that would drop all the
             // items in the array
             </span>core::mem::forget(<span class="self">self</span>);
 
@@ -1822,7 +1823,7 @@
         </span>T: Clone,
     {
         <span class="kw">if </span><span class="self">self</span>.len + other.len() &gt; <span class="self">self</span>.capacity() {
-            <span class="comment">// won&#39;t fit in the `Vec`; don&#39;t modify anything and return an error
+            <span class="comment">// won't fit in the `Vec`; don't modify anything and return an error
             </span><span class="prelude-val">Err</span>(())
         } <span class="kw">else </span>{
             <span class="kw">for </span>elem <span class="kw">in </span>other {
@@ -1834,7 +1835,7 @@
         }
     }
 
-    <span class="doccomment">/// Removes the last element from a vector and returns it, or `None` if it&#39;s empty
+    <span class="doccomment">/// Removes the last element from a vector and returns it, or `None` if it's empty
     </span><span class="kw">pub fn </span>pop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;T&gt; {
         <span class="kw">if </span><span class="self">self</span>.len != <span class="number">0 </span>{
             <span class="prelude-val">Some</span>(<span class="kw">unsafe </span>{ <span class="self">self</span>.pop_unchecked() })
@@ -1874,7 +1875,7 @@
     /// This assumes the vec is not full.
     </span><span class="kw">pub unsafe fn </span>push_unchecked(<span class="kw-2">&amp;mut </span><span class="self">self</span>, item: T) {
         <span class="comment">// NOTE(ptr::write) the memory slot that we are about to write to is uninitialized. We
-        // use `ptr::write` to avoid running `T`&#39;s destructor on the uninitialized memory
+        // use `ptr::write` to avoid running `T`'s destructor on the uninitialized memory
         </span><span class="macro">debug_assert!</span>(!<span class="self">self</span>.is_full());
 
         <span class="kw-2">*</span><span class="self">self</span>.buffer.get_unchecked_mut(<span class="self">self</span>.len) = MaybeUninit::new(item);
@@ -1892,7 +1893,7 @@
         //   such that no value will be dropped twice in case `drop_in_place`
         //   were to panic once (if it panics twice, the program aborts).
         </span><span class="kw">unsafe </span>{
-            <span class="comment">// Note: It&#39;s intentional that this is `&gt;` and not `&gt;=`.
+            <span class="comment">// Note: It's intentional that this is `&gt;` and not `&gt;=`.
             //       Changing it to `&gt;=` has negative performance
             //       implications in some cases. See rust-lang/rust#78884 for more.
             </span><span class="kw">if </span>len &gt; <span class="self">self</span>.len {
@@ -1974,10 +1975,10 @@
     /// use heapless::Vec;
     ///
     /// # // This is just a minimal skeleton for the doc example;
-    /// # // don&#39;t use this as a starting point for a real library.
+    /// # // don't use this as a starting point for a real library.
     /// # pub struct StreamWrapper { strm: *mut core::ffi::c_void }
     /// # const Z_OK: i32 = 0;
-    /// # extern &quot;C&quot; {
+    /// # extern "C" {
     /// #     fn deflateGetDictionary(
     /// #         strm: *mut core::ffi::c_void,
     /// #         dictionary: *mut u8,
@@ -1986,7 +1987,7 @@
     /// # }
     /// # impl StreamWrapper {
     /// pub fn get_dictionary(&amp;self) -&gt; Option&lt;Vec&lt;u8, 32768&gt;&gt; {
-    ///     // Per the FFI method&#39;s docs, &quot;32768 bytes is always enough&quot;.
+    ///     // Per the FFI method's docs, "32768 bytes is always enough".
     ///     let mut dict = Vec::new();
     ///     let mut dict_length = 0;
     ///     // SAFETY: When `deflateGetDictionary` returns `Z_OK`, it holds that:
@@ -2057,16 +2058,16 @@
     </span><span class="comment">///// use heapless::consts::*;
     </span><span class="doccomment">///
     /// let mut v: Vec&lt;_, 8&gt; = Vec::new();
-    /// v.push(&quot;foo&quot;).unwrap();
-    /// v.push(&quot;bar&quot;).unwrap();
-    /// v.push(&quot;baz&quot;).unwrap();
-    /// v.push(&quot;qux&quot;).unwrap();
+    /// v.push("foo").unwrap();
+    /// v.push("bar").unwrap();
+    /// v.push("baz").unwrap();
+    /// v.push("qux").unwrap();
     ///
-    /// assert_eq!(v.swap_remove(1), &quot;bar&quot;);
-    /// assert_eq!(&amp;*v, [&quot;foo&quot;, &quot;qux&quot;, &quot;baz&quot;]);
+    /// assert_eq!(v.swap_remove(1), "bar");
+    /// assert_eq!(&amp;*v, ["foo", "qux", "baz"]);
     ///
-    /// assert_eq!(v.swap_remove(0), &quot;foo&quot;);
-    /// assert_eq!(&amp;*v, [&quot;baz&quot;, &quot;qux&quot;]);
+    /// assert_eq!(v.swap_remove(0), "foo");
+    /// assert_eq!(&amp;*v, ["baz", "qux"]);
     /// ```
     </span><span class="kw">pub fn </span>swap_remove(<span class="kw-2">&amp;mut </span><span class="self">self</span>, index: usize) -&gt; T {
         <span class="macro">assert!</span>(index &lt; <span class="self">self</span>.len);
@@ -2089,16 +2090,16 @@
     /// use heapless::Vec;
     ///
     /// let mut v: Vec&lt;_, 8&gt; = Vec::new();
-    /// v.push(&quot;foo&quot;).unwrap();
-    /// v.push(&quot;bar&quot;).unwrap();
-    /// v.push(&quot;baz&quot;).unwrap();
-    /// v.push(&quot;qux&quot;).unwrap();
+    /// v.push("foo").unwrap();
+    /// v.push("bar").unwrap();
+    /// v.push("baz").unwrap();
+    /// v.push("qux").unwrap();
     ///
-    /// assert_eq!(unsafe { v.swap_remove_unchecked(1) }, &quot;bar&quot;);
-    /// assert_eq!(&amp;*v, [&quot;foo&quot;, &quot;qux&quot;, &quot;baz&quot;]);
+    /// assert_eq!(unsafe { v.swap_remove_unchecked(1) }, "bar");
+    /// assert_eq!(&amp;*v, ["foo", "qux", "baz"]);
     ///
-    /// assert_eq!(unsafe { v.swap_remove_unchecked(0) }, &quot;foo&quot;);
-    /// assert_eq!(&amp;*v, [&quot;baz&quot;, &quot;qux&quot;]);
+    /// assert_eq!(unsafe { v.swap_remove_unchecked(0) }, "foo");
+    /// assert_eq!(&amp;*v, ["baz", "qux"]);
     /// ```
     </span><span class="kw">pub unsafe fn </span>swap_remove_unchecked(<span class="kw-2">&amp;mut </span><span class="self">self</span>, index: usize) -&gt; T {
         <span class="kw">let </span>length = <span class="self">self</span>.len();
@@ -2131,10 +2132,10 @@
     /// ```
     /// use heapless::Vec;
     ///
-    /// let v: Vec&lt;_, 8&gt; = Vec::from_slice(b&quot;abc&quot;).unwrap();
-    /// assert_eq!(v.starts_with(b&quot;&quot;), true);
-    /// assert_eq!(v.starts_with(b&quot;ab&quot;), true);
-    /// assert_eq!(v.starts_with(b&quot;bc&quot;), false);
+    /// let v: Vec&lt;_, 8&gt; = Vec::from_slice(b"abc").unwrap();
+    /// assert_eq!(v.starts_with(b""), true);
+    /// assert_eq!(v.starts_with(b"ab"), true);
+    /// assert_eq!(v.starts_with(b"bc"), false);
     /// ```
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>starts_with(<span class="kw-2">&amp;</span><span class="self">self</span>, needle: <span class="kw-2">&amp;</span>[T]) -&gt; bool
@@ -2154,10 +2155,10 @@
     /// ```
     /// use heapless::Vec;
     ///
-    /// let v: Vec&lt;_, 8&gt; = Vec::from_slice(b&quot;abc&quot;).unwrap();
-    /// assert_eq!(v.ends_with(b&quot;&quot;), true);
-    /// assert_eq!(v.ends_with(b&quot;ab&quot;), false);
-    /// assert_eq!(v.ends_with(b&quot;bc&quot;), true);
+    /// let v: Vec&lt;_, 8&gt; = Vec::from_slice(b"abc").unwrap();
+    /// assert_eq!(v.ends_with(b""), true);
+    /// assert_eq!(v.ends_with(b"ab"), false);
+    /// assert_eq!(v.ends_with(b"bc"), true);
     /// ```
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>ends_with(<span class="kw-2">&amp;</span><span class="self">self</span>, needle: <span class="kw-2">&amp;</span>[T]) -&gt; bool
@@ -2192,12 +2193,12 @@
         <span class="kw">let </span>len = <span class="self">self</span>.len();
         <span class="kw">if </span>index &gt; len {
             <span class="macro">panic!</span>(
-                <span class="string">&quot;insertion index (is {}) should be &lt;= len (is {})&quot;</span>,
+                <span class="string">"insertion index (is {}) should be &lt;= len (is {})"</span>,
                 index, len
             );
         }
 
-        <span class="comment">// check there&#39;s space for the new element
+        <span class="comment">// check there's space for the new element
         </span><span class="kw">if </span><span class="self">self</span>.is_full() {
             <span class="kw">return </span><span class="prelude-val">Err</span>(element);
         }
@@ -2224,8 +2225,8 @@
     /// shifting all elements after it to the left.
     ///
     /// Note: Because this shifts over the remaining elements, it has a
-    /// worst-case performance of *O*(*n*). If you don&#39;t need the order of
-    /// elements to be preserved, use [`swap_remove`] instead. If you&#39;d like to
+    /// worst-case performance of *O*(*n*). If you don't need the order of
+    /// elements to be preserved, use [`swap_remove`] instead. If you'd like to
     /// remove elements from the beginning of the `Vec`, consider using
     /// [`Deque::pop_front`] instead.
     ///
@@ -2248,7 +2249,7 @@
     </span><span class="kw">pub fn </span>remove(<span class="kw-2">&amp;mut </span><span class="self">self</span>, index: usize) -&gt; T {
         <span class="kw">let </span>len = <span class="self">self</span>.len();
         <span class="kw">if </span>index &gt;= len {
-            <span class="macro">panic!</span>(<span class="string">&quot;removal index (is {}) should be &lt; len (is {})&quot;</span>, index, len);
+            <span class="macro">panic!</span>(<span class="string">"removal index (is {}) should be &lt; len (is {})"</span>, index, len);
         }
         <span class="kw">unsafe </span>{
             <span class="comment">// infallible
@@ -2343,14 +2344,14 @@
         // This drop guard will be invoked when predicate or `drop` of element panicked.
         // It shifts unchecked elements to cover holes and `set_len` to the correct length.
         // In cases when predicate and `drop` never panick, it will be optimized out.
-        </span><span class="kw">struct </span>BackshiftOnDrop&lt;<span class="lifetime">&#39;a</span>, T, <span class="kw">const </span>N: usize&gt; {
-            v: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>Vec&lt;T, N&gt;,
+        </span><span class="kw">struct </span>BackshiftOnDrop&lt;<span class="lifetime">'a</span>, T, <span class="kw">const </span>N: usize&gt; {
+            v: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>Vec&lt;T, N&gt;,
             processed_len: usize,
             deleted_cnt: usize,
             original_len: usize,
         }
 
-        <span class="kw">impl</span>&lt;T, <span class="kw">const </span>N: usize&gt; Drop <span class="kw">for </span>BackshiftOnDrop&lt;<span class="lifetime">&#39;_</span>, T, N&gt; {
+        <span class="kw">impl</span>&lt;T, <span class="kw">const </span>N: usize&gt; Drop <span class="kw">for </span>BackshiftOnDrop&lt;<span class="lifetime">'_</span>, T, N&gt; {
             <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
                 <span class="kw">if </span><span class="self">self</span>.deleted_cnt &gt; <span class="number">0 </span>{
                     <span class="comment">// SAFETY: Trailing unchecked items must be valid since we never touch them.
@@ -2381,7 +2382,7 @@
         <span class="kw">fn </span>process_loop&lt;F, T, <span class="kw">const </span>N: usize, <span class="kw">const </span>DELETED: bool&gt;(
             original_len: usize,
             f: <span class="kw-2">&amp;mut </span>F,
-            g: <span class="kw-2">&amp;mut </span>BackshiftOnDrop&lt;<span class="lifetime">&#39;_</span>, T, N&gt;,
+            g: <span class="kw-2">&amp;mut </span>BackshiftOnDrop&lt;<span class="lifetime">'_</span>, T, N&gt;,
         ) <span class="kw">where
             </span>F: FnMut(<span class="kw-2">&amp;mut </span>T) -&gt; bool,
         {
@@ -2437,7 +2438,7 @@
 <span class="kw">where
     </span>T: fmt::Debug,
 {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
         &lt;[T] <span class="kw">as </span>fmt::Debug&gt;::fmt(<span class="self">self</span>, f)
     }
 }
@@ -2460,10 +2461,10 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T: Clone, <span class="kw">const </span>N: usize&gt; TryFrom&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[T]&gt; <span class="kw">for </span>Vec&lt;T, N&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T: Clone, <span class="kw">const </span>N: usize&gt; TryFrom&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[T]&gt; <span class="kw">for </span>Vec&lt;T, N&gt; {
     <span class="kw">type </span>Error = ();
 
-    <span class="kw">fn </span>try_from(slice: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[T]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
+    <span class="kw">fn </span>try_from(slice: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[T]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
         Vec::from_slice(slice)
     }
 }
@@ -2477,13 +2478,13 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T, <span class="kw">const </span>N: usize&gt; Extend&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>T&gt; <span class="kw">for </span>Vec&lt;T, N&gt;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T, <span class="kw">const </span>N: usize&gt; Extend&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>T&gt; <span class="kw">for </span>Vec&lt;T, N&gt;
 <span class="kw">where
-    </span>T: <span class="lifetime">&#39;a </span>+ Copy,
+    </span>T: <span class="lifetime">'a </span>+ Copy,
 {
     <span class="kw">fn </span>extend&lt;I&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, iter: I)
     <span class="kw">where
-        </span>I: IntoIterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>T&gt;,
+        </span>I: IntoIterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">'a </span>T&gt;,
     {
         <span class="self">self</span>.extend(iter.into_iter().cloned())
     }
@@ -2507,18 +2508,18 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T, <span class="kw">const </span>N: usize&gt; IntoIterator <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Vec&lt;T, N&gt; {
-    <span class="kw">type </span>Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>T;
-    <span class="kw">type </span>IntoIter = slice::Iter&lt;<span class="lifetime">&#39;a</span>, T&gt;;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T, <span class="kw">const </span>N: usize&gt; IntoIterator <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>Vec&lt;T, N&gt; {
+    <span class="kw">type </span>Item = <span class="kw-2">&amp;</span><span class="lifetime">'a </span>T;
+    <span class="kw">type </span>IntoIter = slice::Iter&lt;<span class="lifetime">'a</span>, T&gt;;
 
     <span class="kw">fn </span>into_iter(<span class="self">self</span>) -&gt; <span class="self">Self</span>::IntoIter {
         <span class="self">self</span>.iter()
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T, <span class="kw">const </span>N: usize&gt; IntoIterator <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>Vec&lt;T, N&gt; {
-    <span class="kw">type </span>Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>T;
-    <span class="kw">type </span>IntoIter = slice::IterMut&lt;<span class="lifetime">&#39;a</span>, T&gt;;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T, <span class="kw">const </span>N: usize&gt; IntoIterator <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>Vec&lt;T, N&gt; {
+    <span class="kw">type </span>Item = <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>T;
+    <span class="kw">type </span>IntoIter = slice::IterMut&lt;<span class="lifetime">'a</span>, T&gt;;
 
     <span class="kw">fn </span>into_iter(<span class="self">self</span>) -&gt; <span class="self">Self</span>::IntoIter {
         <span class="self">self</span>.iter_mut()
@@ -2532,7 +2533,7 @@
     {
         <span class="kw">let </span><span class="kw-2">mut </span>vec = Vec::new();
         <span class="kw">for </span>i <span class="kw">in </span>iter {
-            vec.push(i).ok().expect(<span class="string">&quot;Vec::from_iter overflow&quot;</span>);
+            vec.push(i).ok().expect(<span class="string">"Vec::from_iter overflow"</span>);
         }
         vec
     }
@@ -3053,7 +3054,7 @@
 
         v.resize(<span class="number">0</span>, <span class="number">0</span>).unwrap();
         v.resize(<span class="number">4</span>, <span class="number">0</span>).unwrap();
-        v.resize(<span class="number">5</span>, <span class="number">0</span>).err().expect(<span class="string">&quot;full&quot;</span>);
+        v.resize(<span class="number">5</span>, <span class="number">0</span>).err().expect(<span class="string">"full"</span>);
     }
 
     <span class="attr">#[test]
@@ -3091,17 +3092,17 @@
         </span>v.resize(<span class="number">1</span>, <span class="number">17</span>).unwrap();
         <span class="macro">assert_eq!</span>(v[<span class="number">0</span>], <span class="number">17</span>);
 
-        <span class="comment">// Old values aren&#39;t changed when growing
+        <span class="comment">// Old values aren't changed when growing
         </span>v.resize(<span class="number">2</span>, <span class="number">18</span>).unwrap();
         <span class="macro">assert_eq!</span>(v[<span class="number">0</span>], <span class="number">17</span>);
         <span class="macro">assert_eq!</span>(v[<span class="number">1</span>], <span class="number">18</span>);
 
-        <span class="comment">// Old values aren&#39;t changed when length unchanged
+        <span class="comment">// Old values aren't changed when length unchanged
         </span>v.resize(<span class="number">2</span>, <span class="number">0</span>).unwrap();
         <span class="macro">assert_eq!</span>(v[<span class="number">0</span>], <span class="number">17</span>);
         <span class="macro">assert_eq!</span>(v[<span class="number">1</span>], <span class="number">18</span>);
 
-        <span class="comment">// Old values aren&#39;t changed when shrinking
+        <span class="comment">// Old values aren't changed when shrinking
         </span>v.resize(<span class="number">1</span>, <span class="number">0</span>).unwrap();
         <span class="macro">assert_eq!</span>(v[<span class="number">0</span>], <span class="number">17</span>);
     }
@@ -3119,8 +3120,8 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>write() {
         <span class="kw">let </span><span class="kw-2">mut </span>v: Vec&lt;u8, <span class="number">4</span>&gt; = Vec::new();
-        <span class="macro">write!</span>(v, <span class="string">&quot;{:x}&quot;</span>, <span class="number">1234</span>).unwrap();
-        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>v[..], <span class="string">b&quot;4d2&quot;</span>);
+        <span class="macro">write!</span>(v, <span class="string">"{:x}"</span>, <span class="number">1234</span>).unwrap();
+        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>v[..], <span class="string">b"4d2"</span>);
     }
 
     <span class="attr">#[test]
@@ -3151,26 +3152,26 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>starts_with() {
-        <span class="kw">let </span>v: Vec&lt;<span class="kw">_</span>, <span class="number">8</span>&gt; = Vec::from_slice(<span class="string">b&quot;ab&quot;</span>).unwrap();
+        <span class="kw">let </span>v: Vec&lt;<span class="kw">_</span>, <span class="number">8</span>&gt; = Vec::from_slice(<span class="string">b"ab"</span>).unwrap();
         <span class="macro">assert!</span>(v.starts_with(<span class="kw-2">&amp;</span>[]));
-        <span class="macro">assert!</span>(v.starts_with(<span class="string">b&quot;&quot;</span>));
-        <span class="macro">assert!</span>(v.starts_with(<span class="string">b&quot;a&quot;</span>));
-        <span class="macro">assert!</span>(v.starts_with(<span class="string">b&quot;ab&quot;</span>));
-        <span class="macro">assert!</span>(!v.starts_with(<span class="string">b&quot;abc&quot;</span>));
-        <span class="macro">assert!</span>(!v.starts_with(<span class="string">b&quot;ba&quot;</span>));
-        <span class="macro">assert!</span>(!v.starts_with(<span class="string">b&quot;b&quot;</span>));
+        <span class="macro">assert!</span>(v.starts_with(<span class="string">b""</span>));
+        <span class="macro">assert!</span>(v.starts_with(<span class="string">b"a"</span>));
+        <span class="macro">assert!</span>(v.starts_with(<span class="string">b"ab"</span>));
+        <span class="macro">assert!</span>(!v.starts_with(<span class="string">b"abc"</span>));
+        <span class="macro">assert!</span>(!v.starts_with(<span class="string">b"ba"</span>));
+        <span class="macro">assert!</span>(!v.starts_with(<span class="string">b"b"</span>));
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>ends_with() {
-        <span class="kw">let </span>v: Vec&lt;<span class="kw">_</span>, <span class="number">8</span>&gt; = Vec::from_slice(<span class="string">b&quot;ab&quot;</span>).unwrap();
+        <span class="kw">let </span>v: Vec&lt;<span class="kw">_</span>, <span class="number">8</span>&gt; = Vec::from_slice(<span class="string">b"ab"</span>).unwrap();
         <span class="macro">assert!</span>(v.ends_with(<span class="kw-2">&amp;</span>[]));
-        <span class="macro">assert!</span>(v.ends_with(<span class="string">b&quot;&quot;</span>));
-        <span class="macro">assert!</span>(v.ends_with(<span class="string">b&quot;b&quot;</span>));
-        <span class="macro">assert!</span>(v.ends_with(<span class="string">b&quot;ab&quot;</span>));
-        <span class="macro">assert!</span>(!v.ends_with(<span class="string">b&quot;abc&quot;</span>));
-        <span class="macro">assert!</span>(!v.ends_with(<span class="string">b&quot;ba&quot;</span>));
-        <span class="macro">assert!</span>(!v.ends_with(<span class="string">b&quot;a&quot;</span>));
+        <span class="macro">assert!</span>(v.ends_with(<span class="string">b""</span>));
+        <span class="macro">assert!</span>(v.ends_with(<span class="string">b"b"</span>));
+        <span class="macro">assert!</span>(v.ends_with(<span class="string">b"ab"</span>));
+        <span class="macro">assert!</span>(!v.ends_with(<span class="string">b"abc"</span>));
+        <span class="macro">assert!</span>(!v.ends_with(<span class="string">b"ba"</span>));
+        <span class="macro">assert!</span>(!v.ends_with(<span class="string">b"a"</span>));
     }
 
     <span class="attr">#[test]

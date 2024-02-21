@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/der-0.4.5/src/decoder.rs`."><title>decoder.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-fa3bb1812debf86c.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="der" data-themes="" data-resource-suffix="" data-rustdoc-version="1.74.1 (a28077b28 2023-12-04)" data-channel="1.74.1" data-search-js="search-8be46b629f5f14a8.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-c5bd66d33317d69f.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="icon" href="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../der/index.html"><img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/der-0.4.5/src/decoder.rs`."><title>decoder.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="der" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="icon" href="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><a class="sub-logo-container" href="../../der/index.html"><img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="der"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -360,20 +361,20 @@
 
 <span class="doccomment">/// DER decoder.
 </span><span class="attr">#[derive(Debug)]
-</span><span class="kw">pub struct </span>Decoder&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub struct </span>Decoder&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Byte slice being decoded.
     ///
     /// In the event an error was previously encountered this will be set to
     /// `None` to prevent further decoding while in a bad state.
-    </span>bytes: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]&gt;,
+    </span>bytes: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]&gt;,
 
     <span class="doccomment">/// Position within the decoded slice.
     </span>position: Length,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Decoder&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Decoder&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Create a new decoder for the given byte slice.
-    </span><span class="kw">pub fn </span>new(bytes: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>new(bytes: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             bytes: <span class="prelude-val">Some</span>(bytes),
             position: Length::ZERO,
@@ -381,7 +382,7 @@
     }
 
     <span class="doccomment">/// Decode a value which impls the [`Decodable`] trait.
-    </span><span class="kw">pub fn </span>decode&lt;T: Decodable&lt;<span class="lifetime">&#39;a</span>&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;T&gt; {
+    </span><span class="kw">pub fn </span>decode&lt;T: Decodable&lt;<span class="lifetime">'a</span>&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;T&gt; {
         <span class="kw">if </span><span class="self">self</span>.is_failed() {
             <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="self">self</span>.error(ErrorKind::Failed));
         }
@@ -427,19 +428,19 @@
 
     <span class="doccomment">/// Have we decoded all of the bytes in this [`Decoder`]?
     ///
-    /// Returns `false` if we&#39;re not finished decoding or if a fatal error
+    /// Returns `false` if we're not finished decoding or if a fatal error
     /// has occurred.
     </span><span class="kw">pub fn </span>is_finished(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
         <span class="self">self</span>.remaining().map(|rem| rem.is_empty()).unwrap_or(<span class="bool-val">false</span>)
     }
 
     <span class="doccomment">/// Attempt to decode an ASN.1 `ANY` value.
-    </span><span class="kw">pub fn </span>any(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Any&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    </span><span class="kw">pub fn </span>any(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Any&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="self">self</span>.decode()
     }
 
     <span class="doccomment">/// Attempt to decode an `OPTIONAL` ASN.1 `ANY` value.
-    </span><span class="kw">pub fn </span>any_optional(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Any&lt;<span class="lifetime">&#39;a</span>&gt;&gt;&gt; {
+    </span><span class="kw">pub fn </span>any_optional(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Any&lt;<span class="lifetime">'a</span>&gt;&gt;&gt; {
         <span class="self">self</span>.decode()
     }
 
@@ -464,14 +465,14 @@
     }
 
     <span class="doccomment">/// Attempt to decode an ASN.1 `INTEGER` as a [`UIntBytes`].
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;bigint&quot;</span>)]
-    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;bigint&quot;</span>)))]
-    </span><span class="kw">pub fn </span>uint_bytes(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;UIntBytes&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    </span><span class="attr">#[cfg(feature = <span class="string">"bigint"</span>)]
+    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"bigint"</span>)))]
+    </span><span class="kw">pub fn </span>uint_bytes(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;UIntBytes&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="self">self</span>.decode()
     }
 
     <span class="doccomment">/// Attempt to decode an ASN.1 `BIT STRING`.
-    </span><span class="kw">pub fn </span>bit_string(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;BitString&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    </span><span class="kw">pub fn </span>bit_string(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;BitString&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="self">self</span>.decode()
     }
 
@@ -490,7 +491,7 @@
     ///   higher numbered field consumed as a follow-up.
     /// - Returns `Ok(None)` if anything other than a [`ContextSpecific`] field
     ///   is encountered.
-    </span><span class="kw">pub fn </span>context_specific(<span class="kw-2">&amp;mut </span><span class="self">self</span>, tag: TagNumber) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Any&lt;<span class="lifetime">&#39;a</span>&gt;&gt;&gt; {
+    </span><span class="kw">pub fn </span>context_specific(<span class="kw-2">&amp;mut </span><span class="self">self</span>, tag: TagNumber) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Any&lt;<span class="lifetime">'a</span>&gt;&gt;&gt; {
         <span class="kw">loop </span>{
             <span class="kw">match </span><span class="self">self</span>.peek().map(Tag::try_from).transpose()<span class="question-mark">? </span>{
                 <span class="prelude-val">Some</span>(Tag::ContextSpecific(actual_tag)) =&gt; {
@@ -498,11 +499,11 @@
                         Ordering::Less =&gt; {
                             <span class="comment">// Decode and ignore lower-numbered fields if
                             // they parse correctly.
-                            </span><span class="self">self</span>.decode::&lt;ContextSpecific&lt;<span class="lifetime">&#39;_</span>&gt;&gt;()<span class="question-mark">?</span>;
+                            </span><span class="self">self</span>.decode::&lt;ContextSpecific&lt;<span class="lifetime">'_</span>&gt;&gt;()<span class="question-mark">?</span>;
                         }
                         Ordering::Equal =&gt; {
                             <span class="kw">return </span><span class="self">self
-                                </span>.decode::&lt;ContextSpecific&lt;<span class="lifetime">&#39;_</span>&gt;&gt;()
+                                </span>.decode::&lt;ContextSpecific&lt;<span class="lifetime">'_</span>&gt;&gt;()
                                 .map(|cs| <span class="prelude-val">Some</span>(cs.value))
                         }
                         Ordering::Greater =&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
@@ -519,7 +520,7 @@
     }
 
     <span class="doccomment">/// Attempt to decode an ASN.1 `IA5String`.
-    </span><span class="kw">pub fn </span>ia5_string(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Ia5String&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    </span><span class="kw">pub fn </span>ia5_string(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Ia5String&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="self">self</span>.decode()
     }
 
@@ -529,24 +530,24 @@
     }
 
     <span class="doccomment">/// Attempt to decode an ASN.1 `OCTET STRING`.
-    </span><span class="kw">pub fn </span>octet_string(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;OctetString&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    </span><span class="kw">pub fn </span>octet_string(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;OctetString&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="self">self</span>.decode()
     }
 
     <span class="doccomment">/// Attempt to decode an ASN.1 `OBJECT IDENTIFIER`.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;oid&quot;</span>)]
-    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;oid&quot;</span>)))]
+    </span><span class="attr">#[cfg(feature = <span class="string">"oid"</span>)]
+    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"oid"</span>)))]
     </span><span class="kw">pub fn </span>oid(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;ObjectIdentifier&gt; {
         <span class="self">self</span>.decode()
     }
 
     <span class="doccomment">/// Attempt to decode an ASN.1 `OPTIONAL` value.
-    </span><span class="kw">pub fn </span>optional&lt;T: Choice&lt;<span class="lifetime">&#39;a</span>&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;T&gt;&gt; {
+    </span><span class="kw">pub fn </span>optional&lt;T: Choice&lt;<span class="lifetime">'a</span>&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;T&gt;&gt; {
         <span class="self">self</span>.decode()
     }
 
     <span class="doccomment">/// Attempt to decode an ASN.1 `PrintableString`.
-    </span><span class="kw">pub fn </span>printable_string(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;PrintableString&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    </span><span class="kw">pub fn </span>printable_string(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;PrintableString&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="self">self</span>.decode()
     }
 
@@ -556,7 +557,7 @@
     }
 
     <span class="doccomment">/// Attempt to decode an ASN.1 `UTF8String`.
-    </span><span class="kw">pub fn </span>utf8_string(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Utf8String&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    </span><span class="kw">pub fn </span>utf8_string(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Utf8String&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="self">self</span>.decode()
     }
 
@@ -564,7 +565,7 @@
     /// [`Decoder`] and calling the provided argument with it.
     </span><span class="kw">pub fn </span>sequence&lt;F, T&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, f: F) -&gt; <span class="prelude-ty">Result</span>&lt;T&gt;
     <span class="kw">where
-        </span>F: FnOnce(<span class="kw-2">&amp;mut </span>Decoder&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;T&gt;,
+        </span>F: FnOnce(<span class="kw-2">&amp;mut </span>Decoder&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;T&gt;,
     {
         Sequence::decode(<span class="self">self</span>)<span class="question-mark">?</span>.decode_nested(f).map_err(|e| {
             <span class="self">self</span>.bytes.take();
@@ -582,7 +583,7 @@
 
     <span class="doccomment">/// Obtain a slice of bytes of the given length from the current cursor
     /// position, or return an error if we have insufficient data.
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>bytes(<span class="kw-2">&amp;mut </span><span class="self">self</span>, len: <span class="kw">impl </span>TryInto&lt;Length&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]&gt; {
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>bytes(<span class="kw-2">&amp;mut </span><span class="self">self</span>, len: <span class="kw">impl </span>TryInto&lt;Length&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]&gt; {
         <span class="kw">if </span><span class="self">self</span>.is_failed() {
             <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="self">self</span>.error(ErrorKind::Failed));
         }
@@ -609,7 +610,7 @@
 
     <span class="doccomment">/// Obtain the remaining bytes in this decoder from the current cursor
     /// position.
-    </span><span class="kw">fn </span>remaining(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]&gt; {
+    </span><span class="kw">fn </span>remaining(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]&gt; {
         <span class="kw">let </span>pos = usize::try_from(<span class="self">self</span>.position)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.bytes
@@ -623,8 +624,8 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; From&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]&gt; <span class="kw">for </span>Decoder&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>from(bytes: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; Decoder&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; From&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]&gt; <span class="kw">for </span>Decoder&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>from(bytes: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; Decoder&lt;<span class="lifetime">'a</span>&gt; {
         Decoder::new(bytes)
     }
 }
@@ -645,11 +646,11 @@
         <span class="macro">assert_eq!</span>(decoder.context_specific(tag).unwrap(), <span class="prelude-val">None</span>);
 
         <span class="comment">// Message containing a non-context-specific type
-        </span><span class="kw">let </span><span class="kw-2">mut </span>decoder = Decoder::new(<span class="kw-2">&amp;</span><span class="macro">hex!</span>(<span class="string">&quot;020100&quot;</span>));
+        </span><span class="kw">let </span><span class="kw-2">mut </span>decoder = Decoder::new(<span class="kw-2">&amp;</span><span class="macro">hex!</span>(<span class="string">"020100"</span>));
         <span class="macro">assert_eq!</span>(decoder.context_specific(tag).unwrap(), <span class="prelude-val">None</span>);
 
         <span class="comment">//
-        </span><span class="kw">let </span><span class="kw-2">mut </span>decoder = Decoder::new(<span class="kw-2">&amp;</span><span class="macro">hex!</span>(<span class="string">&quot;A003020100&quot;</span>));
+        </span><span class="kw">let </span><span class="kw-2">mut </span>decoder = Decoder::new(<span class="kw-2">&amp;</span><span class="macro">hex!</span>(<span class="string">"A003020100"</span>));
         <span class="kw">let </span>field = decoder.context_specific(tag).unwrap().unwrap();
         <span class="macro">assert_eq!</span>(u8::try_from(field).unwrap(), <span class="number">0</span>);
     }
@@ -657,7 +658,7 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>context_specific_skipping_unknown_field() {
         <span class="kw">let </span>tag = TagNumber::new(<span class="number">1</span>);
-        <span class="kw">let </span><span class="kw-2">mut </span>decoder = Decoder::new(<span class="kw-2">&amp;</span><span class="macro">hex!</span>(<span class="string">&quot;A003020100A103020101&quot;</span>));
+        <span class="kw">let </span><span class="kw-2">mut </span>decoder = Decoder::new(<span class="kw-2">&amp;</span><span class="macro">hex!</span>(<span class="string">"A003020100A103020101"</span>));
         <span class="kw">let </span>field = decoder.context_specific(tag).unwrap().unwrap();
         <span class="macro">assert_eq!</span>(u8::try_from(field).unwrap(), <span class="number">1</span>);
     }
@@ -665,7 +666,7 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>context_specific_returns_none_on_greater_tag_number() {
         <span class="kw">let </span>tag = TagNumber::new(<span class="number">0</span>);
-        <span class="kw">let </span><span class="kw-2">mut </span>decoder = Decoder::new(<span class="kw-2">&amp;</span><span class="macro">hex!</span>(<span class="string">&quot;A103020101&quot;</span>));
+        <span class="kw">let </span><span class="kw-2">mut </span>decoder = Decoder::new(<span class="kw-2">&amp;</span><span class="macro">hex!</span>(<span class="string">"A103020101"</span>));
         <span class="macro">assert_eq!</span>(decoder.context_specific(tag).unwrap(), <span class="prelude-val">None</span>);
     }
 

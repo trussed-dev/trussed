@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/heapless-0.7.17/src/string.rs`."><title>string.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-fa3bb1812debf86c.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="heapless" data-themes="" data-resource-suffix="" data-rustdoc-version="1.74.1 (a28077b28 2023-12-04)" data-channel="1.74.1" data-search-js="search-8be46b629f5f14a8.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-c5bd66d33317d69f.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../heapless/index.html"><img class="rust-logo" src="../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/heapless-0.7.17/src/string.rs`."><title>string.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="heapless" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -761,11 +762,11 @@
     /// ```
     /// use heapless::String;
     ///
-    /// let s: String&lt;4&gt; = String::from(&quot;ab&quot;);
+    /// let s: String&lt;4&gt; = String::from("ab");
     /// let b = s.into_bytes();
     /// assert!(b.len() == 2);
     ///
-    /// assert_eq!(&amp;[&#39;a&#39; as u8, &#39;b&#39; as u8], &amp;b[..]);
+    /// assert_eq!(&amp;['a' as u8, 'b' as u8], &amp;b[..]);
     /// ```
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>into_bytes(<span class="self">self</span>) -&gt; Vec&lt;u8, N&gt; {
@@ -781,11 +782,11 @@
     /// ```
     /// use heapless::String;
     ///
-    /// let mut s: String&lt;4&gt; = String::from(&quot;ab&quot;);
-    /// assert!(s.as_str() == &quot;ab&quot;);
+    /// let mut s: String&lt;4&gt; = String::from("ab");
+    /// assert!(s.as_str() == "ab");
     ///
     /// let _s = s.as_str();
-    /// // s.push(&#39;c&#39;); // &lt;- cannot borrow `s` as mutable because it is also borrowed as immutable
+    /// // s.push('c'); // &lt;- cannot borrow `s` as mutable because it is also borrowed as immutable
     /// ```
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>as_str(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>str {
@@ -801,7 +802,7 @@
     /// ```
     /// use heapless::String;
     ///
-    /// let mut s: String&lt;4&gt; = String::from(&quot;ab&quot;);
+    /// let mut s: String&lt;4&gt; = String::from("ab");
     /// let s = s.as_mut_str();
     /// s.make_ascii_uppercase();
     /// ```
@@ -824,7 +825,7 @@
     /// Basic usage:
     ///
     /// ```
-    /// let mut s = String::from(&quot;hello&quot;);
+    /// let mut s = String::from("hello");
     ///
     /// unsafe {
     ///     let vec = s.as_mut_vec();
@@ -832,7 +833,7 @@
     ///
     ///     vec.reverse();
     /// }
-    /// assert_eq!(s, &quot;olleh&quot;);
+    /// assert_eq!(s, "olleh");
     /// ```
     </span><span class="kw">pub unsafe fn </span>as_mut_vec(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>Vec&lt;u8, N&gt; {
         <span class="kw-2">&amp;mut </span><span class="self">self</span>.vec
@@ -847,13 +848,13 @@
     /// ```
     /// use heapless::String;
     ///
-    /// let mut s: String&lt;8&gt; = String::from(&quot;foo&quot;);
+    /// let mut s: String&lt;8&gt; = String::from("foo");
     ///
-    /// assert!(s.push_str(&quot;bar&quot;).is_ok());
+    /// assert!(s.push_str("bar").is_ok());
     ///
-    /// assert_eq!(&quot;foobar&quot;, s);
+    /// assert_eq!("foobar", s);
     ///
-    /// assert!(s.push_str(&quot;tender&quot;).is_err());
+    /// assert!(s.push_str("tender").is_err());
     /// ```
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>push_str(<span class="kw-2">&amp;mut </span><span class="self">self</span>, string: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;(), ()&gt; {
@@ -888,15 +889,15 @@
     /// ```
     /// use heapless::String;
     ///
-    /// let mut s: String&lt;8&gt; = String::from(&quot;abc&quot;);
+    /// let mut s: String&lt;8&gt; = String::from("abc");
     ///
-    /// s.push(&#39;1&#39;).unwrap();
-    /// s.push(&#39;2&#39;).unwrap();
-    /// s.push(&#39;3&#39;).unwrap();
+    /// s.push('1').unwrap();
+    /// s.push('2').unwrap();
+    /// s.push('3').unwrap();
     ///
-    /// assert!(&quot;abc123&quot; == s.as_str());
+    /// assert!("abc123" == s.as_str());
     ///
-    /// assert_eq!(&quot;abc123&quot;, s);
+    /// assert_eq!("abc123", s);
     /// ```
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>push(<span class="kw-2">&amp;mut </span><span class="self">self</span>, c: char) -&gt; <span class="prelude-ty">Result</span>&lt;(), ()&gt; {
@@ -910,7 +911,7 @@
 
     <span class="doccomment">/// Shortens this `String` to the specified length.
     ///
-    /// If `new_len` is greater than the string&#39;s current length, this has no
+    /// If `new_len` is greater than the string's current length, this has no
     /// effect.
     ///
     /// Note that this method has no effect on the allocated capacity
@@ -929,11 +930,11 @@
     /// ```
     /// use heapless::String;
     ///
-    /// let mut s: String&lt;8&gt; = String::from(&quot;hello&quot;);
+    /// let mut s: String&lt;8&gt; = String::from("hello");
     ///
     /// s.truncate(2);
     ///
-    /// assert_eq!(&quot;he&quot;, s);
+    /// assert_eq!("he", s);
     /// ```
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>truncate(<span class="kw-2">&amp;mut </span><span class="self">self</span>, new_len: usize) {
@@ -956,11 +957,11 @@
     /// ```
     /// use heapless::String;
     ///
-    /// let mut s: String&lt;8&gt; = String::from(&quot;foo&quot;);
+    /// let mut s: String&lt;8&gt; = String::from("foo");
     ///
-    /// assert_eq!(s.pop(), Some(&#39;o&#39;));
-    /// assert_eq!(s.pop(), Some(&#39;o&#39;));
-    /// assert_eq!(s.pop(), Some(&#39;f&#39;));
+    /// assert_eq!(s.pop(), Some('o'));
+    /// assert_eq!(s.pop(), Some('o'));
+    /// assert_eq!(s.pop(), Some('f'));
     ///
     /// assert_eq!(s.pop(), None);
     /// ```
@@ -989,7 +990,7 @@
     /// ```
     /// use heapless::String;
     ///
-    /// let mut s: String&lt;8&gt; = String::from(&quot;foo&quot;);
+    /// let mut s: String&lt;8&gt; = String::from("foo");
     ///
     /// s.clear();
     ///
@@ -1009,8 +1010,8 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, <span class="kw">const </span>N: usize&gt; From&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str&gt; <span class="kw">for </span>String&lt;N&gt; {
-    <span class="kw">fn </span>from(s: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str) -&gt; <span class="self">Self </span>{
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, <span class="kw">const </span>N: usize&gt; From&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>str&gt; <span class="kw">for </span>String&lt;N&gt; {
+    <span class="kw">fn </span>from(s: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>str) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span><span class="kw-2">mut </span>new = String::new();
         new.push_str(s).unwrap();
         new
@@ -1037,8 +1038,8 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, <span class="kw">const </span>N: usize&gt; iter::FromIterator&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>char&gt; <span class="kw">for </span>String&lt;N&gt; {
-    <span class="kw">fn </span>from_iter&lt;T: IntoIterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>char&gt;&gt;(iter: T) -&gt; <span class="self">Self </span>{
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, <span class="kw">const </span>N: usize&gt; iter::FromIterator&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>char&gt; <span class="kw">for </span>String&lt;N&gt; {
+    <span class="kw">fn </span>from_iter&lt;T: IntoIterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">'a </span>char&gt;&gt;(iter: T) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span><span class="kw-2">mut </span>new = String::new();
         <span class="kw">for </span>c <span class="kw">in </span>iter {
             new.push(<span class="kw-2">*</span>c).unwrap();
@@ -1047,8 +1048,8 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, <span class="kw">const </span>N: usize&gt; iter::FromIterator&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str&gt; <span class="kw">for </span>String&lt;N&gt; {
-    <span class="kw">fn </span>from_iter&lt;T: IntoIterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str&gt;&gt;(iter: T) -&gt; <span class="self">Self </span>{
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, <span class="kw">const </span>N: usize&gt; iter::FromIterator&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>str&gt; <span class="kw">for </span>String&lt;N&gt; {
+    <span class="kw">fn </span>from_iter&lt;T: IntoIterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">'a </span>str&gt;&gt;(iter: T) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span><span class="kw-2">mut </span>new = String::new();
         <span class="kw">for </span>c <span class="kw">in </span>iter {
             new.push_str(c).unwrap();
@@ -1066,13 +1067,13 @@
 }
 
 <span class="kw">impl</span>&lt;<span class="kw">const </span>N: usize&gt; fmt::Debug <span class="kw">for </span>String&lt;N&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
         &lt;str <span class="kw">as </span>fmt::Debug&gt;::fmt(<span class="self">self</span>, f)
     }
 }
 
 <span class="kw">impl</span>&lt;<span class="kw">const </span>N: usize&gt; fmt::Display <span class="kw">for </span>String&lt;N&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
         &lt;str <span class="kw">as </span>fmt::Display&gt;::fmt(<span class="self">self</span>, f)
     }
 }
@@ -1151,7 +1152,7 @@
     }
 }
 
-<span class="comment">// String&lt;N&gt; == &amp;&#39;str
+<span class="comment">// String&lt;N&gt; == &amp;'str
 </span><span class="kw">impl</span>&lt;<span class="kw">const </span>N: usize&gt; PartialEq&lt;<span class="kw-2">&amp;</span>str&gt; <span class="kw">for </span>String&lt;N&gt; {
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: &amp;&amp;str) -&gt; bool {
@@ -1175,7 +1176,7 @@
     }
 }
 
-<span class="comment">// &amp;&#39;str == String&lt;N&gt;
+<span class="comment">// &amp;'str == String&lt;N&gt;
 </span><span class="kw">impl</span>&lt;<span class="kw">const </span>N: usize&gt; PartialEq&lt;String&lt;N&gt;&gt; <span class="kw">for </span><span class="kw-2">&amp;</span>str {
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span>String&lt;N&gt;) -&gt; bool {
@@ -1208,7 +1209,7 @@
         <span class="kw">impl</span>&lt;<span class="kw">const </span>N: usize&gt; From&lt;<span class="macro-nonterminal">$num</span>&gt; <span class="kw">for </span>String&lt;N&gt; {
             <span class="kw">fn </span>from(s: <span class="macro-nonterminal">$num</span>) -&gt; <span class="self">Self </span>{
                 <span class="kw">let </span><span class="kw-2">mut </span>new = String::new();
-                <span class="macro">write!</span>(<span class="kw-2">&amp;mut </span>new, <span class="string">&quot;{}&quot;</span>, s).unwrap();
+                <span class="macro">write!</span>(<span class="kw-2">&amp;mut </span>new, <span class="string">"{}"</span>, s).unwrap();
                 new
             }
         }
@@ -1236,26 +1237,26 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>clone() {
-        <span class="kw">let </span>s1: String&lt;<span class="number">20</span>&gt; = String::from(<span class="string">&quot;abcd&quot;</span>);
+        <span class="kw">let </span>s1: String&lt;<span class="number">20</span>&gt; = String::from(<span class="string">"abcd"</span>);
         <span class="kw">let </span><span class="kw-2">mut </span>s2 = s1.clone();
-        s2.push_str(<span class="string">&quot; efgh&quot;</span>).unwrap();
+        s2.push_str(<span class="string">" efgh"</span>).unwrap();
 
-        <span class="macro">assert_eq!</span>(s1, <span class="string">&quot;abcd&quot;</span>);
-        <span class="macro">assert_eq!</span>(s2, <span class="string">&quot;abcd efgh&quot;</span>);
+        <span class="macro">assert_eq!</span>(s1, <span class="string">"abcd"</span>);
+        <span class="macro">assert_eq!</span>(s2, <span class="string">"abcd efgh"</span>);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>cmp() {
-        <span class="kw">let </span>s1: String&lt;<span class="number">4</span>&gt; = String::from(<span class="string">&quot;abcd&quot;</span>);
-        <span class="kw">let </span>s2: String&lt;<span class="number">4</span>&gt; = String::from(<span class="string">&quot;zzzz&quot;</span>);
+        <span class="kw">let </span>s1: String&lt;<span class="number">4</span>&gt; = String::from(<span class="string">"abcd"</span>);
+        <span class="kw">let </span>s2: String&lt;<span class="number">4</span>&gt; = String::from(<span class="string">"zzzz"</span>);
 
         <span class="macro">assert!</span>(s1 &lt; s2);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>cmp_heterogenous_size() {
-        <span class="kw">let </span>s1: String&lt;<span class="number">4</span>&gt; = String::from(<span class="string">&quot;abcd&quot;</span>);
-        <span class="kw">let </span>s2: String&lt;<span class="number">8</span>&gt; = String::from(<span class="string">&quot;zzzz&quot;</span>);
+        <span class="kw">let </span>s1: String&lt;<span class="number">4</span>&gt; = String::from(<span class="string">"abcd"</span>);
+        <span class="kw">let </span>s2: String&lt;<span class="number">8</span>&gt; = String::from(<span class="string">"zzzz"</span>);
 
         <span class="macro">assert!</span>(s1 &lt; s2);
     }
@@ -1264,157 +1265,157 @@
     </span><span class="kw">fn </span>debug() {
         <span class="kw">use </span>core::fmt::Write;
 
-        <span class="kw">let </span>s: String&lt;<span class="number">8</span>&gt; = String::from(<span class="string">&quot;abcd&quot;</span>);
+        <span class="kw">let </span>s: String&lt;<span class="number">8</span>&gt; = String::from(<span class="string">"abcd"</span>);
         <span class="kw">let </span><span class="kw-2">mut </span>std_s = std::string::String::new();
-        <span class="macro">write!</span>(std_s, <span class="string">&quot;{:?}&quot;</span>, s).unwrap();
-        <span class="macro">assert_eq!</span>(<span class="string">&quot;\&quot;abcd\&quot;&quot;</span>, std_s);
+        <span class="macro">write!</span>(std_s, <span class="string">"{:?}"</span>, s).unwrap();
+        <span class="macro">assert_eq!</span>(<span class="string">"\"abcd\""</span>, std_s);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>display() {
         <span class="kw">use </span>core::fmt::Write;
 
-        <span class="kw">let </span>s: String&lt;<span class="number">8</span>&gt; = String::from(<span class="string">&quot;abcd&quot;</span>);
+        <span class="kw">let </span>s: String&lt;<span class="number">8</span>&gt; = String::from(<span class="string">"abcd"</span>);
         <span class="kw">let </span><span class="kw-2">mut </span>std_s = std::string::String::new();
-        <span class="macro">write!</span>(std_s, <span class="string">&quot;{}&quot;</span>, s).unwrap();
-        <span class="macro">assert_eq!</span>(<span class="string">&quot;abcd&quot;</span>, std_s);
+        <span class="macro">write!</span>(std_s, <span class="string">"{}"</span>, s).unwrap();
+        <span class="macro">assert_eq!</span>(<span class="string">"abcd"</span>, std_s);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>empty() {
         <span class="kw">let </span>s: String&lt;<span class="number">4</span>&gt; = String::new();
         <span class="macro">assert!</span>(s.capacity() == <span class="number">4</span>);
-        <span class="macro">assert_eq!</span>(s, <span class="string">&quot;&quot;</span>);
+        <span class="macro">assert_eq!</span>(s, <span class="string">""</span>);
         <span class="macro">assert_eq!</span>(s.len(), <span class="number">0</span>);
         <span class="macro">assert_ne!</span>(s.len(), <span class="number">4</span>);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>from() {
-        <span class="kw">let </span>s: String&lt;<span class="number">4</span>&gt; = String::from(<span class="string">&quot;123&quot;</span>);
+        <span class="kw">let </span>s: String&lt;<span class="number">4</span>&gt; = String::from(<span class="string">"123"</span>);
         <span class="macro">assert!</span>(s.len() == <span class="number">3</span>);
-        <span class="macro">assert_eq!</span>(s, <span class="string">&quot;123&quot;</span>);
+        <span class="macro">assert_eq!</span>(s, <span class="string">"123"</span>);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>from_str() {
         <span class="kw">use </span>core::str::FromStr;
 
-        <span class="kw">let </span>s: String&lt;<span class="number">4</span>&gt; = String::&lt;<span class="number">4</span>&gt;::from_str(<span class="string">&quot;123&quot;</span>).unwrap();
+        <span class="kw">let </span>s: String&lt;<span class="number">4</span>&gt; = String::&lt;<span class="number">4</span>&gt;::from_str(<span class="string">"123"</span>).unwrap();
         <span class="macro">assert!</span>(s.len() == <span class="number">3</span>);
-        <span class="macro">assert_eq!</span>(s, <span class="string">&quot;123&quot;</span>);
+        <span class="macro">assert_eq!</span>(s, <span class="string">"123"</span>);
 
-        <span class="kw">let </span>e: () = String::&lt;<span class="number">2</span>&gt;::from_str(<span class="string">&quot;123&quot;</span>).unwrap_err();
+        <span class="kw">let </span>e: () = String::&lt;<span class="number">2</span>&gt;::from_str(<span class="string">"123"</span>).unwrap_err();
         <span class="macro">assert_eq!</span>(e, ());
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>from_iter() {
         <span class="kw">let </span><span class="kw-2">mut </span>v: Vec&lt;char, <span class="number">5</span>&gt; = Vec::new();
-        v.push(<span class="string">&#39;h&#39;</span>).unwrap();
-        v.push(<span class="string">&#39;e&#39;</span>).unwrap();
-        v.push(<span class="string">&#39;l&#39;</span>).unwrap();
-        v.push(<span class="string">&#39;l&#39;</span>).unwrap();
-        v.push(<span class="string">&#39;o&#39;</span>).unwrap();
+        v.push(<span class="string">'h'</span>).unwrap();
+        v.push(<span class="string">'e'</span>).unwrap();
+        v.push(<span class="string">'l'</span>).unwrap();
+        v.push(<span class="string">'l'</span>).unwrap();
+        v.push(<span class="string">'o'</span>).unwrap();
         <span class="kw">let </span>string1: String&lt;<span class="number">5</span>&gt; = v.iter().collect(); <span class="comment">//&amp;char
-        </span><span class="kw">let </span>string2: String&lt;<span class="number">5</span>&gt; = <span class="string">&quot;hello&quot;</span>.chars().collect(); <span class="comment">//char
-        </span><span class="macro">assert_eq!</span>(string1, <span class="string">&quot;hello&quot;</span>);
-        <span class="macro">assert_eq!</span>(string2, <span class="string">&quot;hello&quot;</span>);
+        </span><span class="kw">let </span>string2: String&lt;<span class="number">5</span>&gt; = <span class="string">"hello"</span>.chars().collect(); <span class="comment">//char
+        </span><span class="macro">assert_eq!</span>(string1, <span class="string">"hello"</span>);
+        <span class="macro">assert_eq!</span>(string2, <span class="string">"hello"</span>);
     }
 
     <span class="attr">#[test]
     #[should_panic]
     </span><span class="kw">fn </span>from_panic() {
-        <span class="kw">let _</span>: String&lt;<span class="number">4</span>&gt; = String::from(<span class="string">&quot;12345&quot;</span>);
+        <span class="kw">let _</span>: String&lt;<span class="number">4</span>&gt; = String::from(<span class="string">"12345"</span>);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>from_num() {
         <span class="kw">let </span>v: String&lt;<span class="number">20</span>&gt; = String::from(<span class="number">18446744073709551615 </span><span class="kw">as </span>u64);
-        <span class="macro">assert_eq!</span>(v, <span class="string">&quot;18446744073709551615&quot;</span>);
+        <span class="macro">assert_eq!</span>(v, <span class="string">"18446744073709551615"</span>);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>into_bytes() {
-        <span class="kw">let </span>s: String&lt;<span class="number">4</span>&gt; = String::from(<span class="string">&quot;ab&quot;</span>);
+        <span class="kw">let </span>s: String&lt;<span class="number">4</span>&gt; = String::from(<span class="string">"ab"</span>);
         <span class="kw">let </span>b: Vec&lt;u8, <span class="number">4</span>&gt; = s.into_bytes();
         <span class="macro">assert_eq!</span>(b.len(), <span class="number">2</span>);
-        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>[<span class="string">&#39;a&#39; </span><span class="kw">as </span>u8, <span class="string">&#39;b&#39; </span><span class="kw">as </span>u8], <span class="kw-2">&amp;</span>b[..]);
+        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>[<span class="string">'a' </span><span class="kw">as </span>u8, <span class="string">'b' </span><span class="kw">as </span>u8], <span class="kw-2">&amp;</span>b[..]);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>as_str() {
-        <span class="kw">let </span>s: String&lt;<span class="number">4</span>&gt; = String::from(<span class="string">&quot;ab&quot;</span>);
+        <span class="kw">let </span>s: String&lt;<span class="number">4</span>&gt; = String::from(<span class="string">"ab"</span>);
 
-        <span class="macro">assert_eq!</span>(s.as_str(), <span class="string">&quot;ab&quot;</span>);
+        <span class="macro">assert_eq!</span>(s.as_str(), <span class="string">"ab"</span>);
         <span class="comment">// should be moved to fail test
         //    let _s = s.as_str();
-        // s.push(&#39;c&#39;); // &lt;- cannot borrow `s` as mutable because it is also borrowed as immutable
+        // s.push('c'); // &lt;- cannot borrow `s` as mutable because it is also borrowed as immutable
     </span>}
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>as_mut_str() {
-        <span class="kw">let </span><span class="kw-2">mut </span>s: String&lt;<span class="number">4</span>&gt; = String::from(<span class="string">&quot;ab&quot;</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>s: String&lt;<span class="number">4</span>&gt; = String::from(<span class="string">"ab"</span>);
         <span class="kw">let </span>s = s.as_mut_str();
         s.make_ascii_uppercase();
-        <span class="macro">assert_eq!</span>(s, <span class="string">&quot;AB&quot;</span>);
+        <span class="macro">assert_eq!</span>(s, <span class="string">"AB"</span>);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>push_str() {
-        <span class="kw">let </span><span class="kw-2">mut </span>s: String&lt;<span class="number">8</span>&gt; = String::from(<span class="string">&quot;foo&quot;</span>);
-        <span class="macro">assert!</span>(s.push_str(<span class="string">&quot;bar&quot;</span>).is_ok());
-        <span class="macro">assert_eq!</span>(<span class="string">&quot;foobar&quot;</span>, s);
-        <span class="macro">assert_eq!</span>(s, <span class="string">&quot;foobar&quot;</span>);
-        <span class="macro">assert!</span>(s.push_str(<span class="string">&quot;tender&quot;</span>).is_err());
-        <span class="macro">assert_eq!</span>(<span class="string">&quot;foobar&quot;</span>, s);
-        <span class="macro">assert_eq!</span>(s, <span class="string">&quot;foobar&quot;</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>s: String&lt;<span class="number">8</span>&gt; = String::from(<span class="string">"foo"</span>);
+        <span class="macro">assert!</span>(s.push_str(<span class="string">"bar"</span>).is_ok());
+        <span class="macro">assert_eq!</span>(<span class="string">"foobar"</span>, s);
+        <span class="macro">assert_eq!</span>(s, <span class="string">"foobar"</span>);
+        <span class="macro">assert!</span>(s.push_str(<span class="string">"tender"</span>).is_err());
+        <span class="macro">assert_eq!</span>(<span class="string">"foobar"</span>, s);
+        <span class="macro">assert_eq!</span>(s, <span class="string">"foobar"</span>);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>push() {
-        <span class="kw">let </span><span class="kw-2">mut </span>s: String&lt;<span class="number">6</span>&gt; = String::from(<span class="string">&quot;abc&quot;</span>);
-        <span class="macro">assert!</span>(s.push(<span class="string">&#39;1&#39;</span>).is_ok());
-        <span class="macro">assert!</span>(s.push(<span class="string">&#39;2&#39;</span>).is_ok());
-        <span class="macro">assert!</span>(s.push(<span class="string">&#39;3&#39;</span>).is_ok());
-        <span class="macro">assert!</span>(s.push(<span class="string">&#39;4&#39;</span>).is_err());
-        <span class="macro">assert!</span>(<span class="string">&quot;abc123&quot; </span>== s.as_str());
+        <span class="kw">let </span><span class="kw-2">mut </span>s: String&lt;<span class="number">6</span>&gt; = String::from(<span class="string">"abc"</span>);
+        <span class="macro">assert!</span>(s.push(<span class="string">'1'</span>).is_ok());
+        <span class="macro">assert!</span>(s.push(<span class="string">'2'</span>).is_ok());
+        <span class="macro">assert!</span>(s.push(<span class="string">'3'</span>).is_ok());
+        <span class="macro">assert!</span>(s.push(<span class="string">'4'</span>).is_err());
+        <span class="macro">assert!</span>(<span class="string">"abc123" </span>== s.as_str());
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>as_bytes() {
-        <span class="kw">let </span>s: String&lt;<span class="number">8</span>&gt; = String::from(<span class="string">&quot;hello&quot;</span>);
+        <span class="kw">let </span>s: String&lt;<span class="number">8</span>&gt; = String::from(<span class="string">"hello"</span>);
         <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>[<span class="number">104</span>, <span class="number">101</span>, <span class="number">108</span>, <span class="number">108</span>, <span class="number">111</span>], s.as_bytes());
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>truncate() {
-        <span class="kw">let </span><span class="kw-2">mut </span>s: String&lt;<span class="number">8</span>&gt; = String::from(<span class="string">&quot;hello&quot;</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>s: String&lt;<span class="number">8</span>&gt; = String::from(<span class="string">"hello"</span>);
         s.truncate(<span class="number">6</span>);
         <span class="macro">assert_eq!</span>(s.len(), <span class="number">5</span>);
         s.truncate(<span class="number">2</span>);
         <span class="macro">assert_eq!</span>(s.len(), <span class="number">2</span>);
-        <span class="macro">assert_eq!</span>(<span class="string">&quot;he&quot;</span>, s);
-        <span class="macro">assert_eq!</span>(s, <span class="string">&quot;he&quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="string">"he"</span>, s);
+        <span class="macro">assert_eq!</span>(s, <span class="string">"he"</span>);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>pop() {
-        <span class="kw">let </span><span class="kw-2">mut </span>s: String&lt;<span class="number">8</span>&gt; = String::from(<span class="string">&quot;foo&quot;</span>);
-        <span class="macro">assert_eq!</span>(s.pop(), <span class="prelude-val">Some</span>(<span class="string">&#39;o&#39;</span>));
-        <span class="macro">assert_eq!</span>(s.pop(), <span class="prelude-val">Some</span>(<span class="string">&#39;o&#39;</span>));
-        <span class="macro">assert_eq!</span>(s.pop(), <span class="prelude-val">Some</span>(<span class="string">&#39;f&#39;</span>));
+        <span class="kw">let </span><span class="kw-2">mut </span>s: String&lt;<span class="number">8</span>&gt; = String::from(<span class="string">"foo"</span>);
+        <span class="macro">assert_eq!</span>(s.pop(), <span class="prelude-val">Some</span>(<span class="string">'o'</span>));
+        <span class="macro">assert_eq!</span>(s.pop(), <span class="prelude-val">Some</span>(<span class="string">'o'</span>));
+        <span class="macro">assert_eq!</span>(s.pop(), <span class="prelude-val">Some</span>(<span class="string">'f'</span>));
         <span class="macro">assert_eq!</span>(s.pop(), <span class="prelude-val">None</span>);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>pop_uenc() {
-        <span class="kw">let </span><span class="kw-2">mut </span>s: String&lt;<span class="number">8</span>&gt; = String::from(<span class="string">&quot;é&quot;</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>s: String&lt;<span class="number">8</span>&gt; = String::from(<span class="string">"é"</span>);
         <span class="macro">assert_eq!</span>(s.len(), <span class="number">3</span>);
         <span class="kw">match </span>s.pop() {
             <span class="prelude-val">Some</span>(c) =&gt; {
                 <span class="macro">assert_eq!</span>(s.len(), <span class="number">1</span>);
-                <span class="macro">assert_eq!</span>(c, <span class="string">&#39;\u{0301}&#39;</span>); <span class="comment">// accute accent of e
+                <span class="macro">assert_eq!</span>(c, <span class="string">'\u{0301}'</span>); <span class="comment">// accute accent of e
                 </span>()
             }
             <span class="prelude-val">None </span>=&gt; <span class="macro">assert!</span>(<span class="bool-val">false</span>),
@@ -1425,13 +1426,13 @@
     </span><span class="kw">fn </span>is_empty() {
         <span class="kw">let </span><span class="kw-2">mut </span>v: String&lt;<span class="number">8</span>&gt; = String::new();
         <span class="macro">assert!</span>(v.is_empty());
-        <span class="kw">let _ </span>= v.push(<span class="string">&#39;a&#39;</span>);
+        <span class="kw">let _ </span>= v.push(<span class="string">'a'</span>);
         <span class="macro">assert!</span>(!v.is_empty());
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>clear() {
-        <span class="kw">let </span><span class="kw-2">mut </span>s: String&lt;<span class="number">8</span>&gt; = String::from(<span class="string">&quot;foo&quot;</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>s: String&lt;<span class="number">8</span>&gt; = String::from(<span class="string">"foo"</span>);
         s.clear();
         <span class="macro">assert!</span>(s.is_empty());
         <span class="macro">assert_eq!</span>(<span class="number">0</span>, s.len());

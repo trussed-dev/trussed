@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/heapless-0.7.17/src/spsc.rs`."><title>spsc.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-fa3bb1812debf86c.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="heapless" data-themes="" data-resource-suffix="" data-rustdoc-version="1.74.1 (a28077b28 2023-12-04)" data-channel="1.74.1" data-search-js="search-8be46b629f5f14a8.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-c5bd66d33317d69f.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../heapless/index.html"><img class="rust-logo" src="../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/heapless-0.7.17/src/spsc.rs`."><title>spsc.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="heapless" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1060,7 +1061,7 @@
     }
 
     <span class="doccomment">/// Iterates from the front of the queue to the back
-    </span><span class="kw">pub fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Iter&lt;<span class="lifetime">&#39;_</span>, T, N&gt; {
+    </span><span class="kw">pub fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Iter&lt;<span class="lifetime">'_</span>, T, N&gt; {
         Iter {
             rb: <span class="self">self</span>,
             index: <span class="number">0</span>,
@@ -1069,7 +1070,7 @@
     }
 
     <span class="doccomment">/// Returns an iterator that allows modifying each value
-    </span><span class="kw">pub fn </span>iter_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; IterMut&lt;<span class="lifetime">&#39;_</span>, T, N&gt; {
+    </span><span class="kw">pub fn </span>iter_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; IterMut&lt;<span class="lifetime">'_</span>, T, N&gt; {
         <span class="kw">let </span>len = <span class="self">self</span>.len();
         IterMut {
             rb: <span class="self">self</span>,
@@ -1116,7 +1117,7 @@
         </span>}
     }
 
-    <span class="comment">// The memory for enqueueing is &quot;owned&quot; by the tail pointer.
+    <span class="comment">// The memory for enqueueing is "owned" by the tail pointer.
     // NOTE: This internal function uses internal mutability to allow the [`Producer`] to enqueue
     // items without doing pointer arithmetic and accessing internal fields of this type.
     </span><span class="kw">unsafe fn </span>inner_enqueue(<span class="kw-2">&amp;</span><span class="self">self</span>, val: T) -&gt; <span class="prelude-ty">Result</span>&lt;(), T&gt; {
@@ -1133,7 +1134,7 @@
         }
     }
 
-    <span class="comment">// The memory for enqueueing is &quot;owned&quot; by the tail pointer.
+    <span class="comment">// The memory for enqueueing is "owned" by the tail pointer.
     // NOTE: This internal function uses internal mutability to allow the [`Producer`] to enqueue
     // items without doing pointer arithmetic and accessing internal fields of this type.
     </span><span class="kw">unsafe fn </span>inner_enqueue_unchecked(<span class="kw-2">&amp;</span><span class="self">self</span>, val: T) {
@@ -1144,19 +1145,19 @@
             .store(<span class="self">Self</span>::increment(current_tail), Ordering::Release);
     }
 
-    <span class="doccomment">/// Adds an `item` to the end of the queue, without checking if it&#39;s full
+    <span class="doccomment">/// Adds an `item` to the end of the queue, without checking if it's full
     ///
     /// # Unsafety
     ///
-    /// If the queue is full this operation will leak a value (T&#39;s destructor won&#39;t run on
+    /// If the queue is full this operation will leak a value (T's destructor won't run on
     /// the value that got overwritten by `item`), *and* will allow the `dequeue` operation
-    /// to create a copy of `item`, which could result in `T`&#39;s destructor running on `item`
+    /// to create a copy of `item`, which could result in `T`'s destructor running on `item`
     /// twice.
     </span><span class="kw">pub unsafe fn </span>enqueue_unchecked(<span class="kw-2">&amp;mut </span><span class="self">self</span>, val: T) {
         <span class="self">self</span>.inner_enqueue_unchecked(val)
     }
 
-    <span class="comment">// The memory for dequeuing is &quot;owned&quot; by the head pointer,.
+    <span class="comment">// The memory for dequeuing is "owned" by the head pointer,.
     // NOTE: This internal function uses internal mutability to allow the [`Consumer`] to dequeue
     // items without doing pointer arithmetic and accessing internal fields of this type.
     </span><span class="kw">unsafe fn </span>inner_dequeue(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;T&gt; {
@@ -1174,7 +1175,7 @@
         }
     }
 
-    <span class="comment">// The memory for dequeuing is &quot;owned&quot; by the head pointer,.
+    <span class="comment">// The memory for dequeuing is "owned" by the head pointer,.
     // NOTE: This internal function uses internal mutability to allow the [`Consumer`] to dequeue
     // items without doing pointer arithmetic and accessing internal fields of this type.
     </span><span class="kw">unsafe fn </span>inner_dequeue_unchecked(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; T {
@@ -1198,7 +1199,7 @@
     }
 
     <span class="doccomment">/// Splits a queue into producer and consumer endpoints
-    </span><span class="kw">pub fn </span>split(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; (Producer&lt;<span class="lifetime">&#39;_</span>, T, N&gt;, Consumer&lt;<span class="lifetime">&#39;_</span>, T, N&gt;) {
+    </span><span class="kw">pub fn </span>split(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; (Producer&lt;<span class="lifetime">'_</span>, T, N&gt;, Consumer&lt;<span class="lifetime">'_</span>, T, N&gt;) {
         (Producer { rb: <span class="self">self </span>}, Consumer { rb: <span class="self">self </span>})
     }
 }
@@ -1240,13 +1241,13 @@
 <span class="kw">impl</span>&lt;T, <span class="kw">const </span>N: usize&gt; Eq <span class="kw">for </span>Queue&lt;T, N&gt; <span class="kw">where </span>T: Eq {}
 
 <span class="doccomment">/// An iterator over the items of a queue
-</span><span class="kw">pub struct </span>Iter&lt;<span class="lifetime">&#39;a</span>, T, <span class="kw">const </span>N: usize&gt; {
-    rb: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Queue&lt;T, N&gt;,
+</span><span class="kw">pub struct </span>Iter&lt;<span class="lifetime">'a</span>, T, <span class="kw">const </span>N: usize&gt; {
+    rb: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Queue&lt;T, N&gt;,
     index: usize,
     len: usize,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T, <span class="kw">const </span>N: usize&gt; Clone <span class="kw">for </span>Iter&lt;<span class="lifetime">&#39;a</span>, T, N&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T, <span class="kw">const </span>N: usize&gt; Clone <span class="kw">for </span>Iter&lt;<span class="lifetime">'a</span>, T, N&gt; {
     <span class="kw">fn </span>clone(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             rb: <span class="self">self</span>.rb,
@@ -1257,14 +1258,14 @@
 }
 
 <span class="doccomment">/// A mutable iterator over the items of a queue
-</span><span class="kw">pub struct </span>IterMut&lt;<span class="lifetime">&#39;a</span>, T, <span class="kw">const </span>N: usize&gt; {
-    rb: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>Queue&lt;T, N&gt;,
+</span><span class="kw">pub struct </span>IterMut&lt;<span class="lifetime">'a</span>, T, <span class="kw">const </span>N: usize&gt; {
+    rb: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>Queue&lt;T, N&gt;,
     index: usize,
     len: usize,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T, <span class="kw">const </span>N: usize&gt; Iterator <span class="kw">for </span>Iter&lt;<span class="lifetime">&#39;a</span>, T, N&gt; {
-    <span class="kw">type </span>Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>T;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T, <span class="kw">const </span>N: usize&gt; Iterator <span class="kw">for </span>Iter&lt;<span class="lifetime">'a</span>, T, N&gt; {
+    <span class="kw">type </span>Item = <span class="kw-2">&amp;</span><span class="lifetime">'a </span>T;
 
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
         <span class="kw">if </span><span class="self">self</span>.index &lt; <span class="self">self</span>.len {
@@ -1280,8 +1281,8 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T, <span class="kw">const </span>N: usize&gt; Iterator <span class="kw">for </span>IterMut&lt;<span class="lifetime">&#39;a</span>, T, N&gt; {
-    <span class="kw">type </span>Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>T;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T, <span class="kw">const </span>N: usize&gt; Iterator <span class="kw">for </span>IterMut&lt;<span class="lifetime">'a</span>, T, N&gt; {
+    <span class="kw">type </span>Item = <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>T;
 
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
         <span class="kw">if </span><span class="self">self</span>.index &lt; <span class="self">self</span>.len {
@@ -1297,12 +1298,12 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T, <span class="kw">const </span>N: usize&gt; DoubleEndedIterator <span class="kw">for </span>Iter&lt;<span class="lifetime">&#39;a</span>, T, N&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T, <span class="kw">const </span>N: usize&gt; DoubleEndedIterator <span class="kw">for </span>Iter&lt;<span class="lifetime">'a</span>, T, N&gt; {
     <span class="kw">fn </span>next_back(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
         <span class="kw">if </span><span class="self">self</span>.index &lt; <span class="self">self</span>.len {
             <span class="kw">let </span>head = <span class="self">self</span>.rb.head.load(Ordering::Relaxed);
 
-            <span class="comment">// self.len &gt; 0, since it&#39;s larger than self.index &gt; 0
+            <span class="comment">// self.len &gt; 0, since it's larger than self.index &gt; 0
             </span><span class="kw">let </span>i = (head + <span class="self">self</span>.len - <span class="number">1</span>) % N;
             <span class="self">self</span>.len -= <span class="number">1</span>;
             <span class="prelude-val">Some</span>(<span class="kw">unsafe </span>{ <span class="kw-2">&amp;*</span>(<span class="self">self</span>.rb.buffer.get_unchecked(i).get() <span class="kw">as </span><span class="kw-2">*const </span>T) })
@@ -1312,12 +1313,12 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T, <span class="kw">const </span>N: usize&gt; DoubleEndedIterator <span class="kw">for </span>IterMut&lt;<span class="lifetime">&#39;a</span>, T, N&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T, <span class="kw">const </span>N: usize&gt; DoubleEndedIterator <span class="kw">for </span>IterMut&lt;<span class="lifetime">'a</span>, T, N&gt; {
     <span class="kw">fn </span>next_back(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
         <span class="kw">if </span><span class="self">self</span>.index &lt; <span class="self">self</span>.len {
             <span class="kw">let </span>head = <span class="self">self</span>.rb.head.load(Ordering::Relaxed);
 
-            <span class="comment">// self.len &gt; 0, since it&#39;s larger than self.index &gt; 0
+            <span class="comment">// self.len &gt; 0, since it's larger than self.index &gt; 0
             </span><span class="kw">let </span>i = (head + <span class="self">self</span>.len - <span class="number">1</span>) % N;
             <span class="self">self</span>.len -= <span class="number">1</span>;
             <span class="prelude-val">Some</span>(<span class="kw">unsafe </span>{ <span class="kw-2">&amp;mut *</span>(<span class="self">self</span>.rb.buffer.get_unchecked(i).get() <span class="kw">as </span><span class="kw-2">*mut </span>T) })
@@ -1341,7 +1342,7 @@
 <span class="kw">where
     </span>T: fmt::Debug,
 {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
         f.debug_list().entries(<span class="self">self</span>.iter()).finish()
     }
 }
@@ -1370,41 +1371,41 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T, <span class="kw">const </span>N: usize&gt; IntoIterator <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Queue&lt;T, N&gt; {
-    <span class="kw">type </span>Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>T;
-    <span class="kw">type </span>IntoIter = Iter&lt;<span class="lifetime">&#39;a</span>, T, N&gt;;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T, <span class="kw">const </span>N: usize&gt; IntoIterator <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>Queue&lt;T, N&gt; {
+    <span class="kw">type </span>Item = <span class="kw-2">&amp;</span><span class="lifetime">'a </span>T;
+    <span class="kw">type </span>IntoIter = Iter&lt;<span class="lifetime">'a</span>, T, N&gt;;
 
     <span class="kw">fn </span>into_iter(<span class="self">self</span>) -&gt; <span class="self">Self</span>::IntoIter {
         <span class="self">self</span>.iter()
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T, <span class="kw">const </span>N: usize&gt; IntoIterator <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>Queue&lt;T, N&gt; {
-    <span class="kw">type </span>Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>T;
-    <span class="kw">type </span>IntoIter = IterMut&lt;<span class="lifetime">&#39;a</span>, T, N&gt;;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T, <span class="kw">const </span>N: usize&gt; IntoIterator <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>Queue&lt;T, N&gt; {
+    <span class="kw">type </span>Item = <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>T;
+    <span class="kw">type </span>IntoIter = IterMut&lt;<span class="lifetime">'a</span>, T, N&gt;;
 
     <span class="kw">fn </span>into_iter(<span class="self">self</span>) -&gt; <span class="self">Self</span>::IntoIter {
         <span class="self">self</span>.iter_mut()
     }
 }
 
-<span class="doccomment">/// A queue &quot;consumer&quot;; it can dequeue items from the queue
+<span class="doccomment">/// A queue "consumer"; it can dequeue items from the queue
 /// NOTE the consumer semantically owns the `head` pointer of the queue
-</span><span class="kw">pub struct </span>Consumer&lt;<span class="lifetime">&#39;a</span>, T, <span class="kw">const </span>N: usize&gt; {
-    rb: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Queue&lt;T, N&gt;,
+</span><span class="kw">pub struct </span>Consumer&lt;<span class="lifetime">'a</span>, T, <span class="kw">const </span>N: usize&gt; {
+    rb: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Queue&lt;T, N&gt;,
 }
 
-<span class="kw">unsafe impl</span>&lt;<span class="lifetime">&#39;a</span>, T, <span class="kw">const </span>N: usize&gt; Send <span class="kw">for </span>Consumer&lt;<span class="lifetime">&#39;a</span>, T, N&gt; <span class="kw">where </span>T: Send {}
+<span class="kw">unsafe impl</span>&lt;<span class="lifetime">'a</span>, T, <span class="kw">const </span>N: usize&gt; Send <span class="kw">for </span>Consumer&lt;<span class="lifetime">'a</span>, T, N&gt; <span class="kw">where </span>T: Send {}
 
-<span class="doccomment">/// A queue &quot;producer&quot;; it can enqueue items into the queue
+<span class="doccomment">/// A queue "producer"; it can enqueue items into the queue
 /// NOTE the producer semantically owns the `tail` pointer of the queue
-</span><span class="kw">pub struct </span>Producer&lt;<span class="lifetime">&#39;a</span>, T, <span class="kw">const </span>N: usize&gt; {
-    rb: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Queue&lt;T, N&gt;,
+</span><span class="kw">pub struct </span>Producer&lt;<span class="lifetime">'a</span>, T, <span class="kw">const </span>N: usize&gt; {
+    rb: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Queue&lt;T, N&gt;,
 }
 
-<span class="kw">unsafe impl</span>&lt;<span class="lifetime">&#39;a</span>, T, <span class="kw">const </span>N: usize&gt; Send <span class="kw">for </span>Producer&lt;<span class="lifetime">&#39;a</span>, T, N&gt; <span class="kw">where </span>T: Send {}
+<span class="kw">unsafe impl</span>&lt;<span class="lifetime">'a</span>, T, <span class="kw">const </span>N: usize&gt; Send <span class="kw">for </span>Producer&lt;<span class="lifetime">'a</span>, T, N&gt; <span class="kw">where </span>T: Send {}
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T, <span class="kw">const </span>N: usize&gt; Consumer&lt;<span class="lifetime">&#39;a</span>, T, N&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T, <span class="kw">const </span>N: usize&gt; Consumer&lt;<span class="lifetime">'a</span>, T, N&gt; {
     <span class="doccomment">/// Returns the item in the front of the queue, or `None` if the queue is empty
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>dequeue(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;T&gt; {
@@ -1460,7 +1461,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T, <span class="kw">const </span>N: usize&gt; Producer&lt;<span class="lifetime">&#39;a</span>, T, N&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T, <span class="kw">const </span>N: usize&gt; Producer&lt;<span class="lifetime">'a</span>, T, N&gt; {
     <span class="doccomment">/// Adds an `item` to the end of the queue, returns back the `item` if the queue is full
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>enqueue(<span class="kw-2">&amp;mut </span><span class="self">self</span>, val: T) -&gt; <span class="prelude-ty">Result</span>&lt;(), T&gt; {
@@ -1541,7 +1542,7 @@
 
         <span class="kw">for _ in </span><span class="number">0</span>..<span class="number">1_000_000 </span>{
             <span class="kw">let </span>v = rb.dequeue().unwrap();
-            <span class="macro">println!</span>(<span class="string">&quot;{}&quot;</span>, v);
+            <span class="macro">println!</span>(<span class="string">"{}"</span>, v);
             rb.enqueue(v).unwrap();
             <span class="macro">assert_eq!</span>(rb.len(), <span class="number">2</span>);
         }

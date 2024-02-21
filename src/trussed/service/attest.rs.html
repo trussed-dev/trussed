@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/service/attest.rs`."><title>attest.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-fa3bb1812debf86c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="trussed" data-themes="" data-resource-suffix="" data-rustdoc-version="1.74.1 (a28077b28 2023-12-04)" data-channel="1.74.1" data-search-js="search-8be46b629f5f14a8.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-c5bd66d33317d69f.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../trussed/index.html"><img class="rust-logo" src="../../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/service/attest.rs`."><title>attest.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="trussed" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -815,15 +816,15 @@
     },
 };
 
-<span class="attr">#[cfg(not(feature = <span class="string">&quot;test-attestation-cert-ids&quot;</span>))]
+<span class="attr">#[cfg(not(feature = <span class="string">"test-attestation-cert-ids"</span>))]
 </span><span class="kw">pub const </span>ED255_ATTN_KEY: KeyId = KeyId::from_special(<span class="number">1</span>);
-<span class="attr">#[cfg(feature = <span class="string">&quot;test-attestation-cert-ids&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"test-attestation-cert-ids"</span>)]
 </span><span class="kw">pub const </span>ED255_ATTN_KEY: KeyId = KeyId(<span class="kw">crate</span>::types::Id(u128::from_be_bytes([
     <span class="number">0x12</span>, <span class="number">0xd2</span>, <span class="number">0xa7</span>, <span class="number">0xe4</span>, <span class="number">0x03</span>, <span class="number">0x55</span>, <span class="number">0x21</span>, <span class="number">0x42</span>, <span class="number">0x99</span>, <span class="number">0xf1</span>, <span class="number">0x57</span>, <span class="number">0x34</span>, <span class="number">0xc5</span>, <span class="number">0xd7</span>, <span class="number">0xd0</span>, <span class="number">0xe7</span>,
 ])));
-<span class="attr">#[cfg(not(feature = <span class="string">&quot;test-attestation-cert-ids&quot;</span>))]
+<span class="attr">#[cfg(not(feature = <span class="string">"test-attestation-cert-ids"</span>))]
 </span><span class="kw">pub const </span>P256_ATTN_KEY: KeyId = KeyId::from_special(<span class="number">2</span>);
-<span class="attr">#[cfg(feature = <span class="string">&quot;test-attestation-cert-ids&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"test-attestation-cert-ids"</span>)]
 </span><span class="kw">pub const </span>P256_ATTN_KEY: KeyId = KeyId(<span class="kw">crate</span>::types::Id(u128::from_be_bytes([
     <span class="number">0xc8</span>, <span class="number">0xd6</span>, <span class="number">0x77</span>, <span class="number">0xa3</span>, <span class="number">0x93</span>, <span class="number">0x46</span>, <span class="number">0xc9</span>, <span class="number">0x8f</span>, <span class="number">0xc8</span>, <span class="number">0x5a</span>, <span class="number">0xb0</span>, <span class="number">0x5d</span>, <span class="number">0x29</span>, <span class="number">0xc5</span>, <span class="number">0x75</span>, <span class="number">0x32</span>,
 ])));
@@ -931,16 +932,16 @@
         serial: BigEndianInteger(serial.as_ref()),
         signature_algorithm,
         issuer: Name::default()
-            .with_country(<span class="string">b&quot;CH&quot;</span>)
-            .with_organization(<span class="string">&quot;Trussed&quot;</span>)
-            .with_state(<span class="string">&quot;Zurich&quot;</span>),
-        <span class="comment">// validity: Validity { start: Datetime(b&quot;20210313120000Z&quot;), end: None },
+            .with_country(<span class="string">b"CH"</span>)
+            .with_organization(<span class="string">"Trussed"</span>)
+            .with_state(<span class="string">"Zurich"</span>),
+        <span class="comment">// validity: Validity { start: Datetime(b"20210313120000Z"), end: None },
         </span>validity: Validity {
-            start: Datetime(<span class="string">b&quot;20210313120000Z&quot;</span>),
+            start: Datetime(<span class="string">b"20210313120000Z"</span>),
             end: <span class="prelude-val">None</span>,
         },
         <span class="comment">// subject: Name::default(),
-        </span>subject: Name::default(), <span class="comment">//.with_country(b&quot;CH&quot;).with_organization(&quot;Trussed&quot;).with_state(&quot;Zurich&quot;),
+        </span>subject: Name::default(), <span class="comment">//.with_country(b"CH").with_organization("Trussed").with_state("Zurich"),
         </span>subject_public_key_info: spki,
     };
 
@@ -1006,43 +1007,43 @@
 }
 
 <span class="attr">#[derive(Clone, Copy, Encodable, Eq, PartialEq)]
-</span><span class="kw">pub struct </span>TbsCertificate&lt;<span class="lifetime">&#39;l</span>&gt; {
-    <span class="comment">// this is &quot;EXPLICIT [0]&quot;, where 0 translates to 0x00 and EXPLICIT to constructed|context
-    </span><span class="attr">#[tlv(constructed, context, number = <span class="string">&quot;0x0&quot;</span>)]
+</span><span class="kw">pub struct </span>TbsCertificate&lt;<span class="lifetime">'l</span>&gt; {
+    <span class="comment">// this is "EXPLICIT [0]", where 0 translates to 0x00 and EXPLICIT to constructed|context
+    </span><span class="attr">#[tlv(constructed, context, number = <span class="string">"0x0"</span>)]
     </span>version: Version,
-    <span class="attr">#[tlv(number = <span class="string">&quot;0x2&quot;</span>)] </span><span class="comment">// INTEGER
-    </span>serial: BigEndianInteger&lt;<span class="lifetime">&#39;l</span>&gt;,
-    <span class="attr">#[tlv(constructed, number = <span class="string">&quot;0x10&quot;</span>)] </span><span class="comment">// SEQUENCE
+    <span class="attr">#[tlv(number = <span class="string">"0x2"</span>)] </span><span class="comment">// INTEGER
+    </span>serial: BigEndianInteger&lt;<span class="lifetime">'l</span>&gt;,
+    <span class="attr">#[tlv(constructed, number = <span class="string">"0x10"</span>)] </span><span class="comment">// SEQUENCE
     </span>signature_algorithm: SignatureAlgorithm,
     <span class="doccomment">/// TODO: This MUST be non-empty. Maybe just put O=Trussed
-    </span><span class="attr">#[tlv(constructed, number = <span class="string">&quot;0x10&quot;</span>)] </span><span class="comment">// SEQUENCE
-    </span>issuer: Name&lt;<span class="lifetime">&#39;l</span>&gt;,
-    <span class="attr">#[tlv(constructed, number = <span class="string">&quot;0x10&quot;</span>)] </span><span class="comment">// SEQUENCE
-    </span>validity: Validity&lt;<span class="lifetime">&#39;l</span>&gt;,
+    </span><span class="attr">#[tlv(constructed, number = <span class="string">"0x10"</span>)] </span><span class="comment">// SEQUENCE
+    </span>issuer: Name&lt;<span class="lifetime">'l</span>&gt;,
+    <span class="attr">#[tlv(constructed, number = <span class="string">"0x10"</span>)] </span><span class="comment">// SEQUENCE
+    </span>validity: Validity&lt;<span class="lifetime">'l</span>&gt;,
     <span class="doccomment">/// This one seems optional
-    </span><span class="attr">#[tlv(constructed, number = <span class="string">&quot;0x10&quot;</span>)] </span><span class="comment">// SEQUENCE
-    </span>subject: Name&lt;<span class="lifetime">&#39;l</span>&gt;,
-    <span class="attr">#[tlv(constructed, number = <span class="string">&quot;0x10&quot;</span>)] </span><span class="comment">// SEQUENCE
+    </span><span class="attr">#[tlv(constructed, number = <span class="string">"0x10"</span>)] </span><span class="comment">// SEQUENCE
+    </span>subject: Name&lt;<span class="lifetime">'l</span>&gt;,
+    <span class="attr">#[tlv(constructed, number = <span class="string">"0x10"</span>)] </span><span class="comment">// SEQUENCE
     </span>subject_public_key_info: SerializedSubjectPublicKey,
     <span class="comment">// optional
     // extensions: Extensions
 </span>}
 
 <span class="attr">#[derive(Clone, Encodable, Eq, PartialEq)]
-#[tlv(constructed, number = <span class="string">&quot;0x10&quot;</span>)] </span><span class="comment">// SEQUENCE
-</span><span class="kw">pub struct </span>Certificate&lt;<span class="lifetime">&#39;l</span>&gt; {
-    <span class="attr">#[tlv(constructed, number = <span class="string">&quot;0x10&quot;</span>)] </span><span class="comment">// SEQUENCE
-    </span>tbs_certificate: TbsCertificate&lt;<span class="lifetime">&#39;l</span>&gt;,
-    <span class="attr">#[tlv(constructed, number = <span class="string">&quot;0x10&quot;</span>)] </span><span class="comment">// SEQUENCE
+#[tlv(constructed, number = <span class="string">"0x10"</span>)] </span><span class="comment">// SEQUENCE
+</span><span class="kw">pub struct </span>Certificate&lt;<span class="lifetime">'l</span>&gt; {
+    <span class="attr">#[tlv(constructed, number = <span class="string">"0x10"</span>)] </span><span class="comment">// SEQUENCE
+    </span>tbs_certificate: TbsCertificate&lt;<span class="lifetime">'l</span>&gt;,
+    <span class="attr">#[tlv(constructed, number = <span class="string">"0x10"</span>)] </span><span class="comment">// SEQUENCE
     </span>signature_algorithm: SignatureAlgorithm,
-    <span class="attr">#[tlv(number = <span class="string">&quot;0x3&quot;</span>, slice)] </span><span class="comment">// BIT-STRING
-    </span>signature: <span class="kw-2">&amp;</span><span class="lifetime">&#39;l </span>[u8], <span class="comment">//SerializedSignature,
+    <span class="attr">#[tlv(number = <span class="string">"0x3"</span>, slice)] </span><span class="comment">// BIT-STRING
+    </span>signature: <span class="kw-2">&amp;</span><span class="lifetime">'l </span>[u8], <span class="comment">//SerializedSignature,
 </span>}
 
 <span class="attr">#[derive(Clone, Debug, Eq, PartialEq)]
 </span><span class="kw">pub enum </span>SerializedSignature {
     Ed255([u8; <span class="number">64</span>]),
-    <span class="comment">// This is the DER version with leading &#39;04&#39;
+    <span class="comment">// This is the DER version with leading '04'
     </span>P256(heapless_bytes::Bytes&lt;<span class="number">72</span>&gt;),
 }
 
@@ -1058,15 +1059,15 @@
 
 <span class="comment">// impl Encodable for SerializedSignature {
 //     fn encoded_length(&amp;self) -&gt; BerResult&lt;BerLength&gt; {
-//         // a leading &#39;00&#39; byte to say that we have no unused bits
+//         // a leading '00' byte to say that we have no unused bits
 //         Ok((match self {
 //             SerializedSignature::Ed255(_) =&gt; 65,
 //             SerializedSignature::P256(signature) =&gt; signature.len() as u16 + 1
 //         } as u8).into())
 //     }
 
-//     fn encode(&amp;self, encoder: &amp;mut Encoder&lt;&#39;_&gt;) -&gt; BerResult&lt;()&gt; {
-//         // NB: BIT-STRING needs to have number of &quot;unused bits&quot; in first byte (we have none)
+//     fn encode(&amp;self, encoder: &amp;mut Encoder&lt;'_&gt;) -&gt; BerResult&lt;()&gt; {
+//         // NB: BIT-STRING needs to have number of "unused bits" in first byte (we have none)
 //         match self {
 //             SerializedSignature::Ed255(signature) =&gt; {
 //                 let mut leading_zero = [0u8; 65];
@@ -1103,8 +1104,8 @@
 }
 
 <span class="kw">impl </span>Version {
-    <span class="comment">// const ENCODING: &amp;&#39;static [u8] = &amp;[0xA0, 0x03, 0x02, 0x01, 0x02];
-    </span><span class="kw">const </span>ENCODING: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[u8] = <span class="kw-2">&amp;</span>[<span class="number">0x02</span>, <span class="number">0x01</span>, <span class="number">0x02</span>];
+    <span class="comment">// const ENCODING: &amp;'static [u8] = &amp;[0xA0, 0x03, 0x02, 0x01, 0x02];
+    </span><span class="kw">const </span>ENCODING: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>[u8] = <span class="kw-2">&amp;</span>[<span class="number">0x02</span>, <span class="number">0x01</span>, <span class="number">0x02</span>];
 }
 
 <span class="kw">impl </span>Encodable <span class="kw">for </span>Version {
@@ -1112,7 +1113,7 @@
         <span class="prelude-val">Ok</span>((<span class="self">Self</span>::ENCODING.len() <span class="kw">as </span>u8).into())
     }
 
-    <span class="kw">fn </span>encode(<span class="kw-2">&amp;</span><span class="self">self</span>, encoder: <span class="kw-2">&amp;mut </span>Encoder&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; BerResult&lt;()&gt; {
+    <span class="kw">fn </span>encode(<span class="kw-2">&amp;</span><span class="self">self</span>, encoder: <span class="kw-2">&amp;mut </span>Encoder&lt;<span class="lifetime">'_</span>&gt;) -&gt; BerResult&lt;()&gt; {
         encoder.encode(<span class="kw-2">&amp;</span><span class="self">Self</span>::ENCODING)
     }
 }
@@ -1120,9 +1121,9 @@
 <span class="attr">#[derive(Clone, Copy, Eq, PartialEq)]
 </span><span class="doccomment">/// NB: This is not a full INTEGER implementation, needs the leading tag + length.
 /// We do it this way because the flexiber derive macro currently expects fields to be tagged.
-</span><span class="kw">pub struct </span>BigEndianInteger&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw">pub </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]);
+</span><span class="kw">pub struct </span>BigEndianInteger&lt;<span class="lifetime">'a</span>&gt;(<span class="kw">pub </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]);
 
-<span class="kw">impl </span>Encodable <span class="kw">for </span>BigEndianInteger&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>Encodable <span class="kw">for </span>BigEndianInteger&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>encoded_length(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; BerResult&lt;BerLength&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>num = <span class="self">self</span>.<span class="number">0</span>;
         <span class="comment">// leading zeros must be trimmed (except zero, see below)
@@ -1137,7 +1138,7 @@
         <span class="prelude-val">Ok</span>((l <span class="kw">as </span>u16).into())
     }
 
-    <span class="kw">fn </span>encode(<span class="kw-2">&amp;</span><span class="self">self</span>, encoder: <span class="kw-2">&amp;mut </span>Encoder&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; BerResult&lt;()&gt; {
+    <span class="kw">fn </span>encode(<span class="kw-2">&amp;</span><span class="self">self</span>, encoder: <span class="kw-2">&amp;mut </span>Encoder&lt;<span class="lifetime">'_</span>&gt;) -&gt; BerResult&lt;()&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>num = <span class="self">self</span>.<span class="number">0</span>;
         <span class="kw">while </span>!num.is_empty() &amp;&amp; num[<span class="number">0</span>] == <span class="number">0 </span>{
             num = <span class="kw-2">&amp;</span>num[<span class="number">1</span>..];
@@ -1167,11 +1168,11 @@
 }
 
 <span class="comment">// 1.2.840.10045.4.3.2 ecdsaWithSHA256 (ANSI X9.62 ECDSA algorithm with SHA256))
-</span><span class="kw">const </span>P256_OID_ENCODING: <span class="kw-2">&amp;</span>[u8] = <span class="kw-2">&amp;</span><span class="macro">hex!</span>(<span class="string">&quot;06 08  2A 86 48 CE 3D 04 03 02&quot;</span>);
+</span><span class="kw">const </span>P256_OID_ENCODING: <span class="kw-2">&amp;</span>[u8] = <span class="kw-2">&amp;</span><span class="macro">hex!</span>(<span class="string">"06 08  2A 86 48 CE 3D 04 03 02"</span>);
 <span class="kw">const </span>P256_PUB_ENCODING: <span class="kw-2">&amp;</span>[u8] =
-    <span class="kw-2">&amp;</span><span class="macro">hex!</span>(<span class="string">&quot;06 07 2A 86 48 CE 3D 02 01   06 08 2A 86 48 CE  3D 03 01 07&quot;</span>);
+    <span class="kw-2">&amp;</span><span class="macro">hex!</span>(<span class="string">"06 07 2A 86 48 CE 3D 02 01   06 08 2A 86 48 CE  3D 03 01 07"</span>);
 <span class="comment">// 1.3.101.112 curveEd25519 (EdDSA 25519 signature algorithm)
-</span><span class="kw">const </span>ED255_OID_ENCODING: <span class="kw-2">&amp;</span>[u8] = <span class="kw-2">&amp;</span><span class="macro">hex!</span>(<span class="string">&quot;06 03  2B 65 70&quot;</span>);
+</span><span class="kw">const </span>ED255_OID_ENCODING: <span class="kw-2">&amp;</span>[u8] = <span class="kw-2">&amp;</span><span class="macro">hex!</span>(<span class="string">"06 03  2B 65 70"</span>);
 
 <span class="kw">impl </span>Encodable <span class="kw">for </span>SignatureAlgorithm {
     <span class="kw">fn </span>encoded_length(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; BerResult&lt;BerLength&gt; {
@@ -1182,7 +1183,7 @@
             .into())
     }
 
-    <span class="kw">fn </span>encode(<span class="kw-2">&amp;</span><span class="self">self</span>, encoder: <span class="kw-2">&amp;mut </span>Encoder&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; BerResult&lt;()&gt; {
+    <span class="kw">fn </span>encode(<span class="kw-2">&amp;</span><span class="self">self</span>, encoder: <span class="kw-2">&amp;mut </span>Encoder&lt;<span class="lifetime">'_</span>&gt;) -&gt; BerResult&lt;()&gt; {
         encoder.encode(<span class="kw">match </span><span class="self">self </span>{
             SignatureAlgorithm::Ed255 =&gt; <span class="kw-2">&amp;</span>ED255_OID_ENCODING,
             SignatureAlgorithm::P256 =&gt; <span class="kw-2">&amp;</span>P256_OID_ENCODING,
@@ -1191,37 +1192,37 @@
 }
 
 <span class="attr">#[derive(Clone, Copy, Default, Eq, PartialEq)]
-</span><span class="kw">pub struct </span>Name&lt;<span class="lifetime">&#39;l</span>&gt; {
-    <span class="doccomment">/// this should be an ISO-code (in particular, &quot;printable characters&quot;)
+</span><span class="kw">pub struct </span>Name&lt;<span class="lifetime">'l</span>&gt; {
+    <span class="doccomment">/// this should be an ISO-code (in particular, "printable characters")
     /// TODO: enforce
     </span>country: <span class="prelude-ty">Option</span>&lt;[u8; <span class="number">2</span>]&gt;,
-    organization: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;l </span>str&gt;,
-    state: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;l </span>str&gt;,
+    organization: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'l </span>str&gt;,
+    state: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'l </span>str&gt;,
 }
 
 <span class="attr">#[derive(Clone, Copy, Encodable, Eq, PartialEq)]
-#[tlv(constructed, number = <span class="string">&quot;0x10&quot;</span>)] </span><span class="comment">// SEQUENCE = 0x10
-</span><span class="kw">struct </span>EncodedPart&lt;<span class="lifetime">&#39;l</span>&gt; {
-    <span class="attr">#[tlv(number = <span class="string">&quot;0x6&quot;</span>)] </span><span class="comment">// OBJECT_IDENTIFIER
-    </span>oid: <span class="kw-2">&amp;</span><span class="lifetime">&#39;l </span>[u8],
-    <span class="attr">#[tlv(number = <span class="string">&quot;0xC&quot;</span>)] </span><span class="comment">// UTF8_STRING
-    </span>part: <span class="kw-2">&amp;</span><span class="lifetime">&#39;l </span>[u8],
+#[tlv(constructed, number = <span class="string">"0x10"</span>)] </span><span class="comment">// SEQUENCE = 0x10
+</span><span class="kw">struct </span>EncodedPart&lt;<span class="lifetime">'l</span>&gt; {
+    <span class="attr">#[tlv(number = <span class="string">"0x6"</span>)] </span><span class="comment">// OBJECT_IDENTIFIER
+    </span>oid: <span class="kw-2">&amp;</span><span class="lifetime">'l </span>[u8],
+    <span class="attr">#[tlv(number = <span class="string">"0xC"</span>)] </span><span class="comment">// UTF8_STRING
+    </span>part: <span class="kw-2">&amp;</span><span class="lifetime">'l </span>[u8],
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;l</span>&gt; Name&lt;<span class="lifetime">&#39;l</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'l</span>&gt; Name&lt;<span class="lifetime">'l</span>&gt; {
     <span class="kw">pub fn </span>with_country(<span class="self">self</span>, country: <span class="kw-2">&amp;</span>[u8; <span class="number">2</span>]) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             country: <span class="prelude-val">Some</span>(<span class="kw-2">*</span>country),
             ..<span class="self">self
         </span>}
     }
-    <span class="kw">pub fn </span>with_organization(<span class="self">self</span>, organization: <span class="kw-2">&amp;</span><span class="lifetime">&#39;l </span>str) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>with_organization(<span class="self">self</span>, organization: <span class="kw-2">&amp;</span><span class="lifetime">'l </span>str) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             organization: <span class="prelude-val">Some</span>(organization),
             ..<span class="self">self
         </span>}
     }
-    <span class="kw">pub fn </span>with_state(<span class="self">self</span>, state: <span class="kw-2">&amp;</span><span class="lifetime">&#39;l </span>str) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>with_state(<span class="self">self</span>, state: <span class="kw-2">&amp;</span><span class="lifetime">'l </span>str) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             state: <span class="prelude-val">Some</span>(state),
             ..<span class="self">self
@@ -1229,7 +1230,7 @@
     }
 }
 
-<span class="kw">impl </span>Encodable <span class="kw">for </span>Name&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>Encodable <span class="kw">for </span>Name&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>encoded_length(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; BerResult&lt;BerLength&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>l = <span class="number">0u16</span>;
         <span class="kw">if </span><span class="self">self</span>.country.is_some() {
@@ -1244,24 +1245,24 @@
         <span class="prelude-val">Ok</span>(l.into())
     }
 
-    <span class="kw">fn </span>encode(<span class="kw-2">&amp;</span><span class="self">self</span>, encoder: <span class="kw-2">&amp;mut </span>Encoder&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; BerResult&lt;()&gt; {
+    <span class="kw">fn </span>encode(<span class="kw-2">&amp;</span><span class="self">self</span>, encoder: <span class="kw-2">&amp;mut </span>Encoder&lt;<span class="lifetime">'_</span>&gt;) -&gt; BerResult&lt;()&gt; {
         <span class="comment">// Order by OID for good measure
         </span><span class="kw">if let </span><span class="prelude-val">Some</span>(country) = <span class="self">self</span>.country {
-            <span class="comment">// &quot;31 0B 30 09 06 03 55  04 06 13 02 43 48&quot;
-            </span><span class="kw">let </span><span class="kw-2">mut </span>encoding: [u8; <span class="number">0xB</span>] = <span class="macro">hex!</span>(<span class="string">&quot;30 09 06 03 55  04 06 13 02 00 00&quot;</span>);
+            <span class="comment">// "31 0B 30 09 06 03 55  04 06 13 02 43 48"
+            </span><span class="kw">let </span><span class="kw-2">mut </span>encoding: [u8; <span class="number">0xB</span>] = <span class="macro">hex!</span>(<span class="string">"30 09 06 03 55  04 06 13 02 00 00"</span>);
             encoding[<span class="number">9</span>..].copy_from_slice(<span class="kw-2">&amp;</span>country);
             encoder.encode(<span class="kw-2">&amp;</span>TaggedSlice::from(Tag::SET, <span class="kw-2">&amp;</span>encoding)<span class="question-mark">?</span>)<span class="question-mark">?</span>;
         }
         <span class="kw">if let </span><span class="prelude-val">Some</span>(state) = <span class="self">self</span>.state {
             <span class="kw">let </span>encoded_state = EncodedPart {
-                oid: <span class="kw-2">&amp;</span><span class="macro">hex!</span>(<span class="string">&quot;55 04 08&quot;</span>),
+                oid: <span class="kw-2">&amp;</span><span class="macro">hex!</span>(<span class="string">"55 04 08"</span>),
                 part: state.as_bytes(),
             };
             encoder.encode(<span class="kw-2">&amp;</span>TaggedValue::new(Tag::SET, <span class="kw-2">&amp;</span>encoded_state))<span class="question-mark">?</span>;
         }
         <span class="kw">if let </span><span class="prelude-val">Some</span>(organization) = <span class="self">self</span>.organization {
             <span class="kw">let </span>encoded_organization = EncodedPart {
-                oid: <span class="kw-2">&amp;</span><span class="macro">hex!</span>(<span class="string">&quot;55 04 0A&quot;</span>),
+                oid: <span class="kw-2">&amp;</span><span class="macro">hex!</span>(<span class="string">"55 04 0A"</span>),
                 part: organization.as_bytes(),
             };
             encoder.encode(<span class="kw-2">&amp;</span>TaggedValue::new(Tag::SET, <span class="kw-2">&amp;</span>encoded_organization))<span class="question-mark">?</span>;
@@ -1276,13 +1277,13 @@
 
 <span class="attr">#[derive(Clone, Copy, Eq, PartialEq)]
 </span><span class="doccomment">/// Only empty slices possible currently.
-</span><span class="kw">pub struct </span>Extensions&lt;<span class="lifetime">&#39;l</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;l </span>[Extension]);
+</span><span class="kw">pub struct </span>Extensions&lt;<span class="lifetime">'l</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'l </span>[Extension]);
 
-<span class="kw">impl </span>Encodable <span class="kw">for </span>Extensions&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>Encodable <span class="kw">for </span>Extensions&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>encoded_length(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; BerResult&lt;BerLength&gt; {
         <span class="prelude-val">Ok</span>(<span class="number">0u8</span>.into())
     }
-    <span class="kw">fn </span>encode(<span class="kw-2">&amp;</span><span class="self">self</span>, _encoder: <span class="kw-2">&amp;mut </span>Encoder&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; BerResult&lt;()&gt; {
+    <span class="kw">fn </span>encode(<span class="kw-2">&amp;</span><span class="self">self</span>, _encoder: <span class="kw-2">&amp;mut </span>Encoder&lt;<span class="lifetime">'_</span>&gt;) -&gt; BerResult&lt;()&gt; {
         <span class="prelude-val">Ok</span>(())
     }
 }
@@ -1332,7 +1333,7 @@
         core::fmt::write(
             <span class="kw-2">&amp;mut </span>buffer,
             <span class="macro">format_args!</span>(
-                <span class="string">&quot;{}{:02}{:02}{:02}{:02}{:02}Z&quot;</span>,
+                <span class="string">"{}{:02}{:02}{:02}{:02}{:02}Z"</span>,
                 <span class="self">self</span>.year, <span class="self">self</span>.month, <span class="self">self</span>.day, <span class="self">self</span>.hour, <span class="self">self</span>.minute, <span class="self">self</span>.second
             ),
         )
@@ -1344,13 +1345,13 @@
 }
 
 <span class="attr">#[derive(Clone, Copy, Eq, PartialEq)]
-</span><span class="doccomment">/// Encoded as &quot;YYYYMMDDHHMMSSZ&quot;, encoding takes care of truncating YYYY to YY if necessary.
-</span><span class="kw">pub struct </span>Datetime&lt;<span class="lifetime">&#39;l</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;l </span>[u8]);
+</span><span class="doccomment">/// Encoded as "YYYYMMDDHHMMSSZ", encoding takes care of truncating YYYY to YY if necessary.
+</span><span class="kw">pub struct </span>Datetime&lt;<span class="lifetime">'l</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'l </span>[u8]);
 
-<span class="kw">impl </span>Encodable <span class="kw">for </span>Datetime&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>Encodable <span class="kw">for </span>Datetime&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>encoded_length(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; BerResult&lt;BerLength&gt; {
         <span class="comment">// before 2050: UtcTime -&gt; truncate YYYY to YY
-        </span><span class="prelude-val">Ok</span>(<span class="kw">if </span><span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>[..<span class="number">4</span>] &lt; <span class="string">b&quot;2050&quot; </span>{
+        </span><span class="prelude-val">Ok</span>(<span class="kw">if </span><span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>[..<span class="number">4</span>] &lt; <span class="string">b"2050" </span>{
             <span class="number">0xFu8
         </span><span class="comment">// starting 2050: GeneralizedTime -&gt; keep YYYY
         </span>} <span class="kw">else </span>{
@@ -1358,8 +1359,8 @@
         </span>}
         .into())
     }
-    <span class="kw">fn </span>encode(<span class="kw-2">&amp;</span><span class="self">self</span>, encoder: <span class="kw-2">&amp;mut </span>Encoder&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; BerResult&lt;()&gt; {
-        <span class="kw">let </span>tagged_slice = <span class="kw">if </span><span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>[..<span class="number">4</span>] &lt; <span class="string">b&quot;2050&quot; </span>{
+    <span class="kw">fn </span>encode(<span class="kw-2">&amp;</span><span class="self">self</span>, encoder: <span class="kw-2">&amp;mut </span>Encoder&lt;<span class="lifetime">'_</span>&gt;) -&gt; BerResult&lt;()&gt; {
+        <span class="kw">let </span>tagged_slice = <span class="kw">if </span><span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>[..<span class="number">4</span>] &lt; <span class="string">b"2050" </span>{
             TaggedSlice::from(Tag::UTC_TIME, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>[<span class="number">2</span>..])<span class="question-mark">?
         </span>} <span class="kw">else </span>{
             TaggedSlice::from(Tag::GENERALIZED_TIME, <span class="self">self</span>.<span class="number">0</span>)<span class="question-mark">?
@@ -1369,33 +1370,33 @@
 }
 
 <span class="attr">#[derive(Clone, Copy, Eq, PartialEq)]
-</span><span class="kw">pub struct </span>Validity&lt;<span class="lifetime">&#39;l</span>&gt; {
-    <span class="doccomment">/// Encoded as &quot;YYYYMMDDHHMMSSZ&quot;, encoding takes care of truncating YYYY to YY if necessary.
-    </span>start: Datetime&lt;<span class="lifetime">&#39;l</span>&gt;,
+</span><span class="kw">pub struct </span>Validity&lt;<span class="lifetime">'l</span>&gt; {
+    <span class="doccomment">/// Encoded as "YYYYMMDDHHMMSSZ", encoding takes care of truncating YYYY to YY if necessary.
+    </span>start: Datetime&lt;<span class="lifetime">'l</span>&gt;,
     <span class="doccomment">/// defaults to 9999-12-31T23:59:59Z
-    </span>end: <span class="prelude-ty">Option</span>&lt;Datetime&lt;<span class="lifetime">&#39;l</span>&gt;&gt;,
+    </span>end: <span class="prelude-ty">Option</span>&lt;Datetime&lt;<span class="lifetime">'l</span>&gt;&gt;,
 }
 
-<span class="kw">impl </span>Encodable <span class="kw">for </span>Validity&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>Encodable <span class="kw">for </span>Validity&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>encoded_length(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; BerResult&lt;BerLength&gt; {
         <span class="comment">// before 2050: UtcTime -&gt; truncate YYYY to YY
         </span><span class="self">self</span>.start.encoded_length()<span class="question-mark">?
             </span>+ <span class="self">self
                 </span>.end
-                .unwrap_or(Datetime(<span class="string">b&quot;99991231235959Z&quot;</span>))
+                .unwrap_or(Datetime(<span class="string">b"99991231235959Z"</span>))
                 .encoded_length()<span class="question-mark">?
     </span>}
 
-    <span class="kw">fn </span>encode(<span class="kw-2">&amp;</span><span class="self">self</span>, encoder: <span class="kw-2">&amp;mut </span>Encoder&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; BerResult&lt;()&gt; {
+    <span class="kw">fn </span>encode(<span class="kw-2">&amp;</span><span class="self">self</span>, encoder: <span class="kw-2">&amp;mut </span>Encoder&lt;<span class="lifetime">'_</span>&gt;) -&gt; BerResult&lt;()&gt; {
         encoder.encode(<span class="kw-2">&amp;</span><span class="self">self</span>.start)<span class="question-mark">?</span>;
-        encoder.encode(<span class="kw-2">&amp;</span><span class="self">self</span>.end.unwrap_or(Datetime(<span class="string">b&quot;99991231235959Z&quot;</span>)))
+        encoder.encode(<span class="kw-2">&amp;</span><span class="self">self</span>.end.unwrap_or(Datetime(<span class="string">b"99991231235959Z"</span>)))
     }
 }
 
 <span class="attr">#[derive(Clone, Copy, Eq, PartialEq)]
 </span><span class="kw">pub enum </span>SerializedSubjectPublicKey {
     Ed255([u8; <span class="number">32</span>]),
-    <span class="comment">// This is the DER version with leading &#39;04&#39;
+    <span class="comment">// This is the DER version with leading '04'
     </span>P256([u8; <span class="number">33</span>]),
 }
 
@@ -1408,8 +1409,8 @@
             .into())
     }
 
-    <span class="kw">fn </span>encode(<span class="kw-2">&amp;</span><span class="self">self</span>, encoder: <span class="kw-2">&amp;mut </span>Encoder&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; BerResult&lt;()&gt; {
-        <span class="comment">// NB: BIT-STRING needs to have number of &quot;unused bits&quot; in first byte (we have none)
+    <span class="kw">fn </span>encode(<span class="kw-2">&amp;</span><span class="self">self</span>, encoder: <span class="kw-2">&amp;mut </span>Encoder&lt;<span class="lifetime">'_</span>&gt;) -&gt; BerResult&lt;()&gt; {
+        <span class="comment">// NB: BIT-STRING needs to have number of "unused bits" in first byte (we have none)
         </span><span class="kw">match </span><span class="self">self </span>{
             SerializedSubjectPublicKey::Ed255(pub_key) =&gt; {
                 encoder.encode(<span class="kw-2">&amp;</span>TaggedSlice::from(Tag::SEQUENCE, ED255_OID_ENCODING)<span class="question-mark">?</span>)<span class="question-mark">?</span>;
@@ -1445,7 +1446,7 @@
 //    // 1. verify key exists, is local, and is suitable as X509 SPKI
 //    //    (for now: either P256, Ed255 or X255)
 
-//    // 2. construct &quot;to-be-signed&quot; certificate
+//    // 2. construct "to-be-signed" certificate
 //    let tbs_certificate = TbsCertificate::from(
 
 //    let encoded_tbs_certificate: Bytes&lt;MAX_CERT_SIZE&gt; = tbs_certificate().to_heapless_bytes();
@@ -1554,27 +1555,27 @@
 ////      }
 
 //#[derive(Copy, Clone, Debug, Eq, PartialEq, Message)] // NOTE: added `Message`
-//pub struct AlgorithmIdentifier&lt;&#39;a&gt; {
+//pub struct AlgorithmIdentifier&lt;'a&gt; {
 //    /// This field contains an ASN.1 `OBJECT IDENTIFIER`, a.k.a. OID.
 //    pub algorithm: ObjectIdentifier,
 
 //    /// This field is `OPTIONAL` and contains the ASN.1 `ANY` type, which
 //    /// in this example allows arbitrary algorithm-defined parameters.
-//    pub parameters: Option&lt;Any&lt;&#39;a&gt;&gt;
+//    pub parameters: Option&lt;Any&lt;'a&gt;&gt;
 //}
 
 //    This is from docs.rs/x509 (version 0.2.0)
 
-//    pub fn tbs_certificate&lt;&#39;a, W: Write + &#39;a, Alg, PKI, O: Oid + &#39;a, N: heapless::ArrayLength&lt;u8&gt; + &#39;a&gt;(
-//        serial_number: &amp;&#39;a [u8],
-//        signature: &amp;&#39;a Alg,
-//        issuer: &amp;&#39;a [RelativeName&lt;&#39;a&gt;],
-//        not_before: &amp;&#39;a str,
-//        not_after: Option&lt;&amp;&#39;a str&gt;,
-//        subject: &amp;&#39;a [RelativeName&lt;&#39;a&gt;],
-//        subject_pki: &amp;&#39;a PKI,
-//        exts: &amp;&#39;a [Extension&lt;&#39;a, O&gt;],
-//    ) -&gt; impl SerializeFn&lt;W&gt; + &#39;a
+//    pub fn tbs_certificate&lt;'a, W: Write + 'a, Alg, PKI, O: Oid + 'a, N: heapless::ArrayLength&lt;u8&gt; + 'a&gt;(
+//        serial_number: &amp;'a [u8],
+//        signature: &amp;'a Alg,
+//        issuer: &amp;'a [RelativeName&lt;'a&gt;],
+//        not_before: &amp;'a str,
+//        not_after: Option&lt;&amp;'a str&gt;,
+//        subject: &amp;'a [RelativeName&lt;'a&gt;],
+//        subject_pki: &amp;'a PKI,
+//        exts: &amp;'a [Extension&lt;'a, O&gt;],
+//    ) -&gt; impl SerializeFn&lt;W&gt; + 'a
 //    where
 //        Alg: AlgorithmIdentifier,
 //        PKI: SubjectPublicKeyInfo,

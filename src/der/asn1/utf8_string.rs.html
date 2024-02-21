@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/der-0.4.5/src/asn1/utf8_string.rs`."><title>utf8_string.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-fa3bb1812debf86c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="der" data-themes="" data-resource-suffix="" data-rustdoc-version="1.74.1 (a28077b28 2023-12-04)" data-channel="1.74.1" data-search-js="search-8be46b629f5f14a8.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-c5bd66d33317d69f.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="icon" href="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../der/index.html"><img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/der-0.4.5/src/asn1/utf8_string.rs`."><title>utf8_string.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="der" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="icon" href="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><a class="sub-logo-container" href="../../../der/index.html"><img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="der"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -200,7 +201,7 @@
 };
 <span class="kw">use </span>core::{convert::TryFrom, fmt, str};
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
 </span><span class="kw">use </span>alloc::{borrow::ToOwned, string::String};
 
 <span class="doccomment">/// ASN.1 `UTF8String` type.
@@ -208,22 +209,22 @@
 /// Supports the full UTF-8 encoding.
 ///
 /// Note that the [`Decodable`][`crate::Decodable`] and [`Encodable`] traits
-/// are impl&#39;d for Rust&#39;s [`str`][`prim@str`] primitive, which decodes/encodes
+/// are impl'd for Rust's [`str`][`prim@str`] primitive, which decodes/encodes
 /// as a [`Utf8String`].
 ///
-/// You are free to use [`str`][`prim@str`] instead of this type, however it&#39;s
+/// You are free to use [`str`][`prim@str`] instead of this type, however it's
 /// still provided for explicitness in cases where it might be ambiguous with
 /// other ASN.1 string encodings such as
 /// [`PrintableString`][`crate::asn1::PrintableString`].
 </span><span class="attr">#[derive(Copy, Clone, Eq, PartialEq, PartialOrd, Ord)]
-</span><span class="kw">pub struct </span>Utf8String&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub struct </span>Utf8String&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Inner value
-    </span>inner: StrSlice&lt;<span class="lifetime">&#39;a</span>&gt;,
+    </span>inner: StrSlice&lt;<span class="lifetime">'a</span>&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Utf8String&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Utf8String&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Create a new ASN.1 `UTF8String`.
-    </span><span class="kw">pub fn </span>new&lt;T&gt;(input: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>T) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt;
+    </span><span class="kw">pub fn </span>new&lt;T&gt;(input: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>T) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt;
     <span class="kw">where
         </span>T: AsRef&lt;[u8]&gt; + <span class="question-mark">?</span>Sized,
     {
@@ -231,12 +232,12 @@
     }
 
     <span class="doccomment">/// Borrow the string as a `str`.
-    </span><span class="kw">pub fn </span>as_str(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str {
+    </span><span class="kw">pub fn </span>as_str(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'a </span>str {
         <span class="self">self</span>.inner.as_str()
     }
 
     <span class="doccomment">/// Borrow the string as bytes.
-    </span><span class="kw">pub fn </span>as_bytes(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8] {
+    </span><span class="kw">pub fn </span>as_bytes(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8] {
         <span class="self">self</span>.inner.as_bytes()
     }
 
@@ -251,75 +252,75 @@
     }
 }
 
-<span class="kw">impl </span>AsRef&lt;str&gt; <span class="kw">for </span>Utf8String&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>AsRef&lt;str&gt; <span class="kw">for </span>Utf8String&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>as_ref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>str {
         <span class="self">self</span>.as_str()
     }
 }
 
-<span class="kw">impl </span>AsRef&lt;[u8]&gt; <span class="kw">for </span>Utf8String&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>AsRef&lt;[u8]&gt; <span class="kw">for </span>Utf8String&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>as_ref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[u8] {
         <span class="self">self</span>.as_bytes()
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; From&lt;<span class="kw-2">&amp;</span>Utf8String&lt;<span class="lifetime">&#39;a</span>&gt;&gt; <span class="kw">for </span>Utf8String&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>from(value: <span class="kw-2">&amp;</span>Utf8String&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; Utf8String&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; From&lt;<span class="kw-2">&amp;</span>Utf8String&lt;<span class="lifetime">'a</span>&gt;&gt; <span class="kw">for </span>Utf8String&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>from(value: <span class="kw-2">&amp;</span>Utf8String&lt;<span class="lifetime">'a</span>&gt;) -&gt; Utf8String&lt;<span class="lifetime">'a</span>&gt; {
         <span class="kw-2">*</span>value
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; TryFrom&lt;Any&lt;<span class="lifetime">&#39;a</span>&gt;&gt; <span class="kw">for </span>Utf8String&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; TryFrom&lt;Any&lt;<span class="lifetime">'a</span>&gt;&gt; <span class="kw">for </span>Utf8String&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">type </span>Error = Error;
 
-    <span class="kw">fn </span>try_from(any: Any&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Utf8String&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    <span class="kw">fn </span>try_from(any: Any&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Utf8String&lt;<span class="lifetime">'a</span>&gt;&gt; {
         any.tag().assert_eq(Tag::Utf8String)<span class="question-mark">?</span>;
         <span class="self">Self</span>::new(any.as_bytes())
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; From&lt;Utf8String&lt;<span class="lifetime">&#39;a</span>&gt;&gt; <span class="kw">for </span>Any&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>from(printable_string: Utf8String&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; Any&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; From&lt;Utf8String&lt;<span class="lifetime">'a</span>&gt;&gt; <span class="kw">for </span>Any&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>from(printable_string: Utf8String&lt;<span class="lifetime">'a</span>&gt;) -&gt; Any&lt;<span class="lifetime">'a</span>&gt; {
         Any::from_tag_and_value(Tag::Utf8String, printable_string.inner.into())
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; From&lt;Utf8String&lt;<span class="lifetime">&#39;a</span>&gt;&gt; <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8] {
-    <span class="kw">fn </span>from(utf8_string: Utf8String&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8] {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; From&lt;Utf8String&lt;<span class="lifetime">'a</span>&gt;&gt; <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8] {
+    <span class="kw">fn </span>from(utf8_string: Utf8String&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8] {
         utf8_string.as_bytes()
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Encodable <span class="kw">for </span>Utf8String&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Encodable <span class="kw">for </span>Utf8String&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">fn </span>encoded_len(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Length&gt; {
         Any::from(<span class="kw-2">*</span><span class="self">self</span>).encoded_len()
     }
 
-    <span class="kw">fn </span>encode(<span class="kw-2">&amp;</span><span class="self">self</span>, encoder: <span class="kw-2">&amp;mut </span>Encoder&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="kw">fn </span>encode(<span class="kw-2">&amp;</span><span class="self">self</span>, encoder: <span class="kw-2">&amp;mut </span>Encoder&lt;<span class="lifetime">'_</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         Any::from(<span class="kw-2">*</span><span class="self">self</span>).encode(encoder)
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Tagged <span class="kw">for </span>Utf8String&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Tagged <span class="kw">for </span>Utf8String&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">const </span>TAG: Tag = Tag::Utf8String;
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; fmt::Display <span class="kw">for </span>Utf8String&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; fmt::Display <span class="kw">for </span>Utf8String&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
         f.write_str(<span class="self">self</span>.as_str())
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; fmt::Debug <span class="kw">for </span>Utf8String&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        <span class="macro">write!</span>(f, <span class="string">&quot;Utf8String({:?})&quot;</span>, <span class="self">self</span>.as_str())
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; fmt::Debug <span class="kw">for </span>Utf8String&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        <span class="macro">write!</span>(f, <span class="string">"Utf8String({:?})"</span>, <span class="self">self</span>.as_str())
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; TryFrom&lt;Any&lt;<span class="lifetime">&#39;a</span>&gt;&gt; <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; TryFrom&lt;Any&lt;<span class="lifetime">'a</span>&gt;&gt; <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>str {
     <span class="kw">type </span>Error = Error;
 
-    <span class="kw">fn </span>try_from(any: Any&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str&gt; {
+    <span class="kw">fn </span>try_from(any: Any&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>str&gt; {
         Utf8String::try_from(any).map(|s| s.as_str())
     }
 }
@@ -329,7 +330,7 @@
         Utf8String::new(<span class="self">self</span>)<span class="question-mark">?</span>.encoded_len()
     }
 
-    <span class="kw">fn </span>encode(<span class="kw-2">&amp;</span><span class="self">self</span>, encoder: <span class="kw-2">&amp;mut </span>Encoder&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="kw">fn </span>encode(<span class="kw-2">&amp;</span><span class="self">self</span>, encoder: <span class="kw-2">&amp;mut </span>Encoder&lt;<span class="lifetime">'_</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         Utf8String::new(<span class="self">self</span>)<span class="question-mark">?</span>.encode(encoder)
     }
 }
@@ -338,30 +339,30 @@
     <span class="kw">const </span>TAG: Tag = Tag::Utf8String;
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
-#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;alloc&quot;</span>)))]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; TryFrom&lt;Any&lt;<span class="lifetime">&#39;a</span>&gt;&gt; <span class="kw">for </span>String {
+<span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
+#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"alloc"</span>)))]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; TryFrom&lt;Any&lt;<span class="lifetime">'a</span>&gt;&gt; <span class="kw">for </span>String {
     <span class="kw">type </span>Error = Error;
 
-    <span class="kw">fn </span>try_from(any: Any&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;String&gt; {
+    <span class="kw">fn </span>try_from(any: Any&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;String&gt; {
         Utf8String::try_from(any).map(|s| s.as_str().to_owned())
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
-#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;alloc&quot;</span>)))]
+<span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
+#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"alloc"</span>)))]
 </span><span class="kw">impl </span>Encodable <span class="kw">for </span>String {
     <span class="kw">fn </span>encoded_len(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Length&gt; {
         Utf8String::new(<span class="self">self</span>)<span class="question-mark">?</span>.encoded_len()
     }
 
-    <span class="kw">fn </span>encode(<span class="kw-2">&amp;</span><span class="self">self</span>, encoder: <span class="kw-2">&amp;mut </span>Encoder&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="kw">fn </span>encode(<span class="kw-2">&amp;</span><span class="self">self</span>, encoder: <span class="kw-2">&amp;mut </span>Encoder&lt;<span class="lifetime">'_</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         Utf8String::new(<span class="self">self</span>)<span class="question-mark">?</span>.encode(encoder)
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
-#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;alloc&quot;</span>)))]
+<span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
+#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"alloc"</span>)))]
 </span><span class="kw">impl </span>Tagged <span class="kw">for </span>String {
     <span class="kw">const </span>TAG: Tag = Tag::Utf8String;
 }
@@ -378,14 +379,14 @@
         ];
 
         <span class="kw">let </span>utf8_string = Utf8String::from_der(example_bytes).unwrap();
-        <span class="macro">assert_eq!</span>(utf8_string.as_str(), <span class="string">&quot;Test User 1&quot;</span>);
+        <span class="macro">assert_eq!</span>(utf8_string.as_str(), <span class="string">"Test User 1"</span>);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>parse_utf8_bytes() {
         <span class="kw">let </span>example_bytes = <span class="kw-2">&amp;</span>[<span class="number">0x0c</span>, <span class="number">0x06</span>, <span class="number">0x48</span>, <span class="number">0x65</span>, <span class="number">0x6c</span>, <span class="number">0x6c</span>, <span class="number">0xc3</span>, <span class="number">0xb3</span>];
         <span class="kw">let </span>utf8_string = Utf8String::from_der(example_bytes).unwrap();
-        <span class="macro">assert_eq!</span>(utf8_string.as_str(), <span class="string">&quot;Helló&quot;</span>);
+        <span class="macro">assert_eq!</span>(utf8_string.as_str(), <span class="string">"Helló"</span>);
     }
 }
 </code></pre></div></section></main></body></html>

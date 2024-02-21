@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/half-1.8.2/src/binary16/convert.rs`."><title>convert.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-fa3bb1812debf86c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="half" data-themes="" data-resource-suffix="" data-rustdoc-version="1.74.1 (a28077b28 2023-12-04)" data-channel="1.74.1" data-search-js="search-8be46b629f5f14a8.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-c5bd66d33317d69f.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../half/index.html"><img class="rust-logo" src="../../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/half-1.8.2/src/binary16/convert.rs`."><title>convert.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="half" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -493,19 +494,19 @@
 
 </span><span class="macro">macro_rules! </span>convert_fn {
     (<span class="kw">fn </span><span class="macro-nonterminal">$name</span>:ident(<span class="macro-nonterminal">$var</span>:ident : <span class="macro-nonterminal">$vartype</span>:ty) -&gt; <span class="macro-nonterminal">$restype</span>:ty {
-            <span class="kw">if </span>feature(<span class="string">&quot;f16c&quot;</span>) { <span class="macro-nonterminal">$f16c</span>:expr }
+            <span class="kw">if </span>feature(<span class="string">"f16c"</span>) { <span class="macro-nonterminal">$f16c</span>:expr }
             <span class="kw">else </span>{ <span class="macro-nonterminal">$fallback</span>:expr }}) =&gt; {
         <span class="attr">#[inline]
         </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span><span class="macro-nonterminal">$name</span>(<span class="macro-nonterminal">$var</span>: <span class="macro-nonterminal">$vartype</span>) -&gt; <span class="macro-nonterminal">$restype </span>{
             <span class="comment">// Use CPU feature detection if using std
             </span><span class="attr">#[cfg(all(
-                feature = <span class="string">&quot;use-intrinsics&quot;</span>,
-                feature = <span class="string">&quot;std&quot;</span>,
-                any(target_arch = <span class="string">&quot;x86&quot;</span>, target_arch = <span class="string">&quot;x86_64&quot;</span>),
-                not(target_feature = <span class="string">&quot;f16c&quot;</span>)
+                feature = <span class="string">"use-intrinsics"</span>,
+                feature = <span class="string">"std"</span>,
+                any(target_arch = <span class="string">"x86"</span>, target_arch = <span class="string">"x86_64"</span>),
+                not(target_feature = <span class="string">"f16c"</span>)
             ))]
             </span>{
-                <span class="kw">if </span><span class="macro">is_x86_feature_detected!</span>(<span class="string">&quot;f16c&quot;</span>) {
+                <span class="kw">if </span><span class="macro">is_x86_feature_detected!</span>(<span class="string">"f16c"</span>) {
                     <span class="macro-nonterminal">$f16c
                 </span>} <span class="kw">else </span>{
                     <span class="macro-nonterminal">$fallback
@@ -513,18 +514,18 @@
             }
             <span class="comment">// Use intrinsics directly when a compile target or using no_std
             </span><span class="attr">#[cfg(all(
-                feature = <span class="string">&quot;use-intrinsics&quot;</span>,
-                any(target_arch = <span class="string">&quot;x86&quot;</span>, target_arch = <span class="string">&quot;x86_64&quot;</span>),
-                target_feature = <span class="string">&quot;f16c&quot;
+                feature = <span class="string">"use-intrinsics"</span>,
+                any(target_arch = <span class="string">"x86"</span>, target_arch = <span class="string">"x86_64"</span>),
+                target_feature = <span class="string">"f16c"
             </span>))]
             </span>{
                 <span class="macro-nonterminal">$f16c
             </span>}
             <span class="comment">// Fallback to software
             </span><span class="attr">#[cfg(any(
-                not(feature = <span class="string">&quot;use-intrinsics&quot;</span>),
-                not(any(target_arch = <span class="string">&quot;x86&quot;</span>, target_arch = <span class="string">&quot;x86_64&quot;</span>)),
-                all(not(feature = <span class="string">&quot;std&quot;</span>), not(target_feature = <span class="string">&quot;f16c&quot;</span>))
+                not(feature = <span class="string">"use-intrinsics"</span>),
+                not(any(target_arch = <span class="string">"x86"</span>, target_arch = <span class="string">"x86_64"</span>)),
+                all(not(feature = <span class="string">"std"</span>), not(target_feature = <span class="string">"f16c"</span>))
             ))]
             </span>{
                 <span class="macro-nonterminal">$fallback
@@ -535,7 +536,7 @@
 
 <span class="macro">convert_fn! </span>{
     <span class="kw">fn </span>f32_to_f16(f: f32) -&gt; u16 {
-        <span class="kw">if </span>feature(<span class="string">&quot;f16c&quot;</span>) {
+        <span class="kw">if </span>feature(<span class="string">"f16c"</span>) {
             <span class="kw">unsafe </span>{ x86::f32_to_f16_x86_f16c(f) }
         } <span class="kw">else </span>{
             f32_to_f16_fallback(f)
@@ -545,7 +546,7 @@
 
 <span class="macro">convert_fn! </span>{
     <span class="kw">fn </span>f64_to_f16(f: f64) -&gt; u16 {
-        <span class="kw">if </span>feature(<span class="string">&quot;f16c&quot;</span>) {
+        <span class="kw">if </span>feature(<span class="string">"f16c"</span>) {
             <span class="kw">unsafe </span>{ x86::f32_to_f16_x86_f16c(f <span class="kw">as </span>f32) }
         } <span class="kw">else </span>{
             f64_to_f16_fallback(f)
@@ -555,7 +556,7 @@
 
 <span class="macro">convert_fn! </span>{
     <span class="kw">fn </span>f16_to_f32(i: u16) -&gt; f32 {
-        <span class="kw">if </span>feature(<span class="string">&quot;f16c&quot;</span>) {
+        <span class="kw">if </span>feature(<span class="string">"f16c"</span>) {
             <span class="kw">unsafe </span>{ x86::f16_to_f32_x86_f16c(i) }
         } <span class="kw">else </span>{
             f16_to_f32_fallback(i)
@@ -565,7 +566,7 @@
 
 <span class="macro">convert_fn! </span>{
     <span class="kw">fn </span>f16_to_f64(i: u16) -&gt; f64 {
-        <span class="kw">if </span>feature(<span class="string">&quot;f16c&quot;</span>) {
+        <span class="kw">if </span>feature(<span class="string">"f16c"</span>) {
             <span class="kw">unsafe </span>{ x86::f16_to_f32_x86_f16c(i) <span class="kw">as </span>f64 }
         } <span class="kw">else </span>{
             f16_to_f64_fallback(i)
@@ -578,7 +579,7 @@
 
 </span><span class="macro">convert_fn! </span>{
     <span class="kw">fn </span>f32x4_to_f16x4(f: <span class="kw-2">&amp;</span>[f32]) -&gt; [u16; <span class="number">4</span>] {
-        <span class="kw">if </span>feature(<span class="string">&quot;f16c&quot;</span>) {
+        <span class="kw">if </span>feature(<span class="string">"f16c"</span>) {
             <span class="kw">unsafe </span>{ x86::f32x4_to_f16x4_x86_f16c(f) }
         } <span class="kw">else </span>{
             f32x4_to_f16x4_fallback(f)
@@ -588,7 +589,7 @@
 
 <span class="macro">convert_fn! </span>{
     <span class="kw">fn </span>f16x4_to_f32x4(i: <span class="kw-2">&amp;</span>[u16]) -&gt; [f32; <span class="number">4</span>] {
-        <span class="kw">if </span>feature(<span class="string">&quot;f16c&quot;</span>) {
+        <span class="kw">if </span>feature(<span class="string">"f16c"</span>) {
             <span class="kw">unsafe </span>{ x86::f16x4_to_f32x4_x86_f16c(i) }
         } <span class="kw">else </span>{
             f16x4_to_f32x4_fallback(i)
@@ -598,7 +599,7 @@
 
 <span class="macro">convert_fn! </span>{
     <span class="kw">fn </span>f64x4_to_f16x4(f: <span class="kw-2">&amp;</span>[f64]) -&gt; [u16; <span class="number">4</span>] {
-        <span class="kw">if </span>feature(<span class="string">&quot;f16c&quot;</span>) {
+        <span class="kw">if </span>feature(<span class="string">"f16c"</span>) {
             <span class="kw">unsafe </span>{ x86::f64x4_to_f16x4_x86_f16c(f) }
         } <span class="kw">else </span>{
             f64x4_to_f16x4_fallback(f)
@@ -608,7 +609,7 @@
 
 <span class="macro">convert_fn! </span>{
     <span class="kw">fn </span>f16x4_to_f64x4(i: <span class="kw-2">&amp;</span>[u16]) -&gt; [f64; <span class="number">4</span>] {
-        <span class="kw">if </span>feature(<span class="string">&quot;f16c&quot;</span>) {
+        <span class="kw">if </span>feature(<span class="string">"f16c"</span>) {
             <span class="kw">unsafe </span>{ x86::f16x4_to_f64x4_x86_f16c(i) }
         } <span class="kw">else </span>{
             f16x4_to_f64x4_fallback(i)
@@ -666,7 +667,7 @@
             <span class="comment">// No rounding possibility, so this is a full underflow, return signed zero
             </span><span class="kw">return </span>half_sign <span class="kw">as </span>u16;
         }
-        <span class="comment">// Don&#39;t forget about hidden leading mantissa bit when assembling mantissa
+        <span class="comment">// Don't forget about hidden leading mantissa bit when assembling mantissa
         </span><span class="kw">let </span>man = man | <span class="number">0x0080_0000u32</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>half_man = man &gt;&gt; (<span class="number">14 </span>- half_exp);
         <span class="comment">// Check for rounding (see comment above functions)
@@ -732,7 +733,7 @@
             <span class="comment">// No rounding possibility, so this is a full underflow, return signed zero
             </span><span class="kw">return </span>half_sign <span class="kw">as </span>u16;
         }
-        <span class="comment">// Don&#39;t forget about hidden leading mantissa bit when assembling mantissa
+        <span class="comment">// Don't forget about hidden leading mantissa bit when assembling mantissa
         </span><span class="kw">let </span>man = man | <span class="number">0x0010_0000u32</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>half_man = man &gt;&gt; (<span class="number">11 </span>- half_exp);
         <span class="comment">// Check for rounding (see comment above functions)
@@ -893,20 +894,20 @@
 
 <span class="comment">/////////////// x86/x86_64 f16c ////////////////
 </span><span class="attr">#[cfg(all(
-    feature = <span class="string">&quot;use-intrinsics&quot;</span>,
-    any(target_arch = <span class="string">&quot;x86&quot;</span>, target_arch = <span class="string">&quot;x86_64&quot;</span>)
+    feature = <span class="string">"use-intrinsics"</span>,
+    any(target_arch = <span class="string">"x86"</span>, target_arch = <span class="string">"x86_64"</span>)
 ))]
 </span><span class="kw">mod </span>x86 {
     <span class="kw">use </span>core::{mem::MaybeUninit, ptr};
 
-    <span class="attr">#[cfg(target_arch = <span class="string">&quot;x86&quot;</span>)]
+    <span class="attr">#[cfg(target_arch = <span class="string">"x86"</span>)]
     </span><span class="kw">use </span>core::arch::x86::{__m128, __m128i, _mm_cvtph_ps, _mm_cvtps_ph, _MM_FROUND_TO_NEAREST_INT};
-    <span class="attr">#[cfg(target_arch = <span class="string">&quot;x86_64&quot;</span>)]
+    <span class="attr">#[cfg(target_arch = <span class="string">"x86_64"</span>)]
     </span><span class="kw">use </span>core::arch::x86_64::{
         __m128, __m128i, _mm_cvtph_ps, _mm_cvtps_ph, _MM_FROUND_TO_NEAREST_INT,
     };
 
-    <span class="attr">#[target_feature(enable = <span class="string">&quot;f16c&quot;</span>)]
+    <span class="attr">#[target_feature(enable = <span class="string">"f16c"</span>)]
     #[inline]
     </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">unsafe fn </span>f16_to_f32_x86_f16c(i: u16) -&gt; f32 {
         <span class="kw">let </span><span class="kw-2">mut </span>vec = MaybeUninit::&lt;__m128i&gt;::zeroed();
@@ -915,7 +916,7 @@
         <span class="kw-2">*</span>(<span class="kw-2">&amp;</span>retval <span class="kw">as </span><span class="kw-2">*const </span>__m128).cast()
     }
 
-    <span class="attr">#[target_feature(enable = <span class="string">&quot;f16c&quot;</span>)]
+    <span class="attr">#[target_feature(enable = <span class="string">"f16c"</span>)]
     #[inline]
     </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">unsafe fn </span>f32_to_f16_x86_f16c(f: f32) -&gt; u16 {
         <span class="kw">let </span><span class="kw-2">mut </span>vec = MaybeUninit::&lt;__m128&gt;::zeroed();
@@ -924,7 +925,7 @@
         <span class="kw-2">*</span>(<span class="kw-2">&amp;</span>retval <span class="kw">as </span><span class="kw-2">*const </span>__m128i).cast()
     }
 
-    <span class="attr">#[target_feature(enable = <span class="string">&quot;f16c&quot;</span>)]
+    <span class="attr">#[target_feature(enable = <span class="string">"f16c"</span>)]
     #[inline]
     </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">unsafe fn </span>f16x4_to_f32x4_x86_f16c(v: <span class="kw-2">&amp;</span>[u16]) -&gt; [f32; <span class="number">4</span>] {
         <span class="macro">debug_assert!</span>(v.len() &gt;= <span class="number">4</span>);
@@ -935,7 +936,7 @@
         <span class="kw-2">*</span>(<span class="kw-2">&amp;</span>retval <span class="kw">as </span><span class="kw-2">*const </span>__m128).cast()
     }
 
-    <span class="attr">#[target_feature(enable = <span class="string">&quot;f16c&quot;</span>)]
+    <span class="attr">#[target_feature(enable = <span class="string">"f16c"</span>)]
     #[inline]
     </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">unsafe fn </span>f32x4_to_f16x4_x86_f16c(v: <span class="kw-2">&amp;</span>[f32]) -&gt; [u16; <span class="number">4</span>] {
         <span class="macro">debug_assert!</span>(v.len() &gt;= <span class="number">4</span>);
@@ -946,7 +947,7 @@
         <span class="kw-2">*</span>(<span class="kw-2">&amp;</span>retval <span class="kw">as </span><span class="kw-2">*const </span>__m128i).cast()
     }
 
-    <span class="attr">#[target_feature(enable = <span class="string">&quot;f16c&quot;</span>)]
+    <span class="attr">#[target_feature(enable = <span class="string">"f16c"</span>)]
     #[inline]
     </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">unsafe fn </span>f16x4_to_f64x4_x86_f16c(v: <span class="kw-2">&amp;</span>[u16]) -&gt; [f64; <span class="number">4</span>] {
         <span class="macro">debug_assert!</span>(v.len() &gt;= <span class="number">4</span>);
@@ -965,7 +966,7 @@
         ]
     }
 
-    <span class="attr">#[target_feature(enable = <span class="string">&quot;f16c&quot;</span>)]
+    <span class="attr">#[target_feature(enable = <span class="string">"f16c"</span>)]
     #[inline]
     </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">unsafe fn </span>f64x4_to_f16x4_x86_f16c(v: <span class="kw-2">&amp;</span>[f64]) -&gt; [u16; <span class="number">4</span>] {
         <span class="macro">debug_assert!</span>(v.len() &gt;= <span class="number">4</span>);

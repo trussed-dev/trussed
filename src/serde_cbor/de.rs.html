@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde_cbor-0.11.2/src/de.rs`."><title>de.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-fa3bb1812debf86c.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="serde_cbor" data-themes="" data-resource-suffix="" data-rustdoc-version="1.74.1 (a28077b28 2023-12-04)" data-channel="1.74.1" data-search-js="search-8be46b629f5f14a8.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-c5bd66d33317d69f.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../serde_cbor/index.html"><img class="rust-logo" src="../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde_cbor-0.11.2/src/de.rs`."><title>de.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="serde_cbor" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1366,21 +1367,21 @@
 <span class="kw">use </span>core::str;
 <span class="kw">use </span>half::f16;
 <span class="kw">use </span>serde::de;
-<span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"std"</span>)]
 </span><span class="kw">use </span>std::io;
 
 <span class="kw">use </span><span class="kw">crate</span>::error::{Error, ErrorCode, <span class="prelude-ty">Result</span>};
-<span class="attr">#[cfg(not(feature = <span class="string">&quot;unsealed_read_write&quot;</span>))]
+<span class="attr">#[cfg(not(feature = <span class="string">"unsealed_read_write"</span>))]
 </span><span class="kw">use </span><span class="kw">crate</span>::read::EitherLifetime;
-<span class="attr">#[cfg(feature = <span class="string">&quot;unsealed_read_write&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"unsealed_read_write"</span>)]
 </span><span class="kw">pub use </span><span class="kw">crate</span>::read::EitherLifetime;
-<span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"std"</span>)]
 </span><span class="kw">pub use </span><span class="kw">crate</span>::read::IoRead;
 <span class="kw">use </span><span class="kw">crate</span>::read::Offset;
-<span class="attr">#[cfg(any(feature = <span class="string">&quot;std&quot;</span>, feature = <span class="string">&quot;alloc&quot;</span>))]
+<span class="attr">#[cfg(any(feature = <span class="string">"std"</span>, feature = <span class="string">"alloc"</span>))]
 </span><span class="kw">pub use </span><span class="kw">crate</span>::read::SliceRead;
 <span class="kw">pub use </span><span class="kw">crate</span>::read::{MutSliceRead, Read, SliceReadFixed};
-<span class="attr">#[cfg(feature = <span class="string">&quot;tags&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"tags"</span>)]
 </span><span class="kw">use </span><span class="kw">crate</span>::tags::set_tag;
 <span class="doccomment">/// Decodes a value from CBOR data in a slice.
 ///
@@ -1392,7 +1393,7 @@
 /// # use serde_cbor::de;
 /// let v: Vec&lt;u8&gt; = vec![0x66, 0x66, 0x6f, 0x6f, 0x62, 0x61, 0x72];
 /// let value: String = de::from_slice(&amp;v[..]).unwrap();
-/// assert_eq!(value, &quot;foobar&quot;);
+/// assert_eq!(value, "foobar");
 /// ```
 ///
 /// Deserialize a borrowed string with zero copies.
@@ -1401,12 +1402,12 @@
 /// # use serde_cbor::de;
 /// let v: Vec&lt;u8&gt; = vec![0x66, 0x66, 0x6f, 0x6f, 0x62, 0x61, 0x72];
 /// let value: &amp;str = de::from_slice(&amp;v[..]).unwrap();
-/// assert_eq!(value, &quot;foobar&quot;);
+/// assert_eq!(value, "foobar");
 /// ```
-</span><span class="attr">#[cfg(any(feature = <span class="string">&quot;std&quot;</span>, feature = <span class="string">&quot;alloc&quot;</span>))]
-</span><span class="kw">pub fn </span>from_slice&lt;<span class="lifetime">&#39;a</span>, T&gt;(slice: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;T&gt;
+</span><span class="attr">#[cfg(any(feature = <span class="string">"std"</span>, feature = <span class="string">"alloc"</span>))]
+</span><span class="kw">pub fn </span>from_slice&lt;<span class="lifetime">'a</span>, T&gt;(slice: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;T&gt;
 <span class="kw">where
-    </span>T: de::Deserialize&lt;<span class="lifetime">&#39;a</span>&gt;,
+    </span>T: de::Deserialize&lt;<span class="lifetime">'a</span>&gt;,
 {
     <span class="kw">let </span><span class="kw-2">mut </span>deserializer = Deserializer::from_slice(slice);
     <span class="kw">let </span>value = de::Deserialize::deserialize(<span class="kw-2">&amp;mut </span>deserializer)<span class="question-mark">?</span>;
@@ -1414,16 +1415,16 @@
     <span class="prelude-val">Ok</span>(value)
 }
 
-<span class="comment">// When the &quot;std&quot; feature is enabled there should be little to no need to ever use this function,
+<span class="comment">// When the "std" feature is enabled there should be little to no need to ever use this function,
 // as `from_slice` covers all use cases (at the expense of being less efficient).
 </span><span class="doccomment">/// Decode a value from CBOR data in a mutable slice.
 ///
-/// This can be used in analogy to `from_slice`. Unlike `from_slice`, this will use the slice&#39;s
+/// This can be used in analogy to `from_slice`. Unlike `from_slice`, this will use the slice's
 /// mutability to rearrange data in it in order to resolve indefinite byte or text strings without
 /// resorting to allocations.
-</span><span class="kw">pub fn </span>from_mut_slice&lt;<span class="lifetime">&#39;a</span>, T&gt;(slice: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;T&gt;
+</span><span class="kw">pub fn </span>from_mut_slice&lt;<span class="lifetime">'a</span>, T&gt;(slice: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;T&gt;
 <span class="kw">where
-    </span>T: de::Deserialize&lt;<span class="lifetime">&#39;a</span>&gt;,
+    </span>T: de::Deserialize&lt;<span class="lifetime">'a</span>&gt;,
 {
     <span class="kw">let </span><span class="kw-2">mut </span>deserializer = Deserializer::from_mut_slice(slice);
     <span class="kw">let </span>value = de::Deserialize::deserialize(<span class="kw-2">&amp;mut </span>deserializer)<span class="question-mark">?</span>;
@@ -1431,7 +1432,7 @@
     <span class="prelude-val">Ok</span>(value)
 }
 
-<span class="comment">// When the &quot;std&quot; feature is enabled there should be little to no need to ever use this function,
+<span class="comment">// When the "std" feature is enabled there should be little to no need to ever use this function,
 // as `from_slice` covers all use cases and is much more reliable (at the expense of being less
 // efficient).
 </span><span class="doccomment">/// Decode a value from CBOR data using a scratch buffer.
@@ -1441,9 +1442,9 @@
 ///
 /// A realistic use case for this method would be decoding in a `no_std` environment from an
 /// immutable slice that is too large to copy.
-</span><span class="kw">pub fn </span>from_slice_with_scratch&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>, T&gt;(slice: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8], scratch: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span><span class="kw-2">mut </span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;T&gt;
+</span><span class="kw">pub fn </span>from_slice_with_scratch&lt;<span class="lifetime">'a</span>, <span class="lifetime">'b</span>, T&gt;(slice: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8], scratch: <span class="kw-2">&amp;</span><span class="lifetime">'b </span><span class="kw-2">mut </span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;T&gt;
 <span class="kw">where
-    </span>T: de::Deserialize&lt;<span class="lifetime">&#39;a</span>&gt;,
+    </span>T: de::Deserialize&lt;<span class="lifetime">'a</span>&gt;,
 {
     <span class="kw">let </span><span class="kw-2">mut </span>deserializer = Deserializer::from_slice_with_scratch(slice, scratch);
     <span class="kw">let </span>value = de::Deserialize::deserialize(<span class="kw-2">&amp;mut </span>deserializer)<span class="question-mark">?</span>;
@@ -1461,7 +1462,7 @@
 /// # use serde_cbor::de;
 /// let v: Vec&lt;u8&gt; = vec![0x66, 0x66, 0x6f, 0x6f, 0x62, 0x61, 0x72];
 /// let value: String = de::from_reader(&amp;v[..]).unwrap();
-/// assert_eq!(value, &quot;foobar&quot;);
+/// assert_eq!(value, "foobar");
 /// ```
 ///
 /// Note that `from_reader` cannot borrow data:
@@ -1470,9 +1471,9 @@
 /// # use serde_cbor::de;
 /// let v: Vec&lt;u8&gt; = vec![0x66, 0x66, 0x6f, 0x6f, 0x62, 0x61, 0x72];
 /// let value: &amp;str = de::from_reader(&amp;v[..]).unwrap();
-/// assert_eq!(value, &quot;foobar&quot;);
+/// assert_eq!(value, "foobar");
 /// ```
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+</span><span class="attr">#[cfg(feature = <span class="string">"std"</span>)]
 </span><span class="kw">pub fn </span>from_reader&lt;T, R&gt;(reader: R) -&gt; <span class="prelude-ty">Result</span>&lt;T&gt;
 <span class="kw">where
     </span>T: de::DeserializeOwned,
@@ -1495,7 +1496,7 @@
     accept_legacy_enums: bool,
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"std"</span>)]
 </span><span class="kw">impl</span>&lt;R&gt; Deserializer&lt;IoRead&lt;R&gt;&gt;
 <span class="kw">where
     </span>R: io::Read,
@@ -1506,39 +1507,39 @@
     }
 }
 
-<span class="attr">#[cfg(any(feature = <span class="string">&quot;std&quot;</span>, feature = <span class="string">&quot;alloc&quot;</span>))]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Deserializer&lt;SliceRead&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+<span class="attr">#[cfg(any(feature = <span class="string">"std"</span>, feature = <span class="string">"alloc"</span>))]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Deserializer&lt;SliceRead&lt;<span class="lifetime">'a</span>&gt;&gt; {
     <span class="doccomment">/// Constructs a `Deserializer` which reads from a slice.
     ///
     /// Borrowed strings and byte slices will be provided when possible.
-    </span><span class="kw">pub fn </span>from_slice(bytes: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; Deserializer&lt;SliceRead&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    </span><span class="kw">pub fn </span>from_slice(bytes: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; Deserializer&lt;SliceRead&lt;<span class="lifetime">'a</span>&gt;&gt; {
         Deserializer::new(SliceRead::new(bytes))
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Deserializer&lt;MutSliceRead&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Deserializer&lt;MutSliceRead&lt;<span class="lifetime">'a</span>&gt;&gt; {
     <span class="doccomment">/// Constructs a `Deserializer` which reads from a mutable slice that doubles as its own
     /// scratch buffer.
     ///
     /// Borrowed strings and byte slices will be provided even for indefinite strings.
-    </span><span class="kw">pub fn </span>from_mut_slice(bytes: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>[u8]) -&gt; Deserializer&lt;MutSliceRead&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    </span><span class="kw">pub fn </span>from_mut_slice(bytes: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>[u8]) -&gt; Deserializer&lt;MutSliceRead&lt;<span class="lifetime">'a</span>&gt;&gt; {
         Deserializer::new(MutSliceRead::new(bytes))
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>&gt; Deserializer&lt;SliceReadFixed&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>&gt;&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, <span class="lifetime">'b</span>&gt; Deserializer&lt;SliceReadFixed&lt;<span class="lifetime">'a</span>, <span class="lifetime">'b</span>&gt;&gt; {
     <span class="attr">#[doc(hidden)]
     </span><span class="kw">pub fn </span>from_slice_with_scratch(
-        bytes: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
-        scratch: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span><span class="kw-2">mut </span>[u8],
-    ) -&gt; Deserializer&lt;SliceReadFixed&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>&gt;&gt; {
+        bytes: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
+        scratch: <span class="kw-2">&amp;</span><span class="lifetime">'b </span><span class="kw-2">mut </span>[u8],
+    ) -&gt; Deserializer&lt;SliceReadFixed&lt;<span class="lifetime">'a</span>, <span class="lifetime">'b</span>&gt;&gt; {
         Deserializer::new(SliceReadFixed::new(bytes, scratch))
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;de</span>, R&gt; Deserializer&lt;R&gt;
+<span class="kw">impl</span>&lt;<span class="lifetime">'de</span>, R&gt; Deserializer&lt;R&gt;
 <span class="kw">where
-    </span>R: Read&lt;<span class="lifetime">&#39;de</span>&gt;,
+    </span>R: Read&lt;<span class="lifetime">'de</span>&gt;,
 {
     <span class="doccomment">/// Constructs a `Deserializer` from one of the possible serde_cbor input sources.
     ///
@@ -1554,25 +1555,25 @@
         }
     }
 
-    <span class="doccomment">/// Don&#39;t accept named variants and fields.
+    <span class="doccomment">/// Don't accept named variants and fields.
     </span><span class="kw">pub fn </span>disable_named_format(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.accept_named = <span class="bool-val">false</span>;
         <span class="self">self
     </span>}
 
-    <span class="doccomment">/// Don&#39;t accept numbered variants and fields.
+    <span class="doccomment">/// Don't accept numbered variants and fields.
     </span><span class="kw">pub fn </span>disable_packed_format(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.accept_packed = <span class="bool-val">false</span>;
         <span class="self">self
     </span>}
 
-    <span class="doccomment">/// Don&#39;t accept the new enum format used by `serde_cbor` versions &gt;= v0.10.
+    <span class="doccomment">/// Don't accept the new enum format used by `serde_cbor` versions &gt;= v0.10.
     </span><span class="kw">pub fn </span>disable_standard_enums(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.accept_standard_enums = <span class="bool-val">false</span>;
         <span class="self">self
     </span>}
 
-    <span class="doccomment">/// Don&#39;t accept the old enum format used by `serde_cbor` versions &lt;= v0.9.
+    <span class="doccomment">/// Don't accept the old enum format used by `serde_cbor` versions &lt;= v0.9.
     </span><span class="kw">pub fn </span>disable_legacy_enums(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.accept_legacy_enums = <span class="bool-val">false</span>;
         <span class="self">self
@@ -1588,10 +1589,10 @@
     }
 
     <span class="doccomment">/// Turn a CBOR deserializer into an iterator over values of type T.
-    </span><span class="attr">#[allow(clippy::should_implement_trait)] </span><span class="comment">// Trait doesn&#39;t allow unconstrained T.
-    </span><span class="kw">pub fn </span>into_iter&lt;T&gt;(<span class="self">self</span>) -&gt; StreamDeserializer&lt;<span class="lifetime">&#39;de</span>, R, T&gt;
+    </span><span class="attr">#[allow(clippy::should_implement_trait)] </span><span class="comment">// Trait doesn't allow unconstrained T.
+    </span><span class="kw">pub fn </span>into_iter&lt;T&gt;(<span class="self">self</span>) -&gt; StreamDeserializer&lt;<span class="lifetime">'de</span>, R, T&gt;
     <span class="kw">where
-        </span>T: de::Deserialize&lt;<span class="lifetime">&#39;de</span>&gt;,
+        </span>T: de::Deserialize&lt;<span class="lifetime">'de</span>&gt;,
     {
         StreamDeserializer {
             de: <span class="self">self</span>,
@@ -1647,7 +1648,7 @@
 
     <span class="kw">fn </span>parse_bytes&lt;V&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, len: usize, visitor: V) -&gt; <span class="prelude-ty">Result</span>&lt;V::Value&gt;
     <span class="kw">where
-        </span>V: de::Visitor&lt;<span class="lifetime">&#39;de</span>&gt;,
+        </span>V: de::Visitor&lt;<span class="lifetime">'de</span>&gt;,
     {
         <span class="kw">match </span><span class="self">self</span>.read.read(len)<span class="question-mark">? </span>{
             EitherLifetime::Long(buf) =&gt; visitor.visit_borrowed_bytes(buf),
@@ -1657,7 +1658,7 @@
 
     <span class="kw">fn </span>parse_indefinite_bytes&lt;V&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, visitor: V) -&gt; <span class="prelude-ty">Result</span>&lt;V::Value&gt;
     <span class="kw">where
-        </span>V: de::Visitor&lt;<span class="lifetime">&#39;de</span>&gt;,
+        </span>V: de::Visitor&lt;<span class="lifetime">'de</span>&gt;,
     {
         <span class="self">self</span>.read.clear_buffer();
         <span class="kw">loop </span>{
@@ -1687,7 +1688,7 @@
         }
     }
 
-    <span class="kw">fn </span>convert_str&lt;<span class="lifetime">&#39;a</span>&gt;(buf: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8], buf_end_offset: u64) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str&gt; {
+    <span class="kw">fn </span>convert_str&lt;<span class="lifetime">'a</span>&gt;(buf: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8], buf_end_offset: u64) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>str&gt; {
         <span class="kw">match </span>str::from_utf8(buf) {
             <span class="prelude-val">Ok</span>(s) =&gt; <span class="prelude-val">Ok</span>(s),
             <span class="prelude-val">Err</span>(e) =&gt; {
@@ -1700,7 +1701,7 @@
 
     <span class="kw">fn </span>parse_str&lt;V&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, len: usize, visitor: V) -&gt; <span class="prelude-ty">Result</span>&lt;V::Value&gt;
     <span class="kw">where
-        </span>V: de::Visitor&lt;<span class="lifetime">&#39;de</span>&gt;,
+        </span>V: de::Visitor&lt;<span class="lifetime">'de</span>&gt;,
     {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(offset) = <span class="self">self</span>.read.offset().checked_add(len <span class="kw">as </span>u64) {
             <span class="kw">match </span><span class="self">self</span>.read.read(len)<span class="question-mark">? </span>{
@@ -1724,7 +1725,7 @@
 
     <span class="kw">fn </span>parse_indefinite_str&lt;V&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, visitor: V) -&gt; <span class="prelude-ty">Result</span>&lt;V::Value&gt;
     <span class="kw">where
-        </span>V: de::Visitor&lt;<span class="lifetime">&#39;de</span>&gt;,
+        </span>V: de::Visitor&lt;<span class="lifetime">'de</span>&gt;,
     {
         <span class="self">self</span>.read.clear_buffer();
         <span class="kw">loop </span>{
@@ -1761,10 +1762,10 @@
         }
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;tags&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"tags"</span>)]
     </span><span class="kw">fn </span>handle_tagged_value&lt;V&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, tag: u64, visitor: V) -&gt; <span class="prelude-ty">Result</span>&lt;V::Value&gt;
     <span class="kw">where
-        </span>V: de::Visitor&lt;<span class="lifetime">&#39;de</span>&gt;,
+        </span>V: de::Visitor&lt;<span class="lifetime">'de</span>&gt;,
     {
         <span class="self">self</span>.recursion_checked(|d| {
             set_tag(<span class="prelude-val">Some</span>(tag));
@@ -1774,10 +1775,10 @@
         })
     }
 
-    <span class="attr">#[cfg(not(feature = <span class="string">&quot;tags&quot;</span>))]
+    <span class="attr">#[cfg(not(feature = <span class="string">"tags"</span>))]
     </span><span class="kw">fn </span>handle_tagged_value&lt;V&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, _tag: u64, visitor: V) -&gt; <span class="prelude-ty">Result</span>&lt;V::Value&gt;
     <span class="kw">where
-        </span>V: de::Visitor&lt;<span class="lifetime">&#39;de</span>&gt;,
+        </span>V: de::Visitor&lt;<span class="lifetime">'de</span>&gt;,
     {
         <span class="self">self</span>.recursion_checked(|de| de.parse_value(visitor))
     }
@@ -1797,7 +1798,7 @@
 
     <span class="kw">fn </span>parse_array&lt;V&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw-2">mut </span>len: usize, visitor: V) -&gt; <span class="prelude-ty">Result</span>&lt;V::Value&gt;
     <span class="kw">where
-        </span>V: de::Visitor&lt;<span class="lifetime">&#39;de</span>&gt;,
+        </span>V: de::Visitor&lt;<span class="lifetime">'de</span>&gt;,
     {
         <span class="self">self</span>.recursion_checked(|de| {
             <span class="kw">let </span>value = visitor.visit_seq(SeqAccess { de, len: <span class="kw-2">&amp;mut </span>len })<span class="question-mark">?</span>;
@@ -1812,7 +1813,7 @@
 
     <span class="kw">fn </span>parse_indefinite_array&lt;V&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, visitor: V) -&gt; <span class="prelude-ty">Result</span>&lt;V::Value&gt;
     <span class="kw">where
-        </span>V: de::Visitor&lt;<span class="lifetime">&#39;de</span>&gt;,
+        </span>V: de::Visitor&lt;<span class="lifetime">'de</span>&gt;,
     {
         <span class="self">self</span>.recursion_checked(|de| {
             <span class="kw">let </span>value = visitor.visit_seq(IndefiniteSeqAccess { de })<span class="question-mark">?</span>;
@@ -1826,7 +1827,7 @@
 
     <span class="kw">fn </span>parse_map&lt;V&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw-2">mut </span>len: usize, visitor: V) -&gt; <span class="prelude-ty">Result</span>&lt;V::Value&gt;
     <span class="kw">where
-        </span>V: de::Visitor&lt;<span class="lifetime">&#39;de</span>&gt;,
+        </span>V: de::Visitor&lt;<span class="lifetime">'de</span>&gt;,
     {
         <span class="kw">let </span>accept_packed = <span class="self">self</span>.accept_packed;
         <span class="kw">let </span>accept_named = <span class="self">self</span>.accept_named;
@@ -1848,7 +1849,7 @@
 
     <span class="kw">fn </span>parse_indefinite_map&lt;V&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, visitor: V) -&gt; <span class="prelude-ty">Result</span>&lt;V::Value&gt;
     <span class="kw">where
-        </span>V: de::Visitor&lt;<span class="lifetime">&#39;de</span>&gt;,
+        </span>V: de::Visitor&lt;<span class="lifetime">'de</span>&gt;,
     {
         <span class="kw">let </span>accept_named = <span class="self">self</span>.accept_named;
         <span class="kw">let </span>accept_packed = <span class="self">self</span>.accept_packed;
@@ -1868,7 +1869,7 @@
 
     <span class="kw">fn </span>parse_enum&lt;V&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw-2">mut </span>len: usize, visitor: V) -&gt; <span class="prelude-ty">Result</span>&lt;V::Value&gt;
     <span class="kw">where
-        </span>V: de::Visitor&lt;<span class="lifetime">&#39;de</span>&gt;,
+        </span>V: de::Visitor&lt;<span class="lifetime">'de</span>&gt;,
     {
         <span class="self">self</span>.recursion_checked(|de| {
             <span class="kw">let </span>value = visitor.visit_enum(VariantAccess {
@@ -1885,7 +1886,7 @@
 
     <span class="kw">fn </span>parse_enum_map&lt;V&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, visitor: V) -&gt; <span class="prelude-ty">Result</span>&lt;V::Value&gt;
     <span class="kw">where
-        </span>V: de::Visitor&lt;<span class="lifetime">&#39;de</span>&gt;,
+        </span>V: de::Visitor&lt;<span class="lifetime">'de</span>&gt;,
     {
         <span class="kw">let </span>accept_named = <span class="self">self</span>.accept_named;
         <span class="kw">let </span>accept_packed = <span class="self">self</span>.accept_packed;
@@ -1910,7 +1911,7 @@
 
     <span class="kw">fn </span>parse_indefinite_enum&lt;V&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, visitor: V) -&gt; <span class="prelude-ty">Result</span>&lt;V::Value&gt;
     <span class="kw">where
-        </span>V: de::Visitor&lt;<span class="lifetime">&#39;de</span>&gt;,
+        </span>V: de::Visitor&lt;<span class="lifetime">'de</span>&gt;,
     {
         <span class="self">self</span>.recursion_checked(|de| {
             <span class="kw">let </span>value = visitor.visit_enum(VariantAccess {
@@ -1936,12 +1937,12 @@
         <span class="self">self</span>.parse_u64().map(|i| f64::from_bits(i))
     }
 
-    <span class="comment">// Don&#39;t warn about the `unreachable!` in case
+    <span class="comment">// Don't warn about the `unreachable!` in case
     // exhaustive integer pattern matching is enabled.
     </span><span class="attr">#[allow(unreachable_patterns)]
     </span><span class="kw">fn </span>parse_value&lt;V&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, visitor: V) -&gt; <span class="prelude-ty">Result</span>&lt;V::Value&gt;
     <span class="kw">where
-        </span>V: de::Visitor&lt;<span class="lifetime">&#39;de</span>&gt;,
+        </span>V: de::Visitor&lt;<span class="lifetime">'de</span>&gt;,
     {
         <span class="kw">let </span>byte = <span class="self">self</span>.parse_u8()<span class="question-mark">?</span>;
         <span class="kw">match </span>byte {
@@ -2134,16 +2135,16 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;de</span>, <span class="lifetime">&#39;a</span>, R&gt; de::Deserializer&lt;<span class="lifetime">&#39;de</span>&gt; <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>Deserializer&lt;R&gt;
+<span class="kw">impl</span>&lt;<span class="lifetime">'de</span>, <span class="lifetime">'a</span>, R&gt; de::Deserializer&lt;<span class="lifetime">'de</span>&gt; <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>Deserializer&lt;R&gt;
 <span class="kw">where
-    </span>R: Read&lt;<span class="lifetime">&#39;de</span>&gt;,
+    </span>R: Read&lt;<span class="lifetime">'de</span>&gt;,
 {
     <span class="kw">type </span>Error = Error;
 
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>deserialize_any&lt;V&gt;(<span class="self">self</span>, visitor: V) -&gt; <span class="prelude-ty">Result</span>&lt;V::Value&gt;
     <span class="kw">where
-        </span>V: de::Visitor&lt;<span class="lifetime">&#39;de</span>&gt;,
+        </span>V: de::Visitor&lt;<span class="lifetime">'de</span>&gt;,
     {
         <span class="self">self</span>.parse_value(visitor)
     }
@@ -2151,7 +2152,7 @@
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>deserialize_option&lt;V&gt;(<span class="self">self</span>, visitor: V) -&gt; <span class="prelude-ty">Result</span>&lt;V::Value&gt;
     <span class="kw">where
-        </span>V: de::Visitor&lt;<span class="lifetime">&#39;de</span>&gt;,
+        </span>V: de::Visitor&lt;<span class="lifetime">'de</span>&gt;,
     {
         <span class="kw">match </span><span class="self">self</span>.peek()<span class="question-mark">? </span>{
             <span class="prelude-val">Some</span>(<span class="number">0xf6</span>) =&gt; {
@@ -2165,7 +2166,7 @@
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>deserialize_newtype_struct&lt;V&gt;(<span class="self">self</span>, _name: <span class="kw-2">&amp;</span>str, visitor: V) -&gt; <span class="prelude-ty">Result</span>&lt;V::Value&gt;
     <span class="kw">where
-        </span>V: de::Visitor&lt;<span class="lifetime">&#39;de</span>&gt;,
+        </span>V: de::Visitor&lt;<span class="lifetime">'de</span>&gt;,
     {
         visitor.visit_newtype_struct(<span class="self">self</span>)
     }
@@ -2177,11 +2178,11 @@
     </span><span class="kw">fn </span>deserialize_enum&lt;V&gt;(
         <span class="self">self</span>,
         _name: <span class="kw-2">&amp;</span>str,
-        _variants: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str],
+        _variants: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>[<span class="kw-2">&amp;</span><span class="lifetime">'static </span>str],
         visitor: V,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;V::Value&gt;
     <span class="kw">where
-        </span>V: de::Visitor&lt;<span class="lifetime">&#39;de</span>&gt;,
+        </span>V: de::Visitor&lt;<span class="lifetime">'de</span>&gt;,
     {
         <span class="kw">match </span><span class="self">self</span>.peek()<span class="question-mark">? </span>{
             <span class="prelude-val">Some</span>(byte @ <span class="number">0x80</span>..=<span class="number">0x9f</span>) =&gt; {
@@ -2260,20 +2261,20 @@
     <span class="kw">fn </span>error(<span class="kw-2">&amp;</span><span class="self">self</span>, code: ErrorCode) -&gt; Error;
 }
 
-<span class="kw">struct </span>SeqAccess&lt;<span class="lifetime">&#39;a</span>, R&gt; {
-    de: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>Deserializer&lt;R&gt;,
-    len: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>usize,
+<span class="kw">struct </span>SeqAccess&lt;<span class="lifetime">'a</span>, R&gt; {
+    de: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>Deserializer&lt;R&gt;,
+    len: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>usize,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;de</span>, <span class="lifetime">&#39;a</span>, R&gt; de::SeqAccess&lt;<span class="lifetime">&#39;de</span>&gt; <span class="kw">for </span>SeqAccess&lt;<span class="lifetime">&#39;a</span>, R&gt;
+<span class="kw">impl</span>&lt;<span class="lifetime">'de</span>, <span class="lifetime">'a</span>, R&gt; de::SeqAccess&lt;<span class="lifetime">'de</span>&gt; <span class="kw">for </span>SeqAccess&lt;<span class="lifetime">'a</span>, R&gt;
 <span class="kw">where
-    </span>R: Read&lt;<span class="lifetime">&#39;de</span>&gt;,
+    </span>R: Read&lt;<span class="lifetime">'de</span>&gt;,
 {
     <span class="kw">type </span>Error = Error;
 
     <span class="kw">fn </span>next_element_seed&lt;T&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, seed: T) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;T::Value&gt;&gt;
     <span class="kw">where
-        </span>T: de::DeserializeSeed&lt;<span class="lifetime">&#39;de</span>&gt;,
+        </span>T: de::DeserializeSeed&lt;<span class="lifetime">'de</span>&gt;,
     {
         <span class="kw">if </span><span class="kw-2">*</span><span class="self">self</span>.len == <span class="number">0 </span>{
             <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>);
@@ -2289,28 +2290,28 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;de</span>, <span class="lifetime">&#39;a</span>, R&gt; MakeError <span class="kw">for </span>SeqAccess&lt;<span class="lifetime">&#39;a</span>, R&gt;
+<span class="kw">impl</span>&lt;<span class="lifetime">'de</span>, <span class="lifetime">'a</span>, R&gt; MakeError <span class="kw">for </span>SeqAccess&lt;<span class="lifetime">'a</span>, R&gt;
 <span class="kw">where
-    </span>R: Read&lt;<span class="lifetime">&#39;de</span>&gt;,
+    </span>R: Read&lt;<span class="lifetime">'de</span>&gt;,
 {
     <span class="kw">fn </span>error(<span class="kw-2">&amp;</span><span class="self">self</span>, code: ErrorCode) -&gt; Error {
         <span class="self">self</span>.de.error(code)
     }
 }
 
-<span class="kw">struct </span>IndefiniteSeqAccess&lt;<span class="lifetime">&#39;a</span>, R&gt; {
-    de: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>Deserializer&lt;R&gt;,
+<span class="kw">struct </span>IndefiniteSeqAccess&lt;<span class="lifetime">'a</span>, R&gt; {
+    de: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>Deserializer&lt;R&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;de</span>, <span class="lifetime">&#39;a</span>, R&gt; de::SeqAccess&lt;<span class="lifetime">&#39;de</span>&gt; <span class="kw">for </span>IndefiniteSeqAccess&lt;<span class="lifetime">&#39;a</span>, R&gt;
+<span class="kw">impl</span>&lt;<span class="lifetime">'de</span>, <span class="lifetime">'a</span>, R&gt; de::SeqAccess&lt;<span class="lifetime">'de</span>&gt; <span class="kw">for </span>IndefiniteSeqAccess&lt;<span class="lifetime">'a</span>, R&gt;
 <span class="kw">where
-    </span>R: Read&lt;<span class="lifetime">&#39;de</span>&gt;,
+    </span>R: Read&lt;<span class="lifetime">'de</span>&gt;,
 {
     <span class="kw">type </span>Error = Error;
 
     <span class="kw">fn </span>next_element_seed&lt;T&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, seed: T) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;T::Value&gt;&gt;
     <span class="kw">where
-        </span>T: de::DeserializeSeed&lt;<span class="lifetime">&#39;de</span>&gt;,
+        </span>T: de::DeserializeSeed&lt;<span class="lifetime">'de</span>&gt;,
     {
         <span class="kw">match </span><span class="self">self</span>.de.peek()<span class="question-mark">? </span>{
             <span class="prelude-val">Some</span>(<span class="number">0xff</span>) =&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
@@ -2323,31 +2324,31 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;de</span>, <span class="lifetime">&#39;a</span>, R&gt; MakeError <span class="kw">for </span>IndefiniteSeqAccess&lt;<span class="lifetime">&#39;a</span>, R&gt;
+<span class="kw">impl</span>&lt;<span class="lifetime">'de</span>, <span class="lifetime">'a</span>, R&gt; MakeError <span class="kw">for </span>IndefiniteSeqAccess&lt;<span class="lifetime">'a</span>, R&gt;
 <span class="kw">where
-    </span>R: Read&lt;<span class="lifetime">&#39;de</span>&gt;,
+    </span>R: Read&lt;<span class="lifetime">'de</span>&gt;,
 {
     <span class="kw">fn </span>error(<span class="kw-2">&amp;</span><span class="self">self</span>, code: ErrorCode) -&gt; Error {
         <span class="self">self</span>.de.error(code)
     }
 }
 
-<span class="kw">struct </span>MapAccess&lt;<span class="lifetime">&#39;a</span>, R&gt; {
-    de: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>Deserializer&lt;R&gt;,
-    len: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>usize,
+<span class="kw">struct </span>MapAccess&lt;<span class="lifetime">'a</span>, R&gt; {
+    de: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>Deserializer&lt;R&gt;,
+    len: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>usize,
     accept_named: bool,
     accept_packed: bool,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;de</span>, <span class="lifetime">&#39;a</span>, R&gt; de::MapAccess&lt;<span class="lifetime">&#39;de</span>&gt; <span class="kw">for </span>MapAccess&lt;<span class="lifetime">&#39;a</span>, R&gt;
+<span class="kw">impl</span>&lt;<span class="lifetime">'de</span>, <span class="lifetime">'a</span>, R&gt; de::MapAccess&lt;<span class="lifetime">'de</span>&gt; <span class="kw">for </span>MapAccess&lt;<span class="lifetime">'a</span>, R&gt;
 <span class="kw">where
-    </span>R: Read&lt;<span class="lifetime">&#39;de</span>&gt;,
+    </span>R: Read&lt;<span class="lifetime">'de</span>&gt;,
 {
     <span class="kw">type </span>Error = Error;
 
     <span class="kw">fn </span>next_key_seed&lt;K&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, seed: K) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;K::Value&gt;&gt;
     <span class="kw">where
-        </span>K: de::DeserializeSeed&lt;<span class="lifetime">&#39;de</span>&gt;,
+        </span>K: de::DeserializeSeed&lt;<span class="lifetime">'de</span>&gt;,
     {
         <span class="kw">if </span><span class="kw-2">*</span><span class="self">self</span>.len == <span class="number">0 </span>{
             <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>);
@@ -2370,7 +2371,7 @@
 
     <span class="kw">fn </span>next_value_seed&lt;V&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, seed: V) -&gt; <span class="prelude-ty">Result</span>&lt;V::Value&gt;
     <span class="kw">where
-        </span>V: de::DeserializeSeed&lt;<span class="lifetime">&#39;de</span>&gt;,
+        </span>V: de::DeserializeSeed&lt;<span class="lifetime">'de</span>&gt;,
     {
         seed.deserialize(<span class="kw-2">&amp;mut *</span><span class="self">self</span>.de)
     }
@@ -2380,30 +2381,30 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;de</span>, <span class="lifetime">&#39;a</span>, R&gt; MakeError <span class="kw">for </span>MapAccess&lt;<span class="lifetime">&#39;a</span>, R&gt;
+<span class="kw">impl</span>&lt;<span class="lifetime">'de</span>, <span class="lifetime">'a</span>, R&gt; MakeError <span class="kw">for </span>MapAccess&lt;<span class="lifetime">'a</span>, R&gt;
 <span class="kw">where
-    </span>R: Read&lt;<span class="lifetime">&#39;de</span>&gt;,
+    </span>R: Read&lt;<span class="lifetime">'de</span>&gt;,
 {
     <span class="kw">fn </span>error(<span class="kw-2">&amp;</span><span class="self">self</span>, code: ErrorCode) -&gt; Error {
         <span class="self">self</span>.de.error(code)
     }
 }
 
-<span class="kw">struct </span>IndefiniteMapAccess&lt;<span class="lifetime">&#39;a</span>, R&gt; {
-    de: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>Deserializer&lt;R&gt;,
+<span class="kw">struct </span>IndefiniteMapAccess&lt;<span class="lifetime">'a</span>, R&gt; {
+    de: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>Deserializer&lt;R&gt;,
     accept_packed: bool,
     accept_named: bool,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;de</span>, <span class="lifetime">&#39;a</span>, R&gt; de::MapAccess&lt;<span class="lifetime">&#39;de</span>&gt; <span class="kw">for </span>IndefiniteMapAccess&lt;<span class="lifetime">&#39;a</span>, R&gt;
+<span class="kw">impl</span>&lt;<span class="lifetime">'de</span>, <span class="lifetime">'a</span>, R&gt; de::MapAccess&lt;<span class="lifetime">'de</span>&gt; <span class="kw">for </span>IndefiniteMapAccess&lt;<span class="lifetime">'a</span>, R&gt;
 <span class="kw">where
-    </span>R: Read&lt;<span class="lifetime">&#39;de</span>&gt;,
+    </span>R: Read&lt;<span class="lifetime">'de</span>&gt;,
 {
     <span class="kw">type </span>Error = Error;
 
     <span class="kw">fn </span>next_key_seed&lt;K&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, seed: K) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;K::Value&gt;&gt;
     <span class="kw">where
-        </span>K: de::DeserializeSeed&lt;<span class="lifetime">&#39;de</span>&gt;,
+        </span>K: de::DeserializeSeed&lt;<span class="lifetime">'de</span>&gt;,
     {
         <span class="kw">match </span><span class="self">self</span>.de.peek()<span class="question-mark">? </span>{
             <span class="prelude-val">Some</span>(_byte @ <span class="number">0x00</span>..=<span class="number">0x1b</span>) <span class="kw">if </span>!<span class="self">self</span>.accept_packed =&gt; {
@@ -2423,35 +2424,35 @@
 
     <span class="kw">fn </span>next_value_seed&lt;V&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, seed: V) -&gt; <span class="prelude-ty">Result</span>&lt;V::Value&gt;
     <span class="kw">where
-        </span>V: de::DeserializeSeed&lt;<span class="lifetime">&#39;de</span>&gt;,
+        </span>V: de::DeserializeSeed&lt;<span class="lifetime">'de</span>&gt;,
     {
         seed.deserialize(<span class="kw-2">&amp;mut *</span><span class="self">self</span>.de)
     }
 }
 
-<span class="kw">struct </span>UnitVariantAccess&lt;<span class="lifetime">&#39;a</span>, R&gt; {
-    de: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>Deserializer&lt;R&gt;,
+<span class="kw">struct </span>UnitVariantAccess&lt;<span class="lifetime">'a</span>, R&gt; {
+    de: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>Deserializer&lt;R&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;de</span>, <span class="lifetime">&#39;a</span>, R&gt; de::EnumAccess&lt;<span class="lifetime">&#39;de</span>&gt; <span class="kw">for </span>UnitVariantAccess&lt;<span class="lifetime">&#39;a</span>, R&gt;
+<span class="kw">impl</span>&lt;<span class="lifetime">'de</span>, <span class="lifetime">'a</span>, R&gt; de::EnumAccess&lt;<span class="lifetime">'de</span>&gt; <span class="kw">for </span>UnitVariantAccess&lt;<span class="lifetime">'a</span>, R&gt;
 <span class="kw">where
-    </span>R: Read&lt;<span class="lifetime">&#39;de</span>&gt;,
+    </span>R: Read&lt;<span class="lifetime">'de</span>&gt;,
 {
     <span class="kw">type </span>Error = Error;
-    <span class="kw">type </span>Variant = UnitVariantAccess&lt;<span class="lifetime">&#39;a</span>, R&gt;;
+    <span class="kw">type </span>Variant = UnitVariantAccess&lt;<span class="lifetime">'a</span>, R&gt;;
 
-    <span class="kw">fn </span>variant_seed&lt;V&gt;(<span class="self">self</span>, seed: V) -&gt; <span class="prelude-ty">Result</span>&lt;(V::Value, UnitVariantAccess&lt;<span class="lifetime">&#39;a</span>, R&gt;)&gt;
+    <span class="kw">fn </span>variant_seed&lt;V&gt;(<span class="self">self</span>, seed: V) -&gt; <span class="prelude-ty">Result</span>&lt;(V::Value, UnitVariantAccess&lt;<span class="lifetime">'a</span>, R&gt;)&gt;
     <span class="kw">where
-        </span>V: de::DeserializeSeed&lt;<span class="lifetime">&#39;de</span>&gt;,
+        </span>V: de::DeserializeSeed&lt;<span class="lifetime">'de</span>&gt;,
     {
         <span class="kw">let </span>variant = seed.deserialize(<span class="kw-2">&amp;mut *</span><span class="self">self</span>.de)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>((variant, <span class="self">self</span>))
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;de</span>, <span class="lifetime">&#39;a</span>, R&gt; de::VariantAccess&lt;<span class="lifetime">&#39;de</span>&gt; <span class="kw">for </span>UnitVariantAccess&lt;<span class="lifetime">&#39;a</span>, R&gt;
+<span class="kw">impl</span>&lt;<span class="lifetime">'de</span>, <span class="lifetime">'a</span>, R&gt; de::VariantAccess&lt;<span class="lifetime">'de</span>&gt; <span class="kw">for </span>UnitVariantAccess&lt;<span class="lifetime">'a</span>, R&gt;
 <span class="kw">where
-    </span>R: Read&lt;<span class="lifetime">&#39;de</span>&gt;,
+    </span>R: Read&lt;<span class="lifetime">'de</span>&gt;,
 {
     <span class="kw">type </span>Error = Error;
 
@@ -2461,31 +2462,31 @@
 
     <span class="kw">fn </span>newtype_variant_seed&lt;T&gt;(<span class="self">self</span>, _seed: T) -&gt; <span class="prelude-ty">Result</span>&lt;T::Value&gt;
     <span class="kw">where
-        </span>T: de::DeserializeSeed&lt;<span class="lifetime">&#39;de</span>&gt;,
+        </span>T: de::DeserializeSeed&lt;<span class="lifetime">'de</span>&gt;,
     {
         <span class="prelude-val">Err</span>(de::Error::invalid_type(
             de::Unexpected::UnitVariant,
-            <span class="kw-2">&amp;</span><span class="string">&quot;newtype variant&quot;</span>,
+            <span class="kw-2">&amp;</span><span class="string">"newtype variant"</span>,
         ))
     }
 
     <span class="kw">fn </span>tuple_variant&lt;V&gt;(<span class="self">self</span>, _len: usize, _visitor: V) -&gt; <span class="prelude-ty">Result</span>&lt;V::Value&gt;
     <span class="kw">where
-        </span>V: de::Visitor&lt;<span class="lifetime">&#39;de</span>&gt;,
+        </span>V: de::Visitor&lt;<span class="lifetime">'de</span>&gt;,
     {
         <span class="prelude-val">Err</span>(de::Error::invalid_type(
             de::Unexpected::UnitVariant,
-            <span class="kw-2">&amp;</span><span class="string">&quot;tuple variant&quot;</span>,
+            <span class="kw-2">&amp;</span><span class="string">"tuple variant"</span>,
         ))
     }
 
-    <span class="kw">fn </span>struct_variant&lt;V&gt;(<span class="self">self</span>, _fields: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str], _visitor: V) -&gt; <span class="prelude-ty">Result</span>&lt;V::Value&gt;
+    <span class="kw">fn </span>struct_variant&lt;V&gt;(<span class="self">self</span>, _fields: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>[<span class="kw-2">&amp;</span><span class="lifetime">'static </span>str], _visitor: V) -&gt; <span class="prelude-ty">Result</span>&lt;V::Value&gt;
     <span class="kw">where
-        </span>V: de::Visitor&lt;<span class="lifetime">&#39;de</span>&gt;,
+        </span>V: de::Visitor&lt;<span class="lifetime">'de</span>&gt;,
     {
         <span class="prelude-val">Err</span>(de::Error::invalid_type(
             de::Unexpected::UnitVariant,
-            <span class="kw-2">&amp;</span><span class="string">&quot;struct variant&quot;</span>,
+            <span class="kw-2">&amp;</span><span class="string">"struct variant"</span>,
         ))
     }
 }
@@ -2494,16 +2495,16 @@
     seq: T,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;de</span>, T&gt; de::EnumAccess&lt;<span class="lifetime">&#39;de</span>&gt; <span class="kw">for </span>VariantAccess&lt;T&gt;
+<span class="kw">impl</span>&lt;<span class="lifetime">'de</span>, T&gt; de::EnumAccess&lt;<span class="lifetime">'de</span>&gt; <span class="kw">for </span>VariantAccess&lt;T&gt;
 <span class="kw">where
-    </span>T: de::SeqAccess&lt;<span class="lifetime">&#39;de</span>, Error = Error&gt; + MakeError,
+    </span>T: de::SeqAccess&lt;<span class="lifetime">'de</span>, Error = Error&gt; + MakeError,
 {
     <span class="kw">type </span>Error = Error;
     <span class="kw">type </span>Variant = VariantAccess&lt;T&gt;;
 
     <span class="kw">fn </span>variant_seed&lt;V&gt;(<span class="kw-2">mut </span><span class="self">self</span>, seed: V) -&gt; <span class="prelude-ty">Result</span>&lt;(V::Value, VariantAccess&lt;T&gt;)&gt;
     <span class="kw">where
-        </span>V: de::DeserializeSeed&lt;<span class="lifetime">&#39;de</span>&gt;,
+        </span>V: de::DeserializeSeed&lt;<span class="lifetime">'de</span>&gt;,
     {
         <span class="kw">let </span>variant = <span class="kw">match </span><span class="self">self</span>.seq.next_element_seed(seed) {
             <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(variant)) =&gt; variant,
@@ -2514,9 +2515,9 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;de</span>, T&gt; de::VariantAccess&lt;<span class="lifetime">&#39;de</span>&gt; <span class="kw">for </span>VariantAccess&lt;T&gt;
+<span class="kw">impl</span>&lt;<span class="lifetime">'de</span>, T&gt; de::VariantAccess&lt;<span class="lifetime">'de</span>&gt; <span class="kw">for </span>VariantAccess&lt;T&gt;
 <span class="kw">where
-    </span>T: de::SeqAccess&lt;<span class="lifetime">&#39;de</span>, Error = Error&gt; + MakeError,
+    </span>T: de::SeqAccess&lt;<span class="lifetime">'de</span>, Error = Error&gt; + MakeError,
 {
     <span class="kw">type </span>Error = Error;
 
@@ -2530,7 +2531,7 @@
 
     <span class="kw">fn </span>newtype_variant_seed&lt;S&gt;(<span class="kw-2">mut </span><span class="self">self</span>, seed: S) -&gt; <span class="prelude-ty">Result</span>&lt;S::Value&gt;
     <span class="kw">where
-        </span>S: de::DeserializeSeed&lt;<span class="lifetime">&#39;de</span>&gt;,
+        </span>S: de::DeserializeSeed&lt;<span class="lifetime">'de</span>&gt;,
     {
         <span class="kw">match </span><span class="self">self</span>.seq.next_element_seed(seed) {
             <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(variant)) =&gt; <span class="prelude-val">Ok</span>(variant),
@@ -2541,14 +2542,14 @@
 
     <span class="kw">fn </span>tuple_variant&lt;V&gt;(<span class="self">self</span>, _len: usize, visitor: V) -&gt; <span class="prelude-ty">Result</span>&lt;V::Value&gt;
     <span class="kw">where
-        </span>V: de::Visitor&lt;<span class="lifetime">&#39;de</span>&gt;,
+        </span>V: de::Visitor&lt;<span class="lifetime">'de</span>&gt;,
     {
         visitor.visit_seq(<span class="self">self</span>.seq)
     }
 
-    <span class="kw">fn </span>struct_variant&lt;V&gt;(<span class="kw-2">mut </span><span class="self">self</span>, _fields: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str], visitor: V) -&gt; <span class="prelude-ty">Result</span>&lt;V::Value&gt;
+    <span class="kw">fn </span>struct_variant&lt;V&gt;(<span class="kw-2">mut </span><span class="self">self</span>, _fields: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>[<span class="kw-2">&amp;</span><span class="lifetime">'static </span>str], visitor: V) -&gt; <span class="prelude-ty">Result</span>&lt;V::Value&gt;
     <span class="kw">where
-        </span>V: de::Visitor&lt;<span class="lifetime">&#39;de</span>&gt;,
+        </span>V: de::Visitor&lt;<span class="lifetime">'de</span>&gt;,
     {
         <span class="kw">let </span>seed = StructVariantSeed { visitor };
         <span class="kw">match </span><span class="self">self</span>.seq.next_element_seed(seed) {
@@ -2563,15 +2564,15 @@
     visitor: V,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;de</span>, V&gt; de::DeserializeSeed&lt;<span class="lifetime">&#39;de</span>&gt; <span class="kw">for </span>StructVariantSeed&lt;V&gt;
+<span class="kw">impl</span>&lt;<span class="lifetime">'de</span>, V&gt; de::DeserializeSeed&lt;<span class="lifetime">'de</span>&gt; <span class="kw">for </span>StructVariantSeed&lt;V&gt;
 <span class="kw">where
-    </span>V: de::Visitor&lt;<span class="lifetime">&#39;de</span>&gt;,
+    </span>V: de::Visitor&lt;<span class="lifetime">'de</span>&gt;,
 {
     <span class="kw">type </span>Value = V::Value;
 
     <span class="kw">fn </span>deserialize&lt;D&gt;(<span class="self">self</span>, de: D) -&gt; result::Result&lt;V::Value, D::Error&gt;
     <span class="kw">where
-        </span>D: de::Deserializer&lt;<span class="lifetime">&#39;de</span>&gt;,
+        </span>D: de::Deserializer&lt;<span class="lifetime">'de</span>&gt;,
     {
         de.deserialize_any(<span class="self">self</span>.visitor)
     }
@@ -2597,22 +2598,22 @@
 ///     it.next().unwrap().unwrap()
 /// );
 /// assert_eq!(
-///     Value::Text(&quot;foobar&quot;.to_string()),
+///     Value::Text("foobar".to_string()),
 ///     it.next().unwrap().unwrap()
 /// );
 /// # }
 /// ```
 </span><span class="attr">#[derive(Debug)]
-</span><span class="kw">pub struct </span>StreamDeserializer&lt;<span class="lifetime">&#39;de</span>, R, T&gt; {
+</span><span class="kw">pub struct </span>StreamDeserializer&lt;<span class="lifetime">'de</span>, R, T&gt; {
     de: Deserializer&lt;R&gt;,
     output: PhantomData&lt;T&gt;,
-    lifetime: PhantomData&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;de </span>()&gt;,
+    lifetime: PhantomData&lt;<span class="kw-2">&amp;</span><span class="lifetime">'de </span>()&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;de</span>, R, T&gt; StreamDeserializer&lt;<span class="lifetime">&#39;de</span>, R, T&gt;
+<span class="kw">impl</span>&lt;<span class="lifetime">'de</span>, R, T&gt; StreamDeserializer&lt;<span class="lifetime">'de</span>, R, T&gt;
 <span class="kw">where
-    </span>R: Read&lt;<span class="lifetime">&#39;de</span>&gt;,
-    T: de::Deserialize&lt;<span class="lifetime">&#39;de</span>&gt;,
+    </span>R: Read&lt;<span class="lifetime">'de</span>&gt;,
+    T: de::Deserialize&lt;<span class="lifetime">'de</span>&gt;,
 {
     <span class="doccomment">/// Create a new CBOR stream deserializer from one of the possible
     /// serde_cbor input sources.
@@ -2621,7 +2622,7 @@
     ///
     /// * `Deserializer::from_slice(...).into_iter()`
     /// * `Deserializer::from_reader(...).into_iter()`
-    </span><span class="kw">pub fn </span>new(read: R) -&gt; StreamDeserializer&lt;<span class="lifetime">&#39;de</span>, R, T&gt; {
+    </span><span class="kw">pub fn </span>new(read: R) -&gt; StreamDeserializer&lt;<span class="lifetime">'de</span>, R, T&gt; {
         StreamDeserializer {
             de: Deserializer::new(read),
             output: PhantomData,
@@ -2630,10 +2631,10 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;de</span>, R, T&gt; StreamDeserializer&lt;<span class="lifetime">&#39;de</span>, R, T&gt;
+<span class="kw">impl</span>&lt;<span class="lifetime">'de</span>, R, T&gt; StreamDeserializer&lt;<span class="lifetime">'de</span>, R, T&gt;
 <span class="kw">where
     </span>R: Offset,
-    T: de::Deserialize&lt;<span class="lifetime">&#39;de</span>&gt;,
+    T: de::Deserialize&lt;<span class="lifetime">'de</span>&gt;,
 {
     <span class="doccomment">/// Return the current offset in the reader
     </span><span class="attr">#[inline]
@@ -2642,10 +2643,10 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;de</span>, R, T&gt; Iterator <span class="kw">for </span>StreamDeserializer&lt;<span class="lifetime">&#39;de</span>, R, T&gt;
+<span class="kw">impl</span>&lt;<span class="lifetime">'de</span>, R, T&gt; Iterator <span class="kw">for </span>StreamDeserializer&lt;<span class="lifetime">'de</span>, R, T&gt;
 <span class="kw">where
-    </span>R: Read&lt;<span class="lifetime">&#39;de</span>&gt;,
-    T: de::Deserialize&lt;<span class="lifetime">&#39;de</span>&gt;,
+    </span>R: Read&lt;<span class="lifetime">'de</span>&gt;,
+    T: de::Deserialize&lt;<span class="lifetime">'de</span>&gt;,
 {
     <span class="kw">type </span>Item = <span class="prelude-ty">Result</span>&lt;T&gt;;
 
@@ -2662,16 +2663,16 @@
     map: T,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;de</span>, T&gt; de::EnumAccess&lt;<span class="lifetime">&#39;de</span>&gt; <span class="kw">for </span>VariantAccessMap&lt;T&gt;
+<span class="kw">impl</span>&lt;<span class="lifetime">'de</span>, T&gt; de::EnumAccess&lt;<span class="lifetime">'de</span>&gt; <span class="kw">for </span>VariantAccessMap&lt;T&gt;
 <span class="kw">where
-    </span>T: de::MapAccess&lt;<span class="lifetime">&#39;de</span>, Error = Error&gt; + MakeError,
+    </span>T: de::MapAccess&lt;<span class="lifetime">'de</span>, Error = Error&gt; + MakeError,
 {
     <span class="kw">type </span>Error = Error;
     <span class="kw">type </span>Variant = VariantAccessMap&lt;T&gt;;
 
     <span class="kw">fn </span>variant_seed&lt;V&gt;(<span class="kw-2">mut </span><span class="self">self</span>, seed: V) -&gt; <span class="prelude-ty">Result</span>&lt;(V::Value, VariantAccessMap&lt;T&gt;)&gt;
     <span class="kw">where
-        </span>V: de::DeserializeSeed&lt;<span class="lifetime">&#39;de</span>&gt;,
+        </span>V: de::DeserializeSeed&lt;<span class="lifetime">'de</span>&gt;,
     {
         <span class="kw">let </span>variant = <span class="kw">match </span><span class="self">self</span>.map.next_key_seed(seed) {
             <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(variant)) =&gt; variant,
@@ -2682,9 +2683,9 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;de</span>, T&gt; de::VariantAccess&lt;<span class="lifetime">&#39;de</span>&gt; <span class="kw">for </span>VariantAccessMap&lt;T&gt;
+<span class="kw">impl</span>&lt;<span class="lifetime">'de</span>, T&gt; de::VariantAccess&lt;<span class="lifetime">'de</span>&gt; <span class="kw">for </span>VariantAccessMap&lt;T&gt;
 <span class="kw">where
-    </span>T: de::MapAccess&lt;<span class="lifetime">&#39;de</span>, Error = Error&gt; + MakeError,
+    </span>T: de::MapAccess&lt;<span class="lifetime">'de</span>, Error = Error&gt; + MakeError,
 {
     <span class="kw">type </span>Error = Error;
 
@@ -2697,22 +2698,22 @@
 
     <span class="kw">fn </span>newtype_variant_seed&lt;S&gt;(<span class="kw-2">mut </span><span class="self">self</span>, seed: S) -&gt; <span class="prelude-ty">Result</span>&lt;S::Value&gt;
     <span class="kw">where
-        </span>S: de::DeserializeSeed&lt;<span class="lifetime">&#39;de</span>&gt;,
+        </span>S: de::DeserializeSeed&lt;<span class="lifetime">'de</span>&gt;,
     {
         <span class="self">self</span>.map.next_value_seed(seed)
     }
 
     <span class="kw">fn </span>tuple_variant&lt;V&gt;(<span class="kw-2">mut </span><span class="self">self</span>, _len: usize, visitor: V) -&gt; <span class="prelude-ty">Result</span>&lt;V::Value&gt;
     <span class="kw">where
-        </span>V: de::Visitor&lt;<span class="lifetime">&#39;de</span>&gt;,
+        </span>V: de::Visitor&lt;<span class="lifetime">'de</span>&gt;,
     {
         <span class="kw">let </span>seed = StructVariantSeed { visitor };
         <span class="self">self</span>.map.next_value_seed(seed)
     }
 
-    <span class="kw">fn </span>struct_variant&lt;V&gt;(<span class="kw-2">mut </span><span class="self">self</span>, _fields: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str], visitor: V) -&gt; <span class="prelude-ty">Result</span>&lt;V::Value&gt;
+    <span class="kw">fn </span>struct_variant&lt;V&gt;(<span class="kw-2">mut </span><span class="self">self</span>, _fields: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>[<span class="kw-2">&amp;</span><span class="lifetime">'static </span>str], visitor: V) -&gt; <span class="prelude-ty">Result</span>&lt;V::Value&gt;
     <span class="kw">where
-        </span>V: de::Visitor&lt;<span class="lifetime">&#39;de</span>&gt;,
+        </span>V: de::Visitor&lt;<span class="lifetime">'de</span>&gt;,
     {
         <span class="kw">let </span>seed = StructVariantSeed { visitor };
         <span class="self">self</span>.map.next_value_seed(seed)

@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/p256-0.9.0/src/arithmetic/scalar.rs`."><title>scalar.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-fa3bb1812debf86c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="p256" data-themes="" data-resource-suffix="" data-rustdoc-version="1.74.1 (a28077b28 2023-12-04)" data-channel="1.74.1" data-search-js="search-8be46b629f5f14a8.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-c5bd66d33317d69f.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="icon" href="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../p256/index.html"><img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/p256-0.9.0/src/arithmetic/scalar.rs`."><title>scalar.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="p256" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="icon" href="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><a class="sub-logo-container" href="../../../p256/index.html"><img src="https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg" alt="p256"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1008,15 +1009,15 @@
     ScalarArithmetic,
 };
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;bits&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"bits"</span>)]
 </span><span class="kw">use </span>{<span class="kw">crate</span>::ScalarBits, elliptic_curve::group::ff::PrimeFieldBits};
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;digest&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"digest"</span>)]
 </span><span class="kw">use </span>ecdsa_core::{elliptic_curve::consts::U32, hazmat::FromDigest, signature::digest::Digest};
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;zeroize&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"zeroize"</span>)]
 </span><span class="kw">use </span><span class="kw">crate</span>::SecretKey;
-<span class="attr">#[cfg(feature = <span class="string">&quot;zeroize&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"zeroize"</span>)]
 </span><span class="kw">use </span>elliptic_curve::zeroize::Zeroize;
 
 <span class="doccomment">/// The number of 64-bit limbs used to represent a [`Scalar`].
@@ -1091,7 +1092,7 @@
 ///
 /// Please see the documentation for the relevant traits for more information.
 </span><span class="attr">#[derive(Clone, Copy, Debug, Default)]
-#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;arithmetic&quot;</span>)))]
+#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"arithmetic"</span>)))]
 </span><span class="kw">pub struct </span>Scalar(<span class="kw">pub</span>(<span class="kw">crate</span>) U256);
 
 <span class="kw">impl </span>Field <span class="kw">for </span>Scalar {
@@ -1143,7 +1144,7 @@
 
     <span class="comment">// TODO(tarcieri); stub! See: https://github.com/RustCrypto/elliptic-curves/issues/170
     </span><span class="kw">fn </span>sqrt(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; CtOption&lt;<span class="self">Self</span>&gt; {
-        <span class="macro">todo!</span>(<span class="string">&quot;see RustCrypto/elliptic-curves#170&quot;</span>);
+        <span class="macro">todo!</span>(<span class="string">"see RustCrypto/elliptic-curves#170"</span>);
     }
 }
 
@@ -1200,20 +1201,20 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;bits&quot;</span>)]
-#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;bits&quot;</span>)))]
+<span class="attr">#[cfg(feature = <span class="string">"bits"</span>)]
+#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"bits"</span>)))]
 </span><span class="kw">impl </span>PrimeFieldBits <span class="kw">for </span>Scalar {
-    <span class="attr">#[cfg(target_pointer_width = <span class="string">&quot;32&quot;</span>)]
+    <span class="attr">#[cfg(target_pointer_width = <span class="string">"32"</span>)]
     </span><span class="kw">type </span>ReprBits = [u32; <span class="number">8</span>];
 
-    <span class="attr">#[cfg(target_pointer_width = <span class="string">&quot;64&quot;</span>)]
+    <span class="attr">#[cfg(target_pointer_width = <span class="string">"64"</span>)]
     </span><span class="kw">type </span>ReprBits = [u64; <span class="number">4</span>];
 
     <span class="kw">fn </span>to_le_bits(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ScalarBits {
         <span class="self">self</span>.into()
     }
 
-    <span class="attr">#[cfg(target_pointer_width = <span class="string">&quot;32&quot;</span>)]
+    <span class="attr">#[cfg(target_pointer_width = <span class="string">"32"</span>)]
     </span><span class="kw">fn </span>char_le_bits() -&gt; ScalarBits {
         [
             <span class="number">0xfc63_2551</span>,
@@ -1228,7 +1229,7 @@
         .into()
     }
 
-    <span class="attr">#[cfg(target_pointer_width = <span class="string">&quot;64&quot;</span>)]
+    <span class="attr">#[cfg(target_pointer_width = <span class="string">"64"</span>)]
     </span><span class="kw">fn </span>char_le_bits() -&gt; ScalarBits {
         MODULUS.into()
     }
@@ -1258,7 +1259,7 @@
 </span><span class="kw">fn </span>cmp_vartime(left: <span class="kw-2">&amp;</span>U256, right: <span class="kw-2">&amp;</span>U256) -&gt; i32 {
     <span class="kw">use </span>core::cmp::Ordering::<span class="kw-2">*</span>;
 
-    <span class="comment">// since we&#39;re little-endian, need to reverse iterate
+    <span class="comment">// since we're little-endian, need to reverse iterate
     </span><span class="kw">for </span>(l, r) <span class="kw">in </span>left.iter().rev().zip(right.iter().rev()) {
         <span class="kw">match </span>l.cmp(r) {
             Less =&gt; <span class="kw">return </span>-<span class="number">1</span>,
@@ -1290,8 +1291,8 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;digest&quot;</span>)]
-#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;digest&quot;</span>)))]
+<span class="attr">#[cfg(feature = <span class="string">"digest"</span>)]
+#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"digest"</span>)))]
 </span><span class="kw">impl </span>FromDigest&lt;NistP256&gt; <span class="kw">for </span>Scalar {
     <span class="doccomment">/// Convert the output of a digest algorithm into a [`Scalar`] reduced
     /// modulo n.
@@ -1529,7 +1530,7 @@
             <span class="kw">let </span>(w3, borrow) = sbb(l[<span class="number">3</span>], r[<span class="number">3</span>], borrow);
             <span class="kw">let </span>(w4, _borrow) = sbb(l[<span class="number">4</span>], r[<span class="number">4</span>], borrow);
 
-            <span class="comment">// If underflow occurred on the final limb - don&#39;t care (= add b^{k+1}).
+            <span class="comment">// If underflow occurred on the final limb - don't care (= add b^{k+1}).
             </span>[w0, w1, w2, w3, w4]
         }
 
@@ -1617,7 +1618,7 @@
     <span class="doccomment">/// Returns the multiplicative inverse of self, if self is non-zero
     </span><span class="kw">pub fn </span>invert(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; CtOption&lt;<span class="self">Self</span>&gt; {
         <span class="comment">// We need to find b such that b * a ≡ 1 mod p. As we are in a prime
-        // field, we can apply Fermat&#39;s Little Theorem:
+        // field, we can apply Fermat's Little Theorem:
         //
         //    a^p         ≡ a mod p
         //    a^(p-1)     ≡ 1 mod p
@@ -1650,7 +1651,7 @@
         shr1(<span class="kw-2">&amp;mut </span><span class="self">self</span>.<span class="number">0</span>);
     }
 
-    <span class="doccomment">/// Faster inversion using Stein&#39;s algorithm
+    <span class="doccomment">/// Faster inversion using Stein's algorithm
     </span><span class="kw">pub fn </span>invert_vartime(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; CtOption&lt;<span class="self">Self</span>&gt; {
         <span class="comment">// https://link.springer.com/article/10.1007/s13389-016-0135-4
 
@@ -1818,7 +1819,7 @@
     </span>}
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Neg <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Scalar {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Neg <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>Scalar {
     <span class="kw">type </span>Output = Scalar;
 
     <span class="kw">fn </span>neg(<span class="self">self</span>) -&gt; Scalar {
@@ -1846,8 +1847,8 @@
     }
 }
 
-<span class="attr">#[cfg(all(feature = <span class="string">&quot;bits&quot;</span>, target_pointer_width = <span class="string">&quot;32&quot;</span>))]
-#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;bits&quot;</span>)))]
+<span class="attr">#[cfg(all(feature = <span class="string">"bits"</span>, target_pointer_width = <span class="string">"32"</span>))]
+#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"bits"</span>)))]
 </span><span class="kw">impl </span>From&lt;<span class="kw-2">&amp;</span>Scalar&gt; <span class="kw">for </span>ScalarBits {
     <span class="kw">fn </span>from(scalar: <span class="kw-2">&amp;</span>Scalar) -&gt; ScalarBits {
         <span class="kw">let </span><span class="kw-2">mut </span>output = [<span class="number">0u32</span>; <span class="number">8</span>];
@@ -1861,8 +1862,8 @@
     }
 }
 
-<span class="attr">#[cfg(all(feature = <span class="string">&quot;bits&quot;</span>, target_pointer_width = <span class="string">&quot;64&quot;</span>))]
-#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;bits&quot;</span>)))]
+<span class="attr">#[cfg(all(feature = <span class="string">"bits"</span>, target_pointer_width = <span class="string">"64"</span>))]
+#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"bits"</span>)))]
 </span><span class="kw">impl </span>From&lt;<span class="kw-2">&amp;</span>Scalar&gt; <span class="kw">for </span>ScalarBits {
     <span class="kw">fn </span>from(scalar: <span class="kw-2">&amp;</span>Scalar) -&gt; ScalarBits {
         scalar.<span class="number">0</span>.into()
@@ -1881,14 +1882,14 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;zeroize&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"zeroize"</span>)]
 </span><span class="kw">impl </span>From&lt;<span class="kw-2">&amp;</span>SecretKey&gt; <span class="kw">for </span>Scalar {
     <span class="kw">fn </span>from(secret_key: <span class="kw-2">&amp;</span>SecretKey) -&gt; Scalar {
         <span class="kw-2">*</span>secret_key.to_secret_scalar()
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;zeroize&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"zeroize"</span>)]
 </span><span class="kw">impl </span>Zeroize <span class="kw">for </span>Scalar {
     <span class="kw">fn </span>zeroize(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="self">self</span>.<span class="number">0</span>.as_mut().zeroize()
@@ -1901,7 +1902,7 @@
     <span class="kw">use </span><span class="kw">crate</span>::FieldBytes;
     <span class="kw">use </span>elliptic_curve::group::ff::PrimeField;
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;zeroize&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"zeroize"</span>)]
     </span><span class="kw">use </span><span class="kw">crate</span>::SecretKey;
 
     <span class="attr">#[test]
@@ -1937,20 +1938,20 @@
         <span class="kw">let </span>one = Scalar::one();
         <span class="kw">let </span>three = one + <span class="kw-2">&amp;</span>one + <span class="kw-2">&amp;</span>one;
         <span class="kw">let </span>inv_three = three.invert().unwrap();
-        <span class="comment">// println!(&quot;1/3 = {:x?}&quot;, &amp;inv_three);
+        <span class="comment">// println!("1/3 = {:x?}", &amp;inv_three);
         </span><span class="macro">assert_eq!</span>(three * <span class="kw-2">&amp;</span>inv_three, one);
 
         <span class="kw">let </span>minus_three = -three;
-        <span class="comment">// println!(&quot;-3 = {:x?}&quot;, &amp;minus_three);
+        <span class="comment">// println!("-3 = {:x?}", &amp;minus_three);
         </span><span class="kw">let </span>inv_minus_three = minus_three.invert().unwrap();
         <span class="macro">assert_eq!</span>(inv_minus_three, -inv_three);
-        <span class="comment">// println!(&quot;-1/3 = {:x?}&quot;, &amp;inv_minus_three);
+        <span class="comment">// println!("-1/3 = {:x?}", &amp;inv_minus_three);
         </span><span class="macro">assert_eq!</span>(three * <span class="kw-2">&amp;</span>inv_minus_three, -one);
     }
 
     <span class="comment">// Tests that a Scalar can be safely converted to a SecretKey and back
     </span><span class="attr">#[test]
-    #[cfg(feature = <span class="string">&quot;zeroize&quot;</span>)]
+    #[cfg(feature = <span class="string">"zeroize"</span>)]
     </span><span class="kw">fn </span>from_ec_secret() {
         <span class="kw">let </span>scalar = Scalar::one();
         <span class="kw">let </span>secret = SecretKey::from_bytes(scalar.to_bytes()).unwrap();
@@ -1959,7 +1960,7 @@
     }
 
     <span class="attr">#[test]
-    #[cfg(all(feature = <span class="string">&quot;bits&quot;</span>, target_pointer_width = <span class="string">&quot;32&quot;</span>))]
+    #[cfg(all(feature = <span class="string">"bits"</span>, target_pointer_width = <span class="string">"32"</span>))]
     </span><span class="kw">fn </span>scalar_into_scalarbits() {
         <span class="kw">use </span><span class="kw">crate</span>::ScalarBits;
 
