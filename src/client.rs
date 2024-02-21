@@ -119,6 +119,7 @@ pub trait PollClient {
     }
 }
 
+#[must_use = "Syscalls must be polled with the `syscall` macro"]
 pub struct FutureResult<'c, T, C: ?Sized>
 where
     C: PollClient,

@@ -180,6 +180,7 @@ where
 /// A result returned by [`ExtensionClient`][] and clients using it.
 pub type ExtensionResult<'a, E, T, C> = Result<ExtensionFutureResult<'a, E, T, C>, ClientError>;
 
+#[must_use = "Syscalls must be polled with the `syscall` macro"]
 /// A future of an [`ExtensionResult`][].
 pub struct ExtensionFutureResult<'c, E, T, C: ?Sized> {
     client: &'c mut C,
