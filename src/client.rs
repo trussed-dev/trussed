@@ -537,15 +537,18 @@ pub trait CryptoClient: PollClient {
         wrapping_key: KeyId,
         wrapped_key: Message,
         associated_data: &[u8],
+        nonce: &[u8],
         attributes: StorageAttributes,
     ) -> ClientResult<'c, reply::UnwrapKey, Self> {
         let associated_data =
             Message::from_slice(associated_data).map_err(|_| ClientError::DataTooLarge)?;
+        let nonce = ShortData::from_slice(nonce).map_err(|_| ClientError::DataTooLarge)?;
         self.request(request::UnwrapKey {
             mechanism,
             wrapping_key,
             wrapped_key,
             associated_data,
+            nonce,
             attributes,
         })
     }
@@ -556,6 +559,7 @@ pub trait CryptoClient: PollClient {
         wrapping_key: KeyId,
         key: KeyId,
         associated_data: &[u8],
+        nonce: Option<ShortData>,
     ) -> ClientResult<'_, reply::WrapKey, Self> {
         let associated_data =
             Bytes::from_slice(associated_data).map_err(|_| ClientError::DataTooLarge)?;
@@ -564,6 +568,7 @@ pub trait CryptoClient: PollClient {
             wrapping_key,
             key,
             associated_data,
+            nonce,
         })
     }
 }

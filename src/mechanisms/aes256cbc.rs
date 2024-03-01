@@ -83,7 +83,7 @@ impl WrapKey for super::Aes256Cbc {
             key: request.wrapping_key,
             message,
             associated_data: request.associated_data.clone(),
-            nonce: None,
+            nonce: request.nonce.clone(),
         };
         let encryption_reply = <super::Aes256Cbc>::encrypt(keystore, &encryption_request)?;
 

@@ -312,6 +312,7 @@ pub mod request {
           - wrapping_key: KeyId
           - wrapped_key: Message
           - associated_data: Message
+          - nonce: ShortData
           - attributes: StorageAttributes
 
         Verify:
@@ -327,6 +328,7 @@ pub mod request {
           - wrapping_key: KeyId
           - key: KeyId
           - associated_data: ShortData
+          - nonce: Option<ShortData>
 
         RequestUserConsent:
           - level: consent::Level
