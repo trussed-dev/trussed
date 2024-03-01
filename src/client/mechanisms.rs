@@ -8,16 +8,24 @@ pub trait Aes256Cbc: CryptoClient {
         &'c mut self,
         key: KeyId,
         message: &[u8],
+        iv: &[u8],
     ) -> ClientResult<'c, reply::Decrypt, Self> {
-        self.decrypt(Mechanism::Aes256Cbc, key, message, &[], &[], &[])
+        self.decrypt(Mechanism::Aes256Cbc, key, message, &[], iv, &[])
     }
 
     fn wrap_key_aes256cbc(
         &mut self,
         wrapping_key: KeyId,
         key: KeyId,
+        iv: Option<&[u8; 16]>,
     ) -> ClientResult<'_, reply::WrapKey, Self> {
-        self.wrap_key(Mechanism::Aes256Cbc, wrapping_key, key, &[], None)
+        self.wrap_key(
+            Mechanism::Aes256Cbc,
+            wrapping_key,
+            key,
+            &[],
+            iv.and_then(|iv| ShortData::from_slice(iv).ok()),
+        )
     }
 }
 
