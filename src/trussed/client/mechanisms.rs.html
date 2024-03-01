@@ -487,6 +487,9 @@
 <a href="#486" id="486">486</a>
 <a href="#487" id="487">487</a>
 <a href="#488" id="488">488</a>
+<a href="#489" id="489">489</a>
+<a href="#490" id="490">490</a>
+<a href="#491" id="491">491</a>
 </pre></div><pre class="rust"><code><span class="kw">use super</span>::<span class="kw-2">*</span>;
 
 <span class="attr">#[cfg(feature = <span class="string">"aes256-cbc"</span>)]
@@ -506,7 +509,7 @@
         wrapping_key: KeyId,
         key: KeyId,
     ) -&gt; ClientResult&lt;<span class="lifetime">'_</span>, reply::WrapKey, <span class="self">Self</span>&gt; {
-        <span class="self">self</span>.wrap_key(Mechanism::Aes256Cbc, wrapping_key, key, <span class="kw-2">&amp;</span>[])
+        <span class="self">self</span>.wrap_key(Mechanism::Aes256Cbc, wrapping_key, key, <span class="kw-2">&amp;</span>[], <span class="prelude-val">None</span>)
     }
 }
 
@@ -570,6 +573,7 @@
             wrapping_key,
             Message::from_slice(wrapped_key).map_err(|<span class="kw">_</span>| ClientError::DataTooLarge)<span class="question-mark">?</span>,
             associated_data,
+            <span class="kw-2">&amp;</span>[],
             StorageAttributes::new().set_persistence(location),
         )
     }
@@ -579,12 +583,14 @@
         wrapping_key: KeyId,
         key: KeyId,
         associated_data: <span class="kw-2">&amp;</span>[u8],
+        nonce: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>[u8; <span class="number">12</span>]&gt;,
     ) -&gt; ClientResult&lt;<span class="lifetime">'c</span>, reply::WrapKey, <span class="self">Self</span>&gt; {
         <span class="self">self</span>.wrap_key(
             Mechanism::Chacha8Poly1305,
             wrapping_key,
             key,
             associated_data,
+            nonce.and_then(|nonce| ShortData::from_slice(nonce).ok()),
         )
     }
 }
