@@ -490,6 +490,14 @@
 <a href="#489" id="489">489</a>
 <a href="#490" id="490">490</a>
 <a href="#491" id="491">491</a>
+<a href="#492" id="492">492</a>
+<a href="#493" id="493">493</a>
+<a href="#494" id="494">494</a>
+<a href="#495" id="495">495</a>
+<a href="#496" id="496">496</a>
+<a href="#497" id="497">497</a>
+<a href="#498" id="498">498</a>
+<a href="#499" id="499">499</a>
 </pre></div><pre class="rust"><code><span class="kw">use super</span>::<span class="kw-2">*</span>;
 
 <span class="attr">#[cfg(feature = <span class="string">"aes256-cbc"</span>)]
@@ -500,16 +508,24 @@
         <span class="kw-2">&amp;</span><span class="lifetime">'c </span><span class="kw-2">mut </span><span class="self">self</span>,
         key: KeyId,
         message: <span class="kw-2">&amp;</span>[u8],
+        iv: <span class="kw-2">&amp;</span>[u8],
     ) -&gt; ClientResult&lt;<span class="lifetime">'c</span>, reply::Decrypt, <span class="self">Self</span>&gt; {
-        <span class="self">self</span>.decrypt(Mechanism::Aes256Cbc, key, message, <span class="kw-2">&amp;</span>[], <span class="kw-2">&amp;</span>[], <span class="kw-2">&amp;</span>[])
+        <span class="self">self</span>.decrypt(Mechanism::Aes256Cbc, key, message, <span class="kw-2">&amp;</span>[], iv, <span class="kw-2">&amp;</span>[])
     }
 
     <span class="kw">fn </span>wrap_key_aes256cbc(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         wrapping_key: KeyId,
         key: KeyId,
+        iv: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>[u8; <span class="number">16</span>]&gt;,
     ) -&gt; ClientResult&lt;<span class="lifetime">'_</span>, reply::WrapKey, <span class="self">Self</span>&gt; {
-        <span class="self">self</span>.wrap_key(Mechanism::Aes256Cbc, wrapping_key, key, <span class="kw-2">&amp;</span>[], <span class="prelude-val">None</span>)
+        <span class="self">self</span>.wrap_key(
+            Mechanism::Aes256Cbc,
+            wrapping_key,
+            key,
+            <span class="kw-2">&amp;</span>[],
+            iv.and_then(|iv| ShortData::from_slice(iv).ok()),
+        )
     }
 }
 
