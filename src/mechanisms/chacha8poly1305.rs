@@ -183,7 +183,7 @@ impl WrapKey for super::Chacha8Poly1305 {
             key: request.wrapping_key,
             message,
             associated_data: request.associated_data.clone(),
-            nonce: None,
+            nonce: request.nonce.clone(),
         };
         let encryption_reply = <super::Chacha8Poly1305>::encrypt(keystore, &encryption_request)?;
 

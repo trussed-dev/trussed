@@ -8,16 +8,24 @@ pub trait Aes256Cbc: CryptoClient {
         &'c mut self,
         key: KeyId,
         message: &[u8],
+        iv: &[u8],
     ) -> ClientResult<'c, reply::Decrypt, Self> {
-        self.decrypt(Mechanism::Aes256Cbc, key, message, &[], &[], &[])
+        self.decrypt(Mechanism::Aes256Cbc, key, message, &[], iv, &[])
     }
 
     fn wrap_key_aes256cbc(
         &mut self,
         wrapping_key: KeyId,
         key: KeyId,
+        iv: Option<&[u8; 16]>,
     ) -> ClientResult<'_, reply::WrapKey, Self> {
-        self.wrap_key(Mechanism::Aes256Cbc, wrapping_key, key, &[])
+        self.wrap_key(
+            Mechanism::Aes256Cbc,
+            wrapping_key,
+            key,
+            &[],
+            iv.and_then(|iv| ShortData::from_slice(iv).ok()),
+        )
     }
 }
 
@@ -81,6 +89,7 @@ pub trait Chacha8Poly1305: CryptoClient {
             wrapping_key,
             Message::from_slice(wrapped_key).map_err(|_| ClientError::DataTooLarge)?,
             associated_data,
+            &[],
             StorageAttributes::new().set_persistence(location),
         )
     }
@@ -90,12 +99,14 @@ pub trait Chacha8Poly1305: CryptoClient {
         wrapping_key: KeyId,
         key: KeyId,
         associated_data: &[u8],
+        nonce: Option<&[u8; 12]>,
     ) -> ClientResult<'c, reply::WrapKey, Self> {
         self.wrap_key(
             Mechanism::Chacha8Poly1305,
             wrapping_key,
             key,
             associated_data,
+            nonce.and_then(|nonce| ShortData::from_slice(nonce).ok()),
         )
     }
 }
