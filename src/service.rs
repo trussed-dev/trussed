@@ -404,10 +404,7 @@ impl<P: Platform> ServiceResources<P> {
                 let maybe_entry = match filestore.read_dir_first(
                     &request.dir,
                     request.location,
-                    request
-                        .not_before
-                        .as_ref()
-                        .map(|(path, require_equal)| (&**path, *require_equal)),
+                    &request.not_before,
                 )? {
                     Some((entry, read_dir_state)) => {
                         ctx.read_dir_state = Some(read_dir_state);

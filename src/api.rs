@@ -17,6 +17,32 @@ mod macros;
 //
 // At minimum, we don't want to list the indices (may need proc-macro)
 
+#[derive(Clone, Eq, PartialEq, Debug, serde::Serialize, serde::Deserialize)]
+pub enum NotBefore {
+    /// Start iteration at the beginning of the directory
+    None,
+    /// Start iteration at an exact match with the provided filename
+    Filename(PathBuf),
+    /// Start iteration at the first path that is "after" the provided filename
+    FilenamePart(PathBuf),
+}
+
+impl NotBefore {
+    pub fn with_filename(value: Option<PathBuf>) -> Self {
+        match value {
+            None => Self::None,
+            Some(p) => Self::Filename(p),
+        }
+    }
+
+    pub fn with_filename_part(value: Option<PathBuf>) -> Self {
+        match value {
+            None => Self::None,
+            Some(p) => Self::FilenamePart(p),
+        }
+    }
+}
+
 generate_enums! {
 
     ////////////
@@ -244,7 +270,7 @@ pub mod request {
         ReadDirFirst:
           - location: Location
           - dir: PathBuf
-          - not_before: Option<(PathBuf, bool)>
+          - not_before: NotBefore
 
         ReadDirNext:
 

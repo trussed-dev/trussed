@@ -610,7 +610,7 @@ pub trait FilesystemClient: PollClient {
         self.request(request::ReadDirFirst {
             location,
             dir,
-            not_before: not_before_filename.map(|p| (p, true)),
+            not_before: NotBefore::with_filename(not_before_filename),
         })
     }
 
@@ -630,7 +630,7 @@ pub trait FilesystemClient: PollClient {
         self.request(request::ReadDirFirst {
             location,
             dir,
-            not_before: not_before_filename.map(|p| (p, false)),
+            not_before: NotBefore::with_filename_part(not_before_filename),
         })
     }
 
