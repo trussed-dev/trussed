@@ -333,34 +333,15 @@ mod runner {
     };
 
     pub mod id {
-        use trussed::error::Error;
-
         pub enum Backend {
             Test,
             Sample,
         }
 
+        #[derive(trussed_derive::ExtensionId)]
         pub enum Extension {
             Test = 37,
             Sample = 42,
-        }
-
-        impl From<Extension> for u8 {
-            fn from(extension: Extension) -> Self {
-                extension as u8
-            }
-        }
-
-        impl TryFrom<u8> for Extension {
-            type Error = Error;
-
-            fn try_from(value: u8) -> Result<Self, Self::Error> {
-                match value {
-                    37 => Ok(Self::Test),
-                    42 => Ok(Self::Sample),
-                    _ => Err(Error::InternalError),
-                }
-            }
         }
     }
 

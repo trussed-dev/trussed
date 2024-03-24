@@ -91,27 +91,10 @@ enum Backend {
     B,
 }
 
+#[derive(trussed_derive::ExtensionId)]
 enum Extension {
     Test = 0,
     Sample = 1,
-}
-
-impl From<Extension> for u8 {
-    fn from(extension: Extension) -> u8 {
-        extension as u8
-    }
-}
-
-impl TryFrom<u8> for Extension {
-    type Error = Error;
-
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(Self::Test),
-            1 => Ok(Self::Sample),
-            _ => Err(Error::InternalError),
-        }
-    }
 }
 
 #[derive(Default, trussed_derive::ExtensionDispatch)]
