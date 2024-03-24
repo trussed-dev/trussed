@@ -1,15 +1,9 @@
 use quote::ToTokens;
 use syn::{Attribute, Error, Ident, Result};
 
-pub fn require_attr<'a>(
-    span: &dyn ToTokens,
-    attrs: &'a [Attribute],
-    name: &str,
-) -> Result<&'a Attribute> {
+pub fn get_attr<'a>(attrs: &'a [Attribute], name: &str) -> Result<Option<&'a Attribute>> {
     let mut attrs = attrs.iter().filter(|attr| attr.path().is_ident(name));
-    let first = attrs
-        .next()
-        .ok_or_else(|| Error::new_spanned(span, format!("missing #[{}(...)] attribute", name)))?;
+    let first = attrs.next();
     if let Some(next) = attrs.next() {
         Err(Error::new_spanned(
             next,
@@ -18,6 +12,15 @@ pub fn require_attr<'a>(
     } else {
         Ok(first)
     }
+}
+
+pub fn require_attr<'a>(
+    span: &dyn ToTokens,
+    attrs: &'a [Attribute],
+    name: &str,
+) -> Result<&'a Attribute> {
+    get_attr(attrs, name)?
+        .ok_or_else(|| Error::new_spanned(span, format!("missing #[{}(...)] attribute", name)))
 }
 
 pub fn to_camelcase(ident: &Ident) -> Ident {

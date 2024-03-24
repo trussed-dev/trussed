@@ -25,6 +25,13 @@ mod backends {
             Ok(TestReply)
         }
     }
+
+    #[derive(Default)]
+    pub struct BBackend;
+
+    impl Backend for BBackend {
+        type Context = ();
+    }
 }
 
 mod extensions {
@@ -81,6 +88,7 @@ mod extensions {
 
 enum Backend {
     A,
+    B,
 }
 
 enum Extension {
@@ -115,6 +123,7 @@ impl TryFrom<u8> for Extension {
 struct Dispatch {
     #[extensions("Test")]
     a: backends::ABackend,
+    b: backends::BBackend,
 }
 
 fn main() {
@@ -139,5 +148,9 @@ fn main() {
     }
 
     run(&[BackendId::Core], Some(Error::RequestNotAvailable));
+    run(
+        &[BackendId::Custom(Backend::B)],
+        Some(Error::RequestNotAvailable),
+    );
     run(&[BackendId::Custom(Backend::A)], None);
 }

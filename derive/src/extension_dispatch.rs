@@ -180,11 +180,14 @@ impl Backend {
                 "ExtensionDispatch can only be derived for a struct with named fields",
             )
         })?;
-        let extensions = util::require_attr(field, &field.attrs, "extensions")?
-            .parse_args_with(Punctuated::<LitStr, Token![,]>::parse_terminated)?
-            .into_iter()
-            .map(|s| Extension::new(&s, extensions))
-            .collect::<Result<_>>()?;
+        let extensions = if let Some(attr) = util::get_attr(&field.attrs, "extensions")? {
+            attr.parse_args_with(Punctuated::<LitStr, Token![,]>::parse_terminated)?
+                .into_iter()
+                .map(|s| Extension::new(&s, extensions))
+                .collect::<Result<_>>()?
+        } else {
+            Default::default()
+        };
         Ok(Self {
             id: util::to_camelcase(&ident),
             field: ident,
