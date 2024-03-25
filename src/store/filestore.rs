@@ -1,4 +1,7 @@
+use core::cmp::Ordering;
+
 use crate::{
+    api::NotBefore,
     error::{Error, Result},
     // service::ReadDirState,
     store::{self, DynFilesystem, Store},
@@ -109,7 +112,7 @@ pub trait Filestore {
         &mut self,
         dir: &Path,
         location: Location,
-        not_before: Option<&Path>,
+        not_before: &NotBefore,
     ) -> Result<Option<(DirEntry, ReadDirState)>>;
 
     /// Continue iterating over entries of a directory.
@@ -145,7 +148,7 @@ impl<S: Store> ClientFilestore<S> {
         &mut self,
         clients_dir: &Path,
         location: Location,
-        not_before: Option<&Path>,
+        not_before: &NotBefore,
     ) -> Result<Option<(DirEntry, ReadDirState)>> {
         let fs = self.store.fs(location);
         let dir = self.actual_path(clients_dir)?;
@@ -162,12 +165,13 @@ impl<S: Store> ClientFilestore<S> {
                     // Option<usize, Result<DirEntry>> -> ??
                     .map(|(i, entry)| (i, entry.unwrap()))
                     // if there is a "not_before" entry, skip all entries before it.
-                    .find(|(_, entry)| {
-                        if let Some(not_before) = not_before {
-                            entry.file_name() == not_before.as_ref()
-                        } else {
-                            true
-                        }
+                    .find(|(_, entry)| match not_before {
+                        NotBefore::None => true,
+                        NotBefore::Filename(path) => entry.file_name() == &**path,
+                        NotBefore::FilenamePart(path) => match entry.file_name().cmp_str(path) {
+                            Ordering::Less => false,
+                            Ordering::Equal | Ordering::Greater => true,
+                        },
                     })
                     // if there is an entry, construct the state that needs storing out of it,
                     // remove the prefix from the entry's path to not leak implementation details to
@@ -429,7 +433,7 @@ impl<S: Store> Filestore for ClientFilestore<S> {
         &mut self,
         clients_dir: &Path,
         location: Location,
-        not_before: Option<&Path>,
+        not_before: &NotBefore,
     ) -> Result<Option<(DirEntry, ReadDirState)>> {
         self.read_dir_first_impl(clients_dir, location, not_before)
     }
