@@ -127,6 +127,10 @@ struct Dispatch {
     a_sample: (),
 
     b: backends::BBackend,
+
+    #[allow(unused)]
+    #[dispatch(skip)]
+    other: String,
 }
 
 fn main() {
