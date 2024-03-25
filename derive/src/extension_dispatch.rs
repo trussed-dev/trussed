@@ -28,11 +28,12 @@ impl ExtensionDispatch {
         };
         let dispatch_attrs = DispatchAttrs::new(&input)?;
         let extension_attrs = ExtensionAttrs::new(&input)?;
-        let raw_backends: Vec<_> = data_struct
-            .fields
-            .iter()
-            .map(RawBackend::new)
-            .collect::<Result<_>>()?;
+        let mut raw_backends = Vec::new();
+        for field in &data_struct.fields {
+            if let Some(raw_backend) = RawBackend::new(field)? {
+                raw_backends.push(raw_backend);
+            }
+        }
         let mut backends = Vec::new();
         let mut delegated_backends = Vec::new();
         for raw_backend in raw_backends {
@@ -204,38 +205,45 @@ struct RawBackend {
 }
 
 impl RawBackend {
-    fn new(field: &Field) -> Result<Self> {
-        let ident = field.ident.clone().ok_or_else(|| {
-            Error::new_spanned(
-                field,
-                "ExtensionDispatch can only be derived for a struct with named fields",
-            )
-        })?;
+    fn new(field: &Field) -> Result<Option<Self>> {
         let mut delegate_to = None;
+        let mut skip = false;
         for attr in util::get_attrs(&field.attrs, "dispatch") {
             attr.parse_nested_meta(|meta| {
                 if meta.path.is_ident("delegate_to") {
                     let s: LitStr = meta.value()?.parse()?;
                     delegate_to = Some(s.parse()?);
                     Ok(())
+                } else if meta.path.is_ident("skip") {
+                    skip = true;
+                    Ok(())
                 } else {
                     Err(meta.error("unsupported dispatch attribute"))
                 }
             })?;
         }
+        if skip {
+            return Ok(None);
+        }
+        let ident = field.ident.clone().ok_or_else(|| {
+            Error::new_spanned(
+                field,
+                "ExtensionDispatch can only be derived for a struct with named fields",
+            )
+        })?;
         let mut extensions = Vec::new();
         for attr in util::get_attrs(&field.attrs, "extensions") {
             for s in attr.parse_args_with(Punctuated::<LitStr, Token![,]>::parse_terminated)? {
                 extensions.push(s.parse()?);
             }
         }
-        Ok(Self {
+        Ok(Some(Self {
             id: util::to_camelcase(&ident),
             field: ident,
             ty: field.ty.clone(),
             delegate_to,
             extensions,
-        })
+        }))
     }
 }
 
