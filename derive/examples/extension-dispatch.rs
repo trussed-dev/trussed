@@ -119,6 +119,7 @@ enum Extension {
     Sample = "extensions::SampleExtension"
 )]
 struct Dispatch {
+    #[dispatch(no_core)]
     #[extensions("Test")]
     a: backends::ABackend,
 
