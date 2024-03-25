@@ -200,6 +200,7 @@ struct RawBackend {
     id: Ident,
     field: Ident,
     ty: Type,
+    no_core: bool,
     delegate_to: Option<Ident>,
     extensions: Vec<Ident>,
 }
@@ -207,12 +208,16 @@ struct RawBackend {
 impl RawBackend {
     fn new(field: &Field) -> Result<Option<Self>> {
         let mut delegate_to = None;
+        let mut no_core = false;
         let mut skip = false;
         for attr in util::get_attrs(&field.attrs, "dispatch") {
             attr.parse_nested_meta(|meta| {
                 if meta.path.is_ident("delegate_to") {
                     let s: LitStr = meta.value()?.parse()?;
                     delegate_to = Some(s.parse()?);
+                    Ok(())
+                } else if meta.path.is_ident("no_core") {
+                    no_core = true;
                     Ok(())
                 } else if meta.path.is_ident("skip") {
                     skip = true;
@@ -241,6 +246,7 @@ impl RawBackend {
             id: util::to_camelcase(&ident),
             field: ident,
             ty: field.ty.clone(),
+            no_core,
             delegate_to,
             extensions,
         }))
@@ -253,6 +259,7 @@ struct Backend {
     field: Ident,
     ty: Type,
     index: Index,
+    no_core: bool,
     extensions: Vec<Extension>,
 }
 
@@ -268,6 +275,7 @@ impl Backend {
             field: raw.field,
             ty: raw.ty,
             index: Index::from(i),
+            no_core: raw.no_core,
             extensions,
         })
     }
@@ -278,13 +286,23 @@ impl Backend {
     }
 
     fn request(&self) -> TokenStream {
-        let Self {
-            index, id, field, ..
-        } = self;
+        let id = &self.id;
+        let request = if self.no_core {
+            quote! {
+                Err(::trussed::Error::RequestNotAvailable)
+            }
+        } else {
+            let Self { index, field, .. } = self;
+            quote! {
+                ::trussed::backend::Backend::request(
+                    &mut self.#field, &mut ctx.core, &mut ctx.backends.#index, request, resources,
+                )
+            }
+        };
         quote! {
-            Self::BackendId::#id => ::trussed::backend::Backend::request(
-                &mut self.#field, &mut ctx.core, &mut ctx.backends.#index, request, resources,
-            ),
+            Self::BackendId::#id => {
+                #request
+            }
         }
     }
 
@@ -304,6 +322,7 @@ struct DelegatedBackend {
     id: Ident,
     field: Ident,
     backend: Backend,
+    no_core: bool,
     extensions: Vec<Extension>,
 }
 
@@ -338,25 +357,34 @@ impl DelegatedBackend {
             id: raw.id,
             field: raw.field,
             backend,
+            no_core: raw.no_core,
             extensions,
         })
     }
 
     fn request(&self) -> TokenStream {
-        let Self {
-            id, backend, field, ..
-        } = self;
-        let Backend {
-            field: delegated_field,
-            index: delegated_index,
-            ..
-        } = backend;
-        quote! {
-            Self::BackendId::#id => {
+        let id = &self.id;
+        let request = if self.no_core {
+            quote! {
+                Err(::trussed::Error::RequestNotAvailable)
+            }
+        } else {
+            let Self { backend, field, .. } = self;
+            let Backend {
+                field: delegated_field,
+                index: delegated_index,
+                ..
+            } = backend;
+            quote! {
                 let _ = self.#field;
                 ::trussed::backend::Backend::request(
                     &mut self.#delegated_field, &mut ctx.core, &mut ctx.backends.#delegated_index, request, resources,
                 )
+            }
+        };
+        quote! {
+            Self::BackendId::#id => {
+                #request
             }
         }
     }
@@ -367,6 +395,7 @@ impl DelegatedBackend {
             extensions,
             backend,
             field,
+            ..
         } = self;
         let extension_requests = extensions.iter().map(|e| e.extension_request(backend));
         quote! {
