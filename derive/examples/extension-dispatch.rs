@@ -1,7 +1,9 @@
 use trussed::Error;
 
 mod backends {
-    use super::extensions::{TestExtension, TestReply, TestRequest};
+    use super::extensions::{
+        SampleExtension, SampleReply, SampleRequest, TestExtension, TestReply, TestRequest,
+    };
     use trussed::{
         backend::Backend, platform::Platform, serde_extensions::ExtensionImpl,
         service::ServiceResources, types::CoreContext, Error,
@@ -23,6 +25,18 @@ mod backends {
             _resources: &mut ServiceResources<P>,
         ) -> Result<TestReply, Error> {
             Ok(TestReply)
+        }
+    }
+
+    impl ExtensionImpl<SampleExtension> for ABackend {
+        fn extension_request<P: Platform>(
+            &mut self,
+            _core_ctx: &mut CoreContext,
+            _backend_ctx: &mut Self::Context,
+            _request: &SampleRequest,
+            _resources: &mut ServiceResources<P>,
+        ) -> Result<SampleReply, Error> {
+            Ok(SampleReply)
         }
     }
 
@@ -88,6 +102,7 @@ mod extensions {
 
 enum Backend {
     A,
+    ASample,
     B,
 }
 
@@ -104,9 +119,19 @@ enum Extension {
     Sample = "extensions::SampleExtension"
 )]
 struct Dispatch {
+    #[dispatch(no_core)]
     #[extensions("Test")]
     a: backends::ABackend,
+
+    #[dispatch(delegate_to = "a")]
+    #[extensions("Sample")]
+    a_sample: (),
+
     b: backends::BBackend,
+
+    #[allow(unused)]
+    #[dispatch(skip)]
+    other: String,
 }
 
 fn main() {
@@ -133,6 +158,10 @@ fn main() {
     run(&[BackendId::Core], Some(Error::RequestNotAvailable));
     run(
         &[BackendId::Custom(Backend::B)],
+        Some(Error::RequestNotAvailable),
+    );
+    run(
+        &[BackendId::Custom(Backend::ASample)],
         Some(Error::RequestNotAvailable),
     );
     run(&[BackendId::Custom(Backend::A)], None);
