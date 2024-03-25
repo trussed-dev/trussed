@@ -152,13 +152,14 @@ impl ExtensionAttrs {
     fn new(input: &DeriveInput) -> Result<Self> {
         let mut extensions: HashMap<Ident, Path> = Default::default();
 
-        let attr = util::require_attr(input, &input.attrs, "extensions")?;
-        attr.parse_nested_meta(|meta| {
-            let ident = meta.path.require_ident()?;
-            let s: LitStr = meta.value()?.parse()?;
-            extensions.insert(ident.to_owned(), s.parse()?);
-            Ok(())
-        })?;
+        for attr in util::get_attrs(&input.attrs, "extensions") {
+            attr.parse_nested_meta(|meta| {
+                let ident = meta.path.require_ident()?;
+                let s: LitStr = meta.value()?.parse()?;
+                extensions.insert(ident.to_owned(), s.parse()?);
+                Ok(())
+            })?;
+        }
 
         Ok(Self { extensions })
     }
@@ -173,21 +174,19 @@ struct Backend {
 }
 
 impl Backend {
-    fn new(i: usize, field: &Field, extensions: &HashMap<Ident, Path>) -> Result<Self> {
+    fn new(i: usize, field: &Field, extension_types: &HashMap<Ident, Path>) -> Result<Self> {
         let ident = field.ident.clone().ok_or_else(|| {
             Error::new_spanned(
                 field,
                 "ExtensionDispatch can only be derived for a struct with named fields",
             )
         })?;
-        let extensions = if let Some(attr) = util::get_attr(&field.attrs, "extensions")? {
-            attr.parse_args_with(Punctuated::<LitStr, Token![,]>::parse_terminated)?
-                .into_iter()
-                .map(|s| Extension::new(&s, extensions))
-                .collect::<Result<_>>()?
-        } else {
-            Default::default()
-        };
+        let mut extensions = Vec::new();
+        for attr in util::get_attrs(&field.attrs, "extensions") {
+            for s in attr.parse_args_with(Punctuated::<LitStr, Token![,]>::parse_terminated)? {
+                extensions.push(Extension::new(&s, extension_types)?);
+            }
+        }
         Ok(Self {
             id: util::to_camelcase(&ident),
             field: ident,
