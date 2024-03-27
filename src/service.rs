@@ -113,6 +113,11 @@ impl<P: Platform> ServiceResources<P> {
         ClientFilestore::new(client_id, self.platform.store())
     }
 
+    /// Get access to the filestore for the client without the `dat` intermediary
+    pub fn raw_filestore(&mut self, client_id: PathBuf) -> ClientFilestore<P::S> {
+        ClientFilestore::new_raw(client_id, self.platform.store())
+    }
+
     pub fn trussed_filestore(&mut self) -> ClientFilestore<P::S> {
         ClientFilestore::new(PathBuf::from("trussed"), self.platform.store())
     }
