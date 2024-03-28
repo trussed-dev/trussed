@@ -900,6 +900,29 @@
 <a href="#898" id="898">898</a>
 <a href="#899" id="899">899</a>
 <a href="#900" id="900">900</a>
+<a href="#901" id="901">901</a>
+<a href="#902" id="902">902</a>
+<a href="#903" id="903">903</a>
+<a href="#904" id="904">904</a>
+<a href="#905" id="905">905</a>
+<a href="#906" id="906">906</a>
+<a href="#907" id="907">907</a>
+<a href="#908" id="908">908</a>
+<a href="#909" id="909">909</a>
+<a href="#910" id="910">910</a>
+<a href="#911" id="911">911</a>
+<a href="#912" id="912">912</a>
+<a href="#913" id="913">913</a>
+<a href="#914" id="914">914</a>
+<a href="#915" id="915">915</a>
+<a href="#916" id="916">916</a>
+<a href="#917" id="917">917</a>
+<a href="#918" id="918">918</a>
+<a href="#919" id="919">919</a>
+<a href="#920" id="920">920</a>
+<a href="#921" id="921">921</a>
+<a href="#922" id="922">922</a>
+<a href="#923" id="923">923</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! # Client interface for applications.
 //!
 //! The API methods (such as `GenerateKey`, `Sign`, `Verify`,...) are implemented by a variety
@@ -1500,7 +1523,10 @@
         <span class="self">self</span>.request(request::DebugDumpStore {})
     }
 
-    <span class="kw">fn </span>read_dir_first(
+    <span class="doccomment">/// Open a directory for iteration with `read_dir_next`
+    ///
+    /// For optimization, not_before_filename can be passed to begin the iteration at that file.
+    </span><span class="kw">fn </span>read_dir_first(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         location: Location,
         dir: PathBuf,
@@ -1509,7 +1535,27 @@
         <span class="self">self</span>.request(request::ReadDirFirst {
             location,
             dir,
-            not_before_filename,
+            not_before: NotBefore::with_filename(not_before_filename),
+        })
+    }
+
+    <span class="doccomment">/// Open a directory for iteration with `read_dir_next`
+    ///
+    /// For optimization, not_before_filename can be passed to begin the iteration after the first file that is "alphabetically" before the original file
+    ///
+    /// &lt;div class="warning"&gt;
+    /// The notion used here for "alphabetical" does not correspond to the order of iteration yielded by littlefs. This function should be used with caution. If `not_before_filename` was yielded from a previous use of read_dir, it can lead to entries being repeated.
+    /// &lt;/div&gt;
+    </span><span class="kw">fn </span>read_dir_first_alphabetical(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        location: Location,
+        dir: PathBuf,
+        not_before_filename: <span class="prelude-ty">Option</span>&lt;PathBuf&gt;,
+    ) -&gt; ClientResult&lt;<span class="lifetime">'_</span>, reply::ReadDirFirst, <span class="self">Self</span>&gt; {
+        <span class="self">self</span>.request(request::ReadDirFirst {
+            location,
+            dir,
+            not_before: NotBefore::with_filename_part(not_before_filename),
         })
     }
 

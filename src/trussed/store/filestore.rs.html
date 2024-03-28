@@ -511,7 +511,14 @@
 <a href="#509" id="509">509</a>
 <a href="#510" id="510">510</a>
 <a href="#511" id="511">511</a>
-</pre></div><pre class="rust"><code><span class="kw">use crate</span>::{
+<a href="#512" id="512">512</a>
+<a href="#513" id="513">513</a>
+<a href="#514" id="514">514</a>
+<a href="#515" id="515">515</a>
+</pre></div><pre class="rust"><code><span class="kw">use </span>core::cmp::Ordering;
+
+<span class="kw">use crate</span>::{
+    api::NotBefore,
     error::{Error, <span class="prelude-ty">Result</span>},
     <span class="comment">// service::ReadDirState,
     </span>store::{<span class="self">self</span>, DynFilesystem, Store},
@@ -630,7 +637,7 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         dir: <span class="kw-2">&amp;</span>Path,
         location: Location,
-        not_before: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>Path&gt;,
+        not_before: <span class="kw-2">&amp;</span>NotBefore,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;(DirEntry, ReadDirState)&gt;&gt;;
 
     <span class="doccomment">/// Continue iterating over entries of a directory.
@@ -666,7 +673,7 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         clients_dir: <span class="kw-2">&amp;</span>Path,
         location: Location,
-        not_before: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>Path&gt;,
+        not_before: <span class="kw-2">&amp;</span>NotBefore,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;(DirEntry, ReadDirState)&gt;&gt; {
         <span class="kw">let </span>fs = <span class="self">self</span>.store.fs(location);
         <span class="kw">let </span>dir = <span class="self">self</span>.actual_path(clients_dir)<span class="question-mark">?</span>;
@@ -683,12 +690,13 @@
                     // Option&lt;usize, Result&lt;DirEntry&gt;&gt; -&gt; ??
                     </span>.map(|(i, entry)| (i, entry.unwrap()))
                     <span class="comment">// if there is a "not_before" entry, skip all entries before it.
-                    </span>.find(|(<span class="kw">_</span>, entry)| {
-                        <span class="kw">if let </span><span class="prelude-val">Some</span>(not_before) = not_before {
-                            entry.file_name() == not_before.as_ref()
-                        } <span class="kw">else </span>{
-                            <span class="bool-val">true
-                        </span>}
+                    </span>.find(|(<span class="kw">_</span>, entry)| <span class="kw">match </span>not_before {
+                        NotBefore::None =&gt; <span class="bool-val">true</span>,
+                        NotBefore::Filename(path) =&gt; entry.file_name() == <span class="kw-2">&amp;**</span>path,
+                        NotBefore::FilenamePart(path) =&gt; <span class="kw">match </span>entry.file_name().cmp_str(path) {
+                            Ordering::Less =&gt; <span class="bool-val">false</span>,
+                            Ordering::Equal | Ordering::Greater =&gt; <span class="bool-val">true</span>,
+                        },
                     })
                     <span class="comment">// if there is an entry, construct the state that needs storing out of it,
                     // remove the prefix from the entry's path to not leak implementation details to
@@ -950,7 +958,7 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         clients_dir: <span class="kw-2">&amp;</span>Path,
         location: Location,
-        not_before: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>Path&gt;,
+        not_before: <span class="kw-2">&amp;</span>NotBefore,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;(DirEntry, ReadDirState)&gt;&gt; {
         <span class="self">self</span>.read_dir_first_impl(clients_dir, location, not_before)
     }
