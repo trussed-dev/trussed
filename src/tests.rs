@@ -1,4 +1,5 @@
 #![cfg(test)]
+#![allow(static_mut_refs)]
 use chacha20::ChaCha20;
 
 use crate::types::*;
