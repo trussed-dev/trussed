@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"fn":["current_cbor_tag"],"struct":["Tagged"]};

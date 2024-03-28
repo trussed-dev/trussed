@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"mod":["de","error","ser","tags"],"struct":["Deserializer","Error","Serializer","StreamDeserializer"],"type":["Result"]};

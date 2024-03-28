@@ -31,7 +31,6 @@ var srcIndex = new Map(JSON.parse('[\
 ["flexiber_derive",["",[],["decodable.rs","encodable.rs","lib.rs"]]],\
 ["generic_array",["",[],["arr.rs","functional.rs","hex.rs","impls.rs","iter.rs","lib.rs","sequence.rs"]]],\
 ["group",["",[],["cofactor.rs","lib.rs","prime.rs"]]],\
-["half",["",[["bfloat",[],["convert.rs"]],["binary16",[],["convert.rs"]]],["bfloat.rs","binary16.rs","lib.rs","slice.rs"]]],\
 ["hash32",["",[],["fnv.rs","lib.rs","murmur3.rs"]]],\
 ["heapless",["",[["pool",[["singleton",[],["arc.rs"]]],["cas.rs","mod.rs","singleton.rs"]]],["binary_heap.rs","de.rs","deque.rs","histbuf.rs","indexmap.rs","indexset.rs","lib.rs","linear_map.rs","mpmc.rs","sealed.rs","ser.rs","sorted_linked_list.rs","spsc.rs","string.rs","vec.rs"]]],\
 ["heapless_bytes",["",[],["lib.rs"]]],\
@@ -60,7 +59,6 @@ var srcIndex = new Map(JSON.parse('[\
 ["salty",["",[["field",[],["tweetnacl.rs"]]],["agreement.rs","constants.rs","edwards.rs","field.rs","hash.rs","lib.rs","montgomery.rs","scalar.rs","scalar29.rs","signature.rs"]]],\
 ["scopeguard",["",[],["lib.rs"]]],\
 ["serde",["",[["de",[],["format.rs","ignored_any.rs","impls.rs","mod.rs","seed.rs","size_hint.rs","value.rs"]],["private",[],["de.rs","doc.rs","mod.rs","ser.rs"]],["ser",[],["fmt.rs","impls.rs","impossible.rs","mod.rs"]]],["integer128.rs","lib.rs","macros.rs","std_error.rs"]]],\
-["serde_cbor",["",[],["de.rs","error.rs","lib.rs","read.rs","ser.rs","tags.rs","write.rs"]]],\
 ["serde_derive",["",[["internals",[],["ast.rs","attr.rs","case.rs","check.rs","ctxt.rs","mod.rs","receiver.rs","respan.rs","symbol.rs"]]],["bound.rs","de.rs","dummy.rs","fragment.rs","lib.rs","pretend.rs","ser.rs","this.rs"]]],\
 ["serde_indexed",["",[],["lib.rs","parse.rs"]]],\
 ["serde_repr",["",[],["lib.rs","parse.rs"]]],\

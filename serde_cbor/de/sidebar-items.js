@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"fn":["from_mut_slice","from_slice_with_scratch"],"struct":["Deserializer","MutSliceRead","SliceReadFixed","StreamDeserializer"],"trait":["Read"]};
