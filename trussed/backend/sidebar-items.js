@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["BackendId","NoId"],"struct":["CoreOnly"],"trait":["Backend","Dispatch"]};
+window.SIDEBAR_ITEMS = {"enum":["BackendId","NoId"],"struct":["CoreOnly","OptionalBackend"],"trait":["Backend","Dispatch"]};
