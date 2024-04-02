@@ -92,3 +92,60 @@ impl TryFrom<u8> for NoId {
         Err(Error::InternalError)
     }
 }
+
+/// Helper type for optional backends.
+///
+/// If the backend is `None`, [`Error::RequestNotAvailable`][] is returned.
+#[derive(Debug)]
+pub struct OptionalBackend<T>(Option<T>);
+
+impl<T> OptionalBackend<T> {
+    /// Crates a new optional backend from an `Option<T>`.
+    pub fn new(backend: Option<T>) -> Self {
+        Self(backend)
+    }
+
+    /// Returns a mutable reference to the wrapped backend or [`Error::RequestNotAvailable`][] if
+    /// it is `None`.
+    pub fn inner(&mut self) -> Result<&mut T, Error> {
+        self.0.as_mut().ok_or(Error::RequestNotAvailable)
+    }
+
+    /// Returns the wrapped backend.
+    pub fn into_inner(self) -> Option<T> {
+        self.0
+    }
+}
+
+impl<T> Default for OptionalBackend<T> {
+    fn default() -> Self {
+        Self(None)
+    }
+}
+
+impl<T> From<T> for OptionalBackend<T> {
+    fn from(backend: T) -> Self {
+        Self(Some(backend))
+    }
+}
+
+impl<T> From<Option<T>> for OptionalBackend<T> {
+    fn from(backend: Option<T>) -> Self {
+        Self(backend)
+    }
+}
+
+impl<T: Backend> Backend for OptionalBackend<T> {
+    type Context = T::Context;
+
+    fn request<P: Platform>(
+        &mut self,
+        core_ctx: &mut CoreContext,
+        backend_ctx: &mut Self::Context,
+        request: &Request,
+        resources: &mut ServiceResources<P>,
+    ) -> Result<Reply, Error> {
+        self.inner()?
+            .request(core_ctx, backend_ctx, request, resources)
+    }
+}

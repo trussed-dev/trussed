@@ -17,7 +17,7 @@ use core::{marker::PhantomData, task::Poll};
 
 use crate::{
     api::{reply, request, Reply, Request},
-    backend::{Backend, CoreOnly, Dispatch, NoId},
+    backend::{Backend, CoreOnly, Dispatch, NoId, OptionalBackend},
     client::{ClientError, ClientImplementation, FutureResult, PollClient},
     error::Error,
     platform::{Platform, Syscall},
@@ -128,6 +128,19 @@ pub trait ExtensionImpl<E: Extension>: Backend {
         postcard_serialize_bytes(&reply)
             .map(|reply| reply::SerdeExtension { reply })
             .map_err(|_| Error::ReplySerializationFailure)
+    }
+}
+
+impl<E: Extension, I: ExtensionImpl<E>> ExtensionImpl<E> for OptionalBackend<I> {
+    fn extension_request<P: Platform>(
+        &mut self,
+        core_ctx: &mut CoreContext,
+        backend_ctx: &mut Self::Context,
+        request: &E::Request,
+        resources: &mut ServiceResources<P>,
+    ) -> Result<E::Reply, Error> {
+        self.inner()?
+            .extension_request(core_ctx, backend_ctx, request, resources)
     }
 }
 
