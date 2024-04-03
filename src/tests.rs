@@ -2,14 +2,17 @@
 #![allow(static_mut_refs)]
 
 use chacha20::ChaCha20;
-
-use crate::types::*;
-use crate::*;
 use entropy::shannon_entropy;
+use generic_array::GenericArray;
 use littlefs2::const_ram_storage;
+use littlefs2::driver::Storage as LfsStorage;
 use littlefs2::fs::{Allocation, Filesystem};
+use littlefs2::io::Result as LfsResult;
+use rand_core::{CryptoRng, RngCore};
 
 use crate::client::{CryptoClient as _, FilesystemClient as _};
+use crate::types::{consent, reboot, ui, Bytes, Location, PathBuf};
+use crate::{api, block, platform, store, Error};
 
 pub struct MockRng(ChaCha20);
 
@@ -23,9 +26,9 @@ impl MockRng {
     }
 }
 
-impl rand_core::CryptoRng for MockRng {}
+impl CryptoRng for MockRng {}
 
-impl crate::service::RngCore for MockRng {
+impl RngCore for MockRng {
     fn fill_bytes(&mut self, buf: &mut [u8]) {
         use chacha20::cipher::StreamCipher;
         self.0.apply_keystream(buf);

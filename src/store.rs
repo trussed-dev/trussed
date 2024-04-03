@@ -71,8 +71,10 @@
 //! - Alternative: subdirectory <==> RP hash, everything else in flat files
 //! - In any case need to "list dirs excluding . and .." or similar
 
+use littlefs2::{driver::Storage, fs::Filesystem};
+
 use crate::error::Error;
-use crate::types::*;
+use crate::types::{Bytes, Location, PathBuf};
 #[allow(unused_imports)]
 #[cfg(feature = "semihosting")]
 use cortex_m_semihosting::hprintln;
@@ -127,9 +129,9 @@ pub mod keystore;
 //
 // This makes everything using it *much* more ergonomic.
 pub unsafe trait Store: Copy {
-    type I: 'static + LfsStorage;
-    type E: 'static + LfsStorage;
-    type V: 'static + LfsStorage;
+    type I: 'static + Storage;
+    type E: 'static + Storage;
+    type V: 'static + Storage;
     fn ifs(self) -> &'static Fs<Self::I>;
     fn efs(self) -> &'static Fs<Self::E>;
     fn vfs(self) -> &'static Fs<Self::V>;
@@ -142,18 +144,18 @@ pub unsafe trait Store: Copy {
     }
 }
 
-pub struct Fs<S: 'static + LfsStorage> {
+pub struct Fs<S: 'static + Storage> {
     fs: &'static Filesystem<'static, S>,
 }
 
-impl<S: 'static + LfsStorage> core::ops::Deref for Fs<S> {
+impl<S: 'static + Storage> core::ops::Deref for Fs<S> {
     type Target = Filesystem<'static, S>;
     fn deref(&self) -> &Self::Target {
         self.fs
     }
 }
 
-impl<S: 'static + LfsStorage> Fs<S> {
+impl<S: 'static + Storage> Fs<S> {
     pub fn new(fs: &'static Filesystem<'static, S>) -> Self {
         Self { fs }
     }

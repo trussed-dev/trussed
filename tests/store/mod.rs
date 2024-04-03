@@ -1,5 +1,6 @@
 use littlefs2::const_ram_storage;
-use trussed::types::{LfsResult, LfsStorage};
+use littlefs2::driver::Storage as LfsStorage;
+use littlefs2::io::Result as LfsResult;
 
 const_ram_storage!(InternalStorage, 8192);
 // const_ram_storage!(InternalStorage, 16384);

@@ -5,7 +5,11 @@
 //! [pkcs11-v3]: https://docs.oasis-open.org/pkcs11/pkcs11-base/v3.0/pkcs11-base-v3.0.html
 //! [pkcs11-headers]: https://docs.oasis-open.org/pkcs11/pkcs11-base/v3.0/cs01/include/pkcs11-v3.0/
 
-use crate::types::*;
+use crate::types::{
+    consent, reboot, Bytes, CertId, CounterId, DirEntry, KeyId, KeySerialization, Location,
+    Mechanism, MediumData, Message, PathBuf, SerializedKey, ShortData, Signature,
+    SignatureSerialization, StorageAttributes, UserAttribute,
+};
 use core::time::Duration;
 
 #[macro_use]

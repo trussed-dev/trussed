@@ -1,4 +1,5 @@
 use littlefs2::{
+    object_safe::DynFilesystem,
     path,
     path::{Path, PathBuf},
 };
@@ -7,25 +8,27 @@ pub use rand_core::{RngCore, SeedableRng};
 
 use crate::backend::{BackendId, CoreOnly, Dispatch};
 use crate::client::{ClientBuilder, ClientImplementation};
-use crate::config::*;
+use crate::config::{MAX_MESSAGE_LENGTH, MAX_SERVICE_CLIENTS};
 use crate::error::{Error, Result};
 pub use crate::key;
 use crate::mechanisms;
 pub use crate::pipe::ServiceEndpoint;
 use crate::pipe::TrussedResponder;
-use crate::platform::*;
+use crate::platform::{consent, ui, Platform, Store, Syscall, UserInterface};
 pub use crate::store::{
     self,
     certstore::{Certstore as _, ClientCertstore},
     counterstore::{ClientCounterstore, Counterstore as _},
     filestore::{ClientFilestore, Filestore, ReadDirFilesState, ReadDirState},
     keystore::{ClientKeystore, Keystore},
-    DynFilesystem,
 };
 use crate::types::ui::Status;
-use crate::types::*;
+use crate::types::{Context, CoreContext, Location, Mechanism, MediumData, Message, Vec};
 use crate::Bytes;
-use crate::{api::*, interrupt::InterruptFlag};
+use crate::{
+    api::{reply, request, Reply, Request},
+    interrupt::InterruptFlag,
+};
 
 pub mod attest;
 

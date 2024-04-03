@@ -1,7 +1,9 @@
-use crate::api::*;
+use crate::api::{reply, request};
 use crate::error::Error;
-use crate::service::*;
-use crate::types::*;
+use crate::key;
+use crate::service::{DeriveKey, Hash};
+use crate::store::keystore::Keystore;
+use crate::types::ShortData;
 
 #[cfg(feature = "sha256")]
 impl DeriveKey for super::Sha256 {

@@ -194,7 +194,7 @@ impl KeyId {
 // impl_id!(SecretKeyId);
 
 pub mod ui {
-    use super::*;
+    use serde::{Deserialize, Serialize};
 
     // TODO: Consider whether a simple "language" to specify "patterns"
     // makes sense, vs. "semantic" indications with platform-specific implementation
@@ -210,7 +210,7 @@ pub mod ui {
 }
 
 pub mod reboot {
-    use super::*;
+    use serde::{Deserialize, Serialize};
 
     #[derive(Copy, Clone, Eq, PartialEq, Debug, Serialize, Deserialize)]
     pub enum To {
@@ -220,7 +220,7 @@ pub mod reboot {
 }
 
 pub mod consent {
-    use super::*;
+    use serde::{Deserialize, Serialize};
 
     #[derive(Copy, Clone, Eq, PartialEq, Debug, Serialize, Deserialize)]
     pub enum Level {

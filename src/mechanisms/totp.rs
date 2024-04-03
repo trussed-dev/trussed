@@ -1,6 +1,8 @@
-use crate::api::*;
+use crate::api::{reply, request};
 use crate::error::Error;
-use crate::service::*;
+use crate::key;
+use crate::service::{Exists, Sign};
+use crate::store::keystore::Keystore;
 
 // code copied from https://github.com/avacariu/rust-oath
 

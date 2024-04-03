@@ -77,13 +77,17 @@
 //!
 use core::{marker::PhantomData, task::Poll};
 
-use crate::api::*;
+use crate::api::{reply, request, NotBefore, Reply, ReplyVariant, RequestVariant};
 use crate::backend::{BackendId, CoreOnly, Dispatch};
-use crate::error::*;
+use crate::error::{Error, Result};
 use crate::interrupt::InterruptFlag;
 use crate::pipe::{TrussedRequester, TRUSSED_INTERCHANGE};
 use crate::service::Service;
-use crate::types::*;
+use crate::types::{
+    consent, reboot, Bytes, CertId, CounterId, KeyId, KeySerialization, Location, Mechanism,
+    MediumData, Message, PathBuf, Platform, SerializedKey, ShortData, Signature,
+    SignatureSerialization, StorageAttributes, UserAttribute,
+};
 
 pub use crate::platform::Syscall;
 
