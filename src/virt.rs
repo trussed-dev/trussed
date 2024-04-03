@@ -16,10 +16,9 @@ use rand_core::SeedableRng as _;
 
 use crate::{
     backend::{BackendId, CoreOnly, Dispatch},
-    client::ClientBuilder,
+    client::{ClientBuilder, ClientImplementation},
     platform::{self, Syscall},
     service::Service,
-    ClientImplementation,
 };
 
 pub use store::{Filesystem, Ram, StoreProvider};

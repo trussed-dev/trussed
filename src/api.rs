@@ -5,6 +5,7 @@
 //! [pkcs11-v3]: https://docs.oasis-open.org/pkcs11/pkcs11-base/v3.0/pkcs11-base-v3.0.html
 //! [pkcs11-headers]: https://docs.oasis-open.org/pkcs11/pkcs11-base/v3.0/cs01/include/pkcs11-v3.0/
 
+use crate::error::Error;
 use crate::types::{
     consent, reboot, Bytes, CertId, CounterId, DirEntry, KeyId, KeySerialization, Location,
     Mechanism, MediumData, Message, PathBuf, SerializedKey, ShortData, Signature,
@@ -143,11 +144,11 @@ generate_enums! {
     SerdeExtension: 0x5E
 }
 
-pub trait RequestVariant: Into<Request> + TryFrom<Request, Error = crate::Error> {
+pub trait RequestVariant: Into<Request> + TryFrom<Request, Error = Error> {
     type Reply: ReplyVariant<Request = Self>;
 }
 
-pub trait ReplyVariant: Into<Reply> + TryFrom<Reply, Error = crate::Error> {
+pub trait ReplyVariant: Into<Reply> + TryFrom<Reply, Error = Error> {
     type Request: RequestVariant<Reply = Self>;
 }
 

@@ -82,17 +82,15 @@ use crate::backend::{BackendId, CoreOnly, Dispatch};
 use crate::error::{Error, Result};
 use crate::interrupt::InterruptFlag;
 use crate::pipe::{TrussedRequester, TRUSSED_INTERCHANGE};
+use crate::platform::{Platform, Syscall};
 use crate::service::Service;
 use crate::types::{
     consent, reboot, Bytes, CertId, CounterId, KeyId, KeySerialization, Location, Mechanism,
-    MediumData, Message, PathBuf, Platform, SerializedKey, ShortData, Signature,
-    SignatureSerialization, StorageAttributes, UserAttribute,
+    MediumData, Message, PathBuf, SerializedKey, ShortData, Signature, SignatureSerialization,
+    StorageAttributes, UserAttribute,
 };
 
-pub use crate::platform::Syscall;
-
 pub mod mechanisms;
-pub use mechanisms::*;
 
 // to be fair, this is a programmer error,
 // and could also just panic

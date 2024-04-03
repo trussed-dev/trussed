@@ -7,7 +7,7 @@ use zeroize::Zeroize;
 
 use crate::{
     config::{MAX_KEY_MATERIAL_LENGTH, MAX_SERIALIZED_KEY_LENGTH},
-    Error,
+    error::Error,
 };
 
 pub type Material = Vec<u8, { MAX_KEY_MATERIAL_LENGTH }>;

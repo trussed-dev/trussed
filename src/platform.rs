@@ -8,9 +8,8 @@
 
 use rand_core::{CryptoRng, RngCore};
 
-pub use crate::store::Store;
-pub use crate::types::consent;
-pub use crate::types::{reboot, ui};
+use crate::store::Store;
+use crate::types::{consent, reboot, ui};
 
 pub trait UserInterface {
     /// Check if the user has indicated their presence so as to give

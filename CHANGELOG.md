@@ -47,6 +47,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Use nonce as IV for Aes256Cbc mechanism.
 - Reduce re-exports ([#155][]):
   - Remove most re-exports of external types
+  - Remove all re-exports of internal types
 
 ### Fixed
 

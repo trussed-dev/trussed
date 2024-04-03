@@ -44,12 +44,12 @@ impl ExtensionId {
             }
 
             impl #impl_generics ::core::convert::TryFrom<u8> for #name #ty_generics #where_clause {
-                type Error = ::trussed::Error;
+                type Error = ::trussed::error::Error;
 
                 fn try_from(value: u8) -> ::core::result::Result<Self, Self::Error> {
                     match value {
                         #(#try_from)*
-                        _ => Err(::trussed::Error::InternalError),
+                        _ => Err(::trussed::error::Error::InternalError),
                     }
                 }
             }

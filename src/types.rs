@@ -16,9 +16,6 @@ use crate::config::*;
 use crate::store::filestore::{ReadDirFilesState, ReadDirState};
 use crate::{interrupt::InterruptFlag, key::Secrecy};
 
-pub use crate::client::FutureResult;
-pub use crate::platform::Platform;
-
 /// An empty struct not storing any data.
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct NoData;

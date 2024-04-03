@@ -40,13 +40,6 @@ pub mod types;
 #[cfg_attr(docsrs, doc(cfg(feature = "virt")))]
 pub mod virt;
 
-pub use api::Reply;
-pub use client::{Client, ClientImplementation};
-pub use error::Error;
-/// The trait that platforms need to implement to use Trussed.
-pub use platform::Platform;
-pub use service::Service;
-
 pub use cbor_smol::{cbor_deserialize, cbor_serialize_bytes};
 
 pub(crate) use postcard::from_bytes as postcard_deserialize;
