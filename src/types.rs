@@ -447,8 +447,8 @@ impl TryFrom<ShortData> for Letters {
     }
 }
 
-impl serde::Serialize for Id {
-    fn serialize<S>(&self, serializer: S) -> core::result::Result<S::Ok, S::Error>
+impl Serialize for Id {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: serde::Serializer,
     {
@@ -456,8 +456,8 @@ impl serde::Serialize for Id {
     }
 }
 
-impl<'de> serde::Deserialize<'de> for Id {
-    fn deserialize<D>(deserializer: D) -> core::result::Result<Self, D::Error>
+impl<'de> Deserialize<'de> for Id {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: serde::Deserializer<'de>,
     {
@@ -470,7 +470,7 @@ impl<'de> serde::Deserialize<'de> for Id {
                 formatter.write_str("16 bytes")
             }
 
-            fn visit_bytes<E>(self, v: &[u8]) -> core::result::Result<Self::Value, E>
+            fn visit_bytes<E>(self, v: &[u8]) -> Result<Self::Value, E>
             where
                 E: serde::de::Error,
             {

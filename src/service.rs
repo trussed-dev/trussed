@@ -954,7 +954,7 @@ impl<P: Platform, D: Dispatch> Service<P, D> {
     }
 }
 
-impl<P, D> crate::client::Syscall for &mut Service<P, D>
+impl<P, D> Syscall for &mut Service<P, D>
 where
     P: Platform,
     D: Dispatch,
@@ -964,7 +964,7 @@ where
     }
 }
 
-impl<P, D> crate::client::Syscall for Service<P, D>
+impl<P, D> Syscall for Service<P, D>
 where
     P: Platform,
     D: Dispatch,

@@ -366,7 +366,7 @@ pub mod request {
         Uptime:
 
         Wink:
-          - duration: core::time::Duration
+          - duration: Duration
 
         SetCustomStatus:
           - status: u8
