@@ -5,7 +5,6 @@ use heapless::Vec;
 use serde::{de::Visitor, ser::SerializeMap, Deserialize, Serialize};
 use zeroize::Zeroize;
 
-pub use crate::Bytes;
 use crate::{
     config::{MAX_KEY_MATERIAL_LENGTH, MAX_SERIALIZED_KEY_LENGTH},
     Error,

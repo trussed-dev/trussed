@@ -45,6 +45,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   of being generic over the storage implementation.
 - Add `nonce` argument to `wrap_key` and `unwrap_key` syscalls.
 - Use nonce as IV for Aes256Cbc mechanism.
+- Reduce re-exports ([#155][]):
+  - Remove most re-exports of external types
 
 ### Fixed
 
@@ -58,6 +60,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#64]: https://github.com/trussed-dev/trussed/issues/64
 [#65]: https://github.com/trussed-dev/trussed/issues/65
 [#99]: https://github.com/trussed-dev/trussed/issues/99
+[#155]: https://github.com/trussed-dev/trussed/issues/155
 
 ## [0.1.0] - 2022-01-26
 

@@ -80,10 +80,9 @@ use crate::types::{Bytes, Location, PathBuf};
 use cortex_m_semihosting::hprintln;
 use littlefs2::{
     fs::{DirEntry, Metadata},
+    object_safe::DynFilesystem,
     path::Path,
 };
-
-pub use littlefs2::object_safe::{DynFile, DynFilesystem, DynStorage};
 
 pub mod certstore;
 pub mod counterstore;

@@ -3,6 +3,7 @@ use crate::error::Error;
 use crate::key;
 use crate::service::{Exists, Sign};
 use crate::store::keystore::Keystore;
+use crate::types::Bytes;
 
 // code copied from https://github.com/avacariu/rust-oath
 
@@ -72,7 +73,7 @@ impl Sign for super::Totp {
 
         // return signature (encode as LE)
         Ok(reply::Sign {
-            signature: crate::Bytes::from_slice(totp_material.to_le_bytes().as_ref()).unwrap(),
+            signature: Bytes::from_slice(totp_material.to_le_bytes().as_ref()).unwrap(),
         })
     }
 }

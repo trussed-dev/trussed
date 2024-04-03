@@ -20,8 +20,6 @@
 extern crate delog;
 generate_macros!();
 
-pub use interchange::Interchange;
-
 pub mod api;
 pub mod backend;
 pub mod client;
@@ -50,15 +48,14 @@ pub use platform::Platform;
 pub use service::Service;
 
 pub use cbor_smol::{cbor_deserialize, cbor_serialize_bytes};
-pub use heapless_bytes::Bytes;
 
 pub(crate) use postcard::from_bytes as postcard_deserialize;
 
 pub(crate) fn postcard_serialize_bytes<T: serde::Serialize, const N: usize>(
     object: &T,
-) -> postcard::Result<Bytes<N>> {
+) -> postcard::Result<types::Bytes<N>> {
     let vec = postcard::to_vec(object)?;
-    Ok(Bytes::from(vec))
+    Ok(types::Bytes::from(vec))
 }
 
 #[cfg(test)]

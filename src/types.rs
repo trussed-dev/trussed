@@ -1,21 +1,16 @@
 use core::marker::PhantomData;
 use core::ops::Deref;
 
-pub use generic_array::GenericArray;
-
-pub use heapless::{String, Vec};
-
-pub use crate::Bytes;
-
-pub use littlefs2::{
-    driver::Storage as LfsStorage,
-    fs::{DirEntry, Filesystem, Metadata},
-    io::Result as LfsResult,
-    path::{Path, PathBuf},
-};
-
+use heapless::String;
 use rand_core::{CryptoRng, RngCore};
 use serde::{Deserialize, Serialize};
+
+pub use heapless_bytes::Bytes;
+
+pub use littlefs2::{
+    fs::{DirEntry, Metadata},
+    path::{Path, PathBuf},
+};
 
 use crate::config::*;
 use crate::store::filestore::{ReadDirFilesState, ReadDirState};

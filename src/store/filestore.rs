@@ -5,8 +5,7 @@ use crate::{
     error::{Error, Result},
     // service::ReadDirState,
     store::{self, DynFilesystem, Store},
-    types::{Location, Message, UserAttribute},
-    Bytes,
+    types::{Bytes, Location, Message, UserAttribute},
 };
 use littlefs2::path;
 

@@ -1,10 +1,11 @@
+use heapless::Vec;
 use littlefs2::{
     object_safe::DynFilesystem,
     path,
     path::{Path, PathBuf},
 };
 use rand_chacha::ChaCha8Rng;
-pub use rand_core::{RngCore, SeedableRng};
+use rand_core::{RngCore, SeedableRng};
 
 use crate::backend::{BackendId, CoreOnly, Dispatch};
 use crate::client::{ClientBuilder, ClientImplementation};
@@ -23,8 +24,7 @@ pub use crate::store::{
     keystore::{ClientKeystore, Keystore},
 };
 use crate::types::ui::Status;
-use crate::types::{Context, CoreContext, Location, Mechanism, MediumData, Message, Vec};
-use crate::Bytes;
+use crate::types::{Bytes, Context, CoreContext, Location, Mechanism, MediumData, Message};
 use crate::{
     api::{reply, request, Reply, Request},
     interrupt::InterruptFlag,
