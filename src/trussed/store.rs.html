@@ -653,6 +653,8 @@
 <a href="#651" id="651">651</a>
 <a href="#652" id="652">652</a>
 <a href="#653" id="653">653</a>
+<a href="#654" id="654">654</a>
+<a href="#655" id="655">655</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! `store` presents a combined interface to three littlefs2 filesystems:
 //! internal flash, external flash, volatile/RAM.
 //!
@@ -726,8 +728,10 @@
 //! - Alternative: subdirectory &lt;==&gt; RP hash, everything else in flat files
 //! - In any case need to "list dirs excluding . and .." or similar
 
-</span><span class="kw">use </span><span class="kw">crate</span>::error::Error;
-<span class="kw">use </span><span class="kw">crate</span>::types::<span class="kw-2">*</span>;
+</span><span class="kw">use </span>littlefs2::{driver::Storage, fs::Filesystem};
+
+<span class="kw">use </span><span class="kw">crate</span>::error::Error;
+<span class="kw">use </span><span class="kw">crate</span>::types::{Bytes, Location, PathBuf};
 <span class="attr">#[allow(unused_imports)]
 #[cfg(feature = <span class="string">"semihosting"</span>)]
 </span><span class="kw">use </span>cortex_m_semihosting::hprintln;
@@ -782,9 +786,9 @@
 //
 // This makes everything using it *much* more ergonomic.
 </span><span class="kw">pub unsafe trait </span>Store: Copy {
-    <span class="kw">type </span>I: <span class="lifetime">'static </span>+ LfsStorage;
-    <span class="kw">type </span>E: <span class="lifetime">'static </span>+ LfsStorage;
-    <span class="kw">type </span>V: <span class="lifetime">'static </span>+ LfsStorage;
+    <span class="kw">type </span>I: <span class="lifetime">'static </span>+ Storage;
+    <span class="kw">type </span>E: <span class="lifetime">'static </span>+ Storage;
+    <span class="kw">type </span>V: <span class="lifetime">'static </span>+ Storage;
     <span class="kw">fn </span>ifs(<span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Fs&lt;<span class="self">Self</span>::I&gt;;
     <span class="kw">fn </span>efs(<span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Fs&lt;<span class="self">Self</span>::E&gt;;
     <span class="kw">fn </span>vfs(<span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Fs&lt;<span class="self">Self</span>::V&gt;;
@@ -797,18 +801,18 @@
     }
 }
 
-<span class="kw">pub struct </span>Fs&lt;S: <span class="lifetime">'static </span>+ LfsStorage&gt; {
+<span class="kw">pub struct </span>Fs&lt;S: <span class="lifetime">'static </span>+ Storage&gt; {
     fs: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Filesystem&lt;<span class="lifetime">'static</span>, S&gt;,
 }
 
-<span class="kw">impl</span>&lt;S: <span class="lifetime">'static </span>+ LfsStorage&gt; core::ops::Deref <span class="kw">for </span>Fs&lt;S&gt; {
+<span class="kw">impl</span>&lt;S: <span class="lifetime">'static </span>+ Storage&gt; core::ops::Deref <span class="kw">for </span>Fs&lt;S&gt; {
     <span class="kw">type </span>Target = Filesystem&lt;<span class="lifetime">'static</span>, S&gt;;
     <span class="kw">fn </span>deref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="self">Self</span>::Target {
         <span class="self">self</span>.fs
     }
 }
 
-<span class="kw">impl</span>&lt;S: <span class="lifetime">'static </span>+ LfsStorage&gt; Fs&lt;S&gt; {
+<span class="kw">impl</span>&lt;S: <span class="lifetime">'static </span>+ Storage&gt; Fs&lt;S&gt; {
     <span class="kw">pub fn </span>new(fs: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Filesystem&lt;<span class="lifetime">'static</span>, S&gt;) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{ fs }
     }
