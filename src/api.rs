@@ -5,7 +5,11 @@
 //! [pkcs11-v3]: https://docs.oasis-open.org/pkcs11/pkcs11-base/v3.0/pkcs11-base-v3.0.html
 //! [pkcs11-headers]: https://docs.oasis-open.org/pkcs11/pkcs11-base/v3.0/cs01/include/pkcs11-v3.0/
 
-use crate::types::*;
+use crate::types::{
+    consent, reboot, Bytes, CertId, CounterId, DirEntry, KeyId, KeySerialization, Location,
+    Mechanism, MediumData, Message, PathBuf, SerializedKey, ShortData, Signature,
+    SignatureSerialization, StorageAttributes, UserAttribute,
+};
 use core::time::Duration;
 
 #[macro_use]
@@ -16,6 +20,32 @@ mod macros;
 // to the request type in the client.
 //
 // At minimum, we don't want to list the indices (may need proc-macro)
+
+#[derive(Clone, Eq, PartialEq, Debug, serde::Serialize, serde::Deserialize)]
+pub enum NotBefore {
+    /// Start iteration at the beginning of the directory
+    None,
+    /// Start iteration at an exact match with the provided filename
+    Filename(PathBuf),
+    /// Start iteration at the first path that is "after" the provided filename
+    FilenamePart(PathBuf),
+}
+
+impl NotBefore {
+    pub fn with_filename(value: Option<PathBuf>) -> Self {
+        match value {
+            None => Self::None,
+            Some(p) => Self::Filename(p),
+        }
+    }
+
+    pub fn with_filename_part(value: Option<PathBuf>) -> Self {
+        match value {
+            None => Self::None,
+            Some(p) => Self::FilenamePart(p),
+        }
+    }
+}
 
 generate_enums! {
 
@@ -244,7 +274,7 @@ pub mod request {
         ReadDirFirst:
           - location: Location
           - dir: PathBuf
-          - not_before_filename: Option<PathBuf>
+          - not_before: NotBefore
 
         ReadDirNext:
 
@@ -340,7 +370,7 @@ pub mod request {
         Uptime:
 
         Wink:
-          - duration: core::time::Duration
+          - duration: Duration
 
         SetCustomStatus:
           - status: u8

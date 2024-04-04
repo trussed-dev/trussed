@@ -328,134 +328,34 @@ mod backends {
 
 mod runner {
     use super::{
-        backends::{SampleBackend, SampleContext, TestBackend, TestContext},
+        backends::{SampleBackend, TestBackend},
         extensions::{SampleExtension, TestExtension},
     };
 
     pub mod id {
-        use trussed::error::Error;
-
         pub enum Backend {
             Test,
             Sample,
         }
 
+        #[derive(trussed_derive::ExtensionId)]
         pub enum Extension {
             Test = 37,
             Sample = 42,
         }
-
-        impl From<Extension> for u8 {
-            fn from(extension: Extension) -> Self {
-                extension as u8
-            }
-        }
-
-        impl TryFrom<u8> for Extension {
-            type Error = Error;
-
-            fn try_from(value: u8) -> Result<Self, Self::Error> {
-                match value {
-                    37 => Ok(Self::Test),
-                    42 => Ok(Self::Sample),
-                    _ => Err(Error::InternalError),
-                }
-            }
-        }
     }
 
-    use trussed::{
-        api::{reply, request, Reply, Request},
-        backend::{Backend as _, BackendId},
-        error::Error,
-        platform::Platform,
-        serde_extensions::{ExtensionDispatch, ExtensionId, ExtensionImpl},
-        service::ServiceResources,
-        types::Context,
-    };
+    use trussed::backend::BackendId;
+    use trussed_derive::ExtensionDispatch;
 
-    #[derive(Default)]
+    #[derive(Default, ExtensionDispatch)]
+    #[dispatch(backend_id = "id::Backend", extension_id = "id::Extension")]
+    #[extensions(Test = "TestExtension", Sample = "SampleExtension")]
     pub struct Backends {
+        #[extensions("Test")]
         test: TestBackend,
+        #[extensions("Test", "Sample")]
         sample: SampleBackend,
-    }
-
-    #[derive(Default)]
-    pub struct BackendsContext {
-        test: TestContext,
-        sample: SampleContext,
-    }
-
-    impl ExtensionDispatch for Backends {
-        type BackendId = id::Backend;
-        type Context = BackendsContext;
-        type ExtensionId = id::Extension;
-
-        fn core_request<P: Platform>(
-            &mut self,
-            backend: &Self::BackendId,
-            ctx: &mut Context<Self::Context>,
-            request: &Request,
-            resources: &mut ServiceResources<P>,
-        ) -> Result<Reply, Error> {
-            match backend {
-                id::Backend::Test => {
-                    self.test
-                        .request(&mut ctx.core, &mut ctx.backends.test, request, resources)
-                }
-                id::Backend::Sample => {
-                    self.sample
-                        .request(&mut ctx.core, &mut ctx.backends.sample, request, resources)
-                }
-            }
-        }
-
-        fn extension_request<P: Platform>(
-            &mut self,
-            backend: &Self::BackendId,
-            extension: &Self::ExtensionId,
-            ctx: &mut Context<Self::Context>,
-            request: &request::SerdeExtension,
-            resources: &mut ServiceResources<P>,
-        ) -> Result<reply::SerdeExtension, Error> {
-            match backend {
-                id::Backend::Test => match extension {
-                    id::Extension::Test => self.test.extension_request_serialized(
-                        &mut ctx.core,
-                        &mut ctx.backends.test,
-                        request,
-                        resources,
-                    ),
-                    id::Extension::Sample => Err(Error::RequestNotAvailable),
-                },
-                id::Backend::Sample => match extension {
-                    id::Extension::Test => <SampleBackend as ExtensionImpl<TestExtension>>::extension_request_serialized(
-                        &mut self.sample,
-                        &mut ctx.core,
-                        &mut ctx.backends.sample,
-                        request,
-                        resources,
-                    ),
-                    id::Extension::Sample => <SampleBackend as ExtensionImpl<SampleExtension>>::extension_request_serialized(
-                        &mut self.sample,
-                        &mut ctx.core,
-                        &mut ctx.backends.sample,
-                        request,
-                        resources,
-                    ),
-                },
-            }
-        }
-    }
-
-    impl ExtensionId<TestExtension> for Backends {
-        type Id = id::Extension;
-        const ID: Self::Id = Self::Id::Test;
-    }
-
-    impl ExtensionId<SampleExtension> for Backends {
-        type Id = id::Extension;
-        const ID: Self::Id = Self::Id::Sample;
     }
 
     pub const BACKENDS_TEST1: &[BackendId<id::Backend>] =

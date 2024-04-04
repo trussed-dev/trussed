@@ -1,7 +1,9 @@
-use crate::api::*;
+use crate::api::{reply, request};
 use crate::error::Error;
-use crate::service::*;
-use crate::types::*;
+use crate::key;
+use crate::service::{DeriveKey, Sign};
+use crate::store::keystore::Keystore;
+use crate::types::Signature;
 
 #[cfg(feature = "hmac-blake2s")]
 impl DeriveKey for super::HmacBlake2s {

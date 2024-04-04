@@ -1,8 +1,9 @@
-use crate::api::*;
+use crate::api::{reply, request};
 use crate::error::Error;
 use crate::key;
-use crate::service::*;
-use crate::types::*;
+use crate::service::{SerializeKey, UnsafeInjectKey};
+use crate::store::keystore::Keystore;
+use crate::types::{KeySerialization, SerializedKey};
 
 impl SerializeKey for super::SharedSecret {
     #[inline(never)]

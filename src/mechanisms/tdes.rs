@@ -8,11 +8,13 @@
 // needed to even get ::new() from des...
 #[cfg(feature = "tdes")]
 use des::cipher::{BlockDecrypt, BlockEncrypt, KeyInit};
+use generic_array::GenericArray;
 
-use crate::api::*;
+use crate::api::{reply, request};
 use crate::error::Error;
-use crate::service::*;
-use crate::types::*;
+use crate::key;
+use crate::service::{Decrypt, Encrypt, UnsafeInjectKey};
+use crate::store::keystore::Keystore;
 
 const TDES_KEY_SIZE: usize = 24;
 

@@ -77,13 +77,17 @@
 //!
 use core::{marker::PhantomData, task::Poll};
 
-use crate::api::*;
+use crate::api::{reply, request, NotBefore, Reply, ReplyVariant, RequestVariant};
 use crate::backend::{BackendId, CoreOnly, Dispatch};
-use crate::error::*;
+use crate::error::{Error, Result};
 use crate::interrupt::InterruptFlag;
 use crate::pipe::{TrussedRequester, TRUSSED_INTERCHANGE};
 use crate::service::Service;
-use crate::types::*;
+use crate::types::{
+    consent, reboot, Bytes, CertId, CounterId, KeyId, KeySerialization, Location, Mechanism,
+    MediumData, Message, PathBuf, Platform, SerializedKey, ShortData, Signature,
+    SignatureSerialization, StorageAttributes, UserAttribute,
+};
 
 pub use crate::platform::Syscall;
 
@@ -598,6 +602,9 @@ pub trait FilesystemClient: PollClient {
         self.request(request::DebugDumpStore {})
     }
 
+    /// Open a directory for iteration with `read_dir_next`
+    ///
+    /// For optimization, not_before_filename can be passed to begin the iteration at that file.
     fn read_dir_first(
         &mut self,
         location: Location,
@@ -607,7 +614,27 @@ pub trait FilesystemClient: PollClient {
         self.request(request::ReadDirFirst {
             location,
             dir,
-            not_before_filename,
+            not_before: NotBefore::with_filename(not_before_filename),
+        })
+    }
+
+    /// Open a directory for iteration with `read_dir_next`
+    ///
+    /// For optimization, not_before_filename can be passed to begin the iteration after the first file that is "alphabetically" before the original file
+    ///
+    /// <div class="warning">
+    /// The notion used here for "alphabetical" does not correspond to the order of iteration yielded by littlefs. This function should be used with caution. If `not_before_filename` was yielded from a previous use of read_dir, it can lead to entries being repeated.
+    /// </div>
+    fn read_dir_first_alphabetical(
+        &mut self,
+        location: Location,
+        dir: PathBuf,
+        not_before_filename: Option<PathBuf>,
+    ) -> ClientResult<'_, reply::ReadDirFirst, Self> {
+        self.request(request::ReadDirFirst {
+            location,
+            dir,
+            not_before: NotBefore::with_filename_part(not_before_filename),
         })
     }
 

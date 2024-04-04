@@ -1,4 +1,5 @@
 use littlefs2::{
+    object_safe::DynFilesystem,
     path,
     path::{Path, PathBuf},
 };
@@ -7,25 +8,27 @@ pub use rand_core::{RngCore, SeedableRng};
 
 use crate::backend::{BackendId, CoreOnly, Dispatch};
 use crate::client::{ClientBuilder, ClientImplementation};
-use crate::config::*;
+use crate::config::{MAX_MESSAGE_LENGTH, MAX_SERVICE_CLIENTS};
 use crate::error::{Error, Result};
 pub use crate::key;
 use crate::mechanisms;
 pub use crate::pipe::ServiceEndpoint;
 use crate::pipe::TrussedResponder;
-use crate::platform::*;
+use crate::platform::{consent, ui, Platform, Store, Syscall, UserInterface};
 pub use crate::store::{
     self,
     certstore::{Certstore as _, ClientCertstore},
     counterstore::{ClientCounterstore, Counterstore as _},
     filestore::{ClientFilestore, Filestore, ReadDirFilesState, ReadDirState},
     keystore::{ClientKeystore, Keystore},
-    DynFilesystem,
 };
 use crate::types::ui::Status;
-use crate::types::*;
+use crate::types::{Context, CoreContext, Location, Mechanism, MediumData, Message, Vec};
 use crate::Bytes;
-use crate::{api::*, interrupt::InterruptFlag};
+use crate::{
+    api::{reply, request, Reply, Request},
+    interrupt::InterruptFlag,
+};
 
 pub mod attest;
 
@@ -111,6 +114,11 @@ impl<P: Platform> ServiceResources<P> {
 
     pub fn filestore(&mut self, client_id: PathBuf) -> ClientFilestore<P::S> {
         ClientFilestore::new(client_id, self.platform.store())
+    }
+
+    /// Get access to the filestore for the client without the `dat` intermediary
+    pub fn raw_filestore(&mut self, client_id: PathBuf) -> ClientFilestore<P::S> {
+        ClientFilestore::new_raw(client_id, self.platform.store())
     }
 
     pub fn trussed_filestore(&mut self) -> ClientFilestore<P::S> {
@@ -404,7 +412,7 @@ impl<P: Platform> ServiceResources<P> {
                 let maybe_entry = match filestore.read_dir_first(
                     &request.dir,
                     request.location,
-                    request.not_before_filename.as_deref(),
+                    &request.not_before,
                 )? {
                     Some((entry, read_dir_state)) => {
                         ctx.read_dir_state = Some(read_dir_state);
@@ -949,7 +957,7 @@ impl<P: Platform, D: Dispatch> Service<P, D> {
     }
 }
 
-impl<P, D> crate::client::Syscall for &mut Service<P, D>
+impl<P, D> Syscall for &mut Service<P, D>
 where
     P: Platform,
     D: Dispatch,
@@ -959,7 +967,7 @@ where
     }
 }
 
-impl<P, D> crate::client::Syscall for Service<P, D>
+impl<P, D> Syscall for Service<P, D>
 where
     P: Platform,
     D: Dispatch,

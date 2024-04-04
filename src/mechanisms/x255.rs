@@ -1,13 +1,14 @@
-use core::convert::TryInto;
-
-use crate::api::*;
-// use crate::config::*;
-// use crate::debug;
-use crate::error::Error;
-use crate::service::*;
-use crate::types::*;
-
+use rand_core::RngCore;
 use salty::agreement;
+
+use crate::api::{reply, request};
+use crate::error::Error;
+use crate::key;
+use crate::service::{
+    Agree, DeriveKey, DeserializeKey, Exists, GenerateKey, SerializeKey, UnsafeInjectKey,
+};
+use crate::store::keystore::Keystore;
+use crate::types::{KeyId, KeySerialization, SerializedKey};
 
 fn load_public_key(
     keystore: &mut impl Keystore,

@@ -1,6 +1,10 @@
-use crate::api::*;
+use rand_core::RngCore;
+
+use crate::api::{reply, request};
 use crate::error::Error;
-use crate::service::*;
+use crate::key;
+use crate::service::GenerateKey;
+use crate::store::keystore::Keystore;
 
 #[cfg(feature = "trng")]
 impl GenerateKey for super::Trng {
