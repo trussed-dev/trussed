@@ -402,6 +402,185 @@ pub trait P256: CryptoClient {
     }
 }
 
+#[cfg(feature = "p384")]
+impl<S: Syscall, E> P384 for ClientImplementation<S, E> {}
+
+#[cfg(feature = "p384")]
+pub trait P384: CryptoClient {
+    fn generate_p384_private_key(
+        &mut self,
+        persistence: Location,
+    ) -> ClientResult<'_, reply::GenerateKey, Self> {
+        self.generate_key(
+            Mechanism::P384,
+            StorageAttributes::new().set_persistence(persistence),
+        )
+    }
+
+    fn derive_p384_public_key(
+        &mut self,
+        private_key: KeyId,
+        persistence: Location,
+    ) -> ClientResult<'_, reply::DeriveKey, Self> {
+        self.derive_key(
+            Mechanism::P384,
+            private_key,
+            None,
+            StorageAttributes::new().set_persistence(persistence),
+        )
+    }
+
+    fn deserialize_p384_key<'c>(
+        &'c mut self,
+        serialized_key: &[u8],
+        format: KeySerialization,
+        attributes: StorageAttributes,
+    ) -> ClientResult<'c, reply::DeserializeKey, Self> {
+        self.deserialize_key(Mechanism::P384, serialized_key, format, attributes)
+    }
+
+    fn serialize_p384_key(
+        &mut self,
+        key: KeyId,
+        format: KeySerialization,
+    ) -> ClientResult<'_, reply::SerializeKey, Self> {
+        self.serialize_key(Mechanism::P384, key, format)
+    }
+
+    // generally, don't offer multiple versions of a mechanism, if possible.
+    // try using the simplest when given the choice.
+    // hashing is something users can do themselves hopefully :)
+    //
+    // on the other hand: if users need sha256, then if the service runs in secure trustzone
+    // domain, we'll maybe need two copies of the sha2 code
+    fn sign_p384<'c>(
+        &'c mut self,
+        key: KeyId,
+        message: &[u8],
+        format: SignatureSerialization,
+    ) -> ClientResult<'c, reply::Sign, Self> {
+        self.sign(Mechanism::P384, key, message, format)
+    }
+
+    fn verify_p384<'c>(
+        &'c mut self,
+        key: KeyId,
+        message: &[u8],
+        signature: &[u8],
+    ) -> ClientResult<'c, reply::Verify, Self> {
+        self.verify(
+            Mechanism::P384,
+            key,
+            message,
+            signature,
+            SignatureSerialization::Raw,
+        )
+    }
+
+    fn agree_p384(
+        &mut self,
+        private_key: KeyId,
+        public_key: KeyId,
+        persistence: Location,
+    ) -> ClientResult<'_, reply::Agree, Self> {
+        self.agree(
+            Mechanism::P384,
+            private_key,
+            public_key,
+            StorageAttributes::new().set_persistence(persistence),
+        )
+    }
+}
+
+#[cfg(feature = "p521")]
+impl<S: Syscall, E> P521 for ClientImplementation<S, E> {}
+
+pub trait P521: CryptoClient {
+    fn generate_p521_private_key(
+        &mut self,
+        persistence: Location,
+    ) -> ClientResult<'_, reply::GenerateKey, Self> {
+        self.generate_key(
+            Mechanism::P521,
+            StorageAttributes::new().set_persistence(persistence),
+        )
+    }
+
+    fn derive_p521_public_key(
+        &mut self,
+        private_key: KeyId,
+        persistence: Location,
+    ) -> ClientResult<'_, reply::DeriveKey, Self> {
+        self.derive_key(
+            Mechanism::P521,
+            private_key,
+            None,
+            StorageAttributes::new().set_persistence(persistence),
+        )
+    }
+
+    fn deserialize_p521_key<'c>(
+        &'c mut self,
+        serialized_key: &[u8],
+        format: KeySerialization,
+        attributes: StorageAttributes,
+    ) -> ClientResult<'c, reply::DeserializeKey, Self> {
+        self.deserialize_key(Mechanism::P521, serialized_key, format, attributes)
+    }
+
+    fn serialize_p521_key(
+        &mut self,
+        key: KeyId,
+        format: KeySerialization,
+    ) -> ClientResult<'_, reply::SerializeKey, Self> {
+        self.serialize_key(Mechanism::P521, key, format)
+    }
+
+    // generally, don't offer multiple versions of a mechanism, if possible.
+    // try using the simplest when given the choice.
+    // hashing is something users can do themselves hopefully :)
+    //
+    // on the other hand: if users need sha256, then if the service runs in secure trustzone
+    // domain, we'll maybe need two copies of the sha2 code
+    fn sign_p521<'c>(
+        &'c mut self,
+        key: KeyId,
+        message: &[u8],
+        format: SignatureSerialization,
+    ) -> ClientResult<'c, reply::Sign, Self> {
+        self.sign(Mechanism::P521, key, message, format)
+    }
+
+    fn verify_p521<'c>(
+        &'c mut self,
+        key: KeyId,
+        message: &[u8],
+        signature: &[u8],
+    ) -> ClientResult<'c, reply::Verify, Self> {
+        self.verify(
+            Mechanism::P521,
+            key,
+            message,
+            signature,
+            SignatureSerialization::Raw,
+        )
+    }
+
+    fn agree_p521(
+        &mut self,
+        private_key: KeyId,
+        public_key: KeyId,
+        persistence: Location,
+    ) -> ClientResult<'_, reply::Agree, Self> {
+        self.agree(
+            Mechanism::P521,
+            private_key,
+            public_key,
+            StorageAttributes::new().set_persistence(persistence),
+        )
+    }
+}
+
 #[cfg(feature = "sha256")]
 impl<S: Syscall, E> Sha256 for ClientImplementation<S, E> {}
 
