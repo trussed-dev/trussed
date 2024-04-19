@@ -10,6 +10,9 @@ use littlefs2::fs::{Allocation, Filesystem};
 use littlefs2::io::Result as LfsResult;
 use rand_core::{CryptoRng, RngCore};
 
+#[cfg(feature = "p256")]
+use crate::types::{Mechanism, SignatureSerialization, StorageAttributes};
+
 use crate::client::{CryptoClient as _, FilesystemClient as _};
 use crate::types::{consent, reboot, ui, Bytes, Location, PathBuf};
 use crate::{api, block, platform, store, Error};
@@ -261,7 +264,7 @@ fn sign_ed255() {
     assert_eq!(Err(Error::WrongSignatureLength), reply);
 }
 
-#[cfg(feature = "p255")]
+#[cfg(feature = "p256")]
 #[test]
 #[serial]
 fn sign_p256() {
@@ -301,7 +304,7 @@ fn sign_p256() {
     assert!(valid);
 }
 
-#[cfg(feature = "p255")]
+#[cfg(feature = "p256")]
 #[test]
 #[serial]
 fn agree_p256() {
