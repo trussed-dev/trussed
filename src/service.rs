@@ -955,6 +955,14 @@ impl<P: Platform, D: Dispatch> Service<P, D> {
                 .unwrap(),
         );
     }
+
+    pub fn dispatch(&self) -> &D {
+        &self.dispatch
+    }
+
+    pub fn dispatch_mut(&mut self) -> &mut D {
+        &mut self.dispatch
+    }
 }
 
 impl<P, D> Syscall for &mut Service<P, D>
