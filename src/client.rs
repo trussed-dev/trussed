@@ -795,9 +795,9 @@ impl ClientBuilder {
     ///
     /// Per default, the client does not support backends and always uses the Trussed core
     /// implementation to execute requests.
-    pub fn new(id: impl Into<PathBuf>) -> Self {
+    pub fn new(id: PathBuf) -> Self {
         Self {
-            id: id.into(),
+            id,
             backends: &[],
             interrupt: None,
         }

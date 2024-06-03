@@ -122,7 +122,7 @@ impl<P: Platform> ServiceResources<P> {
     }
 
     pub fn trussed_filestore(&mut self) -> ClientFilestore<P::S> {
-        ClientFilestore::new(PathBuf::from("trussed"), self.platform.store())
+        ClientFilestore::new(path!("trussed").into(), self.platform.store())
     }
 
     pub fn keystore(&mut self, client_id: PathBuf) -> Result<ClientKeystore<P::S>> {
@@ -182,7 +182,7 @@ impl<P: Platform> ServiceResources<P> {
             #[cfg(feature = "crypto-client-attest")]
             Request::Attest(request) => {
                 let mut attn_keystore: ClientKeystore<P::S> = ClientKeystore::new(
-                    PathBuf::from("attn"),
+                    path!("attn").into(),
                     self.rng().map_err(|_| Error::EntropyMalfunction)?,
                     full_store,
                 );
@@ -854,7 +854,7 @@ impl<P: Platform> Service<P> {
     /// interchange pairs.
     pub fn try_new_client<S: Syscall>(
         &mut self,
-        client_id: &str,
+        client_id: PathBuf,
         syscall: S,
         interrupt: Option<&'static InterruptFlag>,
     ) -> Result<ClientImplementation<S>, Error> {
@@ -869,7 +869,7 @@ impl<P: Platform> Service<P> {
     /// single-app runners.
     pub fn try_as_new_client(
         &mut self,
-        client_id: &str,
+        client_id: PathBuf,
         interrupt: Option<&'static InterruptFlag>,
     ) -> Result<ClientImplementation<&mut Self>, Error> {
         ClientBuilder::new(client_id)
@@ -882,7 +882,7 @@ impl<P: Platform> Service<P> {
     /// Service and is therefore `'static`
     pub fn try_into_new_client(
         mut self,
-        client_id: &str,
+        client_id: PathBuf,
         interrupt: Option<&'static InterruptFlag>,
     ) -> Result<ClientImplementation<Self>, Error> {
         ClientBuilder::new(client_id)
