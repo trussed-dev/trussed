@@ -7,13 +7,14 @@ use littlefs2::const_ram_storage;
 use littlefs2::driver::Storage as LfsStorage;
 use littlefs2::fs::{Allocation, Filesystem};
 use littlefs2::io::Result as LfsResult;
+use littlefs2::path;
 use rand_core::{CryptoRng, RngCore};
 
 #[cfg(any(feature = "p256", feature = "p384", feature = "p521",))]
 use crate::types::{Mechanism, SignatureSerialization, StorageAttributes};
 
 use crate::client::{CryptoClient as _, FilesystemClient as _};
-use crate::types::{consent, reboot, ui, Bytes, Location, PathBuf};
+use crate::types::{consent, reboot, ui, Bytes, Location};
 use crate::{api, block, platform, store, Error};
 
 pub struct MockRng(ChaCha20);
@@ -172,7 +173,7 @@ macro_rules! setup {
         let (test_trussed_requester, test_trussed_responder) = crate::pipe::TRUSSED_INTERCHANGE
             .claim()
             .expect("could not setup TEST TrussedInterchange");
-        let test_client_id = "TEST";
+        let test_client_id = path!("TEST");
 
         assert!(trussed
             .add_endpoint(test_trussed_responder, test_client_id, &[], None)
@@ -875,8 +876,10 @@ fn rng() {
 fn filesystem() {
     setup!(client);
 
+    let path = path!("test_file");
+
     assert!(block!(client
-        .entry_metadata(Location::Internal, PathBuf::from("test_file"))
+        .entry_metadata(Location::Internal, path.into())
         .expect("no client error"))
     .expect("no errors")
     .metadata
@@ -884,24 +887,19 @@ fn filesystem() {
 
     let data = Bytes::from_slice(&[0; 20]).unwrap();
     block!(client
-        .write_file(
-            Location::Internal,
-            PathBuf::from("test_file"),
-            data.clone(),
-            None,
-        )
+        .write_file(Location::Internal, path.into(), data.clone(), None,)
         .expect("no client error"))
     .expect("no errors");
 
     let recv_data = block!(client
-        .read_file(Location::Internal, PathBuf::from("test_file"))
+        .read_file(Location::Internal, path.into())
         .expect("no client error"))
     .expect("no errors")
     .data;
     assert_eq!(data, recv_data);
 
     let metadata = block!(client
-        .entry_metadata(Location::Internal, PathBuf::from("test_file"))
+        .entry_metadata(Location::Internal, path.into())
         .expect("no client error"))
     .expect("no errors")
     .metadata
@@ -910,11 +908,11 @@ fn filesystem() {
 
     // This returns an error because the name doesn't exist
     block!(client
-        .remove_file(Location::Internal, PathBuf::from("bad_name"))
+        .remove_file(Location::Internal, path!("bad_name").into())
         .expect("no client error"))
     .ok();
     let metadata = block!(client
-        .entry_metadata(Location::Internal, PathBuf::from("test_file"))
+        .entry_metadata(Location::Internal, path.into())
         .expect("no client error"))
     .expect("no errors")
     .metadata
@@ -922,11 +920,11 @@ fn filesystem() {
     assert!(metadata.is_file());
 
     block!(client
-        .remove_file(Location::Internal, PathBuf::from("test_file"))
+        .remove_file(Location::Internal, path.into())
         .expect("no client error"))
     .expect("no errors");
     assert!(block!(client
-        .entry_metadata(Location::Internal, PathBuf::from("test_file"))
+        .entry_metadata(Location::Internal, path.into())
         .expect("no client error"))
     .expect("no errors")
     .metadata

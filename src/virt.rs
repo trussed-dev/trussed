@@ -131,7 +131,9 @@ impl<S: Syscall> Syscall for Arc<Mutex<S>> {
 impl<S: StoreProvider> Platform<S> {
     pub fn run_client<R>(self, client_id: &str, test: impl FnOnce(Client<S>) -> R) -> R {
         let service = Service::new(self);
-        let client = service.try_into_new_client(client_id, None).unwrap();
+        let client = service
+            .try_into_new_client(client_id.try_into().unwrap(), None)
+            .unwrap();
         test(client)
     }
 
@@ -143,7 +145,7 @@ impl<S: StoreProvider> Platform<S> {
         test: impl FnOnce(Client<S, D>) -> R,
     ) -> R {
         let mut service = Service::with_dispatch(self, dispatch);
-        let client = ClientBuilder::new(client_id)
+        let client = ClientBuilder::new(client_id.try_into().unwrap())
             .backends(backends)
             .prepare(&mut service)
             .unwrap()
@@ -157,8 +159,11 @@ impl<S: StoreProvider> Platform<S> {
         test: impl FnOnce([MultiClient<S>; N]) -> R,
     ) -> R {
         let mut service = Service::new(self);
-        let prepared_clients =
-            client_ids.map(|id| ClientBuilder::new(id).prepare(&mut service).unwrap());
+        let prepared_clients = client_ids.map(|id| {
+            ClientBuilder::new(id.try_into().unwrap())
+                .prepare(&mut service)
+                .unwrap()
+        });
         let service = Arc::new(Mutex::new(service));
         test(prepared_clients.map(|builder| builder.build(service.clone())))
     }
@@ -172,7 +177,7 @@ impl<S: StoreProvider> Platform<S> {
     ) -> R {
         let mut service = Service::with_dispatch(self, dispatch);
         let prepared_clients = client_ids.map(|(id, backends)| {
-            ClientBuilder::new(id)
+            ClientBuilder::new(id.try_into().unwrap())
                 .backends(backends)
                 .prepare(&mut service)
                 .unwrap()

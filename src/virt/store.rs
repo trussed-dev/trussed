@@ -66,7 +66,7 @@ impl Storage for FilesystemStorage {
     fn write(&mut self, offset: usize, data: &[u8]) -> LfsResult<usize> {
         debug!("write: offset: {}, len: {}", offset, data.len());
         if offset + data.len() > STORAGE_SIZE {
-            return Err(littlefs2::io::Error::NoSpace);
+            return Err(littlefs2::io::Error::NO_SPACE);
         }
         let mut file = OpenOptions::new().write(true).open(&self.0).unwrap();
         file.seek(SeekFrom::Start(offset as _)).unwrap();
@@ -79,7 +79,7 @@ impl Storage for FilesystemStorage {
     fn erase(&mut self, offset: usize, len: usize) -> LfsResult<usize> {
         debug!("erase: offset: {}, len: {}", offset, len);
         if offset + len > STORAGE_SIZE {
-            return Err(littlefs2::io::Error::NoSpace);
+            return Err(littlefs2::io::Error::NO_SPACE);
         }
         let mut file = OpenOptions::new().write(true).open(&self.0).unwrap();
         file.seek(SeekFrom::Start(offset as _)).unwrap();

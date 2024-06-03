@@ -85,6 +85,11 @@ impl Id {
         buffer
     }
 
+    pub fn hex_path(&self) -> PathBuf {
+        // the hex representation is always ascii-only and has a valid length, so this cannot panic
+        PathBuf::try_from(self.hex().as_slice()).unwrap()
+    }
+
     /// skips leading zeros
     pub fn hex_clean(&self) -> String<32> {
         const HEX_CHARS: &[u8] = b"0123456789abcdef";
@@ -326,9 +331,9 @@ impl From<PathBuf> for CoreContext {
     }
 }
 
-impl From<&str> for CoreContext {
-    fn from(s: &str) -> Self {
-        Self::new(s.into())
+impl From<&Path> for CoreContext {
+    fn from(path: &Path) -> Self {
+        Self::new(path.into())
     }
 }
 
