@@ -84,10 +84,13 @@ use crate::interrupt::InterruptFlag;
 use crate::pipe::{TrussedRequester, TRUSSED_INTERCHANGE};
 use crate::service::Service;
 use crate::types::{
-    consent, reboot, Bytes, CertId, CounterId, KeyId, KeySerialization, Location, Mechanism,
-    MediumData, Message, PathBuf, Platform, SerializedKey, ShortData, Signature,
-    SignatureSerialization, StorageAttributes, UserAttribute,
+    consent, reboot, Bytes, CertId, KeyId, KeySerialization, Location, Mechanism, MediumData,
+    Message, PathBuf, Platform, SerializedKey, ShortData, Signature, SignatureSerialization,
+    StorageAttributes, UserAttribute,
 };
+
+#[cfg(feature = "counter-client")]
+use crate::types::CounterId;
 
 pub use crate::platform::Syscall;
 
