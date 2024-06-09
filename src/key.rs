@@ -70,6 +70,8 @@ pub enum Kind {
     Rsa4096,
     Ed255,
     P256,
+    P384,
+    P521,
     X255,
 }
 
@@ -211,6 +213,8 @@ impl Kind {
             Kind::Rsa2048 => 7,
             Kind::Rsa3072 => 8,
             Kind::Rsa4096 => 9,
+            Kind::P384 => 10,
+            Kind::P521 => 11,
         }
     }
 
@@ -225,6 +229,8 @@ impl Kind {
             7 => Kind::Rsa2048,
             8 => Kind::Rsa3072,
             9 => Kind::Rsa4096,
+            10 => Kind::P384,
+            11 => Kind::P521,
             _ => return Err(Error::InvalidSerializedKey),
         })
     }
