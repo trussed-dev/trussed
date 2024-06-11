@@ -3,13 +3,12 @@
 use trussed::{
     api::{reply::ReadFile, Reply, Request},
     backend::{self, BackendId},
-    client::FilesystemClient as _,
+    client::{ClientImplementation, FilesystemClient as _},
     error::Error,
     platform,
     service::{Service, ServiceResources},
     types::{CoreContext, Location, Message, PathBuf},
     virt::{self, Ram},
-    ClientImplementation,
 };
 
 type Platform = virt::Platform<Ram>;

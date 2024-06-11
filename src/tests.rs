@@ -14,8 +14,9 @@ use rand_core::{CryptoRng, RngCore};
 use crate::types::{Mechanism, SignatureSerialization, StorageAttributes};
 
 use crate::client::{CryptoClient as _, FilesystemClient as _};
+use crate::error::Error;
 use crate::types::{consent, reboot, ui, Bytes, Location, PathBuf};
-use crate::{api, block, platform, store, Error};
+use crate::{api, block, platform, store};
 
 pub struct MockRng(ChaCha20);
 
@@ -184,7 +185,7 @@ macro_rules! setup {
         let pc_interface: UserInterface = Default::default();
 
         let platform = $platform::new(rng, store, pc_interface);
-        let mut trussed: crate::Service<$platform> = crate::service::Service::new(platform);
+        let mut trussed: crate::service::Service<$platform> = crate::service::Service::new(platform);
 
         let (test_trussed_requester, test_trussed_responder) = crate::pipe::TRUSSED_INTERCHANGE
             .claim()
@@ -198,7 +199,7 @@ macro_rules! setup {
         trussed.set_seed_if_uninitialized(&$seed);
         let mut $client = {
             pub type TestClient<'a> =
-                crate::ClientImplementation<&'a mut crate::Service<$platform>>;
+                crate::client::ClientImplementation<&'a mut crate::service::Service<$platform>>;
             TestClient::new(test_trussed_requester, &mut trussed, None)
         };
     };

@@ -6,8 +6,7 @@ use crate::{
     error::{Error, Result},
     key,
     store::{self, Store},
-    types::{KeyId, Location},
-    Bytes,
+    types::{Bytes, KeyId, Location},
 };
 
 pub type ClientId = PathBuf;
