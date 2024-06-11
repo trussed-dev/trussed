@@ -13,16 +13,17 @@ use generic_array::GenericArray;
 use crate::api::{reply, request};
 use crate::error::Error;
 use crate::key;
-use crate::service::{Decrypt, Encrypt, UnsafeInjectKey};
+use crate::service::MechanismImpl;
 use crate::store::keystore::Keystore;
 
 const TDES_KEY_SIZE: usize = 24;
 
 #[cfg(feature = "tdes")]
-impl Encrypt for super::Tdes {
+impl MechanismImpl for super::Tdes {
     /// Encrypts a single block. Let's hope we don't have to support ECB!!
     #[inline(never)]
     fn encrypt(
+        &self,
         keystore: &mut impl Keystore,
         request: &request::Encrypt,
     ) -> Result<reply::Encrypt, Error> {
@@ -59,13 +60,11 @@ impl Encrypt for super::Tdes {
             tag: Default::default(),
         })
     }
-}
 
-#[cfg(feature = "tdes")]
-impl Decrypt for super::Tdes {
     /// Decrypts a single block. Let's hope we don't have to support ECB!!
     #[inline(never)]
     fn decrypt(
+        &self,
         keystore: &mut impl Keystore,
         request: &request::Decrypt,
     ) -> Result<reply::Decrypt, Error> {
@@ -91,10 +90,9 @@ impl Decrypt for super::Tdes {
             plaintext: Some(message),
         })
     }
-}
 
-impl UnsafeInjectKey for super::Tdes {
     fn unsafe_inject_key(
+        &self,
         keystore: &mut impl Keystore,
         request: &request::UnsafeInjectKey,
     ) -> Result<reply::UnsafeInjectKey, Error> {
@@ -105,7 +103,7 @@ impl UnsafeInjectKey for super::Tdes {
         let key_id = keystore.store_key(
             request.attributes.persistence,
             key::Secrecy::Secret,
-            key::Kind::Symmetric(request.raw_key.len()),
+            key::Kind::Symmetric(request.raw_key.len()).into(),
             &request.raw_key,
         )?;
 
@@ -114,7 +112,4 @@ impl UnsafeInjectKey for super::Tdes {
 }
 
 #[cfg(not(feature = "tdes"))]
-impl Encrypt for super::Tdes {}
-
-#[cfg(not(feature = "tdes"))]
-impl Decrypt for super::Tdes {}
+impl MechanismImpl for super::Tdes {}

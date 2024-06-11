@@ -1,14 +1,15 @@
 use crate::api::{reply, request};
 use crate::error::Error;
 use crate::key;
-use crate::service::{DeriveKey, Sign};
+use crate::service::MechanismImpl;
 use crate::store::keystore::Keystore;
 use crate::types::Signature;
 
 #[cfg(feature = "hmac-blake2s")]
-impl DeriveKey for super::HmacBlake2s {
+impl MechanismImpl for super::HmacBlake2s {
     #[inline(never)]
     fn derive_key(
+        &self,
         keystore: &mut impl Keystore,
         request: &request::DeriveKey,
     ) -> Result<reply::DeriveKey, Error> {
@@ -32,18 +33,19 @@ impl DeriveKey for super::HmacBlake2s {
         let key = keystore.store_key(
             request.attributes.persistence,
             key::Secrecy::Secret,
-            key::Kind::Symmetric(32),
+            key::Kind::Symmetric(32).into(),
             &derived_key,
         )?;
 
         Ok(reply::DeriveKey { key })
     }
-}
 
-#[cfg(feature = "hmac-blake2s")]
-impl Sign for super::HmacBlake2s {
     #[inline(never)]
-    fn sign(keystore: &mut impl Keystore, request: &request::Sign) -> Result<reply::Sign, Error> {
+    fn sign(
+        &self,
+        keystore: &mut impl Keystore,
+        request: &request::Sign,
+    ) -> Result<reply::Sign, Error> {
         use blake2::Blake2s256;
         use hmac::{Mac, SimpleHmac};
         type HmacBlake2s = SimpleHmac<Blake2s256>;
@@ -66,6 +68,4 @@ impl Sign for super::HmacBlake2s {
 }
 
 #[cfg(not(feature = "hmac-blake2s"))]
-impl DeriveKey for super::HmacBlake2s {}
-#[cfg(not(feature = "hmac-blake2s"))]
-impl Sign for super::HmacBlake2s {}
+impl MechanismImpl for super::HmacBlake2s {}

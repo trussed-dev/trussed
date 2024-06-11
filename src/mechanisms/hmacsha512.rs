@@ -1,14 +1,15 @@
 use crate::api::{reply, request};
 use crate::error::Error;
 use crate::key;
-use crate::service::{DeriveKey, Sign};
+use crate::service::MechanismImpl;
 use crate::store::keystore::Keystore;
 use crate::types::Signature;
 
 #[cfg(feature = "hmac-sha512")]
-impl DeriveKey for super::HmacSha512 {
+impl MechanismImpl for super::HmacSha512 {
     #[inline(never)]
     fn derive_key(
+        &self,
         keystore: &mut impl Keystore,
         request: &request::DeriveKey,
     ) -> Result<reply::DeriveKey, Error> {
@@ -32,18 +33,19 @@ impl DeriveKey for super::HmacSha512 {
         let key = keystore.store_key(
             request.attributes.persistence,
             key::Secrecy::Secret,
-            key::Kind::Symmetric(64),
+            key::Kind::Symmetric(64).into(),
             &derived_key,
         )?;
 
         Ok(reply::DeriveKey { key })
     }
-}
 
-#[cfg(feature = "hmac-sha512")]
-impl Sign for super::HmacSha512 {
     #[inline(never)]
-    fn sign(keystore: &mut impl Keystore, request: &request::Sign) -> Result<reply::Sign, Error> {
+    fn sign(
+        &self,
+        keystore: &mut impl Keystore,
+        request: &request::Sign,
+    ) -> Result<reply::Sign, Error> {
         use hmac::{Hmac, Mac};
         use sha2::Sha512;
         type HmacSha512 = Hmac<Sha512>;
@@ -66,6 +68,4 @@ impl Sign for super::HmacSha512 {
 }
 
 #[cfg(not(feature = "hmac-sha512"))]
-impl DeriveKey for super::HmacSha512 {}
-#[cfg(not(feature = "hmac-sha512"))]
-impl Sign for super::HmacSha512 {}
+impl MechanismImpl for super::HmacSha512 {}

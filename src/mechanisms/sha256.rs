@@ -1,14 +1,15 @@
 use crate::api::{reply, request};
 use crate::error::Error;
 use crate::key;
-use crate::service::{DeriveKey, Hash};
+use crate::service::MechanismImpl;
 use crate::store::keystore::Keystore;
 use crate::types::ShortData;
 
 #[cfg(feature = "sha256")]
-impl DeriveKey for super::Sha256 {
+impl MechanismImpl for super::Sha256 {
     #[inline(never)]
     fn derive_key(
+        &self,
         keystore: &mut impl Keystore,
         request: &request::DeriveKey,
     ) -> Result<reply::DeriveKey, Error> {
@@ -27,18 +28,19 @@ impl DeriveKey for super::Sha256 {
         let key_id = keystore.store_key(
             request.attributes.persistence,
             key::Secrecy::Secret,
-            key::Kind::Symmetric(32),
+            key::Kind::Symmetric(32).into(),
             &symmetric_key,
         )?;
 
         Ok(reply::DeriveKey { key: key_id })
     }
-}
 
-#[cfg(feature = "sha256")]
-impl Hash for super::Sha256 {
     #[inline(never)]
-    fn hash(_keystore: &mut impl Keystore, request: &request::Hash) -> Result<reply::Hash, Error> {
+    fn hash(
+        &self,
+        _keystore: &mut impl Keystore,
+        request: &request::Hash,
+    ) -> Result<reply::Hash, Error> {
         use sha2::digest::Digest;
         let mut hash = sha2::Sha256::new();
         hash.update(&request.message);
@@ -51,6 +53,4 @@ impl Hash for super::Sha256 {
 }
 
 #[cfg(not(feature = "sha256"))]
-impl DeriveKey for super::Sha256 {}
-#[cfg(not(feature = "sha256"))]
-impl Hash for super::Sha256 {}
+impl MechanismImpl for super::Sha256 {}

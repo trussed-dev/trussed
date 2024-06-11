@@ -1,10 +1,7 @@
 use crate::api::{reply, request};
 use crate::error::Error;
 use crate::key;
-use crate::service::{
-    Agree, DeriveKey, DeserializeKey, Exists, GenerateKey, SerializeKey, Sign, UnsafeInjectKey,
-    Verify,
-};
+use crate::service::MechanismImpl;
 use crate::store::keystore::Keystore;
 use crate::types::{
     Bytes, KeyId, KeySerialization, SerializedKey, Signature, SignatureSerialization,
@@ -45,9 +42,10 @@ fn load_public_key(
 }
 
 #[cfg(feature = "p256")]
-impl Agree for super::P256 {
+impl MechanismImpl for super::P256 {
     #[inline(never)]
     fn agree(
+        &self,
         keystore: &mut impl Keystore,
         request: &request::Agree,
     ) -> Result<reply::Agree, Error> {
@@ -81,12 +79,10 @@ impl Agree for super::P256 {
             shared_secret: key_id,
         })
     }
-}
 
-#[cfg(feature = "p256")]
-impl DeriveKey for super::P256 {
     #[inline(never)]
     fn derive_key(
+        &self,
         keystore: &mut impl Keystore,
         request: &request::DeriveKey,
     ) -> Result<reply::DeriveKey, Error> {
@@ -98,18 +94,16 @@ impl DeriveKey for super::P256 {
         let public_id = keystore.store_key(
             request.attributes.persistence,
             key::Secrecy::Public,
-            key::Kind::P256,
+            key::Kind::P256.into(),
             &public_key.to_compressed_sec1_bytes(),
         )?;
 
         Ok(reply::DeriveKey { key: public_id })
     }
-}
 
-#[cfg(feature = "p256")]
-impl DeserializeKey for super::P256 {
     #[inline(never)]
     fn deserialize_key(
+        &self,
         keystore: &mut impl Keystore,
         request: &request::DeserializeKey,
     ) -> Result<reply::DeserializeKey, Error> {
@@ -172,18 +166,16 @@ impl DeserializeKey for super::P256 {
         let public_id = keystore.store_key(
             request.attributes.persistence,
             key::Secrecy::Public,
-            key::Kind::P256,
+            key::Kind::P256.into(),
             &public_key.to_compressed_sec1_bytes(),
         )?;
 
         Ok(reply::DeserializeKey { key: public_id })
     }
-}
 
-#[cfg(feature = "p256")]
-impl GenerateKey for super::P256 {
     #[inline(never)]
     fn generate_key(
+        &self,
         keystore: &mut impl Keystore,
         request: &request::GenerateKey,
     ) -> Result<reply::GenerateKey, Error> {
@@ -200,12 +192,10 @@ impl GenerateKey for super::P256 {
         // return handle
         Ok(reply::GenerateKey { key: key_id })
     }
-}
 
-#[cfg(feature = "p256")]
-impl SerializeKey for super::P256 {
     #[inline(never)]
     fn serialize_key(
+        &self,
         keystore: &mut impl Keystore,
         request: &request::SerializeKey,
     ) -> Result<reply::SerializeKey, Error> {
@@ -250,12 +240,10 @@ impl SerializeKey for super::P256 {
 
         Ok(reply::SerializeKey { serialized_key })
     }
-}
 
-#[cfg(feature = "p256")]
-impl Exists for super::P256 {
     #[inline(never)]
     fn exists(
+        &self,
         keystore: &mut impl Keystore,
         request: &request::Exists,
     ) -> Result<reply::Exists, Error> {
@@ -263,12 +251,13 @@ impl Exists for super::P256 {
         let exists = keystore.exists_key(key::Secrecy::Secret, Some(key::Kind::P256), &key_id);
         Ok(reply::Exists { exists })
     }
-}
 
-#[cfg(feature = "p256")]
-impl Sign for super::P256 {
     #[inline(never)]
-    fn sign(keystore: &mut impl Keystore, request: &request::Sign) -> Result<reply::Sign, Error> {
+    fn sign(
+        &self,
+        keystore: &mut impl Keystore,
+        request: &request::Sign,
+    ) -> Result<reply::Sign, Error> {
         let key_id = request.key;
 
         let secret_key = load_secret_key(keystore, &key_id)?;
@@ -291,40 +280,10 @@ impl Sign for super::P256 {
             signature: serialized_signature,
         })
     }
-}
 
-#[cfg(feature = "p256")]
-impl Sign for super::P256Prehashed {
-    #[inline(never)]
-    fn sign(keystore: &mut impl Keystore, request: &request::Sign) -> Result<reply::Sign, Error> {
-        let key_id = request.key;
-
-        let secret_key = load_secret_key(keystore, &key_id)?;
-        let signature = secret_key.sign_prehashed(&request.message, keystore.rng());
-
-        // debug_now!("making signature");
-        let serialized_signature = match request.format {
-            SignatureSerialization::Asn1Der => {
-                let mut buffer = [0u8; 72];
-                let l = signature.to_sec1_bytes(&mut buffer);
-                Signature::from_slice(&buffer[..l]).unwrap()
-            }
-            SignatureSerialization::Raw => {
-                Signature::from_slice(&signature.to_untagged_bytes()).unwrap()
-            }
-        };
-
-        // return signature
-        Ok(reply::Sign {
-            signature: serialized_signature,
-        })
-    }
-}
-
-#[cfg(feature = "p256")]
-impl Verify for super::P256 {
     #[inline(never)]
     fn verify(
+        &self,
         keystore: &mut impl Keystore,
         request: &request::Verify,
     ) -> Result<reply::Verify, Error> {
@@ -345,10 +304,9 @@ impl Verify for super::P256 {
         let valid = public_key.verify(&request.message, &signature);
         Ok(reply::Verify { valid })
     }
-}
 
-impl UnsafeInjectKey for super::P256 {
     fn unsafe_inject_key(
+        &self,
         keystore: &mut impl Keystore,
         request: &request::UnsafeInjectKey,
     ) -> Result<reply::UnsafeInjectKey, Error> {
@@ -375,21 +333,39 @@ impl UnsafeInjectKey for super::P256 {
     }
 }
 
+#[cfg(feature = "p256")]
+impl MechanismImpl for super::P256Prehashed {
+    #[inline(never)]
+    fn sign(
+        &self,
+        keystore: &mut impl Keystore,
+        request: &request::Sign,
+    ) -> Result<reply::Sign, Error> {
+        let key_id = request.key;
+
+        let secret_key = load_secret_key(keystore, &key_id)?;
+        let signature = secret_key.sign_prehashed(&request.message, keystore.rng());
+
+        // debug_now!("making signature");
+        let serialized_signature = match request.format {
+            SignatureSerialization::Asn1Der => {
+                let mut buffer = [0u8; 72];
+                let l = signature.to_sec1_bytes(&mut buffer);
+                Signature::from_slice(&buffer[..l]).unwrap()
+            }
+            SignatureSerialization::Raw => {
+                Signature::from_slice(&signature.to_untagged_bytes()).unwrap()
+            }
+        };
+
+        // return signature
+        Ok(reply::Sign {
+            signature: serialized_signature,
+        })
+    }
+}
+
 #[cfg(not(feature = "p256"))]
-impl Agree for super::P256 {}
+impl MechanismImpl for super::P256 {}
 #[cfg(not(feature = "p256"))]
-impl Exists for super::P256 {}
-#[cfg(not(feature = "p256"))]
-impl DeriveKey for super::P256 {}
-#[cfg(not(feature = "p256"))]
-impl GenerateKey for super::P256 {}
-#[cfg(not(feature = "p256"))]
-impl DeserializeKey for super::P256 {}
-#[cfg(not(feature = "p256"))]
-impl SerializeKey for super::P256 {}
-#[cfg(not(feature = "p256"))]
-impl Sign for super::P256 {}
-#[cfg(not(feature = "p256"))]
-impl Sign for super::P256Prehashed {}
-#[cfg(not(feature = "p256"))]
-impl Verify for super::P256 {}
+impl MechanismImpl for super::P256Prehashed {}

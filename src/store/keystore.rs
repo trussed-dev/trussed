@@ -42,7 +42,7 @@ pub trait Keystore {
         &mut self,
         location: Location,
         secrecy: key::Secrecy,
-        info: impl Into<key::Info>,
+        info: key::Info,
         material: &[u8],
     ) -> Result<KeyId>;
     fn exists_key(&self, secrecy: key::Secrecy, kind: Option<key::Kind>, id: &KeyId) -> bool;
@@ -101,12 +101,11 @@ impl<S: Store> Keystore for ClientKeystore<S> {
         &mut self,
         location: Location,
         secrecy: key::Secrecy,
-        info: impl Into<key::Info>,
+        mut info: key::Info,
         material: &[u8],
     ) -> Result<KeyId> {
         // info_now!("storing {:?} -> {:?}", &key_kind, location);
 
-        let mut info: key::Info = info.into();
         if secrecy == key::Secrecy::Secret {
             info.flags |= key::Flags::SENSITIVE;
         }

@@ -1,7 +1,7 @@
 use crate::api::{reply, request};
 use crate::error::Error;
 use crate::key;
-use crate::service::{Exists, Sign};
+use crate::service::MechanismImpl;
 use crate::store::keystore::Keystore;
 
 // code copied from https://github.com/avacariu/rust-oath
@@ -47,9 +47,13 @@ fn dynamic_truncation(hs: &[u8]) -> u64 {
 }
 
 #[cfg(feature = "totp")]
-impl Sign for super::Totp {
+impl MechanismImpl for super::Totp {
     #[inline(never)]
-    fn sign(keystore: &mut impl Keystore, request: &request::Sign) -> Result<reply::Sign, Error> {
+    fn sign(
+        &self,
+        keystore: &mut impl Keystore,
+        request: &request::Sign,
+    ) -> Result<reply::Sign, Error> {
         let key_id = request.key;
 
         let key = keystore.load_key(key::Secrecy::Secret, None, &key_id)?;
@@ -75,12 +79,10 @@ impl Sign for super::Totp {
             signature: crate::Bytes::from_slice(totp_material.to_le_bytes().as_ref()).unwrap(),
         })
     }
-}
 
-#[cfg(feature = "totp")]
-impl Exists for super::Totp {
     #[inline(never)]
     fn exists(
+        &self,
         keystore: &mut impl Keystore,
         request: &request::Exists,
     ) -> Result<reply::Exists, Error> {
@@ -96,9 +98,7 @@ impl Exists for super::Totp {
 }
 
 #[cfg(not(feature = "totp"))]
-impl Sign for super::Totp {}
-#[cfg(not(feature = "totp"))]
-impl Exists for super::Totp {}
+impl MechanismImpl for super::Totp {}
 
 #[cfg(all(test, feature = "totp"))]
 mod tests {
