@@ -609,7 +609,6 @@ impl<P: Platform> ServiceResources<P> {
                 let timeout =
                     core::time::Duration::from_millis(request.timeout_milliseconds as u64);
 
-                let previous_status = self.platform.user_interface().status();
                 self.platform
                     .user_interface()
                     .set_status(ui::Status::WaitingForUserPresence);
@@ -650,7 +649,6 @@ impl<P: Platform> ServiceResources<P> {
                         }
                     }
                 }
-                self.platform.user_interface().set_status(previous_status);
 
                 let result = Ok(());
                 Ok(Reply::RequestUserConsent(reply::RequestUserConsent {
