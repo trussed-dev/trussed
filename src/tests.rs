@@ -1,4 +1,3 @@
-#![cfg(test)]
 #![allow(static_mut_refs)]
 
 use chacha20::ChaCha20;
@@ -115,45 +114,29 @@ macro_rules! create_memory {
             unsafe { &mut VOLATILE_STORAGE },
         )
     }};
-    // Create a "copy"
-    ($memory: expr) => {{
-        let mem_2 = unsafe {
-            &*(&$memory
-                as *const (
-                    &'static mut littlefs2::fs::Allocation<InternalStorage>,
-                    &'static mut InternalStorage,
-                    &'static mut littlefs2::fs::Allocation<ExternalStorage>,
-                    &'static mut ExternalStorage,
-                    &'static mut littlefs2::fs::Allocation<VolatileStorage>,
-                    &'static mut VolatileStorage,
-                ))
-        };
-        let mem_2 = (
-            (mem_2.0 as *const littlefs2::fs::Allocation<InternalStorage>) as u64,
-            (mem_2.1 as *const InternalStorage) as u64,
-            (mem_2.2 as *const littlefs2::fs::Allocation<ExternalStorage>) as u64,
-            (mem_2.3 as *const ExternalStorage) as u64,
-            (mem_2.4 as *const littlefs2::fs::Allocation<VolatileStorage>) as u64,
-            (mem_2.5 as *const VolatileStorage) as u64,
-        );
-        let mem_2: (
-            &'static mut littlefs2::fs::Allocation<InternalStorage>,
-            &'static mut InternalStorage,
-            &'static mut littlefs2::fs::Allocation<ExternalStorage>,
-            &'static mut ExternalStorage,
-            &'static mut littlefs2::fs::Allocation<VolatileStorage>,
-            &'static mut VolatileStorage,
-        ) = (
-            unsafe { std::mem::transmute(mem_2.0) },
-            unsafe { std::mem::transmute(mem_2.1) },
-            unsafe { std::mem::transmute(mem_2.2) },
-            unsafe { std::mem::transmute(mem_2.3) },
-            unsafe { std::mem::transmute(mem_2.4) },
-            unsafe { std::mem::transmute(mem_2.5) },
-        );
+}
 
-        mem_2
-    }};
+type Memory = (
+    &'static mut littlefs2::fs::Allocation<InternalStorage>,
+    &'static mut InternalStorage,
+    &'static mut littlefs2::fs::Allocation<ExternalStorage>,
+    &'static mut ExternalStorage,
+    &'static mut littlefs2::fs::Allocation<VolatileStorage>,
+    &'static mut VolatileStorage,
+);
+
+/// Create a "copy" of a store
+unsafe fn copy_memory(memory: &Memory) -> Memory {
+    unsafe {
+        (
+            &mut *(memory.0 as *const _ as *mut _),
+            &mut *(memory.1 as *const _ as *mut _),
+            &mut *(memory.2 as *const _ as *mut _),
+            &mut *(memory.3 as *const _ as *mut _),
+            &mut *(memory.4 as *const _ as *mut _),
+            &mut *(memory.5 as *const _ as *mut _),
+        )
+    }
 }
 
 // TODO: what's going on here? Duplicates code in `tests/client/mod.rs`.
@@ -851,7 +834,7 @@ fn rng() {
     }
 
     let mem = create_memory!();
-    let mem_copy = create_memory!(mem);
+    let mem_copy = unsafe { copy_memory(&mem) };
 
     // Trussed saves the RNG state so it cannot produce the same RNG on different boots.
     setup!(
