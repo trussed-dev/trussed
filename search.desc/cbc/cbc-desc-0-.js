@@ -1,0 +1,1 @@
+searchState.loadedDescShard("cbc", 0, "Cipher Block Chaining (CBC) mode.\nCBC mode decryptor.\nCBC mode encryptor.\nReturns the argument unchanged.\nReturns the argument unchanged.\nCalls <code>U::from(self)</code>.\nCalls <code>U::from(self)</code>.")

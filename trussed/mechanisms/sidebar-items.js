@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["Aes256Cbc","Chacha8Poly1305","Ed255","HmacBlake2s","HmacSha1","HmacSha256","HmacSha512","P256","P256Prehashed","Sha256","SharedSecret","Tdes","Totp","Trng","X255"]};
+window.SIDEBAR_ITEMS = {"struct":["Aes256Cbc","Chacha8Poly1305","Ed255","HmacBlake2s","HmacSha1","HmacSha256","HmacSha512","P256","P256Prehashed","P384","P384Prehashed","P521","P521Prehashed","Sha256","SharedSecret","Tdes","Totp","Trng","X255"]};

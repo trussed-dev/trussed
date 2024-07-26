@@ -1,0 +1,1 @@
+searchState.loadedDescShard("flexiber_derive", 0, "Custom derive support for the <code>flexiber</code> crate\nDerive the <code>Decodable</code> trait on a struct.\nDerive the <code>Encodable</code> trait on a struct.")
