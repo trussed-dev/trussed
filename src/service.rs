@@ -171,6 +171,8 @@ impl<P: Platform> ServiceResources<P> {
             Request::DummyRequest => Ok(Reply::DummyReply),
 
             Request::Agree(request) => match request.mechanism {
+                Mechanism::P521 => mechanisms::P521::agree(&mut keystore(self, ctx)?, request),
+                Mechanism::P384 => mechanisms::P384::agree(&mut keystore(self, ctx)?, request),
                 Mechanism::P256 => mechanisms::P256::agree(&mut keystore(self, ctx)?, request),
                 Mechanism::X255 => mechanisms::X255::agree(&mut keystore(self, ctx)?, request),
                 _ => Err(Error::MechanismNotAvailable),
@@ -224,6 +226,8 @@ impl<P: Platform> ServiceResources<P> {
                 Mechanism::Ed255 => {
                     mechanisms::Ed255::derive_key(&mut keystore(self, ctx)?, request)
                 }
+                Mechanism::P521 => mechanisms::P521::derive_key(&mut keystore(self, ctx)?, request),
+                Mechanism::P384 => mechanisms::P384::derive_key(&mut keystore(self, ctx)?, request),
                 Mechanism::P256 => mechanisms::P256::derive_key(&mut keystore(self, ctx)?, request),
                 Mechanism::Sha256 => {
                     mechanisms::Sha256::derive_key(&mut keystore(self, ctx)?, request)
@@ -236,6 +240,12 @@ impl<P: Platform> ServiceResources<P> {
             Request::DeserializeKey(request) => match request.mechanism {
                 Mechanism::Ed255 => {
                     mechanisms::Ed255::deserialize_key(&mut keystore(self, ctx)?, request)
+                }
+                Mechanism::P521 => {
+                    mechanisms::P521::deserialize_key(&mut keystore(self, ctx)?, request)
+                }
+                Mechanism::P384 => {
+                    mechanisms::P384::deserialize_key(&mut keystore(self, ctx)?, request)
                 }
                 Mechanism::P256 => {
                     mechanisms::P256::deserialize_key(&mut keystore(self, ctx)?, request)
@@ -276,6 +286,8 @@ impl<P: Platform> ServiceResources<P> {
 
             Request::Exists(request) => match request.mechanism {
                 Mechanism::Ed255 => mechanisms::Ed255::exists(&mut keystore(self, ctx)?, request),
+                Mechanism::P521 => mechanisms::P521::exists(&mut keystore(self, ctx)?, request),
+                Mechanism::P384 => mechanisms::P384::exists(&mut keystore(self, ctx)?, request),
                 Mechanism::P256 => mechanisms::P256::exists(&mut keystore(self, ctx)?, request),
                 Mechanism::Totp => mechanisms::Totp::exists(&mut keystore(self, ctx)?, request),
                 Mechanism::X255 => mechanisms::X255::exists(&mut keystore(self, ctx)?, request),
@@ -289,6 +301,12 @@ impl<P: Platform> ServiceResources<P> {
                 }
                 Mechanism::Ed255 => {
                     mechanisms::Ed255::generate_key(&mut keystore(self, ctx)?, request)
+                }
+                Mechanism::P521 => {
+                    mechanisms::P521::generate_key(&mut keystore(self, ctx)?, request)
+                }
+                Mechanism::P384 => {
+                    mechanisms::P384::generate_key(&mut keystore(self, ctx)?, request)
                 }
                 Mechanism::P256 => {
                     mechanisms::P256::generate_key(&mut keystore(self, ctx)?, request)
@@ -321,6 +339,12 @@ impl<P: Platform> ServiceResources<P> {
 
             // deprecated
             Request::UnsafeInjectKey(request) => match request.mechanism {
+                Mechanism::P521 => {
+                    mechanisms::P521::unsafe_inject_key(&mut keystore(self, ctx)?, request)
+                }
+                Mechanism::P384 => {
+                    mechanisms::P384::unsafe_inject_key(&mut keystore(self, ctx)?, request)
+                }
                 Mechanism::P256 => {
                     mechanisms::P256::unsafe_inject_key(&mut keystore(self, ctx)?, request)
                 }
@@ -535,6 +559,12 @@ impl<P: Platform> ServiceResources<P> {
                 Mechanism::Ed255 => {
                     mechanisms::Ed255::serialize_key(&mut keystore(self, ctx)?, request)
                 }
+                Mechanism::P521 => {
+                    mechanisms::P521::serialize_key(&mut keystore(self, ctx)?, request)
+                }
+                Mechanism::P384 => {
+                    mechanisms::P384::serialize_key(&mut keystore(self, ctx)?, request)
+                }
                 Mechanism::P256 => {
                     mechanisms::P256::serialize_key(&mut keystore(self, ctx)?, request)
                 }
@@ -562,6 +592,14 @@ impl<P: Platform> ServiceResources<P> {
                 Mechanism::HmacSha512 => {
                     mechanisms::HmacSha512::sign(&mut keystore(self, ctx)?, request)
                 }
+                Mechanism::P521 => mechanisms::P521::sign(&mut keystore(self, ctx)?, request),
+                Mechanism::P521Prehashed => {
+                    mechanisms::P521Prehashed::sign(&mut keystore(self, ctx)?, request)
+                }
+                Mechanism::P384 => mechanisms::P384::sign(&mut keystore(self, ctx)?, request),
+                Mechanism::P384Prehashed => {
+                    mechanisms::P384Prehashed::sign(&mut keystore(self, ctx)?, request)
+                }
                 Mechanism::P256 => mechanisms::P256::sign(&mut keystore(self, ctx)?, request),
                 Mechanism::P256Prehashed => {
                     mechanisms::P256Prehashed::sign(&mut keystore(self, ctx)?, request)
@@ -586,6 +624,8 @@ impl<P: Platform> ServiceResources<P> {
 
             Request::Verify(request) => match request.mechanism {
                 Mechanism::Ed255 => mechanisms::Ed255::verify(&mut keystore(self, ctx)?, request),
+                Mechanism::P521 => mechanisms::P521::verify(&mut keystore(self, ctx)?, request),
+                Mechanism::P384 => mechanisms::P384::verify(&mut keystore(self, ctx)?, request),
                 Mechanism::P256 => mechanisms::P256::verify(&mut keystore(self, ctx)?, request),
                 _ => Err(Error::MechanismNotAvailable),
             }

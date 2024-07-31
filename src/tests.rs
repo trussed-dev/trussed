@@ -1,4 +1,3 @@
-#![cfg(test)]
 #![allow(static_mut_refs)]
 
 use chacha20::ChaCha20;
@@ -10,7 +9,7 @@ use littlefs2::fs::{Allocation, Filesystem};
 use littlefs2::io::Result as LfsResult;
 use rand_core::{CryptoRng, RngCore};
 
-#[cfg(feature = "p256")]
+#[cfg(any(feature = "p256", feature = "p384", feature = "p521",))]
 use crate::types::{Mechanism, SignatureSerialization, StorageAttributes};
 
 use crate::client::{CryptoClient as _, FilesystemClient as _};
@@ -115,45 +114,29 @@ macro_rules! create_memory {
             unsafe { &mut VOLATILE_STORAGE },
         )
     }};
-    // Create a "copy"
-    ($memory: expr) => {{
-        let mem_2 = unsafe {
-            &*(&$memory
-                as *const (
-                    &'static mut littlefs2::fs::Allocation<InternalStorage>,
-                    &'static mut InternalStorage,
-                    &'static mut littlefs2::fs::Allocation<ExternalStorage>,
-                    &'static mut ExternalStorage,
-                    &'static mut littlefs2::fs::Allocation<VolatileStorage>,
-                    &'static mut VolatileStorage,
-                ))
-        };
-        let mem_2 = (
-            (mem_2.0 as *const littlefs2::fs::Allocation<InternalStorage>) as u64,
-            (mem_2.1 as *const InternalStorage) as u64,
-            (mem_2.2 as *const littlefs2::fs::Allocation<ExternalStorage>) as u64,
-            (mem_2.3 as *const ExternalStorage) as u64,
-            (mem_2.4 as *const littlefs2::fs::Allocation<VolatileStorage>) as u64,
-            (mem_2.5 as *const VolatileStorage) as u64,
-        );
-        let mem_2: (
-            &'static mut littlefs2::fs::Allocation<InternalStorage>,
-            &'static mut InternalStorage,
-            &'static mut littlefs2::fs::Allocation<ExternalStorage>,
-            &'static mut ExternalStorage,
-            &'static mut littlefs2::fs::Allocation<VolatileStorage>,
-            &'static mut VolatileStorage,
-        ) = (
-            unsafe { std::mem::transmute(mem_2.0) },
-            unsafe { std::mem::transmute(mem_2.1) },
-            unsafe { std::mem::transmute(mem_2.2) },
-            unsafe { std::mem::transmute(mem_2.3) },
-            unsafe { std::mem::transmute(mem_2.4) },
-            unsafe { std::mem::transmute(mem_2.5) },
-        );
+}
 
-        mem_2
-    }};
+type Memory = (
+    &'static mut littlefs2::fs::Allocation<InternalStorage>,
+    &'static mut InternalStorage,
+    &'static mut littlefs2::fs::Allocation<ExternalStorage>,
+    &'static mut ExternalStorage,
+    &'static mut littlefs2::fs::Allocation<VolatileStorage>,
+    &'static mut VolatileStorage,
+);
+
+/// Create a "copy" of a store
+unsafe fn copy_memory(memory: &Memory) -> Memory {
+    unsafe {
+        (
+            &mut *(memory.0 as *const _ as *mut _),
+            &mut *(memory.1 as *const _ as *mut _),
+            &mut *(memory.2 as *const _ as *mut _),
+            &mut *(memory.3 as *const _ as *mut _),
+            &mut *(memory.4 as *const _ as *mut _),
+            &mut *(memory.5 as *const _ as *mut _),
+        )
+    }
 }
 
 // TODO: what's going on here? Duplicates code in `tests/client/mod.rs`.
@@ -351,6 +334,252 @@ fn agree_p256() {
     let alt_shared_secret = block!(client
         .agree(
             Mechanism::P256,
+            plat_private_key,
+            auth_public_key,
+            StorageAttributes::new().set_persistence(Location::Volatile)
+        )
+        .expect("no client error"))
+    .expect("no errors")
+    .shared_secret;
+
+    // NB: we have no idea about the value of keys, these are just *different* handles
+    assert_ne!(&shared_secret, &alt_shared_secret);
+
+    let symmetric_key = block!(client
+        .derive_key(
+            Mechanism::Sha256,
+            shared_secret,
+            None,
+            StorageAttributes::new().set_persistence(Location::Volatile)
+        )
+        .expect("no client error"))
+    .expect("no errors")
+    .key;
+
+    let new_pin_enc = [1u8, 2, 3];
+
+    let _tag = block!(client
+        .sign(
+            Mechanism::HmacSha256,
+            symmetric_key,
+            &new_pin_enc,
+            SignatureSerialization::Raw
+        )
+        .expect("no client error"))
+    .expect("no errors")
+    .signature;
+}
+
+#[cfg(feature = "p384")]
+#[test]
+#[serial]
+fn sign_p384() {
+    use crate::client::mechanisms::P384 as _;
+    // let mut client = setup!();
+    setup!(client);
+    let private_key = block!(client
+        .generate_p384_private_key(Location::External)
+        .expect("no client error"))
+    .expect("no errors")
+    .key;
+    println!("got a public key {:?}", &private_key);
+    let public_key = block!(client
+        .derive_p384_public_key(private_key, Location::Volatile)
+        .expect("no client error"))
+    .expect("no errors")
+    .key;
+    println!("got a public key {:?}", &public_key);
+
+    let message = [1u8, 2u8, 3u8];
+    let signature = block!(client
+        .sign_p384(private_key, &message, SignatureSerialization::Raw)
+        .expect("no client error"))
+    .expect("good signature")
+    .signature;
+
+    // use core::convert::AsMut;
+    // let sig = signature.0.as_mut()[0] = 0;
+    let future = client.verify_p384(public_key, &message, &signature);
+    let future = future.expect("no client error");
+    let result = block!(future);
+    if result.is_err() {
+        println!("error: {:?}", result);
+    }
+    let reply = result.expect("valid signature");
+    let valid = reply.valid;
+    assert!(valid);
+}
+
+#[cfg(feature = "p384")]
+#[test]
+#[serial]
+fn agree_p384() {
+    // let mut client = setup!();
+    use crate::client::mechanisms::P384;
+    setup!(client);
+    let plat_private_key = block!(client
+        .generate_p384_private_key(Location::Volatile)
+        .expect("no client error"))
+    .expect("no errors")
+    .key;
+    println!("got a public key {:?}", &plat_private_key);
+    let plat_public_key = block!(client
+        .derive_p384_public_key(plat_private_key, Location::Volatile)
+        .expect("no client error"))
+    .expect("no errors")
+    .key;
+    println!("got a public key {:?}", &plat_public_key);
+
+    let auth_private_key = block!(client
+        .generate_p384_private_key(Location::Volatile)
+        .expect("no client error"))
+    .expect("no errors")
+    .key;
+    println!("got a public key {:?}", &auth_private_key);
+    let auth_public_key = block!(client
+        .derive_p384_public_key(auth_private_key, Location::Volatile)
+        .expect("no client error"))
+    .expect("no errors")
+    .key;
+    println!("got a public key {:?}", &auth_public_key);
+
+    let shared_secret = block!(client
+        .agree(
+            Mechanism::P384,
+            auth_private_key,
+            plat_public_key,
+            StorageAttributes::new().set_persistence(Location::Volatile)
+        )
+        .expect("no client error"))
+    .expect("no errors")
+    .shared_secret;
+
+    let alt_shared_secret = block!(client
+        .agree(
+            Mechanism::P384,
+            plat_private_key,
+            auth_public_key,
+            StorageAttributes::new().set_persistence(Location::Volatile)
+        )
+        .expect("no client error"))
+    .expect("no errors")
+    .shared_secret;
+
+    // NB: we have no idea about the value of keys, these are just *different* handles
+    assert_ne!(&shared_secret, &alt_shared_secret);
+
+    let symmetric_key = block!(client
+        .derive_key(
+            Mechanism::Sha256,
+            shared_secret,
+            None,
+            StorageAttributes::new().set_persistence(Location::Volatile)
+        )
+        .expect("no client error"))
+    .expect("no errors")
+    .key;
+
+    let new_pin_enc = [1u8, 2, 3];
+
+    let _tag = block!(client
+        .sign(
+            Mechanism::HmacSha256,
+            symmetric_key,
+            &new_pin_enc,
+            SignatureSerialization::Raw
+        )
+        .expect("no client error"))
+    .expect("no errors")
+    .signature;
+}
+
+#[cfg(feature = "p521")]
+#[test]
+#[serial]
+fn sign_p521() {
+    use crate::client::mechanisms::P521 as _;
+    // let mut client = setup!();
+    setup!(client);
+    let private_key = block!(client
+        .generate_p521_private_key(Location::External)
+        .expect("no client error"))
+    .expect("no errors")
+    .key;
+    println!("got a public key {:?}", &private_key);
+    let public_key = block!(client
+        .derive_p521_public_key(private_key, Location::Volatile)
+        .expect("no client error"))
+    .expect("no errors")
+    .key;
+    println!("got a public key {:?}", &public_key);
+
+    let message = [1u8, 2u8, 3u8];
+    let signature = block!(client
+        .sign_p521(private_key, &message, SignatureSerialization::Raw)
+        .expect("no client error"))
+    .expect("good signature")
+    .signature;
+
+    // use core::convert::AsMut;
+    // let sig = signature.0.as_mut()[0] = 0;
+    let future = client.verify_p521(public_key, &message, &signature);
+    let future = future.expect("no client error");
+    let result = block!(future);
+    if result.is_err() {
+        println!("error: {:?}", result);
+    }
+    let reply = result.expect("valid signature");
+    let valid = reply.valid;
+    assert!(valid);
+}
+
+#[cfg(feature = "p521")]
+#[test]
+#[serial]
+fn agree_p521() {
+    // let mut client = setup!();
+    use crate::client::mechanisms::P521;
+    setup!(client);
+    let plat_private_key = block!(client
+        .generate_p521_private_key(Location::Volatile)
+        .expect("no client error"))
+    .expect("no errors")
+    .key;
+    println!("got a public key {:?}", &plat_private_key);
+    let plat_public_key = block!(client
+        .derive_p521_public_key(plat_private_key, Location::Volatile)
+        .expect("no client error"))
+    .expect("no errors")
+    .key;
+    println!("got a public key {:?}", &plat_public_key);
+
+    let auth_private_key = block!(client
+        .generate_p521_private_key(Location::Volatile)
+        .expect("no client error"))
+    .expect("no errors")
+    .key;
+    println!("got a public key {:?}", &auth_private_key);
+    let auth_public_key = block!(client
+        .derive_p521_public_key(auth_private_key, Location::Volatile)
+        .expect("no client error"))
+    .expect("no errors")
+    .key;
+    println!("got a public key {:?}", &auth_public_key);
+
+    let shared_secret = block!(client
+        .agree(
+            Mechanism::P521,
+            auth_private_key,
+            plat_public_key,
+            StorageAttributes::new().set_persistence(Location::Volatile)
+        )
+        .expect("no client error"))
+    .expect("no errors")
+    .shared_secret;
+
+    let alt_shared_secret = block!(client
+        .agree(
+            Mechanism::P521,
             plat_private_key,
             auth_public_key,
             StorageAttributes::new().set_persistence(Location::Volatile)
@@ -605,7 +834,7 @@ fn rng() {
     }
 
     let mem = create_memory!();
-    let mem_copy = create_memory!(mem);
+    let mem_copy = unsafe { copy_memory(&mem) };
 
     // Trussed saves the RNG state so it cannot produce the same RNG on different boots.
     setup!(

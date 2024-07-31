@@ -70,6 +70,11 @@ pub enum Kind {
     Rsa4096,
     Ed255,
     P256,
+    P384,
+    P521,
+    BrainpoolP256R1,
+    BrainpoolP384R1,
+    BrainpoolP512R1,
     X255,
 }
 
@@ -211,6 +216,11 @@ impl Kind {
             Kind::Rsa2048 => 7,
             Kind::Rsa3072 => 8,
             Kind::Rsa4096 => 9,
+            Kind::P384 => 10,
+            Kind::P521 => 11,
+            Kind::BrainpoolP256R1 => 12,
+            Kind::BrainpoolP384R1 => 13,
+            Kind::BrainpoolP512R1 => 14,
         }
     }
 
@@ -225,6 +235,11 @@ impl Kind {
             7 => Kind::Rsa2048,
             8 => Kind::Rsa3072,
             9 => Kind::Rsa4096,
+            10 => Kind::P384,
+            11 => Kind::P521,
+            12 => Kind::BrainpoolP256R1,
+            13 => Kind::BrainpoolP384R1,
+            14 => Kind::BrainpoolP512R1,
             _ => return Err(Error::InvalidSerializedKey),
         })
     }
