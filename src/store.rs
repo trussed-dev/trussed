@@ -13,6 +13,7 @@
 //! The guiding example for client apps is `fido-authenticator`, which stores:
 //! - it basic state and config, and
 //! - the metadata for its resident keys as a serialized struct
+//!
 //! Both include references to cryptographic keys (via their handle)
 //!
 //! Currently, the backend (internal/external/volatile) is determined via an
