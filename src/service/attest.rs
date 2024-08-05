@@ -473,23 +473,6 @@ impl Encodable for Name<'_> {
     }
 }
 
-#[derive(Clone, Copy, Eq, PartialEq)]
-/// Currently unconstructable.
-pub enum Extension {}
-
-#[derive(Clone, Copy, Eq, PartialEq)]
-/// Only empty slices possible currently.
-pub struct Extensions<'l>(&'l [Extension]);
-
-impl Encodable for Extensions<'_> {
-    fn encoded_length(&self) -> BerResult<BerLength> {
-        Ok(0u8.into())
-    }
-    fn encode(&self, _encoder: &mut Encoder<'_>) -> BerResult<()> {
-        Ok(())
-    }
-}
-
 pub struct ParsedDatetime {
     year: u16,
     month: u8,
