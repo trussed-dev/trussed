@@ -495,34 +495,6 @@ pub enum ObjectType {
     Key(Secrecy),
 }
 
-#[derive(Copy, Clone, Eq, PartialEq, Debug)]
-pub struct PublicKeyAttributes {
-    // never return naked private key
-    sensitive: bool,
-    // always_sensitive: bool,
-
-    // do not even return wrapped private key
-    extractable: bool,
-    // never_extractable: bool,
-
-    // do not save to disk
-    persistent: bool,
-}
-
-#[derive(Copy, Clone, Eq, PartialEq, Debug)]
-pub struct PrivateKeyAttributes {
-    // never return naked private key
-    sensitive: bool,
-    // always_sensitive: bool,
-
-    // do not even return wrapped private key
-    extractable: bool,
-    // never_extractable: bool,
-
-    // do not save to disk
-    persistent: bool,
-}
-
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Serialize, Deserialize)]
 pub enum Location {
     Volatile,
