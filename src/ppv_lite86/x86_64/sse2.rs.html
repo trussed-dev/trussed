@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ppv-lite86-0.2.17/src/x86_64/sse2.rs`."><title>sse2.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="ppv_lite86" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0 (051478957 2024-07-21)" data-channel="1.80.0" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ppv-lite86-0.2.20/src/x86_64/sse2.rs`."><title>sse2.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="ppv_lite86" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0 (051478957 2024-07-21)" data-channel="1.80.0" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1701,6 +1701,10 @@
 <a href="#1701" id="1701">1701</a>
 <a href="#1702" id="1702">1702</a>
 <a href="#1703" id="1703">1703</a>
+<a href="#1704" id="1704">1704</a>
+<a href="#1705" id="1705">1705</a>
+<a href="#1706" id="1706">1706</a>
+<a href="#1707" id="1707">1707</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::soft::{x2, x4};
 <span class="kw">use </span><span class="kw">crate</span>::types::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">crate</span>::vec128_storage;
@@ -1712,6 +1716,7 @@
 <span class="kw">use </span>core::ops::{
     Add, AddAssign, BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Not,
 };
+<span class="kw">use </span>zerocopy::{transmute, AsBytes, FromBytes, FromZeroes};
 
 <span class="macro">macro_rules!</span> impl_binop {
     (<span class="macro-nonterminal">$vec</span>:ident, <span class="macro-nonterminal">$</span><span class="kw">trait</span>:<span class="macro-nonterminal">ident</span>, <span class="macro-nonterminal">$</span><span class="kw">fn</span>:<span class="macro-nonterminal">ident</span>, <span class="macro-nonterminal">$impl_fn</span>:ident) =&gt; {
@@ -1742,7 +1747,8 @@
 <span class="macro">macro_rules!</span> def_vec {
     (<span class="macro-nonterminal">$vec</span>:ident, <span class="macro-nonterminal">$word</span>:ident) =&gt; {
         <span class="attr">#[allow(non_camel_case_types)]
-        #[derive(Copy, Clone)]
+        #[derive(Copy, Clone, FromBytes, AsBytes, FromZeroes)]
+        #[repr(transparent)]
         </span><span class="kw">pub struct </span><span class="macro-nonterminal">$vec</span>&lt;S3, S4, NI&gt; {
             x: __m128i,
             s3: PhantomData&lt;S3&gt;,
@@ -2586,7 +2592,7 @@
 <span class="kw">impl</span>&lt;S3, S4, NI&gt; Vector&lt;[u32; <span class="number">16</span>]&gt; <span class="kw">for </span>u32x4x4_sse2&lt;S3, S4, NI&gt; {
     <span class="attr">#[inline(always)]
     </span><span class="kw">fn </span>to_scalars(<span class="self">self</span>) -&gt; [u32; <span class="number">16</span>] {
-        <span class="kw">unsafe </span>{ core::mem::transmute(<span class="self">self</span>) }
+        <span class="macro">transmute!</span>(<span class="self">self</span>)
     }
 }
 
@@ -2856,7 +2862,7 @@
             x_s3.bswap()
         };
 
-        <span class="macro">assert_eq!</span>(x_s2, <span class="kw">unsafe </span>{ core::mem::transmute(x_s3) });
+        <span class="macro">assert_eq!</span>(x_s2, <span class="macro">transmute!</span>(x_s3));
         <span class="macro">assert_eq!</span>(x_s2, s2.vec(ys));
     }
 
@@ -2880,7 +2886,7 @@
         };
 
         <span class="macro">assert_eq!</span>(x_s2, s2.vec(ys));
-        <span class="macro">assert_eq!</span>(x_s3, <span class="kw">unsafe </span>{ core::mem::transmute(x_s3) });
+        <span class="macro">assert_eq!</span>(x_s3, <span class="macro">transmute!</span>(x_s3));
     }
 
     <span class="attr">#[test]
@@ -2902,7 +2908,7 @@
             x_s3.shuffle2301()
         };
         <span class="macro">assert_eq!</span>(x_s2, s2.vec(ys));
-        <span class="macro">assert_eq!</span>(x_s3, <span class="kw">unsafe </span>{ core::mem::transmute(x_s3) });
+        <span class="macro">assert_eq!</span>(x_s3, <span class="macro">transmute!</span>(x_s3));
 
         <span class="kw">let </span>x_s2 = {
             <span class="kw">let </span>x_s2: &lt;SSE2 <span class="kw">as </span>Machine&gt;::u32x4 = s2.vec(xs);
@@ -2913,12 +2919,12 @@
             x_s3.shuffle3012()
         };
         <span class="macro">assert_eq!</span>(x_s2, s2.vec(zs));
-        <span class="macro">assert_eq!</span>(x_s3, <span class="kw">unsafe </span>{ core::mem::transmute(x_s3) });
+        <span class="macro">assert_eq!</span>(x_s3, <span class="macro">transmute!</span>(x_s3));
 
         <span class="kw">let </span>x_s2 = x_s2.shuffle1230();
         <span class="kw">let </span>x_s3 = x_s3.shuffle1230();
         <span class="macro">assert_eq!</span>(x_s2, s2.vec(xs));
-        <span class="macro">assert_eq!</span>(x_s3, <span class="kw">unsafe </span>{ core::mem::transmute(x_s3) });
+        <span class="macro">assert_eq!</span>(x_s3, <span class="macro">transmute!</span>(x_s3));
     }
 
     <span class="attr">#[test]
@@ -2940,7 +2946,7 @@
             x_s3.shuffle2301()
         };
         <span class="macro">assert_eq!</span>(x_s2, s2.vec(ys));
-        <span class="macro">assert_eq!</span>(x_s3, <span class="kw">unsafe </span>{ core::mem::transmute(x_s3) });
+        <span class="macro">assert_eq!</span>(x_s3, <span class="macro">transmute!</span>(x_s3));
 
         <span class="kw">let </span>x_s2 = {
             <span class="kw">let </span>x_s2: &lt;SSE2 <span class="kw">as </span>Machine&gt;::u64x4 = s2.vec(xs);
@@ -2951,12 +2957,12 @@
             x_s3.shuffle3012()
         };
         <span class="macro">assert_eq!</span>(x_s2, s2.vec(zs));
-        <span class="macro">assert_eq!</span>(x_s3, <span class="kw">unsafe </span>{ core::mem::transmute(x_s3) });
+        <span class="macro">assert_eq!</span>(x_s3, <span class="macro">transmute!</span>(x_s3));
 
         <span class="kw">let </span>x_s2 = x_s2.shuffle1230();
         <span class="kw">let </span>x_s3 = x_s3.shuffle1230();
         <span class="macro">assert_eq!</span>(x_s2, s2.vec(xs));
-        <span class="macro">assert_eq!</span>(x_s3, <span class="kw">unsafe </span>{ core::mem::transmute(x_s3) });
+        <span class="macro">assert_eq!</span>(x_s3, <span class="macro">transmute!</span>(x_s3));
     }
 
     <span class="attr">#[cfg_attr(not(all(target_feature = <span class="string">"ssse3"</span>, target_feature = <span class="string">"sse4.1"</span>)), ignore)]
@@ -3085,8 +3091,10 @@
     <span class="kw">use </span>core::arch::x86_64::<span class="kw-2">*</span>;
     <span class="kw">use </span>core::marker::PhantomData;
     <span class="kw">use </span>core::ops::<span class="kw-2">*</span>;
+    <span class="kw">use </span>zerocopy::{transmute, AsBytes, FromBytes, FromZeroes};
 
-    <span class="attr">#[derive(Copy, Clone)]
+    <span class="attr">#[derive(Copy, Clone, FromBytes, AsBytes, FromZeroes)]
+    #[repr(transparent)]
     </span><span class="kw">pub struct </span>u32x4x2_avx2&lt;NI&gt; {
         x: __m256i,
         ni: PhantomData&lt;NI&gt;,
@@ -3378,7 +3386,7 @@
     <span class="kw">impl</span>&lt;NI: Copy&gt; Vector&lt;[u32; <span class="number">16</span>]&gt; <span class="kw">for </span>u32x4x4_avx2&lt;NI&gt; {
         <span class="attr">#[inline(always)]
         </span><span class="kw">fn </span>to_scalars(<span class="self">self</span>) -&gt; [u32; <span class="number">16</span>] {
-            <span class="kw">unsafe </span>{ core::mem::transmute(<span class="self">self</span>) }
+            <span class="macro">transmute!</span>(<span class="self">self</span>)
         }
     }
     <span class="kw">impl</span>&lt;NI: Copy&gt; From&lt;u32x4x4_avx2&lt;NI&gt;&gt; <span class="kw">for </span>vec512_storage {

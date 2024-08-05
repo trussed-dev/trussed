@@ -75,6 +75,8 @@ var srcIndex = new Map(JSON.parse('[\
 ["unicode_xid",["",[],["lib.rs","tables.rs"]]],\
 ["universal_hash",["",[],["lib.rs"]]],\
 ["void",["",[],["lib.rs"]]],\
+["zerocopy",["",[["third_party",[["rust",[],["layout.rs"]]]]],["byteorder.rs","lib.rs","macro_util.rs","macros.rs","post_monomorphization_compile_fail_tests.rs","util.rs","wrappers.rs"]]],\
+["zerocopy_derive",["",[],["ext.rs","lib.rs","repr.rs"]]],\
 ["zeroize",["",[],["lib.rs","x86.rs"]]],\
 ["zeroize_derive",["",[],["lib.rs"]]]\
 ]'));
