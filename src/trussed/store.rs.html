@@ -650,9 +650,6 @@
 <a href="#650" id="650">650</a>
 <a href="#651" id="651">651</a>
 <a href="#652" id="652">652</a>
-<a href="#653" id="653">653</a>
-<a href="#654" id="654">654</a>
-<a href="#655" id="655">655</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! `store` presents a combined interface to three littlefs2 filesystems:
 //! internal flash, external flash, volatile/RAM.
 //!
@@ -668,6 +665,7 @@
 //! The guiding example for client apps is `fido-authenticator`, which stores:
 //! - it basic state and config, and
 //! - the metadata for its resident keys as a serialized struct
+//!
 //! Both include references to cryptographic keys (via their handle)
 //!
 //! Currently, the backend (internal/external/volatile) is determined via an
@@ -731,9 +729,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::error::Error;
 <span class="kw">use </span><span class="kw">crate</span>::types::{Bytes, Location, PathBuf};
 <span class="attr">#[allow(unused_imports)]
-#[cfg(feature = <span class="string">"semihosting"</span>)]
-</span><span class="kw">use </span>cortex_m_semihosting::hprintln;
-<span class="kw">use </span>littlefs2::{
+</span><span class="kw">use </span>littlefs2::{
     fs::{DirEntry, Metadata},
     path::Path,
 };
@@ -1150,15 +1146,13 @@
 
 <span class="comment">// TODO: replace this with "fs.create_dir_all(path.parent())"
 </span><span class="kw">pub fn </span>create_directories(fs: <span class="kw-2">&amp;</span><span class="kw">dyn </span>DynFilesystem, path: <span class="kw-2">&amp;</span>Path) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
-    <span class="comment">// hprintln!("preparing {:?}", core::str::from_utf8(path).unwrap()).ok();
-    </span><span class="kw">let </span>path_bytes = path.as_ref().as_bytes();
+    <span class="kw">let </span>path_bytes = path.as_ref().as_bytes();
 
     <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..path_bytes.len() {
         <span class="kw">if </span>path_bytes[i] == <span class="string">b'/' </span>{
             <span class="kw">let </span>dir_bytes = <span class="kw-2">&amp;</span>path_bytes[..i];
             <span class="kw">let </span>dir = PathBuf::from(dir_bytes);
             <span class="comment">// let dir_str = core::str::from_utf8(dir).unwrap();
-            // hprintln!("create dir {:?}", dir_str).ok();
             // fs.create_dir(dir).map_err(|_| Error::FilesystemWriteFailure)?;
             </span><span class="kw">match </span>fs.create_dir(<span class="kw-2">&amp;</span>dir) {
                 <span class="prelude-val">Err</span>(littlefs2::io::Error::EntryAlreadyExisted) =&gt; {}
