@@ -18,8 +18,8 @@ use rand_core::{CryptoRng, RngCore};
 use serde::{Deserialize, Serialize};
 
 use crate::config::*;
+use crate::interrupt::InterruptFlag;
 use crate::store::filestore::{ReadDirFilesState, ReadDirState};
-use crate::{interrupt::InterruptFlag, key::Secrecy};
 
 pub use crate::client::FutureResult;
 pub use crate::platform::Platform;
@@ -99,34 +99,6 @@ impl Id {
 
         buffer
     }
-
-    // NOT IMPLEMENTED, as this would allow clients to create non-random (non-special) IDs.
-    // For testing, can construct directly as the newtypes have pub(crate) access.
-    // #[allow(clippy::result_unit_err)]
-    // pub fn try_from_hex(hex: &[u8]) -> core::result::Result<Self, ()> {
-    //     // https://stackoverflow.com/a/52992629
-    //     // (0..hex.len())
-    //     // use hex::FromHex;
-    //     // let maybe_bytes = <[u8; 16]>::from_hex(hex).map_err(|e| ());
-    //     // maybe_bytes.map(|bytes| Self(Bytes::from_slice(&bytes).unwrap()))
-    //     if (hex.len() & 1) == 1 {
-    //         // panic!("hex len & 1 =  {}", hex.len() & 1);
-    //         return Err(());
-    //     }
-    //     if hex.len() > 32 {
-    //         // panic!("hex len {}", hex.len());
-    //         return Err(());
-    //     }
-    //     // let hex = core::str::from_utf8(hex).map_err(|e| ())?;
-    //     let hex = core::str::from_utf8(hex).unwrap();
-    //     // let hex = core::str::from_utf8_unchecked(hex);
-    //     let mut bytes = [0u8; 16];
-    //     for i in 0..(hex.len() >> 1) {
-    //         // bytes[i] = u8::from_str_radix(&hex[i..][..2], 16).map_err(|e| ())?;
-    //         bytes[i] = u8::from_str_radix(&hex[2*i..][..2], 16).unwrap();
-    //     }
-    //     Ok(Self(u128::from_be_bytes(bytes)))
-    // }
 }
 
 macro_rules! impl_id {
@@ -253,21 +225,6 @@ pub mod consent {
     pub type Result = core::result::Result<(), Error>;
 }
 
-// for counters use the pkcs#11 idea of
-// a monotonic incrementing counter that
-// "increments on each read" --> save +=1 operation
-
-// #[derive(Copy, Clone, Eq, PartialEq, Debug)]
-// pub struct AeadUniqueId {
-//     unique_id: [u8; 16],
-//     nonce: [u8; 12],
-//     tag: [u8; 16],
-// }
-
-// pub type AeadKey = [u8; 32];
-// pub type AeadNonce = [u8; 12];
-// pub type AeadTag = [u8; 16];
-
 /// The context for a syscall (per client).
 ///
 /// The context stores the state used by the standard syscall implementations, see
@@ -342,111 +299,6 @@ impl From<&str> for CoreContext {
 // - Mechanism
 // - Profiles
 
-#[derive(Clone, Eq, PartialEq, Debug, Serialize, Deserialize)]
-#[allow(clippy::large_enum_variant)]
-pub enum Attributes {
-    Certificate,
-    Counter,
-    Data(DataAttributes),
-    Key(KeyAttributes),
-}
-
-#[derive(Clone, Eq, PartialEq, Debug)]
-pub enum CertificateType {
-    // "identity", issued by certificate authority
-    // --> authentication
-    PublicKey,
-    // issued by attribute authority
-    // --> authorization
-    Attribute,
-}
-
-// pub enum CertificateCategory {
-//     Authority,
-//     Token,
-//     Other,
-// }
-
-// #[derive(Clone, Default, Eq, PartialEq, Debug)]
-// pub struct CertificateAttributes {
-//     pub certificate_type CertificateType,
-// }
-
-#[derive(Clone, Default, Eq, PartialEq, Debug, Serialize, Deserialize)]
-pub struct DataAttributes {
-    // application that manages the object
-    // pub application: String<MAX_APPLICATION_NAME_LENGTH>,
-    // DER-encoding of *type* of data object
-    // pub object_id: Bytes<?>,
-    pub kind: ShortData,
-    pub value: LongData,
-}
-
-// TODO: In PKCS#11v3, this is a map (AttributeType: ulong -> (*void, len)).
-// "An array of CK_ATTRIBUTEs is called a “template” and is used for creating, manipulating and searching for objects."
-//
-// Maybe we should put these attributes in an enum, and pass an `heapless::IndexSet` of attributes.
-// How do we handle defaults?
-//
-// Lookup seems a bit painful, on the other hand a struct of options is wasteful.
-#[derive(Copy, Clone, Eq, PartialEq, Debug, Serialize, Deserialize)]
-pub struct KeyAttributes {
-    // secrecy: Secrecy,
-    // object_id: Bytes,
-    // derive: bool, // can other keys be derived
-    // local: bool, // generated on token, or copied from such
-    // key_gen_mechanism: Mechanism, // only for local, how was key generated
-    // allowed_mechanisms: Vec<Mechanism>,
-
-    // never return naked private key
-    sensitive: bool,
-    // always_sensitive: bool,
-
-    // do not even return wrapped private key
-    extractable: bool,
-    // never_extractable: bool,
-
-    // do not save to disk
-    persistent: bool,
-}
-
-impl Default for KeyAttributes {
-    fn default() -> Self {
-        Self {
-            sensitive: true,
-            // always_sensitive: true,
-            extractable: false,
-            // never_extractable: true,
-            // cryptoki: token (vs session) object
-            // cryptoki: default false
-            persistent: false,
-        }
-    }
-}
-
-impl KeyAttributes {
-    pub fn new() -> Self {
-        Default::default()
-    }
-}
-
-/// Non-exhaustive to make it unconstructable
-/// NB: Better to check in service that nothing snuck through!
-#[derive(Clone, Default, Eq, PartialEq, Debug, Deserialize, Serialize)]
-#[non_exhaustive]
-pub struct Letters(pub ShortData);
-
-impl TryFrom<ShortData> for Letters {
-    type Error = crate::error::Error;
-
-    fn try_from(bytes: ShortData) -> Result<Self, Self::Error> {
-        if !&bytes.iter().all(|b| *b >= b'a' && *b <= b'z') {
-            return Err(Self::Error::NotJustLetters);
-        }
-        Ok(Letters(bytes))
-    }
-}
-
 impl Serialize for Id {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -483,16 +335,6 @@ impl<'de> Deserialize<'de> for Id {
 
         deserializer.deserialize_bytes(ValueVisitor(PhantomData))
     }
-}
-
-#[derive(Clone, Eq, PartialEq, Debug)]
-pub enum ObjectType {
-    Certificate(CertificateType),
-    // TODO: maybe group under Feature(FeautureType), with FeatureType = Counter, ...
-    // But what else??
-    Counter,
-    Data,
-    Key(Secrecy),
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Serialize, Deserialize)]
@@ -610,7 +452,6 @@ pub enum Mechanism {
     Rsa4096Pkcs1v15,
 }
 
-pub type LongData = Bytes<MAX_LONG_DATA_LENGTH>;
 pub type MediumData = Bytes<MAX_MEDIUM_DATA_LENGTH>;
 pub type ShortData = Bytes<MAX_SHORT_DATA_LENGTH>;
 
