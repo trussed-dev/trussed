@@ -13,12 +13,10 @@
 //!
 //! See `tests/serde_extensions.rs` for an example.
 
-use core::{marker::PhantomData, task::Poll};
-
 use crate::{
     api::{reply, request, Reply, Request},
     backend::{Backend, CoreOnly, Dispatch, NoId, OptionalBackend},
-    client::{ClientError, ClientImplementation, FutureResult, PollClient},
+    client::ClientImplementation,
     error::Error,
     platform::{Platform, Syscall},
     postcard_deserialize, postcard_serialize_bytes,
@@ -26,15 +24,9 @@ use crate::{
     types::{self, Context, CoreContext},
 };
 
-use serde::{de::DeserializeOwned, Serialize};
-
-/// A Trussed API extension.
-pub trait Extension {
-    /// The requests supported by this extension.
-    type Request: DeserializeOwned + Serialize;
-    /// The replies supported by this extension.
-    type Reply: DeserializeOwned + Serialize;
-}
+pub use trussed_core::serde_extensions::{
+    Extension, ExtensionClient, ExtensionFutureResult, ExtensionResult,
+};
 
 /// Dispatches extension requests to custom backends.
 pub trait ExtensionDispatch {
@@ -153,32 +145,6 @@ pub trait ExtensionId<E> {
     const ID: Self::Id;
 }
 
-/// Executes extension requests.
-///
-/// Instead of using this trait directly, extensions should define their own traits that extend
-/// this trait and use the `extension` function to execute extension requests.
-pub trait ExtensionClient<E: Extension>: PollClient {
-    /// Returns the ID for the `E` extension as defined by the runner, see [`ExtensionId`][].
-    fn id() -> u8;
-
-    /// Executes an extension request.
-    ///
-    /// Applications should not call this method directly and instead use a trait provided by the
-    /// extension.
-    fn extension<Rq, Rp>(&mut self, request: Rq) -> ExtensionResult<'_, E, Rp, Self>
-    where
-        Rq: Into<E::Request>,
-        Rp: TryFrom<E::Reply, Error = Error>,
-    {
-        self.request(request::SerdeExtension {
-            id: Self::id(),
-            request: postcard_serialize_bytes(&request.into())
-                .map_err(|_| ClientError::SerializationFailed)?,
-        })
-        .map(From::from)
-    }
-}
-
 impl<E, S, I> ExtensionClient<E> for ClientImplementation<S, I>
 where
     E: Extension,
@@ -187,52 +153,5 @@ where
 {
     fn id() -> u8 {
         I::ID.into()
-    }
-}
-
-/// A result returned by [`ExtensionClient`][] and clients using it.
-pub type ExtensionResult<'a, E, T, C> = Result<ExtensionFutureResult<'a, E, T, C>, ClientError>;
-
-#[must_use = "Syscalls must be polled with the `syscall` macro"]
-/// A future of an [`ExtensionResult`][].
-pub struct ExtensionFutureResult<'c, E, T, C: ?Sized> {
-    client: &'c mut C,
-    __: PhantomData<(E, T)>,
-}
-
-impl<'c, E, T, C: ?Sized> ExtensionFutureResult<'c, E, T, C> {
-    fn new(client: &'c mut C) -> Self {
-        Self {
-            client,
-            __: PhantomData,
-        }
-    }
-}
-
-impl<'c, E, T, C> ExtensionFutureResult<'c, E, T, C>
-where
-    E: Extension,
-    T: TryFrom<E::Reply, Error = Error>,
-    C: PollClient,
-{
-    pub fn poll(&mut self) -> Poll<Result<T, Error>> {
-        self.client.poll().map(|result| {
-            result.and_then(|reply| {
-                let reply = reply::SerdeExtension::try_from(reply)?;
-                let reply: E::Reply = postcard_deserialize(&reply.reply)
-                    .map_err(|_| Error::InvalidSerializedReply)?;
-                reply.try_into()
-            })
-        })
-    }
-}
-
-impl<'c, E, T, C> From<FutureResult<'c, reply::SerdeExtension, C>>
-    for ExtensionFutureResult<'c, E, T, C>
-where
-    C: PollClient + ?Sized,
-{
-    fn from(result: FutureResult<'c, reply::SerdeExtension, C>) -> Self {
-        Self::new(result.client)
     }
 }

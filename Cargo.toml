@@ -1,11 +1,20 @@
 [workspace]
-members = ["derive"]
+members = ["core", "derive"]
 
 [workspace.package]
-authors = ["Nicolas Stalder <n@stalder.io>", "Nitrokey GmbH"]
+authors = ["The Trussed developers", "Nicolas Stalder <n@stalder.io>", "Nitrokey GmbH"]
 edition = "2021"
 homepage = "https://trussed.dev"
 license = "Apache-2.0 OR MIT"
+
+[workspace.dependencies]
+heapless = { version = "0.7", features = ["serde"] }
+heapless-bytes = "0.3"
+littlefs2-core = { version = "0.1", features = ["serde"] }
+postcard = "0.7"
+rand_core = "0.6"
+serde = { version = "1", default-features = false }
+serde-indexed = "0.1"
 
 [package]
 name = "trussed"
@@ -20,6 +29,7 @@ homepage.workspace = true
 license.workspace = true
 
 [dependencies]
+trussed-core = { version = "0.1", path = "core" }
 # general
 bitflags = { version = "2.1" }
 # const-oid = "0.4.5"
@@ -27,12 +37,12 @@ cfg-if = "1.0"
 embedded-hal = { version = "0.2.3", features = ["unproven"] }
 flexiber = { version = "0.1.0", features = ["derive", "heapless"] }
 generic-array = "0.14.4"
-heapless = { version = "0.7", features = ["serde"] }
+heapless.workspace = true
 hex-literal = "0.4.1"
 nb = "1"
-postcard = "0.7.0"
-rand_core = "0.6"
-serde = { version = "1.0", default-features = false }
+postcard.workspace = true
+rand_core.workspace = true
+serde.workspace = true
 zeroize = { version = "1.2", default-features = false, features = ["zeroize_derive"] }
 rand_chacha = { version = "0.3.1", default-features = false }
 
@@ -51,15 +61,15 @@ sha2 = { version = "0.10", default-features = false }
 cosey = "0.3"
 delog = "0.1.0"
 cbor-smol = "0.4"
-heapless-bytes = { version = "0.3.0" }
+ecdsa = { version = "0.16.9", optional = true, default-features = false }
+heapless-bytes.workspace = true
 interchange = "0.3.0"
-littlefs2 = "0.4.0"
+littlefs2 = "0.4"
 p256-cortex-m4 = { version = "0.1.0-alpha.6", features = ["prehash", "sec1-signatures"] }
-salty = { version = "0.3.0", features = ["cose"] }
-serde-indexed = "0.1.0"
 p384 = { version = "0.13.0", optional = true, default-features = false, features = ["sha384", "ecdh", "ecdsa"] }
 p521 = { version = "0.13.3", optional = true, default-features = false, features = ["sha512", "ecdh", "ecdsa"] }
-ecdsa = { version = "0.16.9", optional = true, default-features = false }
+salty = { version = "0.3.0", features = ["cose"] }
+serde-indexed.workspace = true
 
 [dev-dependencies]
 # Testing
@@ -73,7 +83,7 @@ trussed-derive = { path = "derive" }
 
 [features]
 default = ["default-mechanisms", "default-syscalls", "clients-5"]
-serde-extensions = []
+serde-extensions = ["trussed-core/serde-extensions"]
 std = []
 verbose-tests = ["littlefs2/ll-assertions"]
 verbose-lfs = ["littlefs2/ll-assertions", "littlefs2/ll-trace"]
@@ -122,8 +132,8 @@ trng = ["sha-1"]
 
 # syscalls
 default-syscalls = ["counter-client", "crypto-client-attest"]
-counter-client = []
-crypto-client-attest = []
+counter-client = ["trussed-core/counter-client"]
+crypto-client-attest = ["trussed-core/crypto-client-attest"]
 
 clients-1 = []
 clients-2 = []
@@ -148,3 +158,4 @@ rustdoc-args = ["--cfg", "docsrs"]
 
 [patch.crates-io]
 littlefs2 = { git = "https://github.com/trussed-dev/littlefs2.git", branch = "core" }
+littlefs2-core = { git = "https://github.com/trussed-dev/littlefs2.git", branch = "core" }

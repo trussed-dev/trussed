@@ -22,12 +22,11 @@ generate_macros!();
 
 pub use interchange::Interchange;
 
-pub mod api;
+pub use trussed_core::{api, error, interrupt, syscall, try_syscall};
+
 pub mod backend;
 pub mod client;
 pub mod config;
-pub mod error;
-pub mod interrupt;
 pub mod key;
 pub mod mechanisms;
 pub mod pipe;

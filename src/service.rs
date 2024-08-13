@@ -747,11 +747,14 @@ impl<P: Platform> ServiceResources<P> {
                 .map(|id| Reply::WriteCertificate(reply::WriteCertificate { id })),
 
             Request::SerdeExtension(_) => Err(Error::RequestNotAvailable),
-            // _ => {
-            //     // #[cfg(test)]
-            //     // println!("todo: {:?} request!", &request);
-            //     Err(Error::RequestNotAvailable)
-            // },
+
+            _ => {
+                todo!("handle non-exhaustive enum");
+            } // _ => {
+              //     // #[cfg(test)]
+              //     // println!("todo: {:?} request!", &request);
+              //     Err(Error::RequestNotAvailable)
+              // },
         }
     }
 
