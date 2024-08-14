@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde_derive-1.0.204/src/ser.rs`."><title>ser.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="serde_derive" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0 (051478957 2024-07-21)" data-channel="1.80.0" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde_derive-1.0.207/src/ser.rs`."><title>ser.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="serde_derive" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.1 (3f5fd8dd4 2024-08-06)" data-channel="1.80.1" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1348,15 +1348,6 @@
 <a href="#1348" id="1348">1348</a>
 <a href="#1349" id="1349">1349</a>
 <a href="#1350" id="1350">1350</a>
-<a href="#1351" id="1351">1351</a>
-<a href="#1352" id="1352">1352</a>
-<a href="#1353" id="1353">1353</a>
-<a href="#1354" id="1354">1354</a>
-<a href="#1355" id="1355">1355</a>
-<a href="#1356" id="1356">1356</a>
-<a href="#1357" id="1357">1357</a>
-<a href="#1358" id="1358">1358</a>
-<a href="#1359" id="1359">1359</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::fragment::{Fragment, Match, Stmts};
 <span class="kw">use </span><span class="kw">crate</span>::internals::ast::{Container, Data, Field, Style, Variant};
 <span class="kw">use </span><span class="kw">crate</span>::internals::{attr, replace_receiver, Ctxt, Derive};
@@ -1648,9 +1639,18 @@
 }
 
 <span class="kw">fn </span>serialize_struct(params: <span class="kw-2">&amp;</span>Parameters, fields: <span class="kw-2">&amp;</span>[Field], cattrs: <span class="kw-2">&amp;</span>attr::Container) -&gt; Fragment {
-    <span class="macro">assert!</span>(fields.len() <span class="kw">as </span>u64 &lt;= u64::from(u32::MAX));
+    <span class="macro">assert!</span>(
+        fields.len() <span class="kw">as </span>u64 &lt;= u64::from(u32::MAX),
+        <span class="string">"too many fields in {}: {}, maximum supported count is {}"</span>,
+        cattrs.name().serialize_name(),
+        fields.len(),
+        u32::MAX,
+    );
 
-    <span class="kw">if </span>cattrs.has_flatten() {
+    <span class="kw">let </span>has_non_skipped_flatten = fields
+        .iter()
+        .any(|field| field.attrs.flatten() &amp;&amp; !field.attrs.skip_serializing());
+    <span class="kw">if </span>has_non_skipped_flatten {
         serialize_struct_as_map(params, fields, cattrs)
     } <span class="kw">else </span>{
         serialize_struct_as_struct(params, fields, cattrs)
@@ -1729,26 +1729,8 @@
 
     <span class="kw">let </span>let_mut = mut_if(serialized_fields.peek().is_some() || tag_field_exists);
 
-    <span class="kw">let </span>len = <span class="kw">if </span>cattrs.has_flatten() {
-        <span class="macro">quote!</span>(_serde::__private::None)
-    } <span class="kw">else </span>{
-        <span class="kw">let </span>len = serialized_fields
-            .map(|field| <span class="kw">match </span>field.attrs.skip_serializing_if() {
-                <span class="prelude-val">None </span>=&gt; <span class="macro">quote!</span>(<span class="number">1</span>),
-                <span class="prelude-val">Some</span>(path) =&gt; {
-                    <span class="kw">let </span>field_expr = get_member(params, field, <span class="kw-2">&amp;</span>field.member);
-                    <span class="macro">quote!</span>(<span class="kw">if </span>#path(#field_expr) { <span class="number">0 </span>} <span class="kw">else </span>{ <span class="number">1 </span>})
-                }
-            })
-            .fold(
-                <span class="macro">quote!</span>(#tag_field_exists <span class="kw">as </span>usize),
-                |sum, expr| <span class="macro">quote!</span>(#sum + #expr),
-            );
-        <span class="macro">quote!</span>(_serde::__private::Some(#len))
-    };
-
     <span class="macro">quote_block!</span> {
-        <span class="kw">let </span>#let_mut __serde_state = _serde::Serializer::serialize_map(__serializer, #len)<span class="question-mark">?</span>;
+        <span class="kw">let </span>#let_mut __serde_state = _serde::Serializer::serialize_map(__serializer, _serde::__private::None)<span class="question-mark">?</span>;
         #tag_field
         #(#serialize_fields)*
         _serde::ser::SerializeMap::end(__serde_state)
