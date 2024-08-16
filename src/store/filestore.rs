@@ -8,7 +8,7 @@ use crate::{
     types::{Location, Message, UserAttribute},
     Bytes,
 };
-use littlefs2::path;
+use littlefs2::{fs::Attribute, path};
 
 #[derive(Clone)]
 pub struct ReadDirState {
@@ -269,10 +269,11 @@ impl<S: Store> ClientFilestore<S> {
                     // take first entry that meets requirements
                     .find(|(_, entry)| {
                         if let Some(user_attribute) = user_attribute.as_ref() {
+                            let mut buffer = [0; Attribute::MAX_SIZE as _];
                             let mut path = dir.clone();
                             path.push(entry.file_name());
                             let attribute = fs
-                                .attribute(&path, crate::config::USER_ATTRIBUTE_NUMBER)
+                                .attribute(&path, crate::config::USER_ATTRIBUTE_NUMBER, &mut buffer)
                                 .unwrap();
 
                             if let Some(attribute) = attribute {
@@ -338,8 +339,9 @@ impl<S: Store> ClientFilestore<S> {
                         if let Some(user_attribute) = user_attribute.as_ref() {
                             let mut path = real_dir.clone();
                             path.push(entry.file_name());
+                            let mut buffer = [0; Attribute::MAX_SIZE as _];
                             let attribute = fs
-                                .attribute(&path, crate::config::USER_ATTRIBUTE_NUMBER)
+                                .attribute(&path, crate::config::USER_ATTRIBUTE_NUMBER, &mut buffer)
                                 .unwrap();
                             if let Some(attribute) = attribute {
                                 user_attribute == attribute.data()

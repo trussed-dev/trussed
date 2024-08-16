@@ -419,7 +419,7 @@ impl<P: Platform> ServiceResources<P> {
                                 recursively_list(fs, entry.path());
                             }
                             if entry.file_type().is_file() {
-                                let _contents = fs.read::<256>(entry.path()).unwrap();
+                                let _contents = fs.read::<Vec<u8, 256>>(entry.path()).unwrap();
                                 // info_now!("{} ?= {}", entry.metadata().len(), contents.len()).ok();
                                 // info_now!("{:?}", &contents).ok();
                             }
