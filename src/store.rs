@@ -75,7 +75,7 @@
 use littlefs2::{driver::Storage, fs::Filesystem};
 
 use crate::error::Error;
-use crate::types::{Bytes, Location, Vec};
+use crate::types::{Bytes, Location};
 #[allow(unused_imports)]
 use littlefs2::{
     fs::{DirEntry, Metadata},
@@ -510,8 +510,7 @@ pub fn read<const N: usize>(
     debug_now!("reading {}", &path);
     store
         .fs(location)
-        .read::<Vec<u8, N>>(path)
-        .map(From::from)
+        .read(path)
         .map_err(|_| Error::FilesystemReadFailure)
 }
 
