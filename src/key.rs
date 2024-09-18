@@ -76,6 +76,11 @@ pub enum Kind {
     BrainpoolP384R1,
     BrainpoolP512R1,
     X255,
+
+    // Post-quantum cryptography algorithms
+    Dilithium2,
+    Dilithium3,
+    Dilithium5,
 }
 
 bitflags::bitflags! {
@@ -221,6 +226,9 @@ impl Kind {
             Kind::BrainpoolP256R1 => 12,
             Kind::BrainpoolP384R1 => 13,
             Kind::BrainpoolP512R1 => 14,
+            Kind::Dilithium2 => 15,
+            Kind::Dilithium3 => 16,
+            Kind::Dilithium5 => 17,
         }
     }
 
@@ -240,6 +248,9 @@ impl Kind {
             12 => Kind::BrainpoolP256R1,
             13 => Kind::BrainpoolP384R1,
             14 => Kind::BrainpoolP512R1,
+            15 => Kind::Dilithium2,
+            16 => Kind::Dilithium3,
+            17 => Kind::Dilithium5,
             _ => return Err(Error::InvalidSerializedKey),
         })
     }
