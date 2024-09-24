@@ -6,12 +6,11 @@ use serde::{de::Visitor, ser::SerializeMap, Deserialize, Serialize};
 use zeroize::Zeroize;
 
 pub use crate::Bytes;
-use crate::{
-    config::{MAX_KEY_MATERIAL_LENGTH, MAX_SERIALIZED_KEY_LENGTH},
-    Error,
-};
+use crate::{config::MAX_SERIALIZED_KEY_LENGTH, Error};
 
-pub type Material = Vec<u8, { MAX_KEY_MATERIAL_LENGTH }>;
+// Keys are often stored in serialized format (e.g. PKCS#8 used by the RSA backend),
+// so material max length must be serialized max length.
+pub type Material = Vec<u8, { MAX_SERIALIZED_KEY_LENGTH }>;
 pub type SerializedKeyBytes = Vec<u8, { MAX_SERIALIZED_KEY_LENGTH }>;
 
 // We don't implement serde to make sure nobody inadvertently still uses it
