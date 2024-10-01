@@ -6,12 +6,11 @@ use serde::{de::Visitor, ser::SerializeMap, Deserialize, Serialize};
 use zeroize::Zeroize;
 
 pub use crate::Bytes;
-use crate::{
-    config::{MAX_KEY_MATERIAL_LENGTH, MAX_SERIALIZED_KEY_LENGTH},
-    Error,
-};
+use crate::{config::MAX_SERIALIZED_KEY_LENGTH, Error};
 
-pub type Material = Vec<u8, { MAX_KEY_MATERIAL_LENGTH }>;
+// Keys are often stored in serialized format (e.g. PKCS#8 used by the RSA backend),
+// so material max length must be serialized max length.
+pub type Material = Vec<u8, { MAX_SERIALIZED_KEY_LENGTH }>;
 pub type SerializedKeyBytes = Vec<u8, { MAX_SERIALIZED_KEY_LENGTH }>;
 
 // We don't implement serde to make sure nobody inadvertently still uses it
@@ -76,6 +75,14 @@ pub enum Kind {
     BrainpoolP384R1,
     BrainpoolP512R1,
     X255,
+
+    // Post-quantum cryptography algorithms
+    #[cfg(feature = "backend-dilithium2")]
+    Dilithium2,
+    #[cfg(feature = "backend-dilithium3")]
+    Dilithium3,
+    #[cfg(feature = "backend-dilithium5")]
+    Dilithium5,
 }
 
 bitflags::bitflags! {
@@ -221,6 +228,12 @@ impl Kind {
             Kind::BrainpoolP256R1 => 12,
             Kind::BrainpoolP384R1 => 13,
             Kind::BrainpoolP512R1 => 14,
+            #[cfg(feature = "backend-dilithium2")]
+            Kind::Dilithium2 => 15,
+            #[cfg(feature = "backend-dilithium3")]
+            Kind::Dilithium3 => 16,
+            #[cfg(feature = "backend-dilithium5")]
+            Kind::Dilithium5 => 17,
         }
     }
 
@@ -240,6 +253,12 @@ impl Kind {
             12 => Kind::BrainpoolP256R1,
             13 => Kind::BrainpoolP384R1,
             14 => Kind::BrainpoolP512R1,
+            #[cfg(feature = "backend-dilithium2")]
+            15 => Kind::Dilithium2,
+            #[cfg(feature = "backend-dilithium3")]
+            16 => Kind::Dilithium3,
+            #[cfg(feature = "backend-dilithium5")]
+            17 => Kind::Dilithium5,
             _ => return Err(Error::InvalidSerializedKey),
         })
     }

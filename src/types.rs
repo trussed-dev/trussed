@@ -450,13 +450,21 @@ pub enum Mechanism {
     Rsa2048Pkcs1v15,
     Rsa3072Pkcs1v15,
     Rsa4096Pkcs1v15,
+
+    // Post-quantum cryptography algorithms
+    #[cfg(feature = "backend-dilithium2")]
+    Dilithium2,
+    #[cfg(feature = "backend-dilithium3")]
+    Dilithium3,
+    #[cfg(feature = "backend-dilithium5")]
+    Dilithium5,
 }
 
 pub type MediumData = Bytes<MAX_MEDIUM_DATA_LENGTH>;
 pub type ShortData = Bytes<MAX_SHORT_DATA_LENGTH>;
 
 pub type Message = Bytes<MAX_MESSAGE_LENGTH>;
-pub type SerializedKey = Bytes<MAX_KEY_MATERIAL_LENGTH>;
+pub type SerializedKey = Bytes<MAX_SERIALIZED_KEY_LENGTH>;
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Serialize, Deserialize)]
 pub enum KeySerialization {
