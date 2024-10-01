@@ -638,8 +638,11 @@ pub enum Mechanism {
     Rsa4096Pkcs1v15,
 
     // Post-quantum cryptography algorithms
+    #[cfg(feature = "backend-dilithium2")]
     Dilithium2,
+    #[cfg(feature = "backend-dilithium3")]
     Dilithium3,
+    #[cfg(feature = "backend-dilithium5")]
     Dilithium5,
 }
 
