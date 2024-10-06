@@ -4,7 +4,7 @@ use rand_chacha::ChaCha8Rng;
 use crate::{
     error::{Error, Result},
     store::{self, Store},
-    types::{CounterId, Location},
+    types::{Bytes, CounterId, Location},
 };
 
 pub struct ClientCounterstore<S>
@@ -37,7 +37,7 @@ impl<S: Store> ClientCounterstore<S> {
 
     fn read_counter(&mut self, location: Location, id: CounterId) -> Result<Counter> {
         let path = self.counter_path(id);
-        let mut bytes: crate::Bytes<16> = store::read(self.store, location, &path)?;
+        let mut bytes: Bytes<16> = store::read(self.store, location, &path)?;
         bytes.resize_default(16).ok();
         Ok(u128::from_le_bytes(bytes.as_slice().try_into().unwrap()))
     }

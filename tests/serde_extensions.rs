@@ -28,10 +28,10 @@
 
 use trussed::{
     backend::BackendId,
+    client::ClientImplementation,
     service::Service,
     types::ShortData,
     virt::{self, Ram},
-    ClientImplementation,
 };
 
 use runner::Backends;

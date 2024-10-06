@@ -5,10 +5,9 @@ use heapless::Vec;
 use serde::{de::Visitor, ser::SerializeMap, Deserialize, Serialize};
 use zeroize::Zeroize;
 
-pub use crate::Bytes;
 use crate::{
     config::{MAX_KEY_MATERIAL_LENGTH, MAX_SERIALIZED_KEY_LENGTH},
-    Error,
+    error::Error,
 };
 
 pub type Material = Vec<u8, { MAX_KEY_MATERIAL_LENGTH }>;

@@ -1,30 +1,33 @@
+use heapless::Vec;
 use littlefs2::{
     object_safe::DynFilesystem,
     path,
     path::{Path, PathBuf},
 };
 use rand_chacha::ChaCha8Rng;
-pub use rand_core::{RngCore, SeedableRng};
+use rand_core::{RngCore, SeedableRng};
 
 use crate::backend::{BackendId, CoreOnly, Dispatch};
 use crate::client::{ClientBuilder, ClientImplementation};
 use crate::config::{MAX_MESSAGE_LENGTH, MAX_SERVICE_CLIENTS};
 use crate::error::{Error, Result};
-pub use crate::key;
+use crate::key;
 use crate::mechanisms;
-pub use crate::pipe::ServiceEndpoint;
+use crate::pipe::ServiceEndpoint;
 use crate::pipe::TrussedResponder;
-use crate::platform::{consent, ui, Platform, Store, Syscall, UserInterface};
-pub use crate::store::{
-    self,
+use crate::platform::{Platform, Syscall, UserInterface};
+use crate::store::{
     certstore::{Certstore as _, ClientCertstore},
     counterstore::{ClientCounterstore, Counterstore as _},
-    filestore::{ClientFilestore, Filestore, ReadDirFilesState, ReadDirState},
+    filestore::{ClientFilestore, Filestore},
     keystore::{ClientKeystore, Keystore},
+    Store,
 };
-use crate::types::ui::Status;
-use crate::types::{Context, CoreContext, Location, Mechanism, MediumData, Message, Vec};
-use crate::Bytes;
+use crate::types::{
+    consent,
+    ui::{self, Status},
+};
+use crate::types::{Bytes, Context, CoreContext, Location, Mechanism, MediumData, Message};
 use crate::{
     api::{reply, request, Reply, Request},
     interrupt::InterruptFlag,

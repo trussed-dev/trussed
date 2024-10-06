@@ -79,10 +79,9 @@ use crate::types::{Bytes, Location, PathBuf};
 #[allow(unused_imports)]
 use littlefs2::{
     fs::{DirEntry, Metadata},
+    object_safe::DynFilesystem,
     path::Path,
 };
-
-pub use littlefs2::object_safe::{DynFile, DynFilesystem, DynStorage};
 
 pub mod certstore;
 pub mod counterstore;
