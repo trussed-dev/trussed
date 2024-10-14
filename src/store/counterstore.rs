@@ -31,7 +31,7 @@ impl<S: Store> ClientCounterstore<S> {
         let mut path = PathBuf::new();
         path.push(&self.client_id);
         path.push(path!("ctr"));
-        path.push(&PathBuf::from(id.hex().as_slice()));
+        path.push(&id.hex_path());
         path
     }
 

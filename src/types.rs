@@ -85,6 +85,10 @@ impl Id {
         buffer
     }
 
+    pub fn hex_path(&self) -> PathBuf {
+        PathBuf::from(self.hex().as_slice())
+    }
+
     /// skips leading zeros
     pub fn hex_clean(&self) -> String<32> {
         const HEX_CHARS: &[u8] = b"0123456789abcdef";
