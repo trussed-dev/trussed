@@ -7,12 +7,8 @@ pub use heapless::{String, Vec};
 
 pub use crate::Bytes;
 
-pub use littlefs2::{
-    driver::Storage as LfsStorage,
-    fs::{DirEntry, Filesystem, Metadata},
-    io::Result as LfsResult,
-    path::{Path, PathBuf},
-};
+pub use littlefs2::{driver::Storage as LfsStorage, fs::Filesystem};
+pub use littlefs2_core::{DirEntry, Metadata, Path, PathBuf, Result as LfsResult};
 
 use rand_core::{CryptoRng, RngCore};
 use serde::{Deserialize, Serialize};
@@ -86,7 +82,7 @@ impl Id {
     }
 
     pub fn hex_path(&self) -> PathBuf {
-        PathBuf::from(self.hex().as_slice())
+        PathBuf::try_from(self.hex().as_slice()).unwrap()
     }
 
     /// skips leading zeros
@@ -289,7 +285,7 @@ impl From<PathBuf> for CoreContext {
 
 impl From<&str> for CoreContext {
     fn from(s: &str) -> Self {
-        Self::new(s.into())
+        Self::new(s.try_into().unwrap())
     }
 }
 
