@@ -493,7 +493,7 @@ impl<S: Store> Filestore for ClientFilestore<S> {
                     .filter_map(|entry| {
                         let is_file = entry.file_type().is_file();
                         if is_file {
-                            if PathBuf::from(entry.file_name()) == PathBuf::from(filename) {
+                            if entry.file_name() == filename {
                                 Some(PathBuf::from(entry.path()))
                             } else {
                                 None
