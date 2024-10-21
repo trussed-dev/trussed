@@ -45,6 +45,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   of being generic over the storage implementation.
 - Add `nonce` argument to `wrap_key` and `unwrap_key` syscalls.
 - Use nonce as IV for Aes256Cbc mechanism.
+- Updated `cbor-smol` to 0.5.0.
 
 ### Fixed
 

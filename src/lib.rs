@@ -49,8 +49,16 @@ pub use error::Error;
 pub use platform::Platform;
 pub use service::Service;
 
-pub use cbor_smol::{cbor_deserialize, cbor_serialize_bytes};
+pub use cbor_smol::cbor_deserialize;
 pub use heapless_bytes::Bytes;
+
+pub fn cbor_serialize_bytes<T: serde::Serialize, const N: usize>(
+    object: &T,
+) -> cbor_smol::Result<Bytes<N>> {
+    let mut data = Bytes::new();
+    cbor_smol::cbor_serialize_to(object, &mut data)?;
+    Ok(data)
+}
 
 pub(crate) use postcard::from_bytes as postcard_deserialize;
 
