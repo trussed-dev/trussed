@@ -1,5 +1,6 @@
 #![cfg(feature = "virt")]
 
+use littlefs2_core::path;
 use std::time::Duration;
 use trussed::{
     client::{FilesystemClient as _, ManagementClient as _},
@@ -10,12 +11,13 @@ use trussed::{
 
 fn run_test(data: u8) {
     let location = Location::Internal;
-    let path = PathBuf::from("test");
+    let path = PathBuf::from(path!("test"));
     let mut write_data = Bytes::new();
     write_data.push(data).unwrap();
     virt::with_ram_client("test", |mut client| {
         // ensure that the filesystem is empty
-        let read_dir = syscall!(client.read_dir_first(location, PathBuf::from(""), None)).entry;
+        let read_dir =
+            syscall!(client.read_dir_first(location, PathBuf::from(path!("")), None)).entry;
         assert!(
             read_dir.is_none(),
             "Filesystem not empty: {:?}",

@@ -75,7 +75,7 @@
 use littlefs2::{driver::Storage, fs::Filesystem};
 
 use crate::error::Error;
-use crate::types::{Bytes, Location, PathBuf};
+use crate::types::{Bytes, Location};
 #[allow(unused_imports)]
 use littlefs2::{
     fs::{DirEntry, Metadata},
@@ -492,24 +492,10 @@ macro_rules! store {
     };
 }
 
-// TODO: replace this with "fs.create_dir_all(path.parent())"
 pub fn create_directories(fs: &dyn DynFilesystem, path: &Path) -> Result<(), Error> {
-    let path_bytes = path.as_ref().as_bytes();
-
-    for i in 0..path_bytes.len() {
-        if path_bytes[i] == b'/' {
-            let dir_bytes = &path_bytes[..i];
-            let dir = PathBuf::from(dir_bytes);
-            // let dir_str = core::str::from_utf8(dir).unwrap();
-            // fs.create_dir(dir).map_err(|_| Error::FilesystemWriteFailure)?;
-            match fs.create_dir(&dir) {
-                Err(littlefs2::io::Error::EntryAlreadyExisted) => {}
-                Ok(()) => {}
-                error => {
-                    panic!("{:?}", &error);
-                }
-            }
-        }
+    if let Some(parent) = path.parent() {
+        fs.create_dir_all(&parent)
+            .map_err(|_| Error::FilesystemWriteFailure)?;
     }
     Ok(())
 }
@@ -525,7 +511,6 @@ pub fn read<const N: usize>(
     store
         .fs(location)
         .read(path)
-        .map(From::from)
         .map_err(|_| Error::FilesystemReadFailure)
 }
 
@@ -581,7 +566,7 @@ pub fn metadata(
     debug_now!("checking existence of {}", &path);
     match store.fs(location).metadata(path) {
         Ok(metadata) => Ok(Some(metadata)),
-        Err(littlefs2::io::Error::NoSuchEntry) => Ok(None),
+        Err(littlefs2::io::Error::NO_SUCH_ENTRY) => Ok(None),
         Err(_) => Err(Error::FilesystemReadFailure),
     }
 }

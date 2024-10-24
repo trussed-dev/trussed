@@ -143,7 +143,7 @@ impl<S: StoreProvider> Platform<S> {
         test: impl FnOnce(Client<S, D>) -> R,
     ) -> R {
         let mut service = Service::with_dispatch(self, dispatch);
-        let client = ClientBuilder::new(client_id)
+        let client = ClientBuilder::new(littlefs2::path::PathBuf::try_from(client_id).unwrap())
             .backends(backends)
             .prepare(&mut service)
             .unwrap()
@@ -157,8 +157,11 @@ impl<S: StoreProvider> Platform<S> {
         test: impl FnOnce([MultiClient<S>; N]) -> R,
     ) -> R {
         let mut service = Service::new(self);
-        let prepared_clients =
-            client_ids.map(|id| ClientBuilder::new(id).prepare(&mut service).unwrap());
+        let prepared_clients = client_ids.map(|id| {
+            ClientBuilder::new(littlefs2::path::PathBuf::try_from(id).unwrap())
+                .prepare(&mut service)
+                .unwrap()
+        });
         let service = Arc::new(Mutex::new(service));
         test(prepared_clients.map(|builder| builder.build(service.clone())))
     }
@@ -172,7 +175,7 @@ impl<S: StoreProvider> Platform<S> {
     ) -> R {
         let mut service = Service::with_dispatch(self, dispatch);
         let prepared_clients = client_ids.map(|(id, backends)| {
-            ClientBuilder::new(id)
+            ClientBuilder::new(littlefs2::path::PathBuf::try_from(id).unwrap())
                 .backends(backends)
                 .prepare(&mut service)
                 .unwrap()

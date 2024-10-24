@@ -2,6 +2,7 @@
 
 use std::assert_eq;
 
+use littlefs2_core::path;
 use trussed::{
     client::{CryptoClient, FilesystemClient},
     error::Error,
@@ -17,27 +18,27 @@ fn escape_namespace_parent() {
         let key = syscall!(client.generate_key(Mechanism::P256, StorageAttributes::new())).key;
 
         // first approach: directly escape namespace
-        let mut path = PathBuf::from("..");
-        path.push(&PathBuf::from("sec"));
-        path.push(&PathBuf::from(key.hex().as_slice()));
+        let mut path = PathBuf::from(path!(".."));
+        path.push(path!("sec"));
+        path.push(&key.hex_path());
         assert_eq!(
             try_syscall!(client.read_file(Location::Volatile, path)),
             Err(Error::InvalidPath),
         );
 
         // second approach: start with subdir, then escape namespace
-        let mut path = PathBuf::from("foobar/../..");
-        path.push(&PathBuf::from("sec"));
-        path.push(&PathBuf::from(key.hex().as_slice()));
+        let mut path = PathBuf::from(path!("foobar/../.."));
+        path.push(path!("sec"));
+        path.push(&key.hex_path());
         assert_eq!(
             try_syscall!(client.read_file(Location::Volatile, path)),
             Err(Error::InvalidPath),
         );
 
         // false positive: does not escape namespace but still forbidden
-        let mut path = PathBuf::from("foobar/..");
-        path.push(&PathBuf::from("sec"));
-        path.push(&PathBuf::from(key.hex().as_slice()));
+        let mut path = PathBuf::from(path!("foobar/.."));
+        path.push(path!("sec"));
+        path.push(&key.hex_path());
         assert_eq!(
             try_syscall!(client.read_file(Location::Volatile, path)),
             Err(Error::InvalidPath),
@@ -49,9 +50,9 @@ fn escape_namespace_parent() {
 fn escape_namespace_root() {
     client::get(|client| {
         let key = syscall!(client.generate_key(Mechanism::P256, StorageAttributes::new())).key;
-        let mut path = PathBuf::from("/test");
-        path.push(&PathBuf::from("sec"));
-        path.push(&PathBuf::from(key.hex().as_slice()));
+        let mut path = PathBuf::from(path!("/test"));
+        path.push(path!("sec"));
+        path.push(&key.hex_path());
         assert!(try_syscall!(client.read_file(Location::Volatile, path)).is_err());
     })
 }
@@ -60,17 +61,17 @@ fn iterating(location: Location) {
     client::get(|client| {
         syscall!(client.write_file(
             location,
-            PathBuf::from("foo"),
+            PathBuf::from(path!("foo")),
             Bytes::from_slice(b"foo").unwrap(),
             None
         ));
         syscall!(client.write_file(
             location,
-            PathBuf::from("bar"),
+            PathBuf::from(path!("bar")),
             Bytes::from_slice(b"bar").unwrap(),
             None
         ));
-        let first_entry = syscall!(client.read_dir_first(location, PathBuf::from(""), None))
+        let first_entry = syscall!(client.read_dir_first(location, PathBuf::new(), None))
             .entry
             .unwrap();
         assert_eq!(first_entry.file_name(), "bar");
@@ -78,7 +79,7 @@ fn iterating(location: Location) {
         let next_entry = syscall!(client.read_dir_next()).entry.unwrap();
         assert_eq!(next_entry.file_name(), "foo");
 
-        let first_data = syscall!(client.read_dir_files_first(location, PathBuf::from(""), None))
+        let first_data = syscall!(client.read_dir_files_first(location, PathBuf::new(), None))
             .data
             .unwrap();
         assert_eq!(first_data, b"bar");
@@ -88,7 +89,7 @@ fn iterating(location: Location) {
 }
 
 fn iterating_first(location: Location) {
-    use littlefs2::path;
+    use littlefs2_core::path;
     client::get(|client| {
         let files = [
             path!("foo"),
@@ -141,7 +142,7 @@ fn iterating_first(location: Location) {
         }
 
         let first_entry =
-            syscall!(client.read_dir_first_alphabetical(location, PathBuf::from(""), None))
+            syscall!(client.read_dir_first_alphabetical(location, PathBuf::from(path!("")), None))
                 .entry
                 .unwrap();
         assert_eq!(first_entry.path(), files_sorted_lfs[0]);
@@ -153,8 +154,8 @@ fn iterating_first(location: Location) {
 
         let first_entry = syscall!(client.read_dir_first_alphabetical(
             location,
-            PathBuf::from(""),
-            Some(PathBuf::from("fo"))
+            PathBuf::from(path!("")),
+            Some(PathBuf::from(path!("fo")))
         ))
         .entry
         .unwrap();
@@ -169,7 +170,7 @@ fn iterating_first(location: Location) {
 }
 
 fn iterating_files_and_dirs(location: Location) {
-    use littlefs2::path;
+    use littlefs2_core::path;
     client::get(|client| {
         let files = [
             path!("foo"),
@@ -257,7 +258,7 @@ fn iterating_files_and_dirs(location: Location) {
         );
 
         let first_entry =
-            syscall!(client.read_dir_first_alphabetical(location, PathBuf::from(""), None))
+            syscall!(client.read_dir_first_alphabetical(location, PathBuf::from(path!("")), None))
                 .entry
                 .unwrap();
         assert_eq!(first_entry.path(), all_entries_sorted_lfs[0]);
@@ -269,8 +270,8 @@ fn iterating_files_and_dirs(location: Location) {
 
         let first_entry = syscall!(client.read_dir_first_alphabetical(
             location,
-            PathBuf::from(""),
-            Some(PathBuf::from("dir"))
+            PathBuf::from(path!("")),
+            Some(PathBuf::from(path!("dir")))
         ))
         .entry
         .unwrap();

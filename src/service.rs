@@ -1,8 +1,4 @@
-use littlefs2::{
-    object_safe::DynFilesystem,
-    path,
-    path::{Path, PathBuf},
-};
+use littlefs2_core::{path, DynFilesystem, Path, PathBuf};
 use rand_chacha::ChaCha8Rng;
 pub use rand_core::{RngCore, SeedableRng};
 
@@ -122,7 +118,7 @@ impl<P: Platform> ServiceResources<P> {
     }
 
     pub fn trussed_filestore(&mut self) -> ClientFilestore<P::S> {
-        ClientFilestore::new(PathBuf::from("trussed"), self.platform.store())
+        ClientFilestore::new(PathBuf::from(path!("trussed")), self.platform.store())
     }
 
     pub fn keystore(&mut self, client_id: PathBuf) -> Result<ClientKeystore<P::S>> {
@@ -182,7 +178,7 @@ impl<P: Platform> ServiceResources<P> {
             #[cfg(feature = "crypto-client-attest")]
             Request::Attest(request) => {
                 let mut attn_keystore: ClientKeystore<P::S> = ClientKeystore::new(
-                    PathBuf::from("attn"),
+                    PathBuf::from(path!("attn")),
                     self.rng().map_err(|_| Error::EntropyMalfunction)?,
                     full_store,
                 );
@@ -419,7 +415,7 @@ impl<P: Platform> ServiceResources<P> {
                                 recursively_list(fs, entry.path());
                             }
                             if entry.file_type().is_file() {
-                                let _contents = fs.read::<256>(entry.path()).unwrap();
+                                let _contents = fs.read::<Bytes<256>>(entry.path()).unwrap();
                                 // info_now!("{} ?= {}", entry.metadata().len(), contents.len()).ok();
                                 // info_now!("{:?}", &contents).ok();
                             }
@@ -858,7 +854,7 @@ impl<P: Platform> Service<P> {
         syscall: S,
         interrupt: Option<&'static InterruptFlag>,
     ) -> Result<ClientImplementation<S>, Error> {
-        ClientBuilder::new(client_id)
+        ClientBuilder::new(PathBuf::try_from(client_id).unwrap())
             .interrupt(interrupt)
             .prepare(self)
             .map(|p| p.build(syscall))
@@ -872,7 +868,7 @@ impl<P: Platform> Service<P> {
         client_id: &str,
         interrupt: Option<&'static InterruptFlag>,
     ) -> Result<ClientImplementation<&mut Self>, Error> {
-        ClientBuilder::new(client_id)
+        ClientBuilder::new(PathBuf::try_from(client_id).unwrap())
             .interrupt(interrupt)
             .prepare(self)
             .map(|p| p.build(self))
@@ -885,7 +881,7 @@ impl<P: Platform> Service<P> {
         client_id: &str,
         interrupt: Option<&'static InterruptFlag>,
     ) -> Result<ClientImplementation<Self>, Error> {
-        ClientBuilder::new(client_id)
+        ClientBuilder::new(PathBuf::try_from(client_id).unwrap())
             .interrupt(interrupt)
             .prepare(&mut self)
             .map(|p| p.build(self))
