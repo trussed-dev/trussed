@@ -1,5 +1,9 @@
-(function() {var type_impls = {
-"cstr_core":[],
-"cty":[],
-"serde":[]
-};if (window.register_type_impls) {window.register_type_impls(type_impls);} else {window.pending_type_impls = type_impls;}})()
+(function() {
+    var type_impls = Object.fromEntries([["cstr_core",[]],["cty",[]],["serde",[]]]);
+    if (window.register_type_impls) {
+        window.register_type_impls(type_impls);
+    } else {
+        window.pending_type_impls = type_impls;
+    }
+})()
+//{"start":55,"fragment_lengths":[16,11,13]}

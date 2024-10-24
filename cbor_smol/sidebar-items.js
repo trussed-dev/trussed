@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":["cbor_deserialize","cbor_serialize","cbor_serialize_bytes","cbor_serialize_extending_bytes"],"mod":["de","error","ser"],"struct":["Bytes"]};
+window.SIDEBAR_ITEMS = {"fn":["cbor_deserialize","cbor_serialize","cbor_serialize_to"],"mod":["de","error","ser"]};

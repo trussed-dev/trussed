@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cbor-smol-0.4.0/src/error.rs`."><title>error.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="cbor_smol" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.1 (3f5fd8dd4 2024-08-06)" data-channel="1.80.1" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cbor-smol-0.5.0/src/error.rs`."><title>error.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-492a78a4a87dcc01.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="cbor_smol" data-themes="" data-resource-suffix="" data-rustdoc-version="1.82.0 (f6e511eec 2024-10-15)" data-channel="1.82.0" data-search-js="search-a99f1315e7cc5121.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-921df33f47b8780c.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-3b12f09e550e0385.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -142,16 +142,24 @@
 <a href="#142" id="142">142</a>
 <a href="#143" id="143">143</a>
 <a href="#144" id="144">144</a>
+<a href="#145" id="145">145</a>
+<a href="#146" id="146">146</a>
+<a href="#147" id="147">147</a>
+<a href="#148" id="148">148</a>
+<a href="#149" id="149">149</a>
+<a href="#150" id="150">150</a>
+<a href="#151" id="151">151</a>
 </pre></div><pre class="rust"><code><span class="attr">#![allow(unused_variables)]
 
 </span><span class="kw">use </span>core::fmt::{Display, Formatter};
 
 <span class="doccomment">/// This is the Result type used by cbor-smol.
-</span><span class="kw">pub type </span><span class="prelude-ty">Result</span>&lt;T&gt; = core::result::Result&lt;T, Error&gt;;
+</span><span class="kw">pub type </span><span class="prelude-ty">Result</span>&lt;T, <span class="prelude-val">Err </span>= Error&gt; = core::result::Result&lt;T, <span class="prelude-val">Err</span>&gt;;
 
 <span class="doccomment">/// This is the error type used by cbor-smol
 </span><span class="attr">#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[repr(u8)]
+#[non_exhaustive]
 </span><span class="kw">pub enum </span>Error {
     <span class="doccomment">/// This is a feature that cbor-smol will never implement
     </span>WontImplement,
@@ -186,12 +194,16 @@
     </span>DeserializeBadI16,
     <span class="doccomment">/// Expected a i32, was too large
     </span>DeserializeBadI32,
+    <span class="doccomment">/// Expected a i64, was too large
+    </span>DeserializeBadI64,
     <span class="doccomment">/// Expected a u8
     </span>DeserializeBadU8,
     <span class="doccomment">/// Expected a u16
     </span>DeserializeBadU16,
     <span class="doccomment">/// Expected a u32
     </span>DeserializeBadU32,
+    <span class="doccomment">/// Expected a u64
+    </span>DeserializeBadU64,
     <span class="doccomment">/// Expected a NULL marker
     </span>DeserializeExpectedNull,
     <span class="doccomment">/// Inexistent slice-to-array cast error. Used here to avoid calling unwrap.
@@ -233,17 +245,19 @@
                 </span>DeserializeBadI8 =&gt; <span class="string">"Expected a i8"</span>,
                 DeserializeBadI16 =&gt; <span class="string">"Expected a i16"</span>,
                 DeserializeBadI32 =&gt; <span class="string">"Expected a i32"</span>,
+                DeserializeBadI64 =&gt; <span class="string">"Expected a i64"</span>,
                 DeserializeBadMajor =&gt; <span class="string">"Expected a different major type"</span>,
                 DeserializeBadU8 =&gt; <span class="string">"Expected a u8"</span>,
                 DeserializeBadU16 =&gt; <span class="string">"Expected a u16"</span>,
                 DeserializeBadU32 =&gt; <span class="string">"Expected a u32"</span>,
+                DeserializeBadU64 =&gt; <span class="string">"Expected a u64"</span>,
                 DeserializeExpectedNull =&gt; <span class="string">"Expected 0xf6"</span>,
                 InexistentSliceToArrayError =&gt; <span class="string">""</span>,
                 DeserializeNonMinimal =&gt; <span class="string">"Value may be valid, but not encoded in minimal way"</span>,
                 SerdeSerCustom =&gt; <span class="string">"Serde Serialization Error"</span>,
                 SerdeDeCustom =&gt; <span class="string">"Serde Deserialization Error"</span>,
-                SerdeMissingField =&gt; <span class="string">"Serde Missing Required Field"
-            </span>}
+                SerdeMissingField =&gt; <span class="string">"Serde Missing Required Field"</span>,
+            }
         )
     }
 }
@@ -276,7 +290,7 @@
         //
         // `invalid length 297, expected a sequence`
         //
-        </span><span class="macro">info_now!</span>(<span class="string">"deser error: {}"</span>,<span class="kw-2">&amp;</span>msg);
+        </span><span class="macro">info_now!</span>(<span class="string">"deser error: {}"</span>, <span class="kw-2">&amp;</span>msg);
         Error::SerdeDeCustom
     }
     <span class="kw">fn </span>missing_field(field: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str) -&gt; <span class="self">Self </span>{

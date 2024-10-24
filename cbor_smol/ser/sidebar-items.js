@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["Serializer","SliceWriter"],"trait":["Writer"]};
+window.SIDEBAR_ITEMS = {"struct":["Serializer"],"trait":["Writer"]};
