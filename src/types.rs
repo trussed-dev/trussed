@@ -7,12 +7,8 @@ pub use heapless::{String, Vec};
 
 pub use crate::Bytes;
 
-pub use littlefs2::{
-    driver::Storage as LfsStorage,
-    fs::{DirEntry, Filesystem, Metadata},
-    io::Result as LfsResult,
-    path::{Path, PathBuf},
-};
+pub use littlefs2::{driver::Storage as LfsStorage, fs::Filesystem};
+pub use littlefs2_core::{DirEntry, Metadata, Path, PathBuf, Result as LfsResult};
 
 use rand_core::{CryptoRng, RngCore};
 use serde::{Deserialize, Serialize};

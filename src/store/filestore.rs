@@ -8,7 +8,7 @@ use crate::{
     types::{Location, Message, UserAttribute},
     Bytes,
 };
-use littlefs2::path;
+use littlefs2_core::{path, DirEntry, Metadata, Path, PathBuf};
 
 #[derive(Clone)]
 pub struct ReadDirState {
@@ -24,11 +24,6 @@ pub struct ReadDirFilesState {
     location: Location,
     user_attribute: Option<UserAttribute>,
 }
-
-use littlefs2::{
-    fs::{DirEntry, Metadata},
-    path::{Path, PathBuf},
-};
 
 pub struct ClientFilestore<S>
 where
@@ -204,7 +199,7 @@ impl<S: Store> ClientFilestore<S> {
                         // `read_dir_and_then` wants to see Results (although we naturally have an Option
                         // at this point)
                     })
-                    .ok_or(littlefs2::io::Error::IO)
+                    .ok_or(littlefs2_core::Error::IO)
             })
             .ok())
     }
@@ -241,7 +236,7 @@ impl<S: Store> ClientFilestore<S> {
 
                         (entry, read_dir_state)
                     })
-                    .ok_or(littlefs2::io::Error::IO)
+                    .ok_or(littlefs2_core::Error::IO)
             })
             .ok())
     }
@@ -298,7 +293,7 @@ impl<S: Store> ClientFilestore<S> {
                         // `read_dir_and_then` wants to see Results (although we naturally have an Option
                         // at this point)
                     })
-                    .ok_or(littlefs2::io::Error::IO)
+                    .ok_or(littlefs2_core::Error::IO)
             })
             .ok()
             .map(|(i, data)| {
@@ -361,7 +356,7 @@ impl<S: Store> ClientFilestore<S> {
                         (i, data)
                     })
                     // convert Option into Result, again because `read_dir_and_then` expects this
-                    .ok_or(littlefs2::io::Error::IO)
+                    .ok_or(littlefs2_core::Error::IO)
             })
             .ok()
             .map(|(i, data)| {
@@ -509,7 +504,7 @@ impl<S: Store> Filestore for ClientFilestore<S> {
                         }
                     })
                     .next()
-                    .ok_or(littlefs2::io::Error::IO)
+                    .ok_or(littlefs2_core::Error::IO)
             })
             .ok()
         }

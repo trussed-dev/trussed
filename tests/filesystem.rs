@@ -89,7 +89,7 @@ fn iterating(location: Location) {
 }
 
 fn iterating_first(location: Location) {
-    use littlefs2::path;
+    use littlefs2_core::path;
     client::get(|client| {
         let files = [
             path!("foo"),
@@ -170,7 +170,7 @@ fn iterating_first(location: Location) {
 }
 
 fn iterating_files_and_dirs(location: Location) {
-    use littlefs2::path;
+    use littlefs2_core::path;
     client::get(|client| {
         let files = [
             path!("foo"),

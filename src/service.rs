@@ -1,8 +1,4 @@
-use littlefs2::{
-    object_safe::DynFilesystem,
-    path,
-    path::{Path, PathBuf},
-};
+use littlefs2_core::{path, DynFilesystem, Path, PathBuf};
 use rand_chacha::ChaCha8Rng;
 pub use rand_core::{RngCore, SeedableRng};
 
