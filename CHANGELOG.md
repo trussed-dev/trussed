@@ -45,6 +45,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   of being generic over the storage implementation.
 - Add `nonce` argument to `wrap_key` and `unwrap_key` syscalls.
 - Use nonce as IV for Aes256Cbc mechanism.
+- Updated `cbor-smol` to 0.5.0.
 
 ### Fixed
 
@@ -54,6 +55,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed missing path validation in `Filestore` that allowed clients to escape
   their namespace ([#65]).
 - wrap_key: Don't replace associated data with an empty array
+
+### Removed
+
+- Removed unused items:
+  - `config`: `MAX_APPLICATION_NAME_LENGTH`, `MAX_LABEL_LENGTH`, `MAX_LONG_DATA_LENGTH`, `MAX_OBJECT_HANDLES`, `MAX_PATH_LENGTH`
+  - `types`: `Attributes`, `CertificateType` `DataAttributes`, `KeyAttributes`, `Letters`, `LongData`, `ObjectType`
 
 [#64]: https://github.com/trussed-dev/trussed/issues/64
 [#65]: https://github.com/trussed-dev/trussed/issues/65

@@ -1,18 +1,8 @@
-#![allow(non_camel_case_types)]
-#![allow(clippy::upper_case_acronyms)]
-
-use littlefs2::consts;
-
 // TODO: this needs to be overridable.
 // Should we use the "config crate that can have a replacement patched in" idea?
 
-pub type MAX_APPLICATION_NAME_LENGTH = consts::U256;
-pub const MAX_LONG_DATA_LENGTH: usize = 1024;
 pub const MAX_MESSAGE_LENGTH: usize = 1024;
-pub type MAX_OBJECT_HANDLES = consts::U16;
-pub type MAX_LABEL_LENGTH = consts::U256;
 pub const MAX_MEDIUM_DATA_LENGTH: usize = 256;
-pub type MAX_PATH_LENGTH = consts::U256;
 cfg_if::cfg_if! {
     if #[cfg(test)] {
         pub const MAX_SERVICE_CLIENTS: usize = 6;

@@ -13,6 +13,7 @@
 //! The guiding example for client apps is `fido-authenticator`, which stores:
 //! - it basic state and config, and
 //! - the metadata for its resident keys as a serialized struct
+//!
 //! Both include references to cryptographic keys (via their handle)
 //!
 //! Currently, the backend (internal/external/volatile) is determined via an
@@ -76,8 +77,6 @@ use littlefs2::{driver::Storage, fs::Filesystem};
 use crate::error::Error;
 use crate::types::{Bytes, Location, PathBuf};
 #[allow(unused_imports)]
-#[cfg(feature = "semihosting")]
-use cortex_m_semihosting::hprintln;
 use littlefs2::{
     fs::{DirEntry, Metadata},
     path::Path,
@@ -495,7 +494,6 @@ macro_rules! store {
 
 // TODO: replace this with "fs.create_dir_all(path.parent())"
 pub fn create_directories(fs: &dyn DynFilesystem, path: &Path) -> Result<(), Error> {
-    // hprintln!("preparing {:?}", core::str::from_utf8(path).unwrap()).ok();
     let path_bytes = path.as_ref().as_bytes();
 
     for i in 0..path_bytes.len() {
@@ -503,7 +501,6 @@ pub fn create_directories(fs: &dyn DynFilesystem, path: &Path) -> Result<(), Err
             let dir_bytes = &path_bytes[..i];
             let dir = PathBuf::from(dir_bytes);
             // let dir_str = core::str::from_utf8(dir).unwrap();
-            // hprintln!("create dir {:?}", dir_str).ok();
             // fs.create_dir(dir).map_err(|_| Error::FilesystemWriteFailure)?;
             match fs.create_dir(&dir) {
                 Err(littlefs2::io::Error::EntryAlreadyExisted) => {}

@@ -138,15 +138,15 @@ impl<S: Store> Keystore for ClientKeystore<S> {
 
     // TODO: is this an Oracle?
     fn delete_key(&self, id: &KeyId) -> bool {
-        let secrecies = [key::Secrecy::Secret, key::Secrecy::Public];
+        let secrecies = [key::Secrecy::Public, key::Secrecy::Secret];
 
-        let locations = [Location::Internal, Location::External, Location::Volatile];
+        let locations = [Location::Volatile, Location::Internal, Location::External];
 
-        secrecies.iter().any(|secrecy| {
-            let path = self.key_path(*secrecy, id);
-            locations
-                .iter()
-                .any(|location| store::delete(self.store, *location, &path))
+        locations.iter().any(|location| {
+            secrecies.iter().any(|secrecy| {
+                let path = self.key_path(*secrecy, id);
+                store::delete(self.store, *location, &path)
+            })
         })
     }
 
