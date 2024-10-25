@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["FileType","OpenSeekFrom","PathError","SeekFrom"],"macro":["path"],"struct":["Ancestors","Attribute","DirEntry","Error","FileOpenFlags","Iter","Metadata","Path","PathBuf"],"trait":["DynFile","DynFilesystem","Read","Seek","Vec","Write"],"type":["DirEntriesCallback","FileCallback","Predicate","Result"]};

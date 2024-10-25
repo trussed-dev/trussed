@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"trait":["DynFile","DynFilesystem","DynStorage"],"type":["DirEntriesCallback","FileCallback","FilesystemCallback","OpenOptionsCallback","Predicate"]};
+window.SIDEBAR_ITEMS = {"trait":["DynFile","DynFilesystem","DynStorage"],"type":["DirEntriesCallback","FileCallback","FilesystemCallback","Predicate"]};

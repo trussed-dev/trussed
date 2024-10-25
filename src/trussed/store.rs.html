@@ -635,21 +635,6 @@
 <a href="#635" id="635">635</a>
 <a href="#636" id="636">636</a>
 <a href="#637" id="637">637</a>
-<a href="#638" id="638">638</a>
-<a href="#639" id="639">639</a>
-<a href="#640" id="640">640</a>
-<a href="#641" id="641">641</a>
-<a href="#642" id="642">642</a>
-<a href="#643" id="643">643</a>
-<a href="#644" id="644">644</a>
-<a href="#645" id="645">645</a>
-<a href="#646" id="646">646</a>
-<a href="#647" id="647">647</a>
-<a href="#648" id="648">648</a>
-<a href="#649" id="649">649</a>
-<a href="#650" id="650">650</a>
-<a href="#651" id="651">651</a>
-<a href="#652" id="652">652</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! `store` presents a combined interface to three littlefs2 filesystems:
 //! internal flash, external flash, volatile/RAM.
 //!
@@ -727,7 +712,7 @@
 </span><span class="kw">use </span>littlefs2::{driver::Storage, fs::Filesystem};
 
 <span class="kw">use </span><span class="kw">crate</span>::error::Error;
-<span class="kw">use </span><span class="kw">crate</span>::types::{Bytes, Location, PathBuf};
+<span class="kw">use </span><span class="kw">crate</span>::types::{Bytes, Location};
 <span class="attr">#[allow(unused_imports)]
 </span><span class="kw">use </span>littlefs2::{
     fs::{DirEntry, Metadata},
@@ -1144,24 +1129,10 @@
     };
 }
 
-<span class="comment">// TODO: replace this with "fs.create_dir_all(path.parent())"
-</span><span class="kw">pub fn </span>create_directories(fs: <span class="kw-2">&amp;</span><span class="kw">dyn </span>DynFilesystem, path: <span class="kw-2">&amp;</span>Path) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
-    <span class="kw">let </span>path_bytes = path.as_ref().as_bytes();
-
-    <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..path_bytes.len() {
-        <span class="kw">if </span>path_bytes[i] == <span class="string">b'/' </span>{
-            <span class="kw">let </span>dir_bytes = <span class="kw-2">&amp;</span>path_bytes[..i];
-            <span class="kw">let </span>dir = PathBuf::from(dir_bytes);
-            <span class="comment">// let dir_str = core::str::from_utf8(dir).unwrap();
-            // fs.create_dir(dir).map_err(|_| Error::FilesystemWriteFailure)?;
-            </span><span class="kw">match </span>fs.create_dir(<span class="kw-2">&amp;</span>dir) {
-                <span class="prelude-val">Err</span>(littlefs2::io::Error::EntryAlreadyExisted) =&gt; {}
-                <span class="prelude-val">Ok</span>(()) =&gt; {}
-                error =&gt; {
-                    <span class="macro">panic!</span>(<span class="string">"{:?}"</span>, <span class="kw-2">&amp;</span>error);
-                }
-            }
-        }
+<span class="kw">pub fn </span>create_directories(fs: <span class="kw-2">&amp;</span><span class="kw">dyn </span>DynFilesystem, path: <span class="kw-2">&amp;</span>Path) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
+    <span class="kw">if let </span><span class="prelude-val">Some</span>(parent) = path.parent() {
+        fs.create_dir_all(<span class="kw-2">&amp;</span>parent)
+            .map_err(|<span class="kw">_</span>| Error::FilesystemWriteFailure)<span class="question-mark">?</span>;
     }
     <span class="prelude-val">Ok</span>(())
 }
@@ -1177,7 +1148,6 @@
     store
         .fs(location)
         .read(path)
-        .map(From::from)
         .map_err(|<span class="kw">_</span>| Error::FilesystemReadFailure)
 }
 
@@ -1233,7 +1203,7 @@
     <span class="macro">debug_now!</span>(<span class="string">"checking existence of {}"</span>, <span class="kw-2">&amp;</span>path);
     <span class="kw">match </span>store.fs(location).metadata(path) {
         <span class="prelude-val">Ok</span>(metadata) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(metadata)),
-        <span class="prelude-val">Err</span>(littlefs2::io::Error::NoSuchEntry) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
+        <span class="prelude-val">Err</span>(littlefs2::io::Error::NO_SUCH_ENTRY) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
         <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">Err</span>(Error::FilesystemReadFailure),
     }
 }

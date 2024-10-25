@@ -494,12 +494,8 @@
 
 <span class="kw">pub use </span><span class="kw">crate</span>::Bytes;
 
-<span class="kw">pub use </span>littlefs2::{
-    driver::Storage <span class="kw">as </span>LfsStorage,
-    fs::{DirEntry, Filesystem, Metadata},
-    io::Result <span class="kw">as </span>LfsResult,
-    path::{Path, PathBuf},
-};
+<span class="kw">pub use </span>littlefs2::{driver::Storage <span class="kw">as </span>LfsStorage, fs::Filesystem};
+<span class="kw">pub use </span>littlefs2_core::{DirEntry, Metadata, Path, PathBuf, <span class="prelude-ty">Result </span><span class="kw">as </span>LfsResult};
 
 <span class="kw">use </span>rand_core::{CryptoRng, RngCore};
 <span class="kw">use </span>serde::{Deserialize, Serialize};
@@ -570,6 +566,10 @@
             buffer.push(HEX_CHARS[(array[i] &amp; <span class="number">0xf</span>) <span class="kw">as </span>usize]).unwrap();
         }
         buffer
+    }
+
+    <span class="kw">pub fn </span>hex_path(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; PathBuf {
+        PathBuf::try_from(<span class="self">self</span>.hex().as_slice()).unwrap()
     }
 
     <span class="doccomment">/// skips leading zeros
@@ -772,7 +772,7 @@
 
 <span class="kw">impl </span>From&lt;<span class="kw-2">&amp;</span>str&gt; <span class="kw">for </span>CoreContext {
     <span class="kw">fn </span>from(s: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
-        <span class="self">Self</span>::new(s.into())
+        <span class="self">Self</span>::new(s.try_into().unwrap())
     }
 }
 

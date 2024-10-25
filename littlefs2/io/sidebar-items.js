@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["Error","OpenSeekFrom","SeekFrom"],"fn":["error_code_from","result_from"],"mod":["prelude"],"trait":["Read","Seek","Write"],"type":["Result"]};
+window.SIDEBAR_ITEMS = {"enum":["OpenSeekFrom","SeekFrom"],"mod":["prelude"],"struct":["Error"],"trait":["Read","Seek","Write"],"type":["Result"]};

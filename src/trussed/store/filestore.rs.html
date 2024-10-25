@@ -513,6 +513,7 @@
 <a href="#513" id="513">513</a>
 <a href="#514" id="514">514</a>
 <a href="#515" id="515">515</a>
+<a href="#516" id="516">516</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>core::cmp::Ordering;
 
 <span class="kw">use crate</span>::{
@@ -523,7 +524,7 @@
     types::{Location, Message, UserAttribute},
     Bytes,
 };
-<span class="kw">use </span>littlefs2::path;
+<span class="kw">use </span>littlefs2_core::{path, DirEntry, Metadata, Path, PathBuf};
 
 <span class="attr">#[derive(Clone)]
 </span><span class="kw">pub struct </span>ReadDirState {
@@ -539,11 +540,6 @@
     location: Location,
     user_attribute: <span class="prelude-ty">Option</span>&lt;UserAttribute&gt;,
 }
-
-<span class="kw">use </span>littlefs2::{
-    fs::{DirEntry, Metadata},
-    path::{Path, PathBuf},
-};
 
 <span class="kw">pub struct </span>ClientFilestore&lt;S&gt;
 <span class="kw">where
@@ -596,7 +592,7 @@
             <span class="comment">// oh oh oh
             </span>.unwrap();
         <span class="kw">let </span>dat_offset = <span class="string">"/dat/"</span>.len();
-        PathBuf::from(<span class="kw-2">&amp;</span>bytes[end_of_namespace + <span class="number">1 </span>+ offset + dat_offset..])
+        PathBuf::try_from(<span class="kw-2">&amp;</span>bytes[end_of_namespace + <span class="number">1 </span>+ offset + dat_offset..]).unwrap()
     }
 }
 
@@ -719,7 +715,7 @@
                         // `read_dir_and_then` wants to see Results (although we naturally have an Option
                         // at this point)
                     </span>})
-                    .ok_or(littlefs2::io::Error::Io)
+                    .ok_or(littlefs2_core::Error::IO)
             })
             .ok())
     }
@@ -756,7 +752,7 @@
 
                         (entry, read_dir_state)
                     })
-                    .ok_or(littlefs2::io::Error::Io)
+                    .ok_or(littlefs2_core::Error::IO)
             })
             .ok())
     }
@@ -783,14 +779,17 @@
                     <span class="comment">// take first entry that meets requirements
                     </span>.find(|(<span class="kw">_</span>, entry)| {
                         <span class="kw">if let </span><span class="prelude-val">Some</span>(user_attribute) = user_attribute.as_ref() {
+                            <span class="kw">let </span><span class="kw-2">mut </span>buffer = UserAttribute::new();
+                            buffer.resize_to_capacity();
                             <span class="kw">let </span><span class="kw-2">mut </span>path = dir.clone();
                             path.push(entry.file_name());
                             <span class="kw">let </span>attribute = fs
-                                .attribute(<span class="kw-2">&amp;</span>path, <span class="kw">crate</span>::config::USER_ATTRIBUTE_NUMBER)
+                                .attribute(<span class="kw-2">&amp;</span>path, <span class="kw">crate</span>::config::USER_ATTRIBUTE_NUMBER, <span class="kw-2">&amp;mut </span>buffer)
                                 .unwrap();
 
                             <span class="kw">if let </span><span class="prelude-val">Some</span>(attribute) = attribute {
-                                user_attribute == attribute.data()
+                                user_attribute.len() == attribute.total_size()
+                                    &amp;&amp; user_attribute == attribute.data()
                             } <span class="kw">else </span>{
                                 <span class="bool-val">false
                             </span>}
@@ -810,7 +809,7 @@
                         // `read_dir_and_then` wants to see Results (although we naturally have an Option
                         // at this point)
                     </span>})
-                    .ok_or(littlefs2::io::Error::Io)
+                    .ok_or(littlefs2_core::Error::IO)
             })
             .ok()
             .map(|(i, data)| {
@@ -850,13 +849,16 @@
                     <span class="comment">// take first entry that meets requirements
                     </span>.find(|(<span class="kw">_</span>, entry)| {
                         <span class="kw">if let </span><span class="prelude-val">Some</span>(user_attribute) = user_attribute.as_ref() {
+                            <span class="kw">let </span><span class="kw-2">mut </span>buffer = UserAttribute::new();
+                            buffer.resize_to_capacity();
                             <span class="kw">let </span><span class="kw-2">mut </span>path = real_dir.clone();
                             path.push(entry.file_name());
                             <span class="kw">let </span>attribute = fs
-                                .attribute(<span class="kw-2">&amp;</span>path, <span class="kw">crate</span>::config::USER_ATTRIBUTE_NUMBER)
+                                .attribute(<span class="kw-2">&amp;</span>path, <span class="kw">crate</span>::config::USER_ATTRIBUTE_NUMBER, <span class="kw-2">&amp;mut </span>buffer)
                                 .unwrap();
                             <span class="kw">if let </span><span class="prelude-val">Some</span>(attribute) = attribute {
-                                user_attribute == attribute.data()
+                                user_attribute.len() == attribute.total_size()
+                                    &amp;&amp; user_attribute == attribute.data()
                             } <span class="kw">else </span>{
                                 <span class="bool-val">false
                             </span>}
@@ -870,7 +872,7 @@
                         (i, data)
                     })
                     <span class="comment">// convert Option into Result, again because `read_dir_and_then` expects this
-                    </span>.ok_or(littlefs2::io::Error::Io)
+                    </span>.ok_or(littlefs2_core::Error::IO)
             })
             .ok()
             .map(|(i, data)| {
@@ -1008,7 +1010,7 @@
                     .filter_map(|entry| {
                         <span class="kw">let </span>is_file = entry.file_type().is_file();
                         <span class="kw">if </span>is_file {
-                            <span class="kw">if </span>PathBuf::from(entry.file_name()) == PathBuf::from(filename) {
+                            <span class="kw">if </span>entry.file_name() == filename {
                                 <span class="prelude-val">Some</span>(PathBuf::from(entry.path()))
                             } <span class="kw">else </span>{
                                 <span class="prelude-val">None
@@ -1018,7 +1020,7 @@
                         }
                     })
                     .next()
-                    .ok_or(littlefs2::io::Error::Io)
+                    .ok_or(littlefs2_core::Error::IO)
             })
             .ok()
         }
