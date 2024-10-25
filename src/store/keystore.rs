@@ -1,4 +1,4 @@
-use littlefs2::{path, path::PathBuf};
+use littlefs2_core::{path, PathBuf};
 use rand_chacha::ChaCha8Rng;
 
 use crate::{
@@ -86,7 +86,7 @@ impl<S: Store> ClientKeystore<S> {
 
     pub fn key_path(&self, secrecy: key::Secrecy, id: &KeyId) -> PathBuf {
         let mut path = self.key_directory(secrecy);
-        path.push(&PathBuf::from(id.hex().as_slice()));
+        path.push(&id.hex_path());
         path
     }
 }

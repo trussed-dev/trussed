@@ -8,7 +8,7 @@ use crate::{
     types::{Location, Message, UserAttribute},
     Bytes,
 };
-use littlefs2::path;
+use littlefs2_core::{path, DirEntry, Metadata, Path, PathBuf};
 
 #[derive(Clone)]
 pub struct ReadDirState {
@@ -24,11 +24,6 @@ pub struct ReadDirFilesState {
     location: Location,
     user_attribute: Option<UserAttribute>,
 }
-
-use littlefs2::{
-    fs::{DirEntry, Metadata},
-    path::{Path, PathBuf},
-};
 
 pub struct ClientFilestore<S>
 where
@@ -81,7 +76,7 @@ impl<S: Store> ClientFilestore<S> {
             // oh oh oh
             .unwrap();
         let dat_offset = "/dat/".len();
-        PathBuf::from(&bytes[end_of_namespace + 1 + offset + dat_offset..])
+        PathBuf::try_from(&bytes[end_of_namespace + 1 + offset + dat_offset..]).unwrap()
     }
 }
 
@@ -204,7 +199,7 @@ impl<S: Store> ClientFilestore<S> {
                         // `read_dir_and_then` wants to see Results (although we naturally have an Option
                         // at this point)
                     })
-                    .ok_or(littlefs2::io::Error::Io)
+                    .ok_or(littlefs2_core::Error::IO)
             })
             .ok())
     }
@@ -241,7 +236,7 @@ impl<S: Store> ClientFilestore<S> {
 
                         (entry, read_dir_state)
                     })
-                    .ok_or(littlefs2::io::Error::Io)
+                    .ok_or(littlefs2_core::Error::IO)
             })
             .ok())
     }
@@ -268,14 +263,17 @@ impl<S: Store> ClientFilestore<S> {
                     // take first entry that meets requirements
                     .find(|(_, entry)| {
                         if let Some(user_attribute) = user_attribute.as_ref() {
+                            let mut buffer = UserAttribute::new();
+                            buffer.resize_to_capacity();
                             let mut path = dir.clone();
                             path.push(entry.file_name());
                             let attribute = fs
-                                .attribute(&path, crate::config::USER_ATTRIBUTE_NUMBER)
+                                .attribute(&path, crate::config::USER_ATTRIBUTE_NUMBER, &mut buffer)
                                 .unwrap();
 
                             if let Some(attribute) = attribute {
-                                user_attribute == attribute.data()
+                                user_attribute.len() == attribute.total_size()
+                                    && user_attribute == attribute.data()
                             } else {
                                 false
                             }
@@ -295,7 +293,7 @@ impl<S: Store> ClientFilestore<S> {
                         // `read_dir_and_then` wants to see Results (although we naturally have an Option
                         // at this point)
                     })
-                    .ok_or(littlefs2::io::Error::Io)
+                    .ok_or(littlefs2_core::Error::IO)
             })
             .ok()
             .map(|(i, data)| {
@@ -335,13 +333,16 @@ impl<S: Store> ClientFilestore<S> {
                     // take first entry that meets requirements
                     .find(|(_, entry)| {
                         if let Some(user_attribute) = user_attribute.as_ref() {
+                            let mut buffer = UserAttribute::new();
+                            buffer.resize_to_capacity();
                             let mut path = real_dir.clone();
                             path.push(entry.file_name());
                             let attribute = fs
-                                .attribute(&path, crate::config::USER_ATTRIBUTE_NUMBER)
+                                .attribute(&path, crate::config::USER_ATTRIBUTE_NUMBER, &mut buffer)
                                 .unwrap();
                             if let Some(attribute) = attribute {
-                                user_attribute == attribute.data()
+                                user_attribute.len() == attribute.total_size()
+                                    && user_attribute == attribute.data()
                             } else {
                                 false
                             }
@@ -355,7 +356,7 @@ impl<S: Store> ClientFilestore<S> {
                         (i, data)
                     })
                     // convert Option into Result, again because `read_dir_and_then` expects this
-                    .ok_or(littlefs2::io::Error::Io)
+                    .ok_or(littlefs2_core::Error::IO)
             })
             .ok()
             .map(|(i, data)| {
@@ -493,7 +494,7 @@ impl<S: Store> Filestore for ClientFilestore<S> {
                     .filter_map(|entry| {
                         let is_file = entry.file_type().is_file();
                         if is_file {
-                            if PathBuf::from(entry.file_name()) == PathBuf::from(filename) {
+                            if entry.file_name() == filename {
                                 Some(PathBuf::from(entry.path()))
                             } else {
                                 None
@@ -503,7 +504,7 @@ impl<S: Store> Filestore for ClientFilestore<S> {
                         }
                     })
                     .next()
-                    .ok_or(littlefs2::io::Error::Io)
+                    .ok_or(littlefs2_core::Error::IO)
             })
             .ok()
         }

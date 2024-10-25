@@ -1,5 +1,6 @@
 #![cfg(feature = "virt")]
 
+use littlefs2_core::path;
 use trussed::{
     api::{reply::ReadFile, Reply, Request},
     backend::{self, BackendId},
@@ -61,7 +62,7 @@ fn run<F: FnOnce(&mut Client)>(backends: &'static [BackendId<Backend>], f: F) {
 
 #[test]
 fn override_syscall() {
-    let path = PathBuf::from("test");
+    let path = PathBuf::from(path!("test"));
     run(&[], |client| {
         assert!(trussed::try_syscall!(client.read_file(Location::Internal, path.clone())).is_err());
     });
