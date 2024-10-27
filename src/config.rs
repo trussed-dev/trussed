@@ -46,68 +46,33 @@ cfg_if::cfg_if! {
 }
 pub const MAX_SHORT_DATA_LENGTH: usize = 128;
 
-// Constant (static compile-time) max function
-const fn max(a: usize, b: usize) -> usize {
-    [a, b][(a < b) as usize]
-}
-pub const MAX_SIGNATURE_LENGTH: usize = max(
-    // Default from before addition of PQC
-    512 * 2,
-    max(
-        if cfg!(feature = "backend-dilithium2") {
-            pqcrypto_dilithium::ffi::PQCLEAN_DILITHIUM2_CLEAN_CRYPTO_BYTES
-        } else {
-            0
-        },
-        max(
-            if cfg!(feature = "backend-dilithium3") {
-                pqcrypto_dilithium::ffi::PQCLEAN_DILITHIUM3_CLEAN_CRYPTO_BYTES
-            } else {
-                0
-            },
-            if cfg!(feature = "backend-dilithium5") {
-                pqcrypto_dilithium::ffi::PQCLEAN_DILITHIUM5_CLEAN_CRYPTO_BYTES
-            } else {
-                0
-            },
-        ),
-    ),
-);
-
 // For the PQC algorithms, public and private key are generated at the same time and stored together as
 // the private key. Then in the derive call, it just pulls the public key from the private key store
 // and re-saves it as a public-only key. Therefore, the max material length is both keys together, plus
 // the PKCS8 serialization overhead.
-pub const MAX_KEY_MATERIAL_LENGTH: usize = max(
-    // Default from before addition of PQC
-    512 * 2,
-    max(
-        // + 31 is for PKCS#8 serialization
-        if cfg!(feature = "backend-dilithium2") {
-            pqcrypto_dilithium::ffi::PQCLEAN_DILITHIUM2_CLEAN_CRYPTO_PUBLICKEYBYTES
-                + pqcrypto_dilithium::ffi::PQCLEAN_DILITHIUM2_CLEAN_CRYPTO_SECRETKEYBYTES
-                + 31
-        } else {
-            0
-        },
-        max(
-            if cfg!(feature = "backend-dilithium3") {
-                pqcrypto_dilithium::ffi::PQCLEAN_DILITHIUM3_CLEAN_CRYPTO_PUBLICKEYBYTES
-                    + pqcrypto_dilithium::ffi::PQCLEAN_DILITHIUM3_CLEAN_CRYPTO_SECRETKEYBYTES
-                    + 31
-            } else {
-                0
-            },
-            if cfg!(feature = "backend-dilithium5") {
-                pqcrypto_dilithium::ffi::PQCLEAN_DILITHIUM5_CLEAN_CRYPTO_PUBLICKEYBYTES
-                    + pqcrypto_dilithium::ffi::PQCLEAN_DILITHIUM5_CLEAN_CRYPTO_SECRETKEYBYTES
-                    + 31
-            } else {
-                0
-            },
-        ),
-    ),
-);
+cfg_if::cfg_if! {
+    if #[cfg(feature = "backend-dilithium5")] {
+        pub const MAX_SIGNATURE_LENGTH: usize = pqcrypto_dilithium::ffi::PQCLEAN_DILITHIUM5_CLEAN_CRYPTO_BYTES;
+        pub const MAX_KEY_MATERIAL_LENGTH: usize = pqcrypto_dilithium::ffi::PQCLEAN_DILITHIUM2_CLEAN_CRYPTO_PUBLICKEYBYTES
+        + pqcrypto_dilithium::ffi::PQCLEAN_DILITHIUM2_CLEAN_CRYPTO_SECRETKEYBYTES
+        + 31;
+    } else if #[cfg(feature = "backend-dilithium3")] {
+        pub const MAX_SIGNATURE_LENGTH: pqcrypto_dilithium::ffi::PQCLEAN_DILITHIUM2_CLEAN_CRYPTO_BYTES;
+        pub const MAX_KEY_MATERIAL_LENGTH: usize = pqcrypto_dilithium::ffi::PQCLEAN_DILITHIUM3_CLEAN_CRYPTO_PUBLICKEYBYTES
+        + pqcrypto_dilithium::ffi::PQCLEAN_DILITHIUM3_CLEAN_CRYPTO_SECRETKEYBYTES
+        + 31;
+    } else if #[cfg(feature = "backend-dilithium2")] {
+        pub const MAX_SIGNATURE_LENGTH: pqcrypto_dilithium::ffi::PQCLEAN_DILITHIUM2_CLEAN_CRYPTO_BYTES;
+        pub const MAX_KEY_MATERIAL_LENGTH: usize = pqcrypto_dilithium::ffi::PQCLEAN_DILITHIUM5_CLEAN_CRYPTO_PUBLICKEYBYTES
+        + pqcrypto_dilithium::ffi::PQCLEAN_DILITHIUM5_CLEAN_CRYPTO_SECRETKEYBYTES
+        + 31;
+    } else {
+        // Default from before addition of PQC
+        pub const MAX_SIGNATURE_LENGTH: usize = 512 * 2;
+        // FIXME: Value from https://stackoverflow.com/questions/5403808/private-key-length-bytes for Rsa2048 Private key
+        pub const MAX_KEY_MATERIAL_LENGTH: usize = 1160 * 2 + 72;
+    }
+}
 
 // Must be MAX_KEY_MATERIAL_LENGTH + 4
 // Note that this is not the serialized key material (e.g. serialized PKCS#8), but
