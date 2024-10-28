@@ -425,6 +425,8 @@ pub enum Mechanism {
     BrainpoolP384R1Prehashed,
     BrainpoolP512R1,
     BrainpoolP512R1Prehashed,
+    Secp256k1,
+    Secp256k1Prehashed,
     // clients can also do hashing by themselves
     Sha256,
     Tdes,
