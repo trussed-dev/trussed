@@ -6,4 +6,8 @@
 //!
 //! [`trussed`]: https://docs.rs/trussed
 
+pub mod api;
+pub mod config;
+pub mod error;
 pub mod interrupt;
+pub mod types;
