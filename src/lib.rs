@@ -46,7 +46,7 @@ pub use error::Error;
 pub use platform::Platform;
 pub use service::Service;
 
-pub use trussed_core::{api, error, interrupt};
+pub use trussed_core::{api, block, error, interrupt, syscall, try_syscall};
 
 pub use cbor_smol::cbor_deserialize;
 pub use heapless_bytes::Bytes;
