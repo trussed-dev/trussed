@@ -43,8 +43,7 @@ pub struct FutureResult<'c, T, C: ?Sized>
 where
     C: PollClient,
 {
-    // TODO: make private
-    pub client: &'c mut C,
+    pub(crate) client: &'c mut C,
     __: PhantomData<T>,
 }
 

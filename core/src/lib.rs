@@ -11,4 +11,6 @@ pub mod client;
 pub mod config;
 pub mod error;
 pub mod interrupt;
+#[cfg(feature = "serde-extensions")]
+pub mod serde_extensions;
 pub mod types;
