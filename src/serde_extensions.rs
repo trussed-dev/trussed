@@ -21,9 +21,8 @@ use crate::{
     client::{ClientError, ClientImplementation, FutureResult, PollClient},
     error::Error,
     platform::{Platform, Syscall},
-    postcard_deserialize, postcard_serialize_bytes,
     service::ServiceResources,
-    types::{self, Context, CoreContext},
+    types::{self, Bytes, Context, CoreContext},
 };
 
 use serde::{de::DeserializeOwned, Serialize};
@@ -34,6 +33,55 @@ pub trait Extension {
     type Request: DeserializeOwned + Serialize;
     /// The replies supported by this extension.
     type Reply: DeserializeOwned + Serialize;
+
+    /// Serialize an extension request.
+    ///
+    /// Requests that are serialized with this function can be deserialized with
+    /// [`Extension::deserialize_request`][].  The format is not guaranteed to be stable over
+    /// crate releases.
+    #[inline(never)]
+    fn serialize_request(
+        id: u8,
+        request: &Self::Request,
+    ) -> Result<request::SerdeExtension, ClientError> {
+        postcard::to_vec(request)
+            .map(Bytes::from)
+            .map(|request| request::SerdeExtension { id, request })
+            .map_err(|_| ClientError::SerializationFailed)
+    }
+
+    /// Deserialize an extension request.
+    ///
+    /// This function can be used to deserialize requests that have been serialized with
+    /// [`Extension::serialize_request`][].  The format is not guaranteed to be stable over
+    /// crate releases.
+    #[inline(never)]
+    fn deserialize_request(request: &request::SerdeExtension) -> Result<Self::Request, Error> {
+        postcard::from_bytes(&request.request).map_err(|_| Error::InvalidSerializedRequest)
+    }
+
+    /// Serialize an extension reply.
+    ///
+    /// Replies that are serialized with this function can be deserialized with
+    /// [`Extension::deserialize_reply`][].  The format is not guaranteed to be stable over
+    /// crate releases.
+    #[inline(never)]
+    fn serialize_reply(reply: &Self::Reply) -> Result<reply::SerdeExtension, Error> {
+        postcard::to_vec(reply)
+            .map(Bytes::from)
+            .map(|reply| reply::SerdeExtension { reply })
+            .map_err(|_| Error::ReplySerializationFailure)
+    }
+
+    /// Deserialize an extension reply.
+    ///
+    /// This function can be used to deserialize replies that have been serialized with
+    /// [`Extension::serialize_reply`][].  The format is not guaranteed to be stable over
+    /// crate releases.
+    #[inline(never)]
+    fn deserialize_reply(reply: &reply::SerdeExtension) -> Result<Self::Reply, Error> {
+        postcard::from_bytes(&reply.reply).map_err(|_| Error::InvalidSerializedReply)
+    }
 }
 
 /// Dispatches extension requests to custom backends.
@@ -122,12 +170,9 @@ pub trait ExtensionImpl<E: Extension>: Backend {
         request: &request::SerdeExtension,
         resources: &mut ServiceResources<P>,
     ) -> Result<reply::SerdeExtension, Error> {
-        let request =
-            postcard_deserialize(&request.request).map_err(|_| Error::InvalidSerializedRequest)?;
+        let request = E::deserialize_request(request)?;
         let reply = self.extension_request(core_ctx, backend_ctx, &request, resources)?;
-        postcard_serialize_bytes(&reply)
-            .map(|reply| reply::SerdeExtension { reply })
-            .map_err(|_| Error::ReplySerializationFailure)
+        E::serialize_reply(&reply)
     }
 }
 
@@ -170,12 +215,8 @@ pub trait ExtensionClient<E: Extension>: PollClient {
         Rq: Into<E::Request>,
         Rp: TryFrom<E::Reply, Error = Error>,
     {
-        self.request(request::SerdeExtension {
-            id: Self::id(),
-            request: postcard_serialize_bytes(&request.into())
-                .map_err(|_| ClientError::SerializationFailed)?,
-        })
-        .map(From::from)
+        let request = E::serialize_request(Self::id(), &request.into())?;
+        self.request(request).map(From::from)
     }
 }
 
@@ -219,8 +260,7 @@ where
         self.client.poll().map(|result| {
             result.and_then(|reply| {
                 let reply = reply::SerdeExtension::try_from(reply)?;
-                let reply: E::Reply = postcard_deserialize(&reply.reply)
-                    .map_err(|_| Error::InvalidSerializedReply)?;
+                let reply: E::Reply = E::deserialize_reply(&reply)?;
                 reply.try_into()
             })
         })
