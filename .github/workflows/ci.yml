@@ -37,15 +37,21 @@ jobs:
         run: cargo build --workspace --target ${{ matrix.target }}
 
       - name: Check all targets without default features
-        run: cargo check --workspace --all-targets --no-default-features
+        run: |
+          cargo check --workspace --all-targets --no-default-features
+          cargo check --package trussed-core --all-targets --no-default-features
         if: matrix.target == 'x86_64-unknown-linux-gnu'
 
       - name: Check all targets with default features
-        run: cargo check --workspace --all-targets
+        run: |
+          cargo check --workspace --all-targets
+          cargo check --package trussed-core --all-targets
         if: matrix.target == 'x86_64-unknown-linux-gnu'
 
       - name: Check all features and targets
-        run: cargo check --workspace --all-features --all-targets
+        run: |
+          cargo check --workspace --all-features --all-targets
+          cargo check --package trussed-core --all-targets --all-features
         if: matrix.target == 'x86_64-unknown-linux-gnu'
 
       - name: Run tests
@@ -61,5 +67,8 @@ jobs:
         if: matrix.target == 'x86_64-unknown-linux-gnu'
 
       - name: Check documentation
-        run: RUSTDOCFLAGS="-D warnings" cargo doc --no-deps --features serde-extensions,virt
+        run: |
+          export RUSTDOCFLAGS="-D warnings"
+          cargo doc --no-deps --features serde-extensions,virt
+          cargo doc --no-deps --package trussed-core --all-features
         if: matrix.target == 'x86_64-unknown-linux-gnu'

@@ -65,7 +65,6 @@ impl InterruptFlag {
 
     pub fn is_interrupted(&self) -> bool {
         let res = self.load();
-        info_now!("got interrupt state: {:?}", res);
         res == InterruptState::Interrupted
     }
 }

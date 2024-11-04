@@ -84,11 +84,11 @@ macro_rules! impl_request {
         }
     }
     impl core::convert::TryFrom<Request> for $request {
-        type Error = crate::Error;
+        type Error = crate::error::Error;
         fn try_from(request: Request) -> Result<request::$request, Self::Error> {
             match request {
                 Request::$request(request) => Ok(request),
-                _ => Err(crate::Error::InternalError),
+                _ => Err(Self::Error::InternalError),
             }
         }
     }
@@ -118,11 +118,11 @@ macro_rules! impl_reply {
 
     $(#[$attr])?
     impl core::convert::TryFrom<Reply> for $reply {
-        type Error = crate::Error;
+        type Error = crate::error::Error;
         fn try_from(reply: Reply) -> Result<reply::$reply, Self::Error> {
             match reply {
                 Reply::$reply(reply) => Ok(reply),
-                _ => Err(crate::Error::InternalError),
+                _ => Err(Self::Error::InternalError),
             }
         }
     }

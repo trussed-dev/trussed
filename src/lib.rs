@@ -22,12 +22,9 @@ generate_macros!();
 
 pub use interchange::Interchange;
 
-pub mod api;
 pub mod backend;
 pub mod client;
 pub mod config;
-pub mod error;
-pub mod interrupt;
 pub mod key;
 pub mod mechanisms;
 pub mod pipe;
@@ -48,6 +45,8 @@ pub use error::Error;
 /// The trait that platforms need to implement to use Trussed.
 pub use platform::Platform;
 pub use service::Service;
+
+pub use trussed_core::{api, block, error, interrupt, syscall, try_syscall};
 
 pub use cbor_smol::cbor_deserialize;
 pub use heapless_bytes::Bytes;
