@@ -72,7 +72,7 @@
 //! - Alternative: subdirectory <==> RP hash, everything else in flat files
 //! - In any case need to "list dirs excluding . and .." or similar
 
-use littlefs2::{driver::Storage, fs::Filesystem};
+use littlefs2::{driver::Storage, fs::Filesystem, path};
 
 use crate::error::Error;
 use crate::types::{Bytes, Location};
@@ -548,7 +548,28 @@ pub fn store(
 #[inline(never)]
 pub fn delete(store: impl Store, location: Location, path: &Path) -> bool {
     debug_now!("deleting {}", &path);
-    store.fs(location).remove(path).is_ok()
+    let fs = store.fs(location);
+    if !fs.remove(path).is_ok() {
+        return false;
+    }
+
+    // first ancestor is the file itself
+    for parent in path.ancestors().skip(1) {
+        if &*parent == path!("/") {
+            break;
+        }
+        let Ok(meta) = fs.metadata(&parent) else {
+            return false;
+        };
+        if meta.is_dir() && meta.is_empty() {
+            if fs.remove_dir(&parent).is_err() {
+                return false;
+            }
+        } else {
+            break;
+        }
+    }
+    true
 }
 
 #[inline(never)]
