@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["KeySerialization","Location","Mechanism","SignatureSerialization"],"mod":["consent","reboot"],"struct":["Bytes","CertId","CounterId","DirEntry","Id","KeyId","Metadata","PathBuf","StorageAttributes","String"],"trait":["ObjectId"],"type":["MediumData","Message","SerializedKey","ShortData","Signature","SpecialId","UserAttribute"]};
