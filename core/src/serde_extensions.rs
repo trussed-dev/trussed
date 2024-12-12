@@ -118,7 +118,7 @@ impl<'c, E, T, C: ?Sized> ExtensionFutureResult<'c, E, T, C> {
     }
 }
 
-impl<'c, E, T, C> ExtensionFutureResult<'c, E, T, C>
+impl<E, T, C> ExtensionFutureResult<'_, E, T, C>
 where
     E: Extension,
     T: TryFrom<E::Reply, Error = Error>,

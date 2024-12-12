@@ -72,7 +72,7 @@
 //! - Alternative: subdirectory <==> RP hash, everything else in flat files
 //! - In any case need to "list dirs excluding . and .." or similar
 
-use littlefs2::{driver::Storage, fs::Filesystem};
+use littlefs2::{driver::Storage, fs::Filesystem, path};
 
 use crate::error::Error;
 use crate::types::{Bytes, Location};
@@ -204,6 +204,7 @@ macro_rules! store {
                 &'static mut littlefs2::fs::Allocation<$Vfs>,
                 &'static mut $Vfs,
             ) {
+                use core::ptr::addr_of_mut;
                 // static mut INTERNAL_STORAGE: $Ifs = i_ctor();//<$Ifs>::new();
 
                 static mut INTERNAL_STORAGE: Option<$Ifs> = None;
@@ -236,12 +237,12 @@ macro_rules! store {
                 }
 
                 (
-                    unsafe { INTERNAL_FS_ALLOC.as_mut().unwrap() },
-                    unsafe { INTERNAL_STORAGE.as_mut().unwrap() },
-                    unsafe { EXTERNAL_FS_ALLOC.as_mut().unwrap() },
-                    unsafe { EXTERNAL_STORAGE.as_mut().unwrap() },
-                    unsafe { VOLATILE_FS_ALLOC.as_mut().unwrap() },
-                    unsafe { VOLATILE_STORAGE.as_mut().unwrap() },
+                    unsafe { (*addr_of_mut!(INTERNAL_FS_ALLOC)).as_mut().unwrap() },
+                    unsafe { (*addr_of_mut!(INTERNAL_STORAGE)).as_mut().unwrap() },
+                    unsafe { (*addr_of_mut!(EXTERNAL_FS_ALLOC)).as_mut().unwrap() },
+                    unsafe { (*addr_of_mut!(EXTERNAL_STORAGE)).as_mut().unwrap() },
+                    unsafe { (*addr_of_mut!(VOLATILE_FS_ALLOC)).as_mut().unwrap() },
+                    unsafe { (*addr_of_mut!(VOLATILE_STORAGE)).as_mut().unwrap() },
                 )
             }
 
@@ -318,23 +319,26 @@ macro_rules! store {
 
             fn ifs_ptr() -> *mut $crate::store::Fs<$Ifs> {
                 use core::mem::MaybeUninit;
+                use core::ptr::addr_of_mut;
                 use $crate::store::Fs;
                 static mut IFS: MaybeUninit<Fs<$Ifs>> = MaybeUninit::uninit();
-                unsafe { IFS.as_mut_ptr() }
+                unsafe { (*addr_of_mut!(IFS)).as_mut_ptr() }
             }
 
             fn efs_ptr() -> *mut $crate::store::Fs<$Efs> {
                 use core::mem::MaybeUninit;
+                use core::ptr::addr_of_mut;
                 use $crate::store::Fs;
                 static mut EFS: MaybeUninit<Fs<$Efs>> = MaybeUninit::uninit();
-                unsafe { EFS.as_mut_ptr() }
+                unsafe { (*addr_of_mut!(EFS)).as_mut_ptr() }
             }
 
             fn vfs_ptr() -> *mut $crate::store::Fs<$Vfs> {
                 use core::mem::MaybeUninit;
+                use core::ptr::addr_of_mut;
                 use $crate::store::Fs;
                 static mut VFS: MaybeUninit<Fs<$Vfs>> = MaybeUninit::uninit();
-                unsafe { VFS.as_mut_ptr() }
+                unsafe { (*addr_of_mut!(VFS)).as_mut_ptr() }
             }
 
             // Ignore lint for compatibility
@@ -361,6 +365,7 @@ macro_rules! store {
                 format: bool,
             ) -> littlefs2::io::Result<()> {
                 use core::mem::MaybeUninit;
+                use core::ptr::{addr_of, addr_of_mut};
                 use littlefs2::fs::{Allocation, Filesystem};
 
                 static mut IFS_ALLOC: MaybeUninit<&'static mut Allocation<$Ifs>> =
@@ -390,31 +395,31 @@ macro_rules! store {
                         Filesystem::format(ifs_storage).expect("can format");
                     }
 
-                    IFS_ALLOC.as_mut_ptr().write(ifs_alloc);
-                    IFS_STORAGE.as_mut_ptr().write(ifs_storage);
+                    (*addr_of_mut!(IFS_ALLOC)).as_mut_ptr().write(ifs_alloc);
+                    (*addr_of_mut!(IFS_STORAGE)).as_mut_ptr().write(ifs_storage);
                     IFS = Some(Filesystem::mount(
-                        &mut *IFS_ALLOC.as_mut_ptr(),
-                        &mut *IFS_STORAGE.as_mut_ptr(),
+                        &mut *(*addr_of_mut!(IFS_ALLOC)).as_mut_ptr(),
+                        &mut *(*addr_of_mut!(IFS_STORAGE)).as_mut_ptr(),
                     )?);
-                    let ifs = $crate::store::Fs::new(IFS.as_ref().unwrap());
+                    let ifs = $crate::store::Fs::new((*addr_of!(IFS)).as_ref().unwrap());
                     Self::ifs_ptr().write(ifs);
 
-                    EFS_ALLOC.as_mut_ptr().write(efs_alloc);
-                    EFS_STORAGE.as_mut_ptr().write(efs_storage);
+                    (*addr_of_mut!(EFS_ALLOC)).as_mut_ptr().write(efs_alloc);
+                    (*addr_of_mut!(EFS_STORAGE)).as_mut_ptr().write(efs_storage);
                     EFS = Some(Filesystem::mount(
-                        &mut *EFS_ALLOC.as_mut_ptr(),
-                        &mut *EFS_STORAGE.as_mut_ptr(),
+                        &mut *(*addr_of_mut!(EFS_ALLOC)).as_mut_ptr(),
+                        &mut *(*addr_of_mut!(EFS_STORAGE)).as_mut_ptr(),
                     )?);
-                    let efs = $crate::store::Fs::new(EFS.as_ref().unwrap());
+                    let efs = $crate::store::Fs::new((*addr_of_mut!(EFS)).as_ref().unwrap());
                     Self::efs_ptr().write(efs);
 
-                    VFS_ALLOC.as_mut_ptr().write(vfs_alloc);
-                    VFS_STORAGE.as_mut_ptr().write(vfs_storage);
+                    (*addr_of_mut!(VFS_ALLOC)).as_mut_ptr().write(vfs_alloc);
+                    (*addr_of_mut!(VFS_STORAGE)).as_mut_ptr().write(vfs_storage);
                     VFS = Some(Filesystem::mount(
-                        &mut *VFS_ALLOC.as_mut_ptr(),
-                        &mut *VFS_STORAGE.as_mut_ptr(),
+                        &mut *(*addr_of_mut!(VFS_ALLOC)).as_mut_ptr(),
+                        &mut *(*addr_of_mut!(VFS_STORAGE)).as_mut_ptr(),
                     )?);
-                    let vfs = $crate::store::Fs::new(VFS.as_ref().unwrap());
+                    let vfs = $crate::store::Fs::new((*addr_of!(VFS)).as_ref().unwrap());
                     Self::vfs_ptr().write(vfs);
 
                     Ok(())
@@ -429,6 +434,7 @@ macro_rules! store {
             ) -> Self {
                 // This unfortunately repeates the code of `allocate`.
                 // It seems Rust's borrowing rules go against this.
+                use core::ptr::addr_of_mut;
                 use littlefs2::fs::{Allocation, Filesystem};
 
                 static mut INTERNAL_STORAGE: Option<$Ifs> = None;
@@ -463,24 +469,24 @@ macro_rules! store {
                 let store = Self::claim().unwrap();
                 if store
                     .mount(
-                        unsafe { INTERNAL_FS_ALLOC.as_mut().unwrap() },
-                        unsafe { INTERNAL_STORAGE.as_mut().unwrap() },
-                        unsafe { EXTERNAL_FS_ALLOC.as_mut().unwrap() },
-                        unsafe { EXTERNAL_STORAGE.as_mut().unwrap() },
-                        unsafe { VOLATILE_FS_ALLOC.as_mut().unwrap() },
-                        unsafe { VOLATILE_STORAGE.as_mut().unwrap() },
+                        unsafe { (*addr_of_mut!(INTERNAL_FS_ALLOC)).as_mut().unwrap() },
+                        unsafe { (*addr_of_mut!(INTERNAL_STORAGE)).as_mut().unwrap() },
+                        unsafe { (*addr_of_mut!(EXTERNAL_FS_ALLOC)).as_mut().unwrap() },
+                        unsafe { (*addr_of_mut!(EXTERNAL_STORAGE)).as_mut().unwrap() },
+                        unsafe { (*addr_of_mut!(VOLATILE_FS_ALLOC)).as_mut().unwrap() },
+                        unsafe { (*addr_of_mut!(VOLATILE_STORAGE)).as_mut().unwrap() },
                         false,
                     )
                     .is_err()
                 {
                     store
                         .mount(
-                            unsafe { INTERNAL_FS_ALLOC.as_mut().unwrap() },
-                            unsafe { INTERNAL_STORAGE.as_mut().unwrap() },
-                            unsafe { EXTERNAL_FS_ALLOC.as_mut().unwrap() },
-                            unsafe { EXTERNAL_STORAGE.as_mut().unwrap() },
-                            unsafe { VOLATILE_FS_ALLOC.as_mut().unwrap() },
-                            unsafe { VOLATILE_STORAGE.as_mut().unwrap() },
+                            unsafe { (*addr_of_mut!(INTERNAL_FS_ALLOC)).as_mut().unwrap() },
+                            unsafe { (*addr_of_mut!(INTERNAL_STORAGE)).as_mut().unwrap() },
+                            unsafe { (*addr_of_mut!(EXTERNAL_FS_ALLOC)).as_mut().unwrap() },
+                            unsafe { (*addr_of_mut!(EXTERNAL_STORAGE)).as_mut().unwrap() },
+                            unsafe { (*addr_of_mut!(VOLATILE_FS_ALLOC)).as_mut().unwrap() },
+                            unsafe { (*addr_of_mut!(VOLATILE_STORAGE)).as_mut().unwrap() },
                             true,
                         )
                         .unwrap();
@@ -548,7 +554,32 @@ pub fn store(
 #[inline(never)]
 pub fn delete(store: impl Store, location: Location, path: &Path) -> bool {
     debug_now!("deleting {}", &path);
-    store.fs(location).remove(path).is_ok()
+    let fs = store.fs(location);
+    if fs.remove(path).is_err() {
+        return false;
+    }
+
+    // Only delete ancestors for volatile FS
+    if location != Location::Volatile {
+        return true;
+    }
+    // first ancestor is the file itself
+    for parent in path.ancestors().skip(1) {
+        if &*parent == path!("/") {
+            break;
+        }
+        let Ok(meta) = fs.metadata(&parent) else {
+            return false;
+        };
+        if meta.is_dir() && meta.is_empty() {
+            if fs.remove_dir(&parent).is_err() {
+                return false;
+            }
+        } else {
+            break;
+        }
+    }
+    true
 }
 
 #[inline(never)]
