@@ -1,3 +1,4 @@
+use core::ptr::addr_of_mut;
 use std::{
     fs::{File, OpenOptions},
     io::{Read as _, Seek as _, SeekFrom, Write as _},
@@ -132,7 +133,7 @@ impl StoreProvider for Filesystem {
     type Store = FilesystemStore;
 
     unsafe fn ifs() -> &'static mut FilesystemStorage {
-        INTERNAL_FILESYSTEM_STORAGE
+        (*addr_of_mut!(INTERNAL_FILESYSTEM_STORAGE))
             .as_mut()
             .expect("ifs not initialized")
     }
@@ -142,19 +143,25 @@ impl StoreProvider for Filesystem {
     }
 
     unsafe fn reset(&self) {
-        INTERNAL_FILESYSTEM_STORAGE.replace(FilesystemStorage(self.internal.clone()));
-        INTERNAL_FILESYSTEM_FS_ALLOC.replace(littlefs2::fs::Filesystem::allocate());
+        (*addr_of_mut!(INTERNAL_FILESYSTEM_STORAGE))
+            .replace(FilesystemStorage(self.internal.clone()));
+        (*addr_of_mut!(INTERNAL_FILESYSTEM_FS_ALLOC))
+            .replace(littlefs2::fs::Filesystem::allocate());
         reset_external();
         reset_volatile();
 
         Self::store()
             .mount(
-                INTERNAL_FILESYSTEM_FS_ALLOC.as_mut().unwrap(),
-                INTERNAL_FILESYSTEM_STORAGE.as_mut().unwrap(),
-                EXTERNAL_FS_ALLOC.as_mut().unwrap(),
-                EXTERNAL_STORAGE.as_mut().unwrap(),
-                VOLATILE_FS_ALLOC.as_mut().unwrap(),
-                VOLATILE_STORAGE.as_mut().unwrap(),
+                (*addr_of_mut!(INTERNAL_FILESYSTEM_FS_ALLOC))
+                    .as_mut()
+                    .unwrap(),
+                (*addr_of_mut!(INTERNAL_FILESYSTEM_STORAGE))
+                    .as_mut()
+                    .unwrap(),
+                (*addr_of_mut!(EXTERNAL_FS_ALLOC)).as_mut().unwrap(),
+                (*addr_of_mut!(EXTERNAL_STORAGE)).as_mut().unwrap(),
+                (*addr_of_mut!(VOLATILE_FS_ALLOC)).as_mut().unwrap(),
+                (*addr_of_mut!(VOLATILE_STORAGE)).as_mut().unwrap(),
                 self.format,
             )
             .expect("failed to mount filesystem");
@@ -175,7 +182,9 @@ impl StoreProvider for Ram {
     type Store = RamStore;
 
     unsafe fn ifs() -> &'static mut InternalStorage {
-        INTERNAL_RAM_STORAGE.as_mut().expect("ifs not initialized")
+        (*addr_of_mut!(INTERNAL_RAM_STORAGE))
+            .as_mut()
+            .expect("ifs not initialized")
     }
 
     unsafe fn store() -> Self::Store {
@@ -183,19 +192,19 @@ impl StoreProvider for Ram {
     }
 
     unsafe fn reset(&self) {
-        INTERNAL_RAM_STORAGE.replace(InternalStorage::new());
-        INTERNAL_RAM_FS_ALLOC.replace(littlefs2::fs::Filesystem::allocate());
+        (*addr_of_mut!(INTERNAL_RAM_STORAGE)).replace(InternalStorage::new());
+        (*addr_of_mut!(INTERNAL_RAM_FS_ALLOC)).replace(littlefs2::fs::Filesystem::allocate());
         reset_external();
         reset_volatile();
 
         Self::store()
             .mount(
-                INTERNAL_RAM_FS_ALLOC.as_mut().unwrap(),
-                INTERNAL_RAM_STORAGE.as_mut().unwrap(),
-                EXTERNAL_FS_ALLOC.as_mut().unwrap(),
-                EXTERNAL_STORAGE.as_mut().unwrap(),
-                VOLATILE_FS_ALLOC.as_mut().unwrap(),
-                VOLATILE_STORAGE.as_mut().unwrap(),
+                (*addr_of_mut!(INTERNAL_RAM_FS_ALLOC)).as_mut().unwrap(),
+                (*addr_of_mut!(INTERNAL_RAM_STORAGE)).as_mut().unwrap(),
+                (*addr_of_mut!(EXTERNAL_FS_ALLOC)).as_mut().unwrap(),
+                (*addr_of_mut!(EXTERNAL_STORAGE)).as_mut().unwrap(),
+                (*addr_of_mut!(VOLATILE_FS_ALLOC)).as_mut().unwrap(),
+                (*addr_of_mut!(VOLATILE_STORAGE)).as_mut().unwrap(),
                 true,
             )
             .expect("failed to mount filesystem");
@@ -203,11 +212,11 @@ impl StoreProvider for Ram {
 }
 
 unsafe fn reset_external() {
-    EXTERNAL_STORAGE.replace(ExternalStorage::new());
-    EXTERNAL_FS_ALLOC.replace(littlefs2::fs::Filesystem::allocate());
+    (*addr_of_mut!(EXTERNAL_STORAGE)).replace(ExternalStorage::new());
+    (*addr_of_mut!(EXTERNAL_FS_ALLOC)).replace(littlefs2::fs::Filesystem::allocate());
 }
 
 unsafe fn reset_volatile() {
-    VOLATILE_STORAGE.replace(VolatileStorage::new());
-    VOLATILE_FS_ALLOC.replace(littlefs2::fs::Filesystem::allocate());
+    (*addr_of_mut!(VOLATILE_STORAGE)).replace(VolatileStorage::new());
+    (*addr_of_mut!(VOLATILE_FS_ALLOC)).replace(littlefs2::fs::Filesystem::allocate());
 }
