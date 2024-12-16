@@ -7,6 +7,7 @@ use crate::client::{ClientBuilder, ClientImplementation};
 use crate::config::{MAX_MESSAGE_LENGTH, MAX_SERVICE_CLIENTS};
 use crate::error::{Error, Result};
 pub use crate::key;
+#[cfg(feature = "crypto-client")]
 use crate::mechanisms;
 pub use crate::pipe::ServiceEndpoint;
 use crate::pipe::TrussedResponder;
@@ -26,11 +27,13 @@ use crate::{
     interrupt::InterruptFlag,
 };
 
+#[cfg(feature = "crypto-client-attest")]
 pub mod attest;
 
 // #[macro_use]
 // mod macros;
 
+#[cfg(feature = "crypto-client")]
 macro_rules! rpc_trait { ($($Name:ident, $name:ident,)*) => { $(
 
     pub trait $Name {
@@ -39,6 +42,7 @@ macro_rules! rpc_trait { ($($Name:ident, $name:ident,)*) => { $(
     }
 )* } }
 
+#[cfg(feature = "crypto-client")]
 rpc_trait! {
     Agree, agree,
     Decrypt, decrypt,
@@ -155,17 +159,22 @@ impl<P: Platform> ServiceResources<P> {
         #[cfg(feature = "crypto-client-attest")]
         let full_store = self.platform.store();
 
+        #[cfg(feature = "crypto-client")]
         let keystore = once(|this, ctx| this.keystore(ctx.path.clone()));
+        #[cfg(feature = "certificate-client")]
         let certstore = once(|this, ctx| this.certstore(ctx));
         #[cfg(feature = "counter-client")]
         let counterstore = once(|this, ctx| this.counterstore(ctx));
 
+        #[cfg(feature = "filesystem-client")]
         let filestore = &mut self.filestore(ctx.path.clone());
 
         debug_now!("TRUSSED {:?}", request);
         match request {
+            #[cfg(feature = "filesystem-client")]
             Request::DummyRequest => Ok(Reply::DummyReply),
 
+            #[cfg(feature = "crypto-client")]
             Request::Agree(request) => match request.mechanism {
                 Mechanism::P521 => mechanisms::P521::agree(&mut keystore(self, ctx)?, request),
                 Mechanism::P384 => mechanisms::P384::agree(&mut keystore(self, ctx)?, request),
@@ -191,9 +200,7 @@ impl<P: Platform> ServiceResources<P> {
                 .map(Reply::Attest)
             }
 
-            #[cfg(not(feature = "crypto-client-attest"))]
-            Request::Attest(_) => Err(Error::RequestNotAvailable),
-
+            #[cfg(feature = "crypto-client")]
             Request::Decrypt(request) => match request.mechanism {
                 Mechanism::Aes256Cbc => {
                     mechanisms::Aes256Cbc::decrypt(&mut keystore(self, ctx)?, request)
@@ -206,6 +213,7 @@ impl<P: Platform> ServiceResources<P> {
             }
             .map(Reply::Decrypt),
 
+            #[cfg(feature = "crypto-client")]
             Request::DeriveKey(request) => match request.mechanism {
                 Mechanism::HmacBlake2s => {
                     mechanisms::HmacBlake2s::derive_key(&mut keystore(self, ctx)?, request)
@@ -233,6 +241,7 @@ impl<P: Platform> ServiceResources<P> {
             }
             .map(Reply::DeriveKey),
 
+            #[cfg(feature = "crypto-client")]
             Request::DeserializeKey(request) => match request.mechanism {
                 Mechanism::Ed255 => {
                     mechanisms::Ed255::deserialize_key(&mut keystore(self, ctx)?, request)
@@ -253,6 +262,7 @@ impl<P: Platform> ServiceResources<P> {
             }
             .map(Reply::DeserializeKey),
 
+            #[cfg(feature = "crypto-client")]
             Request::Encrypt(request) => match request.mechanism {
                 Mechanism::Aes256Cbc => {
                     mechanisms::Aes256Cbc::encrypt(&mut keystore(self, ctx)?, request)
@@ -265,21 +275,25 @@ impl<P: Platform> ServiceResources<P> {
             }
             .map(Reply::Encrypt),
 
+            #[cfg(feature = "crypto-client")]
             Request::Delete(request) => {
                 let success = keystore(self, ctx)?.delete_key(&request.key);
                 Ok(Reply::Delete(reply::Delete { success }))
             }
 
+            #[cfg(feature = "crypto-client")]
             Request::Clear(request) => {
                 let success = keystore(self, ctx)?.clear_key(&request.key);
                 Ok(Reply::Clear(reply::Clear { success }))
             }
 
+            #[cfg(feature = "crypto-client")]
             Request::DeleteAllKeys(request) => {
                 let count = keystore(self, ctx)?.delete_all(request.location)?;
                 Ok(Reply::DeleteAllKeys(reply::DeleteAllKeys { count }))
             }
 
+            #[cfg(feature = "crypto-client")]
             Request::Exists(request) => match request.mechanism {
                 Mechanism::Ed255 => mechanisms::Ed255::exists(&mut keystore(self, ctx)?, request),
                 Mechanism::P521 => mechanisms::P521::exists(&mut keystore(self, ctx)?, request),
@@ -291,6 +305,7 @@ impl<P: Platform> ServiceResources<P> {
             }
             .map(Reply::Exists),
 
+            #[cfg(feature = "crypto-client")]
             Request::GenerateKey(request) => match request.mechanism {
                 Mechanism::Chacha8Poly1305 => {
                     mechanisms::Chacha8Poly1305::generate_key(&mut keystore(self, ctx)?, request)
@@ -314,6 +329,7 @@ impl<P: Platform> ServiceResources<P> {
             }
             .map(Reply::GenerateKey),
 
+            #[cfg(feature = "crypto-client")]
             Request::GenerateSecretKey(request) => {
                 let mut secret_key = MediumData::new();
                 let size = request.size;
@@ -334,6 +350,7 @@ impl<P: Platform> ServiceResources<P> {
             }
 
             // deprecated
+            #[cfg(feature = "crypto-client")]
             Request::UnsafeInjectKey(request) => match request.mechanism {
                 Mechanism::P521 => {
                     mechanisms::P521::unsafe_inject_key(&mut keystore(self, ctx)?, request)
@@ -363,6 +380,7 @@ impl<P: Platform> ServiceResources<P> {
             }
             .map(Reply::UnsafeInjectKey),
 
+            #[cfg(feature = "crypto-client")]
             Request::UnsafeInjectSharedKey(request) => {
                 let key_id = keystore(self, ctx)?.store_key(
                     request.location,
@@ -376,12 +394,14 @@ impl<P: Platform> ServiceResources<P> {
                 }))
             }
 
+            #[cfg(feature = "crypto-client")]
             Request::Hash(request) => match request.mechanism {
                 Mechanism::Sha256 => mechanisms::Sha256::hash(&mut keystore(self, ctx)?, request),
                 _ => Err(Error::MechanismNotAvailable),
             }
             .map(Reply::Hash),
 
+            #[cfg(feature = "filesystem-client")]
             Request::LocateFile(request) => {
                 let path = filestore.locate_file(
                     request.location,
@@ -394,6 +414,7 @@ impl<P: Platform> ServiceResources<P> {
 
             // This is now preferably done using littlefs-fuse (when device is not yet locked),
             // and should be removed from firmware completely
+            #[cfg(feature = "filesystem-client")]
             Request::DebugDumpStore(_request) => {
                 info_now!(":: PERSISTENT");
                 recursively_list(self.platform.store().fs(Location::Internal), path!("/"));
@@ -428,6 +449,7 @@ impl<P: Platform> ServiceResources<P> {
                 Ok(Reply::DebugDumpStore(reply::DebugDumpStore {}))
             }
 
+            #[cfg(feature = "filesystem-client")]
             Request::ReadDirFirst(request) => {
                 let maybe_entry = match filestore.read_dir_first(
                     &request.dir,
@@ -448,6 +470,7 @@ impl<P: Platform> ServiceResources<P> {
                 }))
             }
 
+            #[cfg(feature = "filesystem-client")]
             Request::ReadDirNext(_request) => {
                 // ensure next call has nothing to work with, unless we store state again
                 let read_dir_state = ctx.read_dir_state.take();
@@ -471,6 +494,7 @@ impl<P: Platform> ServiceResources<P> {
                 }))
             }
 
+            #[cfg(feature = "filesystem-client")]
             Request::ReadDirFilesFirst(request) => {
                 let maybe_data = match filestore.read_dir_files_first(
                     &request.dir,
@@ -491,6 +515,7 @@ impl<P: Platform> ServiceResources<P> {
                 }))
             }
 
+            #[cfg(feature = "filesystem-client")]
             Request::ReadDirFilesNext(_request) => {
                 let read_dir_files_state = ctx.read_dir_files_state.take();
 
@@ -512,34 +537,41 @@ impl<P: Platform> ServiceResources<P> {
                 }))
             }
 
+            #[cfg(feature = "filesystem-client")]
             Request::RemoveDir(request) => {
                 filestore.remove_dir(&request.path, request.location)?;
                 Ok(Reply::RemoveDir(reply::RemoveDir {}))
             }
 
+            #[cfg(feature = "filesystem-client")]
             Request::RemoveDirAll(request) => {
                 let count = filestore.remove_dir_all(&request.path, request.location)?;
                 Ok(Reply::RemoveDirAll(reply::RemoveDirAll { count }))
             }
 
+            #[cfg(feature = "filesystem-client")]
             Request::RemoveFile(request) => {
                 filestore.remove_file(&request.path, request.location)?;
                 Ok(Reply::RemoveFile(reply::RemoveFile {}))
             }
 
+            #[cfg(feature = "filesystem-client")]
             Request::ReadFile(request) => Ok(Reply::ReadFile(reply::ReadFile {
                 data: filestore.read(&request.path, request.location)?,
             })),
 
+            #[cfg(feature = "filesystem-client")]
             Request::Metadata(request) => Ok(Reply::Metadata(reply::Metadata {
                 metadata: filestore.metadata(&request.path, request.location)?,
             })),
 
+            #[cfg(feature = "filesystem-client")]
             Request::Rename(request) => {
                 filestore.rename(&request.from, &request.to, request.location)?;
                 Ok(Reply::Rename(reply::Rename {}))
             }
 
+            #[cfg(feature = "crypto-client")]
             Request::RandomBytes(request) => {
                 if request.count <= MAX_MESSAGE_LENGTH {
                     let mut bytes = Message::new();
@@ -551,6 +583,7 @@ impl<P: Platform> ServiceResources<P> {
                 }
             }
 
+            #[cfg(feature = "crypto-client")]
             Request::SerializeKey(request) => match request.mechanism {
                 Mechanism::Ed255 => {
                     mechanisms::Ed255::serialize_key(&mut keystore(self, ctx)?, request)
@@ -574,6 +607,7 @@ impl<P: Platform> ServiceResources<P> {
             }
             .map(Reply::SerializeKey),
 
+            #[cfg(feature = "crypto-client")]
             Request::Sign(request) => match request.mechanism {
                 Mechanism::Ed255 => mechanisms::Ed255::sign(&mut keystore(self, ctx)?, request),
                 Mechanism::HmacBlake2s => {
@@ -605,11 +639,13 @@ impl<P: Platform> ServiceResources<P> {
             }
             .map(Reply::Sign),
 
+            #[cfg(feature = "filesystem-client")]
             Request::WriteFile(request) => {
                 filestore.write(&request.path, request.location, &request.data)?;
                 Ok(Reply::WriteFile(reply::WriteFile {}))
             }
 
+            #[cfg(feature = "crypto-client")]
             Request::UnwrapKey(request) => match request.mechanism {
                 Mechanism::Chacha8Poly1305 => {
                     mechanisms::Chacha8Poly1305::unwrap_key(&mut keystore(self, ctx)?, request)
@@ -618,6 +654,7 @@ impl<P: Platform> ServiceResources<P> {
             }
             .map(Reply::UnwrapKey),
 
+            #[cfg(feature = "crypto-client")]
             Request::Verify(request) => match request.mechanism {
                 Mechanism::Ed255 => mechanisms::Ed255::verify(&mut keystore(self, ctx)?, request),
                 Mechanism::P521 => mechanisms::P521::verify(&mut keystore(self, ctx)?, request),
@@ -627,6 +664,7 @@ impl<P: Platform> ServiceResources<P> {
             }
             .map(Reply::Verify),
 
+            #[cfg(feature = "crypto-client")]
             Request::WrapKey(request) => match request.mechanism {
                 Mechanism::Aes256Cbc => {
                     mechanisms::Aes256Cbc::wrap_key(&mut keystore(self, ctx)?, request)
@@ -638,6 +676,7 @@ impl<P: Platform> ServiceResources<P> {
             }
             .map(Reply::WrapKey),
 
+            #[cfg(feature = "ui-client")]
             Request::RequestUserConsent(request) => {
                 // assert_eq!(request.level, consent::Level::Normal);
 
@@ -694,19 +733,23 @@ impl<P: Platform> ServiceResources<P> {
                 }))
             }
 
+            #[cfg(feature = "management-client")]
             Request::Reboot(request) => {
                 self.platform.user_interface().reboot(request.to);
             }
 
+            #[cfg(feature = "management-client")]
             Request::Uptime(_request) => Ok(Reply::Uptime(reply::Uptime {
                 uptime: self.platform.user_interface().uptime(),
             })),
 
+            #[cfg(feature = "ui-client")]
             Request::Wink(request) => {
                 self.platform.user_interface().wink(request.duration);
                 Ok(Reply::Wink(reply::Wink {}))
             }
 
+            #[cfg(feature = "ui-client")]
             Request::SetCustomStatus(request) => {
                 self.platform
                     .user_interface()
@@ -719,30 +762,25 @@ impl<P: Platform> ServiceResources<P> {
                 .create(request.location)
                 .map(|id| Reply::CreateCounter(reply::CreateCounter { id })),
 
-            #[cfg(not(feature = "counter-client"))]
-            Request::CreateCounter(_) => Err(Error::RequestNotAvailable),
-
             #[cfg(feature = "counter-client")]
             Request::IncrementCounter(request) => counterstore(self, ctx)?
                 .increment(request.id)
                 .map(|counter| Reply::IncrementCounter(reply::IncrementCounter { counter })),
 
-            #[cfg(not(feature = "counter-client"))]
-            Request::IncrementCounter(_) => Err(Error::RequestNotAvailable),
-
+            #[cfg(feature = "certificate-client")]
             Request::DeleteCertificate(request) => certstore(self, ctx)?
                 .delete_certificate(request.id)
                 .map(|_| Reply::DeleteCertificate(reply::DeleteCertificate {})),
 
+            #[cfg(feature = "certificate-client")]
             Request::ReadCertificate(request) => certstore(self, ctx)?
                 .read_certificate(request.id)
                 .map(|der| Reply::ReadCertificate(reply::ReadCertificate { der })),
 
+            #[cfg(feature = "certificate-client")]
             Request::WriteCertificate(request) => certstore(self, ctx)?
                 .write_certificate(request.location, &request.der)
                 .map(|id| Reply::WriteCertificate(reply::WriteCertificate { id })),
-
-            Request::SerdeExtension(_) => Err(Error::RequestNotAvailable),
 
             _ => Err(Error::RequestNotAvailable),
         }

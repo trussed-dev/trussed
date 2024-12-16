@@ -28,6 +28,7 @@ pub mod backend;
 pub mod client;
 pub mod config;
 pub mod key;
+#[cfg(feature = "crypto-client")]
 pub mod mechanisms;
 pub mod pipe;
 pub mod platform;

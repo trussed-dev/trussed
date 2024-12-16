@@ -83,6 +83,8 @@ macro_rules! impl_request {
             Self::$request(request)
         }
     }
+
+    $(#[$attr])?
     impl core::convert::TryFrom<Request> for $request {
         type Error = crate::error::Error;
         fn try_from(request: Request) -> Result<request::$request, Self::Error> {
@@ -93,6 +95,7 @@ macro_rules! impl_request {
         }
     }
 
+    $(#[$attr])?
     impl RequestVariant for $request {
         type Reply = reply::$request;
     }
@@ -127,12 +130,14 @@ macro_rules! impl_reply {
         }
     }
 
+    $(#[$attr])?
     impl core::convert::From<$reply> for Reply {
         fn from(reply: $reply) -> Reply {
             Reply::$reply(reply)
         }
     }
 
+    $(#[$attr])?
     impl ReplyVariant for $reply {
         type Request = request::$reply;
     }
