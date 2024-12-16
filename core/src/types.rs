@@ -3,7 +3,6 @@ use core::{marker::PhantomData, ops::Deref};
 use rand_core::{CryptoRng, RngCore};
 use serde::{Deserialize, Serialize};
 
-pub use heapless::String;
 pub use heapless_bytes::Bytes;
 pub use littlefs2_core::{DirEntry, Metadata, PathBuf};
 
@@ -105,24 +104,14 @@ impl Id {
     }
 
     /// skips leading zeros
-    pub fn hex_clean(&self) -> String<32> {
-        const HEX_CHARS: &[u8] = b"0123456789abcdef";
-        let mut buffer = String::new();
-        let array = self.0.to_be_bytes();
-
-        // skip leading zeros
-        for v in array.into_iter().skip_while(|v| *v == 0) {
-            buffer.push(HEX_CHARS[(v >> 4) as usize] as char).unwrap();
-            buffer.push(HEX_CHARS[(v & 0xf) as usize] as char).unwrap();
-        }
-
-        buffer
+    pub fn hex_clean(&self) -> HexClean {
+        HexClean(self.0)
     }
 }
 
 impl core::fmt::Debug for Id {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        write!(f, "Id({})", &self.hex_clean())
+        write!(f, "Id({})", self.hex_clean())
     }
 }
 
@@ -161,6 +150,21 @@ impl<'de> Deserialize<'de> for Id {
         }
 
         deserializer.deserialize_bytes(ValueVisitor(PhantomData))
+    }
+}
+
+/// Hex representation of an `u128` without leading zeroes.
+pub struct HexClean(pub u128);
+
+impl core::fmt::Display for HexClean {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        const HEX_CHARS: &[u8] = b"0123456789abcdef";
+        // skip leading zeros
+        for v in self.0.to_be_bytes().into_iter().skip_while(|v| *v == 0) {
+            write!(f, "{}", HEX_CHARS[(v >> 4) as usize] as char)?;
+            write!(f, "{}", HEX_CHARS[(v & 0xf) as usize] as char)?;
+        }
+        Ok(())
     }
 }
 
