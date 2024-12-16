@@ -66,7 +66,7 @@ impl<S: Store> ClientCertstore<S> {
         let mut path = PathBuf::new();
         path.push(&self.client_id);
         path.push(path!("x5c"));
-        path.push(&id.hex_path());
+        path.push(&id.legacy_hex_path());
         path
     }
 

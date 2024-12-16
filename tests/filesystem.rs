@@ -20,7 +20,7 @@ fn escape_namespace_parent() {
         // first approach: directly escape namespace
         let mut path = PathBuf::from(path!(".."));
         path.push(path!("sec"));
-        path.push(&key.hex_path());
+        path.push(&key.legacy_hex_path());
         assert_eq!(
             try_syscall!(client.read_file(Location::Volatile, path)),
             Err(Error::InvalidPath),
@@ -29,7 +29,7 @@ fn escape_namespace_parent() {
         // second approach: start with subdir, then escape namespace
         let mut path = PathBuf::from(path!("foobar/../.."));
         path.push(path!("sec"));
-        path.push(&key.hex_path());
+        path.push(&key.legacy_hex_path());
         assert_eq!(
             try_syscall!(client.read_file(Location::Volatile, path)),
             Err(Error::InvalidPath),
@@ -38,7 +38,7 @@ fn escape_namespace_parent() {
         // false positive: does not escape namespace but still forbidden
         let mut path = PathBuf::from(path!("foobar/.."));
         path.push(path!("sec"));
-        path.push(&key.hex_path());
+        path.push(&key.legacy_hex_path());
         assert_eq!(
             try_syscall!(client.read_file(Location::Volatile, path)),
             Err(Error::InvalidPath),
@@ -52,7 +52,7 @@ fn escape_namespace_root() {
         let key = syscall!(client.generate_key(Mechanism::P256, StorageAttributes::new())).key;
         let mut path = PathBuf::from(path!("/test"));
         path.push(path!("sec"));
-        path.push(&key.hex_path());
+        path.push(&key.legacy_hex_path());
         assert!(try_syscall!(client.read_file(Location::Volatile, path)).is_err());
     })
 }

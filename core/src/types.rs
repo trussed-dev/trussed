@@ -80,8 +80,20 @@ impl Id {
         self.0 < 256
     }
 
-    /// skips leading zeros
+    /// See [`Id::legacy_hex_path`].
+    #[deprecated = "use legacy_hex_path instead"]
     pub fn hex_path(&self) -> PathBuf {
+        self.legacy_hex_path()
+    }
+
+    /// Hex path of this ID without non-trailing zero bytes.
+    ///
+    /// This implementation skips all leading bytes that are zero so that the resulting hex string
+    /// always has an even number of characters and does not start with more than one zero.  For
+    /// compatibility with old Trussed versions, this implementation also skips inner bytes that
+    /// are zero, except for the trailing byte.  This means that for example 4096 and 1048576 both
+    /// are formatted as `"1000"`.
+    pub fn legacy_hex_path(&self) -> PathBuf {
         const HEX_CHARS: &[u8] = b"0123456789abcdef";
         let mut buffer: Bytes<32> = Bytes::new();
         let array = self.0.to_be_bytes();
@@ -427,15 +439,15 @@ mod tests {
 
     #[test]
     fn test_id_hex_path() {
-        assert_eq!(Id(0).hex_path().as_str(), "00");
-        assert_eq!(Id(1).hex_path().as_str(), "01");
-        assert_eq!(Id(10).hex_path().as_str(), "0a");
-        assert_eq!(Id(16).hex_path().as_str(), "10");
-        assert_eq!(Id(256).hex_path().as_str(), "0100");
-        assert_eq!(Id(4096).hex_path().as_str(), "1000");
-        assert_eq!(Id(1048576).hex_path().as_str(), "1000");
+        assert_eq!(Id(0).legacy_hex_path().as_str(), "00");
+        assert_eq!(Id(1).legacy_hex_path().as_str(), "01");
+        assert_eq!(Id(10).legacy_hex_path().as_str(), "0a");
+        assert_eq!(Id(16).legacy_hex_path().as_str(), "10");
+        assert_eq!(Id(256).legacy_hex_path().as_str(), "0100");
+        assert_eq!(Id(4096).legacy_hex_path().as_str(), "1000");
+        assert_eq!(Id(1048576).legacy_hex_path().as_str(), "1000");
         assert_eq!(
-            Id(u128::MAX).hex_path().as_str(),
+            Id(u128::MAX).legacy_hex_path().as_str(),
             "ffffffffffffffffffffffffffffffff"
         );
     }
