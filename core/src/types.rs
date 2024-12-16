@@ -145,7 +145,8 @@ impl Id {
     /// Hex representation of this ID without leading zeroes.
     ///
     /// This implementation skips all leading bytes that are zero so that the resulting hex string
-    /// always has an even number of characters and does not start with more than one zero.
+    /// always has an even number of characters and does not start with more than one zero.  0 is
+    /// formatted as `"00"`.
     pub fn hex_clean(&self) -> HexClean {
         HexClean(self.0)
     }
@@ -198,7 +199,8 @@ impl<'de> Deserialize<'de> for Id {
 /// Hex representation of an `u128` without leading zeroes.
 ///
 /// This implementation skips all leading bytes that are zero so that the resulting hex string
-/// always has an even number of characters and does not start with more than one zero.
+/// always has an even number of characters and does not start with more than one zero.  0 is
+/// formatted as `"00"`.
 pub struct HexClean(pub u128);
 
 impl core::fmt::Display for HexClean {
@@ -224,8 +226,9 @@ impl<'a> HexCleanBytes<'a> {
                 upper: true,
             }
         } else {
+            // Format 0 as "00"
             Self {
-                array: &[],
+                array: &[0],
                 upper: true,
             }
         }
@@ -529,7 +532,7 @@ mod tests {
 
     #[test]
     fn test_id_clean_hex_path() {
-        assert_eq!(Id(0).clean_hex_path().as_str(), "");
+        assert_eq!(Id(0).clean_hex_path().as_str(), "00");
         assert_eq!(Id(1).clean_hex_path().as_str(), "01");
         assert_eq!(Id(10).clean_hex_path().as_str(), "0a");
         assert_eq!(Id(16).clean_hex_path().as_str(), "10");
@@ -544,7 +547,7 @@ mod tests {
 
     #[test]
     fn test_id_hex_clean() {
-        assert_eq!(Id(0).hex_clean().to_string(), "");
+        assert_eq!(Id(0).hex_clean().to_string(), "00");
         assert_eq!(Id(1).hex_clean().to_string(), "01");
         assert_eq!(Id(10).hex_clean().to_string(), "0a");
         assert_eq!(Id(16).hex_clean().to_string(), "10");

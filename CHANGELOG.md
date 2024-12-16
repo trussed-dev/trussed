@@ -53,6 +53,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Removed the unused `Id::hex`.
   - Deprecated `Id::hex_path` and added `Id::legacy_hex_path` as a replacement.
   - Added `Id::clean_hex_path` as an alternative to `Id::legacy_hex_path`.
+  - Changed `Id::hex_clean` to format zero as `"00"`.
 
 ### Fixed
 
