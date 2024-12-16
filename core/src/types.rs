@@ -93,6 +93,9 @@ impl Id {
     /// compatibility with old Trussed versions, this implementation also skips inner bytes that
     /// are zero, except for the trailing byte.  This means that for example 4096 and 1048576 both
     /// are formatted as `"1000"`.
+    ///
+    /// For new features that don’t need backwards-compatibility, use [`Id::clean_hex_path`][]
+    /// instead.
     pub fn legacy_hex_path(&self) -> PathBuf {
         const HEX_CHARS: &[u8] = b"0123456789abcdef";
         let mut buffer = [0; PathBuf::MAX_SIZE_PLUS_ONE];
@@ -120,7 +123,29 @@ impl Id {
         }
     }
 
-    /// skips leading zeros
+    /// Hex path of this ID without leading zero bytes.
+    ///
+    /// This uses the same format as [`Id::hex_clean`][].  Note that the first `hex_path`
+    /// implementation, now available as [`Id::legacy_hex_path`][], skipped all non-trailing zero
+    /// bytes and should only be used if backwards compatibility is required.
+    pub fn clean_hex_path(&self) -> PathBuf {
+        let mut buffer = [0; PathBuf::MAX_SIZE_PLUS_ONE];
+
+        let array = self.0.to_be_bytes();
+        for (i, c) in HexCleanBytes::new(&array).enumerate() {
+            buffer[i] = c as _;
+        }
+
+        // SAFETY:
+        // 1. We only add characters from HEX_CHARS which only contains ASCII characters.
+        // 2. We initialized the buffer with zeroes so there is still a trailing zero.
+        unsafe { PathBuf::from_buffer_unchecked(buffer) }
+    }
+
+    /// Hex representation of this ID without leading zeroes.
+    ///
+    /// This implementation skips all leading bytes that are zero so that the resulting hex string
+    /// always has an even number of characters and does not start with more than one zero.
     pub fn hex_clean(&self) -> HexClean {
         HexClean(self.0)
     }
@@ -171,17 +196,59 @@ impl<'de> Deserialize<'de> for Id {
 }
 
 /// Hex representation of an `u128` without leading zeroes.
+///
+/// This implementation skips all leading bytes that are zero so that the resulting hex string
+/// always has an even number of characters and does not start with more than one zero.
 pub struct HexClean(pub u128);
 
 impl core::fmt::Display for HexClean {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        const HEX_CHARS: &[u8] = b"0123456789abcdef";
-        // skip leading zeros
-        for v in self.0.to_be_bytes().into_iter().skip_while(|v| *v == 0) {
-            write!(f, "{}", HEX_CHARS[(v >> 4) as usize] as char)?;
-            write!(f, "{}", HEX_CHARS[(v & 0xf) as usize] as char)?;
+        let array = self.0.to_be_bytes();
+        for c in HexCleanBytes::new(&array) {
+            write!(f, "{}", char::from(c))?;
         }
         Ok(())
+    }
+}
+
+struct HexCleanBytes<'a> {
+    array: &'a [u8],
+    upper: bool,
+}
+
+impl<'a> HexCleanBytes<'a> {
+    fn new(array: &'a [u8]) -> Self {
+        if let Some(i) = array.iter().position(|&v| v != 0) {
+            Self {
+                array: &array[i..],
+                upper: true,
+            }
+        } else {
+            Self {
+                array: &[],
+                upper: true,
+            }
+        }
+    }
+}
+
+impl Iterator for HexCleanBytes<'_> {
+    type Item = u8;
+
+    fn next(&mut self) -> Option<u8> {
+        const HEX_CHARS: &[u8] = b"0123456789abcdef";
+        if let Some((v, rest)) = self.array.split_first() {
+            if self.upper {
+                self.upper = false;
+                Some(HEX_CHARS[(v >> 4) as usize])
+            } else {
+                self.upper = true;
+                self.array = rest;
+                Some(HEX_CHARS[(v & 0xf) as usize])
+            }
+        } else {
+            None
+        }
     }
 }
 
@@ -456,6 +523,21 @@ mod tests {
         assert_eq!(Id(1048576).legacy_hex_path().as_str(), "1000");
         assert_eq!(
             Id(u128::MAX).legacy_hex_path().as_str(),
+            "ffffffffffffffffffffffffffffffff"
+        );
+    }
+
+    #[test]
+    fn test_id_clean_hex_path() {
+        assert_eq!(Id(0).clean_hex_path().as_str(), "");
+        assert_eq!(Id(1).clean_hex_path().as_str(), "01");
+        assert_eq!(Id(10).clean_hex_path().as_str(), "0a");
+        assert_eq!(Id(16).clean_hex_path().as_str(), "10");
+        assert_eq!(Id(256).clean_hex_path().as_str(), "0100");
+        assert_eq!(Id(4096).clean_hex_path().as_str(), "1000");
+        assert_eq!(Id(1048576).clean_hex_path().as_str(), "100000");
+        assert_eq!(
+            Id(u128::MAX).clean_hex_path().as_str(),
             "ffffffffffffffffffffffffffffffff"
         );
     }
