@@ -419,3 +419,38 @@ impl From<reply::Encrypt> for EncryptedData {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::Id;
+
+    #[test]
+    fn test_id_hex_path() {
+        assert_eq!(Id(0).hex_path().as_str(), "00");
+        assert_eq!(Id(1).hex_path().as_str(), "01");
+        assert_eq!(Id(10).hex_path().as_str(), "0a");
+        assert_eq!(Id(16).hex_path().as_str(), "10");
+        assert_eq!(Id(256).hex_path().as_str(), "0100");
+        assert_eq!(Id(4096).hex_path().as_str(), "1000");
+        assert_eq!(Id(1048576).hex_path().as_str(), "1000");
+        assert_eq!(
+            Id(u128::MAX).hex_path().as_str(),
+            "ffffffffffffffffffffffffffffffff"
+        );
+    }
+
+    #[test]
+    fn test_id_hex_clean() {
+        assert_eq!(Id(0).hex_clean().to_string(), "");
+        assert_eq!(Id(1).hex_clean().to_string(), "01");
+        assert_eq!(Id(10).hex_clean().to_string(), "0a");
+        assert_eq!(Id(16).hex_clean().to_string(), "10");
+        assert_eq!(Id(256).hex_clean().to_string(), "0100");
+        assert_eq!(Id(4096).hex_clean().to_string(), "1000");
+        assert_eq!(Id(1048576).hex_clean().to_string(), "100000");
+        assert_eq!(
+            Id(u128::MAX).hex_clean().to_string(),
+            "ffffffffffffffffffffffffffffffff"
+        );
+    }
+}
