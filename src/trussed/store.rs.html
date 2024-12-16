@@ -635,7 +635,13 @@
 <a href="#634" id="634">634</a>
 <a href="#635" id="635">635</a>
 <a href="#636" id="636">636</a>
-<a href="#637" id="637">637</a></pre></div><pre class="rust"><code><span class="doccomment">//! `store` presents a combined interface to three littlefs2 filesystems:
+<a href="#637" id="637">637</a>
+<a href="#638" id="638">638</a>
+<a href="#639" id="639">639</a>
+<a href="#640" id="640">640</a>
+<a href="#641" id="641">641</a>
+<a href="#642" id="642">642</a>
+<a href="#643" id="643">643</a></pre></div><pre class="rust"><code><span class="doccomment">//! `store` presents a combined interface to three littlefs2 filesystems:
 //! internal flash, external flash, volatile/RAM.
 //!
 //! It covers two usecases:
@@ -841,6 +847,7 @@
                 <span class="kw-2">&amp;</span><span class="lifetime">'static </span><span class="kw-2">mut </span>littlefs2::fs::Allocation&lt;<span class="macro-nonterminal">$Vfs</span>&gt;,
                 <span class="kw-2">&amp;</span><span class="lifetime">'static </span><span class="kw-2">mut </span><span class="macro-nonterminal">$Vfs</span>,
             ) {
+                <span class="kw">use </span>core::ptr::addr_of_mut;
                 <span class="comment">// static mut INTERNAL_STORAGE: $Ifs = i_ctor();//&lt;$Ifs&gt;::new();
 
                 </span><span class="kw">static </span><span class="kw-2">mut </span>INTERNAL_STORAGE: <span class="prelude-ty">Option</span>&lt;<span class="macro-nonterminal">$Ifs</span>&gt; = <span class="prelude-val">None</span>;
@@ -873,12 +880,12 @@
                 }
 
                 (
-                    <span class="kw">unsafe </span>{ INTERNAL_FS_ALLOC.as_mut().unwrap() },
-                    <span class="kw">unsafe </span>{ INTERNAL_STORAGE.as_mut().unwrap() },
-                    <span class="kw">unsafe </span>{ EXTERNAL_FS_ALLOC.as_mut().unwrap() },
-                    <span class="kw">unsafe </span>{ EXTERNAL_STORAGE.as_mut().unwrap() },
-                    <span class="kw">unsafe </span>{ VOLATILE_FS_ALLOC.as_mut().unwrap() },
-                    <span class="kw">unsafe </span>{ VOLATILE_STORAGE.as_mut().unwrap() },
+                    <span class="kw">unsafe </span>{ (<span class="kw-2">*</span><span class="macro">addr_of_mut!</span>(INTERNAL_FS_ALLOC)).as_mut().unwrap() },
+                    <span class="kw">unsafe </span>{ (<span class="kw-2">*</span><span class="macro">addr_of_mut!</span>(INTERNAL_STORAGE)).as_mut().unwrap() },
+                    <span class="kw">unsafe </span>{ (<span class="kw-2">*</span><span class="macro">addr_of_mut!</span>(EXTERNAL_FS_ALLOC)).as_mut().unwrap() },
+                    <span class="kw">unsafe </span>{ (<span class="kw-2">*</span><span class="macro">addr_of_mut!</span>(EXTERNAL_STORAGE)).as_mut().unwrap() },
+                    <span class="kw">unsafe </span>{ (<span class="kw-2">*</span><span class="macro">addr_of_mut!</span>(VOLATILE_FS_ALLOC)).as_mut().unwrap() },
+                    <span class="kw">unsafe </span>{ (<span class="kw-2">*</span><span class="macro">addr_of_mut!</span>(VOLATILE_STORAGE)).as_mut().unwrap() },
                 )
             }
 
@@ -955,23 +962,26 @@
 
             <span class="kw">fn </span>ifs_ptr() -&gt; <span class="kw-2">*mut </span><span class="macro-nonterminal">$crate::store::Fs</span>&lt;<span class="macro-nonterminal">$Ifs</span>&gt; {
                 <span class="kw">use </span>core::mem::MaybeUninit;
+                <span class="kw">use </span>core::ptr::addr_of_mut;
                 <span class="kw">use </span><span class="macro-nonterminal">$crate::store::Fs</span>;
                 <span class="kw">static </span><span class="kw-2">mut </span>IFS: MaybeUninit&lt;Fs&lt;<span class="macro-nonterminal">$Ifs</span>&gt;&gt; = MaybeUninit::uninit();
-                <span class="kw">unsafe </span>{ IFS.as_mut_ptr() }
+                <span class="kw">unsafe </span>{ (<span class="kw-2">*</span><span class="macro">addr_of_mut!</span>(IFS)).as_mut_ptr() }
             }
 
             <span class="kw">fn </span>efs_ptr() -&gt; <span class="kw-2">*mut </span><span class="macro-nonterminal">$crate::store::Fs</span>&lt;<span class="macro-nonterminal">$Efs</span>&gt; {
                 <span class="kw">use </span>core::mem::MaybeUninit;
+                <span class="kw">use </span>core::ptr::addr_of_mut;
                 <span class="kw">use </span><span class="macro-nonterminal">$crate::store::Fs</span>;
                 <span class="kw">static </span><span class="kw-2">mut </span>EFS: MaybeUninit&lt;Fs&lt;<span class="macro-nonterminal">$Efs</span>&gt;&gt; = MaybeUninit::uninit();
-                <span class="kw">unsafe </span>{ EFS.as_mut_ptr() }
+                <span class="kw">unsafe </span>{ (<span class="kw-2">*</span><span class="macro">addr_of_mut!</span>(EFS)).as_mut_ptr() }
             }
 
             <span class="kw">fn </span>vfs_ptr() -&gt; <span class="kw-2">*mut </span><span class="macro-nonterminal">$crate::store::Fs</span>&lt;<span class="macro-nonterminal">$Vfs</span>&gt; {
                 <span class="kw">use </span>core::mem::MaybeUninit;
+                <span class="kw">use </span>core::ptr::addr_of_mut;
                 <span class="kw">use </span><span class="macro-nonterminal">$crate::store::Fs</span>;
                 <span class="kw">static </span><span class="kw-2">mut </span>VFS: MaybeUninit&lt;Fs&lt;<span class="macro-nonterminal">$Vfs</span>&gt;&gt; = MaybeUninit::uninit();
-                <span class="kw">unsafe </span>{ VFS.as_mut_ptr() }
+                <span class="kw">unsafe </span>{ (<span class="kw-2">*</span><span class="macro">addr_of_mut!</span>(VFS)).as_mut_ptr() }
             }
 
             <span class="comment">// Ignore lint for compatibility
@@ -998,6 +1008,7 @@
                 </span>format: bool,
             ) -&gt; littlefs2::io::Result&lt;()&gt; {
                 <span class="kw">use </span>core::mem::MaybeUninit;
+                <span class="kw">use </span>core::ptr::{addr_of, addr_of_mut};
                 <span class="kw">use </span>littlefs2::fs::{Allocation, Filesystem};
 
                 <span class="kw">static </span><span class="kw-2">mut </span>IFS_ALLOC: MaybeUninit&lt;<span class="kw-2">&amp;</span><span class="lifetime">'static </span><span class="kw-2">mut </span>Allocation&lt;<span class="macro-nonterminal">$Ifs</span>&gt;&gt; =
@@ -1027,31 +1038,31 @@
                         Filesystem::format(ifs_storage).expect(<span class="string">"can format"</span>);
                     }
 
-                    IFS_ALLOC.as_mut_ptr().write(ifs_alloc);
-                    IFS_STORAGE.as_mut_ptr().write(ifs_storage);
+                    (<span class="kw-2">*</span><span class="macro">addr_of_mut!</span>(IFS_ALLOC)).as_mut_ptr().write(ifs_alloc);
+                    (<span class="kw-2">*</span><span class="macro">addr_of_mut!</span>(IFS_STORAGE)).as_mut_ptr().write(ifs_storage);
                     IFS = <span class="prelude-val">Some</span>(Filesystem::mount(
-                        <span class="kw-2">&amp;mut *</span>IFS_ALLOC.as_mut_ptr(),
-                        <span class="kw-2">&amp;mut *</span>IFS_STORAGE.as_mut_ptr(),
+                        <span class="kw-2">&amp;mut *</span>(<span class="kw-2">*</span><span class="macro">addr_of_mut!</span>(IFS_ALLOC)).as_mut_ptr(),
+                        <span class="kw-2">&amp;mut *</span>(<span class="kw-2">*</span><span class="macro">addr_of_mut!</span>(IFS_STORAGE)).as_mut_ptr(),
                     )<span class="question-mark">?</span>);
-                    <span class="kw">let </span>ifs = <span class="macro-nonterminal">$crate::store::Fs::new</span>(IFS.as_ref().unwrap());
+                    <span class="kw">let </span>ifs = <span class="macro-nonterminal">$crate::store::Fs::new</span>((<span class="kw-2">*</span><span class="macro">addr_of!</span>(IFS)).as_ref().unwrap());
                     <span class="self">Self</span>::ifs_ptr().write(ifs);
 
-                    EFS_ALLOC.as_mut_ptr().write(efs_alloc);
-                    EFS_STORAGE.as_mut_ptr().write(efs_storage);
+                    (<span class="kw-2">*</span><span class="macro">addr_of_mut!</span>(EFS_ALLOC)).as_mut_ptr().write(efs_alloc);
+                    (<span class="kw-2">*</span><span class="macro">addr_of_mut!</span>(EFS_STORAGE)).as_mut_ptr().write(efs_storage);
                     EFS = <span class="prelude-val">Some</span>(Filesystem::mount(
-                        <span class="kw-2">&amp;mut *</span>EFS_ALLOC.as_mut_ptr(),
-                        <span class="kw-2">&amp;mut *</span>EFS_STORAGE.as_mut_ptr(),
+                        <span class="kw-2">&amp;mut *</span>(<span class="kw-2">*</span><span class="macro">addr_of_mut!</span>(EFS_ALLOC)).as_mut_ptr(),
+                        <span class="kw-2">&amp;mut *</span>(<span class="kw-2">*</span><span class="macro">addr_of_mut!</span>(EFS_STORAGE)).as_mut_ptr(),
                     )<span class="question-mark">?</span>);
-                    <span class="kw">let </span>efs = <span class="macro-nonterminal">$crate::store::Fs::new</span>(EFS.as_ref().unwrap());
+                    <span class="kw">let </span>efs = <span class="macro-nonterminal">$crate::store::Fs::new</span>((<span class="kw-2">*</span><span class="macro">addr_of_mut!</span>(EFS)).as_ref().unwrap());
                     <span class="self">Self</span>::efs_ptr().write(efs);
 
-                    VFS_ALLOC.as_mut_ptr().write(vfs_alloc);
-                    VFS_STORAGE.as_mut_ptr().write(vfs_storage);
+                    (<span class="kw-2">*</span><span class="macro">addr_of_mut!</span>(VFS_ALLOC)).as_mut_ptr().write(vfs_alloc);
+                    (<span class="kw-2">*</span><span class="macro">addr_of_mut!</span>(VFS_STORAGE)).as_mut_ptr().write(vfs_storage);
                     VFS = <span class="prelude-val">Some</span>(Filesystem::mount(
-                        <span class="kw-2">&amp;mut *</span>VFS_ALLOC.as_mut_ptr(),
-                        <span class="kw-2">&amp;mut *</span>VFS_STORAGE.as_mut_ptr(),
+                        <span class="kw-2">&amp;mut *</span>(<span class="kw-2">*</span><span class="macro">addr_of_mut!</span>(VFS_ALLOC)).as_mut_ptr(),
+                        <span class="kw-2">&amp;mut *</span>(<span class="kw-2">*</span><span class="macro">addr_of_mut!</span>(VFS_STORAGE)).as_mut_ptr(),
                     )<span class="question-mark">?</span>);
-                    <span class="kw">let </span>vfs = <span class="macro-nonterminal">$crate::store::Fs::new</span>(VFS.as_ref().unwrap());
+                    <span class="kw">let </span>vfs = <span class="macro-nonterminal">$crate::store::Fs::new</span>((<span class="kw-2">*</span><span class="macro">addr_of!</span>(VFS)).as_ref().unwrap());
                     <span class="self">Self</span>::vfs_ptr().write(vfs);
 
                     <span class="prelude-val">Ok</span>(())
@@ -1066,7 +1077,8 @@
             ) -&gt; <span class="self">Self </span>{
                 <span class="comment">// This unfortunately repeates the code of `allocate`.
                 // It seems Rust's borrowing rules go against this.
-                </span><span class="kw">use </span>littlefs2::fs::{Allocation, Filesystem};
+                </span><span class="kw">use </span>core::ptr::addr_of_mut;
+                <span class="kw">use </span>littlefs2::fs::{Allocation, Filesystem};
 
                 <span class="kw">static </span><span class="kw-2">mut </span>INTERNAL_STORAGE: <span class="prelude-ty">Option</span>&lt;<span class="macro-nonterminal">$Ifs</span>&gt; = <span class="prelude-val">None</span>;
                 <span class="kw">unsafe </span>{
@@ -1100,24 +1112,24 @@
                 <span class="kw">let </span>store = <span class="self">Self</span>::claim().unwrap();
                 <span class="kw">if </span>store
                     .mount(
-                        <span class="kw">unsafe </span>{ INTERNAL_FS_ALLOC.as_mut().unwrap() },
-                        <span class="kw">unsafe </span>{ INTERNAL_STORAGE.as_mut().unwrap() },
-                        <span class="kw">unsafe </span>{ EXTERNAL_FS_ALLOC.as_mut().unwrap() },
-                        <span class="kw">unsafe </span>{ EXTERNAL_STORAGE.as_mut().unwrap() },
-                        <span class="kw">unsafe </span>{ VOLATILE_FS_ALLOC.as_mut().unwrap() },
-                        <span class="kw">unsafe </span>{ VOLATILE_STORAGE.as_mut().unwrap() },
+                        <span class="kw">unsafe </span>{ (<span class="kw-2">*</span><span class="macro">addr_of_mut!</span>(INTERNAL_FS_ALLOC)).as_mut().unwrap() },
+                        <span class="kw">unsafe </span>{ (<span class="kw-2">*</span><span class="macro">addr_of_mut!</span>(INTERNAL_STORAGE)).as_mut().unwrap() },
+                        <span class="kw">unsafe </span>{ (<span class="kw-2">*</span><span class="macro">addr_of_mut!</span>(EXTERNAL_FS_ALLOC)).as_mut().unwrap() },
+                        <span class="kw">unsafe </span>{ (<span class="kw-2">*</span><span class="macro">addr_of_mut!</span>(EXTERNAL_STORAGE)).as_mut().unwrap() },
+                        <span class="kw">unsafe </span>{ (<span class="kw-2">*</span><span class="macro">addr_of_mut!</span>(VOLATILE_FS_ALLOC)).as_mut().unwrap() },
+                        <span class="kw">unsafe </span>{ (<span class="kw-2">*</span><span class="macro">addr_of_mut!</span>(VOLATILE_STORAGE)).as_mut().unwrap() },
                         <span class="bool-val">false</span>,
                     )
                     .is_err()
                 {
                     store
                         .mount(
-                            <span class="kw">unsafe </span>{ INTERNAL_FS_ALLOC.as_mut().unwrap() },
-                            <span class="kw">unsafe </span>{ INTERNAL_STORAGE.as_mut().unwrap() },
-                            <span class="kw">unsafe </span>{ EXTERNAL_FS_ALLOC.as_mut().unwrap() },
-                            <span class="kw">unsafe </span>{ EXTERNAL_STORAGE.as_mut().unwrap() },
-                            <span class="kw">unsafe </span>{ VOLATILE_FS_ALLOC.as_mut().unwrap() },
-                            <span class="kw">unsafe </span>{ VOLATILE_STORAGE.as_mut().unwrap() },
+                            <span class="kw">unsafe </span>{ (<span class="kw-2">*</span><span class="macro">addr_of_mut!</span>(INTERNAL_FS_ALLOC)).as_mut().unwrap() },
+                            <span class="kw">unsafe </span>{ (<span class="kw-2">*</span><span class="macro">addr_of_mut!</span>(INTERNAL_STORAGE)).as_mut().unwrap() },
+                            <span class="kw">unsafe </span>{ (<span class="kw-2">*</span><span class="macro">addr_of_mut!</span>(EXTERNAL_FS_ALLOC)).as_mut().unwrap() },
+                            <span class="kw">unsafe </span>{ (<span class="kw-2">*</span><span class="macro">addr_of_mut!</span>(EXTERNAL_STORAGE)).as_mut().unwrap() },
+                            <span class="kw">unsafe </span>{ (<span class="kw-2">*</span><span class="macro">addr_of_mut!</span>(VOLATILE_FS_ALLOC)).as_mut().unwrap() },
+                            <span class="kw">unsafe </span>{ (<span class="kw-2">*</span><span class="macro">addr_of_mut!</span>(VOLATILE_STORAGE)).as_mut().unwrap() },
                             <span class="bool-val">true</span>,
                         )
                         .unwrap();
