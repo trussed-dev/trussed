@@ -386,6 +386,44 @@ impl Default for StorageAttributes {
     }
 }
 
+/// Available client traits.
+///
+/// This enum does not provide access to the trait features.  It is only intended for backends to
+/// use in constant assertions to ensure that the correct features are enabled.
+#[non_exhaustive]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+pub enum Client {
+    AttestationClient,
+    CertificateClient,
+    CounterClient,
+    CryptoClient,
+    FilesystemClient,
+    ManagementClient,
+    UiClient,
+}
+
+impl Client {
+    /// All enabled clients.
+    ///
+    /// The contents of this constant depends on the enabled features.
+    pub const ENABLED: &[Self] = &[
+        #[cfg(feature = "attestation-client")]
+        Self::AttestationClient,
+        #[cfg(feature = "certificate-client")]
+        Self::CertificateClient,
+        #[cfg(feature = "counter-client")]
+        Self::CounterClient,
+        #[cfg(feature = "crypto-client")]
+        Self::CryptoClient,
+        #[cfg(feature = "filesystem-client")]
+        Self::FilesystemClient,
+        #[cfg(feature = "management-client")]
+        Self::ManagementClient,
+        #[cfg(feature = "ui-client")]
+        Self::UiClient,
+    ];
+}
+
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Serialize, Deserialize)]
 #[non_exhaustive]
 pub enum Mechanism {
