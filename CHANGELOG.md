@@ -49,6 +49,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed `serde::{Deserialize, Serialize}` implementations for the API request
   and reply structs, `types::{consent::{Error, Level}, reboot::To, StorageAttributes,
   KeySerialization, SignatureSerialization}`.
+- Improved hex formatting of `types::Id`:
+  - Removed the unused `Id::hex`.
 
 ### Fixed
 

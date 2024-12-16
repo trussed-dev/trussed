@@ -81,9 +81,9 @@ impl Id {
     }
 
     /// skips leading zeros
-    pub fn hex(&self) -> Bytes<32> {
+    pub fn hex_path(&self) -> PathBuf {
         const HEX_CHARS: &[u8] = b"0123456789abcdef";
-        let mut buffer = Bytes::new();
+        let mut buffer: Bytes<32> = Bytes::new();
         let array = self.0.to_be_bytes();
 
         for i in 0..array.len() {
@@ -96,11 +96,8 @@ impl Id {
             buffer.push(HEX_CHARS[(array[i] >> 4) as usize]).unwrap();
             buffer.push(HEX_CHARS[(array[i] & 0xf) as usize]).unwrap();
         }
-        buffer
-    }
 
-    pub fn hex_path(&self) -> PathBuf {
-        PathBuf::try_from(self.hex().as_slice()).unwrap()
+        PathBuf::try_from(buffer.as_slice()).unwrap()
     }
 
     /// skips leading zeros
