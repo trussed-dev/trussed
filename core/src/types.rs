@@ -7,15 +7,14 @@ pub use heapless::String;
 pub use heapless_bytes::Bytes;
 pub use littlefs2_core::{DirEntry, Metadata, PathBuf};
 
+use crate::api::{reply, request};
 use crate::config::{
     MAX_KEY_MATERIAL_LENGTH, MAX_MEDIUM_DATA_LENGTH, MAX_MESSAGE_LENGTH, MAX_SHORT_DATA_LENGTH,
     MAX_SIGNATURE_LENGTH, MAX_USER_ATTRIBUTE_LENGTH,
 };
 
 pub mod consent {
-    use serde::{Deserialize, Serialize};
-
-    #[derive(Copy, Clone, Eq, PartialEq, Debug, Serialize, Deserialize)]
+    #[derive(Copy, Clone, Eq, PartialEq, Debug)]
     pub enum Level {
         /// There is no user present
         None,
@@ -27,7 +26,7 @@ pub mod consent {
         Strong,
     }
 
-    #[derive(Copy, Clone, Eq, PartialEq, Debug, Serialize, Deserialize)]
+    #[derive(Copy, Clone, Eq, PartialEq, Debug)]
     pub enum Error {
         FailedToInterrupt,
         Interrupted,
@@ -39,9 +38,7 @@ pub mod consent {
 }
 
 pub mod reboot {
-    use serde::{Deserialize, Serialize};
-
-    #[derive(Copy, Clone, Eq, PartialEq, Debug, Serialize, Deserialize)]
+    #[derive(Copy, Clone, Eq, PartialEq, Debug)]
     pub enum To {
         Application,
         ApplicationUpdate,
@@ -240,7 +237,7 @@ pub enum Location {
     External,
 }
 
-#[derive(Clone, Eq, PartialEq, Debug, Serialize, Deserialize)]
+#[derive(Clone, Eq, PartialEq, Debug)]
 #[non_exhaustive]
 pub struct StorageAttributes {
     // each object must have a unique ID
@@ -350,7 +347,7 @@ pub enum Mechanism {
     Rsa4096Pkcs1v15,
 }
 
-#[derive(Copy, Clone, Eq, PartialEq, Debug, Serialize, Deserialize)]
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum KeySerialization {
     // Asn1Der,
     Cose,
@@ -366,10 +363,59 @@ pub enum KeySerialization {
     Pkcs8Der,
 }
 
-#[derive(Copy, Clone, Eq, PartialEq, Debug, Serialize, Deserialize)]
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum SignatureSerialization {
     Asn1Der,
     // Cose,
     Raw,
     // Sec1,
+}
+
+/// Serializable version of [`reply::Encrypt`][].
+///
+/// Sometimes it is necessary the result of an encryption together with the metadata required for
+/// decryption, for example when wrapping keys.  This struct stores the data that is returned by
+/// the [`request::Encrypt`][] syscall, see [`reply::Encrypt`][], in a serializable format.
+#[derive(
+    Clone, Debug, Eq, PartialEq, serde_indexed::DeserializeIndexed, serde_indexed::SerializeIndexed,
+)]
+#[non_exhaustive]
+pub struct EncryptedData {
+    pub ciphertext: Message,
+    pub nonce: ShortData,
+    pub tag: ShortData,
+}
+
+impl EncryptedData {
+    /// Creates a decryption request to decrypt the stored data.
+    pub fn decrypt(
+        self,
+        mechanism: Mechanism,
+        key: KeyId,
+        associated_data: Message,
+    ) -> request::Decrypt {
+        request::Decrypt {
+            mechanism,
+            key,
+            message: self.ciphertext,
+            associated_data,
+            nonce: self.nonce,
+            tag: self.tag,
+        }
+    }
+}
+
+impl From<reply::Encrypt> for EncryptedData {
+    fn from(reply: reply::Encrypt) -> Self {
+        let reply::Encrypt {
+            ciphertext,
+            nonce,
+            tag,
+        } = reply;
+        Self {
+            ciphertext,
+            nonce,
+            tag,
+        }
+    }
 }

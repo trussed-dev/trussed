@@ -1,5 +1,6 @@
 use generic_array::GenericArray;
 use rand_core::RngCore;
+use trussed_core::types::EncryptedData;
 
 use crate::api::{reply, request};
 use crate::error::Error;
@@ -190,8 +191,9 @@ impl WrapKey for super::Chacha8Poly1305 {
         };
         let encryption_reply = <super::Chacha8Poly1305>::encrypt(keystore, &encryption_request)?;
 
+        let wrapped_key = EncryptedData::from(encryption_reply);
         let wrapped_key =
-            crate::postcard_serialize_bytes(&encryption_reply).map_err(|_| Error::CborError)?;
+            crate::postcard_serialize_bytes(&wrapped_key).map_err(|_| Error::CborError)?;
 
         Ok(reply::WrapKey { wrapped_key })
     }
@@ -204,20 +206,14 @@ impl UnwrapKey for super::Chacha8Poly1305 {
         keystore: &mut impl Keystore,
         request: &request::UnwrapKey,
     ) -> Result<reply::UnwrapKey, Error> {
-        let reply::Encrypt {
-            ciphertext,
-            nonce,
-            tag,
-        } = crate::postcard_deserialize(&request.wrapped_key).map_err(|_| Error::CborError)?;
+        let encrypted_data: EncryptedData =
+            crate::postcard_deserialize(&request.wrapped_key).map_err(|_| Error::CborError)?;
 
-        let decryption_request = request::Decrypt {
-            mechanism: Mechanism::Chacha8Poly1305,
-            key: request.wrapping_key,
-            message: ciphertext,
-            associated_data: request.associated_data.clone(),
-            nonce,
-            tag,
-        };
+        let decryption_request = encrypted_data.decrypt(
+            Mechanism::Chacha8Poly1305,
+            request.wrapping_key,
+            request.associated_data.clone(),
+        );
 
         let serialized_key = if let Some(serialized_key) =
             <super::Chacha8Poly1305>::decrypt(keystore, &decryption_request)?.plaintext

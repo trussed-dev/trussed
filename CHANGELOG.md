@@ -46,6 +46,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add `nonce` argument to `wrap_key` and `unwrap_key` syscalls.
 - Use nonce as IV for Aes256Cbc mechanism.
 - Updated `cbor-smol` to 0.5.0.
+- Removed `serde::{Deserialize, Serialize}` implementations for the API request
+  and reply structs, `types::{consent::{Error, Level}, reboot::To, StorageAttributes,
+  KeySerialization, SignatureSerialization}`.
 
 ### Fixed
 

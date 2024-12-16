@@ -70,7 +70,7 @@ macro_rules! impl_request {
     )*)
         => {$(
     $(#[$attr])?
-    #[derive(Clone, Eq, PartialEq, Debug, serde_indexed::DeserializeIndexed, serde_indexed::SerializeIndexed)]
+    #[derive(Clone, Eq, PartialEq, Debug)]
     pub struct $request {
         $(
             pub $name: $type,
@@ -109,7 +109,7 @@ macro_rules! impl_reply {
         => {$(
 
     $(#[$attr])?
-    #[derive(Clone, Eq, PartialEq, Debug, serde_indexed::DeserializeIndexed, serde_indexed::SerializeIndexed)]
+    #[derive(Clone, Eq, PartialEq, Debug)]
     pub struct $reply {
         $(
             pub $name: $type,
