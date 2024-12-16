@@ -95,9 +95,10 @@ impl Id {
     /// are formatted as `"1000"`.
     pub fn legacy_hex_path(&self) -> PathBuf {
         const HEX_CHARS: &[u8] = b"0123456789abcdef";
-        let mut buffer: Bytes<32> = Bytes::new();
+        let mut buffer = [0; PathBuf::MAX_SIZE_PLUS_ONE];
         let array = self.0.to_be_bytes();
 
+        let mut j = 0;
         for i in 0..array.len() {
             if array[i] == 0 && i != (array.len() - 1) {
                 // This actually skips all zeroes, not only leading ones
@@ -105,11 +106,18 @@ impl Id {
                 continue;
             }
 
-            buffer.push(HEX_CHARS[(array[i] >> 4) as usize]).unwrap();
-            buffer.push(HEX_CHARS[(array[i] & 0xf) as usize]).unwrap();
+            buffer[j] = HEX_CHARS[(array[i] >> 4) as usize] as _;
+            buffer[j + 1] = HEX_CHARS[(array[i] & 0xf) as usize] as _;
+            j += 2;
         }
 
-        PathBuf::try_from(buffer.as_slice()).unwrap()
+        // SAFETY:
+        // 1. We only add characters from HEX_CHARS which only contains ASCII characters.
+        // 2. We initialized the buffer with zeroes so there is still a trailing zero.
+        unsafe {
+            assert!(j < buffer.len());
+            PathBuf::from_buffer_unchecked(buffer)
+        }
     }
 
     /// skips leading zeros
