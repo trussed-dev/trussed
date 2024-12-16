@@ -42,7 +42,9 @@ pub mod types;
 pub mod virt;
 
 pub use api::Reply;
-pub use client::{Client, ClientImplementation};
+#[cfg(feature = "all-clients")]
+pub use client::Client;
+pub use client::ClientImplementation;
 pub use error::Error;
 /// The trait that platforms need to implement to use Trussed.
 pub use platform::Platform;
@@ -70,7 +72,7 @@ pub(crate) fn postcard_serialize_bytes<T: serde::Serialize, const N: usize>(
     Ok(Bytes::from(vec))
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "crypto-client", feature = "filesystem-client"))]
 mod tests;
 
 #[cfg(test)]

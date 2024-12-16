@@ -87,20 +87,34 @@ use crate::types::{PathBuf, Platform};
 
 pub use crate::platform::Syscall;
 
+#[cfg(feature = "crypto-client")]
 pub mod mechanisms;
+#[cfg(feature = "crypto-client")]
 pub use mechanisms::*;
 
-pub use trussed_core::client::{
-    CertificateClient, ClientError, ClientResult, CounterClient, CryptoClient, FilesystemClient,
-    FutureResult, ManagementClient, PollClient, UiClient,
-};
+pub use trussed_core::client::{ClientError, ClientResult, FutureResult, PollClient};
+
+#[cfg(feature = "certificate-client")]
+pub use trussed_core::client::CertificateClient;
+#[cfg(feature = "counter-client")]
+pub use trussed_core::client::CounterClient;
+#[cfg(feature = "crypto-client")]
+pub use trussed_core::client::CryptoClient;
+#[cfg(feature = "filesystem-client")]
+pub use trussed_core::client::FilesystemClient;
+#[cfg(feature = "management-client")]
+pub use trussed_core::client::ManagementClient;
+#[cfg(feature = "ui-client")]
+pub use trussed_core::client::UiClient;
 
 /// All-in-one trait bounding on the sub-traits.
+#[cfg(feature = "all-clients")]
 pub trait Client:
     CertificateClient + CryptoClient + CounterClient + FilesystemClient + ManagementClient + UiClient
 {
 }
 
+#[cfg(feature = "all-clients")]
 impl<S: Syscall, E> Client for ClientImplementation<S, E> {}
 
 /// The client implementation client applications actually receive.
@@ -208,11 +222,17 @@ where
     }
 }
 
+#[cfg(feature = "certificate-client")]
 impl<S: Syscall, E> CertificateClient for ClientImplementation<S, E> {}
+#[cfg(feature = "crypto-client")]
 impl<S: Syscall, E> CryptoClient for ClientImplementation<S, E> {}
+#[cfg(feature = "counter-client")]
 impl<S: Syscall, E> CounterClient for ClientImplementation<S, E> {}
+#[cfg(feature = "filesystem-client")]
 impl<S: Syscall, E> FilesystemClient for ClientImplementation<S, E> {}
+#[cfg(feature = "management-client")]
 impl<S: Syscall, E> ManagementClient for ClientImplementation<S, E> {}
+#[cfg(feature = "ui-client")]
 impl<S: Syscall, E> UiClient for ClientImplementation<S, E> {}
 
 /// Builder for [`ClientImplementation`][].

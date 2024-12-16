@@ -42,6 +42,17 @@ jobs:
           cargo check --package trussed-core --all-targets --no-default-features
         if: matrix.target == 'x86_64-unknown-linux-gnu'
 
+      - name: Check all targets with only one client feature
+        run: |
+          for client in certificate crypto counter filesystem management ui
+          do
+            for package in trussed-core trussed
+            do
+              cargo check --package ${package} --all-targets --no-default-features --features ${client}-client
+            done
+          done
+        if: matrix.target == 'x86_64-unknown-linux-gnu'
+
       - name: Check all targets with default features
         run: |
           cargo check --workspace --all-targets

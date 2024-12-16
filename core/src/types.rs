@@ -479,6 +479,7 @@ pub struct EncryptedData {
 
 impl EncryptedData {
     /// Creates a decryption request to decrypt the stored data.
+    #[cfg(feature = "crypto-client")]
     pub fn decrypt(
         self,
         mechanism: Mechanism,
@@ -496,6 +497,7 @@ impl EncryptedData {
     }
 }
 
+#[cfg(feature = "crypto-client")]
 impl From<reply::Encrypt> for EncryptedData {
     fn from(reply: reply::Encrypt) -> Self {
         let reply::Encrypt {
