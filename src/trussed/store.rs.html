@@ -641,7 +641,32 @@
 <a href="#640" id="640">640</a>
 <a href="#641" id="641">641</a>
 <a href="#642" id="642">642</a>
-<a href="#643" id="643">643</a></pre></div><pre class="rust"><code><span class="doccomment">//! `store` presents a combined interface to three littlefs2 filesystems:
+<a href="#643" id="643">643</a>
+<a href="#644" id="644">644</a>
+<a href="#645" id="645">645</a>
+<a href="#646" id="646">646</a>
+<a href="#647" id="647">647</a>
+<a href="#648" id="648">648</a>
+<a href="#649" id="649">649</a>
+<a href="#650" id="650">650</a>
+<a href="#651" id="651">651</a>
+<a href="#652" id="652">652</a>
+<a href="#653" id="653">653</a>
+<a href="#654" id="654">654</a>
+<a href="#655" id="655">655</a>
+<a href="#656" id="656">656</a>
+<a href="#657" id="657">657</a>
+<a href="#658" id="658">658</a>
+<a href="#659" id="659">659</a>
+<a href="#660" id="660">660</a>
+<a href="#661" id="661">661</a>
+<a href="#662" id="662">662</a>
+<a href="#663" id="663">663</a>
+<a href="#664" id="664">664</a>
+<a href="#665" id="665">665</a>
+<a href="#666" id="666">666</a>
+<a href="#667" id="667">667</a>
+<a href="#668" id="668">668</a></pre></div><pre class="rust"><code><span class="doccomment">//! `store` presents a combined interface to three littlefs2 filesystems:
 //! internal flash, external flash, volatile/RAM.
 //!
 //! It covers two usecases:
@@ -715,7 +740,7 @@
 //! - Alternative: subdirectory &lt;==&gt; RP hash, everything else in flat files
 //! - In any case need to "list dirs excluding . and .." or similar
 
-</span><span class="kw">use </span>littlefs2::{driver::Storage, fs::Filesystem};
+</span><span class="kw">use </span>littlefs2::{driver::Storage, fs::Filesystem, path};
 
 <span class="kw">use </span><span class="kw">crate</span>::error::Error;
 <span class="kw">use </span><span class="kw">crate</span>::types::{Bytes, Location};
@@ -1197,8 +1222,33 @@
 <span class="attr">#[inline(never)]
 </span><span class="kw">pub fn </span>delete(store: <span class="kw">impl </span>Store, location: Location, path: <span class="kw-2">&amp;</span>Path) -&gt; bool {
     <span class="macro">debug_now!</span>(<span class="string">"deleting {}"</span>, <span class="kw-2">&amp;</span>path);
-    store.fs(location).remove(path).is_ok()
-}
+    <span class="kw">let </span>fs = store.fs(location);
+    <span class="kw">if </span>fs.remove(path).is_err() {
+        <span class="kw">return </span><span class="bool-val">false</span>;
+    }
+
+    <span class="comment">// Only delete ancestors for volatile FS
+    </span><span class="kw">if </span>location != Location::Volatile {
+        <span class="kw">return </span><span class="bool-val">true</span>;
+    }
+    <span class="comment">// first ancestor is the file itself
+    </span><span class="kw">for </span>parent <span class="kw">in </span>path.ancestors().skip(<span class="number">1</span>) {
+        <span class="kw">if </span><span class="kw-2">&amp;*</span>parent == <span class="macro">path!</span>(<span class="string">"/"</span>) {
+            <span class="kw">break</span>;
+        }
+        <span class="kw">let </span><span class="prelude-val">Ok</span>(meta) = fs.metadata(<span class="kw-2">&amp;</span>parent) <span class="kw">else </span>{
+            <span class="kw">return </span><span class="bool-val">false</span>;
+        };
+        <span class="kw">if </span>meta.is_dir() &amp;&amp; meta.is_empty() {
+            <span class="kw">if </span>fs.remove_dir(<span class="kw-2">&amp;</span>parent).is_err() {
+                <span class="kw">return </span><span class="bool-val">false</span>;
+            }
+        } <span class="kw">else </span>{
+            <span class="kw">break</span>;
+        }
+    }
+    <span class="bool-val">true
+</span>}
 
 <span class="attr">#[inline(never)]
 </span><span class="kw">pub fn </span>exists(store: <span class="kw">impl </span>Store, location: Location, path: <span class="kw-2">&amp;</span>Path) -&gt; bool {
