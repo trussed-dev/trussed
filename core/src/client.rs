@@ -6,6 +6,8 @@ use crate::{
     interrupt::InterruptFlag,
 };
 
+#[cfg(feature = "attestation-client")]
+mod attestation;
 #[cfg(feature = "certificate-client")]
 mod certificate;
 #[cfg(feature = "counter-client")]
@@ -19,6 +21,8 @@ mod management;
 #[cfg(feature = "ui-client")]
 mod ui;
 
+#[cfg(feature = "attestation-client")]
+pub use attestation::AttestationClient;
 #[cfg(feature = "certificate-client")]
 pub use certificate::CertificateClient;
 #[cfg(feature = "counter-client")]

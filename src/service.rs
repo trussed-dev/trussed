@@ -27,7 +27,7 @@ use crate::{
     interrupt::InterruptFlag,
 };
 
-#[cfg(feature = "crypto-client-attest")]
+#[cfg(feature = "attestation-client")]
 pub mod attest;
 
 // #[macro_use]
@@ -156,12 +156,12 @@ impl<P: Platform> ServiceResources<P> {
             generator
         }
 
-        #[cfg(feature = "crypto-client-attest")]
+        #[cfg(feature = "attestation-client")]
         let full_store = self.platform.store();
 
-        #[cfg(feature = "crypto-client")]
+        #[cfg(any(feature = "attestation-client", feature = "crypto-client"))]
         let keystore = once(|this, ctx| this.keystore(ctx.path.clone()));
-        #[cfg(feature = "certificate-client")]
+        #[cfg(any(feature = "attestation-client", feature = "certificate-client"))]
         let certstore = once(|this, ctx| this.certstore(ctx));
         #[cfg(feature = "counter-client")]
         let counterstore = once(|this, ctx| this.counterstore(ctx));
@@ -184,7 +184,7 @@ impl<P: Platform> ServiceResources<P> {
             }
             .map(Reply::Agree),
 
-            #[cfg(feature = "crypto-client-attest")]
+            #[cfg(feature = "attestation-client")]
             Request::Attest(request) => {
                 let mut attn_keystore: ClientKeystore<P::S> = ClientKeystore::new(
                     PathBuf::from(path!("attn")),

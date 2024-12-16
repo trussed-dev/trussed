@@ -94,6 +94,8 @@ pub use mechanisms::*;
 
 pub use trussed_core::client::{ClientError, ClientResult, FutureResult, PollClient};
 
+#[cfg(feature = "attestation-client")]
+pub use trussed_core::client::AttestationClient;
 #[cfg(feature = "certificate-client")]
 pub use trussed_core::client::CertificateClient;
 #[cfg(feature = "counter-client")]

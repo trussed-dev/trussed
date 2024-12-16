@@ -39,8 +39,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Made `postcard_deserialize`, `postcard_serialize` and
   `postcard_serialize_bytes` private.
 - Changed `&PathBuf` to `&Path` where possible.
-- Put `CounterClient` and `CryptoClient::attest` behind feature flags (enabled
-  by default).
 - Change store implementations to use littlefs2’s `DynFilesystem` trait instead
   of being generic over the storage implementation.
 - Add `nonce` argument to `wrap_key` and `unwrap_key` syscalls.
@@ -56,6 +54,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Changed `Id::hex_clean` to format zero as `"00"`.
 - Change client and mechanism selection:
   - Put all client traits, requests, replies and implementations behind feature flags.
+  - Move `CryptoClient::attest` into new `AttestationClient`.
 
 ### Fixed
 

@@ -14,7 +14,7 @@ use crate::types::consent;
 use crate::types::reboot;
 #[cfg(feature = "serde-extensions")]
 use crate::types::Bytes;
-#[cfg(any(feature = "certificate-client", feature = "crypto-client-attest"))]
+#[cfg(any(feature = "attestation-client", feature = "certificate-client"))]
 use crate::types::CertId;
 #[cfg(feature = "counter-client")]
 use crate::types::CounterId;
@@ -34,10 +34,12 @@ use crate::types::Message;
 use crate::types::PathBuf;
 #[cfg(feature = "filesystem-client")]
 use crate::types::{DirEntry, UserAttribute};
+#[cfg(any(feature = "attestation-client", feature = "crypto-client"))]
+use crate::types::{KeyId, Mechanism};
 #[cfg(feature = "crypto-client")]
 use crate::types::{
-    KeyId, KeySerialization, Mechanism, MediumData, SerializedKey, ShortData, Signature,
-    SignatureSerialization, StorageAttributes,
+    KeySerialization, MediumData, SerializedKey, ShortData, Signature, SignatureSerialization,
+    StorageAttributes,
 };
 
 #[macro_use]
@@ -145,7 +147,7 @@ generate_enums! {
     #[cfg(feature = "crypto-client")]
     WrapKey: 24
 
-    #[cfg(feature = "crypto-client-attest")]
+    #[cfg(feature = "attestation-client")]
     Attest: 0xFF
 
     /////////////
@@ -236,7 +238,7 @@ pub mod request {
             - public_key: KeyId
             - attributes: StorageAttributes
 
-        #[cfg(feature = "crypto-client-attest")]
+        #[cfg(feature = "attestation-client")]
         Attest:
             // only Ed255 + P256
             - signing_mechanism: Mechanism
@@ -531,7 +533,7 @@ pub mod reply {
         Agree:
             - shared_secret: KeyId
 
-        #[cfg(feature = "crypto-client-attest")]
+        #[cfg(feature = "attestation-client")]
         Attest:
             - certificate: CertId
 

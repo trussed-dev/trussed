@@ -28,18 +28,6 @@ pub trait CryptoClient: PollClient {
         })
     }
 
-    #[cfg(feature = "crypto-client-attest")]
-    fn attest(
-        &mut self,
-        signing_mechanism: Mechanism,
-        private_key: KeyId,
-    ) -> ClientResult<'_, reply::Attest, Self> {
-        self.request(request::Attest {
-            signing_mechanism,
-            private_key,
-        })
-    }
-
     fn decrypt<'c>(
         &'c mut self,
         mechanism: Mechanism,
