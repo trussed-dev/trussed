@@ -253,12 +253,9 @@
 <a href="#252" id="252">252</a>
 <a href="#253" id="253">253</a>
 <a href="#254" id="254">254</a>
-<a href="#255" id="255">255</a>
-<a href="#256" id="256">256</a>
-<a href="#257" id="257">257</a>
-<a href="#258" id="258">258</a>
-<a href="#259" id="259">259</a></pre></div><pre class="rust"><code><span class="kw">use </span>generic_array::GenericArray;
+<a href="#255" id="255">255</a></pre></div><pre class="rust"><code><span class="kw">use </span>generic_array::GenericArray;
 <span class="kw">use </span>rand_core::RngCore;
+<span class="kw">use </span>trussed_core::types::EncryptedData;
 
 <span class="kw">use </span><span class="kw">crate</span>::api::{reply, request};
 <span class="kw">use </span><span class="kw">crate</span>::error::Error;
@@ -449,8 +446,9 @@
         };
         <span class="kw">let </span>encryption_reply = &lt;<span class="kw">super</span>::Chacha8Poly1305&gt;::encrypt(keystore, <span class="kw-2">&amp;</span>encryption_request)<span class="question-mark">?</span>;
 
+        <span class="kw">let </span>wrapped_key = EncryptedData::from(encryption_reply);
         <span class="kw">let </span>wrapped_key =
-            <span class="kw">crate</span>::postcard_serialize_bytes(<span class="kw-2">&amp;</span>encryption_reply).map_err(|<span class="kw">_</span>| Error::CborError)<span class="question-mark">?</span>;
+            <span class="kw">crate</span>::postcard_serialize_bytes(<span class="kw-2">&amp;</span>wrapped_key).map_err(|<span class="kw">_</span>| Error::CborError)<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(reply::WrapKey { wrapped_key })
     }
@@ -463,20 +461,14 @@
         keystore: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Keystore,
         request: <span class="kw-2">&amp;</span>request::UnwrapKey,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;reply::UnwrapKey, Error&gt; {
-        <span class="kw">let </span>reply::Encrypt {
-            ciphertext,
-            nonce,
-            tag,
-        } = <span class="kw">crate</span>::postcard_deserialize(<span class="kw-2">&amp;</span>request.wrapped_key).map_err(|<span class="kw">_</span>| Error::CborError)<span class="question-mark">?</span>;
+        <span class="kw">let </span>encrypted_data: EncryptedData =
+            <span class="kw">crate</span>::postcard_deserialize(<span class="kw-2">&amp;</span>request.wrapped_key).map_err(|<span class="kw">_</span>| Error::CborError)<span class="question-mark">?</span>;
 
-        <span class="kw">let </span>decryption_request = request::Decrypt {
-            mechanism: Mechanism::Chacha8Poly1305,
-            key: request.wrapping_key,
-            message: ciphertext,
-            associated_data: request.associated_data.clone(),
-            nonce,
-            tag,
-        };
+        <span class="kw">let </span>decryption_request = encrypted_data.decrypt(
+            Mechanism::Chacha8Poly1305,
+            request.wrapping_key,
+            request.associated_data.clone(),
+        );
 
         <span class="kw">let </span>serialized_key = <span class="kw">if let </span><span class="prelude-val">Some</span>(serialized_key) =
             &lt;<span class="kw">super</span>::Chacha8Poly1305&gt;::decrypt(keystore, <span class="kw-2">&amp;</span>decryption_request)<span class="question-mark">?</span>.plaintext
