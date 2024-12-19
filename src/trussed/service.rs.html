@@ -1055,7 +1055,78 @@
 <a href="#1054" id="1054">1054</a>
 <a href="#1055" id="1055">1055</a>
 <a href="#1056" id="1056">1056</a>
-<a href="#1057" id="1057">1057</a></pre></div><pre class="rust"><code><span class="kw">use </span>littlefs2_core::{path, DynFilesystem, Path, PathBuf};
+<a href="#1057" id="1057">1057</a>
+<a href="#1058" id="1058">1058</a>
+<a href="#1059" id="1059">1059</a>
+<a href="#1060" id="1060">1060</a>
+<a href="#1061" id="1061">1061</a>
+<a href="#1062" id="1062">1062</a>
+<a href="#1063" id="1063">1063</a>
+<a href="#1064" id="1064">1064</a>
+<a href="#1065" id="1065">1065</a>
+<a href="#1066" id="1066">1066</a>
+<a href="#1067" id="1067">1067</a>
+<a href="#1068" id="1068">1068</a>
+<a href="#1069" id="1069">1069</a>
+<a href="#1070" id="1070">1070</a>
+<a href="#1071" id="1071">1071</a>
+<a href="#1072" id="1072">1072</a>
+<a href="#1073" id="1073">1073</a>
+<a href="#1074" id="1074">1074</a>
+<a href="#1075" id="1075">1075</a>
+<a href="#1076" id="1076">1076</a>
+<a href="#1077" id="1077">1077</a>
+<a href="#1078" id="1078">1078</a>
+<a href="#1079" id="1079">1079</a>
+<a href="#1080" id="1080">1080</a>
+<a href="#1081" id="1081">1081</a>
+<a href="#1082" id="1082">1082</a>
+<a href="#1083" id="1083">1083</a>
+<a href="#1084" id="1084">1084</a>
+<a href="#1085" id="1085">1085</a>
+<a href="#1086" id="1086">1086</a>
+<a href="#1087" id="1087">1087</a>
+<a href="#1088" id="1088">1088</a>
+<a href="#1089" id="1089">1089</a>
+<a href="#1090" id="1090">1090</a>
+<a href="#1091" id="1091">1091</a>
+<a href="#1092" id="1092">1092</a>
+<a href="#1093" id="1093">1093</a>
+<a href="#1094" id="1094">1094</a>
+<a href="#1095" id="1095">1095</a>
+<a href="#1096" id="1096">1096</a>
+<a href="#1097" id="1097">1097</a>
+<a href="#1098" id="1098">1098</a>
+<a href="#1099" id="1099">1099</a>
+<a href="#1100" id="1100">1100</a>
+<a href="#1101" id="1101">1101</a>
+<a href="#1102" id="1102">1102</a>
+<a href="#1103" id="1103">1103</a>
+<a href="#1104" id="1104">1104</a>
+<a href="#1105" id="1105">1105</a>
+<a href="#1106" id="1106">1106</a>
+<a href="#1107" id="1107">1107</a>
+<a href="#1108" id="1108">1108</a>
+<a href="#1109" id="1109">1109</a>
+<a href="#1110" id="1110">1110</a>
+<a href="#1111" id="1111">1111</a>
+<a href="#1112" id="1112">1112</a>
+<a href="#1113" id="1113">1113</a>
+<a href="#1114" id="1114">1114</a>
+<a href="#1115" id="1115">1115</a>
+<a href="#1116" id="1116">1116</a>
+<a href="#1117" id="1117">1117</a>
+<a href="#1118" id="1118">1118</a>
+<a href="#1119" id="1119">1119</a>
+<a href="#1120" id="1120">1120</a>
+<a href="#1121" id="1121">1121</a>
+<a href="#1122" id="1122">1122</a>
+<a href="#1123" id="1123">1123</a>
+<a href="#1124" id="1124">1124</a>
+<a href="#1125" id="1125">1125</a>
+<a href="#1126" id="1126">1126</a>
+<a href="#1127" id="1127">1127</a>
+<a href="#1128" id="1128">1128</a></pre></div><pre class="rust"><code><span class="kw">use </span>littlefs2_core::{path, DynFilesystem, Path, PathBuf};
 <span class="kw">use </span>rand_chacha::ChaCha8Rng;
 <span class="kw">pub use </span>rand_core::{RngCore, SeedableRng};
 
@@ -1233,10 +1304,14 @@
 
             <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
             </span>Request::Agree(request) =&gt; <span class="kw">match </span>request.mechanism {
-                Mechanism::P521 =&gt; mechanisms::P521::agree(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
-                Mechanism::P384 =&gt; mechanisms::P384::agree(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
-                Mechanism::P256 =&gt; mechanisms::P256::agree(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
-                Mechanism::X255 =&gt; mechanisms::X255::agree(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
+                <span class="attr">#[cfg(feature = <span class="string">"p521"</span>)]
+                </span>Mechanism::P521 =&gt; mechanisms::P521::agree(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
+                <span class="attr">#[cfg(feature = <span class="string">"p384"</span>)]
+                </span>Mechanism::P384 =&gt; mechanisms::P384::agree(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
+                <span class="attr">#[cfg(feature = <span class="string">"p256"</span>)]
+                </span>Mechanism::P256 =&gt; mechanisms::P256::agree(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
+                <span class="attr">#[cfg(feature = <span class="string">"x255"</span>)]
+                </span>Mechanism::X255 =&gt; mechanisms::X255::agree(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
                 <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(Error::MechanismNotAvailable),
             }
             .map(Reply::Agree),
@@ -1259,60 +1334,78 @@
 
             <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
             </span>Request::Decrypt(request) =&gt; <span class="kw">match </span>request.mechanism {
-                Mechanism::Aes256Cbc =&gt; {
+                <span class="attr">#[cfg(feature = <span class="string">"aes256-cbc"</span>)]
+                </span>Mechanism::Aes256Cbc =&gt; {
                     mechanisms::Aes256Cbc::decrypt(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request)
                 }
-                Mechanism::Chacha8Poly1305 =&gt; {
+                <span class="attr">#[cfg(feature = <span class="string">"chacha8-poly1305"</span>)]
+                </span>Mechanism::Chacha8Poly1305 =&gt; {
                     mechanisms::Chacha8Poly1305::decrypt(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request)
                 }
-                Mechanism::Tdes =&gt; mechanisms::Tdes::decrypt(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
+                <span class="attr">#[cfg(feature = <span class="string">"tdes"</span>)]
+                </span>Mechanism::Tdes =&gt; mechanisms::Tdes::decrypt(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
                 <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(Error::MechanismNotAvailable),
             }
             .map(Reply::Decrypt),
 
             <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
             </span>Request::DeriveKey(request) =&gt; <span class="kw">match </span>request.mechanism {
-                Mechanism::HmacBlake2s =&gt; {
+                <span class="attr">#[cfg(feature = <span class="string">"hmac-blake2s"</span>)]
+                </span>Mechanism::HmacBlake2s =&gt; {
                     mechanisms::HmacBlake2s::derive_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request)
                 }
-                Mechanism::HmacSha1 =&gt; {
+                <span class="attr">#[cfg(feature = <span class="string">"hmac-sha1"</span>)]
+                </span>Mechanism::HmacSha1 =&gt; {
                     mechanisms::HmacSha1::derive_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request)
                 }
-                Mechanism::HmacSha256 =&gt; {
+                <span class="attr">#[cfg(feature = <span class="string">"hmac-sha256"</span>)]
+                </span>Mechanism::HmacSha256 =&gt; {
                     mechanisms::HmacSha256::derive_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request)
                 }
-                Mechanism::HmacSha512 =&gt; {
+                <span class="attr">#[cfg(feature = <span class="string">"hmac-sha512"</span>)]
+                </span>Mechanism::HmacSha512 =&gt; {
                     mechanisms::HmacSha512::derive_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request)
                 }
-                Mechanism::Ed255 =&gt; {
+                <span class="attr">#[cfg(feature = <span class="string">"ed255"</span>)]
+                </span>Mechanism::Ed255 =&gt; {
                     mechanisms::Ed255::derive_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request)
                 }
-                Mechanism::P521 =&gt; mechanisms::P521::derive_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
-                Mechanism::P384 =&gt; mechanisms::P384::derive_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
-                Mechanism::P256 =&gt; mechanisms::P256::derive_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
-                Mechanism::Sha256 =&gt; {
+                <span class="attr">#[cfg(feature = <span class="string">"p521"</span>)]
+                </span>Mechanism::P521 =&gt; mechanisms::P521::derive_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
+                <span class="attr">#[cfg(feature = <span class="string">"p384"</span>)]
+                </span>Mechanism::P384 =&gt; mechanisms::P384::derive_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
+                <span class="attr">#[cfg(feature = <span class="string">"p256"</span>)]
+                </span>Mechanism::P256 =&gt; mechanisms::P256::derive_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
+                <span class="attr">#[cfg(feature = <span class="string">"sha256"</span>)]
+                </span>Mechanism::Sha256 =&gt; {
                     mechanisms::Sha256::derive_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request)
                 }
-                Mechanism::X255 =&gt; mechanisms::X255::derive_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
+                <span class="attr">#[cfg(feature = <span class="string">"x255"</span>)]
+                </span>Mechanism::X255 =&gt; mechanisms::X255::derive_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
                 <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(Error::MechanismNotAvailable),
             }
             .map(Reply::DeriveKey),
 
             <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
             </span>Request::DeserializeKey(request) =&gt; <span class="kw">match </span>request.mechanism {
-                Mechanism::Ed255 =&gt; {
+                <span class="attr">#[cfg(feature = <span class="string">"ed255"</span>)]
+                </span>Mechanism::Ed255 =&gt; {
                     mechanisms::Ed255::deserialize_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request)
                 }
-                Mechanism::P521 =&gt; {
+                <span class="attr">#[cfg(feature = <span class="string">"p521"</span>)]
+                </span>Mechanism::P521 =&gt; {
                     mechanisms::P521::deserialize_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request)
                 }
-                Mechanism::P384 =&gt; {
+                <span class="attr">#[cfg(feature = <span class="string">"p384"</span>)]
+                </span>Mechanism::P384 =&gt; {
                     mechanisms::P384::deserialize_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request)
                 }
-                Mechanism::P256 =&gt; {
+                <span class="attr">#[cfg(feature = <span class="string">"p256"</span>)]
+                </span>Mechanism::P256 =&gt; {
                     mechanisms::P256::deserialize_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request)
                 }
-                Mechanism::X255 =&gt; {
+                <span class="attr">#[cfg(feature = <span class="string">"x255"</span>)]
+                </span>Mechanism::X255 =&gt; {
                     mechanisms::X255::deserialize_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request)
                 }
                 <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(Error::MechanismNotAvailable),
@@ -1321,13 +1414,16 @@
 
             <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
             </span>Request::Encrypt(request) =&gt; <span class="kw">match </span>request.mechanism {
-                Mechanism::Aes256Cbc =&gt; {
+                <span class="attr">#[cfg(feature = <span class="string">"aes256-cbc"</span>)]
+                </span>Mechanism::Aes256Cbc =&gt; {
                     mechanisms::Aes256Cbc::encrypt(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request)
                 }
-                Mechanism::Chacha8Poly1305 =&gt; {
+                <span class="attr">#[cfg(feature = <span class="string">"chacha8-poly1305"</span>)]
+                </span>Mechanism::Chacha8Poly1305 =&gt; {
                     mechanisms::Chacha8Poly1305::encrypt(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request)
                 }
-                Mechanism::Tdes =&gt; mechanisms::Tdes::encrypt(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
+                <span class="attr">#[cfg(feature = <span class="string">"tdes"</span>)]
+                </span>Mechanism::Tdes =&gt; mechanisms::Tdes::encrypt(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
                 <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(Error::MechanismNotAvailable),
             }
             .map(Reply::Encrypt),
@@ -1352,34 +1448,46 @@
 
             <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
             </span>Request::Exists(request) =&gt; <span class="kw">match </span>request.mechanism {
-                Mechanism::Ed255 =&gt; mechanisms::Ed255::exists(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
-                Mechanism::P521 =&gt; mechanisms::P521::exists(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
-                Mechanism::P384 =&gt; mechanisms::P384::exists(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
-                Mechanism::P256 =&gt; mechanisms::P256::exists(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
-                Mechanism::Totp =&gt; mechanisms::Totp::exists(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
-                Mechanism::X255 =&gt; mechanisms::X255::exists(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
+                <span class="attr">#[cfg(feature = <span class="string">"ed255"</span>)]
+                </span>Mechanism::Ed255 =&gt; mechanisms::Ed255::exists(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
+                <span class="attr">#[cfg(feature = <span class="string">"p521"</span>)]
+                </span>Mechanism::P521 =&gt; mechanisms::P521::exists(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
+                <span class="attr">#[cfg(feature = <span class="string">"p384"</span>)]
+                </span>Mechanism::P384 =&gt; mechanisms::P384::exists(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
+                <span class="attr">#[cfg(feature = <span class="string">"p256"</span>)]
+                </span>Mechanism::P256 =&gt; mechanisms::P256::exists(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
+                <span class="attr">#[cfg(feature = <span class="string">"totp"</span>)]
+                </span>Mechanism::Totp =&gt; mechanisms::Totp::exists(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
+                <span class="attr">#[cfg(feature = <span class="string">"x255"</span>)]
+                </span>Mechanism::X255 =&gt; mechanisms::X255::exists(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
                 <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(Error::MechanismNotAvailable),
             }
             .map(Reply::Exists),
 
             <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
             </span>Request::GenerateKey(request) =&gt; <span class="kw">match </span>request.mechanism {
-                Mechanism::Chacha8Poly1305 =&gt; {
+                <span class="attr">#[cfg(feature = <span class="string">"chacha8-poly1305"</span>)]
+                </span>Mechanism::Chacha8Poly1305 =&gt; {
                     mechanisms::Chacha8Poly1305::generate_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request)
                 }
-                Mechanism::Ed255 =&gt; {
+                <span class="attr">#[cfg(feature = <span class="string">"ed255"</span>)]
+                </span>Mechanism::Ed255 =&gt; {
                     mechanisms::Ed255::generate_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request)
                 }
-                Mechanism::P521 =&gt; {
+                <span class="attr">#[cfg(feature = <span class="string">"p521"</span>)]
+                </span>Mechanism::P521 =&gt; {
                     mechanisms::P521::generate_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request)
                 }
-                Mechanism::P384 =&gt; {
+                <span class="attr">#[cfg(feature = <span class="string">"p384"</span>)]
+                </span>Mechanism::P384 =&gt; {
                     mechanisms::P384::generate_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request)
                 }
-                Mechanism::P256 =&gt; {
+                <span class="attr">#[cfg(feature = <span class="string">"p256"</span>)]
+                </span>Mechanism::P256 =&gt; {
                     mechanisms::P256::generate_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request)
                 }
-                Mechanism::X255 =&gt; {
+                <span class="attr">#[cfg(feature = <span class="string">"x255"</span>)]
+                </span>Mechanism::X255 =&gt; {
                     mechanisms::X255::generate_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request)
                 }
                 <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(Error::MechanismNotAvailable),
@@ -1409,28 +1517,36 @@
             <span class="comment">// deprecated
             </span><span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
             </span>Request::UnsafeInjectKey(request) =&gt; <span class="kw">match </span>request.mechanism {
-                Mechanism::P521 =&gt; {
+                <span class="attr">#[cfg(feature = <span class="string">"p521"</span>)]
+                </span>Mechanism::P521 =&gt; {
                     mechanisms::P521::unsafe_inject_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request)
                 }
-                Mechanism::P384 =&gt; {
+                <span class="attr">#[cfg(feature = <span class="string">"p384"</span>)]
+                </span>Mechanism::P384 =&gt; {
                     mechanisms::P384::unsafe_inject_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request)
                 }
-                Mechanism::P256 =&gt; {
+                <span class="attr">#[cfg(feature = <span class="string">"p256"</span>)]
+                </span>Mechanism::P256 =&gt; {
                     mechanisms::P256::unsafe_inject_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request)
                 }
-                Mechanism::X255 =&gt; {
+                <span class="attr">#[cfg(feature = <span class="string">"x255"</span>)]
+                </span>Mechanism::X255 =&gt; {
                     mechanisms::X255::unsafe_inject_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request)
                 }
-                Mechanism::Ed255 =&gt; {
+                <span class="attr">#[cfg(feature = <span class="string">"ed255"</span>)]
+                </span>Mechanism::Ed255 =&gt; {
                     mechanisms::Ed255::unsafe_inject_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request)
                 }
-                Mechanism::SharedSecret =&gt; {
+                <span class="attr">#[cfg(feature = <span class="string">"shared-secret"</span>)]
+                </span>Mechanism::SharedSecret =&gt; {
                     mechanisms::SharedSecret::unsafe_inject_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request)
                 }
-                Mechanism::Aes256Cbc =&gt; {
+                <span class="attr">#[cfg(feature = <span class="string">"aes256-cbc"</span>)]
+                </span>Mechanism::Aes256Cbc =&gt; {
                     mechanisms::Aes256Cbc::unsafe_inject_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request)
                 }
-                Mechanism::Tdes =&gt; {
+                <span class="attr">#[cfg(feature = <span class="string">"tdes"</span>)]
+                </span>Mechanism::Tdes =&gt; {
                     mechanisms::Tdes::unsafe_inject_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request)
                 }
                 <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(Error::MechanismNotAvailable),
@@ -1453,7 +1569,8 @@
 
             <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
             </span>Request::Hash(request) =&gt; <span class="kw">match </span>request.mechanism {
-                Mechanism::Sha256 =&gt; mechanisms::Sha256::hash(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
+                <span class="attr">#[cfg(feature = <span class="string">"sha256"</span>)]
+                </span>Mechanism::Sha256 =&gt; mechanisms::Sha256::hash(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
                 <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(Error::MechanismNotAvailable),
             }
             .map(Reply::Hash),
@@ -1642,22 +1759,28 @@
 
             <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
             </span>Request::SerializeKey(request) =&gt; <span class="kw">match </span>request.mechanism {
-                Mechanism::Ed255 =&gt; {
+                <span class="attr">#[cfg(feature = <span class="string">"ed255"</span>)]
+                </span>Mechanism::Ed255 =&gt; {
                     mechanisms::Ed255::serialize_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request)
                 }
-                Mechanism::P521 =&gt; {
+                <span class="attr">#[cfg(feature = <span class="string">"p521"</span>)]
+                </span>Mechanism::P521 =&gt; {
                     mechanisms::P521::serialize_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request)
                 }
-                Mechanism::P384 =&gt; {
+                <span class="attr">#[cfg(feature = <span class="string">"p384"</span>)]
+                </span>Mechanism::P384 =&gt; {
                     mechanisms::P384::serialize_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request)
                 }
-                Mechanism::P256 =&gt; {
+                <span class="attr">#[cfg(feature = <span class="string">"p256"</span>)]
+                </span>Mechanism::P256 =&gt; {
                     mechanisms::P256::serialize_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request)
                 }
-                Mechanism::X255 =&gt; {
+                <span class="attr">#[cfg(feature = <span class="string">"x255"</span>)]
+                </span>Mechanism::X255 =&gt; {
                     mechanisms::X255::serialize_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request)
                 }
-                Mechanism::SharedSecret =&gt; {
+                <span class="attr">#[cfg(feature = <span class="string">"shared-secret"</span>)]
+                </span>Mechanism::SharedSecret =&gt; {
                     mechanisms::SharedSecret::serialize_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request)
                 }
                 <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(Error::MechanismNotAvailable),
@@ -1666,32 +1789,44 @@
 
             <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
             </span>Request::Sign(request) =&gt; <span class="kw">match </span>request.mechanism {
-                Mechanism::Ed255 =&gt; mechanisms::Ed255::sign(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
-                Mechanism::HmacBlake2s =&gt; {
+                <span class="attr">#[cfg(feature = <span class="string">"ed255"</span>)]
+                </span>Mechanism::Ed255 =&gt; mechanisms::Ed255::sign(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
+                <span class="attr">#[cfg(feature = <span class="string">"hmac-blake2s"</span>)]
+                </span>Mechanism::HmacBlake2s =&gt; {
                     mechanisms::HmacBlake2s::sign(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request)
                 }
-                Mechanism::HmacSha1 =&gt; {
+                <span class="attr">#[cfg(feature = <span class="string">"hmac-sha1"</span>)]
+                </span>Mechanism::HmacSha1 =&gt; {
                     mechanisms::HmacSha1::sign(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request)
                 }
-                Mechanism::HmacSha256 =&gt; {
+                <span class="attr">#[cfg(feature = <span class="string">"hmac-sha256"</span>)]
+                </span>Mechanism::HmacSha256 =&gt; {
                     mechanisms::HmacSha256::sign(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request)
                 }
-                Mechanism::HmacSha512 =&gt; {
+                <span class="attr">#[cfg(feature = <span class="string">"hmac-sha512"</span>)]
+                </span>Mechanism::HmacSha512 =&gt; {
                     mechanisms::HmacSha512::sign(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request)
                 }
-                Mechanism::P521 =&gt; mechanisms::P521::sign(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
-                Mechanism::P521Prehashed =&gt; {
+                <span class="attr">#[cfg(feature = <span class="string">"p521"</span>)]
+                </span>Mechanism::P521 =&gt; mechanisms::P521::sign(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
+                <span class="attr">#[cfg(feature = <span class="string">"p521"</span>)]
+                </span>Mechanism::P521Prehashed =&gt; {
                     mechanisms::P521Prehashed::sign(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request)
                 }
-                Mechanism::P384 =&gt; mechanisms::P384::sign(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
-                Mechanism::P384Prehashed =&gt; {
+                <span class="attr">#[cfg(feature = <span class="string">"p384"</span>)]
+                </span>Mechanism::P384 =&gt; mechanisms::P384::sign(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
+                <span class="attr">#[cfg(feature = <span class="string">"p384"</span>)]
+                </span>Mechanism::P384Prehashed =&gt; {
                     mechanisms::P384Prehashed::sign(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request)
                 }
-                Mechanism::P256 =&gt; mechanisms::P256::sign(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
-                Mechanism::P256Prehashed =&gt; {
+                <span class="attr">#[cfg(feature = <span class="string">"p256"</span>)]
+                </span>Mechanism::P256 =&gt; mechanisms::P256::sign(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
+                <span class="attr">#[cfg(feature = <span class="string">"p256"</span>)]
+                </span>Mechanism::P256Prehashed =&gt; {
                     mechanisms::P256Prehashed::sign(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request)
                 }
-                Mechanism::Totp =&gt; mechanisms::Totp::sign(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
+                <span class="attr">#[cfg(feature = <span class="string">"totp"</span>)]
+                </span>Mechanism::Totp =&gt; mechanisms::Totp::sign(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
                 <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(Error::MechanismNotAvailable),
             }
             .map(Reply::Sign),
@@ -1704,7 +1839,8 @@
 
             <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
             </span>Request::UnwrapKey(request) =&gt; <span class="kw">match </span>request.mechanism {
-                Mechanism::Chacha8Poly1305 =&gt; {
+                <span class="attr">#[cfg(feature = <span class="string">"chacha8-poly1305"</span>)]
+                </span>Mechanism::Chacha8Poly1305 =&gt; {
                     mechanisms::Chacha8Poly1305::unwrap_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request)
                 }
                 <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(Error::MechanismNotAvailable),
@@ -1713,20 +1849,26 @@
 
             <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
             </span>Request::Verify(request) =&gt; <span class="kw">match </span>request.mechanism {
-                Mechanism::Ed255 =&gt; mechanisms::Ed255::verify(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
-                Mechanism::P521 =&gt; mechanisms::P521::verify(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
-                Mechanism::P384 =&gt; mechanisms::P384::verify(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
-                Mechanism::P256 =&gt; mechanisms::P256::verify(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
+                <span class="attr">#[cfg(feature = <span class="string">"ed255"</span>)]
+                </span>Mechanism::Ed255 =&gt; mechanisms::Ed255::verify(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
+                <span class="attr">#[cfg(feature = <span class="string">"p521"</span>)]
+                </span>Mechanism::P521 =&gt; mechanisms::P521::verify(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
+                <span class="attr">#[cfg(feature = <span class="string">"p384"</span>)]
+                </span>Mechanism::P384 =&gt; mechanisms::P384::verify(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
+                <span class="attr">#[cfg(feature = <span class="string">"p256"</span>)]
+                </span>Mechanism::P256 =&gt; mechanisms::P256::verify(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
                 <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(Error::MechanismNotAvailable),
             }
             .map(Reply::Verify),
 
             <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
             </span>Request::WrapKey(request) =&gt; <span class="kw">match </span>request.mechanism {
-                Mechanism::Aes256Cbc =&gt; {
+                <span class="attr">#[cfg(feature = <span class="string">"aes256-cbc"</span>)]
+                </span>Mechanism::Aes256Cbc =&gt; {
                     mechanisms::Aes256Cbc::wrap_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request)
                 }
-                Mechanism::Chacha8Poly1305 =&gt; {
+                <span class="attr">#[cfg(feature = <span class="string">"chacha8-poly1305"</span>)]
+                </span>Mechanism::Chacha8Poly1305 =&gt; {
                     mechanisms::Chacha8Poly1305::wrap_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request)
                 }
                 <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(Error::MechanismNotAvailable),

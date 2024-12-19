@@ -88,7 +88,32 @@
 <a href="#87" id="87">87</a>
 <a href="#88" id="88">88</a>
 <a href="#89" id="89">89</a>
-<a href="#90" id="90">90</a></pre></div><pre class="rust"><code><span class="comment">// NOTE: The mechanism implementations are currently littered with `#[inline(never)]`,
+<a href="#90" id="90">90</a>
+<a href="#91" id="91">91</a>
+<a href="#92" id="92">92</a>
+<a href="#93" id="93">93</a>
+<a href="#94" id="94">94</a>
+<a href="#95" id="95">95</a>
+<a href="#96" id="96">96</a>
+<a href="#97" id="97">97</a>
+<a href="#98" id="98">98</a>
+<a href="#99" id="99">99</a>
+<a href="#100" id="100">100</a>
+<a href="#101" id="101">101</a>
+<a href="#102" id="102">102</a>
+<a href="#103" id="103">103</a>
+<a href="#104" id="104">104</a>
+<a href="#105" id="105">105</a>
+<a href="#106" id="106">106</a>
+<a href="#107" id="107">107</a>
+<a href="#108" id="108">108</a>
+<a href="#109" id="109">109</a>
+<a href="#110" id="110">110</a>
+<a href="#111" id="111">111</a>
+<a href="#112" id="112">112</a>
+<a href="#113" id="113">113</a>
+<a href="#114" id="114">114</a>
+<a href="#115" id="115">115</a></pre></div><pre class="rust"><code><span class="comment">// NOTE: The mechanism implementations are currently littered with `#[inline(never)]`,
 // which is annoyingly explicit + manual (easy to forget).
 // The underlying concern is that the stack use of `ServiceResources::reply_to` would be
 // "too big" if they all get inlined.
@@ -101,66 +126,91 @@
 // should be revisited.
 
 // TODO: rename to aes256-cbc-zero-iv
+</span><span class="attr">#[cfg(feature = <span class="string">"aes256-cbc"</span>)]
 </span><span class="kw">pub struct </span>Aes256Cbc {}
-<span class="kw">mod </span>aes256cbc;
+<span class="attr">#[cfg(feature = <span class="string">"aes256-cbc"</span>)]
+</span><span class="kw">mod </span>aes256cbc;
 
-<span class="kw">pub struct </span>Chacha8Poly1305 {}
-<span class="kw">mod </span>chacha8poly1305;
+<span class="attr">#[cfg(feature = <span class="string">"chacha8-poly1305"</span>)]
+</span><span class="kw">pub struct </span>Chacha8Poly1305 {}
+<span class="attr">#[cfg(feature = <span class="string">"chacha8-poly1305"</span>)]
+</span><span class="kw">mod </span>chacha8poly1305;
 
-<span class="kw">pub struct </span>SharedSecret {}
-<span class="kw">mod </span>shared_secret;
+<span class="attr">#[cfg(feature = <span class="string">"shared-secret"</span>)]
+</span><span class="kw">pub struct </span>SharedSecret {}
+<span class="attr">#[cfg(feature = <span class="string">"shared-secret"</span>)]
+</span><span class="kw">mod </span>shared_secret;
 
-<span class="kw">pub struct </span>Ed255 {}
-<span class="kw">mod </span>ed255;
+<span class="attr">#[cfg(feature = <span class="string">"ed255"</span>)]
+</span><span class="kw">pub struct </span>Ed255 {}
+<span class="attr">#[cfg(feature = <span class="string">"ed255"</span>)]
+</span><span class="kw">mod </span>ed255;
 
-<span class="kw">pub struct </span>HmacBlake2s {}
+<span class="attr">#[cfg(feature = <span class="string">"hmac-blake2s"</span>)]
+</span><span class="kw">pub struct </span>HmacBlake2s {}
 <span class="attr">#[cfg(feature = <span class="string">"hmac-blake2s"</span>)]
 </span><span class="kw">mod </span>hmacblake2s;
-<span class="attr">#[cfg(not(feature = <span class="string">"hmac-blake2s"</span>))]
-</span><span class="kw">impl </span><span class="kw">crate</span>::service::DeriveKey <span class="kw">for </span>HmacBlake2s {}
-<span class="attr">#[cfg(not(feature = <span class="string">"hmac-blake2s"</span>))]
-</span><span class="kw">impl </span><span class="kw">crate</span>::service::Sign <span class="kw">for </span>HmacBlake2s {}
 
-<span class="kw">pub struct </span>HmacSha1 {}
-<span class="kw">mod </span>hmacsha1;
+<span class="attr">#[cfg(feature = <span class="string">"hmac-sha1"</span>)]
+</span><span class="kw">pub struct </span>HmacSha1 {}
+<span class="attr">#[cfg(feature = <span class="string">"hmac-sha1"</span>)]
+</span><span class="kw">mod </span>hmacsha1;
 
-<span class="kw">pub struct </span>HmacSha256 {}
-<span class="kw">mod </span>hmacsha256;
+<span class="attr">#[cfg(feature = <span class="string">"hmac-sha256"</span>)]
+</span><span class="kw">pub struct </span>HmacSha256 {}
+<span class="attr">#[cfg(feature = <span class="string">"hmac-sha256"</span>)]
+</span><span class="kw">mod </span>hmacsha256;
 
-<span class="kw">pub struct </span>HmacSha512 {}
+<span class="attr">#[cfg(feature = <span class="string">"hmac-sha512"</span>)]
+</span><span class="kw">pub struct </span>HmacSha512 {}
 <span class="attr">#[cfg(feature = <span class="string">"hmac-sha512"</span>)]
 </span><span class="kw">mod </span>hmacsha512;
-<span class="attr">#[cfg(not(feature = <span class="string">"hmac-sha512"</span>))]
-</span><span class="kw">impl </span><span class="kw">crate</span>::service::DeriveKey <span class="kw">for </span>HmacSha512 {}
-<span class="attr">#[cfg(not(feature = <span class="string">"hmac-sha512"</span>))]
-</span><span class="kw">impl </span><span class="kw">crate</span>::service::Sign <span class="kw">for </span>HmacSha512 {}
 
-<span class="kw">pub struct </span>P256 {}
-<span class="kw">pub struct </span>P256Prehashed {}
-<span class="kw">mod </span>p256;
+<span class="attr">#[cfg(feature = <span class="string">"p256"</span>)]
+</span><span class="kw">pub struct </span>P256 {}
+<span class="attr">#[cfg(feature = <span class="string">"p256"</span>)]
+</span><span class="kw">pub struct </span>P256Prehashed {}
+<span class="attr">#[cfg(feature = <span class="string">"p256"</span>)]
+</span><span class="kw">mod </span>p256;
 
-<span class="kw">pub struct </span>P384 {}
-<span class="kw">pub struct </span>P384Prehashed {}
-<span class="kw">mod </span>p384;
+<span class="attr">#[cfg(feature = <span class="string">"p384"</span>)]
+</span><span class="kw">pub struct </span>P384 {}
+<span class="attr">#[cfg(feature = <span class="string">"p384"</span>)]
+</span><span class="kw">pub struct </span>P384Prehashed {}
+<span class="attr">#[cfg(feature = <span class="string">"p384"</span>)]
+</span><span class="kw">mod </span>p384;
 
-<span class="kw">pub struct </span>P521 {}
-<span class="kw">pub struct </span>P521Prehashed {}
-<span class="kw">mod </span>p521;
+<span class="attr">#[cfg(feature = <span class="string">"p521"</span>)]
+</span><span class="kw">pub struct </span>P521 {}
+<span class="attr">#[cfg(feature = <span class="string">"p521"</span>)]
+</span><span class="kw">pub struct </span>P521Prehashed {}
+<span class="attr">#[cfg(feature = <span class="string">"p521"</span>)]
+</span><span class="kw">mod </span>p521;
 
-<span class="kw">pub struct </span>Sha256 {}
-<span class="kw">mod </span>sha256;
+<span class="attr">#[cfg(feature = <span class="string">"sha256"</span>)]
+</span><span class="kw">pub struct </span>Sha256 {}
+<span class="attr">#[cfg(feature = <span class="string">"sha256"</span>)]
+</span><span class="kw">mod </span>sha256;
 
-<span class="kw">pub struct </span>Tdes {}
-<span class="kw">mod </span>tdes;
+<span class="attr">#[cfg(feature = <span class="string">"tdes"</span>)]
+</span><span class="kw">pub struct </span>Tdes {}
+<span class="attr">#[cfg(feature = <span class="string">"tdes"</span>)]
+</span><span class="kw">mod </span>tdes;
 
-<span class="kw">pub struct </span>Totp {}
-<span class="kw">mod </span>totp;
+<span class="attr">#[cfg(feature = <span class="string">"totp"</span>)]
+</span><span class="kw">pub struct </span>Totp {}
+<span class="attr">#[cfg(feature = <span class="string">"totp"</span>)]
+</span><span class="kw">mod </span>totp;
 
-<span class="kw">pub struct </span>Trng {}
-<span class="kw">mod </span>trng;
+<span class="attr">#[cfg(feature = <span class="string">"trng"</span>)]
+</span><span class="kw">pub struct </span>Trng {}
+<span class="attr">#[cfg(feature = <span class="string">"trng"</span>)]
+</span><span class="kw">mod </span>trng;
 
-<span class="kw">pub struct </span>X255 {}
-<span class="kw">mod </span>x255;
+<span class="attr">#[cfg(feature = <span class="string">"x255"</span>)]
+</span><span class="kw">pub struct </span>X255 {}
+<span class="attr">#[cfg(feature = <span class="string">"x255"</span>)]
+</span><span class="kw">mod </span>x255;
 
 <span class="comment">// pub enum MechanismEnum {
 //     NotImplemented,
