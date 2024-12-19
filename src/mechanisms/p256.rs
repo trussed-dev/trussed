@@ -277,6 +277,9 @@ impl Sign for super::P256 {
             SignatureSerialization::Raw => {
                 Signature::from_slice(&signature.to_untagged_bytes()).unwrap()
             }
+            _ => {
+                return Err(Error::InvalidSerializationFormat);
+            }
         };
 
         // return signature
@@ -303,6 +306,9 @@ impl Sign for super::P256Prehashed {
             }
             SignatureSerialization::Raw => {
                 Signature::from_slice(&signature.to_untagged_bytes()).unwrap()
+            }
+            _ => {
+                return Err(Error::InvalidSerializationFormat);
             }
         };
 

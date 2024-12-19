@@ -39,6 +39,7 @@ pub use ui::UiClient;
 // to be fair, this is a programmer error,
 // and could also just panic
 #[derive(Copy, Clone, Debug)]
+#[non_exhaustive]
 pub enum ClientError {
     Full,
     Pending,

@@ -27,6 +27,7 @@ pub mod consent {
     }
 
     #[derive(Copy, Clone, Eq, PartialEq, Debug)]
+    #[non_exhaustive]
     pub enum Error {
         FailedToInterrupt,
         Interrupted,
@@ -417,8 +418,8 @@ impl NotBefore {
 ///
 /// This enum does not provide access to the trait features.  It is only intended for backends to
 /// use in constant assertions to ensure that the correct features are enabled.
-#[non_exhaustive]
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
+#[non_exhaustive]
 pub enum Client {
     AttestationClient,
     CertificateClient,
@@ -611,6 +612,7 @@ impl Mechanism {
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
+#[non_exhaustive]
 pub enum KeySerialization {
     // Asn1Der,
     Cose,
@@ -627,6 +629,7 @@ pub enum KeySerialization {
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
+#[non_exhaustive]
 pub enum SignatureSerialization {
     Asn1Der,
     // Cose,

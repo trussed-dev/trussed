@@ -209,6 +209,9 @@ impl Sign for P384 {
                 Signature::from_slice(der.as_bytes()).unwrap()
             }
             SignatureSerialization::Raw => Signature::from_slice(&signature.to_bytes()).unwrap(),
+            _ => {
+                return Err(Error::InvalidSerializationFormat);
+            }
         };
 
         // return signature
@@ -235,6 +238,9 @@ impl Sign for P384Prehashed {
                 Signature::from_slice(der.as_bytes()).unwrap()
             }
             SignatureSerialization::Raw => Signature::from_slice(&signature.to_bytes()).unwrap(),
+            _ => {
+                return Err(Error::InvalidSerializationFormat);
+            }
         };
 
         // return signature

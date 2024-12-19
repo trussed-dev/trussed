@@ -35,7 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - As a consequence the type `pipe::TrussedInterchange` becomes a const`pipe::TRUSSED_INTERCHANGE`
 - Updated `littlefs2` to 0.4.0.
 - Made `Request`, `Reply`, `Error`, `Context`, `CoreContext`, `Mechanism`,
-  `ui::Status` non-exhaustive.
+  `KeySerialization`, `SignatureSerialization`, `consent::Error`, `ui::Status` non-exhaustive.
 - Made `postcard_deserialize`, `postcard_serialize` and
   `postcard_serialize_bytes` private.
 - Changed `&PathBuf` to `&Path` where possible.

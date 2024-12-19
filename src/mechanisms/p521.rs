@@ -212,6 +212,9 @@ impl Sign for P521 {
                 Signature::from_slice(der.as_bytes()).unwrap()
             }
             SignatureSerialization::Raw => Signature::from_slice(&signature.to_bytes()).unwrap(),
+            _ => {
+                return Err(Error::InvalidSerializationFormat);
+            }
         };
 
         // return signature
@@ -238,6 +241,9 @@ impl Sign for P521Prehashed {
                 Signature::from_slice(der.as_bytes()).unwrap()
             }
             SignatureSerialization::Raw => Signature::from_slice(&signature.to_bytes()).unwrap(),
+            _ => {
+                return Err(Error::InvalidSerializationFormat);
+            }
         };
 
         // return signature
