@@ -1,5 +1,3 @@
-#![cfg(feature = "virt")]
-
 use std::assert_eq;
 
 use littlefs2_core::path;

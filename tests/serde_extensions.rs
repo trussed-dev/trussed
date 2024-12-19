@@ -1,5 +1,3 @@
-#![cfg(all(feature = "serde-extensions", feature = "virt"))]
-
 // Example displaying and testing multiple backends and extensions:
 //
 // Extensions (in module `extensions`):

@@ -53,6 +53,28 @@ jobs:
           done
         if: matrix.target == 'x86_64-unknown-linux-gnu'
 
+      - name: Check all targets with only one mechanism feature
+        run: |
+          # trussed-core + trussed
+          for mechanism in \
+            aes256-cbc chacha8-poly1305 ed255 hmac-blake2s hmac-sha1 hmac-sha256 hmac-sha512 \
+            p256 p384 p521 sha256 shared-secret tdes totp trng x255
+          do
+            for package in trussed-core trussed
+            do
+              echo "${package}: ${mechanism}"
+              cargo check --package ${package} --all-targets --no-default-features --features crypto-client,${mechanism}
+            done
+          done
+          # trussed-core only
+          for mechanism in \
+            brainpoolp256r1 brainpoolp384r1 brainpoolp512r1 rsa2048 rsa3072 rsa4096 secp256k1
+          do
+            echo "trussed-core: ${mechanism}"
+            cargo check --package trussed-core --all-targets --no-default-features --features crypto-client,${mechanism}
+          done
+        if: matrix.target == 'x86_64-unknown-linux-gnu'
+
       - name: Check all targets with default features
         run: |
           cargo check --workspace --all-targets
@@ -66,7 +88,7 @@ jobs:
         if: matrix.target == 'x86_64-unknown-linux-gnu'
 
       - name: Run tests
-        run: cargo test --workspace --features serde-extensions,virt,p384,p521
+        run: cargo test --workspace --all-features
         if: matrix.target == 'x86_64-unknown-linux-gnu'
 
       - name: Check formatting

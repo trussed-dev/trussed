@@ -5,7 +5,6 @@ use crate::service::{DeriveKey, Sign};
 use crate::store::keystore::Keystore;
 use crate::types::Signature;
 
-#[cfg(feature = "hmac-sha512")]
 impl DeriveKey for super::HmacSha512 {
     #[inline(never)]
     fn derive_key(
@@ -40,7 +39,6 @@ impl DeriveKey for super::HmacSha512 {
     }
 }
 
-#[cfg(feature = "hmac-sha512")]
 impl Sign for super::HmacSha512 {
     #[inline(never)]
     fn sign(keystore: &mut impl Keystore, request: &request::Sign) -> Result<reply::Sign, Error> {
@@ -64,8 +62,3 @@ impl Sign for super::HmacSha512 {
         Ok(reply::Sign { signature })
     }
 }
-
-#[cfg(not(feature = "hmac-sha512"))]
-impl DeriveKey for super::HmacSha512 {}
-#[cfg(not(feature = "hmac-sha512"))]
-impl Sign for super::HmacSha512 {}

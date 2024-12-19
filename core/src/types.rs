@@ -427,53 +427,160 @@ impl Client {
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Serialize, Deserialize)]
 #[non_exhaustive]
 pub enum Mechanism {
+    #[cfg(feature = "aes256-cbc")]
     Aes256Cbc,
+    #[cfg(feature = "chacha8-poly1305")]
     Chacha8Poly1305,
+    #[cfg(feature = "ed255")]
     Ed255,
+    #[cfg(feature = "hmac-blake2s")]
     HmacBlake2s,
+    #[cfg(feature = "hmac-sha1")]
     HmacSha1,
+    #[cfg(feature = "hmac-sha256")]
     HmacSha256,
+    #[cfg(feature = "hmac-sha512")]
     HmacSha512,
     // P256XSha256,
+    #[cfg(feature = "p256")]
     P256,
+    #[cfg(feature = "p256")]
     P256Prehashed,
+    #[cfg(feature = "p384")]
     P384,
+    #[cfg(feature = "p384")]
     P384Prehashed,
+    #[cfg(feature = "p521")]
     P521,
+    #[cfg(feature = "p521")]
     P521Prehashed,
+    #[cfg(feature = "brainpoolp256r1")]
     BrainpoolP256R1,
+    #[cfg(feature = "brainpoolp256r1")]
     BrainpoolP256R1Prehashed,
+    #[cfg(feature = "brainpoolp384r1")]
     BrainpoolP384R1,
+    #[cfg(feature = "brainpoolp384r1")]
     BrainpoolP384R1Prehashed,
+    #[cfg(feature = "brainpoolp512r1")]
     BrainpoolP512R1,
+    #[cfg(feature = "brainpoolp512r1")]
     BrainpoolP512R1Prehashed,
+    #[cfg(feature = "secp256k1")]
     Secp256k1,
+    #[cfg(feature = "secp256k1")]
     Secp256k1Prehashed,
     // clients can also do hashing by themselves
+    #[cfg(feature = "sha256")]
     Sha256,
+    #[cfg(feature = "tdes")]
     Tdes,
+    #[cfg(feature = "totp")]
     Totp,
+    #[cfg(feature = "trng")]
     Trng,
+    #[cfg(feature = "x255")]
     X255,
     /// Used to serialize the output of a diffie-hellman
+    #[cfg(feature = "shared-secret")]
     SharedSecret,
 
     /// Exposes the Raw RSA encryption/decryption primitive. Be aware this is dangerous.
     /// Not having any padding can allow an attacker to obtain plaintexts and forge signatures.
     /// It should only be used if absolutely necessary.
+    #[cfg(feature = "rsa2048")]
     Rsa2048Raw,
     /// Exposes the Raw RSA encryption/decryption primitive. Be aware this is dangerous.
     /// Not having any padding can allow an attacker to obtain plaintexts and forge signatures.
     /// It should only be used if absolutely necessary.
+    #[cfg(feature = "rsa3072")]
     Rsa3072Raw,
     /// Exposes the Raw RSA encryption/decryption primitive. Be aware this is dangerous.
     /// Not having any padding can allow an attacker to obtain plaintexts and forge signatures.
     /// It should only be used if absolutely necessary.
+    #[cfg(feature = "rsa4096")]
     Rsa4096Raw,
 
+    #[cfg(feature = "rsa2048")]
     Rsa2048Pkcs1v15,
+    #[cfg(feature = "rsa3072")]
     Rsa3072Pkcs1v15,
+    #[cfg(feature = "rsa4096")]
     Rsa4096Pkcs1v15,
+}
+
+impl Mechanism {
+    /// All enabled mechanisms.
+    ///
+    /// The contents of this constant depends on the enabled features.
+    pub const ENABLED: &[Self] = &[
+        #[cfg(feature = "aes256-cbc")]
+        Self::Aes256Cbc,
+        #[cfg(feature = "chacha8-poly1305")]
+        Self::Chacha8Poly1305,
+        #[cfg(feature = "ed255")]
+        Self::Ed255,
+        #[cfg(feature = "hmac-blake2s")]
+        Self::HmacBlake2s,
+        #[cfg(feature = "hmac-sha1")]
+        Self::HmacSha1,
+        #[cfg(feature = "hmac-sha256")]
+        Self::HmacSha256,
+        #[cfg(feature = "hmac-sha512")]
+        Self::HmacSha512,
+        #[cfg(feature = "p256")]
+        Self::P256,
+        #[cfg(feature = "p256")]
+        Self::P256Prehashed,
+        #[cfg(feature = "p384")]
+        Self::P384,
+        #[cfg(feature = "p384")]
+        Self::P384Prehashed,
+        #[cfg(feature = "p521")]
+        Self::P521,
+        #[cfg(feature = "p521")]
+        Self::P521Prehashed,
+        #[cfg(feature = "brainpoolp256r1")]
+        Self::BrainpoolP256R1,
+        #[cfg(feature = "brainpoolp256r1")]
+        Self::BrainpoolP256R1Prehashed,
+        #[cfg(feature = "brainpoolp384r1")]
+        Self::BrainpoolP384R1,
+        #[cfg(feature = "brainpoolp384r1")]
+        Self::BrainpoolP384R1Prehashed,
+        #[cfg(feature = "brainpoolp512r1")]
+        Self::BrainpoolP512R1,
+        #[cfg(feature = "brainpoolp512r1")]
+        Self::BrainpoolP512R1Prehashed,
+        #[cfg(feature = "secp256k1")]
+        Self::Secp256k1,
+        #[cfg(feature = "secp256k1")]
+        Self::Secp256k1Prehashed,
+        #[cfg(feature = "sha256")]
+        Self::Sha256,
+        #[cfg(feature = "tdes")]
+        Self::Tdes,
+        #[cfg(feature = "totp")]
+        Self::Totp,
+        #[cfg(feature = "trng")]
+        Self::Trng,
+        #[cfg(feature = "x255")]
+        Self::X255,
+        #[cfg(feature = "shared-secret")]
+        Self::SharedSecret,
+        #[cfg(feature = "rsa2048")]
+        Self::Rsa2048Raw,
+        #[cfg(feature = "rsa3072")]
+        Self::Rsa3072Raw,
+        #[cfg(feature = "rsa4096")]
+        Self::Rsa4096Raw,
+        #[cfg(feature = "rsa2048")]
+        Self::Rsa2048Pkcs1v15,
+        #[cfg(feature = "rsa3072")]
+        Self::Rsa3072Pkcs1v15,
+        #[cfg(feature = "rsa4096")]
+        Self::Rsa4096Pkcs1v15,
+    ];
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]

@@ -44,7 +44,6 @@ fn load_public_key(
         .map_err(|_| Error::InternalError)
 }
 
-#[cfg(feature = "p256")]
 impl Agree for super::P256 {
     #[inline(never)]
     fn agree(
@@ -83,7 +82,6 @@ impl Agree for super::P256 {
     }
 }
 
-#[cfg(feature = "p256")]
 impl DeriveKey for super::P256 {
     #[inline(never)]
     fn derive_key(
@@ -106,7 +104,6 @@ impl DeriveKey for super::P256 {
     }
 }
 
-#[cfg(feature = "p256")]
 impl DeserializeKey for super::P256 {
     #[inline(never)]
     fn deserialize_key(
@@ -180,7 +177,6 @@ impl DeserializeKey for super::P256 {
     }
 }
 
-#[cfg(feature = "p256")]
 impl GenerateKey for super::P256 {
     #[inline(never)]
     fn generate_key(
@@ -202,7 +198,6 @@ impl GenerateKey for super::P256 {
     }
 }
 
-#[cfg(feature = "p256")]
 impl SerializeKey for super::P256 {
     #[inline(never)]
     fn serialize_key(
@@ -252,7 +247,6 @@ impl SerializeKey for super::P256 {
     }
 }
 
-#[cfg(feature = "p256")]
 impl Exists for super::P256 {
     #[inline(never)]
     fn exists(
@@ -265,7 +259,6 @@ impl Exists for super::P256 {
     }
 }
 
-#[cfg(feature = "p256")]
 impl Sign for super::P256 {
     #[inline(never)]
     fn sign(keystore: &mut impl Keystore, request: &request::Sign) -> Result<reply::Sign, Error> {
@@ -293,7 +286,6 @@ impl Sign for super::P256 {
     }
 }
 
-#[cfg(feature = "p256")]
 impl Sign for super::P256Prehashed {
     #[inline(never)]
     fn sign(keystore: &mut impl Keystore, request: &request::Sign) -> Result<reply::Sign, Error> {
@@ -321,7 +313,6 @@ impl Sign for super::P256Prehashed {
     }
 }
 
-#[cfg(feature = "p256")]
 impl Verify for super::P256 {
     #[inline(never)]
     fn verify(
@@ -374,22 +365,3 @@ impl UnsafeInjectKey for super::P256 {
             .map(|key| reply::UnsafeInjectKey { key })
     }
 }
-
-#[cfg(not(feature = "p256"))]
-impl Agree for super::P256 {}
-#[cfg(not(feature = "p256"))]
-impl Exists for super::P256 {}
-#[cfg(not(feature = "p256"))]
-impl DeriveKey for super::P256 {}
-#[cfg(not(feature = "p256"))]
-impl GenerateKey for super::P256 {}
-#[cfg(not(feature = "p256"))]
-impl DeserializeKey for super::P256 {}
-#[cfg(not(feature = "p256"))]
-impl SerializeKey for super::P256 {}
-#[cfg(not(feature = "p256"))]
-impl Sign for super::P256 {}
-#[cfg(not(feature = "p256"))]
-impl Sign for super::P256Prehashed {}
-#[cfg(not(feature = "p256"))]
-impl Verify for super::P256 {}

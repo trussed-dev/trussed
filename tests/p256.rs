@@ -1,5 +1,3 @@
-#![cfg(feature = "virt")]
-
 use trussed::client::mechanisms::{HmacSha256, P256};
 use trussed::client::CryptoClient;
 use trussed::types::{KeySerialization, Mechanism, StorageAttributes};

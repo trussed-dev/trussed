@@ -5,7 +5,6 @@ use crate::service::{DeriveKey, Hash};
 use crate::store::keystore::Keystore;
 use crate::types::ShortData;
 
-#[cfg(feature = "sha256")]
 impl DeriveKey for super::Sha256 {
     #[inline(never)]
     fn derive_key(
@@ -35,7 +34,6 @@ impl DeriveKey for super::Sha256 {
     }
 }
 
-#[cfg(feature = "sha256")]
 impl Hash for super::Sha256 {
     #[inline(never)]
     fn hash(_keystore: &mut impl Keystore, request: &request::Hash) -> Result<reply::Hash, Error> {
@@ -49,8 +47,3 @@ impl Hash for super::Sha256 {
         Ok(reply::Hash { hash: hashed })
     }
 }
-
-#[cfg(not(feature = "sha256"))]
-impl DeriveKey for super::Sha256 {}
-#[cfg(not(feature = "sha256"))]
-impl Hash for super::Sha256 {}

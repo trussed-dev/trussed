@@ -1,5 +1,3 @@
-#![cfg(feature = "virt")]
-
 use littlefs2_core::path;
 use trussed::{
     api::{reply::ReadFile, Reply, Request},
