@@ -343,8 +343,8 @@ pub struct StorageAttributes {
     // persistent: bool,
     pub persistence: Location,
 
-    /// Wether a the result of an [`agree`](crate::client::CryptoClient::agree) can be serialized
-    /// with [`serialize_key`](crate::client::CryptoClient::serialize_key)
+    /// Wether a the result of an [`agree`](crate::CryptoClient::agree) can be serialized with
+    /// [`serialize_key`](crate::CryptoClient::serialize_key)
     pub serializable: bool,
     // cryptoki: user must be logged in
     // private: bool,

@@ -7,34 +7,19 @@ use crate::{
 };
 
 #[cfg(feature = "attestation-client")]
-mod attestation;
+pub mod attestation;
 #[cfg(feature = "certificate-client")]
-mod certificate;
+pub mod certificate;
 #[cfg(feature = "counter-client")]
-mod counter;
+pub mod counter;
 #[cfg(feature = "crypto-client")]
-mod crypto;
+pub mod crypto;
 #[cfg(feature = "filesystem-client")]
-mod filesystem;
+pub mod filesystem;
 #[cfg(feature = "management-client")]
-mod management;
+pub mod management;
 #[cfg(feature = "ui-client")]
-mod ui;
-
-#[cfg(feature = "attestation-client")]
-pub use attestation::AttestationClient;
-#[cfg(feature = "certificate-client")]
-pub use certificate::CertificateClient;
-#[cfg(feature = "counter-client")]
-pub use counter::CounterClient;
-#[cfg(feature = "crypto-client")]
-pub use crypto::*;
-#[cfg(feature = "filesystem-client")]
-pub use filesystem::FilesystemClient;
-#[cfg(feature = "management-client")]
-pub use management::ManagementClient;
-#[cfg(feature = "ui-client")]
-pub use ui::UiClient;
+pub mod ui;
 
 // to be fair, this is a programmer error,
 // and could also just panic
