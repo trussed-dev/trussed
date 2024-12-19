@@ -24,6 +24,7 @@ generate_macros!();
 
 pub use interchange::Interchange;
 
+pub mod api;
 pub mod backend;
 pub mod client;
 pub mod config;
@@ -51,7 +52,7 @@ pub use error::Error;
 pub use platform::Platform;
 pub use service::Service;
 
-pub use trussed_core::{api, block, error, interrupt, syscall, try_syscall};
+pub use trussed_core::{block, error, interrupt, syscall, try_syscall};
 
 pub use cbor_smol::cbor_deserialize;
 pub use heapless_bytes::Bytes;

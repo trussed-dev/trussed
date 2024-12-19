@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 pub use heapless_bytes::Bytes;
 pub use littlefs2_core::{DirEntry, Metadata, PathBuf};
 
+#[cfg(feature = "crypto-client")]
 use crate::api::{reply, request};
 use crate::config::{
     MAX_KEY_MATERIAL_LENGTH, MAX_MEDIUM_DATA_LENGTH, MAX_MESSAGE_LENGTH, MAX_SHORT_DATA_LENGTH,
@@ -383,6 +384,32 @@ impl StorageAttributes {
 impl Default for StorageAttributes {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+#[derive(Clone, Eq, PartialEq, Debug, serde::Serialize, serde::Deserialize)]
+pub enum NotBefore {
+    /// Start iteration at the beginning of the directory
+    None,
+    /// Start iteration at an exact match with the provided filename
+    Filename(PathBuf),
+    /// Start iteration at the first path that is "after" the provided filename
+    FilenamePart(PathBuf),
+}
+
+impl NotBefore {
+    pub fn with_filename(value: Option<PathBuf>) -> Self {
+        match value {
+            None => Self::None,
+            Some(p) => Self::Filename(p),
+        }
+    }
+
+    pub fn with_filename_part(value: Option<PathBuf>) -> Self {
+        match value {
+            None => Self::None,
+            Some(p) => Self::FilenamePart(p),
+        }
     }
 }
 

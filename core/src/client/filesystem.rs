@@ -1,7 +1,7 @@
 use super::{ClientResult, PollClient};
 use crate::{
-    api::{reply, request, NotBefore},
-    types::{Location, Message, PathBuf, UserAttribute},
+    api::{reply, request},
+    types::{Location, Message, NotBefore, PathBuf, UserAttribute},
 };
 
 /// Read/Write/Delete files, iterate over directories.

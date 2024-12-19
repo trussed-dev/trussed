@@ -31,9 +31,8 @@ use crate::types::Location;
     feature = "filesystem-client"
 ))]
 use crate::types::Message;
-use crate::types::PathBuf;
 #[cfg(feature = "filesystem-client")]
-use crate::types::{DirEntry, UserAttribute};
+use crate::types::{DirEntry, NotBefore, PathBuf, UserAttribute};
 #[cfg(any(feature = "attestation-client", feature = "crypto-client"))]
 use crate::types::{KeyId, Mechanism};
 #[cfg(feature = "crypto-client")]
@@ -50,32 +49,6 @@ mod macros;
 // to the request type in the client.
 //
 // At minimum, we don't want to list the indices (may need proc-macro)
-
-#[derive(Clone, Eq, PartialEq, Debug, serde::Serialize, serde::Deserialize)]
-pub enum NotBefore {
-    /// Start iteration at the beginning of the directory
-    None,
-    /// Start iteration at an exact match with the provided filename
-    Filename(PathBuf),
-    /// Start iteration at the first path that is "after" the provided filename
-    FilenamePart(PathBuf),
-}
-
-impl NotBefore {
-    pub fn with_filename(value: Option<PathBuf>) -> Self {
-        match value {
-            None => Self::None,
-            Some(p) => Self::Filename(p),
-        }
-    }
-
-    pub fn with_filename_part(value: Option<PathBuf>) -> Self {
-        match value {
-            None => Self::None,
-            Some(p) => Self::FilenamePart(p),
-        }
-    }
-}
 
 generate_enums! {
 
