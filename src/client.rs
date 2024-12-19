@@ -92,22 +92,22 @@ pub mod mechanisms;
 #[cfg(feature = "crypto-client")]
 pub use mechanisms::*;
 
-pub use trussed_core::client::{ClientError, ClientResult, FutureResult, PollClient};
+pub use trussed_core::{ClientError, ClientResult, FutureResult, PollClient};
 
 #[cfg(feature = "attestation-client")]
-pub use trussed_core::client::AttestationClient;
+pub use trussed_core::AttestationClient;
 #[cfg(feature = "certificate-client")]
-pub use trussed_core::client::CertificateClient;
+pub use trussed_core::CertificateClient;
 #[cfg(feature = "counter-client")]
-pub use trussed_core::client::CounterClient;
+pub use trussed_core::CounterClient;
 #[cfg(feature = "crypto-client")]
-pub use trussed_core::client::CryptoClient;
+pub use trussed_core::CryptoClient;
 #[cfg(feature = "filesystem-client")]
-pub use trussed_core::client::FilesystemClient;
+pub use trussed_core::FilesystemClient;
 #[cfg(feature = "management-client")]
-pub use trussed_core::client::ManagementClient;
+pub use trussed_core::ManagementClient;
 #[cfg(feature = "ui-client")]
-pub use trussed_core::client::UiClient;
+pub use trussed_core::UiClient;
 
 /// All-in-one trait bounding on the sub-traits.
 #[cfg(feature = "all-clients")]
