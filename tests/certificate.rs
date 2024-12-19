@@ -1,5 +1,3 @@
-#![cfg(feature = "virt")]
-
 mod client;
 
 use trussed::{client::CertificateClient as _, syscall, try_syscall, types::Location::*};

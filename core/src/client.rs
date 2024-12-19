@@ -28,10 +28,7 @@ pub use certificate::CertificateClient;
 #[cfg(feature = "counter-client")]
 pub use counter::CounterClient;
 #[cfg(feature = "crypto-client")]
-pub use crypto::{
-    Aes256Cbc, Chacha8Poly1305, CryptoClient, Ed255, HmacBlake2s, HmacSha1, HmacSha256, HmacSha512,
-    Sha256, Tdes, Totp, P256, P384, P521, X255,
-};
+pub use crypto::*;
 #[cfg(feature = "filesystem-client")]
 pub use filesystem::FilesystemClient;
 #[cfg(feature = "management-client")]

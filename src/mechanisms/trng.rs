@@ -6,7 +6,6 @@ use crate::key;
 use crate::service::GenerateKey;
 use crate::store::keystore::Keystore;
 
-#[cfg(feature = "trng")]
 impl GenerateKey for super::Trng {
     fn generate_key(
         keystore: &mut impl Keystore,

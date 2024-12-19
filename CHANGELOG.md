@@ -54,6 +54,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Changed `Id::hex_clean` to format zero as `"00"`.
 - Change client and mechanism selection:
   - Put all client traits, requests, replies and implementations behind feature flags.
+  - Put all mechanisms behind feature flags.
   - Move `CryptoClient::attest` into new `AttestationClient`.
 
 ### Fixed

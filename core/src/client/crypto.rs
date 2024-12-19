@@ -283,6 +283,7 @@ pub trait CryptoClient: PollClient {
     }
 }
 
+#[cfg(feature = "aes256-cbc")]
 pub trait Aes256Cbc: CryptoClient {
     fn decrypt_aes256cbc<'c>(
         &'c mut self,
@@ -309,6 +310,7 @@ pub trait Aes256Cbc: CryptoClient {
     }
 }
 
+#[cfg(feature = "chacha8-poly1305")]
 pub trait Chacha8Poly1305: CryptoClient {
     fn decrypt_chacha8poly1305<'c>(
         &'c mut self,
@@ -388,6 +390,7 @@ pub trait Chacha8Poly1305: CryptoClient {
     }
 }
 
+#[cfg(feature = "hmac-blake2s")]
 pub trait HmacBlake2s: CryptoClient {
     fn hmacblake2s_derive_key(
         &mut self,
@@ -417,6 +420,7 @@ pub trait HmacBlake2s: CryptoClient {
     }
 }
 
+#[cfg(feature = "hmac-sha1")]
 pub trait HmacSha1: CryptoClient {
     fn hmacsha1_derive_key(
         &mut self,
@@ -446,6 +450,7 @@ pub trait HmacSha1: CryptoClient {
     }
 }
 
+#[cfg(feature = "hmac-sha256")]
 pub trait HmacSha256: CryptoClient {
     fn hmacsha256_derive_key(
         &mut self,
@@ -475,6 +480,7 @@ pub trait HmacSha256: CryptoClient {
     }
 }
 
+#[cfg(feature = "hmac-sha512")]
 pub trait HmacSha512: CryptoClient {
     fn hmacsha512_derive_key(
         &mut self,
@@ -504,6 +510,7 @@ pub trait HmacSha512: CryptoClient {
     }
 }
 
+#[cfg(feature = "ed255")]
 pub trait Ed255: CryptoClient {
     fn generate_ed255_private_key(
         &mut self,
@@ -569,6 +576,7 @@ pub trait Ed255: CryptoClient {
     }
 }
 
+#[cfg(feature = "p256")]
 pub trait P256: CryptoClient {
     fn generate_p256_private_key(
         &mut self,
@@ -655,6 +663,7 @@ pub trait P256: CryptoClient {
     }
 }
 
+#[cfg(feature = "p384")]
 pub trait P384: CryptoClient {
     fn generate_p384_private_key(
         &mut self,
@@ -741,6 +750,7 @@ pub trait P384: CryptoClient {
     }
 }
 
+#[cfg(feature = "p521")]
 pub trait P521: CryptoClient {
     fn generate_p521_private_key(
         &mut self,
@@ -827,6 +837,7 @@ pub trait P521: CryptoClient {
     }
 }
 
+#[cfg(feature = "sha256")]
 pub trait Sha256: CryptoClient {
     fn sha256_derive_key(
         &mut self,
@@ -849,6 +860,7 @@ pub trait Sha256: CryptoClient {
     }
 }
 
+#[cfg(feature = "tdes")]
 pub trait Tdes: CryptoClient {
     fn decrypt_tdes<'c>(
         &'c mut self,
@@ -867,6 +879,7 @@ pub trait Tdes: CryptoClient {
     }
 }
 
+#[cfg(feature = "totp")]
 pub trait Totp: CryptoClient {
     fn sign_totp(&mut self, key: KeyId, timestamp: u64) -> ClientResult<'_, reply::Sign, Self> {
         self.sign(
@@ -878,6 +891,7 @@ pub trait Totp: CryptoClient {
     }
 }
 
+#[cfg(feature = "x255")]
 pub trait X255: CryptoClient {
     fn generate_x255_secret_key(
         &mut self,

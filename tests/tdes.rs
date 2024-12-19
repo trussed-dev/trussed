@@ -1,5 +1,3 @@
-#![cfg(feature = "virt")]
-
 use trussed::client::CryptoClient;
 use trussed::syscall;
 

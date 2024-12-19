@@ -41,7 +41,6 @@ fn load_secret_key(
     Ok(keypair)
 }
 
-#[cfg(feature = "x255")]
 impl Agree for super::X255 {
     // #[inline(never)]
     fn agree(
@@ -78,7 +77,6 @@ impl Agree for super::X255 {
     }
 }
 
-#[cfg(feature = "x255")]
 impl GenerateKey for super::X255 {
     // #[inline(never)]
     fn generate_key(
@@ -102,7 +100,6 @@ impl GenerateKey for super::X255 {
     }
 }
 
-#[cfg(feature = "x255")]
 impl Exists for super::X255 {
     // #[inline(never)]
     fn exists(
@@ -115,7 +112,6 @@ impl Exists for super::X255 {
     }
 }
 
-#[cfg(feature = "x255")]
 impl DeriveKey for super::X255 {
     // #[inline(never)]
     fn derive_key(
@@ -139,7 +135,6 @@ impl DeriveKey for super::X255 {
     }
 }
 
-#[cfg(feature = "x255")]
 impl SerializeKey for super::X255 {
     // #[inline(never)]
     fn serialize_key(
@@ -166,7 +161,6 @@ impl SerializeKey for super::X255 {
     }
 }
 
-#[cfg(feature = "x255")]
 impl DeserializeKey for super::X255 {
     // #[inline(never)]
     fn deserialize_key(
@@ -227,16 +221,3 @@ impl UnsafeInjectKey for super::X255 {
             .map(|key| reply::UnsafeInjectKey { key })
     }
 }
-
-#[cfg(not(feature = "x255"))]
-impl Agree for super::X255 {}
-#[cfg(not(feature = "x255"))]
-impl GenerateKey for super::X255 {}
-#[cfg(not(feature = "x255"))]
-impl Exists for super::X255 {}
-#[cfg(not(feature = "x255"))]
-impl DeriveKey for super::X255 {}
-#[cfg(not(feature = "x255"))]
-impl SerializeKey for super::X255 {}
-#[cfg(not(feature = "x255"))]
-impl DeserializeKey for super::X255 {}

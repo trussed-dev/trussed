@@ -43,7 +43,6 @@ fn load_keypair(keystore: &mut impl Keystore, key_id: &KeyId) -> Result<salty::K
     Ok(keypair)
 }
 
-#[cfg(feature = "ed255")]
 impl DeriveKey for super::Ed255 {
     #[inline(never)]
     fn derive_key(
@@ -64,7 +63,6 @@ impl DeriveKey for super::Ed255 {
     }
 }
 
-#[cfg(feature = "ed255")]
 impl DeserializeKey for super::Ed255 {
     #[inline(never)]
     fn deserialize_key(
@@ -98,7 +96,6 @@ impl DeserializeKey for super::Ed255 {
     }
 }
 
-#[cfg(feature = "ed255")]
 impl GenerateKey for super::Ed255 {
     #[inline(never)]
     fn generate_key(
@@ -125,7 +122,6 @@ impl GenerateKey for super::Ed255 {
     }
 }
 
-#[cfg(feature = "ed255")]
 impl SerializeKey for super::Ed255 {
     #[inline(never)]
     fn serialize_key(
@@ -163,7 +159,6 @@ impl SerializeKey for super::Ed255 {
     }
 }
 
-#[cfg(feature = "ed255")]
 impl Exists for super::Ed255 {
     #[inline(never)]
     fn exists(
@@ -177,7 +172,6 @@ impl Exists for super::Ed255 {
     }
 }
 
-#[cfg(feature = "ed255")]
 impl Sign for super::Ed255 {
     #[inline(never)]
     fn sign(keystore: &mut impl Keystore, request: &request::Sign) -> Result<reply::Sign, Error> {
@@ -210,7 +204,6 @@ impl Sign for super::Ed255 {
     }
 }
 
-#[cfg(feature = "ed255")]
 impl Verify for super::Ed255 {
     #[inline(never)]
     fn verify(
@@ -268,18 +261,3 @@ impl UnsafeInjectKey for super::Ed255 {
             .map(|key| reply::UnsafeInjectKey { key })
     }
 }
-
-#[cfg(not(feature = "ed255"))]
-impl Exists for super::Ed255 {}
-#[cfg(not(feature = "ed255"))]
-impl DeriveKey for super::Ed255 {}
-#[cfg(not(feature = "ed255"))]
-impl GenerateKey for super::Ed255 {}
-#[cfg(not(feature = "ed255"))]
-impl SerializeKey for super::Ed255 {}
-#[cfg(not(feature = "ed255"))]
-impl DeserializeKey for super::Ed255 {}
-#[cfg(not(feature = "ed255"))]
-impl Sign for super::Ed255 {}
-#[cfg(not(feature = "ed255"))]
-impl Verify for super::Ed255 {}

@@ -109,25 +109,27 @@ default-mechanisms = [
     # "hmac-sha512",
     "p256",
     "sha256",
+    "shared-secret",
     "tdes",
     "totp",
     "trng",
 ]
-aes256-cbc = []
-chacha8-poly1305 = []
-ed255 = []
-x255 = []
-hmac-blake2s = ["blake2"]
-hmac-sha1 = []
-hmac-sha256 = []
-hmac-sha512 = []
-p256 = []
-p384 = ["dep:p384"]
-p521 = ["dep:p521", "dep:ecdsa"]
-sha256 = []
-tdes = ["des"]
-totp = ["sha-1"]
-trng = ["sha-1"]
+aes256-cbc = ["trussed-core/aes256-cbc"]
+chacha8-poly1305 = ["trussed-core/chacha8-poly1305"]
+ed255 = ["trussed-core/ed255"]
+x255 = ["trussed-core/x255"]
+hmac-blake2s = ["trussed-core/hmac-blake2s", "blake2"]
+hmac-sha1 = ["trussed-core/hmac-sha1", "sha-1"]
+hmac-sha256 = ["trussed-core/hmac-sha256"]
+hmac-sha512 = ["trussed-core/hmac-sha512"]
+p256 = ["trussed-core/p256"]
+p384 = ["trussed-core/p384", "dep:p384"]
+p521 = ["trussed-core/p521", "dep:p521", "dep:ecdsa"]
+sha256 = ["trussed-core/sha256"]
+shared-secret = ["trussed-core/shared-secret"]
+tdes = ["trussed-core/tdes", "des"]
+totp = ["trussed-core/totp", "sha-1"]
+trng = ["trussed-core/trng", "sha-1"]
 
 # clients
 all-clients = [
@@ -139,7 +141,7 @@ all-clients = [
   "management-client",
   "ui-client",
 ]
-attestation-client = ["crypto-client", "trussed-core/attestation-client"]
+attestation-client = ["crypto-client", "ed255", "p256", "trussed-core/attestation-client"]
 certificate-client = ["trussed-core/certificate-client"]
 crypto-client = ["trussed-core/crypto-client"]
 counter-client = ["trussed-core/counter-client"]
@@ -161,8 +163,50 @@ clients-11 = []
 clients-12 = []
 
 test-attestation-cert-ids = []
-# [patch.crates-io]
-# interchange = { git = "https://github.com/trussed-dev/interchange", branch = "main" }
+
+[[test]]
+name = "aes256cbc"
+required-features = ["crypto-client", "default-mechanisms", "virt"]
+
+[[test]]
+name = "backends"
+required-features = ["filesystem-client", "virt"]
+
+[[test]]
+name = "certificate"
+required-features = ["certificate-client", "virt"]
+
+[[test]]
+name = "counter"
+required-features = ["counter-client", "virt"]
+
+[[test]]
+name = "filesystem"
+required-features = ["crypto-client", "default-mechanisms", "filesystem-client", "virt"]
+
+[[test]]
+name = "key_confusion"
+required-features = ["crypto-client", "default-mechanisms", "hmac-blake2s", "hmac-sha512", "virt"]
+
+[[test]]
+name = "p256"
+required-features = ["crypto-client", "default-mechanisms", "virt"]
+
+[[test]]
+name = "serde_extensions"
+required-features = ["serde-extensions", "virt"]
+
+[[test]]
+name = "tdes"
+required-features = ["crypto-client", "tdes", "virt"]
+
+[[test]]
+name = "virt"
+required-features = ["filesystem-client", "management-client", "virt"]
+
+[[test]]
+name = "x255"
+required-features = ["crypto-client", "default-mechanisms", "virt"]
 
 [package.metadata.docs.rs]
 features = ["serde-extensions", "virt"]

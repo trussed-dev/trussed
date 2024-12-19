@@ -5,7 +5,6 @@ use crate::service::{DeriveKey, Sign};
 use crate::store::keystore::Keystore;
 use crate::types::Signature;
 
-#[cfg(feature = "hmac-sha256")]
 impl DeriveKey for super::HmacSha256 {
     #[inline(never)]
     fn derive_key(
@@ -45,7 +44,6 @@ impl DeriveKey for super::HmacSha256 {
     }
 }
 
-#[cfg(feature = "hmac-sha256")]
 impl Sign for super::HmacSha256 {
     #[inline(never)]
     fn sign(keystore: &mut impl Keystore, request: &request::Sign) -> Result<reply::Sign, Error> {
@@ -70,8 +68,3 @@ impl Sign for super::HmacSha256 {
         Ok(reply::Sign { signature })
     }
 }
-
-#[cfg(not(feature = "hmac-sha256"))]
-impl DeriveKey for super::HmacSha256 {}
-#[cfg(not(feature = "hmac-sha256"))]
-impl Sign for super::HmacSha256 {}

@@ -1,5 +1,3 @@
-#![cfg(feature = "virt")]
-
 use serial_test::serial;
 use trussed::client::mechanisms::{P256, X255};
 use trussed::client::CryptoClient;

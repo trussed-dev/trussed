@@ -20,7 +20,6 @@ const TAG_LEN: usize = 16;
 const KIND: key::Kind = key::Kind::Symmetric(KEY_LEN);
 const KIND_NONCE: key::Kind = key::Kind::Symmetric32Nonce(NONCE_LEN);
 
-#[cfg(feature = "chacha8-poly1305")]
 impl GenerateKey for super::Chacha8Poly1305 {
     #[inline(never)]
     fn generate_key(
@@ -64,7 +63,6 @@ fn increment_nonce(nonce: &mut [u8]) -> Result<(), Error> {
     }
 }
 
-#[cfg(feature = "chacha8-poly1305")]
 impl Decrypt for super::Chacha8Poly1305 {
     #[inline(never)]
     fn decrypt(
@@ -168,7 +166,6 @@ impl Encrypt for super::Chacha8Poly1305 {
     }
 }
 
-#[cfg(feature = "chacha8-poly1305")]
 impl WrapKey for super::Chacha8Poly1305 {
     #[inline(never)]
     fn wrap_key(
@@ -199,7 +196,6 @@ impl WrapKey for super::Chacha8Poly1305 {
     }
 }
 
-#[cfg(feature = "chacha8-poly1305")]
 impl UnwrapKey for super::Chacha8Poly1305 {
     #[inline(never)]
     fn unwrap_key(
@@ -242,14 +238,3 @@ impl UnwrapKey for super::Chacha8Poly1305 {
         Ok(reply::UnwrapKey { key: Some(key_id) })
     }
 }
-
-#[cfg(not(feature = "chacha8-poly1305"))]
-impl Decrypt for super::Chacha8Poly1305 {}
-#[cfg(not(feature = "chacha8-poly1305"))]
-impl Encrypt for super::Chacha8Poly1305 {}
-#[cfg(not(feature = "chacha8-poly1305"))]
-impl WrapKey for super::Chacha8Poly1305 {}
-#[cfg(not(feature = "chacha8-poly1305"))]
-impl UnwrapKey for super::Chacha8Poly1305 {}
-#[cfg(not(feature = "chacha8-poly1305"))]
-impl GenerateKey for super::Chacha8Poly1305 {}

@@ -7,7 +7,6 @@ use crate::types::{Mechanism, Message, ShortData};
 
 const AES256_KEY_SIZE: usize = 32;
 
-#[cfg(feature = "aes256-cbc")]
 impl Encrypt for super::Aes256Cbc {
     /// Encrypts the input *with zero IV*
     fn encrypt(
@@ -66,7 +65,6 @@ impl Encrypt for super::Aes256Cbc {
     }
 }
 
-#[cfg(feature = "aes256-cbc")]
 impl WrapKey for super::Aes256Cbc {
     fn wrap_key(
         keystore: &mut impl Keystore,
@@ -101,7 +99,6 @@ impl WrapKey for super::Aes256Cbc {
     }
 }
 
-#[cfg(feature = "aes256-cbc")]
 impl Decrypt for super::Aes256Cbc {
     fn decrypt(
         keystore: &mut impl Keystore,
@@ -160,7 +157,6 @@ impl Decrypt for super::Aes256Cbc {
     }
 }
 
-#[cfg(feature = "aes256-cbc")]
 impl UnsafeInjectKey for super::Aes256Cbc {
     fn unsafe_inject_key(
         keystore: &mut impl Keystore,
@@ -180,12 +176,3 @@ impl UnsafeInjectKey for super::Aes256Cbc {
         Ok(reply::UnsafeInjectKey { key: key_id })
     }
 }
-
-#[cfg(not(feature = "aes256-cbc"))]
-impl UnsafeInjectKey for super::Aes256Cbc {}
-#[cfg(not(feature = "aes256-cbc"))]
-impl Decrypt for super::Aes256Cbc {}
-#[cfg(not(feature = "aes256-cbc"))]
-impl Encrypt for super::Aes256Cbc {}
-#[cfg(not(feature = "aes256-cbc"))]
-impl WrapKey for super::Aes256Cbc {}

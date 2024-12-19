@@ -6,7 +6,6 @@
 // use cortex_m_semihosting::{dbg, hprintln};
 
 // needed to even get ::new() from des...
-#[cfg(feature = "tdes")]
 use des::cipher::{BlockDecrypt, BlockEncrypt, KeyInit};
 use generic_array::GenericArray;
 
@@ -18,7 +17,6 @@ use crate::store::keystore::Keystore;
 
 const TDES_KEY_SIZE: usize = 24;
 
-#[cfg(feature = "tdes")]
 impl Encrypt for super::Tdes {
     /// Encrypts a single block. Let's hope we don't have to support ECB!!
     #[inline(never)]
@@ -61,7 +59,6 @@ impl Encrypt for super::Tdes {
     }
 }
 
-#[cfg(feature = "tdes")]
 impl Decrypt for super::Tdes {
     /// Decrypts a single block. Let's hope we don't have to support ECB!!
     #[inline(never)]
@@ -112,9 +109,3 @@ impl UnsafeInjectKey for super::Tdes {
         Ok(reply::UnsafeInjectKey { key: key_id })
     }
 }
-
-#[cfg(not(feature = "tdes"))]
-impl Encrypt for super::Tdes {}
-
-#[cfg(not(feature = "tdes"))]
-impl Decrypt for super::Tdes {}
