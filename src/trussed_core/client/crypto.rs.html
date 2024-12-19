@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `core/src/client/mechanisms.rs`."><title>mechanisms.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-b0742ba02757f159.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="trussed_core" data-themes="" data-resource-suffix="" data-rustdoc-version="1.83.0 (90b35a623 2024-11-26)" data-channel="1.83.0" data-search-js="search-f0d225181b97f9a4.js" data-settings-js="settings-805db61a62df4bd2.js" ><script src="../../../static.files/storage-1d39b6787ed640ff.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-f070b9041d14864c.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-0111fcff984fae8f.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><h1><div class="sub-heading">trussed_core/client/</div>mechanisms.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `core/src/client/crypto.rs`."><title>crypto.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-b0742ba02757f159.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="trussed_core" data-themes="" data-resource-suffix="" data-rustdoc-version="1.83.0 (90b35a623 2024-11-26)" data-channel="1.83.0" data-search-js="search-f0d225181b97f9a4.js" data-settings-js="settings-805db61a62df4bd2.js" ><script src="../../../static.files/storage-1d39b6787ed640ff.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-f070b9041d14864c.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-0111fcff984fae8f.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><h1><div class="sub-heading">trussed_core/client/</div>crypto.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers">
 <a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
@@ -640,14 +640,566 @@
 <a href="#639" id="639">639</a>
 <a href="#640" id="640">640</a>
 <a href="#641" id="641">641</a>
-<a href="#642" id="642">642</a></pre></div><pre class="rust"><code><span class="kw">use super</span>::{ClientError, ClientResult, CryptoClient};
+<a href="#642" id="642">642</a>
+<a href="#643" id="643">643</a>
+<a href="#644" id="644">644</a>
+<a href="#645" id="645">645</a>
+<a href="#646" id="646">646</a>
+<a href="#647" id="647">647</a>
+<a href="#648" id="648">648</a>
+<a href="#649" id="649">649</a>
+<a href="#650" id="650">650</a>
+<a href="#651" id="651">651</a>
+<a href="#652" id="652">652</a>
+<a href="#653" id="653">653</a>
+<a href="#654" id="654">654</a>
+<a href="#655" id="655">655</a>
+<a href="#656" id="656">656</a>
+<a href="#657" id="657">657</a>
+<a href="#658" id="658">658</a>
+<a href="#659" id="659">659</a>
+<a href="#660" id="660">660</a>
+<a href="#661" id="661">661</a>
+<a href="#662" id="662">662</a>
+<a href="#663" id="663">663</a>
+<a href="#664" id="664">664</a>
+<a href="#665" id="665">665</a>
+<a href="#666" id="666">666</a>
+<a href="#667" id="667">667</a>
+<a href="#668" id="668">668</a>
+<a href="#669" id="669">669</a>
+<a href="#670" id="670">670</a>
+<a href="#671" id="671">671</a>
+<a href="#672" id="672">672</a>
+<a href="#673" id="673">673</a>
+<a href="#674" id="674">674</a>
+<a href="#675" id="675">675</a>
+<a href="#676" id="676">676</a>
+<a href="#677" id="677">677</a>
+<a href="#678" id="678">678</a>
+<a href="#679" id="679">679</a>
+<a href="#680" id="680">680</a>
+<a href="#681" id="681">681</a>
+<a href="#682" id="682">682</a>
+<a href="#683" id="683">683</a>
+<a href="#684" id="684">684</a>
+<a href="#685" id="685">685</a>
+<a href="#686" id="686">686</a>
+<a href="#687" id="687">687</a>
+<a href="#688" id="688">688</a>
+<a href="#689" id="689">689</a>
+<a href="#690" id="690">690</a>
+<a href="#691" id="691">691</a>
+<a href="#692" id="692">692</a>
+<a href="#693" id="693">693</a>
+<a href="#694" id="694">694</a>
+<a href="#695" id="695">695</a>
+<a href="#696" id="696">696</a>
+<a href="#697" id="697">697</a>
+<a href="#698" id="698">698</a>
+<a href="#699" id="699">699</a>
+<a href="#700" id="700">700</a>
+<a href="#701" id="701">701</a>
+<a href="#702" id="702">702</a>
+<a href="#703" id="703">703</a>
+<a href="#704" id="704">704</a>
+<a href="#705" id="705">705</a>
+<a href="#706" id="706">706</a>
+<a href="#707" id="707">707</a>
+<a href="#708" id="708">708</a>
+<a href="#709" id="709">709</a>
+<a href="#710" id="710">710</a>
+<a href="#711" id="711">711</a>
+<a href="#712" id="712">712</a>
+<a href="#713" id="713">713</a>
+<a href="#714" id="714">714</a>
+<a href="#715" id="715">715</a>
+<a href="#716" id="716">716</a>
+<a href="#717" id="717">717</a>
+<a href="#718" id="718">718</a>
+<a href="#719" id="719">719</a>
+<a href="#720" id="720">720</a>
+<a href="#721" id="721">721</a>
+<a href="#722" id="722">722</a>
+<a href="#723" id="723">723</a>
+<a href="#724" id="724">724</a>
+<a href="#725" id="725">725</a>
+<a href="#726" id="726">726</a>
+<a href="#727" id="727">727</a>
+<a href="#728" id="728">728</a>
+<a href="#729" id="729">729</a>
+<a href="#730" id="730">730</a>
+<a href="#731" id="731">731</a>
+<a href="#732" id="732">732</a>
+<a href="#733" id="733">733</a>
+<a href="#734" id="734">734</a>
+<a href="#735" id="735">735</a>
+<a href="#736" id="736">736</a>
+<a href="#737" id="737">737</a>
+<a href="#738" id="738">738</a>
+<a href="#739" id="739">739</a>
+<a href="#740" id="740">740</a>
+<a href="#741" id="741">741</a>
+<a href="#742" id="742">742</a>
+<a href="#743" id="743">743</a>
+<a href="#744" id="744">744</a>
+<a href="#745" id="745">745</a>
+<a href="#746" id="746">746</a>
+<a href="#747" id="747">747</a>
+<a href="#748" id="748">748</a>
+<a href="#749" id="749">749</a>
+<a href="#750" id="750">750</a>
+<a href="#751" id="751">751</a>
+<a href="#752" id="752">752</a>
+<a href="#753" id="753">753</a>
+<a href="#754" id="754">754</a>
+<a href="#755" id="755">755</a>
+<a href="#756" id="756">756</a>
+<a href="#757" id="757">757</a>
+<a href="#758" id="758">758</a>
+<a href="#759" id="759">759</a>
+<a href="#760" id="760">760</a>
+<a href="#761" id="761">761</a>
+<a href="#762" id="762">762</a>
+<a href="#763" id="763">763</a>
+<a href="#764" id="764">764</a>
+<a href="#765" id="765">765</a>
+<a href="#766" id="766">766</a>
+<a href="#767" id="767">767</a>
+<a href="#768" id="768">768</a>
+<a href="#769" id="769">769</a>
+<a href="#770" id="770">770</a>
+<a href="#771" id="771">771</a>
+<a href="#772" id="772">772</a>
+<a href="#773" id="773">773</a>
+<a href="#774" id="774">774</a>
+<a href="#775" id="775">775</a>
+<a href="#776" id="776">776</a>
+<a href="#777" id="777">777</a>
+<a href="#778" id="778">778</a>
+<a href="#779" id="779">779</a>
+<a href="#780" id="780">780</a>
+<a href="#781" id="781">781</a>
+<a href="#782" id="782">782</a>
+<a href="#783" id="783">783</a>
+<a href="#784" id="784">784</a>
+<a href="#785" id="785">785</a>
+<a href="#786" id="786">786</a>
+<a href="#787" id="787">787</a>
+<a href="#788" id="788">788</a>
+<a href="#789" id="789">789</a>
+<a href="#790" id="790">790</a>
+<a href="#791" id="791">791</a>
+<a href="#792" id="792">792</a>
+<a href="#793" id="793">793</a>
+<a href="#794" id="794">794</a>
+<a href="#795" id="795">795</a>
+<a href="#796" id="796">796</a>
+<a href="#797" id="797">797</a>
+<a href="#798" id="798">798</a>
+<a href="#799" id="799">799</a>
+<a href="#800" id="800">800</a>
+<a href="#801" id="801">801</a>
+<a href="#802" id="802">802</a>
+<a href="#803" id="803">803</a>
+<a href="#804" id="804">804</a>
+<a href="#805" id="805">805</a>
+<a href="#806" id="806">806</a>
+<a href="#807" id="807">807</a>
+<a href="#808" id="808">808</a>
+<a href="#809" id="809">809</a>
+<a href="#810" id="810">810</a>
+<a href="#811" id="811">811</a>
+<a href="#812" id="812">812</a>
+<a href="#813" id="813">813</a>
+<a href="#814" id="814">814</a>
+<a href="#815" id="815">815</a>
+<a href="#816" id="816">816</a>
+<a href="#817" id="817">817</a>
+<a href="#818" id="818">818</a>
+<a href="#819" id="819">819</a>
+<a href="#820" id="820">820</a>
+<a href="#821" id="821">821</a>
+<a href="#822" id="822">822</a>
+<a href="#823" id="823">823</a>
+<a href="#824" id="824">824</a>
+<a href="#825" id="825">825</a>
+<a href="#826" id="826">826</a>
+<a href="#827" id="827">827</a>
+<a href="#828" id="828">828</a>
+<a href="#829" id="829">829</a>
+<a href="#830" id="830">830</a>
+<a href="#831" id="831">831</a>
+<a href="#832" id="832">832</a>
+<a href="#833" id="833">833</a>
+<a href="#834" id="834">834</a>
+<a href="#835" id="835">835</a>
+<a href="#836" id="836">836</a>
+<a href="#837" id="837">837</a>
+<a href="#838" id="838">838</a>
+<a href="#839" id="839">839</a>
+<a href="#840" id="840">840</a>
+<a href="#841" id="841">841</a>
+<a href="#842" id="842">842</a>
+<a href="#843" id="843">843</a>
+<a href="#844" id="844">844</a>
+<a href="#845" id="845">845</a>
+<a href="#846" id="846">846</a>
+<a href="#847" id="847">847</a>
+<a href="#848" id="848">848</a>
+<a href="#849" id="849">849</a>
+<a href="#850" id="850">850</a>
+<a href="#851" id="851">851</a>
+<a href="#852" id="852">852</a>
+<a href="#853" id="853">853</a>
+<a href="#854" id="854">854</a>
+<a href="#855" id="855">855</a>
+<a href="#856" id="856">856</a>
+<a href="#857" id="857">857</a>
+<a href="#858" id="858">858</a>
+<a href="#859" id="859">859</a>
+<a href="#860" id="860">860</a>
+<a href="#861" id="861">861</a>
+<a href="#862" id="862">862</a>
+<a href="#863" id="863">863</a>
+<a href="#864" id="864">864</a>
+<a href="#865" id="865">865</a>
+<a href="#866" id="866">866</a>
+<a href="#867" id="867">867</a>
+<a href="#868" id="868">868</a>
+<a href="#869" id="869">869</a>
+<a href="#870" id="870">870</a>
+<a href="#871" id="871">871</a>
+<a href="#872" id="872">872</a>
+<a href="#873" id="873">873</a>
+<a href="#874" id="874">874</a>
+<a href="#875" id="875">875</a>
+<a href="#876" id="876">876</a>
+<a href="#877" id="877">877</a>
+<a href="#878" id="878">878</a>
+<a href="#879" id="879">879</a>
+<a href="#880" id="880">880</a>
+<a href="#881" id="881">881</a>
+<a href="#882" id="882">882</a>
+<a href="#883" id="883">883</a>
+<a href="#884" id="884">884</a>
+<a href="#885" id="885">885</a>
+<a href="#886" id="886">886</a>
+<a href="#887" id="887">887</a>
+<a href="#888" id="888">888</a>
+<a href="#889" id="889">889</a>
+<a href="#890" id="890">890</a>
+<a href="#891" id="891">891</a>
+<a href="#892" id="892">892</a>
+<a href="#893" id="893">893</a>
+<a href="#894" id="894">894</a>
+<a href="#895" id="895">895</a>
+<a href="#896" id="896">896</a>
+<a href="#897" id="897">897</a>
+<a href="#898" id="898">898</a>
+<a href="#899" id="899">899</a>
+<a href="#900" id="900">900</a>
+<a href="#901" id="901">901</a>
+<a href="#902" id="902">902</a>
+<a href="#903" id="903">903</a>
+<a href="#904" id="904">904</a>
+<a href="#905" id="905">905</a>
+<a href="#906" id="906">906</a>
+<a href="#907" id="907">907</a>
+<a href="#908" id="908">908</a>
+<a href="#909" id="909">909</a>
+<a href="#910" id="910">910</a>
+<a href="#911" id="911">911</a>
+<a href="#912" id="912">912</a>
+<a href="#913" id="913">913</a>
+<a href="#914" id="914">914</a>
+<a href="#915" id="915">915</a>
+<a href="#916" id="916">916</a>
+<a href="#917" id="917">917</a>
+<a href="#918" id="918">918</a></pre></div><pre class="rust"><code><span class="kw">use super</span>::{ClientError, ClientResult, PollClient};
 <span class="kw">use crate</span>::{
-    api::reply,
+    api::{reply, request},
     types::{
-        KeyId, KeySerialization, Location, Mechanism, MediumData, Message, ShortData,
-        SignatureSerialization, StorageAttributes,
+        Bytes, KeyId, KeySerialization, Location, Mechanism, MediumData, Message, SerializedKey,
+        ShortData, Signature, SignatureSerialization, StorageAttributes,
     },
 };
+
+<span class="doccomment">/// Trussed Client interface that Trussed apps can rely on.
+</span><span class="kw">pub trait </span>CryptoClient: PollClient {
+    <span class="comment">// call with any of `crate::api::request::*`
+    // fn request&lt;'c&gt;(&amp;'c mut self, req: impl Into&lt;Request&gt;)
+    // -&gt; core::result::Result&lt;RawFutureResult&lt;'c, Self&gt;, ClientError&gt;;
+
+    </span><span class="kw">fn </span>agree(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        mechanism: Mechanism,
+        private_key: KeyId,
+        public_key: KeyId,
+        attributes: StorageAttributes,
+    ) -&gt; ClientResult&lt;<span class="lifetime">'_</span>, reply::Agree, <span class="self">Self</span>&gt; {
+        <span class="self">self</span>.request(request::Agree {
+            mechanism,
+            private_key,
+            public_key,
+            attributes,
+        })
+    }
+
+    <span class="kw">fn </span>decrypt&lt;<span class="lifetime">'c</span>&gt;(
+        <span class="kw-2">&amp;</span><span class="lifetime">'c </span><span class="kw-2">mut </span><span class="self">self</span>,
+        mechanism: Mechanism,
+        key: KeyId,
+        message: <span class="kw-2">&amp;</span>[u8],
+        associated_data: <span class="kw-2">&amp;</span>[u8],
+        nonce: <span class="kw-2">&amp;</span>[u8],
+        tag: <span class="kw-2">&amp;</span>[u8],
+    ) -&gt; ClientResult&lt;<span class="lifetime">'c</span>, reply::Decrypt, <span class="self">Self</span>&gt; {
+        <span class="kw">let </span>message = Message::from_slice(message).map_err(|<span class="kw">_</span>| ClientError::DataTooLarge)<span class="question-mark">?</span>;
+        <span class="kw">let </span>associated_data =
+            Message::from_slice(associated_data).map_err(|<span class="kw">_</span>| ClientError::DataTooLarge)<span class="question-mark">?</span>;
+        <span class="kw">let </span>nonce = ShortData::from_slice(nonce).map_err(|<span class="kw">_</span>| ClientError::DataTooLarge)<span class="question-mark">?</span>;
+        <span class="kw">let </span>tag = ShortData::from_slice(tag).map_err(|<span class="kw">_</span>| ClientError::DataTooLarge)<span class="question-mark">?</span>;
+        <span class="self">self</span>.request(request::Decrypt {
+            mechanism,
+            key,
+            message,
+            associated_data,
+            nonce,
+            tag,
+        })
+    }
+
+    <span class="kw">fn </span>delete(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: KeyId) -&gt; ClientResult&lt;<span class="lifetime">'_</span>, reply::Delete, <span class="self">Self</span>&gt; {
+        <span class="self">self</span>.request(request::Delete {
+            key,
+            <span class="comment">// mechanism,
+        </span>})
+    }
+
+    <span class="doccomment">/// Clear private data from the key
+    ///
+    /// This will not delete all metadata from storage.
+    /// Other backends can retain metadata required for `unwrap_key` to work properly
+    /// and delete this metadata only once `delete` is called.
+    </span><span class="kw">fn </span>clear(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: KeyId) -&gt; ClientResult&lt;<span class="lifetime">'_</span>, reply::Clear, <span class="self">Self</span>&gt; {
+        <span class="self">self</span>.request(request::Clear {
+            key,
+            <span class="comment">// mechanism,
+        </span>})
+    }
+
+    <span class="doccomment">/// Skips deleting read-only / manufacture keys (currently, "low ID").
+    </span><span class="kw">fn </span>delete_all(<span class="kw-2">&amp;mut </span><span class="self">self</span>, location: Location) -&gt; ClientResult&lt;<span class="lifetime">'_</span>, reply::DeleteAllKeys, <span class="self">Self</span>&gt; {
+        <span class="self">self</span>.request(request::DeleteAllKeys { location })
+    }
+
+    <span class="kw">fn </span>derive_key(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        mechanism: Mechanism,
+        base_key: KeyId,
+        additional_data: <span class="prelude-ty">Option</span>&lt;MediumData&gt;,
+        attributes: StorageAttributes,
+    ) -&gt; ClientResult&lt;<span class="lifetime">'_</span>, reply::DeriveKey, <span class="self">Self</span>&gt; {
+        <span class="self">self</span>.request(request::DeriveKey {
+            mechanism,
+            base_key,
+            additional_data,
+            attributes,
+        })
+    }
+
+    <span class="kw">fn </span>deserialize_key&lt;<span class="lifetime">'c</span>&gt;(
+        <span class="kw-2">&amp;</span><span class="lifetime">'c </span><span class="kw-2">mut </span><span class="self">self</span>,
+        mechanism: Mechanism,
+        serialized_key: <span class="kw-2">&amp;</span>[u8],
+        format: KeySerialization,
+        attributes: StorageAttributes,
+    ) -&gt; ClientResult&lt;<span class="lifetime">'c</span>, reply::DeserializeKey, <span class="self">Self</span>&gt; {
+        <span class="kw">let </span>serialized_key =
+            SerializedKey::from_slice(serialized_key).map_err(|<span class="kw">_</span>| ClientError::DataTooLarge)<span class="question-mark">?</span>;
+        <span class="self">self</span>.request(request::DeserializeKey {
+            mechanism,
+            serialized_key,
+            format,
+            attributes,
+        })
+    }
+
+    <span class="kw">fn </span>encrypt&lt;<span class="lifetime">'c</span>&gt;(
+        <span class="kw-2">&amp;</span><span class="lifetime">'c </span><span class="kw-2">mut </span><span class="self">self</span>,
+        mechanism: Mechanism,
+        key: KeyId,
+        message: <span class="kw-2">&amp;</span>[u8],
+        associated_data: <span class="kw-2">&amp;</span>[u8],
+        nonce: <span class="prelude-ty">Option</span>&lt;ShortData&gt;,
+    ) -&gt; ClientResult&lt;<span class="lifetime">'c</span>, reply::Encrypt, <span class="self">Self</span>&gt; {
+        <span class="kw">let </span>message = Message::from_slice(message).map_err(|<span class="kw">_</span>| ClientError::DataTooLarge)<span class="question-mark">?</span>;
+        <span class="kw">let </span>associated_data =
+            ShortData::from_slice(associated_data).map_err(|<span class="kw">_</span>| ClientError::DataTooLarge)<span class="question-mark">?</span>;
+        <span class="self">self</span>.request(request::Encrypt {
+            mechanism,
+            key,
+            message,
+            associated_data,
+            nonce,
+        })
+    }
+
+    <span class="kw">fn </span>exists(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        mechanism: Mechanism,
+        key: KeyId,
+    ) -&gt; ClientResult&lt;<span class="lifetime">'_</span>, reply::Exists, <span class="self">Self</span>&gt; {
+        <span class="self">self</span>.request(request::Exists { key, mechanism })
+    }
+
+    <span class="kw">fn </span>generate_key(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        mechanism: Mechanism,
+        attributes: StorageAttributes,
+    ) -&gt; ClientResult&lt;<span class="lifetime">'_</span>, reply::GenerateKey, <span class="self">Self</span>&gt; {
+        <span class="self">self</span>.request(request::GenerateKey {
+            mechanism,
+            attributes,
+        })
+    }
+
+    <span class="kw">fn </span>generate_secret_key(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        size: usize,
+        persistence: Location,
+    ) -&gt; ClientResult&lt;<span class="lifetime">'_</span>, reply::GenerateSecretKey, <span class="self">Self</span>&gt; {
+        <span class="self">self</span>.request(request::GenerateSecretKey {
+            size,
+            attributes: StorageAttributes::new().set_persistence(persistence),
+        })
+    }
+
+    <span class="kw">fn </span>hash(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        mechanism: Mechanism,
+        message: Message,
+    ) -&gt; ClientResult&lt;<span class="lifetime">'_</span>, reply::Hash, <span class="self">Self</span>&gt; {
+        <span class="self">self</span>.request(request::Hash { mechanism, message })
+    }
+
+    <span class="kw">fn </span>random_bytes(<span class="kw-2">&amp;mut </span><span class="self">self</span>, count: usize) -&gt; ClientResult&lt;<span class="lifetime">'_</span>, reply::RandomBytes, <span class="self">Self</span>&gt; {
+        <span class="self">self</span>.request(request::RandomBytes { count })
+    }
+
+    <span class="kw">fn </span>serialize_key(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        mechanism: Mechanism,
+        key: KeyId,
+        format: KeySerialization,
+    ) -&gt; ClientResult&lt;<span class="lifetime">'_</span>, reply::SerializeKey, <span class="self">Self</span>&gt; {
+        <span class="self">self</span>.request(request::SerializeKey {
+            key,
+            mechanism,
+            format,
+        })
+    }
+
+    <span class="kw">fn </span>sign&lt;<span class="lifetime">'c</span>&gt;(
+        <span class="kw-2">&amp;</span><span class="lifetime">'c </span><span class="kw-2">mut </span><span class="self">self</span>,
+        mechanism: Mechanism,
+        key: KeyId,
+        data: <span class="kw-2">&amp;</span>[u8],
+        format: SignatureSerialization,
+    ) -&gt; ClientResult&lt;<span class="lifetime">'c</span>, reply::Sign, <span class="self">Self</span>&gt; {
+        <span class="self">self</span>.request(request::Sign {
+            key,
+            mechanism,
+            message: Bytes::from_slice(data).map_err(|<span class="kw">_</span>| ClientError::DataTooLarge)<span class="question-mark">?</span>,
+            format,
+        })
+    }
+
+    <span class="kw">fn </span>verify&lt;<span class="lifetime">'c</span>&gt;(
+        <span class="kw-2">&amp;</span><span class="lifetime">'c </span><span class="kw-2">mut </span><span class="self">self</span>,
+        mechanism: Mechanism,
+        key: KeyId,
+        message: <span class="kw-2">&amp;</span>[u8],
+        signature: <span class="kw-2">&amp;</span>[u8],
+        format: SignatureSerialization,
+    ) -&gt; ClientResult&lt;<span class="lifetime">'c</span>, reply::Verify, <span class="self">Self</span>&gt; {
+        <span class="self">self</span>.request(request::Verify {
+            mechanism,
+            key,
+            message: Message::from_slice(message).expect(<span class="string">"all good"</span>),
+            signature: Signature::from_slice(signature).expect(<span class="string">"all good"</span>),
+            format,
+        })
+    }
+
+    <span class="kw">fn </span>unsafe_inject_key(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        mechanism: Mechanism,
+        raw_key: <span class="kw-2">&amp;</span>[u8],
+        persistence: Location,
+        format: KeySerialization,
+    ) -&gt; ClientResult&lt;<span class="lifetime">'_</span>, reply::UnsafeInjectKey, <span class="self">Self</span>&gt; {
+        <span class="self">self</span>.request(request::UnsafeInjectKey {
+            mechanism,
+            raw_key: SerializedKey::from_slice(raw_key).unwrap(),
+            attributes: StorageAttributes::new().set_persistence(persistence),
+            format,
+        })
+    }
+
+    <span class="kw">fn </span>unsafe_inject_shared_key(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        raw_key: <span class="kw-2">&amp;</span>[u8],
+        location: Location,
+    ) -&gt; ClientResult&lt;<span class="lifetime">'_</span>, reply::UnsafeInjectSharedKey, <span class="self">Self</span>&gt; {
+        <span class="self">self</span>.request(request::UnsafeInjectSharedKey {
+            raw_key: ShortData::from_slice(raw_key).unwrap(),
+            location,
+        })
+    }
+
+    <span class="kw">fn </span>unwrap_key&lt;<span class="lifetime">'c</span>&gt;(
+        <span class="kw-2">&amp;</span><span class="lifetime">'c </span><span class="kw-2">mut </span><span class="self">self</span>,
+        mechanism: Mechanism,
+        wrapping_key: KeyId,
+        wrapped_key: Message,
+        associated_data: <span class="kw-2">&amp;</span>[u8],
+        nonce: <span class="kw-2">&amp;</span>[u8],
+        attributes: StorageAttributes,
+    ) -&gt; ClientResult&lt;<span class="lifetime">'c</span>, reply::UnwrapKey, <span class="self">Self</span>&gt; {
+        <span class="kw">let </span>associated_data =
+            Message::from_slice(associated_data).map_err(|<span class="kw">_</span>| ClientError::DataTooLarge)<span class="question-mark">?</span>;
+        <span class="kw">let </span>nonce = ShortData::from_slice(nonce).map_err(|<span class="kw">_</span>| ClientError::DataTooLarge)<span class="question-mark">?</span>;
+        <span class="self">self</span>.request(request::UnwrapKey {
+            mechanism,
+            wrapping_key,
+            wrapped_key,
+            associated_data,
+            nonce,
+            attributes,
+        })
+    }
+
+    <span class="kw">fn </span>wrap_key(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        mechanism: Mechanism,
+        wrapping_key: KeyId,
+        key: KeyId,
+        associated_data: <span class="kw-2">&amp;</span>[u8],
+        nonce: <span class="prelude-ty">Option</span>&lt;ShortData&gt;,
+    ) -&gt; ClientResult&lt;<span class="lifetime">'_</span>, reply::WrapKey, <span class="self">Self</span>&gt; {
+        <span class="kw">let </span>associated_data =
+            Bytes::from_slice(associated_data).map_err(|<span class="kw">_</span>| ClientError::DataTooLarge)<span class="question-mark">?</span>;
+        <span class="self">self</span>.request(request::WrapKey {
+            mechanism,
+            wrapping_key,
+            key,
+            associated_data,
+            nonce,
+        })
+    }
+}
 
 <span class="kw">pub trait </span>Aes256Cbc: CryptoClient {
     <span class="kw">fn </span>decrypt_aes256cbc&lt;<span class="lifetime">'c</span>&gt;(

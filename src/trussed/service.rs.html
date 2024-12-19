@@ -1017,7 +1017,45 @@
 <a href="#1016" id="1016">1016</a>
 <a href="#1017" id="1017">1017</a>
 <a href="#1018" id="1018">1018</a>
-<a href="#1019" id="1019">1019</a></pre></div><pre class="rust"><code><span class="kw">use </span>littlefs2_core::{path, DynFilesystem, Path, PathBuf};
+<a href="#1019" id="1019">1019</a>
+<a href="#1020" id="1020">1020</a>
+<a href="#1021" id="1021">1021</a>
+<a href="#1022" id="1022">1022</a>
+<a href="#1023" id="1023">1023</a>
+<a href="#1024" id="1024">1024</a>
+<a href="#1025" id="1025">1025</a>
+<a href="#1026" id="1026">1026</a>
+<a href="#1027" id="1027">1027</a>
+<a href="#1028" id="1028">1028</a>
+<a href="#1029" id="1029">1029</a>
+<a href="#1030" id="1030">1030</a>
+<a href="#1031" id="1031">1031</a>
+<a href="#1032" id="1032">1032</a>
+<a href="#1033" id="1033">1033</a>
+<a href="#1034" id="1034">1034</a>
+<a href="#1035" id="1035">1035</a>
+<a href="#1036" id="1036">1036</a>
+<a href="#1037" id="1037">1037</a>
+<a href="#1038" id="1038">1038</a>
+<a href="#1039" id="1039">1039</a>
+<a href="#1040" id="1040">1040</a>
+<a href="#1041" id="1041">1041</a>
+<a href="#1042" id="1042">1042</a>
+<a href="#1043" id="1043">1043</a>
+<a href="#1044" id="1044">1044</a>
+<a href="#1045" id="1045">1045</a>
+<a href="#1046" id="1046">1046</a>
+<a href="#1047" id="1047">1047</a>
+<a href="#1048" id="1048">1048</a>
+<a href="#1049" id="1049">1049</a>
+<a href="#1050" id="1050">1050</a>
+<a href="#1051" id="1051">1051</a>
+<a href="#1052" id="1052">1052</a>
+<a href="#1053" id="1053">1053</a>
+<a href="#1054" id="1054">1054</a>
+<a href="#1055" id="1055">1055</a>
+<a href="#1056" id="1056">1056</a>
+<a href="#1057" id="1057">1057</a></pre></div><pre class="rust"><code><span class="kw">use </span>littlefs2_core::{path, DynFilesystem, Path, PathBuf};
 <span class="kw">use </span>rand_chacha::ChaCha8Rng;
 <span class="kw">pub use </span>rand_core::{RngCore, SeedableRng};
 
@@ -1026,7 +1064,8 @@
 <span class="kw">use </span><span class="kw">crate</span>::config::{MAX_MESSAGE_LENGTH, MAX_SERVICE_CLIENTS};
 <span class="kw">use </span><span class="kw">crate</span>::error::{Error, <span class="prelude-ty">Result</span>};
 <span class="kw">pub use </span><span class="kw">crate</span>::key;
-<span class="kw">use </span><span class="kw">crate</span>::mechanisms;
+<span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
+</span><span class="kw">use </span><span class="kw">crate</span>::mechanisms;
 <span class="kw">pub use </span><span class="kw">crate</span>::pipe::ServiceEndpoint;
 <span class="kw">use </span><span class="kw">crate</span>::pipe::TrussedResponder;
 <span class="kw">use </span><span class="kw">crate</span>::platform::{consent, ui, Platform, Store, Syscall, UserInterface};
@@ -1045,11 +1084,13 @@
     interrupt::InterruptFlag,
 };
 
-<span class="kw">pub mod </span>attest;
+<span class="attr">#[cfg(feature = <span class="string">"attestation-client"</span>)]
+</span><span class="kw">pub mod </span>attest;
 
 <span class="comment">// #[macro_use]
 // mod macros;
 
+</span><span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
 </span><span class="macro">macro_rules!</span> rpc_trait { ($(<span class="macro-nonterminal">$Name</span>:ident, <span class="macro-nonterminal">$name</span>:ident,)<span class="kw-2">*</span>) =&gt; { $(
 
     <span class="kw">pub trait </span><span class="macro-nonterminal">$Name </span>{
@@ -1058,7 +1099,8 @@
     }
 )* } }
 
-<span class="macro">rpc_trait!</span> {
+<span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
+</span><span class="macro">rpc_trait!</span> {
     Agree, agree,
     Decrypt, decrypt,
     DeriveKey, derive_key,
@@ -1171,21 +1213,26 @@
             generator
         }
 
-        <span class="attr">#[cfg(feature = <span class="string">"crypto-client-attest"</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"attestation-client"</span>)]
         </span><span class="kw">let </span>full_store = <span class="self">self</span>.platform.store();
 
-        <span class="kw">let </span>keystore = once(|this, ctx| this.keystore(ctx.path.clone()));
-        <span class="kw">let </span>certstore = once(|this, ctx| this.certstore(ctx));
+        <span class="attr">#[cfg(any(feature = <span class="string">"attestation-client"</span>, feature = <span class="string">"crypto-client"</span>))]
+        </span><span class="kw">let </span>keystore = once(|this, ctx| this.keystore(ctx.path.clone()));
+        <span class="attr">#[cfg(any(feature = <span class="string">"attestation-client"</span>, feature = <span class="string">"certificate-client"</span>))]
+        </span><span class="kw">let </span>certstore = once(|this, ctx| this.certstore(ctx));
         <span class="attr">#[cfg(feature = <span class="string">"counter-client"</span>)]
         </span><span class="kw">let </span>counterstore = once(|this, ctx| this.counterstore(ctx));
 
-        <span class="kw">let </span>filestore = <span class="kw-2">&amp;mut </span><span class="self">self</span>.filestore(ctx.path.clone());
+        <span class="attr">#[cfg(feature = <span class="string">"filesystem-client"</span>)]
+        </span><span class="kw">let </span>filestore = <span class="kw-2">&amp;mut </span><span class="self">self</span>.filestore(ctx.path.clone());
 
         <span class="macro">debug_now!</span>(<span class="string">"TRUSSED {:?}"</span>, request);
         <span class="kw">match </span>request {
-            Request::DummyRequest =&gt; <span class="prelude-val">Ok</span>(Reply::DummyReply),
+            <span class="attr">#[cfg(feature = <span class="string">"filesystem-client"</span>)]
+            </span>Request::DummyRequest =&gt; <span class="prelude-val">Ok</span>(Reply::DummyReply),
 
-            Request::Agree(request) =&gt; <span class="kw">match </span>request.mechanism {
+            <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
+            </span>Request::Agree(request) =&gt; <span class="kw">match </span>request.mechanism {
                 Mechanism::P521 =&gt; mechanisms::P521::agree(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
                 Mechanism::P384 =&gt; mechanisms::P384::agree(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
                 Mechanism::P256 =&gt; mechanisms::P256::agree(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
@@ -1194,7 +1241,7 @@
             }
             .map(Reply::Agree),
 
-            <span class="attr">#[cfg(feature = <span class="string">"crypto-client-attest"</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"attestation-client"</span>)]
             </span>Request::Attest(request) =&gt; {
                 <span class="kw">let </span><span class="kw-2">mut </span>attn_keystore: ClientKeystore&lt;P::S&gt; = ClientKeystore::new(
                     PathBuf::from(<span class="macro">path!</span>(<span class="string">"attn"</span>)),
@@ -1210,10 +1257,8 @@
                 .map(Reply::Attest)
             }
 
-            <span class="attr">#[cfg(not(feature = <span class="string">"crypto-client-attest"</span>))]
-            </span>Request::Attest(<span class="kw">_</span>) =&gt; <span class="prelude-val">Err</span>(Error::RequestNotAvailable),
-
-            Request::Decrypt(request) =&gt; <span class="kw">match </span>request.mechanism {
+            <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
+            </span>Request::Decrypt(request) =&gt; <span class="kw">match </span>request.mechanism {
                 Mechanism::Aes256Cbc =&gt; {
                     mechanisms::Aes256Cbc::decrypt(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request)
                 }
@@ -1225,7 +1270,8 @@
             }
             .map(Reply::Decrypt),
 
-            Request::DeriveKey(request) =&gt; <span class="kw">match </span>request.mechanism {
+            <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
+            </span>Request::DeriveKey(request) =&gt; <span class="kw">match </span>request.mechanism {
                 Mechanism::HmacBlake2s =&gt; {
                     mechanisms::HmacBlake2s::derive_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request)
                 }
@@ -1252,7 +1298,8 @@
             }
             .map(Reply::DeriveKey),
 
-            Request::DeserializeKey(request) =&gt; <span class="kw">match </span>request.mechanism {
+            <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
+            </span>Request::DeserializeKey(request) =&gt; <span class="kw">match </span>request.mechanism {
                 Mechanism::Ed255 =&gt; {
                     mechanisms::Ed255::deserialize_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request)
                 }
@@ -1272,7 +1319,8 @@
             }
             .map(Reply::DeserializeKey),
 
-            Request::Encrypt(request) =&gt; <span class="kw">match </span>request.mechanism {
+            <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
+            </span>Request::Encrypt(request) =&gt; <span class="kw">match </span>request.mechanism {
                 Mechanism::Aes256Cbc =&gt; {
                     mechanisms::Aes256Cbc::encrypt(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request)
                 }
@@ -1284,22 +1332,26 @@
             }
             .map(Reply::Encrypt),
 
-            Request::Delete(request) =&gt; {
+            <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
+            </span>Request::Delete(request) =&gt; {
                 <span class="kw">let </span>success = keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>.delete_key(<span class="kw-2">&amp;</span>request.key);
                 <span class="prelude-val">Ok</span>(Reply::Delete(reply::Delete { success }))
             }
 
-            Request::Clear(request) =&gt; {
+            <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
+            </span>Request::Clear(request) =&gt; {
                 <span class="kw">let </span>success = keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>.clear_key(<span class="kw-2">&amp;</span>request.key);
                 <span class="prelude-val">Ok</span>(Reply::Clear(reply::Clear { success }))
             }
 
-            Request::DeleteAllKeys(request) =&gt; {
+            <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
+            </span>Request::DeleteAllKeys(request) =&gt; {
                 <span class="kw">let </span>count = keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>.delete_all(request.location)<span class="question-mark">?</span>;
                 <span class="prelude-val">Ok</span>(Reply::DeleteAllKeys(reply::DeleteAllKeys { count }))
             }
 
-            Request::Exists(request) =&gt; <span class="kw">match </span>request.mechanism {
+            <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
+            </span>Request::Exists(request) =&gt; <span class="kw">match </span>request.mechanism {
                 Mechanism::Ed255 =&gt; mechanisms::Ed255::exists(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
                 Mechanism::P521 =&gt; mechanisms::P521::exists(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
                 Mechanism::P384 =&gt; mechanisms::P384::exists(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
@@ -1310,7 +1362,8 @@
             }
             .map(Reply::Exists),
 
-            Request::GenerateKey(request) =&gt; <span class="kw">match </span>request.mechanism {
+            <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
+            </span>Request::GenerateKey(request) =&gt; <span class="kw">match </span>request.mechanism {
                 Mechanism::Chacha8Poly1305 =&gt; {
                     mechanisms::Chacha8Poly1305::generate_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request)
                 }
@@ -1333,7 +1386,8 @@
             }
             .map(Reply::GenerateKey),
 
-            Request::GenerateSecretKey(request) =&gt; {
+            <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
+            </span>Request::GenerateSecretKey(request) =&gt; {
                 <span class="kw">let </span><span class="kw-2">mut </span>secret_key = MediumData::new();
                 <span class="kw">let </span>size = request.size;
                 <span class="kw">let </span><span class="kw-2">mut </span>keystore = keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>;
@@ -1353,6 +1407,7 @@
             }
 
             <span class="comment">// deprecated
+            </span><span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
             </span>Request::UnsafeInjectKey(request) =&gt; <span class="kw">match </span>request.mechanism {
                 Mechanism::P521 =&gt; {
                     mechanisms::P521::unsafe_inject_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request)
@@ -1382,7 +1437,8 @@
             }
             .map(Reply::UnsafeInjectKey),
 
-            Request::UnsafeInjectSharedKey(request) =&gt; {
+            <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
+            </span>Request::UnsafeInjectSharedKey(request) =&gt; {
                 <span class="kw">let </span>key_id = keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>.store_key(
                     request.location,
                     key::Secrecy::Secret,
@@ -1395,13 +1451,15 @@
                 }))
             }
 
-            Request::Hash(request) =&gt; <span class="kw">match </span>request.mechanism {
+            <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
+            </span>Request::Hash(request) =&gt; <span class="kw">match </span>request.mechanism {
                 Mechanism::Sha256 =&gt; mechanisms::Sha256::hash(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
                 <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(Error::MechanismNotAvailable),
             }
             .map(Reply::Hash),
 
-            Request::LocateFile(request) =&gt; {
+            <span class="attr">#[cfg(feature = <span class="string">"filesystem-client"</span>)]
+            </span>Request::LocateFile(request) =&gt; {
                 <span class="kw">let </span>path = filestore.locate_file(
                     request.location,
                     request.dir.as_deref(),
@@ -1413,6 +1471,7 @@
 
             <span class="comment">// This is now preferably done using littlefs-fuse (when device is not yet locked),
             // and should be removed from firmware completely
+            </span><span class="attr">#[cfg(feature = <span class="string">"filesystem-client"</span>)]
             </span>Request::DebugDumpStore(_request) =&gt; {
                 <span class="macro">info_now!</span>(<span class="string">":: PERSISTENT"</span>);
                 recursively_list(<span class="self">self</span>.platform.store().fs(Location::Internal), <span class="macro">path!</span>(<span class="string">"/"</span>));
@@ -1447,7 +1506,8 @@
                 <span class="prelude-val">Ok</span>(Reply::DebugDumpStore(reply::DebugDumpStore {}))
             }
 
-            Request::ReadDirFirst(request) =&gt; {
+            <span class="attr">#[cfg(feature = <span class="string">"filesystem-client"</span>)]
+            </span>Request::ReadDirFirst(request) =&gt; {
                 <span class="kw">let </span>maybe_entry = <span class="kw">match </span>filestore.read_dir_first(
                     <span class="kw-2">&amp;</span>request.dir,
                     request.location,
@@ -1467,7 +1527,8 @@
                 }))
             }
 
-            Request::ReadDirNext(_request) =&gt; {
+            <span class="attr">#[cfg(feature = <span class="string">"filesystem-client"</span>)]
+            </span>Request::ReadDirNext(_request) =&gt; {
                 <span class="comment">// ensure next call has nothing to work with, unless we store state again
                 </span><span class="kw">let </span>read_dir_state = ctx.read_dir_state.take();
 
@@ -1490,7 +1551,8 @@
                 }))
             }
 
-            Request::ReadDirFilesFirst(request) =&gt; {
+            <span class="attr">#[cfg(feature = <span class="string">"filesystem-client"</span>)]
+            </span>Request::ReadDirFilesFirst(request) =&gt; {
                 <span class="kw">let </span>maybe_data = <span class="kw">match </span>filestore.read_dir_files_first(
                     <span class="kw-2">&amp;</span>request.dir,
                     request.location,
@@ -1510,7 +1572,8 @@
                 }))
             }
 
-            Request::ReadDirFilesNext(_request) =&gt; {
+            <span class="attr">#[cfg(feature = <span class="string">"filesystem-client"</span>)]
+            </span>Request::ReadDirFilesNext(_request) =&gt; {
                 <span class="kw">let </span>read_dir_files_state = ctx.read_dir_files_state.take();
 
                 <span class="kw">let </span>maybe_data = <span class="kw">match </span>read_dir_files_state {
@@ -1531,35 +1594,42 @@
                 }))
             }
 
-            Request::RemoveDir(request) =&gt; {
+            <span class="attr">#[cfg(feature = <span class="string">"filesystem-client"</span>)]
+            </span>Request::RemoveDir(request) =&gt; {
                 filestore.remove_dir(<span class="kw-2">&amp;</span>request.path, request.location)<span class="question-mark">?</span>;
                 <span class="prelude-val">Ok</span>(Reply::RemoveDir(reply::RemoveDir {}))
             }
 
-            Request::RemoveDirAll(request) =&gt; {
+            <span class="attr">#[cfg(feature = <span class="string">"filesystem-client"</span>)]
+            </span>Request::RemoveDirAll(request) =&gt; {
                 <span class="kw">let </span>count = filestore.remove_dir_all(<span class="kw-2">&amp;</span>request.path, request.location)<span class="question-mark">?</span>;
                 <span class="prelude-val">Ok</span>(Reply::RemoveDirAll(reply::RemoveDirAll { count }))
             }
 
-            Request::RemoveFile(request) =&gt; {
+            <span class="attr">#[cfg(feature = <span class="string">"filesystem-client"</span>)]
+            </span>Request::RemoveFile(request) =&gt; {
                 filestore.remove_file(<span class="kw-2">&amp;</span>request.path, request.location)<span class="question-mark">?</span>;
                 <span class="prelude-val">Ok</span>(Reply::RemoveFile(reply::RemoveFile {}))
             }
 
-            Request::ReadFile(request) =&gt; <span class="prelude-val">Ok</span>(Reply::ReadFile(reply::ReadFile {
+            <span class="attr">#[cfg(feature = <span class="string">"filesystem-client"</span>)]
+            </span>Request::ReadFile(request) =&gt; <span class="prelude-val">Ok</span>(Reply::ReadFile(reply::ReadFile {
                 data: filestore.read(<span class="kw-2">&amp;</span>request.path, request.location)<span class="question-mark">?</span>,
             })),
 
-            Request::Metadata(request) =&gt; <span class="prelude-val">Ok</span>(Reply::Metadata(reply::Metadata {
+            <span class="attr">#[cfg(feature = <span class="string">"filesystem-client"</span>)]
+            </span>Request::Metadata(request) =&gt; <span class="prelude-val">Ok</span>(Reply::Metadata(reply::Metadata {
                 metadata: filestore.metadata(<span class="kw-2">&amp;</span>request.path, request.location)<span class="question-mark">?</span>,
             })),
 
-            Request::Rename(request) =&gt; {
+            <span class="attr">#[cfg(feature = <span class="string">"filesystem-client"</span>)]
+            </span>Request::Rename(request) =&gt; {
                 filestore.rename(<span class="kw-2">&amp;</span>request.from, <span class="kw-2">&amp;</span>request.to, request.location)<span class="question-mark">?</span>;
                 <span class="prelude-val">Ok</span>(Reply::Rename(reply::Rename {}))
             }
 
-            Request::RandomBytes(request) =&gt; {
+            <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
+            </span>Request::RandomBytes(request) =&gt; {
                 <span class="kw">if </span>request.count &lt;= MAX_MESSAGE_LENGTH {
                     <span class="kw">let </span><span class="kw-2">mut </span>bytes = Message::new();
                     bytes.resize_default(request.count).unwrap();
@@ -1570,7 +1640,8 @@
                 }
             }
 
-            Request::SerializeKey(request) =&gt; <span class="kw">match </span>request.mechanism {
+            <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
+            </span>Request::SerializeKey(request) =&gt; <span class="kw">match </span>request.mechanism {
                 Mechanism::Ed255 =&gt; {
                     mechanisms::Ed255::serialize_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request)
                 }
@@ -1593,7 +1664,8 @@
             }
             .map(Reply::SerializeKey),
 
-            Request::Sign(request) =&gt; <span class="kw">match </span>request.mechanism {
+            <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
+            </span>Request::Sign(request) =&gt; <span class="kw">match </span>request.mechanism {
                 Mechanism::Ed255 =&gt; mechanisms::Ed255::sign(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
                 Mechanism::HmacBlake2s =&gt; {
                     mechanisms::HmacBlake2s::sign(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request)
@@ -1624,12 +1696,14 @@
             }
             .map(Reply::Sign),
 
-            Request::WriteFile(request) =&gt; {
+            <span class="attr">#[cfg(feature = <span class="string">"filesystem-client"</span>)]
+            </span>Request::WriteFile(request) =&gt; {
                 filestore.write(<span class="kw-2">&amp;</span>request.path, request.location, <span class="kw-2">&amp;</span>request.data)<span class="question-mark">?</span>;
                 <span class="prelude-val">Ok</span>(Reply::WriteFile(reply::WriteFile {}))
             }
 
-            Request::UnwrapKey(request) =&gt; <span class="kw">match </span>request.mechanism {
+            <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
+            </span>Request::UnwrapKey(request) =&gt; <span class="kw">match </span>request.mechanism {
                 Mechanism::Chacha8Poly1305 =&gt; {
                     mechanisms::Chacha8Poly1305::unwrap_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request)
                 }
@@ -1637,7 +1711,8 @@
             }
             .map(Reply::UnwrapKey),
 
-            Request::Verify(request) =&gt; <span class="kw">match </span>request.mechanism {
+            <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
+            </span>Request::Verify(request) =&gt; <span class="kw">match </span>request.mechanism {
                 Mechanism::Ed255 =&gt; mechanisms::Ed255::verify(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
                 Mechanism::P521 =&gt; mechanisms::P521::verify(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
                 Mechanism::P384 =&gt; mechanisms::P384::verify(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request),
@@ -1646,7 +1721,8 @@
             }
             .map(Reply::Verify),
 
-            Request::WrapKey(request) =&gt; <span class="kw">match </span>request.mechanism {
+            <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
+            </span>Request::WrapKey(request) =&gt; <span class="kw">match </span>request.mechanism {
                 Mechanism::Aes256Cbc =&gt; {
                     mechanisms::Aes256Cbc::wrap_key(<span class="kw-2">&amp;mut </span>keystore(<span class="self">self</span>, ctx)<span class="question-mark">?</span>, request)
                 }
@@ -1657,7 +1733,8 @@
             }
             .map(Reply::WrapKey),
 
-            Request::RequestUserConsent(request) =&gt; {
+            <span class="attr">#[cfg(feature = <span class="string">"ui-client"</span>)]
+            </span>Request::RequestUserConsent(request) =&gt; {
                 <span class="comment">// assert_eq!(request.level, consent::Level::Normal);
 
                 </span><span class="kw">let </span>starttime = <span class="self">self</span>.platform.user_interface().uptime();
@@ -1713,20 +1790,24 @@
                 }))
             }
 
-            Request::Reboot(request) =&gt; {
+            <span class="attr">#[cfg(feature = <span class="string">"management-client"</span>)]
+            </span>Request::Reboot(request) =&gt; {
                 <span class="self">self</span>.platform.user_interface().reboot(request.to);
             }
 
-            Request::Uptime(_request) =&gt; <span class="prelude-val">Ok</span>(Reply::Uptime(reply::Uptime {
+            <span class="attr">#[cfg(feature = <span class="string">"management-client"</span>)]
+            </span>Request::Uptime(_request) =&gt; <span class="prelude-val">Ok</span>(Reply::Uptime(reply::Uptime {
                 uptime: <span class="self">self</span>.platform.user_interface().uptime(),
             })),
 
-            Request::Wink(request) =&gt; {
+            <span class="attr">#[cfg(feature = <span class="string">"ui-client"</span>)]
+            </span>Request::Wink(request) =&gt; {
                 <span class="self">self</span>.platform.user_interface().wink(request.duration);
                 <span class="prelude-val">Ok</span>(Reply::Wink(reply::Wink {}))
             }
 
-            Request::SetCustomStatus(request) =&gt; {
+            <span class="attr">#[cfg(feature = <span class="string">"ui-client"</span>)]
+            </span>Request::SetCustomStatus(request) =&gt; {
                 <span class="self">self</span>.platform
                     .user_interface()
                     .set_status(Status::Custom(request.status));
@@ -1738,30 +1819,25 @@
                 </span>.create(request.location)
                 .map(|id| Reply::CreateCounter(reply::CreateCounter { id })),
 
-            <span class="attr">#[cfg(not(feature = <span class="string">"counter-client"</span>))]
-            </span>Request::CreateCounter(<span class="kw">_</span>) =&gt; <span class="prelude-val">Err</span>(Error::RequestNotAvailable),
-
             <span class="attr">#[cfg(feature = <span class="string">"counter-client"</span>)]
             </span>Request::IncrementCounter(request) =&gt; counterstore(<span class="self">self</span>, ctx)<span class="question-mark">?
                 </span>.increment(request.id)
                 .map(|counter| Reply::IncrementCounter(reply::IncrementCounter { counter })),
 
-            <span class="attr">#[cfg(not(feature = <span class="string">"counter-client"</span>))]
-            </span>Request::IncrementCounter(<span class="kw">_</span>) =&gt; <span class="prelude-val">Err</span>(Error::RequestNotAvailable),
-
-            Request::DeleteCertificate(request) =&gt; certstore(<span class="self">self</span>, ctx)<span class="question-mark">?
+            <span class="attr">#[cfg(feature = <span class="string">"certificate-client"</span>)]
+            </span>Request::DeleteCertificate(request) =&gt; certstore(<span class="self">self</span>, ctx)<span class="question-mark">?
                 </span>.delete_certificate(request.id)
                 .map(|<span class="kw">_</span>| Reply::DeleteCertificate(reply::DeleteCertificate {})),
 
-            Request::ReadCertificate(request) =&gt; certstore(<span class="self">self</span>, ctx)<span class="question-mark">?
+            <span class="attr">#[cfg(feature = <span class="string">"certificate-client"</span>)]
+            </span>Request::ReadCertificate(request) =&gt; certstore(<span class="self">self</span>, ctx)<span class="question-mark">?
                 </span>.read_certificate(request.id)
                 .map(|der| Reply::ReadCertificate(reply::ReadCertificate { der })),
 
-            Request::WriteCertificate(request) =&gt; certstore(<span class="self">self</span>, ctx)<span class="question-mark">?
+            <span class="attr">#[cfg(feature = <span class="string">"certificate-client"</span>)]
+            </span>Request::WriteCertificate(request) =&gt; certstore(<span class="self">self</span>, ctx)<span class="question-mark">?
                 </span>.write_certificate(request.location, <span class="kw-2">&amp;</span>request.der)
                 .map(|id| Reply::WriteCertificate(reply::WriteCertificate { id })),
-
-            Request::SerdeExtension(<span class="kw">_</span>) =&gt; <span class="prelude-val">Err</span>(Error::RequestNotAvailable),
 
             <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(Error::RequestNotAvailable),
         }

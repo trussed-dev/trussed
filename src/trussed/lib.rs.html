@@ -76,7 +76,10 @@
 <a href="#75" id="75">75</a>
 <a href="#76" id="76">76</a>
 <a href="#77" id="77">77</a>
-<a href="#78" id="78">78</a></pre></div><pre class="rust"><code><span class="attr">#![cfg_attr(not(any(feature = <span class="string">"std"</span>, test)), no_std)]
+<a href="#78" id="78">78</a>
+<a href="#79" id="79">79</a>
+<a href="#80" id="80">80</a>
+<a href="#81" id="81">81</a></pre></div><pre class="rust"><code><span class="attr">#![cfg_attr(not(any(feature = <span class="string">"std"</span>, test)), no_std)]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 </span><span class="doccomment">//! # Trussed
 //!
@@ -106,7 +109,8 @@
 <span class="kw">pub mod </span>client;
 <span class="kw">pub mod </span>config;
 <span class="kw">pub mod </span>key;
-<span class="kw">pub mod </span>mechanisms;
+<span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
+</span><span class="kw">pub mod </span>mechanisms;
 <span class="kw">pub mod </span>pipe;
 <span class="kw">pub mod </span>platform;
 <span class="attr">#[cfg(feature = <span class="string">"serde-extensions"</span>)]
@@ -120,7 +124,9 @@
 </span><span class="kw">pub mod </span>virt;
 
 <span class="kw">pub use </span>api::Reply;
-<span class="kw">pub use </span>client::{Client, ClientImplementation};
+<span class="attr">#[cfg(feature = <span class="string">"all-clients"</span>)]
+</span><span class="kw">pub use </span>client::Client;
+<span class="kw">pub use </span>client::ClientImplementation;
 <span class="kw">pub use </span>error::Error;
 <span class="doccomment">/// The trait that platforms need to implement to use Trussed.
 </span><span class="kw">pub use </span>platform::Platform;
@@ -148,7 +154,7 @@
     <span class="prelude-val">Ok</span>(Bytes::from(vec))
 }
 
-<span class="attr">#[cfg(test)]
+<span class="attr">#[cfg(all(test, feature = <span class="string">"crypto-client"</span>, feature = <span class="string">"filesystem-client"</span>))]
 </span><span class="kw">mod </span>tests;
 
 <span class="attr">#[cfg(test)]

@@ -312,7 +312,29 @@
 <a href="#311" id="311">311</a>
 <a href="#312" id="312">312</a>
 <a href="#313" id="313">313</a>
-<a href="#314" id="314">314</a></pre></div><pre class="rust"><code><span class="doccomment">//! # Client interface for applications.
+<a href="#314" id="314">314</a>
+<a href="#315" id="315">315</a>
+<a href="#316" id="316">316</a>
+<a href="#317" id="317">317</a>
+<a href="#318" id="318">318</a>
+<a href="#319" id="319">319</a>
+<a href="#320" id="320">320</a>
+<a href="#321" id="321">321</a>
+<a href="#322" id="322">322</a>
+<a href="#323" id="323">323</a>
+<a href="#324" id="324">324</a>
+<a href="#325" id="325">325</a>
+<a href="#326" id="326">326</a>
+<a href="#327" id="327">327</a>
+<a href="#328" id="328">328</a>
+<a href="#329" id="329">329</a>
+<a href="#330" id="330">330</a>
+<a href="#331" id="331">331</a>
+<a href="#332" id="332">332</a>
+<a href="#333" id="333">333</a>
+<a href="#334" id="334">334</a>
+<a href="#335" id="335">335</a>
+<a href="#336" id="336">336</a></pre></div><pre class="rust"><code><span class="doccomment">//! # Client interface for applications.
 //!
 //! The API methods (such as `GenerateKey`, `Sign`, `Verify`,...) are implemented by a variety
 //! of mechanisms (such as `Ed255`, `X255`, `Chacha8Poly1305`, `HmacSha256`,...).
@@ -401,21 +423,37 @@
 
 <span class="kw">pub use </span><span class="kw">crate</span>::platform::Syscall;
 
-<span class="kw">pub mod </span>mechanisms;
-<span class="kw">pub use </span>mechanisms::<span class="kw-2">*</span>;
+<span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
+</span><span class="kw">pub mod </span>mechanisms;
+<span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
+</span><span class="kw">pub use </span>mechanisms::<span class="kw-2">*</span>;
 
-<span class="kw">pub use </span>trussed_core::client::{
-    CertificateClient, ClientError, ClientResult, CounterClient, CryptoClient, FilesystemClient,
-    FutureResult, ManagementClient, PollClient, UiClient,
-};
+<span class="kw">pub use </span>trussed_core::client::{ClientError, ClientResult, FutureResult, PollClient};
+
+<span class="attr">#[cfg(feature = <span class="string">"attestation-client"</span>)]
+</span><span class="kw">pub use </span>trussed_core::client::AttestationClient;
+<span class="attr">#[cfg(feature = <span class="string">"certificate-client"</span>)]
+</span><span class="kw">pub use </span>trussed_core::client::CertificateClient;
+<span class="attr">#[cfg(feature = <span class="string">"counter-client"</span>)]
+</span><span class="kw">pub use </span>trussed_core::client::CounterClient;
+<span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
+</span><span class="kw">pub use </span>trussed_core::client::CryptoClient;
+<span class="attr">#[cfg(feature = <span class="string">"filesystem-client"</span>)]
+</span><span class="kw">pub use </span>trussed_core::client::FilesystemClient;
+<span class="attr">#[cfg(feature = <span class="string">"management-client"</span>)]
+</span><span class="kw">pub use </span>trussed_core::client::ManagementClient;
+<span class="attr">#[cfg(feature = <span class="string">"ui-client"</span>)]
+</span><span class="kw">pub use </span>trussed_core::client::UiClient;
 
 <span class="doccomment">/// All-in-one trait bounding on the sub-traits.
+</span><span class="attr">#[cfg(feature = <span class="string">"all-clients"</span>)]
 </span><span class="kw">pub trait </span>Client:
     CertificateClient + CryptoClient + CounterClient + FilesystemClient + ManagementClient + UiClient
 {
 }
 
-<span class="kw">impl</span>&lt;S: Syscall, E&gt; Client <span class="kw">for </span>ClientImplementation&lt;S, E&gt; {}
+<span class="attr">#[cfg(feature = <span class="string">"all-clients"</span>)]
+</span><span class="kw">impl</span>&lt;S: Syscall, E&gt; Client <span class="kw">for </span>ClientImplementation&lt;S, E&gt; {}
 
 <span class="doccomment">/// The client implementation client applications actually receive.
 </span><span class="kw">pub struct </span>ClientImplementation&lt;S, D = CoreOnly&gt; {
@@ -522,12 +560,18 @@
     }
 }
 
-<span class="kw">impl</span>&lt;S: Syscall, E&gt; CertificateClient <span class="kw">for </span>ClientImplementation&lt;S, E&gt; {}
-<span class="kw">impl</span>&lt;S: Syscall, E&gt; CryptoClient <span class="kw">for </span>ClientImplementation&lt;S, E&gt; {}
-<span class="kw">impl</span>&lt;S: Syscall, E&gt; CounterClient <span class="kw">for </span>ClientImplementation&lt;S, E&gt; {}
-<span class="kw">impl</span>&lt;S: Syscall, E&gt; FilesystemClient <span class="kw">for </span>ClientImplementation&lt;S, E&gt; {}
-<span class="kw">impl</span>&lt;S: Syscall, E&gt; ManagementClient <span class="kw">for </span>ClientImplementation&lt;S, E&gt; {}
-<span class="kw">impl</span>&lt;S: Syscall, E&gt; UiClient <span class="kw">for </span>ClientImplementation&lt;S, E&gt; {}
+<span class="attr">#[cfg(feature = <span class="string">"certificate-client"</span>)]
+</span><span class="kw">impl</span>&lt;S: Syscall, E&gt; CertificateClient <span class="kw">for </span>ClientImplementation&lt;S, E&gt; {}
+<span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
+</span><span class="kw">impl</span>&lt;S: Syscall, E&gt; CryptoClient <span class="kw">for </span>ClientImplementation&lt;S, E&gt; {}
+<span class="attr">#[cfg(feature = <span class="string">"counter-client"</span>)]
+</span><span class="kw">impl</span>&lt;S: Syscall, E&gt; CounterClient <span class="kw">for </span>ClientImplementation&lt;S, E&gt; {}
+<span class="attr">#[cfg(feature = <span class="string">"filesystem-client"</span>)]
+</span><span class="kw">impl</span>&lt;S: Syscall, E&gt; FilesystemClient <span class="kw">for </span>ClientImplementation&lt;S, E&gt; {}
+<span class="attr">#[cfg(feature = <span class="string">"management-client"</span>)]
+</span><span class="kw">impl</span>&lt;S: Syscall, E&gt; ManagementClient <span class="kw">for </span>ClientImplementation&lt;S, E&gt; {}
+<span class="attr">#[cfg(feature = <span class="string">"ui-client"</span>)]
+</span><span class="kw">impl</span>&lt;S: Syscall, E&gt; UiClient <span class="kw">for </span>ClientImplementation&lt;S, E&gt; {}
 
 <span class="doccomment">/// Builder for [`ClientImplementation`][].
 ///

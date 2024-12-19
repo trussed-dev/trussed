@@ -557,19 +557,214 @@
 <a href="#556" id="556">556</a>
 <a href="#557" id="557">557</a>
 <a href="#558" id="558">558</a>
-<a href="#559" id="559">559</a></pre></div><pre class="rust"><code><span class="doccomment">//! This (incomplete!) API loosely follows [PKCS#11 v3][pkcs11-v3].
+<a href="#559" id="559">559</a>
+<a href="#560" id="560">560</a>
+<a href="#561" id="561">561</a>
+<a href="#562" id="562">562</a>
+<a href="#563" id="563">563</a>
+<a href="#564" id="564">564</a>
+<a href="#565" id="565">565</a>
+<a href="#566" id="566">566</a>
+<a href="#567" id="567">567</a>
+<a href="#568" id="568">568</a>
+<a href="#569" id="569">569</a>
+<a href="#570" id="570">570</a>
+<a href="#571" id="571">571</a>
+<a href="#572" id="572">572</a>
+<a href="#573" id="573">573</a>
+<a href="#574" id="574">574</a>
+<a href="#575" id="575">575</a>
+<a href="#576" id="576">576</a>
+<a href="#577" id="577">577</a>
+<a href="#578" id="578">578</a>
+<a href="#579" id="579">579</a>
+<a href="#580" id="580">580</a>
+<a href="#581" id="581">581</a>
+<a href="#582" id="582">582</a>
+<a href="#583" id="583">583</a>
+<a href="#584" id="584">584</a>
+<a href="#585" id="585">585</a>
+<a href="#586" id="586">586</a>
+<a href="#587" id="587">587</a>
+<a href="#588" id="588">588</a>
+<a href="#589" id="589">589</a>
+<a href="#590" id="590">590</a>
+<a href="#591" id="591">591</a>
+<a href="#592" id="592">592</a>
+<a href="#593" id="593">593</a>
+<a href="#594" id="594">594</a>
+<a href="#595" id="595">595</a>
+<a href="#596" id="596">596</a>
+<a href="#597" id="597">597</a>
+<a href="#598" id="598">598</a>
+<a href="#599" id="599">599</a>
+<a href="#600" id="600">600</a>
+<a href="#601" id="601">601</a>
+<a href="#602" id="602">602</a>
+<a href="#603" id="603">603</a>
+<a href="#604" id="604">604</a>
+<a href="#605" id="605">605</a>
+<a href="#606" id="606">606</a>
+<a href="#607" id="607">607</a>
+<a href="#608" id="608">608</a>
+<a href="#609" id="609">609</a>
+<a href="#610" id="610">610</a>
+<a href="#611" id="611">611</a>
+<a href="#612" id="612">612</a>
+<a href="#613" id="613">613</a>
+<a href="#614" id="614">614</a>
+<a href="#615" id="615">615</a>
+<a href="#616" id="616">616</a>
+<a href="#617" id="617">617</a>
+<a href="#618" id="618">618</a>
+<a href="#619" id="619">619</a>
+<a href="#620" id="620">620</a>
+<a href="#621" id="621">621</a>
+<a href="#622" id="622">622</a>
+<a href="#623" id="623">623</a>
+<a href="#624" id="624">624</a>
+<a href="#625" id="625">625</a>
+<a href="#626" id="626">626</a>
+<a href="#627" id="627">627</a>
+<a href="#628" id="628">628</a>
+<a href="#629" id="629">629</a>
+<a href="#630" id="630">630</a>
+<a href="#631" id="631">631</a>
+<a href="#632" id="632">632</a>
+<a href="#633" id="633">633</a>
+<a href="#634" id="634">634</a>
+<a href="#635" id="635">635</a>
+<a href="#636" id="636">636</a>
+<a href="#637" id="637">637</a>
+<a href="#638" id="638">638</a>
+<a href="#639" id="639">639</a>
+<a href="#640" id="640">640</a>
+<a href="#641" id="641">641</a>
+<a href="#642" id="642">642</a>
+<a href="#643" id="643">643</a>
+<a href="#644" id="644">644</a>
+<a href="#645" id="645">645</a>
+<a href="#646" id="646">646</a>
+<a href="#647" id="647">647</a>
+<a href="#648" id="648">648</a>
+<a href="#649" id="649">649</a>
+<a href="#650" id="650">650</a>
+<a href="#651" id="651">651</a>
+<a href="#652" id="652">652</a>
+<a href="#653" id="653">653</a>
+<a href="#654" id="654">654</a>
+<a href="#655" id="655">655</a>
+<a href="#656" id="656">656</a>
+<a href="#657" id="657">657</a>
+<a href="#658" id="658">658</a>
+<a href="#659" id="659">659</a>
+<a href="#660" id="660">660</a>
+<a href="#661" id="661">661</a>
+<a href="#662" id="662">662</a>
+<a href="#663" id="663">663</a>
+<a href="#664" id="664">664</a>
+<a href="#665" id="665">665</a>
+<a href="#666" id="666">666</a>
+<a href="#667" id="667">667</a>
+<a href="#668" id="668">668</a>
+<a href="#669" id="669">669</a>
+<a href="#670" id="670">670</a>
+<a href="#671" id="671">671</a>
+<a href="#672" id="672">672</a>
+<a href="#673" id="673">673</a>
+<a href="#674" id="674">674</a>
+<a href="#675" id="675">675</a>
+<a href="#676" id="676">676</a>
+<a href="#677" id="677">677</a>
+<a href="#678" id="678">678</a>
+<a href="#679" id="679">679</a>
+<a href="#680" id="680">680</a>
+<a href="#681" id="681">681</a>
+<a href="#682" id="682">682</a>
+<a href="#683" id="683">683</a>
+<a href="#684" id="684">684</a>
+<a href="#685" id="685">685</a>
+<a href="#686" id="686">686</a>
+<a href="#687" id="687">687</a>
+<a href="#688" id="688">688</a>
+<a href="#689" id="689">689</a>
+<a href="#690" id="690">690</a>
+<a href="#691" id="691">691</a>
+<a href="#692" id="692">692</a>
+<a href="#693" id="693">693</a>
+<a href="#694" id="694">694</a>
+<a href="#695" id="695">695</a>
+<a href="#696" id="696">696</a>
+<a href="#697" id="697">697</a>
+<a href="#698" id="698">698</a>
+<a href="#699" id="699">699</a>
+<a href="#700" id="700">700</a>
+<a href="#701" id="701">701</a>
+<a href="#702" id="702">702</a>
+<a href="#703" id="703">703</a>
+<a href="#704" id="704">704</a>
+<a href="#705" id="705">705</a>
+<a href="#706" id="706">706</a>
+<a href="#707" id="707">707</a>
+<a href="#708" id="708">708</a>
+<a href="#709" id="709">709</a>
+<a href="#710" id="710">710</a>
+<a href="#711" id="711">711</a>
+<a href="#712" id="712">712</a>
+<a href="#713" id="713">713</a>
+<a href="#714" id="714">714</a>
+<a href="#715" id="715">715</a>
+<a href="#716" id="716">716</a>
+<a href="#717" id="717">717</a>
+<a href="#718" id="718">718</a>
+<a href="#719" id="719">719</a>
+<a href="#720" id="720">720</a>
+<a href="#721" id="721">721</a>
+<a href="#722" id="722">722</a>
+<a href="#723" id="723">723</a>
+<a href="#724" id="724">724</a>
+<a href="#725" id="725">725</a></pre></div><pre class="rust"><code><span class="doccomment">//! This (incomplete!) API loosely follows [PKCS#11 v3][pkcs11-v3].
 //!
 //! For constants see [their headers][pkcs11-headers].
 //!
 //! [pkcs11-v3]: https://docs.oasis-open.org/pkcs11/pkcs11-base/v3.0/pkcs11-base-v3.0.html
 //! [pkcs11-headers]: https://docs.oasis-open.org/pkcs11/pkcs11-base/v3.0/cs01/include/pkcs11-v3.0/
 
+</span><span class="attr">#[cfg(any(feature = <span class="string">"management-client"</span>, feature = <span class="string">"ui-client"</span>))]
 </span><span class="kw">use </span>core::time::Duration;
 
-<span class="kw">use </span><span class="kw">crate</span>::types::{
-    consent, reboot, Bytes, CertId, CounterId, DirEntry, KeyId, KeySerialization, Location,
-    Mechanism, MediumData, Message, PathBuf, SerializedKey, ShortData, Signature,
-    SignatureSerialization, StorageAttributes, UserAttribute,
+<span class="attr">#[cfg(feature = <span class="string">"ui-client"</span>)]
+</span><span class="kw">use </span><span class="kw">crate</span>::types::consent;
+<span class="attr">#[cfg(feature = <span class="string">"management-client"</span>)]
+</span><span class="kw">use </span><span class="kw">crate</span>::types::reboot;
+<span class="attr">#[cfg(feature = <span class="string">"serde-extensions"</span>)]
+</span><span class="kw">use </span><span class="kw">crate</span>::types::Bytes;
+<span class="attr">#[cfg(any(feature = <span class="string">"attestation-client"</span>, feature = <span class="string">"certificate-client"</span>))]
+</span><span class="kw">use </span><span class="kw">crate</span>::types::CertId;
+<span class="attr">#[cfg(feature = <span class="string">"counter-client"</span>)]
+</span><span class="kw">use </span><span class="kw">crate</span>::types::CounterId;
+<span class="attr">#[cfg(any(
+    feature = <span class="string">"certificate-client"</span>,
+    feature = <span class="string">"counter-client"</span>,
+    feature = <span class="string">"crypto-client"</span>,
+    feature = <span class="string">"filesystem-client"
+</span>))]
+</span><span class="kw">use </span><span class="kw">crate</span>::types::Location;
+<span class="attr">#[cfg(any(
+    feature = <span class="string">"certificate-client"</span>,
+    feature = <span class="string">"crypto-client"</span>,
+    feature = <span class="string">"filesystem-client"
+</span>))]
+</span><span class="kw">use </span><span class="kw">crate</span>::types::Message;
+<span class="kw">use </span><span class="kw">crate</span>::types::PathBuf;
+<span class="attr">#[cfg(feature = <span class="string">"filesystem-client"</span>)]
+</span><span class="kw">use </span><span class="kw">crate</span>::types::{DirEntry, UserAttribute};
+<span class="attr">#[cfg(any(feature = <span class="string">"attestation-client"</span>, feature = <span class="string">"crypto-client"</span>))]
+</span><span class="kw">use </span><span class="kw">crate</span>::types::{KeyId, Mechanism};
+<span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
+</span><span class="kw">use </span><span class="kw">crate</span>::types::{
+    KeySerialization, MediumData, SerializedKey, ShortData, Signature, SignatureSerialization,
+    StorageAttributes,
 };
 
 <span class="attr">#[macro_use]
@@ -613,44 +808,71 @@
     // Crypto //
     ////////////
 
+    </span><span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
     </span>Agree: <span class="number">1
     </span><span class="comment">// CreateObject: 2
     // TODO: why do Decrypt and DeriveKey both have discriminant 3?!
+    </span><span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
     </span>Decrypt: <span class="number">3
+    </span><span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
     </span>DeriveKey: <span class="number">4
+    </span><span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
     </span>DeserializeKey: <span class="number">5
+    </span><span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
     </span>Encrypt: <span class="number">6
+    </span><span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
     </span>Delete: <span class="number">7
     </span><span class="comment">// Clear private data from the key
     // This will not always delete all metadata from storage.
     // Other backends can retain metadata required for `unwrap_key` to work properly
     // and delete this metadata only once `delete` is called.
+    </span><span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
     </span>Clear: <span class="number">63
+    </span><span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
     </span>DeleteAllKeys: <span class="number">25
+    </span><span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
     </span>Exists: <span class="number">8
     </span><span class="comment">// DeriveKeypair: 3
     // FindObjects: 9
+    </span><span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
     </span>GenerateKey: <span class="number">10
+    </span><span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
     </span>GenerateSecretKey: <span class="number">11
     </span><span class="comment">// GenerateKeypair: 6
+    </span><span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
     </span>Hash: <span class="number">12
     </span><span class="comment">// TODO: add ReadDir{First,Next}, not loading data, if needed for efficiency
+    </span><span class="attr">#[cfg(feature = <span class="string">"filesystem-client"</span>)]
     </span>ReadDirFilesFirst: <span class="number">13
+    </span><span class="attr">#[cfg(feature = <span class="string">"filesystem-client"</span>)]
     </span>ReadDirFilesNext: <span class="number">14
+    </span><span class="attr">#[cfg(feature = <span class="string">"filesystem-client"</span>)]
     </span>ReadFile: <span class="number">15
+    </span><span class="attr">#[cfg(feature = <span class="string">"filesystem-client"</span>)]
     </span>Metadata: <span class="number">26
+    </span><span class="attr">#[cfg(feature = <span class="string">"filesystem-client"</span>)]
     </span>Rename: <span class="number">27
     </span><span class="comment">// ReadCounter: 7
+    </span><span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
     </span>RandomBytes: <span class="number">16
+    </span><span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
     </span>SerializeKey: <span class="number">17
+    </span><span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
     </span>Sign: <span class="number">18
+    </span><span class="attr">#[cfg(feature = <span class="string">"filesystem-client"</span>)]
     </span>WriteFile: <span class="number">19
+    </span><span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
     </span>UnsafeInjectKey: <span class="number">20
+    </span><span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
     </span>UnsafeInjectSharedKey: <span class="number">21
+    </span><span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
     </span>UnwrapKey: <span class="number">22
+    </span><span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
     </span>Verify: <span class="number">23
+    </span><span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
     </span>WrapKey: <span class="number">24
 
+    </span><span class="attr">#[cfg(feature = <span class="string">"attestation-client"</span>)]
     </span>Attest: <span class="number">0xFF
 
     </span><span class="comment">/////////////
@@ -658,48 +880,66 @@
     /////////////
 
     // // CreateDir,    &lt;-- implied by WriteFile
+    </span><span class="attr">#[cfg(feature = <span class="string">"filesystem-client"</span>)]
     </span>ReadDirFirst: <span class="number">31 </span><span class="comment">//      &lt;-- gets Option&lt;FileType&gt; to restrict to just dir/file DirEntries,
+    </span><span class="attr">#[cfg(feature = <span class="string">"filesystem-client"</span>)]
     </span>ReadDirNext: <span class="number">32 </span><span class="comment">//      &lt;-- gets Option&lt;FileType&gt; to restrict to just dir/file DirEntries,
     //                   // returns simplified Metadata
     // // ReadDirFilesFirst: 23 // &lt;-- returns contents
     // // ReadDirFilesNext: 24 // &lt;-- returns contents
     // ReadFile: 25
+    </span><span class="attr">#[cfg(feature = <span class="string">"filesystem-client"</span>)]
     </span>RemoveFile: <span class="number">33
+    </span><span class="attr">#[cfg(feature = <span class="string">"filesystem-client"</span>)]
     </span>RemoveDir: <span class="number">36
+    </span><span class="attr">#[cfg(feature = <span class="string">"filesystem-client"</span>)]
     </span>RemoveDirAll: <span class="number">34
     </span><span class="comment">// WriteFile: 29
+    </span><span class="attr">#[cfg(feature = <span class="string">"filesystem-client"</span>)]
     </span>LocateFile: <span class="number">35
 
     </span><span class="comment">////////
     // UI //
     ////////
 
+    </span><span class="attr">#[cfg(feature = <span class="string">"ui-client"</span>)]
     </span>RequestUserConsent: <span class="number">41
+    </span><span class="attr">#[cfg(feature = <span class="string">"management-client"</span>)]
     </span>Reboot: <span class="number">42
+    </span><span class="attr">#[cfg(feature = <span class="string">"management-client"</span>)]
     </span>Uptime: <span class="number">43
+    </span><span class="attr">#[cfg(feature = <span class="string">"ui-client"</span>)]
     </span>Wink: <span class="number">44
+    </span><span class="attr">#[cfg(feature = <span class="string">"ui-client"</span>)]
     </span>SetCustomStatus: <span class="number">45
 
     </span><span class="comment">//////////////
     // Counters //
     //////////////
 
+    </span><span class="attr">#[cfg(feature = <span class="string">"counter-client"</span>)]
     </span>CreateCounter: <span class="number">50
+    </span><span class="attr">#[cfg(feature = <span class="string">"counter-client"</span>)]
     </span>IncrementCounter: <span class="number">51
 
     </span><span class="comment">//////////////////
     // Certificates //
     //////////////////
 
+    </span><span class="attr">#[cfg(feature = <span class="string">"certificate-client"</span>)]
     </span>DeleteCertificate: <span class="number">60
+    </span><span class="attr">#[cfg(feature = <span class="string">"certificate-client"</span>)]
     </span>ReadCertificate: <span class="number">61
+    </span><span class="attr">#[cfg(feature = <span class="string">"certificate-client"</span>)]
     </span>WriteCertificate: <span class="number">62
 
     </span><span class="comment">///////////
     // Other //
     ///////////
+    </span><span class="attr">#[cfg(feature = <span class="string">"filesystem-client"</span>)]
     </span>DebugDumpStore: <span class="number">0x79
 
+    </span><span class="attr">#[cfg(feature = <span class="string">"serde-extensions"</span>)]
     </span>SerdeExtension: <span class="number">0x5E
 </span>}
 
@@ -712,16 +952,19 @@
 }
 
 <span class="kw">pub mod </span>request {
-    <span class="kw">use super</span>::<span class="kw-2">*</span>;
+    <span class="attr">#[allow(unused_imports)]
+    </span><span class="kw">use super</span>::<span class="kw-2">*</span>;
 
     <span class="macro">impl_request!</span> {
-        Agree:
+        <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
+        </span>Agree:
             - mechanism: Mechanism
             - private_key: KeyId
             - public_key: KeyId
             - attributes: StorageAttributes
 
-        Attest:
+        <span class="attr">#[cfg(feature = <span class="string">"attestation-client"</span>)]
+        </span>Attest:
             <span class="comment">// only Ed255 + P256
             </span>- signing_mechanism: Mechanism
             <span class="comment">// only Ed255 + P256
@@ -733,9 +976,11 @@
         // CreateObject:
         //     - attributes: Attributes
 
+        </span><span class="attr">#[cfg(feature = <span class="string">"filesystem-client"</span>)]
         </span>DebugDumpStore:
 
-        Decrypt:
+        <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
+        </span>Decrypt:
           - mechanism: Mechanism
           - key: KeyId
           - message: Message
@@ -743,13 +988,16 @@
           - nonce: ShortData
           - tag: ShortData
 
-        Delete:
+        <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
+        </span>Delete:
           - key: KeyId
 
-        Clear:
+        <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
+        </span>Clear:
           - key: KeyId
 
-        DeleteAllKeys:
+        <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
+        </span>DeleteAllKeys:
           - location: Location
 
         <span class="comment">// DeleteBlob:
@@ -760,6 +1008,7 @@
         // - public key from private key
         // - Diffie-Hellman
         // - hierarchical deterministic wallet stuff
+        </span><span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
         </span>DeriveKey:
             - mechanism: Mechanism
             - base_key: KeyId
@@ -774,32 +1023,37 @@
         //     // - additional_data: Message
         //     // - attributes: KeyAttributes
 
+        </span><span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
         </span>DeserializeKey:
           - mechanism: Mechanism
           - serialized_key: SerializedKey
           - format: KeySerialization
           - attributes: StorageAttributes
 
-        Encrypt:
+        <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
+        </span>Encrypt:
           - mechanism: Mechanism
           - key: KeyId
           - message: Message
           - associated_data: ShortData
           - nonce: <span class="prelude-ty">Option</span>&lt;ShortData&gt;
 
-        Exists:
+        <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
+        </span>Exists:
           - mechanism: Mechanism
           - key: KeyId
 
         <span class="comment">// FindObjects:
         //     // - attributes: Attributes
 
+        </span><span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
         </span>GenerateKey:
             - mechanism: Mechanism        <span class="comment">// -&gt; implies key type
             // - attributes: KeyAttributes
             </span>- attributes: StorageAttributes
 
-        GenerateSecretKey:
+        <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
+        </span>GenerateSecretKey:
             - size: usize        <span class="comment">// -&gt; implies key type
             // - attributes: KeyAttributes
             </span>- attributes: StorageAttributes
@@ -815,51 +1069,63 @@
         //     - object: ObjectHandle
         //     - attributes: Attributes
 
+        </span><span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
         </span>Hash:
           - mechanism: Mechanism
           - message: Message
 
-        LocateFile:
+        <span class="attr">#[cfg(feature = <span class="string">"filesystem-client"</span>)]
+        </span>LocateFile:
           - location: Location
           - dir: <span class="prelude-ty">Option</span>&lt;PathBuf&gt;
           - filename: PathBuf
 
-        ReadDirFilesFirst:
+        <span class="attr">#[cfg(feature = <span class="string">"filesystem-client"</span>)]
+        </span>ReadDirFilesFirst:
           - location: Location
           - dir: PathBuf
           - user_attribute: <span class="prelude-ty">Option</span>&lt;UserAttribute&gt;
 
-        ReadDirFilesNext:
+        <span class="attr">#[cfg(feature = <span class="string">"filesystem-client"</span>)]
+        </span>ReadDirFilesNext:
 
-        ReadDirFirst:
+        <span class="attr">#[cfg(feature = <span class="string">"filesystem-client"</span>)]
+        </span>ReadDirFirst:
           - location: Location
           - dir: PathBuf
           - not_before: NotBefore
 
-        ReadDirNext:
+        <span class="attr">#[cfg(feature = <span class="string">"filesystem-client"</span>)]
+        </span>ReadDirNext:
 
-        ReadFile:
+        <span class="attr">#[cfg(feature = <span class="string">"filesystem-client"</span>)]
+        </span>ReadFile:
           - location: Location
           - path: PathBuf
 
-        Metadata:
+        <span class="attr">#[cfg(feature = <span class="string">"filesystem-client"</span>)]
+        </span>Metadata:
           - location: Location
           - path: PathBuf
 
-        Rename:
+        <span class="attr">#[cfg(feature = <span class="string">"filesystem-client"</span>)]
+        </span>Rename:
           - location: Location
           - from: PathBuf
           - to: PathBuf
 
-        RemoveFile:
+        <span class="attr">#[cfg(feature = <span class="string">"filesystem-client"</span>)]
+        </span>RemoveFile:
           - location: Location
           - path: PathBuf
 
-        RemoveDir:
+        <span class="attr">#[cfg(feature = <span class="string">"filesystem-client"</span>)]
+        </span>RemoveDir:
           - location: Location
           - path: PathBuf
 
-        RemoveDirAll:
+        <span class="attr">#[cfg(feature = <span class="string">"filesystem-client"</span>)]
+        </span>RemoveDirAll:
           - location: Location
           - path: PathBuf
 
@@ -867,37 +1133,44 @@
         // ReadCounter:
         //     - counter: ObjectHandle
 
+        </span><span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
         </span>RandomBytes:
           - count: usize
 
-        SerializeKey:
+        <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
+        </span>SerializeKey:
           - mechanism: Mechanism
           - key: KeyId
           - format: KeySerialization
 
-        Sign:
+        <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
+        </span>Sign:
           - mechanism: Mechanism
           - key: KeyId
           - message: Message
           - format: SignatureSerialization
 
-        WriteFile:
+        <span class="attr">#[cfg(feature = <span class="string">"filesystem-client"</span>)]
+        </span>WriteFile:
           - location: Location
           - path: PathBuf
           - data: Message
           - user_attribute: <span class="prelude-ty">Option</span>&lt;UserAttribute&gt;
 
-        UnsafeInjectKey:
+        <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
+        </span>UnsafeInjectKey:
           - mechanism: Mechanism        <span class="comment">// -&gt; implies key type
           </span>- raw_key: SerializedKey
           - attributes: StorageAttributes
           - format: KeySerialization
 
-        UnsafeInjectSharedKey:
+        <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
+        </span>UnsafeInjectSharedKey:
           - location: Location
           - raw_key: ShortData
 
-        UnwrapKey:
+        <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
+        </span>UnwrapKey:
           - mechanism: Mechanism
           - wrapping_key: KeyId
           - wrapped_key: Message
@@ -905,7 +1178,8 @@
           - nonce: ShortData
           - attributes: StorageAttributes
 
-        Verify:
+        <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
+        </span>Verify:
           - mechanism: Mechanism
           - key: KeyId
           - message: Message
@@ -913,6 +1187,7 @@
           - format: SignatureSerialization
 
         <span class="comment">// this should always be an AEAD algorithm
+        </span><span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
         </span>WrapKey:
           - mechanism: Mechanism
           - wrapping_key: KeyId
@@ -920,45 +1195,57 @@
           - associated_data: ShortData
           - nonce: <span class="prelude-ty">Option</span>&lt;ShortData&gt;
 
-        RequestUserConsent:
+        <span class="attr">#[cfg(feature = <span class="string">"ui-client"</span>)]
+        </span>RequestUserConsent:
           - level: consent::Level
           - timeout_milliseconds: u32
 
-        Reboot:
+        <span class="attr">#[cfg(feature = <span class="string">"management-client"</span>)]
+        </span>Reboot:
           - to: reboot::To
 
-        Uptime:
+        <span class="attr">#[cfg(feature = <span class="string">"management-client"</span>)]
+        </span>Uptime:
 
-        Wink:
+        <span class="attr">#[cfg(feature = <span class="string">"ui-client"</span>)]
+        </span>Wink:
           - duration: Duration
 
-        SetCustomStatus:
+        <span class="attr">#[cfg(feature = <span class="string">"ui-client"</span>)]
+        </span>SetCustomStatus:
           - status: u8
 
-        CreateCounter:
+        <span class="attr">#[cfg(feature = <span class="string">"counter-client"</span>)]
+        </span>CreateCounter:
           - location: Location
 
-        IncrementCounter:
+        <span class="attr">#[cfg(feature = <span class="string">"counter-client"</span>)]
+        </span>IncrementCounter:
           - id: CounterId
 
-        DeleteCertificate:
+        <span class="attr">#[cfg(feature = <span class="string">"certificate-client"</span>)]
+        </span>DeleteCertificate:
           - id: CertId
 
-        ReadCertificate:
+        <span class="attr">#[cfg(feature = <span class="string">"certificate-client"</span>)]
+        </span>ReadCertificate:
           - id: CertId
 
-        WriteCertificate:
+        <span class="attr">#[cfg(feature = <span class="string">"certificate-client"</span>)]
+        </span>WriteCertificate:
           - location: Location
           - der: Message
 
-        SerdeExtension:
+        <span class="attr">#[cfg(feature = <span class="string">"serde-extensions"</span>)]
+        </span>SerdeExtension:
           - id: u8
           - request: Bytes&lt;{ <span class="kw">crate</span>::config::SERDE_EXTENSION_REQUEST_LENGTH }&gt;
     }
 }
 
 <span class="kw">pub mod </span>reply {
-    <span class="kw">use super</span>::<span class="kw-2">*</span>;
+    <span class="attr">#[allow(unused_imports)]
+    </span><span class="kw">use super</span>::<span class="kw-2">*</span>;
 
     <span class="comment">// type ObjectHandles = Vec&lt;ObjectHandle, config::MAX_OBJECT_HANDLES&gt;;
 
@@ -967,10 +1254,12 @@
         // depending on mechanism
         // e.g.: P256Raw -&gt; SharedSecret32
         //       P256Sha256 -&gt; SymmetricKey32
+        </span><span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
         </span>Agree:
             - shared_secret: KeyId
 
-        Attest:
+        <span class="attr">#[cfg(feature = <span class="string">"attestation-client"</span>)]
+        </span>Attest:
             - certificate: CertId
 
         <span class="comment">// CreateObject:
@@ -981,138 +1270,181 @@
         //     // can be higher than capacity of vector
         //     - num_objects: usize
 
+        </span><span class="attr">#[cfg(feature = <span class="string">"filesystem-client"</span>)]
         </span>DebugDumpStore:
 
-        Decrypt:
+        <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
+        </span>Decrypt:
             - plaintext: <span class="prelude-ty">Option</span>&lt;Message&gt;
 
-        Delete:
+        <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
+        </span>Delete:
             - success: bool
 
-        Clear:
+        <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
+        </span>Clear:
             - success: bool
 
-        DeleteAllKeys:
+        <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
+        </span>DeleteAllKeys:
             - count: usize
 
-        DeriveKey:
+        <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
+        </span>DeriveKey:
             - key: KeyId
 
         <span class="comment">// DeriveKeypair:
         //     - private_key: ObjectHandle
         //     - public_key: ObjectHandle
 
+        </span><span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
         </span>DeserializeKey:
             - key: KeyId
 
-        Encrypt:
+        <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
+        </span>Encrypt:
             - ciphertext: Message
             - nonce: ShortData
             - tag: ShortData
 
-        Exists:
+        <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
+        </span>Exists:
             - exists: bool
 
-        GenerateKey:
+        <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
+        </span>GenerateKey:
             - key: KeyId
 
-        GenerateSecretKey:
+        <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
+        </span>GenerateSecretKey:
             - key: KeyId
 
         <span class="comment">// GenerateKeypair:
         //     - private_key: KeyId
         //     - public_key: KeyId
 
+        </span><span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
         </span>Hash:
           - hash: ShortData
 
-        LocateFile:
+        <span class="attr">#[cfg(feature = <span class="string">"filesystem-client"</span>)]
+        </span>LocateFile:
           - path: <span class="prelude-ty">Option</span>&lt;PathBuf&gt;
 
-        ReadDirFilesFirst:
+        <span class="attr">#[cfg(feature = <span class="string">"filesystem-client"</span>)]
+        </span>ReadDirFilesFirst:
           - data: <span class="prelude-ty">Option</span>&lt;Message&gt;
 
-        ReadDirFilesNext:
+        <span class="attr">#[cfg(feature = <span class="string">"filesystem-client"</span>)]
+        </span>ReadDirFilesNext:
           - data: <span class="prelude-ty">Option</span>&lt;Message&gt;
 
-        ReadDirFirst:
+        <span class="attr">#[cfg(feature = <span class="string">"filesystem-client"</span>)]
+        </span>ReadDirFirst:
           - entry: <span class="prelude-ty">Option</span>&lt;DirEntry&gt;
 
-        ReadDirNext:
+        <span class="attr">#[cfg(feature = <span class="string">"filesystem-client"</span>)]
+        </span>ReadDirNext:
           - entry: <span class="prelude-ty">Option</span>&lt;DirEntry&gt;
 
-        ReadFile:
+        <span class="attr">#[cfg(feature = <span class="string">"filesystem-client"</span>)]
+        </span>ReadFile:
           - data: Message
 
-        Metadata:
+        <span class="attr">#[cfg(feature = <span class="string">"filesystem-client"</span>)]
+        </span>Metadata:
           - metadata: <span class="prelude-ty">Option</span>&lt;<span class="kw">crate</span>::types::Metadata&gt;
 
-        Rename:
+        <span class="attr">#[cfg(feature = <span class="string">"filesystem-client"</span>)]
+        </span>Rename:
 
-        RemoveDir:
+        <span class="attr">#[cfg(feature = <span class="string">"filesystem-client"</span>)]
+        </span>RemoveDir:
 
-        RemoveDirAll:
+        <span class="attr">#[cfg(feature = <span class="string">"filesystem-client"</span>)]
+        </span>RemoveDirAll:
           - count: usize
 
-        RemoveFile:
+        <span class="attr">#[cfg(feature = <span class="string">"filesystem-client"</span>)]
+        </span>RemoveFile:
 
         <span class="comment">// ReadCounter:
         //     - counter: u32
 
+        </span><span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
         </span>RandomBytes:
             - bytes: Message
 
-        SerializeKey:
+        <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
+        </span>SerializeKey:
             - serialized_key: SerializedKey
 
-        Sign:
+        <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
+        </span>Sign:
             - signature: Signature
 
-        WriteFile:
+        <span class="attr">#[cfg(feature = <span class="string">"filesystem-client"</span>)]
+        </span>WriteFile:
 
-        Verify:
+        <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
+        </span>Verify:
             - valid: bool
 
-        UnsafeInjectKey:
+        <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
+        </span>UnsafeInjectKey:
             - key: KeyId
 
-        UnsafeInjectSharedKey:
+        <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
+        </span>UnsafeInjectSharedKey:
             - key: KeyId
 
-        UnwrapKey:
+        <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
+        </span>UnwrapKey:
             - key: <span class="prelude-ty">Option</span>&lt;KeyId&gt;
 
-        WrapKey:
+        <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
+        </span>WrapKey:
             - wrapped_key: Message
 
         <span class="comment">// UI
+        </span><span class="attr">#[cfg(feature = <span class="string">"ui-client"</span>)]
         </span>RequestUserConsent:
             - result: consent::Result
 
-        Reboot:
+        <span class="attr">#[cfg(feature = <span class="string">"management-client"</span>)]
+        </span>Reboot:
 
-        Uptime:
+        <span class="attr">#[cfg(feature = <span class="string">"management-client"</span>)]
+        </span>Uptime:
           - uptime: Duration
 
-        Wink:
+        <span class="attr">#[cfg(feature = <span class="string">"ui-client"</span>)]
+        </span>Wink:
 
-        SetCustomStatus:
+        <span class="attr">#[cfg(feature = <span class="string">"ui-client"</span>)]
+        </span>SetCustomStatus:
 
-        CreateCounter:
+        <span class="attr">#[cfg(feature = <span class="string">"counter-client"</span>)]
+        </span>CreateCounter:
           - id: CounterId
 
-        IncrementCounter:
+        <span class="attr">#[cfg(feature = <span class="string">"counter-client"</span>)]
+        </span>IncrementCounter:
           - counter: u128
 
-        DeleteCertificate:
+        <span class="attr">#[cfg(feature = <span class="string">"certificate-client"</span>)]
+        </span>DeleteCertificate:
 
-        ReadCertificate:
+        <span class="attr">#[cfg(feature = <span class="string">"certificate-client"</span>)]
+        </span>ReadCertificate:
           - der: Message
 
-        WriteCertificate:
+        <span class="attr">#[cfg(feature = <span class="string">"certificate-client"</span>)]
+        </span>WriteCertificate:
           - id: CertId
 
-        SerdeExtension:
+        <span class="attr">#[cfg(feature = <span class="string">"serde-extensions"</span>)]
+        </span>SerdeExtension:
           - reply: Bytes&lt;{ <span class="kw">crate</span>::config::SERDE_EXTENSION_REPLY_LENGTH }&gt;
     }
 }
