@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"enum":["ClientError"],"struct":["FutureResult"],"trait":["Aes256Cbc","AttestationClient","CertificateClient","Chacha8Poly1305","CounterClient","CryptoClient","Ed255","FilesystemClient","HmacSha1","HmacSha256","ManagementClient","P256","PollClient","Sha256","Tdes","Totp","UiClient","X255"],"type":["ClientResult"]};

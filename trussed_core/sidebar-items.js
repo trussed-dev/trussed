@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"macro":["block","syscall","try_syscall"],"mod":["api","client","config","error","interrupt","types"]};
+window.SIDEBAR_ITEMS = {"enum":["ClientError","Error","InterruptState"],"macro":["block","syscall","try_syscall"],"mod":["api","config","mechanisms","types"],"struct":["FromU8Error","FutureResult","InterruptFlag"],"trait":["AttestationClient","CertificateClient","CounterClient","CryptoClient","FilesystemClient","ManagementClient","PollClient","UiClient"],"type":["ClientResult","Result"]};
