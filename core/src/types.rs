@@ -419,6 +419,7 @@ impl NotBefore {
 /// This enum does not provide access to the trait features.  It is only intended for backends to
 /// use in constant assertions to ensure that the correct features are enabled.
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
+#[repr(u8)]
 #[non_exhaustive]
 pub enum Client {
     AttestationClient,
@@ -453,6 +454,7 @@ impl Client {
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Serialize, Deserialize)]
+#[repr(u8)]
 #[non_exhaustive]
 pub enum Mechanism {
     #[cfg(feature = "aes256-cbc")]
