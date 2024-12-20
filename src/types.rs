@@ -82,6 +82,10 @@ pub const IMPLEMENTED_MECHANISMS: &[Mechanism] = &[
     Mechanism::P521Prehashed,
     #[cfg(feature = "sha256")]
     Mechanism::Sha256,
+    #[cfg(feature = "shared-secret")]
+    Mechanism::SharedSecret,
+    #[cfg(feature = "tdes")]
+    Mechanism::Tdes,
     #[cfg(feature = "totp")]
     Mechanism::Totp,
     #[cfg(feature = "x255")]
