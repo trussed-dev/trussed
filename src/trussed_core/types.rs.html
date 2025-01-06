@@ -723,21 +723,7 @@
 <a href="#722" id="722">722</a>
 <a href="#723" id="723">723</a>
 <a href="#724" id="724">724</a>
-<a href="#725" id="725">725</a>
-<a href="#726" id="726">726</a>
-<a href="#727" id="727">727</a>
-<a href="#728" id="728">728</a>
-<a href="#729" id="729">729</a>
-<a href="#730" id="730">730</a>
-<a href="#731" id="731">731</a>
-<a href="#732" id="732">732</a>
-<a href="#733" id="733">733</a>
-<a href="#734" id="734">734</a>
-<a href="#735" id="735">735</a>
-<a href="#736" id="736">736</a>
-<a href="#737" id="737">737</a>
-<a href="#738" id="738">738</a>
-<a href="#739" id="739">739</a></pre></div><pre class="rust"><code><span class="kw">use </span>core::{marker::PhantomData, ops::Deref};
+<a href="#725" id="725">725</a></pre></div><pre class="rust"><code><span class="kw">use </span>core::{marker::PhantomData, ops::Deref};
 
 <span class="kw">use </span>rand_core::{CryptoRng, RngCore};
 <span class="kw">use </span>serde::{Deserialize, Serialize};
@@ -1191,163 +1177,149 @@
     ];
 }
 
-<span class="attr">#[derive(Copy, Clone, Eq, PartialEq, Debug, Serialize, Deserialize)]
-#[non_exhaustive]
-</span><span class="kw">pub enum </span>Mechanism {
-    <span class="attr">#[cfg(feature = <span class="string">"aes256-cbc"</span>)]
-    </span>Aes256Cbc,
-    <span class="attr">#[cfg(feature = <span class="string">"chacha8-poly1305"</span>)]
-    </span>Chacha8Poly1305,
-    <span class="attr">#[cfg(feature = <span class="string">"ed255"</span>)]
-    </span>Ed255,
-    <span class="attr">#[cfg(feature = <span class="string">"hmac-blake2s"</span>)]
-    </span>HmacBlake2s,
-    <span class="attr">#[cfg(feature = <span class="string">"hmac-sha1"</span>)]
-    </span>HmacSha1,
-    <span class="attr">#[cfg(feature = <span class="string">"hmac-sha256"</span>)]
-    </span>HmacSha256,
-    <span class="attr">#[cfg(feature = <span class="string">"hmac-sha512"</span>)]
-    </span>HmacSha512,
-    <span class="comment">// P256XSha256,
-    </span><span class="attr">#[cfg(feature = <span class="string">"p256"</span>)]
-    </span>P256,
-    <span class="attr">#[cfg(feature = <span class="string">"p256"</span>)]
-    </span>P256Prehashed,
-    <span class="attr">#[cfg(feature = <span class="string">"p384"</span>)]
-    </span>P384,
-    <span class="attr">#[cfg(feature = <span class="string">"p384"</span>)]
-    </span>P384Prehashed,
-    <span class="attr">#[cfg(feature = <span class="string">"p521"</span>)]
-    </span>P521,
-    <span class="attr">#[cfg(feature = <span class="string">"p521"</span>)]
-    </span>P521Prehashed,
-    <span class="attr">#[cfg(feature = <span class="string">"brainpoolp256r1"</span>)]
-    </span>BrainpoolP256R1,
-    <span class="attr">#[cfg(feature = <span class="string">"brainpoolp256r1"</span>)]
-    </span>BrainpoolP256R1Prehashed,
-    <span class="attr">#[cfg(feature = <span class="string">"brainpoolp384r1"</span>)]
-    </span>BrainpoolP384R1,
-    <span class="attr">#[cfg(feature = <span class="string">"brainpoolp384r1"</span>)]
-    </span>BrainpoolP384R1Prehashed,
-    <span class="attr">#[cfg(feature = <span class="string">"brainpoolp512r1"</span>)]
-    </span>BrainpoolP512R1,
-    <span class="attr">#[cfg(feature = <span class="string">"brainpoolp512r1"</span>)]
-    </span>BrainpoolP512R1Prehashed,
-    <span class="attr">#[cfg(feature = <span class="string">"secp256k1"</span>)]
-    </span>Secp256k1,
-    <span class="attr">#[cfg(feature = <span class="string">"secp256k1"</span>)]
-    </span>Secp256k1Prehashed,
-    <span class="comment">// clients can also do hashing by themselves
-    </span><span class="attr">#[cfg(feature = <span class="string">"sha256"</span>)]
-    </span>Sha256,
-    <span class="attr">#[cfg(feature = <span class="string">"tdes"</span>)]
-    </span>Tdes,
-    <span class="attr">#[cfg(feature = <span class="string">"totp"</span>)]
-    </span>Totp,
-    <span class="attr">#[cfg(feature = <span class="string">"trng"</span>)]
-    </span>Trng,
-    <span class="attr">#[cfg(feature = <span class="string">"x255"</span>)]
-    </span>X255,
-    <span class="doccomment">/// Used to serialize the output of a diffie-hellman
-    </span><span class="attr">#[cfg(feature = <span class="string">"shared-secret"</span>)]
-    </span>SharedSecret,
+<span class="macro">macro_rules!</span> generate_mechanism {
+    (
+        $(<span class="attr">#[<span class="macro-nonterminal">$outer</span>:meta]</span>)*
+        <span class="macro-nonterminal">$vis</span>:vis <span class="kw">enum </span><span class="macro-nonterminal">$name</span>:ident {
+            $(
+                <span class="attr">#[cfg($(<span class="macro-nonterminal">$cfg_cond</span>:tt)<span class="kw-2">*</span>)]
+                </span>$(<span class="attr">#[<span class="macro-nonterminal">$inner</span>:meta]</span>)*
+                <span class="macro-nonterminal">$variant</span>:ident,
+            )*
+        }
+    ) =&gt; {
+        $(<span class="attr">#[<span class="macro-nonterminal">$outer</span>]</span>)*
+        <span class="macro-nonterminal">$vis </span><span class="kw">enum </span><span class="macro-nonterminal">$name </span>{
+            $(
+                <span class="attr">#[cfg($(<span class="macro-nonterminal">$cfg_cond</span>)<span class="kw-2">*</span>)]
+                </span>$(<span class="attr">#[<span class="macro-nonterminal">$inner</span>]</span>)*
+                <span class="macro-nonterminal">$variant</span>,
+            )*
+        }
 
-    <span class="doccomment">/// Exposes the Raw RSA encryption/decryption primitive. Be aware this is dangerous.
-    /// Not having any padding can allow an attacker to obtain plaintexts and forge signatures.
-    /// It should only be used if absolutely necessary.
-    </span><span class="attr">#[cfg(feature = <span class="string">"rsa2048"</span>)]
-    </span>Rsa2048Raw,
-    <span class="doccomment">/// Exposes the Raw RSA encryption/decryption primitive. Be aware this is dangerous.
-    /// Not having any padding can allow an attacker to obtain plaintexts and forge signatures.
-    /// It should only be used if absolutely necessary.
-    </span><span class="attr">#[cfg(feature = <span class="string">"rsa3072"</span>)]
-    </span>Rsa3072Raw,
-    <span class="doccomment">/// Exposes the Raw RSA encryption/decryption primitive. Be aware this is dangerous.
-    /// Not having any padding can allow an attacker to obtain plaintexts and forge signatures.
-    /// It should only be used if absolutely necessary.
-    </span><span class="attr">#[cfg(feature = <span class="string">"rsa4096"</span>)]
-    </span>Rsa4096Raw,
+        <span class="kw">impl </span><span class="macro-nonterminal">$name </span>{
+            <span class="doccomment">/// All enabled mechanisms.
+            ///
+            /// The contents of this constant depends on the enabled features.
+            </span><span class="kw">pub const </span>ENABLED: <span class="kw-2">&amp;</span>[<span class="self">Self</span>] = <span class="kw-2">&amp;</span>[
+                $(
+                    <span class="attr">#[cfg($(<span class="macro-nonterminal">$cfg_cond</span>)<span class="kw-2">*</span>)]
+                    </span><span class="self">Self</span>::<span class="macro-nonterminal">$variant</span>,
+                )*
+            ];
 
-    <span class="attr">#[cfg(feature = <span class="string">"rsa2048"</span>)]
-    </span>Rsa2048Pkcs1v15,
-    <span class="attr">#[cfg(feature = <span class="string">"rsa3072"</span>)]
-    </span>Rsa3072Pkcs1v15,
-    <span class="attr">#[cfg(feature = <span class="string">"rsa4096"</span>)]
-    </span>Rsa4096Pkcs1v15,
+            <span class="doccomment">/// Check equality in a const-friendly way.
+            </span><span class="kw">pub const fn </span>const_eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="self">Self</span>) -&gt; bool {
+                <span class="kw">let _ </span>= other;
+                <span class="kw">match </span><span class="kw-2">*</span><span class="self">self </span>{
+                    $(
+                        <span class="attr">#[cfg($(<span class="macro-nonterminal">$cfg_cond</span>)<span class="kw-2">*</span>)]
+                        </span><span class="self">Self</span>::<span class="macro-nonterminal">$variant </span>=&gt; <span class="macro">matches!</span>(other, <span class="self">Self</span>::<span class="macro-nonterminal">$variant</span>),
+                    )*
+                }
+            }
+
+            <span class="doccomment">/// Panic with a message contain this mechanism.
+            ///
+            /// This is intended for compile time checks that don’t have a direct way to indicate
+            /// a missing mechanism in a panic message.
+            </span><span class="kw">pub const fn </span>panic(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ! {
+                <span class="kw">match </span><span class="kw-2">*</span><span class="self">self </span>{
+                    $(
+                        <span class="attr">#[cfg($(<span class="macro-nonterminal">$cfg_cond</span>)<span class="kw-2">*</span>)]
+                        </span><span class="self">Self</span>::<span class="macro-nonterminal">$variant </span>=&gt; <span class="macro">panic!</span>(<span class="macro">concat!</span>(<span class="string">"panic for mechanism: "</span>, <span class="macro">stringify!</span>(<span class="macro-nonterminal">$variant</span>))),
+                    )*
+                }
+            }
+        }
+    }
 }
 
-<span class="kw">impl </span>Mechanism {
-    <span class="doccomment">/// All enabled mechanisms.
-    ///
-    /// The contents of this constant depends on the enabled features.
-    </span><span class="kw">pub const </span>ENABLED: <span class="kw-2">&amp;</span>[<span class="self">Self</span>] = <span class="kw-2">&amp;</span>[
+<span class="macro">generate_mechanism!</span> {
+    <span class="attr">#[derive(Copy, Clone, Eq, PartialEq, Debug, Serialize, Deserialize)]
+    #[non_exhaustive]
+    </span><span class="kw">pub enum </span>Mechanism {
         <span class="attr">#[cfg(feature = <span class="string">"aes256-cbc"</span>)]
-        </span><span class="self">Self</span>::Aes256Cbc,
+        </span>Aes256Cbc,
         <span class="attr">#[cfg(feature = <span class="string">"chacha8-poly1305"</span>)]
-        </span><span class="self">Self</span>::Chacha8Poly1305,
+        </span>Chacha8Poly1305,
         <span class="attr">#[cfg(feature = <span class="string">"ed255"</span>)]
-        </span><span class="self">Self</span>::Ed255,
+        </span>Ed255,
         <span class="attr">#[cfg(feature = <span class="string">"hmac-blake2s"</span>)]
-        </span><span class="self">Self</span>::HmacBlake2s,
+        </span>HmacBlake2s,
         <span class="attr">#[cfg(feature = <span class="string">"hmac-sha1"</span>)]
-        </span><span class="self">Self</span>::HmacSha1,
+        </span>HmacSha1,
         <span class="attr">#[cfg(feature = <span class="string">"hmac-sha256"</span>)]
-        </span><span class="self">Self</span>::HmacSha256,
+        </span>HmacSha256,
         <span class="attr">#[cfg(feature = <span class="string">"hmac-sha512"</span>)]
-        </span><span class="self">Self</span>::HmacSha512,
+        </span>HmacSha512,
+        <span class="comment">// P256XSha256,
+        </span><span class="attr">#[cfg(feature = <span class="string">"p256"</span>)]
+        </span>P256,
         <span class="attr">#[cfg(feature = <span class="string">"p256"</span>)]
-        </span><span class="self">Self</span>::P256,
-        <span class="attr">#[cfg(feature = <span class="string">"p256"</span>)]
-        </span><span class="self">Self</span>::P256Prehashed,
+        </span>P256Prehashed,
         <span class="attr">#[cfg(feature = <span class="string">"p384"</span>)]
-        </span><span class="self">Self</span>::P384,
+        </span>P384,
         <span class="attr">#[cfg(feature = <span class="string">"p384"</span>)]
-        </span><span class="self">Self</span>::P384Prehashed,
+        </span>P384Prehashed,
         <span class="attr">#[cfg(feature = <span class="string">"p521"</span>)]
-        </span><span class="self">Self</span>::P521,
+        </span>P521,
         <span class="attr">#[cfg(feature = <span class="string">"p521"</span>)]
-        </span><span class="self">Self</span>::P521Prehashed,
+        </span>P521Prehashed,
         <span class="attr">#[cfg(feature = <span class="string">"brainpoolp256r1"</span>)]
-        </span><span class="self">Self</span>::BrainpoolP256R1,
+        </span>BrainpoolP256R1,
         <span class="attr">#[cfg(feature = <span class="string">"brainpoolp256r1"</span>)]
-        </span><span class="self">Self</span>::BrainpoolP256R1Prehashed,
+        </span>BrainpoolP256R1Prehashed,
         <span class="attr">#[cfg(feature = <span class="string">"brainpoolp384r1"</span>)]
-        </span><span class="self">Self</span>::BrainpoolP384R1,
+        </span>BrainpoolP384R1,
         <span class="attr">#[cfg(feature = <span class="string">"brainpoolp384r1"</span>)]
-        </span><span class="self">Self</span>::BrainpoolP384R1Prehashed,
+        </span>BrainpoolP384R1Prehashed,
         <span class="attr">#[cfg(feature = <span class="string">"brainpoolp512r1"</span>)]
-        </span><span class="self">Self</span>::BrainpoolP512R1,
+        </span>BrainpoolP512R1,
         <span class="attr">#[cfg(feature = <span class="string">"brainpoolp512r1"</span>)]
-        </span><span class="self">Self</span>::BrainpoolP512R1Prehashed,
+        </span>BrainpoolP512R1Prehashed,
         <span class="attr">#[cfg(feature = <span class="string">"secp256k1"</span>)]
-        </span><span class="self">Self</span>::Secp256k1,
+        </span>Secp256k1,
         <span class="attr">#[cfg(feature = <span class="string">"secp256k1"</span>)]
-        </span><span class="self">Self</span>::Secp256k1Prehashed,
-        <span class="attr">#[cfg(feature = <span class="string">"sha256"</span>)]
-        </span><span class="self">Self</span>::Sha256,
+        </span>Secp256k1Prehashed,
+        <span class="comment">// clients can also do hashing by themselves
+        </span><span class="attr">#[cfg(feature = <span class="string">"sha256"</span>)]
+        </span>Sha256,
         <span class="attr">#[cfg(feature = <span class="string">"tdes"</span>)]
-        </span><span class="self">Self</span>::Tdes,
+        </span>Tdes,
         <span class="attr">#[cfg(feature = <span class="string">"totp"</span>)]
-        </span><span class="self">Self</span>::Totp,
+        </span>Totp,
         <span class="attr">#[cfg(feature = <span class="string">"trng"</span>)]
-        </span><span class="self">Self</span>::Trng,
+        </span>Trng,
         <span class="attr">#[cfg(feature = <span class="string">"x255"</span>)]
-        </span><span class="self">Self</span>::X255,
+        </span>X255,
         <span class="attr">#[cfg(feature = <span class="string">"shared-secret"</span>)]
-        </span><span class="self">Self</span>::SharedSecret,
+        </span><span class="doccomment">/// Used to serialize the output of a diffie-hellman
+        </span>SharedSecret,
+
         <span class="attr">#[cfg(feature = <span class="string">"rsa2048"</span>)]
-        </span><span class="self">Self</span>::Rsa2048Raw,
+        </span><span class="doccomment">/// Exposes the Raw RSA encryption/decryption primitive. Be aware this is dangerous.
+        /// Not having any padding can allow an attacker to obtain plaintexts and forge signatures.
+        /// It should only be used if absolutely necessary.
+        </span>Rsa2048Raw,
         <span class="attr">#[cfg(feature = <span class="string">"rsa3072"</span>)]
-        </span><span class="self">Self</span>::Rsa3072Raw,
+        </span><span class="doccomment">/// Exposes the Raw RSA encryption/decryption primitive. Be aware this is dangerous.
+        /// Not having any padding can allow an attacker to obtain plaintexts and forge signatures.
+        /// It should only be used if absolutely necessary.
+        </span>Rsa3072Raw,
         <span class="attr">#[cfg(feature = <span class="string">"rsa4096"</span>)]
-        </span><span class="self">Self</span>::Rsa4096Raw,
+        </span><span class="doccomment">/// Exposes the Raw RSA encryption/decryption primitive. Be aware this is dangerous.
+        /// Not having any padding can allow an attacker to obtain plaintexts and forge signatures.
+        /// It should only be used if absolutely necessary.
+        </span>Rsa4096Raw,
+
         <span class="attr">#[cfg(feature = <span class="string">"rsa2048"</span>)]
-        </span><span class="self">Self</span>::Rsa2048Pkcs1v15,
+        </span>Rsa2048Pkcs1v15,
         <span class="attr">#[cfg(feature = <span class="string">"rsa3072"</span>)]
-        </span><span class="self">Self</span>::Rsa3072Pkcs1v15,
+        </span>Rsa3072Pkcs1v15,
         <span class="attr">#[cfg(feature = <span class="string">"rsa4096"</span>)]
-        </span><span class="self">Self</span>::Rsa4096Pkcs1v15,
-    ];
+        </span>Rsa4096Pkcs1v15,
+    }
 }
 
 <span class="attr">#[derive(Copy, Clone, Eq, PartialEq, Debug)]
