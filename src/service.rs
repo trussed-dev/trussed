@@ -3,7 +3,6 @@ use rand_chacha::ChaCha8Rng;
 pub use rand_core::{RngCore, SeedableRng};
 
 use crate::backend::{BackendId, CoreOnly, Dispatch};
-use crate::client::{ClientBuilder, ClientImplementation};
 use crate::config::{MAX_MESSAGE_LENGTH, MAX_SERVICE_CLIENTS};
 use crate::error::{Error, Result};
 pub use crate::key;
@@ -11,7 +10,7 @@ pub use crate::key;
 use crate::mechanisms;
 pub use crate::pipe::ServiceEndpoint;
 use crate::pipe::TrussedResponder;
-use crate::platform::{consent, ui, Platform, Store, Syscall, UserInterface};
+use crate::platform::{consent, ui, Platform, Store, UserInterface};
 pub use crate::store::{
     self,
     certstore::{Certstore as _, ClientCertstore},
@@ -951,49 +950,6 @@ impl<P: Platform, D: Dispatch> Service<P, D> {
     }
 }
 
-impl<P: Platform> Service<P> {
-    /// Add a new client, claiming one of the statically configured
-    /// interchange pairs.
-    pub fn try_new_client<S: Syscall>(
-        &mut self,
-        client_id: &str,
-        syscall: S,
-        interrupt: Option<&'static InterruptFlag>,
-    ) -> Result<ClientImplementation<S>, Error> {
-        ClientBuilder::new(PathBuf::try_from(client_id).unwrap())
-            .interrupt(interrupt)
-            .prepare(self)
-            .map(|p| p.build(syscall))
-    }
-
-    /// Specialization of `try_new_client`, using `self`'s implementation of `Syscall`
-    /// (directly call self for processing). This method is only useful for single-threaded
-    /// single-app runners.
-    pub fn try_as_new_client(
-        &mut self,
-        client_id: &str,
-        interrupt: Option<&'static InterruptFlag>,
-    ) -> Result<ClientImplementation<&mut Self>, Error> {
-        ClientBuilder::new(PathBuf::try_from(client_id).unwrap())
-            .interrupt(interrupt)
-            .prepare(self)
-            .map(|p| p.build(self))
-    }
-
-    /// Similar to [try_as_new_client][Service::try_as_new_client] except that the returning client owns the
-    /// Service and is therefore `'static`
-    pub fn try_into_new_client(
-        mut self,
-        client_id: &str,
-        interrupt: Option<&'static InterruptFlag>,
-    ) -> Result<ClientImplementation<Self>, Error> {
-        ClientBuilder::new(PathBuf::try_from(client_id).unwrap())
-            .interrupt(interrupt)
-            .prepare(&mut self)
-            .map(|p| p.build(self))
-    }
-}
-
 impl<P: Platform, D: Dispatch> Service<P, D> {
     pub fn add_endpoint(
         &mut self,
@@ -1104,25 +1060,5 @@ impl<P: Platform, D: Dispatch> Service<P, D> {
 
     pub fn dispatch_mut(&mut self) -> &mut D {
         &mut self.dispatch
-    }
-}
-
-impl<P, D> Syscall for &mut Service<P, D>
-where
-    P: Platform,
-    D: Dispatch,
-{
-    fn syscall(&mut self) {
-        self.process();
-    }
-}
-
-impl<P, D> Syscall for Service<P, D>
-where
-    P: Platform,
-    D: Dispatch,
-{
-    fn syscall(&mut self) {
-        self.process();
     }
 }

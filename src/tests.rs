@@ -126,6 +126,14 @@ type Memory = (
     &'static mut VolatileStorage,
 );
 
+struct ServiceSyscall<'a, P: platform::Platform>(&'a mut crate::Service<P>);
+
+impl<P: platform::Platform> platform::Syscall for ServiceSyscall<'_, P> {
+    fn syscall(&mut self) {
+        self.0.process();
+    }
+}
+
 /// Create a "copy" of a store
 unsafe fn copy_memory(memory: &Memory) -> Memory {
     unsafe {
@@ -182,8 +190,8 @@ macro_rules! setup {
         trussed.set_seed_if_uninitialized(&$seed);
         let mut $client = {
             pub type TestClient<'a> =
-                crate::ClientImplementation<&'a mut crate::Service<$platform>>;
-            TestClient::new(test_trussed_requester, &mut trussed, None)
+                crate::ClientImplementation<ServiceSyscall<'a, $platform>>;
+            TestClient::new(test_trussed_requester, ServiceSyscall(&mut trussed), None)
         };
     };
 }

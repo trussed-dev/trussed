@@ -239,10 +239,6 @@ impl<S: Syscall, E> UiClient for ClientImplementation<S, E> {}
 
 /// Builder for [`ClientImplementation`][].
 ///
-/// This builder can be used to select the backends used for the client.  If no backends are used,
-/// [`Service::try_new_client`][], [`Service::try_as_new_client`][] and
-/// [`Service::try_into_new_client`][] can be used directly.
-///
 /// The maximum number of clients that can be created is defined by the `clients-?` features.  If
 /// this number is exceeded, [`Error::ClientCountExceeded`][] is returned.
 pub struct ClientBuilder<D: Dispatch = CoreOnly> {

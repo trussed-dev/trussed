@@ -8,7 +8,11 @@ mod ui;
 
 use std::{
     path::PathBuf,
-    sync::{Arc, Mutex},
+    sync::{
+        mpsc::{self, Receiver, Sender},
+        Mutex,
+    },
+    thread,
 };
 
 use rand_chacha::ChaCha8Rng;
@@ -17,7 +21,7 @@ use rand_core::SeedableRng as _;
 use crate::{
     backend::{BackendId, CoreOnly, Dispatch},
     client::ClientBuilder,
-    platform::{self, Syscall},
+    platform,
     service::Service,
     ClientImplementation,
 };
@@ -25,10 +29,7 @@ use crate::{
 pub use store::{Filesystem, Ram, StoreProvider};
 pub use ui::UserInterface;
 
-pub type Client<S, D = CoreOnly> = ClientImplementation<Service<Platform<S>, D>, D>;
-/// Virtual client that can coexist with other clients
-pub type MultiClient<S, D = CoreOnly> =
-    ClientImplementation<Arc<Mutex<Service<Platform<S>, D>>>, D>;
+pub type Client<D = CoreOnly> = ClientImplementation<Syscall, D>;
 
 // We need this mutex to make sure that:
 // - TrussedInterchange is not used concurrently (panics if violated)
@@ -57,7 +58,7 @@ where
 pub fn with_client<S, R, F>(store: S, client_id: &str, f: F) -> R
 where
     S: StoreProvider,
-    F: FnOnce(Client<S>) -> R,
+    F: FnOnce(Client) -> R,
 {
     with_platform(store, |platform| platform.run_client(client_id, f))
 }
@@ -65,14 +66,14 @@ where
 pub fn with_fs_client<P, R, F>(internal: P, client_id: &str, f: F) -> R
 where
     P: Into<PathBuf>,
-    F: FnOnce(Client<Filesystem>) -> R,
+    F: FnOnce(Client) -> R,
 {
     with_client(Filesystem::new(internal), client_id, f)
 }
 
 pub fn with_ram_client<R, F>(client_id: &str, f: F) -> R
 where
-    F: FnOnce(Client<Ram>) -> R,
+    F: FnOnce(Client) -> R,
 {
     with_client(Ram::default(), client_id, f)
 }
@@ -80,7 +81,7 @@ where
 pub fn with_clients<S, R, F, const N: usize>(store: S, client_ids: [&str; N], f: F) -> R
 where
     S: StoreProvider,
-    F: FnOnce([MultiClient<S>; N]) -> R,
+    F: FnOnce([Client; N]) -> R,
 {
     with_platform(store, |platform| platform.run_clients(client_ids, f))
 }
@@ -88,7 +89,7 @@ where
 pub fn with_fs_clients<P, R, F, const N: usize>(internal: P, client_ids: [&str; N], f: F) -> R
 where
     P: Into<PathBuf>,
-    F: FnOnce([MultiClient<Filesystem>; N]) -> R,
+    F: FnOnce([Client; N]) -> R,
 {
     with_clients(Filesystem::new(internal), client_ids, f)
 }
@@ -111,9 +112,57 @@ where
 /// ```
 pub fn with_ram_clients<R, F, const N: usize>(client_ids: [&str; N], f: F) -> R
 where
-    F: FnOnce([MultiClient<Ram>; N]) -> R,
+    F: FnOnce([Client; N]) -> R,
 {
     with_clients(Ram::default(), client_ids, f)
+}
+
+pub struct Syscall(Sender<()>);
+
+impl platform::Syscall for Syscall {
+    fn syscall(&mut self) {
+        self.0.send(()).unwrap();
+    }
+}
+
+struct Runner {
+    syscall_tx: Sender<()>,
+    syscall_rx: Receiver<()>,
+}
+
+impl Runner {
+    fn new() -> Self {
+        let (syscall_tx, syscall_rx) = mpsc::channel();
+        Self {
+            syscall_tx,
+            syscall_rx,
+        }
+    }
+
+    fn syscall(&self) -> Syscall {
+        Syscall(self.syscall_tx.clone())
+    }
+
+    fn run<S, D, F, R>(self, mut service: Service<Platform<S>, D>, f: F) -> R
+    where
+        S: StoreProvider,
+        D: Dispatch,
+        F: FnOnce() -> R,
+    {
+        let (stop_tx, stop_rx) = mpsc::channel();
+        thread::scope(|s| {
+            s.spawn(move || {
+                while stop_rx.try_recv().is_err() {
+                    if self.syscall_rx.try_recv().is_ok() {
+                        service.process();
+                    }
+                }
+            });
+            let result = f();
+            stop_tx.send(()).unwrap();
+            result
+        })
+    }
 }
 
 pub struct Platform<S: StoreProvider> {
@@ -122,17 +171,9 @@ pub struct Platform<S: StoreProvider> {
     ui: UserInterface,
 }
 
-impl<S: Syscall> Syscall for Arc<Mutex<S>> {
-    fn syscall(&mut self) {
-        self.lock().unwrap().syscall()
-    }
-}
-
 impl<S: StoreProvider> Platform<S> {
-    pub fn run_client<R>(self, client_id: &str, test: impl FnOnce(Client<S>) -> R) -> R {
-        let service = Service::new(self);
-        let client = service.try_into_new_client(client_id, None).unwrap();
-        test(client)
+    pub fn run_client<R>(self, client_id: &str, test: impl FnOnce(Client) -> R) -> R {
+        self.run_client_with_backends(client_id, CoreOnly, &[], test)
     }
 
     pub fn run_client_with_backends<R, D: Dispatch>(
@@ -140,30 +181,32 @@ impl<S: StoreProvider> Platform<S> {
         client_id: &str,
         dispatch: D,
         backends: &'static [BackendId<D::BackendId>],
-        test: impl FnOnce(Client<S, D>) -> R,
+        test: impl FnOnce(Client<D>) -> R,
     ) -> R {
+        let runner = Runner::new();
         let mut service = Service::with_dispatch(self, dispatch);
         let client = ClientBuilder::new(littlefs2::path::PathBuf::try_from(client_id).unwrap())
             .backends(backends)
             .prepare(&mut service)
             .unwrap()
-            .build(service);
-        test(client)
+            .build(runner.syscall());
+        runner.run(service, || test(client))
     }
 
     pub fn run_clients<R, const N: usize>(
         self,
         client_ids: [&str; N],
-        test: impl FnOnce([MultiClient<S>; N]) -> R,
+        test: impl FnOnce([Client; N]) -> R,
     ) -> R {
+        let runner = Runner::new();
         let mut service = Service::new(self);
-        let prepared_clients = client_ids.map(|id| {
+        let clients = client_ids.map(|id| {
             ClientBuilder::new(littlefs2::path::PathBuf::try_from(id).unwrap())
                 .prepare(&mut service)
                 .unwrap()
+                .build(runner.syscall())
         });
-        let service = Arc::new(Mutex::new(service));
-        test(prepared_clients.map(|builder| builder.build(service.clone())))
+        runner.run(service, || test(clients))
     }
 
     /// Using const generics rather than a `Vec` to allow destructuring in the method
@@ -171,17 +214,18 @@ impl<S: StoreProvider> Platform<S> {
         self,
         client_ids: [(&str, &'static [BackendId<D::BackendId>]); N],
         dispatch: D,
-        test: impl FnOnce([MultiClient<S, D>; N]) -> R,
+        test: impl FnOnce([Client<D>; N]) -> R,
     ) -> R {
+        let runner = Runner::new();
         let mut service = Service::with_dispatch(self, dispatch);
-        let prepared_clients = client_ids.map(|(id, backends)| {
+        let clients = client_ids.map(|(id, backends)| {
             ClientBuilder::new(littlefs2::path::PathBuf::try_from(id).unwrap())
                 .backends(backends)
                 .prepare(&mut service)
                 .unwrap()
+                .build(runner.syscall())
         });
-        let service = Arc::new(Mutex::new(service));
-        test(prepared_clients.map(|builder| builder.build(service.clone())))
+        runner.run(service, || test(clients))
     }
 }
 

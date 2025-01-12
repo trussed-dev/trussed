@@ -26,16 +26,13 @@
 
 use trussed::{
     backend::BackendId,
-    service::Service,
     types::ShortData,
     virt::{self, Ram},
-    ClientImplementation,
 };
 
 use runner::Backends;
 
-type Platform = virt::Platform<Ram>;
-type Client = ClientImplementation<Service<Platform, Backends>, Backends>;
+type Client = virt::Client<Backends>;
 
 mod extensions {
     use serde::{Deserialize, Serialize};

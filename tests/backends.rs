@@ -5,14 +5,12 @@ use trussed::{
     client::FilesystemClient as _,
     error::Error,
     platform,
-    service::{Service, ServiceResources},
+    service::ServiceResources,
     types::{CoreContext, Location, Message, PathBuf},
     virt::{self, Ram},
-    ClientImplementation,
 };
 
-type Platform = virt::Platform<Ram>;
-type Client = ClientImplementation<Service<Platform, Dispatch>, Dispatch>;
+type Client = virt::Client<Dispatch>;
 
 const BACKENDS_TEST: &[BackendId<Backend>] = &[BackendId::Custom(Backend::Test), BackendId::Core];
 
