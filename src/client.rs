@@ -115,15 +115,15 @@ pub trait Client:
 }
 
 #[cfg(feature = "all-clients")]
-impl<S: Syscall, E> Client for ClientImplementation<S, E> {}
+impl<S: Syscall, E> Client for ClientImplementation<'_, S, E> {}
 
 /// The client implementation client applications actually receive.
-pub struct ClientImplementation<S, D = CoreOnly> {
+pub struct ClientImplementation<'a, S, D = CoreOnly> {
     // raw: RawClient<Client<S>>,
     syscall: S,
 
     // RawClient:
-    pub(crate) interchange: TrussedRequester,
+    pub(crate) interchange: TrussedRequester<'a>,
     pub(crate) interrupt: Option<&'static InterruptFlag>,
     // pending: Option<Discriminant<Request>>,
     pending: Option<u8>,
@@ -138,12 +138,12 @@ pub struct ClientImplementation<S, D = CoreOnly> {
 //     }
 // }
 
-impl<S, E> ClientImplementation<S, E>
+impl<'a, S, E> ClientImplementation<'a, S, E>
 where
     S: Syscall,
 {
     pub fn new(
-        interchange: TrussedRequester,
+        interchange: TrussedRequester<'a>,
         syscall: S,
         interrupt: Option<&'static InterruptFlag>,
     ) -> Self {
@@ -157,7 +157,7 @@ where
     }
 }
 
-impl<S, E> PollClient for ClientImplementation<S, E>
+impl<S, E> PollClient for ClientImplementation<'_, S, E>
 where
     S: Syscall,
 {
@@ -223,14 +223,14 @@ where
 }
 
 #[cfg(feature = "certificate-client")]
-impl<S: Syscall, E> CertificateClient for ClientImplementation<S, E> {}
+impl<S: Syscall, E> CertificateClient for ClientImplementation<'_, S, E> {}
 #[cfg(feature = "crypto-client")]
-impl<S: Syscall, E> CryptoClient for ClientImplementation<S, E> {}
+impl<S: Syscall, E> CryptoClient for ClientImplementation<'_, S, E> {}
 #[cfg(feature = "counter-client")]
-impl<S: Syscall, E> CounterClient for ClientImplementation<S, E> {}
+impl<S: Syscall, E> CounterClient for ClientImplementation<'_, S, E> {}
 #[cfg(feature = "filesystem-client")]
-impl<S: Syscall, E> FilesystemClient for ClientImplementation<S, E> {}
+impl<S: Syscall, E> FilesystemClient for ClientImplementation<'_, S, E> {}
 #[cfg(feature = "management-client")]
-impl<S: Syscall, E> ManagementClient for ClientImplementation<S, E> {}
+impl<S: Syscall, E> ManagementClient for ClientImplementation<'_, S, E> {}
 #[cfg(feature = "ui-client")]
-impl<S: Syscall, E> UiClient for ClientImplementation<S, E> {}
+impl<S: Syscall, E> UiClient for ClientImplementation<'_, S, E> {}

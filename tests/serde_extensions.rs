@@ -32,7 +32,7 @@ use trussed::{
 
 use runner::Backends;
 
-type Client = virt::Client<Backends>;
+type Client<'a> = virt::Client<'a, Backends>;
 
 mod extensions {
     use serde::{Deserialize, Serialize};
@@ -369,7 +369,7 @@ mod runner {
     ];
 }
 
-pub fn run<F: FnOnce(&mut Client)>(backends: &'static [BackendId<runner::id::Backend>], f: F) {
+pub fn run<F: FnOnce(&mut Client<'_>)>(backends: &'static [BackendId<runner::id::Backend>], f: F) {
     virt::with_platform(Ram::default(), |platform| {
         platform.run_client_with_backends(
             "test",

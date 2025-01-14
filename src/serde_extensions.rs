@@ -141,7 +141,7 @@ pub trait ExtensionId<E> {
     const ID: Self::Id;
 }
 
-impl<E, S, I> ExtensionClient<E> for ClientImplementation<S, I>
+impl<E, S, I> ExtensionClient<E> for ClientImplementation<'_, S, I>
 where
     E: Extension,
     S: Syscall,

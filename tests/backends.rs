@@ -10,7 +10,7 @@ use trussed::{
     virt::{self, Ram},
 };
 
-type Client = virt::Client<Dispatch>;
+type Client<'a> = virt::Client<'a, Dispatch>;
 
 const BACKENDS_TEST: &[BackendId<Backend>] = &[BackendId::Custom(Backend::Test), BackendId::Core];
 
@@ -48,7 +48,7 @@ impl backend::Backend for TestBackend {
     }
 }
 
-fn run<F: FnOnce(&mut Client)>(backends: &'static [BackendId<Backend>], f: F) {
+fn run<F: FnOnce(&mut Client<'_>)>(backends: &'static [BackendId<Backend>], f: F) {
     virt::with_platform(Ram::default(), |platform| {
         platform.run_client_with_backends("test", Dispatch::default(), backends, |mut client| {
             f(&mut client)

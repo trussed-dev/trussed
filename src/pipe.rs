@@ -2,23 +2,16 @@
 // Ignore lint caused by interchange! macro
 #![allow(clippy::derive_partial_eq_without_eq)]
 
-use interchange::{Interchange, InterchangeRef, Requester, Responder};
+use interchange::{Channel, Requester, Responder};
 
 use crate::api::{Reply, Request};
 use crate::backend::BackendId;
-use crate::config;
 use crate::error::Error;
 use crate::types::{Context, CoreContext};
 
-type TrussedInterchangeInner =
-    Interchange<Request, Result<Reply, Error>, { config::MAX_SERVICE_CLIENTS }>;
-static TRUSSED_INTERCHANGE_INNER: TrussedInterchangeInner = Interchange::new();
-
-pub type TrussedInterchange = InterchangeRef<'static, Request, Result<Reply, Error>>;
-pub static TRUSSED_INTERCHANGE: TrussedInterchange = TRUSSED_INTERCHANGE_INNER.as_interchange_ref();
-
-pub type TrussedResponder = Responder<'static, Request, Result<Reply, Error>>;
-pub type TrussedRequester = Requester<'static, Request, Result<Reply, Error>>;
+pub type TrussedChannel = Channel<Request, Result<Reply, Error>>;
+pub type TrussedResponder<'a> = Responder<'a, Request, Result<Reply, Error>>;
+pub type TrussedRequester<'a> = Requester<'a, Request, Result<Reply, Error>>;
 
 // pub use interchange::TrussedInterchange;
 
@@ -30,17 +23,17 @@ pub type TrussedRequester = Requester<'static, Request, Result<Reply, Error>>;
 // https://xenomai.org/documentation/xenomai-2.4/html/api/group__native__queue.html
 // https://doc.micrium.com/display/osiiidoc/Using+Message+Queues
 
-pub struct ServiceEndpoint<I: 'static, C> {
-    pub(crate) interchange: TrussedResponder,
+pub struct ServiceEndpoint<'a, I: 'static, C> {
+    pub(crate) interchange: TrussedResponder<'a>,
     // service (trusted) has this, not client (untrusted)
     // used among other things to namespace cryptographic material
     pub(crate) ctx: Context<C>,
     pub(crate) backends: &'static [BackendId<I>],
 }
 
-impl<I: 'static, C: Default> ServiceEndpoint<I, C> {
+impl<'a, I: 'static, C: Default> ServiceEndpoint<'a, I, C> {
     pub fn new(
-        interchange: TrussedResponder,
+        interchange: TrussedResponder<'a>,
         context: CoreContext,
         backends: &'static [BackendId<I>],
     ) -> Self {
@@ -56,7 +49,7 @@ impl<I: 'static, C: Default> ServiceEndpoint<I, C> {
 
 #[cfg(test)]
 mod tests {
-    use super::TrussedInterchange;
+    use super::TrussedChannel;
     use crate::api::{Reply, Request};
     use core::mem;
 
@@ -66,23 +59,19 @@ mod tests {
 
     const MAX_SIZE: usize = 2416;
 
-    fn assert_size<T>() {
-        let size = mem::size_of::<T>();
-        assert!(size <= MAX_SIZE, "{size}");
-    }
-
     #[test]
-    fn test_request_size() {
-        assert_size::<Request>();
-    }
+    fn test_sizes() {
+        let request_size = mem::size_of::<Request>();
+        let reply_size = mem::size_of::<Reply>();
+        let channel_size = mem::size_of::<TrussedChannel>();
 
-    #[test]
-    fn test_reply_size() {
-        assert_size::<Reply>();
-    }
+        assert!(request_size <= MAX_SIZE, "request_size = {request_size}");
+        assert!(reply_size <= MAX_SIZE, "reply_size = {request_size}");
 
-    #[test]
-    fn test_interchange_size() {
-        assert_size::<TrussedInterchange>();
+        // Allow some overhead for the channel metadata
+        assert!(
+            channel_size <= MAX_SIZE + 64,
+            "channel_size = {channel_size}"
+        );
     }
 }

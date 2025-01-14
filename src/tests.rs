@@ -126,12 +126,12 @@ type Memory = (
     &'static mut VolatileStorage,
 );
 
-struct ServiceSyscall<P: platform::Platform> {
+struct ServiceSyscall<'a, P: platform::Platform> {
     service: crate::Service<P>,
-    ep: crate::pipe::ServiceEndpoint<crate::backend::NoId, crate::types::NoData>,
+    ep: crate::pipe::ServiceEndpoint<'a, crate::backend::NoId, crate::types::NoData>,
 }
 
-impl<P: platform::Platform> platform::Syscall for ServiceSyscall<P> {
+impl<P: platform::Platform> platform::Syscall for ServiceSyscall<'_, P> {
     fn syscall(&mut self) {
         self.service.process(core::slice::from_mut(&mut self.ep));
     }
@@ -181,8 +181,9 @@ macro_rules! setup {
         let platform = $platform::new(rng, store, pc_interface);
         let mut trussed: crate::Service<$platform> = crate::service::Service::new(platform);
 
-        let (test_trussed_requester, test_trussed_responder) = crate::pipe::TRUSSED_INTERCHANGE
-            .claim()
+        let channel = crate::pipe::TrussedChannel::new();
+        let (test_trussed_requester, test_trussed_responder) = channel
+            .split()
             .expect("could not setup TEST TrussedInterchange");
         let test_client_id = path!("TEST");
         let context = crate::types::CoreContext::new(test_client_id.into());

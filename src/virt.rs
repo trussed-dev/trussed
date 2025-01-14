@@ -7,6 +7,7 @@ mod store;
 mod ui;
 
 use std::{
+    iter,
     path::PathBuf,
     sync::{
         mpsc::{self, Receiver, Sender},
@@ -20,7 +21,7 @@ use rand_core::SeedableRng as _;
 
 use crate::{
     backend::{BackendId, CoreOnly, Dispatch},
-    pipe::{ServiceEndpoint, TrussedResponder, TRUSSED_INTERCHANGE},
+    pipe::{ServiceEndpoint, TrussedChannel, TrussedResponder},
     platform,
     service::Service,
     types::CoreContext,
@@ -30,7 +31,7 @@ use crate::{
 pub use store::{Filesystem, Ram, StoreProvider};
 pub use ui::UserInterface;
 
-pub type Client<D = CoreOnly> = ClientImplementation<Syscall, D>;
+pub type Client<'a, D = CoreOnly> = ClientImplementation<'a, Syscall, D>;
 
 // We need this mutex to make sure that:
 // - TrussedInterchange is not used concurrently (panics if violated)
@@ -126,13 +127,13 @@ impl platform::Syscall for Syscall {
     }
 }
 
-struct Runner<I: 'static, C> {
+struct Runner<'a, I: 'static, C> {
     syscall_tx: Sender<()>,
     syscall_rx: Receiver<()>,
-    eps: Vec<ServiceEndpoint<I, C>>,
+    eps: Vec<ServiceEndpoint<'a, I, C>>,
 }
 
-impl<I: 'static, C: Default> Runner<I, C> {
+impl<'a, I: 'static, C: Default> Runner<'a, I, C> {
     fn new() -> Self {
         let (syscall_tx, syscall_rx) = mpsc::channel();
         Self {
@@ -148,7 +149,7 @@ impl<I: 'static, C: Default> Runner<I, C> {
 
     fn add_endpoint(
         &mut self,
-        responder: TrussedResponder,
+        responder: TrussedResponder<'a>,
         client_id: &str,
         backends: &'static [BackendId<I>],
     ) {
@@ -199,14 +200,15 @@ impl<S: StoreProvider> Platform<S> {
         client_id: &str,
         dispatch: D,
         backends: &'static [BackendId<D::BackendId>],
-        test: impl FnOnce(Client<D>) -> R,
+        test: impl FnOnce(Client<'_, D>) -> R,
     ) -> R
     where
         D::Context: Send + Sync,
         D::BackendId: Send + Sync,
     {
+        let channel = TrussedChannel::new();
         let mut runner = Runner::new();
-        let (requester, responder) = TRUSSED_INTERCHANGE.claim().unwrap();
+        let (requester, responder) = channel.split().unwrap();
         runner.add_endpoint(responder, client_id, backends);
         let client = Client::new(requester, runner.syscall(), None);
         runner.run(self, dispatch, || test(client))
@@ -217,13 +219,16 @@ impl<S: StoreProvider> Platform<S> {
         client_ids: [&str; N],
         test: impl FnOnce([Client; N]) -> R,
     ) -> R {
+        let channels = [const { TrussedChannel::new() }; N];
         let mut runner = Runner::new();
-        let clients = client_ids.map(|id| {
-            let (requester, responder) = TRUSSED_INTERCHANGE.claim().unwrap();
-            runner.add_endpoint(responder, id, &[]);
-            Client::new(requester, runner.syscall(), None)
-        });
-        runner.run(self, CoreOnly, || test(clients))
+        let clients: Vec<_> = iter::zip(client_ids, &channels)
+            .map(|(id, channel)| {
+                let (requester, responder) = channel.split().unwrap();
+                runner.add_endpoint(responder, id, &[]);
+                Client::new(requester, runner.syscall(), None)
+            })
+            .collect();
+        runner.run(self, CoreOnly, || test(clients.try_into().ok().unwrap()))
     }
 
     /// Using const generics rather than a `Vec` to allow destructuring in the method
@@ -231,19 +236,22 @@ impl<S: StoreProvider> Platform<S> {
         self,
         client_ids: [(&str, &'static [BackendId<D::BackendId>]); N],
         dispatch: D,
-        test: impl FnOnce([Client<D>; N]) -> R,
+        test: impl FnOnce([Client<'_, D>; N]) -> R,
     ) -> R
     where
         D::Context: Send + Sync,
         D::BackendId: Send + Sync,
     {
+        let channels = [const { TrussedChannel::new() }; N];
         let mut runner = Runner::new();
-        let clients = client_ids.map(|(id, backends)| {
-            let (requester, responder) = TRUSSED_INTERCHANGE.claim().unwrap();
-            runner.add_endpoint(responder, id, backends);
-            Client::new(requester, runner.syscall(), None)
-        });
-        runner.run(self, dispatch, || test(clients))
+        let clients: Vec<_> = iter::zip(client_ids, &channels)
+            .map(|((id, backends), channel)| {
+                let (requester, responder) = channel.split().unwrap();
+                runner.add_endpoint(responder, id, backends);
+                Client::new(requester, runner.syscall(), None)
+            })
+            .collect();
+        runner.run(self, dispatch, || test(clients.try_into().ok().unwrap()))
     }
 }
 

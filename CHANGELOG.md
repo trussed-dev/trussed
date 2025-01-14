@@ -55,6 +55,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Put all mechanisms behind feature flags.
   - Move `CryptoClient::attest` into new `AttestationClient`.
 - Pass endpoints to `Service::process` instead of storing them in the service.
+- Added support for non-static channels:
+  - Added lifetimes to `ClientImplementation` and `ServiceEndpoints`.
+  - Added the `pipe::TrussedChannel` type.
 
 ### Fixed
 
@@ -71,6 +74,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `config`: `MAX_APPLICATION_NAME_LENGTH`, `MAX_LABEL_LENGTH`, `MAX_LONG_DATA_LENGTH`, `MAX_OBJECT_HANDLES`, `MAX_PATH_LENGTH`
   - `types`: `Attributes`, `CertificateType` `DataAttributes`, `KeyAttributes`, `Letters`, `LongData`, `ObjectType`
 - Removed the `Syscall` implementations for `Service` and the `Syscall::try_as_new_client` and `Syscall::try_new_client` methods.
+- Removed `TrussedInterchange` and `TRUSSED_INTERCHANGE` from `pipe`.
 
 [#64]: https://github.com/trussed-dev/trussed/issues/64
 [#65]: https://github.com/trussed-dev/trussed/issues/65
