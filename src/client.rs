@@ -78,12 +78,10 @@
 use core::{marker::PhantomData, task::Poll};
 
 use crate::api::{Reply, RequestVariant};
-use crate::backend::{BackendId, CoreOnly, Dispatch};
+use crate::backend::CoreOnly;
 use crate::error::{Error, Result};
 use crate::interrupt::InterruptFlag;
-use crate::pipe::{TrussedRequester, TRUSSED_INTERCHANGE};
-use crate::service::Service;
-use crate::types::{PathBuf, Platform};
+use crate::pipe::TrussedRequester;
 
 pub use crate::platform::Syscall;
 
@@ -236,97 +234,3 @@ impl<S: Syscall, E> FilesystemClient for ClientImplementation<S, E> {}
 impl<S: Syscall, E> ManagementClient for ClientImplementation<S, E> {}
 #[cfg(feature = "ui-client")]
 impl<S: Syscall, E> UiClient for ClientImplementation<S, E> {}
-
-/// Builder for [`ClientImplementation`][].
-///
-/// The maximum number of clients that can be created is defined by the `clients-?` features.  If
-/// this number is exceeded, [`Error::ClientCountExceeded`][] is returned.
-pub struct ClientBuilder<D: Dispatch = CoreOnly> {
-    id: PathBuf,
-    backends: &'static [BackendId<D::BackendId>],
-    interrupt: Option<&'static InterruptFlag>,
-}
-
-impl ClientBuilder {
-    /// Creates a new client builder using the given client ID.
-    ///
-    /// Per default, the client does not support backends and always uses the Trussed core
-    /// implementation to execute requests.
-    pub fn new(id: impl Into<PathBuf>) -> Self {
-        Self {
-            id: id.into(),
-            backends: &[],
-            interrupt: None,
-        }
-    }
-}
-
-impl<D: Dispatch> ClientBuilder<D> {
-    /// Selects the backends to use for this client.
-    ///
-    /// If `backends` is empty, the Trussed core implementation is always used.
-    pub fn backends<E: Dispatch>(
-        self,
-        backends: &'static [BackendId<E::BackendId>],
-    ) -> ClientBuilder<E> {
-        ClientBuilder {
-            id: self.id,
-            backends,
-            interrupt: self.interrupt,
-        }
-    }
-
-    pub fn interrupt(self, interrupt: Option<&'static InterruptFlag>) -> Self {
-        Self { interrupt, ..self }
-    }
-
-    fn create_endpoint<P: Platform>(
-        self,
-        service: &mut Service<P, D>,
-    ) -> Result<TrussedRequester, Error> {
-        let (requester, responder) = TRUSSED_INTERCHANGE
-            .claim()
-            .ok_or(Error::ClientCountExceeded)?;
-        service.add_endpoint(responder, self.id, self.backends, self.interrupt)?;
-        Ok(requester)
-    }
-
-    /// Prepare a client using the given service.
-    ///
-    /// This allocates a [`TrussedInterchange`][`crate::pipe::TrussedInterchange`] and a
-    /// [`ServiceEndpoint`][`crate::service::ServiceEndpoint`].
-    pub fn prepare<P: Platform>(
-        self,
-        service: &mut Service<P, D>,
-    ) -> Result<PreparedClient<D>, Error> {
-        let interrupt = self.interrupt;
-        self.create_endpoint(service)
-            .map(|requester| PreparedClient::new(requester, interrupt))
-    }
-}
-
-/// An intermediate step of the [`ClientBuilder`][].
-///
-/// This struct already has an allocated [`TrussedInterchange`][`crate::pipe::TrussedInterchange`] and
-/// [`ServiceEndpoint`][`crate::service::ServiceEndpoint`] but still needs a [`Syscall`][]
-/// implementation.
-pub struct PreparedClient<D> {
-    requester: TrussedRequester,
-    interrupt: Option<&'static InterruptFlag>,
-    _marker: PhantomData<D>,
-}
-
-impl<D> PreparedClient<D> {
-    fn new(requester: TrussedRequester, interrupt: Option<&'static InterruptFlag>) -> Self {
-        Self {
-            requester,
-            interrupt,
-            _marker: Default::default(),
-        }
-    }
-
-    /// Builds the client using the given syscall implementation.
-    pub fn build<S: Syscall>(self, syscall: S) -> ClientImplementation<S, D> {
-        ClientImplementation::new(self.requester, syscall, self.interrupt)
-    }
-}

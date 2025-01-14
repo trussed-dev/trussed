@@ -3,8 +3,7 @@
 //! Trussed provides a default implementation for all [`Request`][]s, the core backend.  Runners
 //! can add custom [`Backend`][] implementations using the [`Dispatch`][] trait that can override
 //! the implementation of one or more requests.  The backends used to execute a request can be
-//! selected per client when constructing a client using
-//! [`ClientBuilder::backends`][`crate::client::ClientBuilder::backends`].
+//! selected per client when constructing the [`ServiceEndpoint`][`crate::pipe::ServiceEndpoint`].
 //!
 //! Backends can also implement API extensions to provide additional syscalls (see the
 //! [`serde_extensions`][`crate::serde_extensions`] module).
@@ -50,8 +49,8 @@ pub trait Backend {
 ///
 /// If a runner does not support custom backends, it can use the [`CoreOnly`][] dispatch.
 /// Otherwise it can provide an implementation of this trait that defines which backends are
-/// supported.  The backends that are used to execute a request can be selected when constructing a
-/// client using [`ClientBuilder::backends`][`crate::client::ClientBuilder::backends`].
+/// supported.  The backends that are used to execute a request can be selected when constructing
+/// the [`ServiceEndpoint`][`crate::pipe::ServiceEndpoint`] for the client.
 pub trait Dispatch {
     /// The ID type for the custom backends used by this dispatch implementation.
     type BackendId: 'static;

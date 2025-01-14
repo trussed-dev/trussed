@@ -20,7 +20,7 @@ use rand_core::SeedableRng as _;
 
 use crate::{
     backend::{BackendId, CoreOnly, Dispatch},
-    client::ClientBuilder,
+    pipe::TRUSSED_INTERCHANGE,
     platform,
     service::Service,
     ClientImplementation,
@@ -185,11 +185,12 @@ impl<S: StoreProvider> Platform<S> {
     ) -> R {
         let runner = Runner::new();
         let mut service = Service::with_dispatch(self, dispatch);
-        let client = ClientBuilder::new(littlefs2::path::PathBuf::try_from(client_id).unwrap())
-            .backends(backends)
-            .prepare(&mut service)
-            .unwrap()
-            .build(runner.syscall());
+        let client_id = littlefs2::path::PathBuf::try_from(client_id).unwrap();
+        let (requester, responder) = TRUSSED_INTERCHANGE.claim().unwrap();
+        service
+            .add_endpoint(responder, client_id, backends, None)
+            .unwrap();
+        let client = Client::new(requester, runner.syscall(), None);
         runner.run(service, || test(client))
     }
 
@@ -201,10 +202,12 @@ impl<S: StoreProvider> Platform<S> {
         let runner = Runner::new();
         let mut service = Service::new(self);
         let clients = client_ids.map(|id| {
-            ClientBuilder::new(littlefs2::path::PathBuf::try_from(id).unwrap())
-                .prepare(&mut service)
-                .unwrap()
-                .build(runner.syscall())
+            let client_id = littlefs2::path::PathBuf::try_from(id).unwrap();
+            let (requester, responder) = TRUSSED_INTERCHANGE.claim().unwrap();
+            service
+                .add_endpoint(responder, client_id, &[], None)
+                .unwrap();
+            Client::new(requester, runner.syscall(), None)
         });
         runner.run(service, || test(clients))
     }
@@ -219,11 +222,12 @@ impl<S: StoreProvider> Platform<S> {
         let runner = Runner::new();
         let mut service = Service::with_dispatch(self, dispatch);
         let clients = client_ids.map(|(id, backends)| {
-            ClientBuilder::new(littlefs2::path::PathBuf::try_from(id).unwrap())
-                .backends(backends)
-                .prepare(&mut service)
-                .unwrap()
-                .build(runner.syscall())
+            let client_id = littlefs2::path::PathBuf::try_from(id).unwrap();
+            let (requester, responder) = TRUSSED_INTERCHANGE.claim().unwrap();
+            service
+                .add_endpoint(responder, client_id, backends, None)
+                .unwrap();
+            Client::new(requester, runner.syscall(), None)
         });
         runner.run(service, || test(clients))
     }
