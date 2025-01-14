@@ -20,9 +20,10 @@ use rand_core::SeedableRng as _;
 
 use crate::{
     backend::{BackendId, CoreOnly, Dispatch},
-    pipe::TRUSSED_INTERCHANGE,
+    pipe::{ServiceEndpoint, TrussedResponder, TRUSSED_INTERCHANGE},
     platform,
     service::Service,
+    types::CoreContext,
     ClientImplementation,
 };
 
@@ -125,17 +126,19 @@ impl platform::Syscall for Syscall {
     }
 }
 
-struct Runner {
+struct Runner<I: 'static, C> {
     syscall_tx: Sender<()>,
     syscall_rx: Receiver<()>,
+    eps: Vec<ServiceEndpoint<I, C>>,
 }
 
-impl Runner {
+impl<I: 'static, C: Default> Runner<I, C> {
     fn new() -> Self {
         let (syscall_tx, syscall_rx) = mpsc::channel();
         Self {
             syscall_tx,
             syscall_rx,
+            eps: Vec::new(),
         }
     }
 
@@ -143,18 +146,33 @@ impl Runner {
         Syscall(self.syscall_tx.clone())
     }
 
-    fn run<S, D, F, R>(self, mut service: Service<Platform<S>, D>, f: F) -> R
+    fn add_endpoint(
+        &mut self,
+        responder: TrussedResponder,
+        client_id: &str,
+        backends: &'static [BackendId<I>],
+    ) {
+        let context = CoreContext::new(client_id.try_into().unwrap());
+        self.eps
+            .push(ServiceEndpoint::new(responder, context, backends));
+    }
+
+    fn run<P, D, F, R>(self, platform: P, dispatch: D, f: F) -> R
     where
-        S: StoreProvider,
-        D: Dispatch,
+        P: platform::Platform,
+        D: Dispatch<Context = C, BackendId = I>,
+        C: Send + Sync,
+        I: Send + Sync,
         F: FnOnce() -> R,
     {
         let (stop_tx, stop_rx) = mpsc::channel();
+        let mut service = Service::with_dispatch(platform, dispatch);
         thread::scope(|s| {
             s.spawn(move || {
+                let mut eps = self.eps;
                 while stop_rx.try_recv().is_err() {
                     if self.syscall_rx.try_recv().is_ok() {
-                        service.process();
+                        service.process(&mut eps);
                     }
                 }
             });
@@ -182,16 +200,16 @@ impl<S: StoreProvider> Platform<S> {
         dispatch: D,
         backends: &'static [BackendId<D::BackendId>],
         test: impl FnOnce(Client<D>) -> R,
-    ) -> R {
-        let runner = Runner::new();
-        let mut service = Service::with_dispatch(self, dispatch);
-        let client_id = littlefs2::path::PathBuf::try_from(client_id).unwrap();
+    ) -> R
+    where
+        D::Context: Send + Sync,
+        D::BackendId: Send + Sync,
+    {
+        let mut runner = Runner::new();
         let (requester, responder) = TRUSSED_INTERCHANGE.claim().unwrap();
-        service
-            .add_endpoint(responder, client_id, backends, None)
-            .unwrap();
+        runner.add_endpoint(responder, client_id, backends);
         let client = Client::new(requester, runner.syscall(), None);
-        runner.run(service, || test(client))
+        runner.run(self, dispatch, || test(client))
     }
 
     pub fn run_clients<R, const N: usize>(
@@ -199,17 +217,13 @@ impl<S: StoreProvider> Platform<S> {
         client_ids: [&str; N],
         test: impl FnOnce([Client; N]) -> R,
     ) -> R {
-        let runner = Runner::new();
-        let mut service = Service::new(self);
+        let mut runner = Runner::new();
         let clients = client_ids.map(|id| {
-            let client_id = littlefs2::path::PathBuf::try_from(id).unwrap();
             let (requester, responder) = TRUSSED_INTERCHANGE.claim().unwrap();
-            service
-                .add_endpoint(responder, client_id, &[], None)
-                .unwrap();
+            runner.add_endpoint(responder, id, &[]);
             Client::new(requester, runner.syscall(), None)
         });
-        runner.run(service, || test(clients))
+        runner.run(self, CoreOnly, || test(clients))
     }
 
     /// Using const generics rather than a `Vec` to allow destructuring in the method
@@ -218,18 +232,18 @@ impl<S: StoreProvider> Platform<S> {
         client_ids: [(&str, &'static [BackendId<D::BackendId>]); N],
         dispatch: D,
         test: impl FnOnce([Client<D>; N]) -> R,
-    ) -> R {
-        let runner = Runner::new();
-        let mut service = Service::with_dispatch(self, dispatch);
+    ) -> R
+    where
+        D::Context: Send + Sync,
+        D::BackendId: Send + Sync,
+    {
+        let mut runner = Runner::new();
         let clients = client_ids.map(|(id, backends)| {
-            let client_id = littlefs2::path::PathBuf::try_from(id).unwrap();
             let (requester, responder) = TRUSSED_INTERCHANGE.claim().unwrap();
-            service
-                .add_endpoint(responder, client_id, backends, None)
-                .unwrap();
+            runner.add_endpoint(responder, id, backends);
             Client::new(requester, runner.syscall(), None)
         });
-        runner.run(service, || test(clients))
+        runner.run(self, dispatch, || test(clients))
     }
 }
 

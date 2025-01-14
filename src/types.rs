@@ -126,33 +126,19 @@ pub struct CoreContext {
 
 impl CoreContext {
     pub fn new(path: PathBuf) -> Self {
-        Self {
-            path,
-            read_dir_state: None,
-            read_dir_files_state: None,
-            interrupt: None,
-        }
+        Self::with_interrupt(path, None)
     }
 
     pub fn with_interrupt(path: PathBuf, interrupt: Option<&'static InterruptFlag>) -> Self {
+        if path.as_str() == "trussed" {
+            panic!("trussed is a reserved client ID");
+        }
         Self {
             path,
             read_dir_state: None,
             read_dir_files_state: None,
             interrupt,
         }
-    }
-}
-
-impl From<PathBuf> for CoreContext {
-    fn from(path: PathBuf) -> Self {
-        Self::new(path)
-    }
-}
-
-impl From<&str> for CoreContext {
-    fn from(s: &str) -> Self {
-        Self::new(s.try_into().unwrap())
     }
 }
 

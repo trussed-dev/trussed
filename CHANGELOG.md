@@ -54,6 +54,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Put all client traits, requests, replies and implementations behind feature flags.
   - Put all mechanisms behind feature flags.
   - Move `CryptoClient::attest` into new `AttestationClient`.
+- Pass endpoints to `Service::process` instead of storing them in the service.
 
 ### Fixed
 

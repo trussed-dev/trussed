@@ -8,7 +8,7 @@ use crate::api::{Reply, Request};
 use crate::backend::BackendId;
 use crate::config;
 use crate::error::Error;
-use crate::types::Context;
+use crate::types::{Context, CoreContext};
 
 type TrussedInterchangeInner =
     Interchange<Request, Result<Reply, Error>, { config::MAX_SERVICE_CLIENTS }>;
@@ -31,11 +31,25 @@ pub type TrussedRequester = Requester<'static, Request, Result<Reply, Error>>;
 // https://doc.micrium.com/display/osiiidoc/Using+Message+Queues
 
 pub struct ServiceEndpoint<I: 'static, C> {
-    pub interchange: TrussedResponder,
+    pub(crate) interchange: TrussedResponder,
     // service (trusted) has this, not client (untrusted)
     // used among other things to namespace cryptographic material
-    pub ctx: Context<C>,
-    pub backends: &'static [BackendId<I>],
+    pub(crate) ctx: Context<C>,
+    pub(crate) backends: &'static [BackendId<I>],
+}
+
+impl<I: 'static, C: Default> ServiceEndpoint<I, C> {
+    pub fn new(
+        interchange: TrussedResponder,
+        context: CoreContext,
+        backends: &'static [BackendId<I>],
+    ) -> Self {
+        Self {
+            interchange,
+            ctx: context.into(),
+            backends,
+        }
+    }
 }
 
 // pub type ClientEndpoint = Requester<TrussedInterchange>;

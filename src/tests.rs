@@ -126,11 +126,14 @@ type Memory = (
     &'static mut VolatileStorage,
 );
 
-struct ServiceSyscall<'a, P: platform::Platform>(&'a mut crate::Service<P>);
+struct ServiceSyscall<P: platform::Platform> {
+    service: crate::Service<P>,
+    ep: crate::pipe::ServiceEndpoint<crate::backend::NoId, crate::types::NoData>,
+}
 
-impl<P: platform::Platform> platform::Syscall for ServiceSyscall<'_, P> {
+impl<P: platform::Platform> platform::Syscall for ServiceSyscall<P> {
     fn syscall(&mut self) {
-        self.0.process();
+        self.service.process(core::slice::from_mut(&mut self.ep));
     }
 }
 
@@ -182,17 +185,15 @@ macro_rules! setup {
             .claim()
             .expect("could not setup TEST TrussedInterchange");
         let test_client_id = path!("TEST");
-
-        assert!(trussed
-            .add_endpoint(test_trussed_responder, test_client_id, &[], None)
-            .is_ok());
+        let context = crate::types::CoreContext::new(test_client_id.into());
+        let ep = crate::pipe::ServiceEndpoint::new(test_trussed_responder, context, &[]);
 
         trussed.set_seed_if_uninitialized(&$seed);
-        let mut $client = {
-            pub type TestClient<'a> =
-                crate::ClientImplementation<ServiceSyscall<'a, $platform>>;
-            TestClient::new(test_trussed_requester, ServiceSyscall(&mut trussed), None)
+        let syscall = ServiceSyscall {
+            service: trussed,
+            ep,
         };
+        let mut $client = crate::ClientImplementation::<_>::new(test_trussed_requester, syscall, None);
     };
 }
 

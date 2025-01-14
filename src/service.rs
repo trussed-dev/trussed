@@ -2,14 +2,14 @@ use littlefs2_core::{path, DynFilesystem, Path, PathBuf};
 use rand_chacha::ChaCha8Rng;
 pub use rand_core::{RngCore, SeedableRng};
 
+use crate::api::{reply, request, Reply, Request};
 use crate::backend::{BackendId, CoreOnly, Dispatch};
-use crate::config::{MAX_MESSAGE_LENGTH, MAX_SERVICE_CLIENTS};
+use crate::config::MAX_MESSAGE_LENGTH;
 use crate::error::{Error, Result};
 pub use crate::key;
 #[cfg(feature = "crypto-client")]
 use crate::mechanisms;
 pub use crate::pipe::ServiceEndpoint;
-use crate::pipe::TrussedResponder;
 use crate::platform::{consent, ui, Platform, Store, UserInterface};
 pub use crate::store::{
     self,
@@ -19,12 +19,8 @@ pub use crate::store::{
     keystore::{ClientKeystore, Keystore},
 };
 use crate::types::ui::Status;
-use crate::types::{Context, CoreContext, Location, Mechanism, MediumData, Message, Vec};
+use crate::types::{Context, CoreContext, Location, Mechanism, MediumData, Message};
 use crate::Bytes;
-use crate::{
-    api::{reply, request, Reply, Request},
-    interrupt::InterruptFlag,
-};
 
 #[cfg(feature = "attestation-client")]
 pub mod attest;
@@ -90,7 +86,6 @@ where
     P: Platform,
     D: Dispatch,
 {
-    eps: Vec<ServiceEndpoint<D::BackendId, D::Context>, { MAX_SERVICE_CLIENTS }>,
     resources: ServiceResources<P>,
     dispatch: D,
 }
@@ -943,7 +938,6 @@ impl<P: Platform, D: Dispatch> Service<P, D> {
     pub fn with_dispatch(platform: P, dispatch: D) -> Self {
         let resources = ServiceResources::new(platform);
         Self {
-            eps: Vec::new(),
             resources,
             dispatch,
         }
@@ -951,26 +945,6 @@ impl<P: Platform, D: Dispatch> Service<P, D> {
 }
 
 impl<P: Platform, D: Dispatch> Service<P, D> {
-    pub fn add_endpoint(
-        &mut self,
-        interchange: TrussedResponder,
-        client: impl Into<PathBuf>,
-        backends: &'static [BackendId<D::BackendId>],
-        interrupt: Option<&'static InterruptFlag>,
-    ) -> Result<(), Error> {
-        let core_ctx = CoreContext::with_interrupt(client.into(), interrupt);
-        if &*core_ctx.path == path!("trussed") {
-            panic!("trussed is a reserved client ID");
-        }
-        self.eps
-            .push(ServiceEndpoint {
-                interchange,
-                ctx: core_ctx.into(),
-                backends,
-            })
-            .map_err(|_| Error::ClientCountExceeded)
-    }
-
     pub fn set_seed_if_uninitialized(&mut self, seed: &[u8; 32]) {
         let mut filestore = self.resources.trussed_filestore();
         let path = path!("rng-state.bin");
@@ -993,14 +967,10 @@ impl<P: Platform, D: Dispatch> Service<P, D> {
     }
 
     // process one request per client which has any
-    pub fn process(&mut self) {
-        // split self since we iter-mut over eps and need &mut of the other resources
-        let eps = &mut self.eps;
-        let resources = &mut self.resources;
-
-        for ep in eps.iter_mut() {
+    pub fn process(&mut self, eps: &mut [ServiceEndpoint<D::BackendId, D::Context>]) {
+        for ep in eps {
             if let Ok(request) = ep.interchange.request() {
-                resources
+                self.resources
                     .platform
                     .user_interface()
                     .set_status(ui::Status::Processing);
@@ -1008,12 +978,16 @@ impl<P: Platform, D: Dispatch> Service<P, D> {
 
                 // resources.currently_serving = ep.client_id.clone();
                 let reply_result = if ep.backends.is_empty() {
-                    resources.reply_to(&mut ep.ctx.core, request)
+                    self.resources.reply_to(&mut ep.ctx.core, request)
                 } else {
                     let mut reply_result = Err(Error::RequestNotAvailable);
                     for backend in ep.backends {
-                        reply_result =
-                            resources.dispatch(&mut self.dispatch, backend, &mut ep.ctx, request);
+                        reply_result = self.resources.dispatch(
+                            &mut self.dispatch,
+                            backend,
+                            &mut ep.ctx,
+                            request,
+                        );
                         if reply_result != Err(Error::RequestNotAvailable) {
                             break;
                         }
@@ -1021,7 +995,7 @@ impl<P: Platform, D: Dispatch> Service<P, D> {
                     reply_result
                 };
 
-                resources
+                self.resources
                     .platform
                     .user_interface()
                     .set_status(ui::Status::Idle);
