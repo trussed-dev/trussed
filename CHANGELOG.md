@@ -23,7 +23,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Set `config::MAX_SERVICE_CLIENTS` based on the clients-? feature.
 - Made `StorageAttributes` non-exhaustive.
 - Changed `KeyStore<P: Platform>` to `KeyStore<S: Store>`.
 - Replaced the client ID with a `ClientContext` struct.
@@ -75,6 +74,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `types`: `Attributes`, `CertificateType` `DataAttributes`, `KeyAttributes`, `Letters`, `LongData`, `ObjectType`
 - Removed the `Syscall` implementations for `Service` and the `Syscall::try_as_new_client` and `Syscall::try_new_client` methods.
 - Removed `TrussedInterchange` and `TRUSSED_INTERCHANGE` from `pipe`.
+- Removed the `clients-?` features.
 
 [#64]: https://github.com/trussed-dev/trussed/issues/64
 [#65]: https://github.com/trussed-dev/trussed/issues/65
