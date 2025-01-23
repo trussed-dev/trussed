@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/pipe.rs`."><title>pipe.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-b0742ba02757f159.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="trussed" data-themes="" data-resource-suffix="" data-rustdoc-version="1.83.0 (90b35a623 2024-11-26)" data-channel="1.83.0" data-search-js="search-f0d225181b97f9a4.js" data-settings-js="settings-805db61a62df4bd2.js" ><script src="../../static.files/storage-1d39b6787ed640ff.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-f070b9041d14864c.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-0111fcff984fae8f.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><h1><div class="sub-heading">trussed/</div>pipe.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/pipe.rs`."><title>pipe.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-42caa33d.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="trussed" data-themes="" data-resource-suffix="" data-rustdoc-version="1.84.0 (9fc6b4312 2025-01-07)" data-channel="1.84.0" data-search-js="search-92e6798f.js" data-settings-js="settings-0f613d39.js" ><script src="../../static.files/storage-59e33391.js"></script><script defer src="../../static.files/src-script-56102188.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-5f194d8c.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-893ab5e7.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><h1><div class="sub-heading">trussed/</div>pipe.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers">
 <a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
@@ -72,27 +72,23 @@
 <a href="#71" id="71">71</a>
 <a href="#72" id="72">72</a>
 <a href="#73" id="73">73</a>
-<a href="#74" id="74">74</a></pre></div><pre class="rust"><code><span class="attr">#![allow(clippy::transmute_ptr_to_ptr)]
+<a href="#74" id="74">74</a>
+<a href="#75" id="75">75</a>
+<a href="#76" id="76">76</a>
+<a href="#77" id="77">77</a></pre></div><pre class="rust"><code><span class="attr">#![allow(clippy::transmute_ptr_to_ptr)]
 </span><span class="comment">// Ignore lint caused by interchange! macro
 </span><span class="attr">#![allow(clippy::derive_partial_eq_without_eq)]
 
-</span><span class="kw">use </span>interchange::{Interchange, InterchangeRef, Requester, Responder};
+</span><span class="kw">use </span>interchange::{Channel, Requester, Responder};
 
 <span class="kw">use </span><span class="kw">crate</span>::api::{Reply, Request};
 <span class="kw">use </span><span class="kw">crate</span>::backend::BackendId;
-<span class="kw">use </span><span class="kw">crate</span>::config;
 <span class="kw">use </span><span class="kw">crate</span>::error::Error;
-<span class="kw">use </span><span class="kw">crate</span>::types::Context;
+<span class="kw">use </span><span class="kw">crate</span>::types::{Context, CoreContext};
 
-<span class="kw">type </span>TrussedInterchangeInner =
-    Interchange&lt;Request, <span class="prelude-ty">Result</span>&lt;Reply, Error&gt;, { config::MAX_SERVICE_CLIENTS }&gt;;
-<span class="kw">static </span>TRUSSED_INTERCHANGE_INNER: TrussedInterchangeInner = Interchange::new();
-
-<span class="kw">pub type </span>TrussedInterchange = InterchangeRef&lt;<span class="lifetime">'static</span>, Request, <span class="prelude-ty">Result</span>&lt;Reply, Error&gt;&gt;;
-<span class="kw">pub static </span>TRUSSED_INTERCHANGE: TrussedInterchange = TRUSSED_INTERCHANGE_INNER.as_interchange_ref();
-
-<span class="kw">pub type </span>TrussedResponder = Responder&lt;<span class="lifetime">'static</span>, Request, <span class="prelude-ty">Result</span>&lt;Reply, Error&gt;&gt;;
-<span class="kw">pub type </span>TrussedRequester = Requester&lt;<span class="lifetime">'static</span>, Request, <span class="prelude-ty">Result</span>&lt;Reply, Error&gt;&gt;;
+<span class="kw">pub type </span>TrussedChannel = Channel&lt;Request, <span class="prelude-ty">Result</span>&lt;Reply, Error&gt;&gt;;
+<span class="kw">pub type </span>TrussedResponder&lt;<span class="lifetime">'a</span>&gt; = Responder&lt;<span class="lifetime">'a</span>, Request, <span class="prelude-ty">Result</span>&lt;Reply, Error&gt;&gt;;
+<span class="kw">pub type </span>TrussedRequester&lt;<span class="lifetime">'a</span>&gt; = Requester&lt;<span class="lifetime">'a</span>, Request, <span class="prelude-ty">Result</span>&lt;Reply, Error&gt;&gt;;
 
 <span class="comment">// pub use interchange::TrussedInterchange;
 
@@ -104,19 +100,33 @@
 // https://xenomai.org/documentation/xenomai-2.4/html/api/group__native__queue.html
 // https://doc.micrium.com/display/osiiidoc/Using+Message+Queues
 
-</span><span class="kw">pub struct </span>ServiceEndpoint&lt;I: <span class="lifetime">'static</span>, C&gt; {
-    <span class="kw">pub </span>interchange: TrussedResponder,
+</span><span class="kw">pub struct </span>ServiceEndpoint&lt;<span class="lifetime">'a</span>, I: <span class="lifetime">'static</span>, C&gt; {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) interchange: TrussedResponder&lt;<span class="lifetime">'a</span>&gt;,
     <span class="comment">// service (trusted) has this, not client (untrusted)
     // used among other things to namespace cryptographic material
-    </span><span class="kw">pub </span>ctx: Context&lt;C&gt;,
-    <span class="kw">pub </span>backends: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>[BackendId&lt;I&gt;],
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) ctx: Context&lt;C&gt;,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) backends: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>[BackendId&lt;I&gt;],
+}
+
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, I: <span class="lifetime">'static</span>, C: Default&gt; ServiceEndpoint&lt;<span class="lifetime">'a</span>, I, C&gt; {
+    <span class="kw">pub fn </span>new(
+        interchange: TrussedResponder&lt;<span class="lifetime">'a</span>&gt;,
+        context: CoreContext,
+        backends: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>[BackendId&lt;I&gt;],
+    ) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            interchange,
+            ctx: context.into(),
+            backends,
+        }
+    }
 }
 
 <span class="comment">// pub type ClientEndpoint = Requester&lt;TrussedInterchange&gt;;
 
 </span><span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
-    <span class="kw">use </span><span class="kw">super</span>::TrussedInterchange;
+    <span class="kw">use </span><span class="kw">super</span>::TrussedChannel;
     <span class="kw">use </span><span class="kw">crate</span>::api::{Reply, Request};
     <span class="kw">use </span>core::mem;
 
@@ -126,24 +136,20 @@
 
     </span><span class="kw">const </span>MAX_SIZE: usize = <span class="number">2416</span>;
 
-    <span class="kw">fn </span>assert_size&lt;T&gt;() {
-        <span class="kw">let </span>size = mem::size_of::&lt;T&gt;();
-        <span class="macro">assert!</span>(size &lt;= MAX_SIZE, <span class="string">"{size}"</span>);
-    }
-
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test_request_size() {
-        assert_size::&lt;Request&gt;();
-    }
+    </span><span class="kw">fn </span>test_sizes() {
+        <span class="kw">let </span>request_size = mem::size_of::&lt;Request&gt;();
+        <span class="kw">let </span>reply_size = mem::size_of::&lt;Reply&gt;();
+        <span class="kw">let </span>channel_size = mem::size_of::&lt;TrussedChannel&gt;();
 
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>test_reply_size() {
-        assert_size::&lt;Reply&gt;();
-    }
+        <span class="macro">assert!</span>(request_size &lt;= MAX_SIZE, <span class="string">"request_size = {request_size}"</span>);
+        <span class="macro">assert!</span>(reply_size &lt;= MAX_SIZE, <span class="string">"reply_size = {request_size}"</span>);
 
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>test_interchange_size() {
-        assert_size::&lt;TrussedInterchange&gt;();
+        <span class="comment">// Allow some overhead for the channel metadata
+        </span><span class="macro">assert!</span>(
+            channel_size &lt;= MAX_SIZE + <span class="number">64</span>,
+            <span class="string">"channel_size = {channel_size}"
+        </span>);
     }
 }
 </code></pre></div></section></main></body></html>
