@@ -57,6 +57,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added support for non-static channels:
   - Added lifetimes to `ClientImplementation` and `ServiceEndpoints`.
   - Added the `pipe::TrussedChannel` type.
+- Refactored the `Store` trait:
+  - Removed the requirement for a static lifetime.
+  - Removed the `Fs` wrapper type.
+  - Removed the storage types to return `&dyn DynFilesystem` instead.
+  - Removed the `Copy` requirement.
+  - Removed the `unsafe` keyword for the `Store` trait.
 
 ### Fixed
 

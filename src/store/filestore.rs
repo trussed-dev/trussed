@@ -286,7 +286,7 @@ impl<S: Store> ClientFilestore<S> {
                     // the client, and return both the entry and the state
                     .map(|(i, entry)| {
                         // The semantics is that for a non-existent file, we return None (not an error)
-                        let data = store::read(self.store, location, entry.path()).ok();
+                        let data = store::read(&self.store, location, entry.path()).ok();
                         (i, data)
 
                         // the `ok_or` dummy error followed by the `ok` in the next line is because
@@ -352,7 +352,7 @@ impl<S: Store> ClientFilestore<S> {
                     })
                     .map(|(i, entry)| {
                         // The semantics is that for a non-existent file, we return None (not an error)
-                        let data = store::read(self.store, location, entry.path()).ok();
+                        let data = store::read(&self.store, location, entry.path()).ok();
                         (i, data)
                     })
                     // convert Option into Result, again because `read_dir_and_then` expects this
@@ -376,36 +376,36 @@ impl<S: Store> Filestore for ClientFilestore<S> {
     fn read<const N: usize>(&mut self, path: &Path, location: Location) -> Result<Bytes<N>> {
         let path = self.actual_path(path)?;
 
-        store::read(self.store, location, &path)
+        store::read(&self.store, location, &path)
     }
 
     fn write(&mut self, path: &Path, location: Location, data: &[u8]) -> Result<()> {
         let path = self.actual_path(path)?;
-        store::store(self.store, location, &path, data)
+        store::store(&self.store, location, &path, data)
     }
 
     fn exists(&mut self, path: &Path, location: Location) -> bool {
         if let Ok(path) = self.actual_path(path) {
-            store::exists(self.store, location, &path)
+            store::exists(&self.store, location, &path)
         } else {
             false
         }
     }
     fn metadata(&mut self, path: &Path, location: Location) -> Result<Option<Metadata>> {
         let path = self.actual_path(path)?;
-        store::metadata(self.store, location, &path)
+        store::metadata(&self.store, location, &path)
     }
 
     fn rename(&mut self, from: &Path, to: &Path, location: Location) -> Result<()> {
         let from = self.actual_path(from)?;
         let to = self.actual_path(to)?;
-        store::rename(self.store, location, &from, &to)
+        store::rename(&self.store, location, &from, &to)
     }
 
     fn remove_file(&mut self, path: &Path, location: Location) -> Result<()> {
         let path = self.actual_path(path)?;
 
-        match store::delete(self.store, location, &path) {
+        match store::delete(&self.store, location, &path) {
             true => Ok(()),
             false => Err(Error::InternalError),
         }
@@ -414,7 +414,7 @@ impl<S: Store> Filestore for ClientFilestore<S> {
     fn remove_dir(&mut self, path: &Path, location: Location) -> Result<()> {
         let path = self.actual_path(path)?;
 
-        match store::delete(self.store, location, &path) {
+        match store::delete(&self.store, location, &path) {
             true => Ok(()),
             false => Err(Error::InternalError),
         }
@@ -423,7 +423,7 @@ impl<S: Store> Filestore for ClientFilestore<S> {
     fn remove_dir_all(&mut self, path: &Path, location: Location) -> Result<usize> {
         let path = self.actual_path(path)?;
 
-        store::remove_dir_all_where(self.store, location, &path, &|_| true)
+        store::remove_dir_all_where(&self.store, location, &path, &|_| true)
             .map_err(|_| Error::InternalError)
     }
     fn remove_dir_all_where(
@@ -434,7 +434,7 @@ impl<S: Store> Filestore for ClientFilestore<S> {
     ) -> Result<usize> {
         let path = self.actual_path(path)?;
 
-        store::remove_dir_all_where(self.store, location, &path, &predicate)
+        store::remove_dir_all_where(&self.store, location, &path, &predicate)
             .map_err(|_| Error::InternalError)
     }
 
