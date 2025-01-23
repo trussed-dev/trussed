@@ -31,7 +31,7 @@ impl<S: Store> Certstore for ClientCertstore<S> {
         let locations = [Location::Internal, Location::External, Location::Volatile];
         locations
             .iter()
-            .any(|&location| store::delete(self.store, location, &path))
+            .any(|&location| store::delete(&self.store, location, &path))
             .then_some(())
             .ok_or(Error::NoSuchKey)
     }
@@ -41,14 +41,14 @@ impl<S: Store> Certstore for ClientCertstore<S> {
         let locations = [Location::Internal, Location::External, Location::Volatile];
         locations
             .iter()
-            .find_map(|&location| store::read(self.store, location, &path).ok())
+            .find_map(|&location| store::read(&self.store, location, &path).ok())
             .ok_or(Error::NoSuchCertificate)
     }
 
     fn write_certificate(&mut self, location: Location, der: &Message) -> Result<CertId> {
         let id = CertId::new(&mut self.rng);
         let path = self.cert_path(id);
-        store::store(self.store, location, &path, der.as_slice())?;
+        store::store(&self.store, location, &path, der.as_slice())?;
         Ok(id)
     }
 }

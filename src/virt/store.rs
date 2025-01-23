@@ -13,8 +13,9 @@ use crate::{store, store::Store};
 
 pub trait StoreProvider {
     type Store: Store;
+    type Ifs;
 
-    unsafe fn ifs() -> &'static mut <Self::Store as Store>::I;
+    unsafe fn ifs() -> &'static mut Self::Ifs;
 
     unsafe fn store() -> Self::Store;
 
@@ -128,6 +129,7 @@ impl Filesystem {
 
 impl StoreProvider for Filesystem {
     type Store = FilesystemStore;
+    type Ifs = FilesystemStorage;
 
     unsafe fn ifs() -> &'static mut FilesystemStorage {
         (*addr_of_mut!(INTERNAL_FILESYSTEM_STORAGE))
@@ -177,6 +179,7 @@ pub struct Ram {}
 
 impl StoreProvider for Ram {
     type Store = RamStore;
+    type Ifs = InternalStorage;
 
     unsafe fn ifs() -> &'static mut InternalStorage {
         (*addr_of_mut!(INTERNAL_RAM_STORAGE))
