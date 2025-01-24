@@ -339,7 +339,7 @@ macro_rules! store {
                 format: bool,
             ) -> littlefs2::io::Result<()> {
                 use core::mem::MaybeUninit;
-                use core::ptr::addr_of_mut;
+                use core::ptr::{addr_of, addr_of_mut};
                 use littlefs2::fs::{Allocation, Filesystem};
 
                 static mut IFS_ALLOC: MaybeUninit<&'static mut Allocation<$Ifs>> =
@@ -375,7 +375,7 @@ macro_rules! store {
                         &mut *(*addr_of_mut!(IFS_ALLOC)).as_mut_ptr(),
                         &mut *(*addr_of_mut!(IFS_STORAGE)).as_mut_ptr(),
                     )?);
-                    Self::ifs_ptr().write(IFS.as_ref().unwrap());
+                    Self::ifs_ptr().write(addr_of!(IFS).as_ref().unwrap().as_ref().unwrap());
 
                     (*addr_of_mut!(EFS_ALLOC)).as_mut_ptr().write(efs_alloc);
                     (*addr_of_mut!(EFS_STORAGE)).as_mut_ptr().write(efs_storage);
@@ -383,7 +383,7 @@ macro_rules! store {
                         &mut *(*addr_of_mut!(EFS_ALLOC)).as_mut_ptr(),
                         &mut *(*addr_of_mut!(EFS_STORAGE)).as_mut_ptr(),
                     )?);
-                    Self::efs_ptr().write(EFS.as_ref().unwrap());
+                    Self::efs_ptr().write(addr_of!(EFS).as_ref().unwrap().as_ref().unwrap());
 
                     (*addr_of_mut!(VFS_ALLOC)).as_mut_ptr().write(vfs_alloc);
                     (*addr_of_mut!(VFS_STORAGE)).as_mut_ptr().write(vfs_storage);
@@ -391,7 +391,7 @@ macro_rules! store {
                         &mut *(*addr_of_mut!(VFS_ALLOC)).as_mut_ptr(),
                         &mut *(*addr_of_mut!(VFS_STORAGE)).as_mut_ptr(),
                     )?);
-                    Self::vfs_ptr().write(VFS.as_ref().unwrap());
+                    Self::vfs_ptr().write(addr_of!(VFS).as_ref().unwrap().as_ref().unwrap());
 
                     Ok(())
                 }
