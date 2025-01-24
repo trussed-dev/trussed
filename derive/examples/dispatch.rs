@@ -24,12 +24,12 @@ fn main() {
         backend::BackendId,
         client::CryptoClient,
         try_syscall,
-        virt::{self, Ram},
+        virt::{self, StoreConfig},
         Error,
     };
 
     fn run(backends: &'static [BackendId<Backend>], expected: Option<Error>) {
-        virt::with_platform(Ram::default(), |platform| {
+        virt::with_platform(StoreConfig::ram(), |platform| {
             platform.run_client_with_backends(
                 "test",
                 Dispatch::default(),

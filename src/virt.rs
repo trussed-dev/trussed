@@ -8,11 +8,7 @@ mod ui;
 
 use std::{
     iter,
-    path::PathBuf,
-    sync::{
-        mpsc::{self, Receiver, Sender},
-        Mutex,
-    },
+    sync::mpsc::{self, Receiver, Sender},
     thread,
 };
 
@@ -28,76 +24,35 @@ use crate::{
     ClientImplementation,
 };
 
-pub use store::{Filesystem, Ram, StoreProvider};
+pub use store::{StorageConfig, StoreConfig};
 pub use ui::UserInterface;
 
 pub type Client<'a, D = CoreOnly> = ClientImplementation<'a, Syscall, D>;
 
-// We need this mutex to make sure that:
-// - TrussedInterchange is not used concurrently (panics if violated)
-// - the Store is not used concurrently
-static MUTEX: Mutex<()> = Mutex::new(());
-
-pub fn with_platform<S, R, F>(store: S, f: F) -> R
+pub fn with_platform<R, F>(mut store: StoreConfig, f: F) -> R
 where
-    S: StoreProvider,
-    F: FnOnce(Platform<S>) -> R,
+    F: FnOnce(Platform<'_>) -> R,
 {
-    let _guard = MUTEX.lock().unwrap_or_else(|err| err.into_inner());
-    unsafe {
-        store.reset();
-    }
-    // causing a regression again
-    // let rng = chacha20::ChaCha8Rng::from_rng(rand_core::OsRng).unwrap();
-    let platform = Platform {
-        rng: ChaCha8Rng::from_seed([42u8; 32]),
-        _store: store,
-        ui: UserInterface::new(),
-    };
-    f(platform)
+    store.with_store(|store| {
+        // causing a regression again
+        // let rng = chacha20::ChaCha8Rng::from_rng(rand_core::OsRng).unwrap();
+        let platform = Platform {
+            rng: ChaCha8Rng::from_seed([42u8; 32]),
+            store,
+            ui: UserInterface::new(),
+        };
+        f(platform)
+    })
 }
 
-pub fn with_client<S, R, F>(store: S, client_id: &str, f: F) -> R
+pub fn with_client<R, F>(store: StoreConfig, client_id: &str, f: F) -> R
 where
-    S: StoreProvider,
     F: FnOnce(Client) -> R,
 {
     with_platform(store, |platform| platform.run_client(client_id, f))
 }
 
-pub fn with_fs_client<P, R, F>(internal: P, client_id: &str, f: F) -> R
-where
-    P: Into<PathBuf>,
-    F: FnOnce(Client) -> R,
-{
-    with_client(Filesystem::new(internal), client_id, f)
-}
-
-pub fn with_ram_client<R, F>(client_id: &str, f: F) -> R
-where
-    F: FnOnce(Client) -> R,
-{
-    with_client(Ram::default(), client_id, f)
-}
-
-pub fn with_clients<S, R, F, const N: usize>(store: S, client_ids: [&str; N], f: F) -> R
-where
-    S: StoreProvider,
-    F: FnOnce([Client; N]) -> R,
-{
-    with_platform(store, |platform| platform.run_clients(client_ids, f))
-}
-
-pub fn with_fs_clients<P, R, F, const N: usize>(internal: P, client_ids: [&str; N], f: F) -> R
-where
-    P: Into<PathBuf>,
-    F: FnOnce([Client; N]) -> R,
-{
-    with_clients(Filesystem::new(internal), client_ids, f)
-}
-
-/// Run a function with multiple clients using the RAM for the filesystem.
-///
+/// Run a function with multiple clients.
 ///
 /// Const generics are used to allow easy deconstruction in the callback arguments
 ///
@@ -105,18 +60,18 @@ where
 ///# use trussed::client::{Ed255, CryptoClient};
 ///# use trussed::types::{Location, Mechanism};
 ///# use trussed::syscall;
-///# use trussed::virt::with_ram_clients;
-/// with_ram_clients(["client1", "client2"], |[mut client1, mut client2]| {
+///# use trussed::virt::{with_clients, StoreConfig};
+/// with_clients(StoreConfig::ram(), ["client1", "client2"], |[mut client1, mut client2]| {
 ///     let key = syscall!(client1.generate_ed255_private_key(Location::Internal)).key;
 ///     // The clients are distinct
 ///     assert!(!syscall!(client2.exists(Mechanism::Ed255, key)).exists);
 /// })    
 /// ```
-pub fn with_ram_clients<R, F, const N: usize>(client_ids: [&str; N], f: F) -> R
+pub fn with_clients<R, F, const N: usize>(store: StoreConfig, client_ids: [&str; N], f: F) -> R
 where
     F: FnOnce([Client; N]) -> R,
 {
-    with_clients(Ram::default(), client_ids, f)
+    with_platform(store, |platform| platform.run_clients(client_ids, f))
 }
 
 pub struct Syscall(Sender<()>);
@@ -184,13 +139,13 @@ impl<'a, I: 'static, C: Default> Runner<'a, I, C> {
     }
 }
 
-pub struct Platform<S: StoreProvider> {
+pub struct Platform<'a> {
     rng: ChaCha8Rng,
-    _store: S,
+    store: store::Store<'a>,
     ui: UserInterface,
 }
 
-impl<S: StoreProvider> Platform<S> {
+impl Platform<'_> {
     pub fn run_client<R>(self, client_id: &str, test: impl FnOnce(Client) -> R) -> R {
         self.run_client_with_backends(client_id, CoreOnly, &[], test)
     }
@@ -255,9 +210,9 @@ impl<S: StoreProvider> Platform<S> {
     }
 }
 
-unsafe impl<S: StoreProvider> platform::Platform for Platform<S> {
+unsafe impl<'a> platform::Platform for Platform<'a> {
     type R = ChaCha8Rng;
-    type S = S::Store;
+    type S = store::Store<'a>;
     type UI = UserInterface;
 
     fn user_interface(&mut self) -> &mut Self::UI {
@@ -269,6 +224,6 @@ unsafe impl<S: StoreProvider> platform::Platform for Platform<S> {
     }
 
     fn store(&self) -> Self::S {
-        unsafe { S::store() }
+        self.store
     }
 }

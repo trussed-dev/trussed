@@ -1,46 +1,100 @@
-use core::ptr::addr_of_mut;
 use std::{
     fs::{File, OpenOptions},
     io::{Read as _, Seek as _, SeekFrom, Write as _},
-    marker::PhantomData,
     path::PathBuf,
 };
 
 use generic_array::typenum::{U512, U8};
-use littlefs2::{const_ram_storage, driver::Storage, fs::Allocation, io::Result as LfsResult};
+use littlefs2::{const_ram_storage, driver::Storage, object_safe::DynStorageAlloc};
+use littlefs2_core::{DynFilesystem, Result};
 
-use crate::{store, store::Store};
+use crate::store;
 
-pub trait StoreProvider {
-    type Store: Store;
-    type Ifs;
+pub struct StoreConfig<'a> {
+    pub internal: StorageConfig<'a>,
+    pub external: StorageConfig<'a>,
+    pub volatile: StorageConfig<'a>,
+}
 
-    unsafe fn ifs() -> &'static mut Self::Ifs;
+impl StoreConfig<'_> {
+    pub fn ram() -> Self {
+        Self {
+            internal: StorageConfig::ram(),
+            external: StorageConfig::ram(),
+            volatile: StorageConfig::ram(),
+        }
+    }
 
-    unsafe fn store() -> Self::Store;
+    pub fn with_store<F, T>(&mut self, f: F) -> T
+    where
+        F: FnOnce(Store) -> T,
+    {
+        self.internal
+            .with_fs(|internal| {
+                self.external
+                    .with_fs(|external| {
+                        self.volatile
+                            .with_fs(|volatile| {
+                                let store = Store {
+                                    internal,
+                                    external,
+                                    volatile,
+                                };
+                                f(store)
+                            })
+                            .expect("failed to mount volatile storage")
+                    })
+                    .expect("failed to mount external storage")
+            })
+            .expect("failed to mount internal storage")
+    }
+}
 
-    unsafe fn reset(&self);
+pub struct StorageConfig<'a> {
+    pub storage: Box<dyn DynStorageAlloc + 'a>,
+    pub format: bool,
+}
+
+impl StorageConfig<'_> {
+    pub fn ram() -> Self {
+        Self {
+            storage: Box::new(RamStorage::new()),
+            format: true,
+        }
+    }
+
+    pub fn filesystem(path: PathBuf) -> Self {
+        let len = u64::try_from(STORAGE_SIZE).unwrap();
+        let format = if let Ok(file) = File::open(&path) {
+            assert_eq!(file.metadata().unwrap().len(), len);
+            false
+        } else {
+            let file = File::create(&path).expect("failed to create storage file");
+            file.set_len(len).expect("failed to set storage file len");
+            true
+        };
+        Self {
+            storage: Box::new(FilesystemStorage(path)),
+            format,
+        }
+    }
+
+    pub fn with_fs<F, T>(&mut self, f: F) -> Result<T>
+    where
+        F: FnOnce(&dyn DynFilesystem) -> T,
+    {
+        if self.format {
+            self.storage.format()?;
+        }
+        self.storage.mount_and_then_once(|fs| Ok(f(fs)))
+    }
 }
 
 const STORAGE_SIZE: usize = 512 * 128;
 
-static mut INTERNAL_RAM_STORAGE: Option<InternalStorage> = None;
-static mut INTERNAL_RAM_FS_ALLOC: Option<Allocation<InternalStorage>> = None;
+const_ram_storage!(RamStorage, STORAGE_SIZE);
 
-static mut INTERNAL_FILESYSTEM_STORAGE: Option<FilesystemStorage> = None;
-static mut INTERNAL_FILESYSTEM_FS_ALLOC: Option<Allocation<FilesystemStorage>> = None;
-
-static mut EXTERNAL_STORAGE: Option<ExternalStorage> = None;
-static mut EXTERNAL_FS_ALLOC: Option<Allocation<ExternalStorage>> = None;
-
-static mut VOLATILE_STORAGE: Option<VolatileStorage> = None;
-static mut VOLATILE_FS_ALLOC: Option<Allocation<VolatileStorage>> = None;
-
-const_ram_storage!(InternalStorage, STORAGE_SIZE);
-const_ram_storage!(ExternalStorage, STORAGE_SIZE);
-const_ram_storage!(VolatileStorage, STORAGE_SIZE);
-
-pub struct FilesystemStorage(PathBuf);
+struct FilesystemStorage(PathBuf);
 
 impl Storage for FilesystemStorage {
     const READ_SIZE: usize = 16;
@@ -53,7 +107,7 @@ impl Storage for FilesystemStorage {
     type CACHE_SIZE = U512;
     type LOOKAHEAD_SIZE = U8;
 
-    fn read(&mut self, offset: usize, buffer: &mut [u8]) -> LfsResult<usize> {
+    fn read(&mut self, offset: usize, buffer: &mut [u8]) -> Result<usize> {
         debug!("read: offset: {}, len: {}", offset, buffer.len());
         let mut file = File::open(&self.0).unwrap();
         file.seek(SeekFrom::Start(offset as _)).unwrap();
@@ -62,7 +116,7 @@ impl Storage for FilesystemStorage {
         Ok(bytes_read as _)
     }
 
-    fn write(&mut self, offset: usize, data: &[u8]) -> LfsResult<usize> {
+    fn write(&mut self, offset: usize, data: &[u8]) -> Result<usize> {
         debug!("write: offset: {}, len: {}", offset, data.len());
         if offset + data.len() > STORAGE_SIZE {
             return Err(littlefs2::io::Error::NO_SPACE);
@@ -75,7 +129,7 @@ impl Storage for FilesystemStorage {
         Ok(bytes_written)
     }
 
-    fn erase(&mut self, offset: usize, len: usize) -> LfsResult<usize> {
+    fn erase(&mut self, offset: usize, len: usize) -> Result<usize> {
         debug!("erase: offset: {}, len: {}", offset, len);
         if offset + len > STORAGE_SIZE {
             return Err(littlefs2::io::Error::NO_SPACE);
@@ -92,131 +146,23 @@ impl Storage for FilesystemStorage {
     }
 }
 
-store!(
-    FilesystemStore,
-    Internal: FilesystemStorage,
-    External: ExternalStorage,
-    Volatile: VolatileStorage
-);
-
-impl Default for FilesystemStore {
-    fn default() -> Self {
-        Self { __: PhantomData }
-    }
+#[derive(Clone, Copy)]
+pub struct Store<'a> {
+    pub internal: &'a dyn DynFilesystem,
+    pub external: &'a dyn DynFilesystem,
+    pub volatile: &'a dyn DynFilesystem,
 }
 
-#[derive(Clone, Debug)]
-pub struct Filesystem {
-    internal: PathBuf,
-    format: bool,
-}
-
-impl Filesystem {
-    pub fn new(internal: impl Into<PathBuf>) -> Self {
-        let internal = internal.into();
-        let len = u64::try_from(STORAGE_SIZE).unwrap();
-        let format = if let Ok(file) = File::open(&internal) {
-            assert_eq!(file.metadata().unwrap().len(), len);
-            false
-        } else {
-            let file = File::create(&internal).expect("failed to create storage file");
-            file.set_len(len).expect("failed to set storage file len");
-            true
-        };
-        Self { internal, format }
-    }
-}
-
-impl StoreProvider for Filesystem {
-    type Store = FilesystemStore;
-    type Ifs = FilesystemStorage;
-
-    unsafe fn ifs() -> &'static mut FilesystemStorage {
-        (*addr_of_mut!(INTERNAL_FILESYSTEM_STORAGE))
-            .as_mut()
-            .expect("ifs not initialized")
+impl store::Store for Store<'_> {
+    fn ifs(&self) -> &dyn DynFilesystem {
+        self.internal
     }
 
-    unsafe fn store() -> Self::Store {
-        Self::Store { __: PhantomData }
+    fn efs(&self) -> &dyn DynFilesystem {
+        self.external
     }
 
-    unsafe fn reset(&self) {
-        (*addr_of_mut!(INTERNAL_FILESYSTEM_STORAGE))
-            .replace(FilesystemStorage(self.internal.clone()));
-        (*addr_of_mut!(INTERNAL_FILESYSTEM_FS_ALLOC))
-            .replace(littlefs2::fs::Filesystem::allocate());
-        reset_external();
-        reset_volatile();
-
-        Self::store()
-            .mount(
-                (*addr_of_mut!(INTERNAL_FILESYSTEM_FS_ALLOC))
-                    .as_mut()
-                    .unwrap(),
-                (*addr_of_mut!(INTERNAL_FILESYSTEM_STORAGE))
-                    .as_mut()
-                    .unwrap(),
-                (*addr_of_mut!(EXTERNAL_FS_ALLOC)).as_mut().unwrap(),
-                (*addr_of_mut!(EXTERNAL_STORAGE)).as_mut().unwrap(),
-                (*addr_of_mut!(VOLATILE_FS_ALLOC)).as_mut().unwrap(),
-                (*addr_of_mut!(VOLATILE_STORAGE)).as_mut().unwrap(),
-                self.format,
-            )
-            .expect("failed to mount filesystem");
+    fn vfs(&self) -> &dyn DynFilesystem {
+        self.volatile
     }
-}
-
-store!(
-    RamStore,
-    Internal: InternalStorage,
-    External: ExternalStorage,
-    Volatile: VolatileStorage
-);
-
-#[derive(Copy, Clone, Debug, Default)]
-pub struct Ram {}
-
-impl StoreProvider for Ram {
-    type Store = RamStore;
-    type Ifs = InternalStorage;
-
-    unsafe fn ifs() -> &'static mut InternalStorage {
-        (*addr_of_mut!(INTERNAL_RAM_STORAGE))
-            .as_mut()
-            .expect("ifs not initialized")
-    }
-
-    unsafe fn store() -> Self::Store {
-        Self::Store { __: PhantomData }
-    }
-
-    unsafe fn reset(&self) {
-        (*addr_of_mut!(INTERNAL_RAM_STORAGE)).replace(InternalStorage::new());
-        (*addr_of_mut!(INTERNAL_RAM_FS_ALLOC)).replace(littlefs2::fs::Filesystem::allocate());
-        reset_external();
-        reset_volatile();
-
-        Self::store()
-            .mount(
-                (*addr_of_mut!(INTERNAL_RAM_FS_ALLOC)).as_mut().unwrap(),
-                (*addr_of_mut!(INTERNAL_RAM_STORAGE)).as_mut().unwrap(),
-                (*addr_of_mut!(EXTERNAL_FS_ALLOC)).as_mut().unwrap(),
-                (*addr_of_mut!(EXTERNAL_STORAGE)).as_mut().unwrap(),
-                (*addr_of_mut!(VOLATILE_FS_ALLOC)).as_mut().unwrap(),
-                (*addr_of_mut!(VOLATILE_STORAGE)).as_mut().unwrap(),
-                true,
-            )
-            .expect("failed to mount filesystem");
-    }
-}
-
-unsafe fn reset_external() {
-    (*addr_of_mut!(EXTERNAL_STORAGE)).replace(ExternalStorage::new());
-    (*addr_of_mut!(EXTERNAL_FS_ALLOC)).replace(littlefs2::fs::Filesystem::allocate());
-}
-
-unsafe fn reset_volatile() {
-    (*addr_of_mut!(VOLATILE_STORAGE)).replace(VolatileStorage::new());
-    (*addr_of_mut!(VOLATILE_FS_ALLOC)).replace(littlefs2::fs::Filesystem::allocate());
 }

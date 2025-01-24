@@ -12,7 +12,7 @@ fn run_test(data: u8) {
     let path = PathBuf::from(path!("test"));
     let mut write_data = Bytes::new();
     write_data.push(data).unwrap();
-    virt::with_ram_client("test", |mut client| {
+    virt::with_client(virt::StoreConfig::ram(), "test", |mut client| {
         // ensure that the filesystem is empty
         let read_dir =
             syscall!(client.read_dir_first(location, PathBuf::from(path!("")), None)).entry;
