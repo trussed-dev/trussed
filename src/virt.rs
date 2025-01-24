@@ -9,10 +9,7 @@ mod ui;
 use std::{
     iter,
     path::PathBuf,
-    sync::{
-        mpsc::{self, Receiver, Sender},
-        Mutex,
-    },
+    sync::mpsc::{self, Receiver, Sender},
     thread,
 };
 
@@ -27,31 +24,52 @@ use crate::{
     types::CoreContext,
     ClientImplementation,
 };
+use store::{Resources, Store};
 
 pub use store::{Filesystem, Ram, StoreProvider};
 pub use ui::UserInterface;
 
 pub type Client<'a, D = CoreOnly> = ClientImplementation<'a, Syscall, D>;
 
-// We need this mutex to make sure that:
-// - TrussedInterchange is not used concurrently (panics if violated)
-// - the Store is not used concurrently
-static MUTEX: Mutex<()> = Mutex::new(());
-
-pub fn with_platform<S, R, F>(store: S, f: F) -> R
+pub fn with_platform<S, R, F>(store_provider: S, f: F) -> R
 where
     S: StoreProvider,
-    F: FnOnce(Platform<S>) -> R,
+    F: FnOnce(Platform<'_>) -> R,
 {
-    let _guard = MUTEX.lock().unwrap_or_else(|err| err.into_inner());
-    unsafe {
-        store.reset();
+    let format_internal = store_provider.format_internal();
+    let format_external = store_provider.format_external();
+    let format_volatile = store_provider.format_volatile();
+
+    let (internal, external, volatile) = store_provider.split();
+    let mut internal = Resources::new(internal);
+    let mut external = Resources::new(external);
+    let mut volatile = Resources::new(volatile);
+
+    if format_internal {
+        internal.format().unwrap();
     }
+    if format_external {
+        external.format().unwrap();
+    }
+    if format_volatile {
+        volatile.format().unwrap();
+    }
+
+    let ifs = internal.mount().unwrap();
+    let efs = external.mount().unwrap();
+    let vfs = volatile.mount().unwrap();
+
+    let store = Store {
+        internal: &ifs,
+        external: &efs,
+        volatile: &vfs,
+    };
+
     // causing a regression again
     // let rng = chacha20::ChaCha8Rng::from_rng(rand_core::OsRng).unwrap();
     let platform = Platform {
         rng: ChaCha8Rng::from_seed([42u8; 32]),
-        _store: store,
+        store,
         ui: UserInterface::new(),
     };
     f(platform)
@@ -184,13 +202,13 @@ impl<'a, I: 'static, C: Default> Runner<'a, I, C> {
     }
 }
 
-pub struct Platform<S: StoreProvider> {
+pub struct Platform<'a> {
     rng: ChaCha8Rng,
-    _store: S,
+    store: store::Store<'a>,
     ui: UserInterface,
 }
 
-impl<S: StoreProvider> Platform<S> {
+impl Platform<'_> {
     pub fn run_client<R>(self, client_id: &str, test: impl FnOnce(Client) -> R) -> R {
         self.run_client_with_backends(client_id, CoreOnly, &[], test)
     }
@@ -255,9 +273,9 @@ impl<S: StoreProvider> Platform<S> {
     }
 }
 
-unsafe impl<S: StoreProvider> platform::Platform for Platform<S> {
+unsafe impl<'a> platform::Platform for Platform<'a> {
     type R = ChaCha8Rng;
-    type S = S::Store;
+    type S = store::Store<'a>;
     type UI = UserInterface;
 
     fn user_interface(&mut self) -> &mut Self::UI {
@@ -269,6 +287,6 @@ unsafe impl<S: StoreProvider> platform::Platform for Platform<S> {
     }
 
     fn store(&self) -> Self::S {
-        unsafe { S::store() }
+        self.store
     }
 }

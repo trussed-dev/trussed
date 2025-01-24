@@ -72,7 +72,7 @@
 //! - Alternative: subdirectory <==> RP hash, everything else in flat files
 //! - In any case need to "list dirs excluding . and .." or similar
 
-use littlefs2::{driver::Storage, fs::Filesystem, path};
+use littlefs2::path;
 
 use crate::error::Error;
 use crate::types::{Bytes, Location};
@@ -127,36 +127,16 @@ pub mod keystore;
 // LfsStorage-bound types) to remove lifetimes and generic parameters from Store.
 //
 // This makes everything using it *much* more ergonomic.
-pub unsafe trait Store: Copy {
-    type I: 'static + Storage;
-    type E: 'static + Storage;
-    type V: 'static + Storage;
-    fn ifs(self) -> &'static Fs<Self::I>;
-    fn efs(self) -> &'static Fs<Self::E>;
-    fn vfs(self) -> &'static Fs<Self::V>;
+pub trait Store {
+    fn ifs(&self) -> &dyn DynFilesystem;
+    fn efs(&self) -> &dyn DynFilesystem;
+    fn vfs(&self) -> &dyn DynFilesystem;
     fn fs(&self, location: Location) -> &dyn DynFilesystem {
         match location {
-            Location::Internal => self.ifs().fs,
-            Location::External => self.efs().fs,
-            Location::Volatile => self.vfs().fs,
+            Location::Internal => self.ifs(),
+            Location::External => self.efs(),
+            Location::Volatile => self.vfs(),
         }
-    }
-}
-
-pub struct Fs<S: 'static + Storage> {
-    fs: &'static Filesystem<'static, S>,
-}
-
-impl<S: 'static + Storage> core::ops::Deref for Fs<S> {
-    type Target = Filesystem<'static, S>;
-    fn deref(&self) -> &Self::Target {
-        self.fs
-    }
-}
-
-impl<S: 'static + Storage> Fs<S> {
-    pub fn new(fs: &'static Filesystem<'static, S>) -> Self {
-        Self { fs }
     }
 }
 
@@ -174,19 +154,15 @@ macro_rules! store {
             __: core::marker::PhantomData<*mut ()>,
         }
 
-        unsafe impl $crate::store::Store for $store {
-            type I = $Ifs;
-            type E = $Efs;
-            type V = $Vfs;
-
-            fn ifs(self) -> &'static $crate::store::Fs<$Ifs> {
-                unsafe { &*Self::ifs_ptr() }
+        impl $crate::store::Store for $store {
+            fn ifs(&self) -> &dyn littlefs2::object_safe::DynFilesystem {
+                unsafe { Self::ifs_ptr().assume_init() }
             }
-            fn efs(self) -> &'static $crate::store::Fs<$Efs> {
-                unsafe { &*Self::efs_ptr() }
+            fn efs(&self) -> &dyn littlefs2::object_safe::DynFilesystem {
+                unsafe { Self::efs_ptr().assume_init() }
             }
-            fn vfs(self) -> &'static $crate::store::Fs<$Vfs> {
-                unsafe { &*Self::vfs_ptr() }
+            fn vfs(&self) -> &dyn littlefs2::object_safe::DynFilesystem {
+                unsafe { Self::vfs_ptr().assume_init() }
             }
         }
 
@@ -277,14 +253,9 @@ macro_rules! store {
                 efs: &'static littlefs2::fs::Filesystem<$Efs>,
                 vfs: &'static littlefs2::fs::Filesystem<$Vfs>,
             ) -> Self {
-                let store_ifs = $crate::store::Fs::new(ifs);
-                let store_efs = $crate::store::Fs::new(efs);
-                let store_vfs = $crate::store::Fs::new(vfs);
-                unsafe {
-                    Self::ifs_ptr().write(store_ifs);
-                    Self::efs_ptr().write(store_efs);
-                    Self::vfs_ptr().write(store_vfs);
-                }
+                Self::ifs_ptr().write(ifs);
+                Self::efs_ptr().write(efs);
+                Self::vfs_ptr().write(vfs);
                 Self::claim().unwrap()
             }
 
@@ -317,28 +288,31 @@ macro_rules! store {
                 }
             }
 
-            fn ifs_ptr() -> *mut $crate::store::Fs<$Ifs> {
+            fn ifs_ptr() -> &'static mut core::mem::MaybeUninit<
+                &'static dyn littlefs2::object_safe::DynFilesystem,
+            > {
                 use core::mem::MaybeUninit;
-                use core::ptr::addr_of_mut;
-                use $crate::store::Fs;
-                static mut IFS: MaybeUninit<Fs<$Ifs>> = MaybeUninit::uninit();
-                unsafe { (*addr_of_mut!(IFS)).as_mut_ptr() }
+                static mut IFS: MaybeUninit<&'static dyn littlefs2::object_safe::DynFilesystem> =
+                    MaybeUninit::uninit();
+                unsafe { (&raw mut IFS).as_mut().unwrap() }
             }
 
-            fn efs_ptr() -> *mut $crate::store::Fs<$Efs> {
+            fn efs_ptr() -> &'static mut core::mem::MaybeUninit<
+                &'static dyn littlefs2::object_safe::DynFilesystem,
+            > {
                 use core::mem::MaybeUninit;
-                use core::ptr::addr_of_mut;
-                use $crate::store::Fs;
-                static mut EFS: MaybeUninit<Fs<$Efs>> = MaybeUninit::uninit();
-                unsafe { (*addr_of_mut!(EFS)).as_mut_ptr() }
+                static mut EFS: MaybeUninit<&'static dyn littlefs2::object_safe::DynFilesystem> =
+                    MaybeUninit::uninit();
+                unsafe { (&raw mut EFS).as_mut().unwrap() }
             }
 
-            fn vfs_ptr() -> *mut $crate::store::Fs<$Vfs> {
+            fn vfs_ptr() -> &'static mut core::mem::MaybeUninit<
+                &'static dyn littlefs2::object_safe::DynFilesystem,
+            > {
                 use core::mem::MaybeUninit;
-                use core::ptr::addr_of_mut;
-                use $crate::store::Fs;
-                static mut VFS: MaybeUninit<Fs<$Vfs>> = MaybeUninit::uninit();
-                unsafe { (*addr_of_mut!(VFS)).as_mut_ptr() }
+                static mut VFS: MaybeUninit<&'static dyn littlefs2::object_safe::DynFilesystem> =
+                    MaybeUninit::uninit();
+                unsafe { (&raw mut VFS).as_mut().unwrap() }
             }
 
             // Ignore lint for compatibility
@@ -401,8 +375,7 @@ macro_rules! store {
                         &mut *(*addr_of_mut!(IFS_ALLOC)).as_mut_ptr(),
                         &mut *(*addr_of_mut!(IFS_STORAGE)).as_mut_ptr(),
                     )?);
-                    let ifs = $crate::store::Fs::new((*addr_of!(IFS)).as_ref().unwrap());
-                    Self::ifs_ptr().write(ifs);
+                    Self::ifs_ptr().write(addr_of!(IFS).as_ref().unwrap().as_ref().unwrap());
 
                     (*addr_of_mut!(EFS_ALLOC)).as_mut_ptr().write(efs_alloc);
                     (*addr_of_mut!(EFS_STORAGE)).as_mut_ptr().write(efs_storage);
@@ -410,8 +383,7 @@ macro_rules! store {
                         &mut *(*addr_of_mut!(EFS_ALLOC)).as_mut_ptr(),
                         &mut *(*addr_of_mut!(EFS_STORAGE)).as_mut_ptr(),
                     )?);
-                    let efs = $crate::store::Fs::new((*addr_of_mut!(EFS)).as_ref().unwrap());
-                    Self::efs_ptr().write(efs);
+                    Self::efs_ptr().write(addr_of!(EFS).as_ref().unwrap().as_ref().unwrap());
 
                     (*addr_of_mut!(VFS_ALLOC)).as_mut_ptr().write(vfs_alloc);
                     (*addr_of_mut!(VFS_STORAGE)).as_mut_ptr().write(vfs_storage);
@@ -419,8 +391,7 @@ macro_rules! store {
                         &mut *(*addr_of_mut!(VFS_ALLOC)).as_mut_ptr(),
                         &mut *(*addr_of_mut!(VFS_STORAGE)).as_mut_ptr(),
                     )?);
-                    let vfs = $crate::store::Fs::new((*addr_of!(VFS)).as_ref().unwrap());
-                    Self::vfs_ptr().write(vfs);
+                    Self::vfs_ptr().write(addr_of!(VFS).as_ref().unwrap().as_ref().unwrap());
 
                     Ok(())
                 }
@@ -509,7 +480,7 @@ pub fn create_directories(fs: &dyn DynFilesystem, path: &Path) -> Result<(), Err
 /// Reads contents from path in location of store.
 #[inline(never)]
 pub fn read<const N: usize>(
-    store: impl Store,
+    store: &impl Store,
     location: Location,
     path: &Path,
 ) -> Result<Bytes<N>, Error> {
@@ -523,7 +494,7 @@ pub fn read<const N: usize>(
 /// Writes contents to path in location of store.
 #[inline(never)]
 pub fn write(
-    store: impl Store,
+    store: &impl Store,
     location: Location,
     path: &Path,
     contents: &[u8],
@@ -538,7 +509,7 @@ pub fn write(
 /// Creates parent directory if necessary, then writes.
 #[inline(never)]
 pub fn store(
-    store: impl Store,
+    store: &impl Store,
     location: Location,
     path: &Path,
     contents: &[u8],
@@ -552,7 +523,7 @@ pub fn store(
 }
 
 #[inline(never)]
-pub fn delete(store: impl Store, location: Location, path: &Path) -> bool {
+pub fn delete(store: &impl Store, location: Location, path: &Path) -> bool {
     debug_now!("deleting {}", &path);
     let fs = store.fs(location);
     if fs.remove(path).is_err() {
@@ -583,14 +554,14 @@ pub fn delete(store: impl Store, location: Location, path: &Path) -> bool {
 }
 
 #[inline(never)]
-pub fn exists(store: impl Store, location: Location, path: &Path) -> bool {
+pub fn exists(store: &impl Store, location: Location, path: &Path) -> bool {
     debug_now!("checking existence of {}", &path);
     store.fs(location).exists(path)
 }
 
 #[inline(never)]
 pub fn metadata(
-    store: impl Store,
+    store: &impl Store,
     location: Location,
     path: &Path,
 ) -> Result<Option<Metadata>, Error> {
@@ -603,7 +574,7 @@ pub fn metadata(
 }
 
 #[inline(never)]
-pub fn rename(store: impl Store, location: Location, from: &Path, to: &Path) -> Result<(), Error> {
+pub fn rename(store: &impl Store, location: Location, from: &Path, to: &Path) -> Result<(), Error> {
     debug_now!("renaming {} to {}", &from, &to);
     store
         .fs(location)
@@ -612,14 +583,14 @@ pub fn rename(store: impl Store, location: Location, from: &Path, to: &Path) -> 
 }
 
 #[inline(never)]
-pub fn remove_dir(store: impl Store, location: Location, path: &Path) -> bool {
+pub fn remove_dir(store: &impl Store, location: Location, path: &Path) -> bool {
     debug_now!("remove_dir'ing {}", &path);
     store.fs(location).remove_dir(path).is_ok()
 }
 
 #[inline(never)]
 pub fn remove_dir_all_where(
-    store: impl Store,
+    store: &impl Store,
     location: Location,
     path: &Path,
     predicate: &dyn Fn(&DirEntry) -> bool,
