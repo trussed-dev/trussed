@@ -37,14 +37,14 @@ impl<S: Store> ClientCounterstore<S> {
 
     fn read_counter(&mut self, location: Location, id: CounterId) -> Result<Counter> {
         let path = self.counter_path(id);
-        let mut bytes: crate::Bytes<16> = store::read(self.store, location, &path)?;
+        let mut bytes: crate::Bytes<16> = store::read(&self.store, location, &path)?;
         bytes.resize_default(16).ok();
         Ok(u128::from_le_bytes(bytes.as_slice().try_into().unwrap()))
     }
 
     fn write_counter(&mut self, location: Location, id: CounterId, value: u128) -> Result<()> {
         let path = self.counter_path(id);
-        store::store(self.store, location, &path, &value.to_le_bytes())
+        store::store(&self.store, location, &path, &value.to_le_bytes())
     }
 
     fn increment_location(&mut self, location: Location, id: CounterId) -> Result<Counter> {
