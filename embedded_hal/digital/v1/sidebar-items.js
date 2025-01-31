@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"mod":["toggleable"],"trait":["InputPin","OutputPin","StatefulOutputPin","ToggleableOutputPin"]};

@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"enum":["Direction"],"mod":["adc","blocking","can","digital","fmt","prelude","serial","spi","timer","watchdog"],"trait":["Capture","Pwm","PwmPin","Qei"]};

@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"enum":["Operation"],"trait":["AddressMode","Read","Transactional","TransactionalIter","Write","WriteIter","WriteIterRead","WriteRead"],"type":["SevenBitAddress","TenBitAddress"]};
