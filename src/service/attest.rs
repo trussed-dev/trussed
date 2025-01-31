@@ -439,10 +439,10 @@ impl Encodable for Name<'_> {
             l += 0xD;
         }
         if let Some(organization) = self.organization {
-            l += 11 + organization.as_bytes().len() as u16;
+            l += 11 + organization.len() as u16;
         }
         if let Some(state) = self.state {
-            l += 11 + state.as_bytes().len() as u16;
+            l += 11 + state.len() as u16;
         }
         Ok(l.into())
     }
