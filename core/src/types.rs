@@ -594,6 +594,14 @@ generate_mechanism! {
         Rsa3072Pkcs1v15,
         #[cfg(feature = "rsa4096")]
         Rsa4096Pkcs1v15,
+
+        // Post-Quantum Cryptography
+        #[cfg(feature = "mldsa44")]
+        Mldsa44,
+        #[cfg(feature = "mldsa65")]
+        Mldsa65,
+        #[cfg(feature = "mldsa87")]
+        Mldsa87,
     }
 }
 

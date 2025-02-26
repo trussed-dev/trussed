@@ -11,6 +11,8 @@ use crate::{
     Error,
 };
 
+// Keys are often stored in serialized format (e.g. PKCS#8 used by the RSA backend),
+// so material max length must be serialized max length.
 pub type Material = Vec<u8, { MAX_KEY_MATERIAL_LENGTH }>;
 pub type SerializedKeyBytes = Vec<u8, { MAX_SERIALIZED_KEY_LENGTH }>;
 
@@ -77,6 +79,13 @@ pub enum Kind {
     BrainpoolP512R1,
     X255,
     Secp256k1,
+    // Post-quantum cryptography algorithms
+    #[cfg(feature = "mldsa44")]
+    Mldsa44,
+    #[cfg(feature = "mldsa65")]
+    Mldsa65,
+    #[cfg(feature = "mldsa87")]
+    Mldsa87,
 }
 
 bitflags::bitflags! {
@@ -223,6 +232,12 @@ impl Kind {
             Kind::BrainpoolP384R1 => 13,
             Kind::BrainpoolP512R1 => 14,
             Kind::Secp256k1 => 15,
+            #[cfg(feature = "mldsa44")]
+            Kind::Mldsa44 => 16,
+            #[cfg(feature = "mldsa65")]
+            Kind::Mldsa65 => 17,
+            #[cfg(feature = "mldsa87")]
+            Kind::Mldsa87 => 18,
         }
     }
 
@@ -243,6 +258,12 @@ impl Kind {
             13 => Kind::BrainpoolP384R1,
             14 => Kind::BrainpoolP512R1,
             15 => Kind::Secp256k1,
+            #[cfg(feature = "mldsa44")]
+            16 => Kind::Mldsa44,
+            #[cfg(feature = "mldsa65")]
+            17 => Kind::Mldsa65,
+            #[cfg(feature = "mldsa87")]
+            18 => Kind::Mldsa87,
             _ => return Err(Error::InvalidSerializedKey),
         })
     }

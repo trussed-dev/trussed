@@ -7,7 +7,9 @@ pub use trussed_core::config::{
     SERDE_EXTENSION_REQUEST_LENGTH,
 };
 
-// must be MAX_KEY_MATERIAL_LENGTH + 4
+// Must be MAX_KEY_MATERIAL_LENGTH + 4
+// Note that this is not the serialized key material (e.g. serialized PKCS#8), but
+// the internal Trussed serialization that adds flags and such
 pub const MAX_SERIALIZED_KEY_LENGTH: usize = MAX_KEY_MATERIAL_LENGTH + 4;
 
 pub const USER_ATTRIBUTE_NUMBER: u8 = 37;
