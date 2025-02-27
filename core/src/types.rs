@@ -9,7 +9,7 @@ pub use littlefs2_core::{DirEntry, Metadata, PathBuf};
 #[cfg(feature = "crypto-client")]
 use crate::api::{reply, request};
 use crate::config::{
-    MAX_KEY_MATERIAL_LENGTH, MAX_MEDIUM_DATA_LENGTH, MAX_MESSAGE_LENGTH, MAX_SHORT_DATA_LENGTH,
+    MAX_MEDIUM_DATA_LENGTH, MAX_MESSAGE_LENGTH, MAX_SERIALIZED_KEY_LENGTH, MAX_SHORT_DATA_LENGTH,
     MAX_SIGNATURE_LENGTH, MAX_USER_ATTRIBUTE_LENGTH,
 };
 
@@ -49,7 +49,7 @@ pub mod reboot {
 pub type Message = Bytes<MAX_MESSAGE_LENGTH>;
 pub type MediumData = Bytes<MAX_MEDIUM_DATA_LENGTH>;
 pub type ShortData = Bytes<MAX_SHORT_DATA_LENGTH>;
-pub type SerializedKey = Bytes<MAX_KEY_MATERIAL_LENGTH>;
+pub type SerializedKey = Bytes<MAX_SERIALIZED_KEY_LENGTH>;
 pub type Signature = Bytes<MAX_SIGNATURE_LENGTH>;
 pub type UserAttribute = Bytes<MAX_USER_ATTRIBUTE_LENGTH>;
 
@@ -594,6 +594,14 @@ generate_mechanism! {
         Rsa3072Pkcs1v15,
         #[cfg(feature = "rsa4096")]
         Rsa4096Pkcs1v15,
+
+        // Post-Quantum Cryptography
+        #[cfg(feature = "mldsa44")]
+        Mldsa44,
+        #[cfg(feature = "mldsa65")]
+        Mldsa65,
+        #[cfg(feature = "mldsa87")]
+        Mldsa87,
     }
 }
 
