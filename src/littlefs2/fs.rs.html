@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/littlefs2-0.5.0/src/fs.rs`."><title>fs.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-42caa33d.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="littlefs2" data-themes="" data-resource-suffix="" data-rustdoc-version="1.84.1 (e71f9a9a9 2025-01-27)" data-channel="1.84.1" data-search-js="search-92e6798f.js" data-settings-js="settings-0f613d39.js" ><script src="../../static.files/storage-59e33391.js"></script><script defer src="../../static.files/src-script-56102188.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-5f194d8c.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-893ab5e7.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><h1><div class="sub-heading">littlefs2/</div>fs.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/littlefs2-0.6.0/src/fs.rs`."><title>fs.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-46132b98.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="littlefs2" data-themes="" data-resource-suffix="" data-rustdoc-version="1.85.0 (4d91de4e4 2025-02-17)" data-channel="1.85.0" data-search-js="search-75f5ac3e.js" data-settings-js="settings-0f613d39.js" ><script src="../../static.files/storage-59e33391.js"></script><script defer src="../../static.files/src-script-56102188.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-5f194d8c.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-893ab5e7.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><h1><div class="sub-heading">littlefs2/</div>fs.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers">
 <a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
@@ -1467,7 +1467,31 @@
 <a href="#1466" id="1466">1466</a>
 <a href="#1467" id="1467">1467</a>
 <a href="#1468" id="1468">1468</a>
-<a href="#1469" id="1469">1469</a></pre></div><pre class="rust"><code><span class="doccomment">//! Experimental Filesystem version using closures.
+<a href="#1469" id="1469">1469</a>
+<a href="#1470" id="1470">1470</a>
+<a href="#1471" id="1471">1471</a>
+<a href="#1472" id="1472">1472</a>
+<a href="#1473" id="1473">1473</a>
+<a href="#1474" id="1474">1474</a>
+<a href="#1475" id="1475">1475</a>
+<a href="#1476" id="1476">1476</a>
+<a href="#1477" id="1477">1477</a>
+<a href="#1478" id="1478">1478</a>
+<a href="#1479" id="1479">1479</a>
+<a href="#1480" id="1480">1480</a>
+<a href="#1481" id="1481">1481</a>
+<a href="#1482" id="1482">1482</a>
+<a href="#1483" id="1483">1483</a>
+<a href="#1484" id="1484">1484</a>
+<a href="#1485" id="1485">1485</a>
+<a href="#1486" id="1486">1486</a>
+<a href="#1487" id="1487">1487</a>
+<a href="#1488" id="1488">1488</a>
+<a href="#1489" id="1489">1489</a>
+<a href="#1490" id="1490">1490</a>
+<a href="#1491" id="1491">1491</a>
+<a href="#1492" id="1492">1492</a>
+<a href="#1493" id="1493">1493</a></pre></div><pre class="rust"><code><span class="doccomment">//! Experimental Filesystem version using closures.
 
 </span><span class="kw">use </span>core::ffi::{c_int, c_void};
 <span class="kw">use </span>core::ptr::addr_of;
@@ -1488,6 +1512,7 @@
     driver,
     io::{<span class="self">self</span>, Error, OpenSeekFrom, <span class="prelude-ty">Result</span>},
     path::{Path, PathBuf},
+    DISK_VERSION,
 };
 
 <span class="kw">fn </span>error_code_from&lt;T&gt;(result: <span class="prelude-ty">Result</span>&lt;T&gt;) -&gt; ll::lfs_error {
@@ -1627,6 +1652,10 @@
             name_max: filename_max_plus_one.wrapping_sub(<span class="number">1</span>),
             file_max,
             attr_max,
+            compact_thresh: <span class="number">0</span>,
+            metadata_max: <span class="number">0</span>,
+            inline_max: <span class="number">0</span>,
+            disk_version: DISK_VERSION.into(),
         };
 
         <span class="self">Self </span>{
@@ -2042,7 +2071,6 @@
     ///
     /// It is equivalent to OpenOptions::new() but allows you to write more readable code.
     /// This also avoids the need to import OpenOptions`.
-
     </span><span class="kw">pub fn </span>with_options() -&gt; OpenOptions {
         OpenOptions::new()
     }
@@ -2405,7 +2433,7 @@
     path: <span class="kw-2">&amp;</span><span class="lifetime">'b </span>Path,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, <span class="lifetime">'b</span>, S: driver::Storage&gt; Iterator <span class="kw">for </span>ReadDir&lt;<span class="lifetime">'a</span>, <span class="lifetime">'b</span>, S&gt; {
+<span class="kw">impl</span>&lt;S: driver::Storage&gt; Iterator <span class="kw">for </span>ReadDir&lt;<span class="lifetime">'_</span>, <span class="lifetime">'_</span>, S&gt; {
     <span class="kw">type </span>Item = <span class="prelude-ty">Result</span>&lt;DirEntry&gt;;
 
     <span class="comment">// remove this allowance again, once path overflow is properly handled
@@ -2441,9 +2469,9 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, <span class="lifetime">'b</span>, S: driver::Storage&gt; ReadDir&lt;<span class="lifetime">'a</span>, <span class="lifetime">'b</span>, S&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, S: driver::Storage&gt; ReadDir&lt;<span class="lifetime">'a</span>, <span class="lifetime">'_</span>, S&gt; {
     <span class="comment">// Safety-hatch to experiment with missing parts of API
-    </span><span class="kw">pub unsafe fn </span>borrow_filesystem&lt;<span class="lifetime">'c</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'c </span><span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'c </span>Filesystem&lt;<span class="lifetime">'a</span>, S&gt; {
+    </span><span class="kw">pub unsafe fn </span>borrow_filesystem&lt;<span class="lifetime">'b</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'b </span><span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'b </span>Filesystem&lt;<span class="lifetime">'a</span>, S&gt; {
         <span class="self">self</span>.fs
     }
 }
@@ -2690,9 +2718,29 @@
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
     <span class="kw">use </span><span class="kw">crate</span>::path;
     <span class="kw">use </span>core::convert::TryInto;
-    <span class="kw">use </span>driver::Storage <span class="kw">as </span>LfsStorage;
-    <span class="kw">use </span>io::Result <span class="kw">as </span>LfsResult;
     <span class="macro">const_ram_storage!</span>(TestStorage, <span class="number">4096</span>);
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>disk_version() {
+        <span class="kw">let </span><span class="kw-2">mut </span>test_storage = TestStorage::new();
+        Filesystem::format(<span class="kw-2">&amp;mut </span>test_storage).unwrap();
+        Filesystem::mount_and_then(<span class="kw-2">&amp;mut </span>test_storage, |fs| {
+            <span class="kw">let </span><span class="kw-2">mut </span>fs_info = ll::lfs_fsinfo {
+                disk_version: <span class="number">0</span>,
+                block_size: <span class="number">0</span>,
+                block_count: <span class="number">0</span>,
+                name_max: <span class="number">0</span>,
+                file_max: <span class="number">0</span>,
+                attr_max: <span class="number">0</span>,
+            };
+            <span class="kw">let </span>return_code =
+                <span class="kw">unsafe </span>{ ll::lfs_fs_stat(<span class="kw-2">&amp;mut </span>fs.alloc.borrow_mut().state, <span class="kw-2">&amp;mut </span>fs_info) };
+            result_from((), return_code).unwrap();
+            <span class="macro">assert_eq!</span>(fs_info.disk_version, DISK_VERSION.into());
+            <span class="prelude-val">Ok</span>(())
+        })
+        .unwrap();
+    }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>todo() {
