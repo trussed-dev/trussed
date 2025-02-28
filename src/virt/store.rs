@@ -7,10 +7,7 @@ use std::{
 };
 
 use generic_array::typenum::{U512, U8};
-use littlefs2::{
-    const_ram_storage, driver::Storage, driver::Storage as LfsStorage, fs::Allocation,
-    io::Result as LfsResult,
-};
+use littlefs2::{const_ram_storage, driver::Storage, fs::Allocation, io::Result as LfsResult};
 
 use crate::{store, store::Store};
 

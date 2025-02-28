@@ -4,9 +4,7 @@ use chacha20::ChaCha20;
 use entropy::shannon_entropy;
 use generic_array::GenericArray;
 use littlefs2::const_ram_storage;
-use littlefs2::driver::Storage as LfsStorage;
 use littlefs2::fs::{Allocation, Filesystem};
-use littlefs2::io::Result as LfsResult;
 use littlefs2_core::path;
 use rand_core::{CryptoRng, RngCore};
 
