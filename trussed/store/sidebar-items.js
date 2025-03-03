@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":["create_directories","delete","exists","metadata","read","remove_dir","remove_dir_all_where","rename","store","write"],"mod":["certstore","counterstore","filestore","keystore"],"struct":["Fs"],"trait":["DynFile","DynFilesystem","DynStorage","Store"]};
+window.SIDEBAR_ITEMS = {"fn":["create_directories","delete","exists","metadata","read","remove_dir","remove_dir_all_where","rename","store","write"],"mod":["certstore","counterstore","filestore","keystore"],"trait":["DynFile","DynFilesystem","DynStorage","Store"]};

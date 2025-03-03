@@ -802,7 +802,7 @@
                     // the client, and return both the entry and the state
                     </span>.map(|(i, entry)| {
                         <span class="comment">// The semantics is that for a non-existent file, we return None (not an error)
-                        </span><span class="kw">let </span>data = store::read(<span class="self">self</span>.store, location, entry.path()).ok();
+                        </span><span class="kw">let </span>data = store::read(<span class="kw-2">&amp;</span><span class="self">self</span>.store, location, entry.path()).ok();
                         (i, data)
 
                         <span class="comment">// the `ok_or` dummy error followed by the `ok` in the next line is because
@@ -868,7 +868,7 @@
                     })
                     .map(|(i, entry)| {
                         <span class="comment">// The semantics is that for a non-existent file, we return None (not an error)
-                        </span><span class="kw">let </span>data = store::read(<span class="self">self</span>.store, location, entry.path()).ok();
+                        </span><span class="kw">let </span>data = store::read(<span class="kw-2">&amp;</span><span class="self">self</span>.store, location, entry.path()).ok();
                         (i, data)
                     })
                     <span class="comment">// convert Option into Result, again because `read_dir_and_then` expects this
@@ -892,36 +892,36 @@
     <span class="kw">fn </span>read&lt;<span class="kw">const </span>N: usize&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>Path, location: Location) -&gt; <span class="prelude-ty">Result</span>&lt;Bytes&lt;N&gt;&gt; {
         <span class="kw">let </span>path = <span class="self">self</span>.actual_path(path)<span class="question-mark">?</span>;
 
-        store::read(<span class="self">self</span>.store, location, <span class="kw-2">&amp;</span>path)
+        store::read(<span class="kw-2">&amp;</span><span class="self">self</span>.store, location, <span class="kw-2">&amp;</span>path)
     }
 
     <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>Path, location: Location, data: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>path = <span class="self">self</span>.actual_path(path)<span class="question-mark">?</span>;
-        store::store(<span class="self">self</span>.store, location, <span class="kw-2">&amp;</span>path, data)
+        store::store(<span class="kw-2">&amp;</span><span class="self">self</span>.store, location, <span class="kw-2">&amp;</span>path, data)
     }
 
     <span class="kw">fn </span>exists(<span class="kw-2">&amp;mut </span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>Path, location: Location) -&gt; bool {
         <span class="kw">if let </span><span class="prelude-val">Ok</span>(path) = <span class="self">self</span>.actual_path(path) {
-            store::exists(<span class="self">self</span>.store, location, <span class="kw-2">&amp;</span>path)
+            store::exists(<span class="kw-2">&amp;</span><span class="self">self</span>.store, location, <span class="kw-2">&amp;</span>path)
         } <span class="kw">else </span>{
             <span class="bool-val">false
         </span>}
     }
     <span class="kw">fn </span>metadata(<span class="kw-2">&amp;mut </span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>Path, location: Location) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Metadata&gt;&gt; {
         <span class="kw">let </span>path = <span class="self">self</span>.actual_path(path)<span class="question-mark">?</span>;
-        store::metadata(<span class="self">self</span>.store, location, <span class="kw-2">&amp;</span>path)
+        store::metadata(<span class="kw-2">&amp;</span><span class="self">self</span>.store, location, <span class="kw-2">&amp;</span>path)
     }
 
     <span class="kw">fn </span>rename(<span class="kw-2">&amp;mut </span><span class="self">self</span>, from: <span class="kw-2">&amp;</span>Path, to: <span class="kw-2">&amp;</span>Path, location: Location) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>from = <span class="self">self</span>.actual_path(from)<span class="question-mark">?</span>;
         <span class="kw">let </span>to = <span class="self">self</span>.actual_path(to)<span class="question-mark">?</span>;
-        store::rename(<span class="self">self</span>.store, location, <span class="kw-2">&amp;</span>from, <span class="kw-2">&amp;</span>to)
+        store::rename(<span class="kw-2">&amp;</span><span class="self">self</span>.store, location, <span class="kw-2">&amp;</span>from, <span class="kw-2">&amp;</span>to)
     }
 
     <span class="kw">fn </span>remove_file(<span class="kw-2">&amp;mut </span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>Path, location: Location) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>path = <span class="self">self</span>.actual_path(path)<span class="question-mark">?</span>;
 
-        <span class="kw">match </span>store::delete(<span class="self">self</span>.store, location, <span class="kw-2">&amp;</span>path) {
+        <span class="kw">match </span>store::delete(<span class="kw-2">&amp;</span><span class="self">self</span>.store, location, <span class="kw-2">&amp;</span>path) {
             <span class="bool-val">true </span>=&gt; <span class="prelude-val">Ok</span>(()),
             <span class="bool-val">false </span>=&gt; <span class="prelude-val">Err</span>(Error::InternalError),
         }
@@ -930,7 +930,7 @@
     <span class="kw">fn </span>remove_dir(<span class="kw-2">&amp;mut </span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>Path, location: Location) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>path = <span class="self">self</span>.actual_path(path)<span class="question-mark">?</span>;
 
-        <span class="kw">match </span>store::delete(<span class="self">self</span>.store, location, <span class="kw-2">&amp;</span>path) {
+        <span class="kw">match </span>store::delete(<span class="kw-2">&amp;</span><span class="self">self</span>.store, location, <span class="kw-2">&amp;</span>path) {
             <span class="bool-val">true </span>=&gt; <span class="prelude-val">Ok</span>(()),
             <span class="bool-val">false </span>=&gt; <span class="prelude-val">Err</span>(Error::InternalError),
         }
@@ -939,7 +939,7 @@
     <span class="kw">fn </span>remove_dir_all(<span class="kw-2">&amp;mut </span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>Path, location: Location) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="kw">let </span>path = <span class="self">self</span>.actual_path(path)<span class="question-mark">?</span>;
 
-        store::remove_dir_all_where(<span class="self">self</span>.store, location, <span class="kw-2">&amp;</span>path, <span class="kw-2">&amp;</span>|<span class="kw">_</span>| <span class="bool-val">true</span>)
+        store::remove_dir_all_where(<span class="kw-2">&amp;</span><span class="self">self</span>.store, location, <span class="kw-2">&amp;</span>path, <span class="kw-2">&amp;</span>|<span class="kw">_</span>| <span class="bool-val">true</span>)
             .map_err(|<span class="kw">_</span>| Error::InternalError)
     }
     <span class="kw">fn </span>remove_dir_all_where(
@@ -950,7 +950,7 @@
     ) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
         <span class="kw">let </span>path = <span class="self">self</span>.actual_path(path)<span class="question-mark">?</span>;
 
-        store::remove_dir_all_where(<span class="self">self</span>.store, location, <span class="kw-2">&amp;</span>path, <span class="kw-2">&amp;</span>predicate)
+        store::remove_dir_all_where(<span class="kw-2">&amp;</span><span class="self">self</span>.store, location, <span class="kw-2">&amp;</span>path, <span class="kw-2">&amp;</span>predicate)
             .map_err(|<span class="kw">_</span>| Error::InternalError)
     }
 
