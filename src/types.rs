@@ -88,6 +88,8 @@ pub const IMPLEMENTED_MECHANISMS: &[Mechanism] = &[
     Mechanism::Tdes,
     #[cfg(feature = "totp")]
     Mechanism::Totp,
+    #[cfg(feature = "trng")]
+    Mechanism::Trng,
     #[cfg(feature = "x255")]
     Mechanism::X255,
 ];

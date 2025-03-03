@@ -63,6 +63,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Removed the storage types to return `&dyn DynFilesystem` instead.
   - Removed the `Copy` requirement.
   - Removed the `unsafe` keyword for the `Store` trait.
+- Replaced the mechanism RPC traits in `service` with a single `MechanismImpl` trait.
 
 ### Fixed
 

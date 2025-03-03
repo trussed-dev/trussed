@@ -5,7 +5,7 @@ use trussed_core::types::EncryptedData;
 use crate::api::{reply, request};
 use crate::error::Error;
 use crate::key;
-use crate::service::{Decrypt, Encrypt, GenerateKey, UnwrapKey, WrapKey};
+use crate::service::MechanismImpl;
 use crate::store::keystore::Keystore;
 use crate::types::{Mechanism, Message, ShortData};
 
@@ -20,9 +20,26 @@ const TAG_LEN: usize = 16;
 const KIND: key::Kind = key::Kind::Symmetric(KEY_LEN);
 const KIND_NONCE: key::Kind = key::Kind::Symmetric32Nonce(NONCE_LEN);
 
-impl GenerateKey for super::Chacha8Poly1305 {
+#[inline(never)]
+fn increment_nonce(nonce: &mut [u8]) -> Result<(), Error> {
+    assert_eq!(nonce.len(), NONCE_LEN);
+    let mut carry: u16 = 1;
+    for digit in nonce.iter_mut() {
+        let x = (*digit as u16) + carry;
+        *digit = x as u8;
+        carry = x >> 8;
+    }
+    if carry == 0 {
+        Ok(())
+    } else {
+        Err(Error::NonceOverflow)
+    }
+}
+
+impl MechanismImpl for super::Chacha8Poly1305 {
     #[inline(never)]
     fn generate_key(
+        &self,
         keystore: &mut impl Keystore,
         request: &request::GenerateKey,
     ) -> Result<reply::GenerateKey, Error> {
@@ -45,27 +62,10 @@ impl GenerateKey for super::Chacha8Poly1305 {
 
         Ok(reply::GenerateKey { key: key_id })
     }
-}
 
-#[inline(never)]
-fn increment_nonce(nonce: &mut [u8]) -> Result<(), Error> {
-    assert_eq!(nonce.len(), NONCE_LEN);
-    let mut carry: u16 = 1;
-    for digit in nonce.iter_mut() {
-        let x = (*digit as u16) + carry;
-        *digit = x as u8;
-        carry = x >> 8;
-    }
-    if carry == 0 {
-        Ok(())
-    } else {
-        Err(Error::NonceOverflow)
-    }
-}
-
-impl Decrypt for super::Chacha8Poly1305 {
     #[inline(never)]
     fn decrypt(
+        &self,
         keystore: &mut impl Keystore,
         request: &request::Decrypt,
     ) -> Result<reply::Decrypt, Error> {
@@ -103,12 +103,10 @@ impl Decrypt for super::Chacha8Poly1305 {
             },
         })
     }
-}
 
-#[cfg(feature = "chacha8-poly1305")]
-impl Encrypt for super::Chacha8Poly1305 {
     #[inline(never)]
     fn encrypt(
+        &self,
         keystore: &mut impl Keystore,
         request: &request::Encrypt,
     ) -> Result<reply::Encrypt, Error> {
@@ -164,11 +162,10 @@ impl Encrypt for super::Chacha8Poly1305 {
             tag,
         })
     }
-}
 
-impl WrapKey for super::Chacha8Poly1305 {
     #[inline(never)]
     fn wrap_key(
+        &self,
         keystore: &mut impl Keystore,
         request: &request::WrapKey,
     ) -> Result<reply::WrapKey, Error> {
@@ -186,7 +183,7 @@ impl WrapKey for super::Chacha8Poly1305 {
             associated_data: request.associated_data.clone(),
             nonce: request.nonce.clone(),
         };
-        let encryption_reply = <super::Chacha8Poly1305>::encrypt(keystore, &encryption_request)?;
+        let encryption_reply = self.encrypt(keystore, &encryption_request)?;
 
         let wrapped_key = EncryptedData::from(encryption_reply);
         let wrapped_key =
@@ -194,11 +191,10 @@ impl WrapKey for super::Chacha8Poly1305 {
 
         Ok(reply::WrapKey { wrapped_key })
     }
-}
 
-impl UnwrapKey for super::Chacha8Poly1305 {
     #[inline(never)]
     fn unwrap_key(
+        &self,
         keystore: &mut impl Keystore,
         request: &request::UnwrapKey,
     ) -> Result<reply::UnwrapKey, Error> {
@@ -211,13 +207,12 @@ impl UnwrapKey for super::Chacha8Poly1305 {
             request.associated_data.clone(),
         );
 
-        let serialized_key = if let Some(serialized_key) =
-            <super::Chacha8Poly1305>::decrypt(keystore, &decryption_request)?.plaintext
-        {
-            serialized_key
-        } else {
-            return Ok(reply::UnwrapKey { key: None });
-        };
+        let serialized_key =
+            if let Some(serialized_key) = self.decrypt(keystore, &decryption_request)?.plaintext {
+                serialized_key
+            } else {
+                return Ok(reply::UnwrapKey { key: None });
+            };
 
         // TODO: probably change this to returning Option<key> too
         let key::Key {

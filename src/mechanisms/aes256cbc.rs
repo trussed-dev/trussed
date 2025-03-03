@@ -1,15 +1,16 @@
 use crate::api::{reply, request};
 use crate::error::Error;
 use crate::key;
-use crate::service::{Decrypt, Encrypt, UnsafeInjectKey, WrapKey};
+use crate::service::MechanismImpl;
 use crate::store::keystore::Keystore;
 use crate::types::{Mechanism, Message, ShortData};
 
 const AES256_KEY_SIZE: usize = 32;
 
-impl Encrypt for super::Aes256Cbc {
+impl MechanismImpl for super::Aes256Cbc {
     /// Encrypts the input *with zero IV*
     fn encrypt(
+        &self,
         keystore: &mut impl Keystore,
         request: &request::Encrypt,
     ) -> Result<reply::Encrypt, Error> {
@@ -63,10 +64,9 @@ impl Encrypt for super::Aes256Cbc {
             tag: ShortData::new(),
         })
     }
-}
 
-impl WrapKey for super::Aes256Cbc {
     fn wrap_key(
+        &self,
         keystore: &mut impl Keystore,
         request: &request::WrapKey,
     ) -> Result<reply::WrapKey, Error> {
@@ -91,16 +91,15 @@ impl WrapKey for super::Aes256Cbc {
             associated_data: request.associated_data.clone(),
             nonce: request.nonce.clone(),
         };
-        let encryption_reply = <super::Aes256Cbc>::encrypt(keystore, &encryption_request)?;
+        let encryption_reply = self.encrypt(keystore, &encryption_request)?;
 
         let wrapped_key = encryption_reply.ciphertext;
 
         Ok(reply::WrapKey { wrapped_key })
     }
-}
 
-impl Decrypt for super::Aes256Cbc {
     fn decrypt(
+        &self,
         keystore: &mut impl Keystore,
         request: &request::Decrypt,
     ) -> Result<reply::Decrypt, Error> {
@@ -155,10 +154,9 @@ impl Decrypt for super::Aes256Cbc {
             plaintext: Some(plaintext),
         })
     }
-}
 
-impl UnsafeInjectKey for super::Aes256Cbc {
     fn unsafe_inject_key(
+        &self,
         keystore: &mut impl Keystore,
         request: &request::UnsafeInjectKey,
     ) -> Result<reply::UnsafeInjectKey, Error> {
