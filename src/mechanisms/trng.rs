@@ -3,11 +3,12 @@ use rand_core::RngCore;
 use crate::api::{reply, request};
 use crate::error::Error;
 use crate::key;
-use crate::service::GenerateKey;
+use crate::service::MechanismImpl;
 use crate::store::keystore::Keystore;
 
-impl GenerateKey for super::Trng {
+impl MechanismImpl for super::Trng {
     fn generate_key(
+        &self,
         keystore: &mut impl Keystore,
         request: &request::GenerateKey,
     ) -> Result<reply::GenerateKey, Error> {

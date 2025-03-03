@@ -1,13 +1,14 @@
 use crate::api::{reply, request};
 use crate::error::Error;
 use crate::key;
-use crate::service::{SerializeKey, UnsafeInjectKey};
+use crate::service::MechanismImpl;
 use crate::store::keystore::Keystore;
 use crate::types::{KeySerialization, SerializedKey};
 
-impl SerializeKey for super::SharedSecret {
+impl MechanismImpl for super::SharedSecret {
     #[inline(never)]
     fn serialize_key(
+        &self,
         keystore: &mut impl Keystore,
         request: &request::SerializeKey,
     ) -> Result<reply::SerializeKey, Error> {
@@ -28,10 +29,9 @@ impl SerializeKey for super::SharedSecret {
 
         Ok(reply::SerializeKey { serialized_key })
     }
-}
 
-impl UnsafeInjectKey for super::SharedSecret {
     fn unsafe_inject_key(
+        &self,
         keystore: &mut impl Keystore,
         request: &request::UnsafeInjectKey,
     ) -> Result<reply::UnsafeInjectKey, Error> {

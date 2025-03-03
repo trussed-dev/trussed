@@ -9,7 +9,7 @@ use crate::{
     api::{reply::Attest as AttestReply, request, request::Attest as AttestRequest},
     error::Error,
     key, mechanisms,
-    service::{DeriveKey, SerializeKey, Sign},
+    service::MechanismImpl,
     store::certstore::Certstore,
     store::keystore::Keystore,
     types::{
@@ -67,26 +67,28 @@ pub fn try_attest(
 
     let spki = match key_algorithm {
         KeyAlgorithm::Ed255 => {
-            let public_key = mechanisms::Ed255::derive_key(
-                keystore,
-                &request::DeriveKey {
-                    mechanism: Mechanism::Ed255,
-                    base_key: request.private_key,
-                    additional_data: None,
-                    attributes: StorageAttributes::new().set_persistence(Location::Volatile),
-                },
-            )?
-            .key;
-            let serialized_key = mechanisms::Ed255::serialize_key(
-                keystore,
-                &request::SerializeKey {
-                    mechanism: Mechanism::Ed255,
-                    key: public_key,
-                    format: KeySerialization::Raw,
-                },
-            )
-            .unwrap()
-            .serialized_key;
+            let public_key = mechanisms::Ed255
+                .derive_key(
+                    keystore,
+                    &request::DeriveKey {
+                        mechanism: Mechanism::Ed255,
+                        base_key: request.private_key,
+                        additional_data: None,
+                        attributes: StorageAttributes::new().set_persistence(Location::Volatile),
+                    },
+                )?
+                .key;
+            let serialized_key = mechanisms::Ed255
+                .serialize_key(
+                    keystore,
+                    &request::SerializeKey {
+                        mechanism: Mechanism::Ed255,
+                        key: public_key,
+                        format: KeySerialization::Raw,
+                    },
+                )
+                .unwrap()
+                .serialized_key;
             keystore.delete_key(&public_key);
 
             SerializedSubjectPublicKey::Ed255(
@@ -98,26 +100,28 @@ pub fn try_attest(
         }
 
         KeyAlgorithm::P256 => {
-            let public_key = mechanisms::P256::derive_key(
-                keystore,
-                &request::DeriveKey {
-                    mechanism: Mechanism::P256,
-                    base_key: request.private_key,
-                    additional_data: None,
-                    attributes: StorageAttributes::new().set_persistence(Location::Volatile),
-                },
-            )?
-            .key;
-            let serialized_key = mechanisms::P256::serialize_key(
-                keystore,
-                &request::SerializeKey {
-                    mechanism: Mechanism::P256,
-                    key: public_key,
-                    format: KeySerialization::Sec1,
-                },
-            )
-            .unwrap()
-            .serialized_key;
+            let public_key = mechanisms::P256
+                .derive_key(
+                    keystore,
+                    &request::DeriveKey {
+                        mechanism: Mechanism::P256,
+                        base_key: request.private_key,
+                        additional_data: None,
+                        attributes: StorageAttributes::new().set_persistence(Location::Volatile),
+                    },
+                )?
+                .key;
+            let serialized_key = mechanisms::P256
+                .serialize_key(
+                    keystore,
+                    &request::SerializeKey {
+                        mechanism: Mechanism::P256,
+                        key: public_key,
+                        format: KeySerialization::Sec1,
+                    },
+                )
+                .unwrap()
+                .serialized_key;
             keystore.delete_key(&public_key);
 
             SerializedSubjectPublicKey::P256(
@@ -156,33 +160,35 @@ pub fn try_attest(
     // 2. sign the TBS Cert
     let signature = match signature_algorithm {
         SignatureAlgorithm::Ed255 => {
-            let signature = mechanisms::Ed255::sign(
-                attn_keystore,
-                &request::Sign {
-                    mechanism: Mechanism::Ed255,
-                    key: ED255_ATTN_KEY,
-                    message,
-                    format: SignatureSerialization::Raw,
-                },
-            )
-            .unwrap()
-            .signature;
+            let signature = mechanisms::Ed255
+                .sign(
+                    attn_keystore,
+                    &request::Sign {
+                        mechanism: Mechanism::Ed255,
+                        key: ED255_ATTN_KEY,
+                        message,
+                        format: SignatureSerialization::Raw,
+                    },
+                )
+                .unwrap()
+                .signature;
             SerializedSignature::Ed255(signature.as_ref().try_into().unwrap())
         }
         SignatureAlgorithm::P256 => SerializedSignature::P256(
             heapless_bytes::Bytes::from_slice(
-                mechanisms::P256::sign(
-                    attn_keystore,
-                    &request::Sign {
-                        mechanism: Mechanism::P256,
-                        key: P256_ATTN_KEY,
-                        message,
-                        format: SignatureSerialization::Asn1Der,
-                    },
-                )
-                .unwrap()
-                .signature
-                .as_ref(),
+                mechanisms::P256
+                    .sign(
+                        attn_keystore,
+                        &request::Sign {
+                            mechanism: Mechanism::P256,
+                            key: P256_ATTN_KEY,
+                            message,
+                            format: SignatureSerialization::Asn1Der,
+                        },
+                    )
+                    .unwrap()
+                    .signature
+                    .as_ref(),
             )
             .unwrap(),
         ),
