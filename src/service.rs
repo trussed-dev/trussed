@@ -29,96 +29,147 @@ pub mod attest;
 // mod macros;
 
 #[cfg(feature = "crypto-client")]
-macro_rules! rpc_trait { { $($name:ident,)* } => {
-    pub trait MechanismImpl {
-        $(
-            paste::paste! {
-                fn $name(
-                    &self,
-                    keystore: &mut impl Keystore,
-                    request: &request::[<$name:camel>],
-                ) -> Result<reply::[<$name:camel>]> {
-                    let _ = (keystore, request);
-                    Err(Error::MechanismNotAvailable)
+macro_rules! impl_mechanisms {
+    {
+        [
+            $(
+                #[cfg($($cfg_cond:tt)*)]
+                $mechanism:ident,
+            )*
+        ]
+    } => {
+        pub const IMPLEMENTED_MECHANISMS: &[Mechanism] = &[
+            $(
+                #[cfg($($cfg_cond)*)]
+                Mechanism::$mechanism,
+            )*
+        ];
+    }
+}
+
+#[cfg(feature = "crypto-client")]
+macro_rules! impl_rpc_method {
+    {
+        $name:ident,
+        mechanisms = [$(
+            #[cfg($($cfg_cond:tt)*)]
+            $mechanism:ident,
+        )*],
+    } => {
+        paste::paste! {
+            #[inline(never)]
+            fn $name(
+                &self,
+                keystore: &mut impl Keystore,
+                request: &request::[<$name:camel>],
+            ) -> Result<reply::[<$name:camel>]> {
+                match self {
+                    $(
+                        #[cfg($($cfg_cond)*)]
+                        Self::$mechanism => mechanisms::$mechanism.$name(keystore, request),
+                    )*
+                    _ => Err(Error::MechanismNotAvailable),
                 }
             }
-        )*
+        }
     }
+}
 
-    impl MechanismImpl for Mechanism {
-        $(
-            paste::paste! {
-                #[inline(never)]
-                fn $name(
-                    &self,
-                    keystore: &mut impl Keystore,
-                    request: &request::[<$name:camel>],
-                ) -> Result<reply::[<$name:camel>]> {
-                    // TODO: sync with IMPLEMENTED_MECHANISMS
-                    match self {
-                        #[cfg(feature = "aes256-cbc")]
-                        Self::Aes256Cbc => mechanisms::Aes256Cbc.$name(keystore, request),
-                        #[cfg(feature = "chacha8-poly1305")]
-                        Self::Chacha8Poly1305 => mechanisms::Chacha8Poly1305.$name(keystore, request),
-                        #[cfg(feature = "ed255")]
-                        Self::Ed255 => mechanisms::Ed255.$name(keystore, request),
-                        #[cfg(feature = "hmac-blake2s")]
-                        Self::HmacBlake2s => mechanisms::HmacBlake2s.$name(keystore, request),
-                        #[cfg(feature = "hmac-sha1")]
-                        Self::HmacSha1 => mechanisms::HmacSha1.$name(keystore, request),
-                        #[cfg(feature = "hmac-sha256")]
-                        Self::HmacSha256 => mechanisms::HmacSha256.$name(keystore, request),
-                        #[cfg(feature = "hmac-sha512")]
-                        Self::HmacSha512 => mechanisms::HmacSha512.$name(keystore, request),
-                        #[cfg(feature = "p256")]
-                        Self::P256 => mechanisms::P256.$name(keystore, request),
-                        #[cfg(feature = "p256")]
-                        Self::P256Prehashed => mechanisms::P256Prehashed.$name(keystore, request),
-                        #[cfg(feature = "p384")]
-                        Self::P384 => mechanisms::P384.$name(keystore, request),
-                        #[cfg(feature = "p384")]
-                        Self::P384Prehashed => mechanisms::P384Prehashed.$name(keystore, request),
-                        #[cfg(feature = "p521")]
-                        Self::P521 => mechanisms::P521.$name(keystore, request),
-                        #[cfg(feature = "p521")]
-                        Self::P521Prehashed => mechanisms::P521Prehashed.$name(keystore, request),
-                        #[cfg(feature = "sha256")]
-                        Self::Sha256 => mechanisms::Sha256.$name(keystore, request),
-                        #[cfg(feature = "shared-secret")]
-                        Self::SharedSecret => mechanisms::SharedSecret.$name(keystore, request),
-                        #[cfg(feature = "tdes")]
-                        Self::Tdes => mechanisms::Tdes.$name(keystore, request),
-                        #[cfg(feature = "totp")]
-                        Self::Totp => mechanisms::Totp.$name(keystore, request),
-                        #[cfg(feature = "trng")]
-                        Self::Trng => mechanisms::Trng.$name(keystore, request),
-                        #[cfg(feature = "x255")]
-                        Self::X255 => mechanisms::X255.$name(keystore, request),
-                        _ => Err(Error::MechanismNotAvailable),
+#[cfg(feature = "crypto-client")]
+macro_rules! rpc_trait {
+    {
+        methods = [$($name:ident,)*],
+        mechanisms = $mechanisms:tt,
+    } => {
+        pub trait MechanismImpl {
+            $(
+                paste::paste! {
+                    fn $name(
+                        &self,
+                        keystore: &mut impl Keystore,
+                        request: &request::[<$name:camel>],
+                    ) -> Result<reply::[<$name:camel>]> {
+                        let _ = (keystore, request);
+                        Err(Error::MechanismNotAvailable)
                     }
                 }
-            }
-        )*
+            )*
+        }
+
+        impl MechanismImpl for Mechanism {
+            $(
+                impl_rpc_method! {
+                    $name,
+                    mechanisms = $mechanisms,
+                }
+            )*
+        }
+
+        impl_mechanisms! {
+            $mechanisms
+        }
     }
-} }
+}
 
 #[cfg(feature = "crypto-client")]
 rpc_trait! {
-    agree,
-    decrypt,
-    derive_key,
-    deserialize_key,
-    encrypt,
-    exists,
-    generate_key,
-    hash,
-    serialize_key,
-    sign,
-    unsafe_inject_key,
-    unwrap_key,
-    verify,
-    // TODO: can the default implementation be implemented in terms of Encrypt?
-    wrap_key,
+    methods = [
+        agree,
+        decrypt,
+        derive_key,
+        deserialize_key,
+        encrypt,
+        exists,
+        generate_key,
+        hash,
+        serialize_key,
+        sign,
+        unsafe_inject_key,
+        unwrap_key,
+        verify,
+        // TODO: can the default implementation be implemented in terms of Encrypt?
+        wrap_key,
+    ],
+    mechanisms = [
+        #[cfg(feature = "aes256-cbc")]
+        Aes256Cbc,
+        #[cfg(feature = "chacha8-poly1305")]
+        Chacha8Poly1305,
+        #[cfg(feature = "ed255")]
+        Ed255,
+        #[cfg(feature = "hmac-blake2s")]
+        HmacBlake2s,
+        #[cfg(feature = "hmac-sha1")]
+        HmacSha1,
+        #[cfg(feature = "hmac-sha256")]
+        HmacSha256,
+        #[cfg(feature = "hmac-sha512")]
+        HmacSha512,
+        #[cfg(feature = "p256")]
+        P256,
+        #[cfg(feature = "p256")]
+        P256Prehashed,
+        #[cfg(feature = "p384")]
+        P384,
+        #[cfg(feature = "p384")]
+        P384Prehashed,
+        #[cfg(feature = "p521")]
+        P521,
+        #[cfg(feature = "p521")]
+        P521Prehashed,
+        #[cfg(feature = "sha256")]
+        Sha256,
+        #[cfg(feature = "shared-secret")]
+        SharedSecret,
+        #[cfg(feature = "tdes")]
+        Tdes,
+        #[cfg(feature = "totp")]
+        Totp,
+        #[cfg(feature = "trng")]
+        Trng,
+        #[cfg(feature = "x255")]
+        X255,
+    ],
 }
 
 pub struct ServiceResources<P>
