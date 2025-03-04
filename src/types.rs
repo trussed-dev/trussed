@@ -42,47 +42,6 @@ pub mod consent {
     pub use trussed_core::types::consent::{Error, Level, Result};
 }
 
-pub const IMPLEMENTED_MECHANISMS: &[Mechanism] = &[
-    #[cfg(feature = "aes256-cbc")]
-    Mechanism::Aes256Cbc,
-    #[cfg(feature = "chacha8-poly1305")]
-    Mechanism::Chacha8Poly1305,
-    #[cfg(feature = "ed255")]
-    Mechanism::Ed255,
-    #[cfg(feature = "hmac-blake2s")]
-    Mechanism::HmacBlake2s,
-    #[cfg(feature = "hmac-sha1")]
-    Mechanism::HmacSha1,
-    #[cfg(feature = "hmac-sha256")]
-    Mechanism::HmacSha256,
-    #[cfg(feature = "hmac-sha512")]
-    Mechanism::HmacSha512,
-    #[cfg(feature = "p256")]
-    Mechanism::P256,
-    #[cfg(feature = "p256")]
-    Mechanism::P256Prehashed,
-    #[cfg(feature = "p384")]
-    Mechanism::P384,
-    #[cfg(feature = "p384")]
-    Mechanism::P384Prehashed,
-    #[cfg(feature = "p521")]
-    Mechanism::P521,
-    #[cfg(feature = "p521")]
-    Mechanism::P521Prehashed,
-    #[cfg(feature = "sha256")]
-    Mechanism::Sha256,
-    #[cfg(feature = "shared-secret")]
-    Mechanism::SharedSecret,
-    #[cfg(feature = "tdes")]
-    Mechanism::Tdes,
-    #[cfg(feature = "totp")]
-    Mechanism::Totp,
-    #[cfg(feature = "trng")]
-    Mechanism::Trng,
-    #[cfg(feature = "x255")]
-    Mechanism::X255,
-];
-
 /// The context for a syscall (per client).
 ///
 /// The context stores the state used by the standard syscall implementations, see
