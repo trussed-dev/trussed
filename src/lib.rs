@@ -32,7 +32,7 @@ pub mod error;
 pub mod interrupt;
 pub mod key;
 #[cfg(feature = "crypto-client")]
-pub mod mechanisms;
+mod mechanisms;
 pub mod pipe;
 pub mod platform;
 #[cfg(feature = "serde-extensions")]

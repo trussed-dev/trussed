@@ -65,6 +65,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Removed the `unsafe` keyword for the `Store` trait.
 - Removed the `unsafe` keyword for the `Platform` trait.
 - Replaced the mechanism RPC traits in `service` with a single `MechanismImpl` trait.
+- Made the `mechanisms` module private.  Mechanism implementation can still be accessed via the `Mechanism` enum.
 
 ### Fixed
 
