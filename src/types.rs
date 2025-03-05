@@ -4,7 +4,6 @@ pub use heapless::{String, Vec};
 
 pub use crate::Bytes;
 
-pub use littlefs2::{driver::Storage as LfsStorage, fs::Filesystem};
 pub use littlefs2_core::{DirEntry, Metadata, Path, PathBuf, Result as LfsResult};
 
 pub use trussed_core::types::{

@@ -1,5 +1,4 @@
 mod client;
-mod store;
 
 use trussed::{client::CounterClient as _, syscall, types::Location::*};
 

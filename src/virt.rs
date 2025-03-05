@@ -24,7 +24,7 @@ use crate::{
     ClientImplementation,
 };
 
-pub use store::{StorageConfig, StoreConfig};
+pub use store::{StorageConfig, Store, StoreConfig};
 pub use ui::UserInterface;
 
 pub type Client<'a, D = CoreOnly> = ClientImplementation<'a, Syscall, D>;

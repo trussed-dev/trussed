@@ -6,7 +6,7 @@ use std::{
 
 use generic_array::typenum::{U512, U8};
 use littlefs2::{const_ram_storage, driver::Storage, object_safe::DynStorageAlloc};
-use littlefs2_core::{DynFilesystem, Result};
+use littlefs2_core::{DynFilesystem, Error, Result};
 
 use crate::store;
 
@@ -119,7 +119,7 @@ impl Storage for FilesystemStorage {
     fn write(&mut self, offset: usize, data: &[u8]) -> Result<usize> {
         debug!("write: offset: {}, len: {}", offset, data.len());
         if offset + data.len() > STORAGE_SIZE {
-            return Err(littlefs2::io::Error::NO_SPACE);
+            return Err(Error::NO_SPACE);
         }
         let mut file = OpenOptions::new().write(true).open(&self.0).unwrap();
         file.seek(SeekFrom::Start(offset as _)).unwrap();
@@ -132,7 +132,7 @@ impl Storage for FilesystemStorage {
     fn erase(&mut self, offset: usize, len: usize) -> Result<usize> {
         debug!("erase: offset: {}, len: {}", offset, len);
         if offset + len > STORAGE_SIZE {
-            return Err(littlefs2::io::Error::NO_SPACE);
+            return Err(Error::NO_SPACE);
         }
         let mut file = OpenOptions::new().write(true).open(&self.0).unwrap();
         file.seek(SeekFrom::Start(offset as _)).unwrap();

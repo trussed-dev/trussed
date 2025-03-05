@@ -81,6 +81,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed the `Syscall` implementations for `Service` and the `Syscall::try_as_new_client` and `Syscall::try_new_client` methods.
 - Removed `TrussedInterchange` and `TRUSSED_INTERCHANGE` from `pipe`.
 - Removed the `clients-?` features.
+- Removed the `store!` macro.  Embedded runners should provide their own implementation.  Software runners can use `virt::StoreConfig` to create a `virt::Store`.
 
 [#64]: https://github.com/trussed-dev/trussed/issues/64
 [#65]: https://github.com/trussed-dev/trussed/issues/65
