@@ -1,13 +1,14 @@
 use crate::api::{reply, request};
 use crate::error::Error;
 use crate::key;
-use crate::service::{DeriveKey, Hash};
+use crate::service::MechanismImpl;
 use crate::store::keystore::Keystore;
 use crate::types::ShortData;
 
-impl DeriveKey for super::Sha256 {
+impl MechanismImpl for super::Sha256 {
     #[inline(never)]
     fn derive_key(
+        &self,
         keystore: &mut impl Keystore,
         request: &request::DeriveKey,
     ) -> Result<reply::DeriveKey, Error> {
@@ -32,11 +33,13 @@ impl DeriveKey for super::Sha256 {
 
         Ok(reply::DeriveKey { key: key_id })
     }
-}
 
-impl Hash for super::Sha256 {
     #[inline(never)]
-    fn hash(_keystore: &mut impl Keystore, request: &request::Hash) -> Result<reply::Hash, Error> {
+    fn hash(
+        &self,
+        _keystore: &mut impl Keystore,
+        request: &request::Hash,
+    ) -> Result<reply::Hash, Error> {
         use sha2::digest::Digest;
         let mut hash = sha2::Sha256::new();
         hash.update(&request.message);

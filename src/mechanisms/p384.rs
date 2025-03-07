@@ -12,10 +12,7 @@ use super::{P384Prehashed, P384};
 use crate::{
     api::{reply, request},
     key,
-    service::{
-        Agree, DeriveKey, DeserializeKey, Exists, GenerateKey, SerializeKey, Sign, UnsafeInjectKey,
-        Verify,
-    },
+    service::MechanismImpl,
     store::keystore::Keystore,
     types::{KeyId, KeySerialization, SerializedKey, Signature, SignatureSerialization},
     Error,
@@ -52,8 +49,9 @@ fn to_sec1_bytes(public_key: &p384::PublicKey) -> heapless::Vec<u8, { SCALAR_SIZ
     encoded_point.as_bytes().try_into().unwrap()
 }
 
-impl Agree for P384 {
+impl MechanismImpl for P384 {
     fn agree(
+        &self,
         keystore: &mut impl Keystore,
         request: &request::Agree,
     ) -> Result<reply::Agree, Error> {
@@ -85,10 +83,10 @@ impl Agree for P384 {
             shared_secret: key_id,
         })
     }
-}
-impl DeriveKey for P384 {
+
     #[inline(never)]
     fn derive_key(
+        &self,
         keystore: &mut impl Keystore,
         request: &request::DeriveKey,
     ) -> Result<reply::DeriveKey, Error> {
@@ -106,10 +104,10 @@ impl DeriveKey for P384 {
 
         Ok(reply::DeriveKey { key: public_id })
     }
-}
-impl DeserializeKey for P384 {
+
     #[inline(never)]
     fn deserialize_key(
+        &self,
         keystore: &mut impl Keystore,
         request: &request::DeserializeKey,
     ) -> Result<reply::DeserializeKey, Error> {
@@ -144,10 +142,10 @@ impl DeserializeKey for P384 {
 
         Ok(reply::DeserializeKey { key: public_id })
     }
-}
-impl SerializeKey for P384 {
+
     #[inline(never)]
     fn serialize_key(
+        &self,
         keystore: &mut impl Keystore,
         request: &request::SerializeKey,
     ) -> Result<reply::SerializeKey, Error> {
@@ -179,10 +177,10 @@ impl SerializeKey for P384 {
 
         Ok(reply::SerializeKey { serialized_key })
     }
-}
-impl Exists for P384 {
+
     #[inline(never)]
     fn exists(
+        &self,
         keystore: &mut impl Keystore,
         request: &request::Exists,
     ) -> Result<reply::Exists, Error> {
@@ -190,11 +188,13 @@ impl Exists for P384 {
         let exists = keystore.exists_key(key::Secrecy::Secret, Some(key::Kind::P384), &key_id);
         Ok(reply::Exists { exists })
     }
-}
 
-impl Sign for P384 {
     #[inline(never)]
-    fn sign(keystore: &mut impl Keystore, request: &request::Sign) -> Result<reply::Sign, Error> {
+    fn sign(
+        &self,
+        keystore: &mut impl Keystore,
+        request: &request::Sign,
+    ) -> Result<reply::Sign, Error> {
         let key_id = request.key;
 
         let secret_key = load_secret_key(keystore, &key_id)?;
@@ -219,39 +219,9 @@ impl Sign for P384 {
             signature: serialized_signature,
         })
     }
-}
-impl Sign for P384Prehashed {
-    #[inline(never)]
-    fn sign(keystore: &mut impl Keystore, request: &request::Sign) -> Result<reply::Sign, Error> {
-        let key_id = request.key;
 
-        let secret_key = load_secret_key(keystore, &key_id)?;
-        let signing_key = SigningKey::from(secret_key);
-        let signature: p384::ecdsa::Signature = signing_key
-            .sign_prehash_with_rng(keystore.rng(), &request.message)
-            .map_err(|_| Error::InvalidSerializedRequest)?;
-
-        // debug_now!("making signature");
-        let serialized_signature = match request.format {
-            SignatureSerialization::Asn1Der => {
-                let der = signature.to_der();
-                Signature::from_slice(der.as_bytes()).unwrap()
-            }
-            SignatureSerialization::Raw => Signature::from_slice(&signature.to_bytes()).unwrap(),
-            _ => {
-                return Err(Error::InvalidSerializationFormat);
-            }
-        };
-
-        // return signature
-        Ok(reply::Sign {
-            signature: serialized_signature,
-        })
-    }
-}
-
-impl UnsafeInjectKey for P384 {
     fn unsafe_inject_key(
+        &self,
         keystore: &mut impl Keystore,
         request: &request::UnsafeInjectKey,
     ) -> Result<reply::UnsafeInjectKey, Error> {
@@ -276,11 +246,10 @@ impl UnsafeInjectKey for P384 {
             )
             .map(|key| reply::UnsafeInjectKey { key })
     }
-}
 
-impl Verify for P384 {
     #[inline(never)]
     fn verify(
+        &self,
         keystore: &mut impl Keystore,
         request: &request::Verify,
     ) -> Result<reply::Verify, Error> {
@@ -303,9 +272,9 @@ impl Verify for P384 {
         let valid = verifying_key.verify(&request.message, &signature).is_ok();
         Ok(reply::Verify { valid })
     }
-}
-impl GenerateKey for P384 {
+
     fn generate_key(
+        &self,
         keystore: &mut impl Keystore,
         request: &request::GenerateKey,
     ) -> Result<reply::GenerateKey, Error> {
@@ -320,5 +289,39 @@ impl GenerateKey for P384 {
 
         // return handle
         Ok(reply::GenerateKey { key: key_id })
+    }
+}
+
+impl MechanismImpl for P384Prehashed {
+    #[inline(never)]
+    fn sign(
+        &self,
+        keystore: &mut impl Keystore,
+        request: &request::Sign,
+    ) -> Result<reply::Sign, Error> {
+        let key_id = request.key;
+
+        let secret_key = load_secret_key(keystore, &key_id)?;
+        let signing_key = SigningKey::from(secret_key);
+        let signature: p384::ecdsa::Signature = signing_key
+            .sign_prehash_with_rng(keystore.rng(), &request.message)
+            .map_err(|_| Error::InvalidSerializedRequest)?;
+
+        // debug_now!("making signature");
+        let serialized_signature = match request.format {
+            SignatureSerialization::Asn1Der => {
+                let der = signature.to_der();
+                Signature::from_slice(der.as_bytes()).unwrap()
+            }
+            SignatureSerialization::Raw => Signature::from_slice(&signature.to_bytes()).unwrap(),
+            _ => {
+                return Err(Error::InvalidSerializationFormat);
+            }
+        };
+
+        // return signature
+        Ok(reply::Sign {
+            signature: serialized_signature,
+        })
     }
 }
