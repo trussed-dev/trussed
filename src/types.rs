@@ -40,16 +40,6 @@ pub mod ui {
 
 pub mod consent {
     pub use trussed_core::types::consent::{Error, Level, Result};
-
-    use serde::{Deserialize, Serialize};
-
-    #[derive(Copy, Clone, Eq, PartialEq, Debug, Serialize, Deserialize)]
-    pub enum Urgency {
-        /// Pending other user consent requests will fail as interrupted.
-        InterruptOthers,
-        /// If other user consent requests are pending, fail this request.
-        FailIfOthers,
-    }
 }
 
 pub const IMPLEMENTED_MECHANISMS: &[Mechanism] = &[

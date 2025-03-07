@@ -78,7 +78,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Removed unused items:
   - `config`: `MAX_APPLICATION_NAME_LENGTH`, `MAX_LABEL_LENGTH`, `MAX_LONG_DATA_LENGTH`, `MAX_OBJECT_HANDLES`, `MAX_PATH_LENGTH`
-  - `types`: `Attributes`, `CertificateType` `DataAttributes`, `KeyAttributes`, `Letters`, `LongData`, `ObjectType`
+  - `types`: `Attributes`, `CertificateType` `DataAttributes`, `KeyAttributes`, `Letters`, `LongData`, `ObjectType`, `consent::Urgency`
 - Removed the `Syscall` implementations for `Service` and the `Syscall::try_as_new_client` and `Syscall::try_new_client` methods.
 - Removed `TrussedInterchange` and `TRUSSED_INTERCHANGE` from `pipe`.
 - Removed the `clients-?` features.
