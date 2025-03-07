@@ -1,4 +1,4 @@
-use littlefs2_core::{path, DynFilesystem, Path, PathBuf};
+use littlefs2_core::{path, PathBuf};
 use rand_chacha::ChaCha8Rng;
 pub use rand_core::{RngCore, SeedableRng};
 
@@ -10,7 +10,7 @@ pub use crate::key;
 #[cfg(feature = "crypto-client")]
 use crate::mechanisms;
 pub use crate::pipe::ServiceEndpoint;
-use crate::platform::{consent, ui, Platform, Store, UserInterface};
+use crate::platform::{consent, ui, Platform, UserInterface};
 pub use crate::store::{
     self,
     certstore::{Certstore as _, ClientCertstore},
@@ -452,40 +452,9 @@ impl<P: Platform> ServiceResources<P> {
                 Ok(Reply::LocateFile(reply::LocateFile { path }))
             }
 
-            // This is now preferably done using littlefs-fuse (when device is not yet locked),
-            // and should be removed from firmware completely
             #[cfg(feature = "filesystem-client")]
             Request::DebugDumpStore(_request) => {
-                info_now!(":: PERSISTENT");
-                recursively_list(self.platform.store().fs(Location::Internal), path!("/"));
-
-                info_now!(":: VOLATILE");
-                recursively_list(self.platform.store().fs(Location::Volatile), path!("/"));
-
-                fn recursively_list(fs: &dyn DynFilesystem, path: &Path) {
-                    // let fs = store.vfs();
-                    fs.read_dir_and_then(path, &mut |dir| {
-                        for (i, entry) in dir.enumerate() {
-                            let entry = entry.unwrap();
-                            if i < 2 {
-                                // info_now!("skipping {:?}", &entry.path()).ok();
-                                continue;
-                            }
-                            info_now!("{:?} p({:?})", entry.path(), &path);
-                            if entry.file_type().is_dir() {
-                                recursively_list(fs, entry.path());
-                            }
-                            if entry.file_type().is_file() {
-                                let _contents = fs.read::<Bytes<256>>(entry.path()).unwrap();
-                                // info_now!("{} ?= {}", entry.metadata().len(), contents.len()).ok();
-                                // info_now!("{:?}", &contents).ok();
-                            }
-                        }
-                        Ok(())
-                    })
-                    .unwrap();
-                }
-
+                error!("DebugDumpStore is deprecated");
                 Ok(Reply::DebugDumpStore(reply::DebugDumpStore {}))
             }
 
