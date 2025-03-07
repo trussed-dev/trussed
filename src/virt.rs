@@ -210,7 +210,7 @@ impl Platform<'_> {
     }
 }
 
-unsafe impl<'a> platform::Platform for Platform<'a> {
+impl<'a> platform::Platform for Platform<'a> {
     type R = ChaCha8Rng;
     type S = store::Store<'a>;
     type UI = UserInterface;

@@ -54,7 +54,7 @@ pub trait UserInterface {
 // This is the same trick as in "store.rs",
 // replacing generic parameters with associated types
 // and a macro.
-pub unsafe trait Platform {
+pub trait Platform {
     // temporarily remove CryptoRng bound until HALs come along
     type R: CryptoRng + RngCore;
     type S: Store;
@@ -92,7 +92,7 @@ macro_rules! platform {
             }
         }
 
-        unsafe impl $crate::platform::Platform for $PlatformName {
+        impl $crate::platform::Platform for $PlatformName {
             type R = $Rng;
             type S = $Store;
             type UI = $UserInterface;
