@@ -50,26 +50,25 @@ macro_rules! impl_mechanisms {
 #[cfg(feature = "crypto-client")]
 macro_rules! impl_rpc_method {
     {
-        $name:ident,
+        $struct:ident,
+        $method:ident,
         mechanisms = [$(
             #[cfg($($cfg_cond:tt)*)]
             $mechanism:ident,
         )*],
     } => {
-        paste::paste! {
-            #[inline(never)]
-            fn $name(
-                &self,
-                keystore: &mut impl Keystore,
-                request: &request::[<$name:camel>],
-            ) -> Result<reply::[<$name:camel>]> {
-                match self {
-                    $(
-                        #[cfg($($cfg_cond)*)]
-                        Self::$mechanism => mechanisms::$mechanism.$name(keystore, request),
-                    )*
-                    _ => Err(Error::MechanismNotAvailable),
-                }
+        #[inline(never)]
+        fn $method(
+            &self,
+            keystore: &mut impl Keystore,
+            request: &request::$struct,
+        ) -> Result<reply::$struct> {
+            match self {
+                $(
+                    #[cfg($($cfg_cond)*)]
+                    Self::$mechanism => mechanisms::$mechanism.$method(keystore, request),
+                )*
+                _ => Err(Error::MechanismNotAvailable),
             }
         }
     }
@@ -78,20 +77,18 @@ macro_rules! impl_rpc_method {
 #[cfg(feature = "crypto-client")]
 macro_rules! rpc_trait {
     {
-        methods = [$($name:ident,)*],
+        methods = [$($method:ident: $struct:ident,)*],
         mechanisms = $mechanisms:tt,
     } => {
         pub trait MechanismImpl {
             $(
-                paste::paste! {
-                    fn $name(
-                        &self,
-                        keystore: &mut impl Keystore,
-                        request: &request::[<$name:camel>],
-                    ) -> Result<reply::[<$name:camel>]> {
-                        let _ = (keystore, request);
-                        Err(Error::MechanismNotAvailable)
-                    }
+                fn $method(
+                    &self,
+                    keystore: &mut impl Keystore,
+                    request: &request::$struct,
+                ) -> Result<reply::$struct> {
+                    let _ = (keystore, request);
+                    Err(Error::MechanismNotAvailable)
                 }
             )*
         }
@@ -99,7 +96,8 @@ macro_rules! rpc_trait {
         impl MechanismImpl for Mechanism {
             $(
                 impl_rpc_method! {
-                    $name,
+                    $struct,
+                    $method,
                     mechanisms = $mechanisms,
                 }
             )*
@@ -114,21 +112,21 @@ macro_rules! rpc_trait {
 #[cfg(feature = "crypto-client")]
 rpc_trait! {
     methods = [
-        agree,
-        decrypt,
-        derive_key,
-        deserialize_key,
-        encrypt,
-        exists,
-        generate_key,
-        hash,
-        serialize_key,
-        sign,
-        unsafe_inject_key,
-        unwrap_key,
-        verify,
+        agree: Agree,
+        decrypt: Decrypt,
+        derive_key: DeriveKey,
+        deserialize_key: DeserializeKey,
+        encrypt: Encrypt,
+        exists: Exists,
+        generate_key: GenerateKey,
+        hash: Hash,
+        serialize_key: SerializeKey,
+        sign: Sign,
+        unsafe_inject_key: UnsafeInjectKey,
+        unwrap_key: UnwrapKey,
+        verify: Verify,
         // TODO: can the default implementation be implemented in terms of Encrypt?
-        wrap_key,
+        wrap_key: WrapKey,
     ],
     mechanisms = [
         #[cfg(feature = "aes256-cbc")]
