@@ -856,6 +856,13 @@ impl<P: Platform, D: Dispatch> Service<P, D> {
                 };
             }
         }
+
+        #[cfg(all(
+            any(feature = "log-debug", feature = "log-all"),
+            not(feature = "log-none")
+        ))]
+        use crate::store::Store as _;
+
         debug_now!(
             "I/E/V : {}/{}/{} >",
             self.resources
