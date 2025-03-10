@@ -778,7 +778,13 @@
 <a href="#777" id="777">777</a>
 <a href="#778" id="778">778</a>
 <a href="#779" id="779">779</a>
-<a href="#780" id="780">780</a></pre></div><pre class="rust"><code><span class="kw">use </span>flexiber::{
+<a href="#780" id="780">780</a>
+<a href="#781" id="781">781</a>
+<a href="#782" id="782">782</a>
+<a href="#783" id="783">783</a>
+<a href="#784" id="784">784</a>
+<a href="#785" id="785">785</a>
+<a href="#786" id="786">786</a></pre></div><pre class="rust"><code><span class="kw">use </span>flexiber::{
     Encodable, EncodableHeapless, Encoder, Length <span class="kw">as </span>BerLength, <span class="prelude-ty">Result</span> <span class="kw">as </span>BerResult, Tag,
     TaggedSlice, TaggedValue,
 };
@@ -789,7 +795,7 @@
     api::{reply::Attest <span class="kw">as </span>AttestReply, request, request::Attest <span class="kw">as </span>AttestRequest},
     error::Error,
     key, mechanisms,
-    service::{DeriveKey, SerializeKey, Sign},
+    service::MechanismImpl,
     store::certstore::Certstore,
     store::keystore::Keystore,
     types::{
@@ -847,26 +853,28 @@
 
     <span class="kw">let </span>spki = <span class="kw">match </span>key_algorithm {
         KeyAlgorithm::Ed255 =&gt; {
-            <span class="kw">let </span>public_key = mechanisms::Ed255::derive_key(
-                keystore,
-                <span class="kw-2">&amp;</span>request::DeriveKey {
-                    mechanism: Mechanism::Ed255,
-                    base_key: request.private_key,
-                    additional_data: <span class="prelude-val">None</span>,
-                    attributes: StorageAttributes::new().set_persistence(Location::Volatile),
-                },
-            )<span class="question-mark">?
-            </span>.key;
-            <span class="kw">let </span>serialized_key = mechanisms::Ed255::serialize_key(
-                keystore,
-                <span class="kw-2">&amp;</span>request::SerializeKey {
-                    mechanism: Mechanism::Ed255,
-                    key: public_key,
-                    format: KeySerialization::Raw,
-                },
-            )
-            .unwrap()
-            .serialized_key;
+            <span class="kw">let </span>public_key = mechanisms::Ed255
+                .derive_key(
+                    keystore,
+                    <span class="kw-2">&amp;</span>request::DeriveKey {
+                        mechanism: Mechanism::Ed255,
+                        base_key: request.private_key,
+                        additional_data: <span class="prelude-val">None</span>,
+                        attributes: StorageAttributes::new().set_persistence(Location::Volatile),
+                    },
+                )<span class="question-mark">?
+                </span>.key;
+            <span class="kw">let </span>serialized_key = mechanisms::Ed255
+                .serialize_key(
+                    keystore,
+                    <span class="kw-2">&amp;</span>request::SerializeKey {
+                        mechanism: Mechanism::Ed255,
+                        key: public_key,
+                        format: KeySerialization::Raw,
+                    },
+                )
+                .unwrap()
+                .serialized_key;
             keystore.delete_key(<span class="kw-2">&amp;</span>public_key);
 
             SerializedSubjectPublicKey::Ed255(
@@ -878,26 +886,28 @@
         }
 
         KeyAlgorithm::P256 =&gt; {
-            <span class="kw">let </span>public_key = mechanisms::P256::derive_key(
-                keystore,
-                <span class="kw-2">&amp;</span>request::DeriveKey {
-                    mechanism: Mechanism::P256,
-                    base_key: request.private_key,
-                    additional_data: <span class="prelude-val">None</span>,
-                    attributes: StorageAttributes::new().set_persistence(Location::Volatile),
-                },
-            )<span class="question-mark">?
-            </span>.key;
-            <span class="kw">let </span>serialized_key = mechanisms::P256::serialize_key(
-                keystore,
-                <span class="kw-2">&amp;</span>request::SerializeKey {
-                    mechanism: Mechanism::P256,
-                    key: public_key,
-                    format: KeySerialization::Sec1,
-                },
-            )
-            .unwrap()
-            .serialized_key;
+            <span class="kw">let </span>public_key = mechanisms::P256
+                .derive_key(
+                    keystore,
+                    <span class="kw-2">&amp;</span>request::DeriveKey {
+                        mechanism: Mechanism::P256,
+                        base_key: request.private_key,
+                        additional_data: <span class="prelude-val">None</span>,
+                        attributes: StorageAttributes::new().set_persistence(Location::Volatile),
+                    },
+                )<span class="question-mark">?
+                </span>.key;
+            <span class="kw">let </span>serialized_key = mechanisms::P256
+                .serialize_key(
+                    keystore,
+                    <span class="kw-2">&amp;</span>request::SerializeKey {
+                        mechanism: Mechanism::P256,
+                        key: public_key,
+                        format: KeySerialization::Sec1,
+                    },
+                )
+                .unwrap()
+                .serialized_key;
             keystore.delete_key(<span class="kw-2">&amp;</span>public_key);
 
             SerializedSubjectPublicKey::P256(
@@ -936,33 +946,35 @@
     <span class="comment">// 2. sign the TBS Cert
     </span><span class="kw">let </span>signature = <span class="kw">match </span>signature_algorithm {
         SignatureAlgorithm::Ed255 =&gt; {
-            <span class="kw">let </span>signature = mechanisms::Ed255::sign(
-                attn_keystore,
-                <span class="kw-2">&amp;</span>request::Sign {
-                    mechanism: Mechanism::Ed255,
-                    key: ED255_ATTN_KEY,
-                    message,
-                    format: SignatureSerialization::Raw,
-                },
-            )
-            .unwrap()
-            .signature;
+            <span class="kw">let </span>signature = mechanisms::Ed255
+                .sign(
+                    attn_keystore,
+                    <span class="kw-2">&amp;</span>request::Sign {
+                        mechanism: Mechanism::Ed255,
+                        key: ED255_ATTN_KEY,
+                        message,
+                        format: SignatureSerialization::Raw,
+                    },
+                )
+                .unwrap()
+                .signature;
             SerializedSignature::Ed255(signature.as_ref().try_into().unwrap())
         }
         SignatureAlgorithm::P256 =&gt; SerializedSignature::P256(
             heapless_bytes::Bytes::from_slice(
-                mechanisms::P256::sign(
-                    attn_keystore,
-                    <span class="kw-2">&amp;</span>request::Sign {
-                        mechanism: Mechanism::P256,
-                        key: P256_ATTN_KEY,
-                        message,
-                        format: SignatureSerialization::Asn1Der,
-                    },
-                )
-                .unwrap()
-                .signature
-                .as_ref(),
+                mechanisms::P256
+                    .sign(
+                        attn_keystore,
+                        <span class="kw-2">&amp;</span>request::Sign {
+                            mechanism: Mechanism::P256,
+                            key: P256_ATTN_KEY,
+                            message,
+                            format: SignatureSerialization::Asn1Der,
+                        },
+                    )
+                    .unwrap()
+                    .signature
+                    .as_ref(),
             )
             .unwrap(),
         ),

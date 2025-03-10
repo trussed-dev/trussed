@@ -68,16 +68,20 @@
 <a href="#67" id="67">67</a>
 <a href="#68" id="68">68</a>
 <a href="#69" id="69">69</a>
-<a href="#70" id="70">70</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::api::{reply, request};
+<a href="#70" id="70">70</a>
+<a href="#71" id="71">71</a>
+<a href="#72" id="72">72</a>
+<a href="#73" id="73">73</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::api::{reply, request};
 <span class="kw">use </span><span class="kw">crate</span>::error::Error;
 <span class="kw">use </span><span class="kw">crate</span>::key;
-<span class="kw">use </span><span class="kw">crate</span>::service::{DeriveKey, Sign};
+<span class="kw">use </span><span class="kw">crate</span>::service::MechanismImpl;
 <span class="kw">use </span><span class="kw">crate</span>::store::keystore::Keystore;
 <span class="kw">use </span><span class="kw">crate</span>::types::Signature;
 
-<span class="kw">impl </span>DeriveKey <span class="kw">for </span><span class="kw">super</span>::HmacSha256 {
+<span class="kw">impl </span>MechanismImpl <span class="kw">for </span><span class="kw">super</span>::HmacSha256 {
     <span class="attr">#[inline(never)]
     </span><span class="kw">fn </span>derive_key(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
         keystore: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Keystore,
         request: <span class="kw-2">&amp;</span>request::DeriveKey,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;reply::DeriveKey, Error&gt; {
@@ -112,11 +116,13 @@
 
         <span class="prelude-val">Ok</span>(reply::DeriveKey { key: key_id })
     }
-}
 
-<span class="kw">impl </span>Sign <span class="kw">for </span><span class="kw">super</span>::HmacSha256 {
     <span class="attr">#[inline(never)]
-    </span><span class="kw">fn </span>sign(keystore: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Keystore, request: <span class="kw-2">&amp;</span>request::Sign) -&gt; <span class="prelude-ty">Result</span>&lt;reply::Sign, Error&gt; {
+    </span><span class="kw">fn </span>sign(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        keystore: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Keystore,
+        request: <span class="kw-2">&amp;</span>request::Sign,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;reply::Sign, Error&gt; {
         <span class="kw">use </span>hmac::{Hmac, Mac};
         <span class="kw">use </span>sha2::Sha256;
         <span class="kw">type </span>HmacSha256 = Hmac&lt;Sha256&gt;;

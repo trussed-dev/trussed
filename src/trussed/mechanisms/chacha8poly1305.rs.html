@@ -233,19 +233,14 @@
 <a href="#232" id="232">232</a>
 <a href="#233" id="233">233</a>
 <a href="#234" id="234">234</a>
-<a href="#235" id="235">235</a>
-<a href="#236" id="236">236</a>
-<a href="#237" id="237">237</a>
-<a href="#238" id="238">238</a>
-<a href="#239" id="239">239</a>
-<a href="#240" id="240">240</a></pre></div><pre class="rust"><code><span class="kw">use </span>generic_array::GenericArray;
+<a href="#235" id="235">235</a></pre></div><pre class="rust"><code><span class="kw">use </span>generic_array::GenericArray;
 <span class="kw">use </span>rand_core::RngCore;
 <span class="kw">use </span>trussed_core::types::EncryptedData;
 
 <span class="kw">use </span><span class="kw">crate</span>::api::{reply, request};
 <span class="kw">use </span><span class="kw">crate</span>::error::Error;
 <span class="kw">use </span><span class="kw">crate</span>::key;
-<span class="kw">use </span><span class="kw">crate</span>::service::{Decrypt, Encrypt, GenerateKey, UnwrapKey, WrapKey};
+<span class="kw">use </span><span class="kw">crate</span>::service::MechanismImpl;
 <span class="kw">use </span><span class="kw">crate</span>::store::keystore::Keystore;
 <span class="kw">use </span><span class="kw">crate</span>::types::{Mechanism, Message, ShortData};
 
@@ -260,9 +255,26 @@
 <span class="kw">const </span>KIND: key::Kind = key::Kind::Symmetric(KEY_LEN);
 <span class="kw">const </span>KIND_NONCE: key::Kind = key::Kind::Symmetric32Nonce(NONCE_LEN);
 
-<span class="kw">impl </span>GenerateKey <span class="kw">for </span><span class="kw">super</span>::Chacha8Poly1305 {
+<span class="attr">#[inline(never)]
+</span><span class="kw">fn </span>increment_nonce(nonce: <span class="kw-2">&amp;mut </span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
+    <span class="macro">assert_eq!</span>(nonce.len(), NONCE_LEN);
+    <span class="kw">let </span><span class="kw-2">mut </span>carry: u16 = <span class="number">1</span>;
+    <span class="kw">for </span>digit <span class="kw">in </span>nonce.iter_mut() {
+        <span class="kw">let </span>x = (<span class="kw-2">*</span>digit <span class="kw">as </span>u16) + carry;
+        <span class="kw-2">*</span>digit = x <span class="kw">as </span>u8;
+        carry = x &gt;&gt; <span class="number">8</span>;
+    }
+    <span class="kw">if </span>carry == <span class="number">0 </span>{
+        <span class="prelude-val">Ok</span>(())
+    } <span class="kw">else </span>{
+        <span class="prelude-val">Err</span>(Error::NonceOverflow)
+    }
+}
+
+<span class="kw">impl </span>MechanismImpl <span class="kw">for </span><span class="kw">super</span>::Chacha8Poly1305 {
     <span class="attr">#[inline(never)]
     </span><span class="kw">fn </span>generate_key(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
         keystore: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Keystore,
         request: <span class="kw-2">&amp;</span>request::GenerateKey,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;reply::GenerateKey, Error&gt; {
@@ -285,27 +297,10 @@
 
         <span class="prelude-val">Ok</span>(reply::GenerateKey { key: key_id })
     }
-}
 
-<span class="attr">#[inline(never)]
-</span><span class="kw">fn </span>increment_nonce(nonce: <span class="kw-2">&amp;mut </span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
-    <span class="macro">assert_eq!</span>(nonce.len(), NONCE_LEN);
-    <span class="kw">let </span><span class="kw-2">mut </span>carry: u16 = <span class="number">1</span>;
-    <span class="kw">for </span>digit <span class="kw">in </span>nonce.iter_mut() {
-        <span class="kw">let </span>x = (<span class="kw-2">*</span>digit <span class="kw">as </span>u16) + carry;
-        <span class="kw-2">*</span>digit = x <span class="kw">as </span>u8;
-        carry = x &gt;&gt; <span class="number">8</span>;
-    }
-    <span class="kw">if </span>carry == <span class="number">0 </span>{
-        <span class="prelude-val">Ok</span>(())
-    } <span class="kw">else </span>{
-        <span class="prelude-val">Err</span>(Error::NonceOverflow)
-    }
-}
-
-<span class="kw">impl </span>Decrypt <span class="kw">for </span><span class="kw">super</span>::Chacha8Poly1305 {
     <span class="attr">#[inline(never)]
     </span><span class="kw">fn </span>decrypt(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
         keystore: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Keystore,
         request: <span class="kw-2">&amp;</span>request::Decrypt,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;reply::Decrypt, Error&gt; {
@@ -343,12 +338,10 @@
             },
         })
     }
-}
 
-<span class="attr">#[cfg(feature = <span class="string">"chacha8-poly1305"</span>)]
-</span><span class="kw">impl </span>Encrypt <span class="kw">for </span><span class="kw">super</span>::Chacha8Poly1305 {
     <span class="attr">#[inline(never)]
     </span><span class="kw">fn </span>encrypt(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
         keystore: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Keystore,
         request: <span class="kw-2">&amp;</span>request::Encrypt,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;reply::Encrypt, Error&gt; {
@@ -404,11 +397,10 @@
             tag,
         })
     }
-}
 
-<span class="kw">impl </span>WrapKey <span class="kw">for </span><span class="kw">super</span>::Chacha8Poly1305 {
     <span class="attr">#[inline(never)]
     </span><span class="kw">fn </span>wrap_key(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
         keystore: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Keystore,
         request: <span class="kw-2">&amp;</span>request::WrapKey,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;reply::WrapKey, Error&gt; {
@@ -426,7 +418,7 @@
             associated_data: request.associated_data.clone(),
             nonce: request.nonce.clone(),
         };
-        <span class="kw">let </span>encryption_reply = &lt;<span class="kw">super</span>::Chacha8Poly1305&gt;::encrypt(keystore, <span class="kw-2">&amp;</span>encryption_request)<span class="question-mark">?</span>;
+        <span class="kw">let </span>encryption_reply = <span class="self">self</span>.encrypt(keystore, <span class="kw-2">&amp;</span>encryption_request)<span class="question-mark">?</span>;
 
         <span class="kw">let </span>wrapped_key = EncryptedData::from(encryption_reply);
         <span class="kw">let </span>wrapped_key =
@@ -434,11 +426,10 @@
 
         <span class="prelude-val">Ok</span>(reply::WrapKey { wrapped_key })
     }
-}
 
-<span class="kw">impl </span>UnwrapKey <span class="kw">for </span><span class="kw">super</span>::Chacha8Poly1305 {
     <span class="attr">#[inline(never)]
     </span><span class="kw">fn </span>unwrap_key(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
         keystore: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Keystore,
         request: <span class="kw-2">&amp;</span>request::UnwrapKey,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;reply::UnwrapKey, Error&gt; {
@@ -451,13 +442,12 @@
             request.associated_data.clone(),
         );
 
-        <span class="kw">let </span>serialized_key = <span class="kw">if let </span><span class="prelude-val">Some</span>(serialized_key) =
-            &lt;<span class="kw">super</span>::Chacha8Poly1305&gt;::decrypt(keystore, <span class="kw-2">&amp;</span>decryption_request)<span class="question-mark">?</span>.plaintext
-        {
-            serialized_key
-        } <span class="kw">else </span>{
-            <span class="kw">return </span><span class="prelude-val">Ok</span>(reply::UnwrapKey { key: <span class="prelude-val">None </span>});
-        };
+        <span class="kw">let </span>serialized_key =
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(serialized_key) = <span class="self">self</span>.decrypt(keystore, <span class="kw-2">&amp;</span>decryption_request)<span class="question-mark">?</span>.plaintext {
+                serialized_key
+            } <span class="kw">else </span>{
+                <span class="kw">return </span><span class="prelude-val">Ok</span>(reply::UnwrapKey { key: <span class="prelude-val">None </span>});
+            };
 
         <span class="comment">// TODO: probably change this to returning Option&lt;key&gt; too
         </span><span class="kw">let </span>key::Key {

@@ -214,22 +214,13 @@
 <a href="#213" id="213">213</a>
 <a href="#214" id="214">214</a>
 <a href="#215" id="215">215</a>
-<a href="#216" id="216">216</a>
-<a href="#217" id="217">217</a>
-<a href="#218" id="218">218</a>
-<a href="#219" id="219">219</a>
-<a href="#220" id="220">220</a>
-<a href="#221" id="221">221</a>
-<a href="#222" id="222">222</a>
-<a href="#223" id="223">223</a></pre></div><pre class="rust"><code><span class="kw">use </span>rand_core::RngCore;
+<a href="#216" id="216">216</a></pre></div><pre class="rust"><code><span class="kw">use </span>rand_core::RngCore;
 <span class="kw">use </span>salty::agreement;
 
 <span class="kw">use </span><span class="kw">crate</span>::api::{reply, request};
 <span class="kw">use </span><span class="kw">crate</span>::error::Error;
 <span class="kw">use </span><span class="kw">crate</span>::key;
-<span class="kw">use </span><span class="kw">crate</span>::service::{
-    Agree, DeriveKey, DeserializeKey, Exists, GenerateKey, SerializeKey, UnsafeInjectKey,
-};
+<span class="kw">use </span><span class="kw">crate</span>::service::MechanismImpl;
 <span class="kw">use </span><span class="kw">crate</span>::store::keystore::Keystore;
 <span class="kw">use </span><span class="kw">crate</span>::types::{KeyId, KeySerialization, SerializedKey};
 
@@ -264,9 +255,10 @@
     <span class="prelude-val">Ok</span>(keypair)
 }
 
-<span class="kw">impl </span>Agree <span class="kw">for </span><span class="kw">super</span>::X255 {
+<span class="kw">impl </span>MechanismImpl <span class="kw">for </span><span class="kw">super</span>::X255 {
     <span class="comment">// #[inline(never)]
     </span><span class="kw">fn </span>agree(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
         keystore: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Keystore,
         request: <span class="kw-2">&amp;</span>request::Agree,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;reply::Agree, Error&gt; {
@@ -298,11 +290,10 @@
             shared_secret: key_id,
         })
     }
-}
 
-<span class="kw">impl </span>GenerateKey <span class="kw">for </span><span class="kw">super</span>::X255 {
     <span class="comment">// #[inline(never)]
     </span><span class="kw">fn </span>generate_key(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
         keystore: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Keystore,
         request: <span class="kw-2">&amp;</span>request::GenerateKey,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;reply::GenerateKey, Error&gt; {
@@ -321,11 +312,10 @@
         <span class="comment">// return handle
         </span><span class="prelude-val">Ok</span>(reply::GenerateKey { key: key_id })
     }
-}
 
-<span class="kw">impl </span>Exists <span class="kw">for </span><span class="kw">super</span>::X255 {
     <span class="comment">// #[inline(never)]
     </span><span class="kw">fn </span>exists(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
         keystore: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Keystore,
         request: <span class="kw-2">&amp;</span>request::Exists,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;reply::Exists, Error&gt; {
@@ -333,11 +323,10 @@
         <span class="kw">let </span>exists = keystore.exists_key(key::Secrecy::Secret, <span class="prelude-val">Some</span>(key::Kind::X255), <span class="kw-2">&amp;</span>key_id);
         <span class="prelude-val">Ok</span>(reply::Exists { exists })
     }
-}
 
-<span class="kw">impl </span>DeriveKey <span class="kw">for </span><span class="kw">super</span>::X255 {
     <span class="comment">// #[inline(never)]
     </span><span class="kw">fn </span>derive_key(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
         keystore: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Keystore,
         request: <span class="kw-2">&amp;</span>request::DeriveKey,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;reply::DeriveKey, Error&gt; {
@@ -356,11 +345,10 @@
 
         <span class="prelude-val">Ok</span>(reply::DeriveKey { key: public_id })
     }
-}
 
-<span class="kw">impl </span>SerializeKey <span class="kw">for </span><span class="kw">super</span>::X255 {
     <span class="comment">// #[inline(never)]
     </span><span class="kw">fn </span>serialize_key(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
         keystore: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Keystore,
         request: <span class="kw-2">&amp;</span>request::SerializeKey,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;reply::SerializeKey, Error&gt; {
@@ -382,11 +370,10 @@
 
         <span class="prelude-val">Ok</span>(reply::SerializeKey { serialized_key })
     }
-}
 
-<span class="kw">impl </span>DeserializeKey <span class="kw">for </span><span class="kw">super</span>::X255 {
     <span class="comment">// #[inline(never)]
     </span><span class="kw">fn </span>deserialize_key(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
         keystore: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Keystore,
         request: <span class="kw-2">&amp;</span>request::DeserializeKey,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;reply::DeserializeKey, Error&gt; {
@@ -415,10 +402,9 @@
 
         <span class="prelude-val">Ok</span>(reply::DeserializeKey { key: public_id })
     }
-}
 
-<span class="kw">impl </span>UnsafeInjectKey <span class="kw">for </span><span class="kw">super</span>::X255 {
     <span class="kw">fn </span>unsafe_inject_key(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
         keystore: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Keystore,
         request: <span class="kw-2">&amp;</span>request::UnsafeInjectKey,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;reply::UnsafeInjectKey, Error&gt; {

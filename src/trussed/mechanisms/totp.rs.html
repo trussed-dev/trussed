@@ -105,10 +105,13 @@
 <a href="#104" id="104">104</a>
 <a href="#105" id="105">105</a>
 <a href="#106" id="106">106</a>
-<a href="#107" id="107">107</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::api::{reply, request};
+<a href="#107" id="107">107</a>
+<a href="#108" id="108">108</a>
+<a href="#109" id="109">109</a>
+<a href="#110" id="110">110</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::api::{reply, request};
 <span class="kw">use </span><span class="kw">crate</span>::error::Error;
 <span class="kw">use </span><span class="kw">crate</span>::key;
-<span class="kw">use </span><span class="kw">crate</span>::service::{Exists, Sign};
+<span class="kw">use </span><span class="kw">crate</span>::service::MechanismImpl;
 <span class="kw">use </span><span class="kw">crate</span>::store::keystore::Keystore;
 
 <span class="comment">// code copied from https://github.com/avacariu/rust-oath
@@ -151,9 +154,13 @@
     </span>p &amp; <span class="number">0x7fff_ffff
 </span>}
 
-<span class="kw">impl </span>Sign <span class="kw">for </span><span class="kw">super</span>::Totp {
+<span class="kw">impl </span>MechanismImpl <span class="kw">for </span><span class="kw">super</span>::Totp {
     <span class="attr">#[inline(never)]
-    </span><span class="kw">fn </span>sign(keystore: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Keystore, request: <span class="kw-2">&amp;</span>request::Sign) -&gt; <span class="prelude-ty">Result</span>&lt;reply::Sign, Error&gt; {
+    </span><span class="kw">fn </span>sign(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        keystore: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Keystore,
+        request: <span class="kw-2">&amp;</span>request::Sign,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;reply::Sign, Error&gt; {
         <span class="kw">let </span>key_id = request.key;
 
         <span class="kw">let </span>key = keystore.load_key(key::Secrecy::Secret, <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span>key_id)<span class="question-mark">?</span>;
@@ -179,11 +186,10 @@
             signature: <span class="kw">crate</span>::Bytes::from_slice(totp_material.to_le_bytes().as_ref()).unwrap(),
         })
     }
-}
 
-<span class="kw">impl </span>Exists <span class="kw">for </span><span class="kw">super</span>::Totp {
     <span class="attr">#[inline(never)]
     </span><span class="kw">fn </span>exists(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
         keystore: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Keystore,
         request: <span class="kw-2">&amp;</span>request::Exists,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;reply::Exists, Error&gt; {

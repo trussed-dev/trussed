@@ -368,16 +368,10 @@
 <a href="#367" id="367">367</a>
 <a href="#368" id="368">368</a>
 <a href="#369" id="369">369</a>
-<a href="#370" id="370">370</a>
-<a href="#371" id="371">371</a>
-<a href="#372" id="372">372</a>
-<a href="#373" id="373">373</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::api::{reply, request};
+<a href="#370" id="370">370</a></pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::api::{reply, request};
 <span class="kw">use </span><span class="kw">crate</span>::error::Error;
 <span class="kw">use </span><span class="kw">crate</span>::key;
-<span class="kw">use </span><span class="kw">crate</span>::service::{
-    Agree, DeriveKey, DeserializeKey, Exists, GenerateKey, SerializeKey, Sign, UnsafeInjectKey,
-    Verify,
-};
+<span class="kw">use </span><span class="kw">crate</span>::service::MechanismImpl;
 <span class="kw">use </span><span class="kw">crate</span>::store::keystore::Keystore;
 <span class="kw">use </span><span class="kw">crate</span>::types::{
     Bytes, KeyId, KeySerialization, SerializedKey, Signature, SignatureSerialization,
@@ -417,9 +411,10 @@
         .map_err(|<span class="kw">_</span>| Error::InternalError)
 }
 
-<span class="kw">impl </span>Agree <span class="kw">for </span><span class="kw">super</span>::P256 {
+<span class="kw">impl </span>MechanismImpl <span class="kw">for </span><span class="kw">super</span>::P256 {
     <span class="attr">#[inline(never)]
     </span><span class="kw">fn </span>agree(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
         keystore: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Keystore,
         request: <span class="kw-2">&amp;</span>request::Agree,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;reply::Agree, Error&gt; {
@@ -453,11 +448,10 @@
             shared_secret: key_id,
         })
     }
-}
 
-<span class="kw">impl </span>DeriveKey <span class="kw">for </span><span class="kw">super</span>::P256 {
     <span class="attr">#[inline(never)]
     </span><span class="kw">fn </span>derive_key(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
         keystore: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Keystore,
         request: <span class="kw-2">&amp;</span>request::DeriveKey,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;reply::DeriveKey, Error&gt; {
@@ -475,11 +469,10 @@
 
         <span class="prelude-val">Ok</span>(reply::DeriveKey { key: public_id })
     }
-}
 
-<span class="kw">impl </span>DeserializeKey <span class="kw">for </span><span class="kw">super</span>::P256 {
     <span class="attr">#[inline(never)]
     </span><span class="kw">fn </span>deserialize_key(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
         keystore: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Keystore,
         request: <span class="kw-2">&amp;</span>request::DeserializeKey,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;reply::DeserializeKey, Error&gt; {
@@ -548,11 +541,10 @@
 
         <span class="prelude-val">Ok</span>(reply::DeserializeKey { key: public_id })
     }
-}
 
-<span class="kw">impl </span>GenerateKey <span class="kw">for </span><span class="kw">super</span>::P256 {
     <span class="attr">#[inline(never)]
     </span><span class="kw">fn </span>generate_key(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
         keystore: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Keystore,
         request: <span class="kw-2">&amp;</span>request::GenerateKey,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;reply::GenerateKey, Error&gt; {
@@ -569,11 +561,10 @@
         <span class="comment">// return handle
         </span><span class="prelude-val">Ok</span>(reply::GenerateKey { key: key_id })
     }
-}
 
-<span class="kw">impl </span>SerializeKey <span class="kw">for </span><span class="kw">super</span>::P256 {
     <span class="attr">#[inline(never)]
     </span><span class="kw">fn </span>serialize_key(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
         keystore: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Keystore,
         request: <span class="kw-2">&amp;</span>request::SerializeKey,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;reply::SerializeKey, Error&gt; {
@@ -618,11 +609,10 @@
 
         <span class="prelude-val">Ok</span>(reply::SerializeKey { serialized_key })
     }
-}
 
-<span class="kw">impl </span>Exists <span class="kw">for </span><span class="kw">super</span>::P256 {
     <span class="attr">#[inline(never)]
     </span><span class="kw">fn </span>exists(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
         keystore: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Keystore,
         request: <span class="kw-2">&amp;</span>request::Exists,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;reply::Exists, Error&gt; {
@@ -630,11 +620,13 @@
         <span class="kw">let </span>exists = keystore.exists_key(key::Secrecy::Secret, <span class="prelude-val">Some</span>(key::Kind::P256), <span class="kw-2">&amp;</span>key_id);
         <span class="prelude-val">Ok</span>(reply::Exists { exists })
     }
-}
 
-<span class="kw">impl </span>Sign <span class="kw">for </span><span class="kw">super</span>::P256 {
     <span class="attr">#[inline(never)]
-    </span><span class="kw">fn </span>sign(keystore: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Keystore, request: <span class="kw-2">&amp;</span>request::Sign) -&gt; <span class="prelude-ty">Result</span>&lt;reply::Sign, Error&gt; {
+    </span><span class="kw">fn </span>sign(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        keystore: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Keystore,
+        request: <span class="kw-2">&amp;</span>request::Sign,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;reply::Sign, Error&gt; {
         <span class="kw">let </span>key_id = request.key;
 
         <span class="kw">let </span>secret_key = load_secret_key(keystore, <span class="kw-2">&amp;</span>key_id)<span class="question-mark">?</span>;
@@ -660,11 +652,66 @@
             signature: serialized_signature,
         })
     }
+
+    <span class="attr">#[inline(never)]
+    </span><span class="kw">fn </span>verify(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        keystore: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Keystore,
+        request: <span class="kw-2">&amp;</span>request::Verify,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;reply::Verify, Error&gt; {
+        <span class="kw">let </span>key_id = request.key;
+
+        <span class="kw">let </span>public_key = load_public_key(keystore, <span class="kw-2">&amp;</span>key_id)<span class="question-mark">?</span>;
+
+        <span class="kw">let </span>signature = p256_cortex_m4::Signature::from_untagged_bytes(<span class="kw-2">&amp;</span>request.signature)
+            <span class="comment">// well... or wrong encoding, need r,s in range 1..=n-1
+            </span>.map_err(|<span class="kw">_</span>| Error::WrongSignatureLength)<span class="question-mark">?</span>;
+
+        <span class="kw">if let </span>SignatureSerialization::Raw = request.format {
+        } <span class="kw">else </span>{
+            <span class="comment">// well more TODO
+            </span><span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidSerializationFormat);
+        }
+
+        <span class="kw">let </span>valid = public_key.verify(<span class="kw-2">&amp;</span>request.message, <span class="kw-2">&amp;</span>signature);
+        <span class="prelude-val">Ok</span>(reply::Verify { valid })
+    }
+
+    <span class="kw">fn </span>unsafe_inject_key(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        keystore: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Keystore,
+        request: <span class="kw-2">&amp;</span>request::UnsafeInjectKey,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;reply::UnsafeInjectKey, Error&gt; {
+        <span class="kw">if </span>request.format != KeySerialization::Raw {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidSerializationFormat);
+        }
+
+        <span class="kw">let </span>sk = p256_cortex_m4::SecretKey::from_bytes(<span class="kw-2">&amp;</span>request.raw_key)
+            .map_err(|<span class="kw">_</span>| Error::InvalidSerializedKey)<span class="question-mark">?</span>;
+
+        <span class="kw">let </span>info = key::Info {
+            flags: key::Flags::SENSITIVE,
+            kind: key::Kind::P256,
+        };
+
+        keystore
+            .store_key(
+                request.attributes.persistence,
+                key::Secrecy::Secret,
+                info,
+                <span class="kw">unsafe </span>{ <span class="kw-2">&amp;</span>sk.to_bytes() },
+            )
+            .map(|key| reply::UnsafeInjectKey { key })
+    }
 }
 
-<span class="kw">impl </span>Sign <span class="kw">for </span><span class="kw">super</span>::P256Prehashed {
+<span class="kw">impl </span>MechanismImpl <span class="kw">for </span><span class="kw">super</span>::P256Prehashed {
     <span class="attr">#[inline(never)]
-    </span><span class="kw">fn </span>sign(keystore: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Keystore, request: <span class="kw-2">&amp;</span>request::Sign) -&gt; <span class="prelude-ty">Result</span>&lt;reply::Sign, Error&gt; {
+    </span><span class="kw">fn </span>sign(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        keystore: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Keystore,
+        request: <span class="kw-2">&amp;</span>request::Sign,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;reply::Sign, Error&gt; {
         <span class="kw">let </span>key_id = request.key;
 
         <span class="kw">let </span>secret_key = load_secret_key(keystore, <span class="kw-2">&amp;</span>key_id)<span class="question-mark">?</span>;
@@ -689,59 +736,6 @@
         </span><span class="prelude-val">Ok</span>(reply::Sign {
             signature: serialized_signature,
         })
-    }
-}
-
-<span class="kw">impl </span>Verify <span class="kw">for </span><span class="kw">super</span>::P256 {
-    <span class="attr">#[inline(never)]
-    </span><span class="kw">fn </span>verify(
-        keystore: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Keystore,
-        request: <span class="kw-2">&amp;</span>request::Verify,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;reply::Verify, Error&gt; {
-        <span class="kw">let </span>key_id = request.key;
-
-        <span class="kw">let </span>public_key = load_public_key(keystore, <span class="kw-2">&amp;</span>key_id)<span class="question-mark">?</span>;
-
-        <span class="kw">let </span>signature = p256_cortex_m4::Signature::from_untagged_bytes(<span class="kw-2">&amp;</span>request.signature)
-            <span class="comment">// well... or wrong encoding, need r,s in range 1..=n-1
-            </span>.map_err(|<span class="kw">_</span>| Error::WrongSignatureLength)<span class="question-mark">?</span>;
-
-        <span class="kw">if let </span>SignatureSerialization::Raw = request.format {
-        } <span class="kw">else </span>{
-            <span class="comment">// well more TODO
-            </span><span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidSerializationFormat);
-        }
-
-        <span class="kw">let </span>valid = public_key.verify(<span class="kw-2">&amp;</span>request.message, <span class="kw-2">&amp;</span>signature);
-        <span class="prelude-val">Ok</span>(reply::Verify { valid })
-    }
-}
-
-<span class="kw">impl </span>UnsafeInjectKey <span class="kw">for </span><span class="kw">super</span>::P256 {
-    <span class="kw">fn </span>unsafe_inject_key(
-        keystore: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Keystore,
-        request: <span class="kw-2">&amp;</span>request::UnsafeInjectKey,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;reply::UnsafeInjectKey, Error&gt; {
-        <span class="kw">if </span>request.format != KeySerialization::Raw {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidSerializationFormat);
-        }
-
-        <span class="kw">let </span>sk = p256_cortex_m4::SecretKey::from_bytes(<span class="kw-2">&amp;</span>request.raw_key)
-            .map_err(|<span class="kw">_</span>| Error::InvalidSerializedKey)<span class="question-mark">?</span>;
-
-        <span class="kw">let </span>info = key::Info {
-            flags: key::Flags::SENSITIVE,
-            kind: key::Kind::P256,
-        };
-
-        keystore
-            .store_key(
-                request.attributes.persistence,
-                key::Secrecy::Secret,
-                info,
-                <span class="kw">unsafe </span>{ <span class="kw-2">&amp;</span>sk.to_bytes() },
-            )
-            .map(|key| reply::UnsafeInjectKey { key })
     }
 }
 </code></pre></div></section></main></body></html>

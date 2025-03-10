@@ -108,8 +108,7 @@
 <a href="#107" id="107">107</a>
 <a href="#108" id="108">108</a>
 <a href="#109" id="109">109</a>
-<a href="#110" id="110">110</a>
-<a href="#111" id="111">111</a></pre></div><pre class="rust"><code><span class="doccomment">//! This is so nasty!
+<a href="#110" id="110">110</a></pre></div><pre class="rust"><code><span class="doccomment">//! This is so nasty!
 //!
 //! We need to support 3DES to provide compatibility with Yubico's braindead
 //! implementation of key management...
@@ -123,15 +122,16 @@
 <span class="kw">use </span><span class="kw">crate</span>::api::{reply, request};
 <span class="kw">use </span><span class="kw">crate</span>::error::Error;
 <span class="kw">use </span><span class="kw">crate</span>::key;
-<span class="kw">use </span><span class="kw">crate</span>::service::{Decrypt, Encrypt, UnsafeInjectKey};
+<span class="kw">use </span><span class="kw">crate</span>::service::MechanismImpl;
 <span class="kw">use </span><span class="kw">crate</span>::store::keystore::Keystore;
 
 <span class="kw">const </span>TDES_KEY_SIZE: usize = <span class="number">24</span>;
 
-<span class="kw">impl </span>Encrypt <span class="kw">for </span><span class="kw">super</span>::Tdes {
+<span class="kw">impl </span>MechanismImpl <span class="kw">for </span><span class="kw">super</span>::Tdes {
     <span class="doccomment">/// Encrypts a single block. Let's hope we don't have to support ECB!!
     </span><span class="attr">#[inline(never)]
     </span><span class="kw">fn </span>encrypt(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
         keystore: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Keystore,
         request: <span class="kw-2">&amp;</span>request::Encrypt,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;reply::Encrypt, Error&gt; {
@@ -168,12 +168,11 @@
             tag: Default::default(),
         })
     }
-}
 
-<span class="kw">impl </span>Decrypt <span class="kw">for </span><span class="kw">super</span>::Tdes {
     <span class="doccomment">/// Decrypts a single block. Let's hope we don't have to support ECB!!
     </span><span class="attr">#[inline(never)]
     </span><span class="kw">fn </span>decrypt(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
         keystore: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Keystore,
         request: <span class="kw-2">&amp;</span>request::Decrypt,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;reply::Decrypt, Error&gt; {
@@ -199,10 +198,9 @@
             plaintext: <span class="prelude-val">Some</span>(message),
         })
     }
-}
 
-<span class="kw">impl </span>UnsafeInjectKey <span class="kw">for </span><span class="kw">super</span>::Tdes {
     <span class="kw">fn </span>unsafe_inject_key(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
         keystore: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Keystore,
         request: <span class="kw-2">&amp;</span>request::UnsafeInjectKey,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;reply::UnsafeInjectKey, Error&gt; {
