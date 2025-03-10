@@ -1005,38 +1005,7 @@
 <a href="#1004" id="1004">1004</a>
 <a href="#1005" id="1005">1005</a>
 <a href="#1006" id="1006">1006</a>
-<a href="#1007" id="1007">1007</a>
-<a href="#1008" id="1008">1008</a>
-<a href="#1009" id="1009">1009</a>
-<a href="#1010" id="1010">1010</a>
-<a href="#1011" id="1011">1011</a>
-<a href="#1012" id="1012">1012</a>
-<a href="#1013" id="1013">1013</a>
-<a href="#1014" id="1014">1014</a>
-<a href="#1015" id="1015">1015</a>
-<a href="#1016" id="1016">1016</a>
-<a href="#1017" id="1017">1017</a>
-<a href="#1018" id="1018">1018</a>
-<a href="#1019" id="1019">1019</a>
-<a href="#1020" id="1020">1020</a>
-<a href="#1021" id="1021">1021</a>
-<a href="#1022" id="1022">1022</a>
-<a href="#1023" id="1023">1023</a>
-<a href="#1024" id="1024">1024</a>
-<a href="#1025" id="1025">1025</a>
-<a href="#1026" id="1026">1026</a>
-<a href="#1027" id="1027">1027</a>
-<a href="#1028" id="1028">1028</a>
-<a href="#1029" id="1029">1029</a>
-<a href="#1030" id="1030">1030</a>
-<a href="#1031" id="1031">1031</a>
-<a href="#1032" id="1032">1032</a>
-<a href="#1033" id="1033">1033</a>
-<a href="#1034" id="1034">1034</a>
-<a href="#1035" id="1035">1035</a>
-<a href="#1036" id="1036">1036</a>
-<a href="#1037" id="1037">1037</a>
-<a href="#1038" id="1038">1038</a></pre></div><pre class="rust"><code><span class="kw">use </span>littlefs2_core::{path, DynFilesystem, Path, PathBuf};
+<a href="#1007" id="1007">1007</a></pre></div><pre class="rust"><code><span class="kw">use </span>littlefs2_core::{path, PathBuf};
 <span class="kw">use </span>rand_chacha::ChaCha8Rng;
 <span class="kw">pub use </span>rand_core::{RngCore, SeedableRng};
 
@@ -1048,7 +1017,7 @@
 <span class="attr">#[cfg(feature = <span class="string">"crypto-client"</span>)]
 </span><span class="kw">use </span><span class="kw">crate</span>::mechanisms;
 <span class="kw">pub use </span><span class="kw">crate</span>::pipe::ServiceEndpoint;
-<span class="kw">use </span><span class="kw">crate</span>::platform::{consent, ui, Platform, Store, UserInterface};
+<span class="kw">use </span><span class="kw">crate</span>::platform::{consent, ui, Platform, UserInterface};
 <span class="kw">pub use </span><span class="kw">crate</span>::store::{
     <span class="self">self</span>,
     certstore::{Certstore <span class="kw">as _</span>, ClientCertstore},
@@ -1490,40 +1459,9 @@
                 <span class="prelude-val">Ok</span>(Reply::LocateFile(reply::LocateFile { path }))
             }
 
-            <span class="comment">// This is now preferably done using littlefs-fuse (when device is not yet locked),
-            // and should be removed from firmware completely
-            </span><span class="attr">#[cfg(feature = <span class="string">"filesystem-client"</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"filesystem-client"</span>)]
             </span>Request::DebugDumpStore(_request) =&gt; {
-                <span class="macro">info_now!</span>(<span class="string">":: PERSISTENT"</span>);
-                recursively_list(<span class="self">self</span>.platform.store().fs(Location::Internal), <span class="macro">path!</span>(<span class="string">"/"</span>));
-
-                <span class="macro">info_now!</span>(<span class="string">":: VOLATILE"</span>);
-                recursively_list(<span class="self">self</span>.platform.store().fs(Location::Volatile), <span class="macro">path!</span>(<span class="string">"/"</span>));
-
-                <span class="kw">fn </span>recursively_list(fs: <span class="kw-2">&amp;</span><span class="kw">dyn </span>DynFilesystem, path: <span class="kw-2">&amp;</span>Path) {
-                    <span class="comment">// let fs = store.vfs();
-                    </span>fs.read_dir_and_then(path, <span class="kw-2">&amp;mut </span>|dir| {
-                        <span class="kw">for </span>(i, entry) <span class="kw">in </span>dir.enumerate() {
-                            <span class="kw">let </span>entry = entry.unwrap();
-                            <span class="kw">if </span>i &lt; <span class="number">2 </span>{
-                                <span class="comment">// info_now!("skipping {:?}", &amp;entry.path()).ok();
-                                </span><span class="kw">continue</span>;
-                            }
-                            <span class="macro">info_now!</span>(<span class="string">"{:?} p({:?})"</span>, entry.path(), <span class="kw-2">&amp;</span>path);
-                            <span class="kw">if </span>entry.file_type().is_dir() {
-                                recursively_list(fs, entry.path());
-                            }
-                            <span class="kw">if </span>entry.file_type().is_file() {
-                                <span class="kw">let </span>_contents = fs.read::&lt;Bytes&lt;<span class="number">256</span>&gt;&gt;(entry.path()).unwrap();
-                                <span class="comment">// info_now!("{} ?= {}", entry.metadata().len(), contents.len()).ok();
-                                // info_now!("{:?}", &amp;contents).ok();
-                            </span>}
-                        }
-                        <span class="prelude-val">Ok</span>(())
-                    })
-                    .unwrap();
-                }
-
+                <span class="macro">error!</span>(<span class="string">"DebugDumpStore is deprecated"</span>);
                 <span class="prelude-val">Ok</span>(Reply::DebugDumpStore(reply::DebugDumpStore {}))
             }
 
