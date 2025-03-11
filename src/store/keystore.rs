@@ -113,7 +113,7 @@ impl<S: Store> Keystore for ClientKeystore<S> {
         let key = key::Key {
             flags: info.flags,
             kind: info.kind,
-            material: key::Material::from_slice(material).unwrap(),
+            material: key::Material::try_from(material).unwrap(),
         };
 
         let id = self.generate_key_id();
@@ -208,7 +208,7 @@ impl<S: Store> Keystore for ClientKeystore<S> {
         let key = key::Key {
             flags: Default::default(),
             kind,
-            material: key::Material::from_slice(material).unwrap(),
+            material: key::Material::try_from(material).unwrap(),
         };
 
         let path = self.key_path(secrecy, id);

@@ -479,62 +479,6 @@ impl Encodable for Name<'_> {
     }
 }
 
-pub struct ParsedDatetime {
-    year: u16,
-    month: u8,
-    day: u8,
-    hour: u8,
-    minute: u8,
-    second: u8,
-}
-
-impl ParsedDatetime {
-    pub fn new(year: u16, month: u8, day: u8, hour: u8, minute: u8, second: u8) -> Option<Self> {
-        let valid = [
-            year >= 2000,
-            year <= 9999,
-            month >= 1,
-            month <= 12,
-            day >= 1,
-            day <= 31,
-            hour <= 23,
-            minute <= 59,
-            second <= 59,
-        ]
-        .iter()
-        .all(|b| *b);
-
-        if valid {
-            Some(Self {
-                year,
-                month,
-                day,
-                hour,
-                minute,
-                second,
-            })
-        } else {
-            None
-        }
-    }
-
-    pub fn to_bytes(&self) -> [u8; 15] {
-        let mut buffer: heapless::Vec<u8, 15> = Default::default();
-        buffer.resize_default(15).unwrap();
-        core::fmt::write(
-            &mut buffer,
-            format_args!(
-                "{}{:02}{:02}{:02}{:02}{:02}Z",
-                self.year, self.month, self.day, self.hour, self.minute, self.second
-            ),
-        )
-        .unwrap();
-        let mut array = [0u8; 15];
-        array.copy_from_slice(&buffer);
-        array
-    }
-}
-
 #[derive(Clone, Copy, Eq, PartialEq)]
 /// Encoded as "YYYYMMDDHHMMSSZ", encoding takes care of truncating YYYY to YY if necessary.
 pub struct Datetime<'l>(&'l [u8]);
