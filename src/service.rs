@@ -1,4 +1,4 @@
-use littlefs2_core::{path, DynFilesystem, Path, PathBuf};
+use littlefs2_core::{path, PathBuf};
 use rand_chacha::ChaCha8Rng;
 pub use rand_core::{RngCore, SeedableRng};
 
@@ -10,7 +10,7 @@ pub use crate::key;
 #[cfg(feature = "crypto-client")]
 use crate::mechanisms;
 pub use crate::pipe::ServiceEndpoint;
-use crate::platform::{consent, ui, Platform, Store, UserInterface};
+use crate::platform::{consent, ui, Platform, UserInterface};
 pub use crate::store::{
     self,
     certstore::{Certstore as _, ClientCertstore},
@@ -29,31 +29,145 @@ pub mod attest;
 // mod macros;
 
 #[cfg(feature = "crypto-client")]
-macro_rules! rpc_trait { ($($Name:ident, $name:ident,)*) => { $(
-
-    pub trait $Name {
-        fn $name(_keystore: &mut impl Keystore, _request: &request::$Name)
-        -> Result<reply::$Name> { Err(Error::MechanismNotAvailable) }
+macro_rules! impl_mechanisms {
+    {
+        [
+            $(
+                #[cfg($($cfg_cond:tt)*)]
+                $mechanism:ident,
+            )*
+        ]
+    } => {
+        pub const IMPLEMENTED_MECHANISMS: &[Mechanism] = &[
+            $(
+                #[cfg($($cfg_cond)*)]
+                Mechanism::$mechanism,
+            )*
+        ];
     }
-)* } }
+}
+
+#[cfg(feature = "crypto-client")]
+macro_rules! impl_rpc_method {
+    {
+        $struct:ident,
+        $method:ident,
+        mechanisms = [$(
+            #[cfg($($cfg_cond:tt)*)]
+            $mechanism:ident,
+        )*],
+    } => {
+        #[inline(never)]
+        fn $method(
+            &self,
+            keystore: &mut impl Keystore,
+            request: &request::$struct,
+        ) -> Result<reply::$struct> {
+            match self {
+                $(
+                    #[cfg($($cfg_cond)*)]
+                    Self::$mechanism => mechanisms::$mechanism.$method(keystore, request),
+                )*
+                _ => Err(Error::MechanismNotAvailable),
+            }
+        }
+    }
+}
+
+#[cfg(feature = "crypto-client")]
+macro_rules! rpc_trait {
+    {
+        methods = [$($method:ident: $struct:ident,)*],
+        mechanisms = $mechanisms:tt,
+    } => {
+        pub trait MechanismImpl {
+            $(
+                fn $method(
+                    &self,
+                    keystore: &mut impl Keystore,
+                    request: &request::$struct,
+                ) -> Result<reply::$struct> {
+                    let _ = (keystore, request);
+                    Err(Error::MechanismNotAvailable)
+                }
+            )*
+        }
+
+        impl MechanismImpl for Mechanism {
+            $(
+                impl_rpc_method! {
+                    $struct,
+                    $method,
+                    mechanisms = $mechanisms,
+                }
+            )*
+        }
+
+        impl_mechanisms! {
+            $mechanisms
+        }
+    }
+}
 
 #[cfg(feature = "crypto-client")]
 rpc_trait! {
-    Agree, agree,
-    Decrypt, decrypt,
-    DeriveKey, derive_key,
-    DeserializeKey, deserialize_key,
-    Encrypt, encrypt,
-    Exists, exists,
-    GenerateKey, generate_key,
-    Hash, hash,
-    SerializeKey, serialize_key,
-    Sign, sign,
-    UnsafeInjectKey, unsafe_inject_key,
-    UnwrapKey, unwrap_key,
-    Verify, verify,
-    // TODO: can the default implementation be implemented in terms of Encrypt?
-    WrapKey, wrap_key,
+    methods = [
+        agree: Agree,
+        decrypt: Decrypt,
+        derive_key: DeriveKey,
+        deserialize_key: DeserializeKey,
+        encrypt: Encrypt,
+        exists: Exists,
+        generate_key: GenerateKey,
+        hash: Hash,
+        serialize_key: SerializeKey,
+        sign: Sign,
+        unsafe_inject_key: UnsafeInjectKey,
+        unwrap_key: UnwrapKey,
+        verify: Verify,
+        // TODO: can the default implementation be implemented in terms of Encrypt?
+        wrap_key: WrapKey,
+    ],
+    mechanisms = [
+        #[cfg(feature = "aes256-cbc")]
+        Aes256Cbc,
+        #[cfg(feature = "chacha8-poly1305")]
+        Chacha8Poly1305,
+        #[cfg(feature = "ed255")]
+        Ed255,
+        #[cfg(feature = "hmac-blake2s")]
+        HmacBlake2s,
+        #[cfg(feature = "hmac-sha1")]
+        HmacSha1,
+        #[cfg(feature = "hmac-sha256")]
+        HmacSha256,
+        #[cfg(feature = "hmac-sha512")]
+        HmacSha512,
+        #[cfg(feature = "p256")]
+        P256,
+        #[cfg(feature = "p256")]
+        P256Prehashed,
+        #[cfg(feature = "p384")]
+        P384,
+        #[cfg(feature = "p384")]
+        P384Prehashed,
+        #[cfg(feature = "p521")]
+        P521,
+        #[cfg(feature = "p521")]
+        P521Prehashed,
+        #[cfg(feature = "sha256")]
+        Sha256,
+        #[cfg(feature = "shared-secret")]
+        SharedSecret,
+        #[cfg(feature = "tdes")]
+        Tdes,
+        #[cfg(feature = "totp")]
+        Totp,
+        #[cfg(feature = "trng")]
+        Trng,
+        #[cfg(feature = "x255")]
+        X255,
+    ],
 }
 
 pub struct ServiceResources<P>
@@ -169,18 +283,10 @@ impl<P: Platform> ServiceResources<P> {
             Request::DummyRequest => Ok(Reply::DummyReply),
 
             #[cfg(feature = "crypto-client")]
-            Request::Agree(request) => match request.mechanism {
-                #[cfg(feature = "p521")]
-                Mechanism::P521 => mechanisms::P521::agree(&mut keystore(self, ctx)?, request),
-                #[cfg(feature = "p384")]
-                Mechanism::P384 => mechanisms::P384::agree(&mut keystore(self, ctx)?, request),
-                #[cfg(feature = "p256")]
-                Mechanism::P256 => mechanisms::P256::agree(&mut keystore(self, ctx)?, request),
-                #[cfg(feature = "x255")]
-                Mechanism::X255 => mechanisms::X255::agree(&mut keystore(self, ctx)?, request),
-                _ => Err(Error::MechanismNotAvailable),
-            }
-            .map(Reply::Agree),
+            Request::Agree(request) => request
+                .mechanism
+                .agree(&mut keystore(self, ctx)?, request)
+                .map(Reply::Agree),
 
             #[cfg(feature = "attestation-client")]
             Request::Attest(request) => {
@@ -199,100 +305,28 @@ impl<P: Platform> ServiceResources<P> {
             }
 
             #[cfg(feature = "crypto-client")]
-            Request::Decrypt(request) => match request.mechanism {
-                #[cfg(feature = "aes256-cbc")]
-                Mechanism::Aes256Cbc => {
-                    mechanisms::Aes256Cbc::decrypt(&mut keystore(self, ctx)?, request)
-                }
-                #[cfg(feature = "chacha8-poly1305")]
-                Mechanism::Chacha8Poly1305 => {
-                    mechanisms::Chacha8Poly1305::decrypt(&mut keystore(self, ctx)?, request)
-                }
-                #[cfg(feature = "tdes")]
-                Mechanism::Tdes => mechanisms::Tdes::decrypt(&mut keystore(self, ctx)?, request),
-                _ => Err(Error::MechanismNotAvailable),
-            }
-            .map(Reply::Decrypt),
+            Request::Decrypt(request) => request
+                .mechanism
+                .decrypt(&mut keystore(self, ctx)?, request)
+                .map(Reply::Decrypt),
 
             #[cfg(feature = "crypto-client")]
-            Request::DeriveKey(request) => match request.mechanism {
-                #[cfg(feature = "hmac-blake2s")]
-                Mechanism::HmacBlake2s => {
-                    mechanisms::HmacBlake2s::derive_key(&mut keystore(self, ctx)?, request)
-                }
-                #[cfg(feature = "hmac-sha1")]
-                Mechanism::HmacSha1 => {
-                    mechanisms::HmacSha1::derive_key(&mut keystore(self, ctx)?, request)
-                }
-                #[cfg(feature = "hmac-sha256")]
-                Mechanism::HmacSha256 => {
-                    mechanisms::HmacSha256::derive_key(&mut keystore(self, ctx)?, request)
-                }
-                #[cfg(feature = "hmac-sha512")]
-                Mechanism::HmacSha512 => {
-                    mechanisms::HmacSha512::derive_key(&mut keystore(self, ctx)?, request)
-                }
-                #[cfg(feature = "ed255")]
-                Mechanism::Ed255 => {
-                    mechanisms::Ed255::derive_key(&mut keystore(self, ctx)?, request)
-                }
-                #[cfg(feature = "p521")]
-                Mechanism::P521 => mechanisms::P521::derive_key(&mut keystore(self, ctx)?, request),
-                #[cfg(feature = "p384")]
-                Mechanism::P384 => mechanisms::P384::derive_key(&mut keystore(self, ctx)?, request),
-                #[cfg(feature = "p256")]
-                Mechanism::P256 => mechanisms::P256::derive_key(&mut keystore(self, ctx)?, request),
-                #[cfg(feature = "sha256")]
-                Mechanism::Sha256 => {
-                    mechanisms::Sha256::derive_key(&mut keystore(self, ctx)?, request)
-                }
-                #[cfg(feature = "x255")]
-                Mechanism::X255 => mechanisms::X255::derive_key(&mut keystore(self, ctx)?, request),
-                _ => Err(Error::MechanismNotAvailable),
-            }
-            .map(Reply::DeriveKey),
+            Request::DeriveKey(request) => request
+                .mechanism
+                .derive_key(&mut keystore(self, ctx)?, request)
+                .map(Reply::DeriveKey),
 
             #[cfg(feature = "crypto-client")]
-            Request::DeserializeKey(request) => match request.mechanism {
-                #[cfg(feature = "ed255")]
-                Mechanism::Ed255 => {
-                    mechanisms::Ed255::deserialize_key(&mut keystore(self, ctx)?, request)
-                }
-                #[cfg(feature = "p521")]
-                Mechanism::P521 => {
-                    mechanisms::P521::deserialize_key(&mut keystore(self, ctx)?, request)
-                }
-                #[cfg(feature = "p384")]
-                Mechanism::P384 => {
-                    mechanisms::P384::deserialize_key(&mut keystore(self, ctx)?, request)
-                }
-                #[cfg(feature = "p256")]
-                Mechanism::P256 => {
-                    mechanisms::P256::deserialize_key(&mut keystore(self, ctx)?, request)
-                }
-                #[cfg(feature = "x255")]
-                Mechanism::X255 => {
-                    mechanisms::X255::deserialize_key(&mut keystore(self, ctx)?, request)
-                }
-                _ => Err(Error::MechanismNotAvailable),
-            }
-            .map(Reply::DeserializeKey),
+            Request::DeserializeKey(request) => request
+                .mechanism
+                .deserialize_key(&mut keystore(self, ctx)?, request)
+                .map(Reply::DeserializeKey),
 
             #[cfg(feature = "crypto-client")]
-            Request::Encrypt(request) => match request.mechanism {
-                #[cfg(feature = "aes256-cbc")]
-                Mechanism::Aes256Cbc => {
-                    mechanisms::Aes256Cbc::encrypt(&mut keystore(self, ctx)?, request)
-                }
-                #[cfg(feature = "chacha8-poly1305")]
-                Mechanism::Chacha8Poly1305 => {
-                    mechanisms::Chacha8Poly1305::encrypt(&mut keystore(self, ctx)?, request)
-                }
-                #[cfg(feature = "tdes")]
-                Mechanism::Tdes => mechanisms::Tdes::encrypt(&mut keystore(self, ctx)?, request),
-                _ => Err(Error::MechanismNotAvailable),
-            }
-            .map(Reply::Encrypt),
+            Request::Encrypt(request) => request
+                .mechanism
+                .encrypt(&mut keystore(self, ctx)?, request)
+                .map(Reply::Encrypt),
 
             #[cfg(feature = "crypto-client")]
             Request::Delete(request) => {
@@ -313,52 +347,16 @@ impl<P: Platform> ServiceResources<P> {
             }
 
             #[cfg(feature = "crypto-client")]
-            Request::Exists(request) => match request.mechanism {
-                #[cfg(feature = "ed255")]
-                Mechanism::Ed255 => mechanisms::Ed255::exists(&mut keystore(self, ctx)?, request),
-                #[cfg(feature = "p521")]
-                Mechanism::P521 => mechanisms::P521::exists(&mut keystore(self, ctx)?, request),
-                #[cfg(feature = "p384")]
-                Mechanism::P384 => mechanisms::P384::exists(&mut keystore(self, ctx)?, request),
-                #[cfg(feature = "p256")]
-                Mechanism::P256 => mechanisms::P256::exists(&mut keystore(self, ctx)?, request),
-                #[cfg(feature = "totp")]
-                Mechanism::Totp => mechanisms::Totp::exists(&mut keystore(self, ctx)?, request),
-                #[cfg(feature = "x255")]
-                Mechanism::X255 => mechanisms::X255::exists(&mut keystore(self, ctx)?, request),
-                _ => Err(Error::MechanismNotAvailable),
-            }
-            .map(Reply::Exists),
+            Request::Exists(request) => request
+                .mechanism
+                .exists(&mut keystore(self, ctx)?, request)
+                .map(Reply::Exists),
 
             #[cfg(feature = "crypto-client")]
-            Request::GenerateKey(request) => match request.mechanism {
-                #[cfg(feature = "chacha8-poly1305")]
-                Mechanism::Chacha8Poly1305 => {
-                    mechanisms::Chacha8Poly1305::generate_key(&mut keystore(self, ctx)?, request)
-                }
-                #[cfg(feature = "ed255")]
-                Mechanism::Ed255 => {
-                    mechanisms::Ed255::generate_key(&mut keystore(self, ctx)?, request)
-                }
-                #[cfg(feature = "p521")]
-                Mechanism::P521 => {
-                    mechanisms::P521::generate_key(&mut keystore(self, ctx)?, request)
-                }
-                #[cfg(feature = "p384")]
-                Mechanism::P384 => {
-                    mechanisms::P384::generate_key(&mut keystore(self, ctx)?, request)
-                }
-                #[cfg(feature = "p256")]
-                Mechanism::P256 => {
-                    mechanisms::P256::generate_key(&mut keystore(self, ctx)?, request)
-                }
-                #[cfg(feature = "x255")]
-                Mechanism::X255 => {
-                    mechanisms::X255::generate_key(&mut keystore(self, ctx)?, request)
-                }
-                _ => Err(Error::MechanismNotAvailable),
-            }
-            .map(Reply::GenerateKey),
+            Request::GenerateKey(request) => request
+                .mechanism
+                .generate_key(&mut keystore(self, ctx)?, request)
+                .map(Reply::GenerateKey),
 
             #[cfg(feature = "crypto-client")]
             Request::GenerateSecretKey(request) => {
@@ -382,42 +380,10 @@ impl<P: Platform> ServiceResources<P> {
 
             // deprecated
             #[cfg(feature = "crypto-client")]
-            Request::UnsafeInjectKey(request) => match request.mechanism {
-                #[cfg(feature = "p521")]
-                Mechanism::P521 => {
-                    mechanisms::P521::unsafe_inject_key(&mut keystore(self, ctx)?, request)
-                }
-                #[cfg(feature = "p384")]
-                Mechanism::P384 => {
-                    mechanisms::P384::unsafe_inject_key(&mut keystore(self, ctx)?, request)
-                }
-                #[cfg(feature = "p256")]
-                Mechanism::P256 => {
-                    mechanisms::P256::unsafe_inject_key(&mut keystore(self, ctx)?, request)
-                }
-                #[cfg(feature = "x255")]
-                Mechanism::X255 => {
-                    mechanisms::X255::unsafe_inject_key(&mut keystore(self, ctx)?, request)
-                }
-                #[cfg(feature = "ed255")]
-                Mechanism::Ed255 => {
-                    mechanisms::Ed255::unsafe_inject_key(&mut keystore(self, ctx)?, request)
-                }
-                #[cfg(feature = "shared-secret")]
-                Mechanism::SharedSecret => {
-                    mechanisms::SharedSecret::unsafe_inject_key(&mut keystore(self, ctx)?, request)
-                }
-                #[cfg(feature = "aes256-cbc")]
-                Mechanism::Aes256Cbc => {
-                    mechanisms::Aes256Cbc::unsafe_inject_key(&mut keystore(self, ctx)?, request)
-                }
-                #[cfg(feature = "tdes")]
-                Mechanism::Tdes => {
-                    mechanisms::Tdes::unsafe_inject_key(&mut keystore(self, ctx)?, request)
-                }
-                _ => Err(Error::MechanismNotAvailable),
-            }
-            .map(Reply::UnsafeInjectKey),
+            Request::UnsafeInjectKey(request) => request
+                .mechanism
+                .unsafe_inject_key(&mut keystore(self, ctx)?, request)
+                .map(Reply::UnsafeInjectKey),
 
             #[cfg(feature = "crypto-client")]
             Request::UnsafeInjectSharedKey(request) => {
@@ -434,12 +400,10 @@ impl<P: Platform> ServiceResources<P> {
             }
 
             #[cfg(feature = "crypto-client")]
-            Request::Hash(request) => match request.mechanism {
-                #[cfg(feature = "sha256")]
-                Mechanism::Sha256 => mechanisms::Sha256::hash(&mut keystore(self, ctx)?, request),
-                _ => Err(Error::MechanismNotAvailable),
-            }
-            .map(Reply::Hash),
+            Request::Hash(request) => request
+                .mechanism
+                .hash(&mut keystore(self, ctx)?, request)
+                .map(Reply::Hash),
 
             #[cfg(feature = "filesystem-client")]
             Request::LocateFile(request) => {
@@ -452,40 +416,9 @@ impl<P: Platform> ServiceResources<P> {
                 Ok(Reply::LocateFile(reply::LocateFile { path }))
             }
 
-            // This is now preferably done using littlefs-fuse (when device is not yet locked),
-            // and should be removed from firmware completely
             #[cfg(feature = "filesystem-client")]
             Request::DebugDumpStore(_request) => {
-                info_now!(":: PERSISTENT");
-                recursively_list(self.platform.store().fs(Location::Internal), path!("/"));
-
-                info_now!(":: VOLATILE");
-                recursively_list(self.platform.store().fs(Location::Volatile), path!("/"));
-
-                fn recursively_list(fs: &dyn DynFilesystem, path: &Path) {
-                    // let fs = store.vfs();
-                    fs.read_dir_and_then(path, &mut |dir| {
-                        for (i, entry) in dir.enumerate() {
-                            let entry = entry.unwrap();
-                            if i < 2 {
-                                // info_now!("skipping {:?}", &entry.path()).ok();
-                                continue;
-                            }
-                            info_now!("{:?} p({:?})", entry.path(), &path);
-                            if entry.file_type().is_dir() {
-                                recursively_list(fs, entry.path());
-                            }
-                            if entry.file_type().is_file() {
-                                let _contents = fs.read::<Bytes<256>>(entry.path()).unwrap();
-                                // info_now!("{} ?= {}", entry.metadata().len(), contents.len()).ok();
-                                // info_now!("{:?}", &contents).ok();
-                            }
-                        }
-                        Ok(())
-                    })
-                    .unwrap();
-                }
-
+                error!("DebugDumpStore is deprecated");
                 Ok(Reply::DebugDumpStore(reply::DebugDumpStore {}))
             }
 
@@ -624,78 +557,16 @@ impl<P: Platform> ServiceResources<P> {
             }
 
             #[cfg(feature = "crypto-client")]
-            Request::SerializeKey(request) => match request.mechanism {
-                #[cfg(feature = "ed255")]
-                Mechanism::Ed255 => {
-                    mechanisms::Ed255::serialize_key(&mut keystore(self, ctx)?, request)
-                }
-                #[cfg(feature = "p521")]
-                Mechanism::P521 => {
-                    mechanisms::P521::serialize_key(&mut keystore(self, ctx)?, request)
-                }
-                #[cfg(feature = "p384")]
-                Mechanism::P384 => {
-                    mechanisms::P384::serialize_key(&mut keystore(self, ctx)?, request)
-                }
-                #[cfg(feature = "p256")]
-                Mechanism::P256 => {
-                    mechanisms::P256::serialize_key(&mut keystore(self, ctx)?, request)
-                }
-                #[cfg(feature = "x255")]
-                Mechanism::X255 => {
-                    mechanisms::X255::serialize_key(&mut keystore(self, ctx)?, request)
-                }
-                #[cfg(feature = "shared-secret")]
-                Mechanism::SharedSecret => {
-                    mechanisms::SharedSecret::serialize_key(&mut keystore(self, ctx)?, request)
-                }
-                _ => Err(Error::MechanismNotAvailable),
-            }
-            .map(Reply::SerializeKey),
+            Request::SerializeKey(request) => request
+                .mechanism
+                .serialize_key(&mut keystore(self, ctx)?, request)
+                .map(Reply::SerializeKey),
 
             #[cfg(feature = "crypto-client")]
-            Request::Sign(request) => match request.mechanism {
-                #[cfg(feature = "ed255")]
-                Mechanism::Ed255 => mechanisms::Ed255::sign(&mut keystore(self, ctx)?, request),
-                #[cfg(feature = "hmac-blake2s")]
-                Mechanism::HmacBlake2s => {
-                    mechanisms::HmacBlake2s::sign(&mut keystore(self, ctx)?, request)
-                }
-                #[cfg(feature = "hmac-sha1")]
-                Mechanism::HmacSha1 => {
-                    mechanisms::HmacSha1::sign(&mut keystore(self, ctx)?, request)
-                }
-                #[cfg(feature = "hmac-sha256")]
-                Mechanism::HmacSha256 => {
-                    mechanisms::HmacSha256::sign(&mut keystore(self, ctx)?, request)
-                }
-                #[cfg(feature = "hmac-sha512")]
-                Mechanism::HmacSha512 => {
-                    mechanisms::HmacSha512::sign(&mut keystore(self, ctx)?, request)
-                }
-                #[cfg(feature = "p521")]
-                Mechanism::P521 => mechanisms::P521::sign(&mut keystore(self, ctx)?, request),
-                #[cfg(feature = "p521")]
-                Mechanism::P521Prehashed => {
-                    mechanisms::P521Prehashed::sign(&mut keystore(self, ctx)?, request)
-                }
-                #[cfg(feature = "p384")]
-                Mechanism::P384 => mechanisms::P384::sign(&mut keystore(self, ctx)?, request),
-                #[cfg(feature = "p384")]
-                Mechanism::P384Prehashed => {
-                    mechanisms::P384Prehashed::sign(&mut keystore(self, ctx)?, request)
-                }
-                #[cfg(feature = "p256")]
-                Mechanism::P256 => mechanisms::P256::sign(&mut keystore(self, ctx)?, request),
-                #[cfg(feature = "p256")]
-                Mechanism::P256Prehashed => {
-                    mechanisms::P256Prehashed::sign(&mut keystore(self, ctx)?, request)
-                }
-                #[cfg(feature = "totp")]
-                Mechanism::Totp => mechanisms::Totp::sign(&mut keystore(self, ctx)?, request),
-                _ => Err(Error::MechanismNotAvailable),
-            }
-            .map(Reply::Sign),
+            Request::Sign(request) => request
+                .mechanism
+                .sign(&mut keystore(self, ctx)?, request)
+                .map(Reply::Sign),
 
             #[cfg(feature = "filesystem-client")]
             Request::WriteFile(request) => {
@@ -704,42 +575,22 @@ impl<P: Platform> ServiceResources<P> {
             }
 
             #[cfg(feature = "crypto-client")]
-            Request::UnwrapKey(request) => match request.mechanism {
-                #[cfg(feature = "chacha8-poly1305")]
-                Mechanism::Chacha8Poly1305 => {
-                    mechanisms::Chacha8Poly1305::unwrap_key(&mut keystore(self, ctx)?, request)
-                }
-                _ => Err(Error::MechanismNotAvailable),
-            }
-            .map(Reply::UnwrapKey),
+            Request::UnwrapKey(request) => request
+                .mechanism
+                .unwrap_key(&mut keystore(self, ctx)?, request)
+                .map(Reply::UnwrapKey),
 
             #[cfg(feature = "crypto-client")]
-            Request::Verify(request) => match request.mechanism {
-                #[cfg(feature = "ed255")]
-                Mechanism::Ed255 => mechanisms::Ed255::verify(&mut keystore(self, ctx)?, request),
-                #[cfg(feature = "p521")]
-                Mechanism::P521 => mechanisms::P521::verify(&mut keystore(self, ctx)?, request),
-                #[cfg(feature = "p384")]
-                Mechanism::P384 => mechanisms::P384::verify(&mut keystore(self, ctx)?, request),
-                #[cfg(feature = "p256")]
-                Mechanism::P256 => mechanisms::P256::verify(&mut keystore(self, ctx)?, request),
-                _ => Err(Error::MechanismNotAvailable),
-            }
-            .map(Reply::Verify),
+            Request::Verify(request) => request
+                .mechanism
+                .verify(&mut keystore(self, ctx)?, request)
+                .map(Reply::Verify),
 
             #[cfg(feature = "crypto-client")]
-            Request::WrapKey(request) => match request.mechanism {
-                #[cfg(feature = "aes256-cbc")]
-                Mechanism::Aes256Cbc => {
-                    mechanisms::Aes256Cbc::wrap_key(&mut keystore(self, ctx)?, request)
-                }
-                #[cfg(feature = "chacha8-poly1305")]
-                Mechanism::Chacha8Poly1305 => {
-                    mechanisms::Chacha8Poly1305::wrap_key(&mut keystore(self, ctx)?, request)
-                }
-                _ => Err(Error::MechanismNotAvailable),
-            }
-            .map(Reply::WrapKey),
+            Request::WrapKey(request) => request
+                .mechanism
+                .wrap_key(&mut keystore(self, ctx)?, request)
+                .map(Reply::WrapKey),
 
             #[cfg(feature = "ui-client")]
             Request::RequestUserConsent(request) => {
@@ -1005,6 +856,13 @@ impl<P: Platform, D: Dispatch> Service<P, D> {
                 };
             }
         }
+
+        #[cfg(all(
+            any(feature = "log-debug", feature = "log-all"),
+            not(feature = "log-none")
+        ))]
+        use crate::store::Store as _;
+
         debug_now!(
             "I/E/V : {}/{}/{} >",
             self.resources

@@ -118,7 +118,7 @@ impl<S: Store> Keystore for ClientKeystore<S> {
 
         let id = self.generate_key_id();
         let path = self.key_path(secrecy, &id);
-        store::store(self.store, location, &path, &key.serialize())?;
+        store::store(&self.store, location, &path, &key.serialize())?;
 
         Ok(id)
     }
@@ -145,7 +145,7 @@ impl<S: Store> Keystore for ClientKeystore<S> {
         locations.iter().any(|location| {
             secrecies.iter().any(|secrecy| {
                 let path = self.key_path(*secrecy, id);
-                store::delete(self.store, *location, &path)
+                store::delete(&self.store, *location, &path)
             })
         })
     }
@@ -159,12 +159,12 @@ impl<S: Store> Keystore for ClientKeystore<S> {
     fn delete_all(&self, location: Location) -> Result<usize> {
         let secret_path = self.key_directory(key::Secrecy::Secret);
         let secret_deleted =
-            store::remove_dir_all_where(self.store, location, &secret_path, &|dir_entry| {
+            store::remove_dir_all_where(&self.store, location, &secret_path, &|dir_entry| {
                 dir_entry.file_name().as_ref().len() >= 4
             })?;
         let public_path = self.key_directory(key::Secrecy::Public);
         let public_deleted =
-            store::remove_dir_all_where(self.store, location, &public_path, &|dir_entry| {
+            store::remove_dir_all_where(&self.store, location, &public_path, &|dir_entry| {
                 dir_entry.file_name().as_ref().len() >= 4
             })?;
         Ok(secret_deleted + public_deleted)
@@ -212,7 +212,7 @@ impl<S: Store> Keystore for ClientKeystore<S> {
         };
 
         let path = self.key_path(secrecy, id);
-        store::store(self.store, location, &path, &key.serialize())?;
+        store::store(&self.store, location, &path, &key.serialize())?;
 
         Ok(())
     }

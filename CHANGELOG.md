@@ -30,7 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `PollClient::syscall`.
 - Upgrade the `interchange` dependency to version 0.3.0 ([#99][])
   - As a consequence the type `pipe::TrussedInterchange` becomes a const`pipe::TRUSSED_INTERCHANGE`
-- Updated `littlefs2` to 0.4.0.
+- Updated `littlefs2` to 0.6.0.
 - Made `Request`, `Reply`, `Error`, `Context`, `CoreContext`, `Mechanism`,
   `KeySerialization`, `SignatureSerialization`, `consent::Error`, `ui::Status` non-exhaustive.
 - Made `postcard_deserialize`, `postcard_serialize` and
@@ -57,6 +57,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added support for non-static channels:
   - Added lifetimes to `ClientImplementation` and `ServiceEndpoints`.
   - Added the `pipe::TrussedChannel` type.
+- Refactored the `Store` trait:
+  - Removed the requirement for a static lifetime.
+  - Removed the `Fs` wrapper type.
+  - Removed the storage types to return `&dyn DynFilesystem` instead.
+  - Removed the `Copy` requirement.
+  - Removed the `unsafe` keyword for the `Store` trait.
+- Removed the `unsafe` keyword for the `Platform` trait.
+- Replaced the mechanism RPC traits in `service` with a single `MechanismImpl` trait.
+- Made the `mechanisms` module private.  Mechanism implementation can still be accessed via the `Mechanism` enum.
 
 ### Fixed
 
@@ -71,10 +80,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Removed unused items:
   - `config`: `MAX_APPLICATION_NAME_LENGTH`, `MAX_LABEL_LENGTH`, `MAX_LONG_DATA_LENGTH`, `MAX_OBJECT_HANDLES`, `MAX_PATH_LENGTH`
-  - `types`: `Attributes`, `CertificateType` `DataAttributes`, `KeyAttributes`, `Letters`, `LongData`, `ObjectType`
+  - `types`: `Attributes`, `CertificateType` `DataAttributes`, `KeyAttributes`, `Letters`, `LongData`, `ObjectType`, `consent::Urgency`
 - Removed the `Syscall` implementations for `Service` and the `Syscall::try_as_new_client` and `Syscall::try_new_client` methods.
 - Removed `TrussedInterchange` and `TRUSSED_INTERCHANGE` from `pipe`.
 - Removed the `clients-?` features.
+- Removed the `store!` macro.  Embedded runners should provide their own implementation.  Software runners can use `virt::StoreConfig` to create a `virt::Store`.
 
 [#64]: https://github.com/trussed-dev/trussed/issues/64
 [#65]: https://github.com/trussed-dev/trussed/issues/65

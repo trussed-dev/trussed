@@ -1,10 +1,7 @@
 use crate::api::{reply, request};
 use crate::error::Error;
 use crate::key;
-use crate::service::{
-    Agree, DeriveKey, DeserializeKey, Exists, GenerateKey, SerializeKey, Sign, UnsafeInjectKey,
-    Verify,
-};
+use crate::service::MechanismImpl;
 use crate::store::keystore::Keystore;
 use crate::types::{
     Bytes, KeyId, KeySerialization, SerializedKey, Signature, SignatureSerialization,
@@ -44,9 +41,10 @@ fn load_public_key(
         .map_err(|_| Error::InternalError)
 }
 
-impl Agree for super::P256 {
+impl MechanismImpl for super::P256 {
     #[inline(never)]
     fn agree(
+        &self,
         keystore: &mut impl Keystore,
         request: &request::Agree,
     ) -> Result<reply::Agree, Error> {
@@ -80,11 +78,10 @@ impl Agree for super::P256 {
             shared_secret: key_id,
         })
     }
-}
 
-impl DeriveKey for super::P256 {
     #[inline(never)]
     fn derive_key(
+        &self,
         keystore: &mut impl Keystore,
         request: &request::DeriveKey,
     ) -> Result<reply::DeriveKey, Error> {
@@ -102,11 +99,10 @@ impl DeriveKey for super::P256 {
 
         Ok(reply::DeriveKey { key: public_id })
     }
-}
 
-impl DeserializeKey for super::P256 {
     #[inline(never)]
     fn deserialize_key(
+        &self,
         keystore: &mut impl Keystore,
         request: &request::DeserializeKey,
     ) -> Result<reply::DeserializeKey, Error> {
@@ -175,11 +171,10 @@ impl DeserializeKey for super::P256 {
 
         Ok(reply::DeserializeKey { key: public_id })
     }
-}
 
-impl GenerateKey for super::P256 {
     #[inline(never)]
     fn generate_key(
+        &self,
         keystore: &mut impl Keystore,
         request: &request::GenerateKey,
     ) -> Result<reply::GenerateKey, Error> {
@@ -196,11 +191,10 @@ impl GenerateKey for super::P256 {
         // return handle
         Ok(reply::GenerateKey { key: key_id })
     }
-}
 
-impl SerializeKey for super::P256 {
     #[inline(never)]
     fn serialize_key(
+        &self,
         keystore: &mut impl Keystore,
         request: &request::SerializeKey,
     ) -> Result<reply::SerializeKey, Error> {
@@ -245,11 +239,10 @@ impl SerializeKey for super::P256 {
 
         Ok(reply::SerializeKey { serialized_key })
     }
-}
 
-impl Exists for super::P256 {
     #[inline(never)]
     fn exists(
+        &self,
         keystore: &mut impl Keystore,
         request: &request::Exists,
     ) -> Result<reply::Exists, Error> {
@@ -257,11 +250,13 @@ impl Exists for super::P256 {
         let exists = keystore.exists_key(key::Secrecy::Secret, Some(key::Kind::P256), &key_id);
         Ok(reply::Exists { exists })
     }
-}
 
-impl Sign for super::P256 {
     #[inline(never)]
-    fn sign(keystore: &mut impl Keystore, request: &request::Sign) -> Result<reply::Sign, Error> {
+    fn sign(
+        &self,
+        keystore: &mut impl Keystore,
+        request: &request::Sign,
+    ) -> Result<reply::Sign, Error> {
         let key_id = request.key;
 
         let secret_key = load_secret_key(keystore, &key_id)?;
@@ -287,11 +282,66 @@ impl Sign for super::P256 {
             signature: serialized_signature,
         })
     }
+
+    #[inline(never)]
+    fn verify(
+        &self,
+        keystore: &mut impl Keystore,
+        request: &request::Verify,
+    ) -> Result<reply::Verify, Error> {
+        let key_id = request.key;
+
+        let public_key = load_public_key(keystore, &key_id)?;
+
+        let signature = p256_cortex_m4::Signature::from_untagged_bytes(&request.signature)
+            // well... or wrong encoding, need r,s in range 1..=n-1
+            .map_err(|_| Error::WrongSignatureLength)?;
+
+        if let SignatureSerialization::Raw = request.format {
+        } else {
+            // well more TODO
+            return Err(Error::InvalidSerializationFormat);
+        }
+
+        let valid = public_key.verify(&request.message, &signature);
+        Ok(reply::Verify { valid })
+    }
+
+    fn unsafe_inject_key(
+        &self,
+        keystore: &mut impl Keystore,
+        request: &request::UnsafeInjectKey,
+    ) -> Result<reply::UnsafeInjectKey, Error> {
+        if request.format != KeySerialization::Raw {
+            return Err(Error::InvalidSerializationFormat);
+        }
+
+        let sk = p256_cortex_m4::SecretKey::from_bytes(&request.raw_key)
+            .map_err(|_| Error::InvalidSerializedKey)?;
+
+        let info = key::Info {
+            flags: key::Flags::SENSITIVE,
+            kind: key::Kind::P256,
+        };
+
+        keystore
+            .store_key(
+                request.attributes.persistence,
+                key::Secrecy::Secret,
+                info,
+                unsafe { &sk.to_bytes() },
+            )
+            .map(|key| reply::UnsafeInjectKey { key })
+    }
 }
 
-impl Sign for super::P256Prehashed {
+impl MechanismImpl for super::P256Prehashed {
     #[inline(never)]
-    fn sign(keystore: &mut impl Keystore, request: &request::Sign) -> Result<reply::Sign, Error> {
+    fn sign(
+        &self,
+        keystore: &mut impl Keystore,
+        request: &request::Sign,
+    ) -> Result<reply::Sign, Error> {
         let key_id = request.key;
 
         let secret_key = load_secret_key(keystore, &key_id)?;
@@ -316,58 +366,5 @@ impl Sign for super::P256Prehashed {
         Ok(reply::Sign {
             signature: serialized_signature,
         })
-    }
-}
-
-impl Verify for super::P256 {
-    #[inline(never)]
-    fn verify(
-        keystore: &mut impl Keystore,
-        request: &request::Verify,
-    ) -> Result<reply::Verify, Error> {
-        let key_id = request.key;
-
-        let public_key = load_public_key(keystore, &key_id)?;
-
-        let signature = p256_cortex_m4::Signature::from_untagged_bytes(&request.signature)
-            // well... or wrong encoding, need r,s in range 1..=n-1
-            .map_err(|_| Error::WrongSignatureLength)?;
-
-        if let SignatureSerialization::Raw = request.format {
-        } else {
-            // well more TODO
-            return Err(Error::InvalidSerializationFormat);
-        }
-
-        let valid = public_key.verify(&request.message, &signature);
-        Ok(reply::Verify { valid })
-    }
-}
-
-impl UnsafeInjectKey for super::P256 {
-    fn unsafe_inject_key(
-        keystore: &mut impl Keystore,
-        request: &request::UnsafeInjectKey,
-    ) -> Result<reply::UnsafeInjectKey, Error> {
-        if request.format != KeySerialization::Raw {
-            return Err(Error::InvalidSerializationFormat);
-        }
-
-        let sk = p256_cortex_m4::SecretKey::from_bytes(&request.raw_key)
-            .map_err(|_| Error::InvalidSerializedKey)?;
-
-        let info = key::Info {
-            flags: key::Flags::SENSITIVE,
-            kind: key::Kind::P256,
-        };
-
-        keystore
-            .store_key(
-                request.attributes.persistence,
-                key::Secrecy::Secret,
-                info,
-                unsafe { &sk.to_bytes() },
-            )
-            .map(|key| reply::UnsafeInjectKey { key })
     }
 }

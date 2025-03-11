@@ -4,9 +4,7 @@ use chacha20::ChaCha20;
 use entropy::shannon_entropy;
 use generic_array::GenericArray;
 use littlefs2::const_ram_storage;
-use littlefs2::driver::Storage as LfsStorage;
 use littlefs2::fs::{Allocation, Filesystem};
-use littlefs2::io::Result as LfsResult;
 use littlefs2_core::path;
 use rand_core::{CryptoRng, RngCore};
 
@@ -159,22 +157,81 @@ macro_rules! setup {
         setup!($client, Store, Platform, memory, [0u8; 32], true);
     };
     ($client:ident, $store:ident, $platform: ident, $memory:expr, $seed:expr, $reformat: expr) => {
-        store!(
-            $store,
-            Internal: InternalStorage,
-            External: ExternalStorage,
-            Volatile: VolatileStorage
-        );
+        #[derive(Copy, Clone)]
+        pub struct $store {
+            ifs: &'static dyn littlefs2_core::DynFilesystem,
+            efs: &'static dyn littlefs2_core::DynFilesystem,
+            vfs: &'static dyn littlefs2_core::DynFilesystem,
+            __: core::marker::PhantomData<*mut ()>,
+        }
+
+        impl $store {
+            pub fn claim(memory: Memory, format: bool) -> Option<Self> {
+                use core::mem::MaybeUninit;
+                use core::sync::atomic::{AtomicBool, Ordering};
+                use littlefs2::fs::Filesystem;
+
+                static CLAIMED: AtomicBool = AtomicBool::new(false);
+                static mut IFS: MaybeUninit<Filesystem<'static, InternalStorage>> =
+                    MaybeUninit::uninit();
+                static mut EFS: MaybeUninit<Filesystem<'static, ExternalStorage>> =
+                    MaybeUninit::uninit();
+                static mut VFS: MaybeUninit<Filesystem<'static, VolatileStorage>> =
+                    MaybeUninit::uninit();
+
+                if CLAIMED
+                    .compare_exchange_weak(false, true, Ordering::AcqRel, Ordering::Acquire)
+                    .is_ok()
+                {
+
+                    let (ifs_alloc, ifs_storage, efs_alloc, efs_storage, vfs_alloc, vfs_storage) = memory;
+
+                    // always need to format RAM
+                    Filesystem::format(vfs_storage).expect("can format");
+                    // this is currently a RAM fs too...
+                    Filesystem::format(efs_storage).expect("can format");
+
+                    if format {
+                        Filesystem::format(ifs_storage).expect("can format");
+                    }
+
+                    let ifs = Filesystem::mount(ifs_alloc, ifs_storage).expect("failed to mount IFS");
+                    let efs = Filesystem::mount(efs_alloc, efs_storage).expect("failed to mount EFS");
+                    let vfs = Filesystem::mount(vfs_alloc, vfs_storage).expect("failed to mount VFS");
+
+                    let (ifs, efs, vfs) = unsafe {
+                        (IFS.write(ifs), EFS.write(efs), VFS.write(vfs))
+                    };
+
+                    Some(Self {
+                        ifs,
+                        efs,
+                        vfs,
+                        __: Default::default(),
+                    })
+                } else {
+                    None
+                }
+            }
+        }
+
+        impl store::Store for $store {
+            fn ifs(&self) -> &dyn littlefs2_core::DynFilesystem {
+                self.ifs
+            }
+
+            fn efs(&self) -> &dyn littlefs2_core::DynFilesystem {
+                self.efs
+            }
+
+            fn vfs(&self) -> &dyn littlefs2_core::DynFilesystem {
+                self.vfs
+            }
+        }
+
         platform!($platform, R: MockRng, S: $store, UI: UserInterface,);
 
-        let store = $store::claim().unwrap();
-
-        store
-            .mount(
-                $memory.0, $memory.1, $memory.2, $memory.3, $memory.4, $memory.5, $reformat,
-            )
-            .unwrap();
-
+        let store = $store::claim($memory, $reformat).unwrap();
         let rng = MockRng::new();
         let pc_interface: UserInterface = Default::default();
 

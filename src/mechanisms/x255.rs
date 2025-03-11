@@ -4,9 +4,7 @@ use salty::agreement;
 use crate::api::{reply, request};
 use crate::error::Error;
 use crate::key;
-use crate::service::{
-    Agree, DeriveKey, DeserializeKey, Exists, GenerateKey, SerializeKey, UnsafeInjectKey,
-};
+use crate::service::MechanismImpl;
 use crate::store::keystore::Keystore;
 use crate::types::{KeyId, KeySerialization, SerializedKey};
 
@@ -41,9 +39,10 @@ fn load_secret_key(
     Ok(keypair)
 }
 
-impl Agree for super::X255 {
+impl MechanismImpl for super::X255 {
     // #[inline(never)]
     fn agree(
+        &self,
         keystore: &mut impl Keystore,
         request: &request::Agree,
     ) -> Result<reply::Agree, Error> {
@@ -75,11 +74,10 @@ impl Agree for super::X255 {
             shared_secret: key_id,
         })
     }
-}
 
-impl GenerateKey for super::X255 {
     // #[inline(never)]
     fn generate_key(
+        &self,
         keystore: &mut impl Keystore,
         request: &request::GenerateKey,
     ) -> Result<reply::GenerateKey, Error> {
@@ -98,11 +96,10 @@ impl GenerateKey for super::X255 {
         // return handle
         Ok(reply::GenerateKey { key: key_id })
     }
-}
 
-impl Exists for super::X255 {
     // #[inline(never)]
     fn exists(
+        &self,
         keystore: &mut impl Keystore,
         request: &request::Exists,
     ) -> Result<reply::Exists, Error> {
@@ -110,11 +107,10 @@ impl Exists for super::X255 {
         let exists = keystore.exists_key(key::Secrecy::Secret, Some(key::Kind::X255), &key_id);
         Ok(reply::Exists { exists })
     }
-}
 
-impl DeriveKey for super::X255 {
     // #[inline(never)]
     fn derive_key(
+        &self,
         keystore: &mut impl Keystore,
         request: &request::DeriveKey,
     ) -> Result<reply::DeriveKey, Error> {
@@ -133,11 +129,10 @@ impl DeriveKey for super::X255 {
 
         Ok(reply::DeriveKey { key: public_id })
     }
-}
 
-impl SerializeKey for super::X255 {
     // #[inline(never)]
     fn serialize_key(
+        &self,
         keystore: &mut impl Keystore,
         request: &request::SerializeKey,
     ) -> Result<reply::SerializeKey, Error> {
@@ -159,11 +154,10 @@ impl SerializeKey for super::X255 {
 
         Ok(reply::SerializeKey { serialized_key })
     }
-}
 
-impl DeserializeKey for super::X255 {
     // #[inline(never)]
     fn deserialize_key(
+        &self,
         keystore: &mut impl Keystore,
         request: &request::DeserializeKey,
     ) -> Result<reply::DeserializeKey, Error> {
@@ -192,10 +186,9 @@ impl DeserializeKey for super::X255 {
 
         Ok(reply::DeserializeKey { key: public_id })
     }
-}
 
-impl UnsafeInjectKey for super::X255 {
     fn unsafe_inject_key(
+        &self,
         keystore: &mut impl Keystore,
         request: &request::UnsafeInjectKey,
     ) -> Result<reply::UnsafeInjectKey, Error> {

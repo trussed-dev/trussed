@@ -27,7 +27,7 @@
 use trussed::{
     backend::BackendId,
     types::ShortData,
-    virt::{self, Ram},
+    virt::{self, StoreConfig},
 };
 
 use runner::Backends;
@@ -370,7 +370,7 @@ mod runner {
 }
 
 pub fn run<F: FnOnce(&mut Client<'_>)>(backends: &'static [BackendId<runner::id::Backend>], f: F) {
-    virt::with_platform(Ram::default(), |platform| {
+    virt::with_platform(StoreConfig::ram(), |platform| {
         platform.run_client_with_backends(
             "test",
             runner::Backends::default(),

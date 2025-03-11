@@ -6,6 +6,7 @@ use crate::{
 
 /// Read/Write/Delete files, iterate over directories.
 pub trait FilesystemClient: PollClient {
+    #[deprecated]
     fn debug_dump_store(&mut self) -> ClientResult<'_, reply::DebugDumpStore, Self> {
         self.request(request::DebugDumpStore {})
     }

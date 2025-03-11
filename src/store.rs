@@ -72,17 +72,11 @@
 //! - Alternative: subdirectory <==> RP hash, everything else in flat files
 //! - In any case need to "list dirs excluding . and .." or similar
 
-use littlefs2::{driver::Storage, fs::Filesystem, path};
-
 use crate::error::Error;
 use crate::types::{Bytes, Location};
-#[allow(unused_imports)]
-use littlefs2::{
-    fs::{DirEntry, Metadata},
-    path::Path,
-};
+use littlefs2_core::{path, DirEntry, Metadata, Path};
 
-pub use littlefs2::object_safe::{DynFile, DynFilesystem, DynStorage};
+pub use littlefs2_core::{DynFile, DynFilesystem};
 
 pub mod certstore;
 pub mod counterstore;
@@ -127,375 +121,17 @@ pub mod keystore;
 // LfsStorage-bound types) to remove lifetimes and generic parameters from Store.
 //
 // This makes everything using it *much* more ergonomic.
-pub unsafe trait Store: Copy {
-    type I: 'static + Storage;
-    type E: 'static + Storage;
-    type V: 'static + Storage;
-    fn ifs(self) -> &'static Fs<Self::I>;
-    fn efs(self) -> &'static Fs<Self::E>;
-    fn vfs(self) -> &'static Fs<Self::V>;
+pub trait Store {
+    fn ifs(&self) -> &dyn DynFilesystem;
+    fn efs(&self) -> &dyn DynFilesystem;
+    fn vfs(&self) -> &dyn DynFilesystem;
     fn fs(&self, location: Location) -> &dyn DynFilesystem {
         match location {
-            Location::Internal => self.ifs().fs,
-            Location::External => self.efs().fs,
-            Location::Volatile => self.vfs().fs,
+            Location::Internal => self.ifs(),
+            Location::External => self.efs(),
+            Location::Volatile => self.vfs(),
         }
     }
-}
-
-pub struct Fs<S: 'static + Storage> {
-    fs: &'static Filesystem<'static, S>,
-}
-
-impl<S: 'static + Storage> core::ops::Deref for Fs<S> {
-    type Target = Filesystem<'static, S>;
-    fn deref(&self) -> &Self::Target {
-        self.fs
-    }
-}
-
-impl<S: 'static + Storage> Fs<S> {
-    pub fn new(fs: &'static Filesystem<'static, S>) -> Self {
-        Self { fs }
-    }
-}
-
-#[macro_export]
-macro_rules! store {
-    (
-    $store:ident,
-    Internal: $Ifs:ty,
-    External: $Efs:ty,
-    Volatile: $Vfs:ty
-) => {
-        #[derive(Clone, Copy)]
-        pub struct $store {
-            // __: $crate::store::NotSendOrSync,
-            __: core::marker::PhantomData<*mut ()>,
-        }
-
-        unsafe impl $crate::store::Store for $store {
-            type I = $Ifs;
-            type E = $Efs;
-            type V = $Vfs;
-
-            fn ifs(self) -> &'static $crate::store::Fs<$Ifs> {
-                unsafe { &*Self::ifs_ptr() }
-            }
-            fn efs(self) -> &'static $crate::store::Fs<$Efs> {
-                unsafe { &*Self::efs_ptr() }
-            }
-            fn vfs(self) -> &'static $crate::store::Fs<$Vfs> {
-                unsafe { &*Self::vfs_ptr() }
-            }
-        }
-
-        impl $store {
-            #[allow(dead_code)]
-            pub fn allocate(
-                internal_fs: $Ifs,
-                external_fs: $Efs,
-                volatile_fs: $Vfs,
-            ) -> (
-                &'static mut littlefs2::fs::Allocation<$Ifs>,
-                &'static mut $Ifs,
-                &'static mut littlefs2::fs::Allocation<$Efs>,
-                &'static mut $Efs,
-                &'static mut littlefs2::fs::Allocation<$Vfs>,
-                &'static mut $Vfs,
-            ) {
-                use core::ptr::addr_of_mut;
-                // static mut INTERNAL_STORAGE: $Ifs = i_ctor();//<$Ifs>::new();
-
-                static mut INTERNAL_STORAGE: Option<$Ifs> = None;
-                unsafe {
-                    INTERNAL_STORAGE = Some(internal_fs);
-                }
-                static mut INTERNAL_FS_ALLOC: Option<littlefs2::fs::Allocation<$Ifs>> = None;
-                unsafe {
-                    INTERNAL_FS_ALLOC = Some(littlefs2::fs::Filesystem::allocate());
-                }
-
-                // static mut EXTERNAL_STORAGE: $Efs = <$Efs>::new();
-                static mut EXTERNAL_STORAGE: Option<$Efs> = None;
-                unsafe {
-                    EXTERNAL_STORAGE = Some(external_fs);
-                }
-                static mut EXTERNAL_FS_ALLOC: Option<littlefs2::fs::Allocation<$Efs>> = None;
-                unsafe {
-                    EXTERNAL_FS_ALLOC = Some(littlefs2::fs::Filesystem::allocate());
-                }
-
-                // static mut VOLATILE_STORAGE: $Vfs = <$Vfs>::new();
-                static mut VOLATILE_STORAGE: Option<$Vfs> = None;
-                unsafe {
-                    VOLATILE_STORAGE = Some(volatile_fs);
-                }
-                static mut VOLATILE_FS_ALLOC: Option<littlefs2::fs::Allocation<$Vfs>> = None;
-                unsafe {
-                    VOLATILE_FS_ALLOC = Some(littlefs2::fs::Filesystem::allocate());
-                }
-
-                (
-                    unsafe { (*addr_of_mut!(INTERNAL_FS_ALLOC)).as_mut().unwrap() },
-                    unsafe { (*addr_of_mut!(INTERNAL_STORAGE)).as_mut().unwrap() },
-                    unsafe { (*addr_of_mut!(EXTERNAL_FS_ALLOC)).as_mut().unwrap() },
-                    unsafe { (*addr_of_mut!(EXTERNAL_STORAGE)).as_mut().unwrap() },
-                    unsafe { (*addr_of_mut!(VOLATILE_FS_ALLOC)).as_mut().unwrap() },
-                    unsafe { (*addr_of_mut!(VOLATILE_STORAGE)).as_mut().unwrap() },
-                )
-            }
-
-            #[allow(dead_code)]
-            pub fn init(
-                internal_fs: $Ifs,
-                external_fs: $Efs,
-                volatile_fs: $Vfs,
-                format: bool,
-            ) -> Self {
-                let (ifs_alloc, ifs_storage, efs_alloc, efs_storage, vfs_alloc, vfs_storage) =
-                    Self::allocate(internal_fs, external_fs, volatile_fs);
-                let store = Self::claim().unwrap();
-                store
-                    .mount(
-                        ifs_alloc,
-                        ifs_storage,
-                        efs_alloc,
-                        efs_storage,
-                        vfs_alloc,
-                        vfs_storage,
-                        format,
-                    )
-                    .unwrap();
-
-                store
-            }
-
-            #[allow(dead_code)]
-            pub fn init_raw(
-                ifs: &'static littlefs2::fs::Filesystem<$Ifs>,
-                efs: &'static littlefs2::fs::Filesystem<$Efs>,
-                vfs: &'static littlefs2::fs::Filesystem<$Vfs>,
-            ) -> Self {
-                let store_ifs = $crate::store::Fs::new(ifs);
-                let store_efs = $crate::store::Fs::new(efs);
-                let store_vfs = $crate::store::Fs::new(vfs);
-                unsafe {
-                    Self::ifs_ptr().write(store_ifs);
-                    Self::efs_ptr().write(store_efs);
-                    Self::vfs_ptr().write(store_vfs);
-                }
-                Self::claim().unwrap()
-            }
-
-            #[allow(dead_code)]
-            pub fn attach(internal_fs: $Ifs, external_fs: $Efs, volatile_fs: $Vfs) -> Self {
-                Self::init(internal_fs, external_fs, volatile_fs, false)
-            }
-
-            #[allow(dead_code)]
-            pub fn format(internal_fs: $Ifs, external_fs: $Efs, volatile_fs: $Vfs) -> Self {
-                Self::init(internal_fs, external_fs, volatile_fs, true)
-            }
-
-            pub fn claim() -> Option<$store> {
-                use core::sync::atomic::{AtomicBool, Ordering};
-                // use $crate::store::NotSendOrSync;
-
-                static CLAIMED: AtomicBool = AtomicBool::new(false);
-
-                if CLAIMED
-                    .compare_exchange_weak(false, true, Ordering::AcqRel, Ordering::Acquire)
-                    .is_ok()
-                {
-                    // Some(Self { __: unsafe { $crate::store::NotSendOrSync::new() } })
-                    Some(Self {
-                        __: core::marker::PhantomData,
-                    })
-                } else {
-                    None
-                }
-            }
-
-            fn ifs_ptr() -> *mut $crate::store::Fs<$Ifs> {
-                use core::mem::MaybeUninit;
-                use core::ptr::addr_of_mut;
-                use $crate::store::Fs;
-                static mut IFS: MaybeUninit<Fs<$Ifs>> = MaybeUninit::uninit();
-                unsafe { (*addr_of_mut!(IFS)).as_mut_ptr() }
-            }
-
-            fn efs_ptr() -> *mut $crate::store::Fs<$Efs> {
-                use core::mem::MaybeUninit;
-                use core::ptr::addr_of_mut;
-                use $crate::store::Fs;
-                static mut EFS: MaybeUninit<Fs<$Efs>> = MaybeUninit::uninit();
-                unsafe { (*addr_of_mut!(EFS)).as_mut_ptr() }
-            }
-
-            fn vfs_ptr() -> *mut $crate::store::Fs<$Vfs> {
-                use core::mem::MaybeUninit;
-                use core::ptr::addr_of_mut;
-                use $crate::store::Fs;
-                static mut VFS: MaybeUninit<Fs<$Vfs>> = MaybeUninit::uninit();
-                unsafe { (*addr_of_mut!(VFS)).as_mut_ptr() }
-            }
-
-            // Ignore lint for compatibility
-            #[allow(clippy::too_many_arguments)]
-            pub fn mount(
-                &self,
-
-                ifs_alloc: &'static mut littlefs2::fs::Allocation<$Ifs>,
-                ifs_storage: &'static mut $Ifs,
-                efs_alloc: &'static mut littlefs2::fs::Allocation<$Efs>,
-                efs_storage: &'static mut $Efs,
-                vfs_alloc: &'static mut littlefs2::fs::Allocation<$Vfs>,
-                vfs_storage: &'static mut $Vfs,
-
-                // statics: (
-                //     &'static mut littlefs2::fs::Allocation<$Ifs>,
-                //     &'static mut $Ifs,
-                //     &'static mut littlefs2::fs::Allocation<$Efs>,
-                //     &'static mut $Efs,
-                //     &'static mut littlefs2::fs::Allocation<$Vfs>,
-                //     &'static mut $Vfs,
-                // ),
-                // TODO: flag per backend?
-                format: bool,
-            ) -> littlefs2::io::Result<()> {
-                use core::mem::MaybeUninit;
-                use core::ptr::{addr_of, addr_of_mut};
-                use littlefs2::fs::{Allocation, Filesystem};
-
-                static mut IFS_ALLOC: MaybeUninit<&'static mut Allocation<$Ifs>> =
-                    MaybeUninit::uninit();
-                static mut IFS_STORAGE: MaybeUninit<&'static mut $Ifs> = MaybeUninit::uninit();
-                static mut IFS: Option<Filesystem<'static, $Ifs>> = None;
-
-                static mut EFS_ALLOC: MaybeUninit<&'static mut Allocation<$Efs>> =
-                    MaybeUninit::uninit();
-                static mut EFS_STORAGE: MaybeUninit<&'static mut $Efs> = MaybeUninit::uninit();
-                static mut EFS: Option<Filesystem<'static, $Efs>> = None;
-
-                static mut VFS_ALLOC: MaybeUninit<&'static mut Allocation<$Vfs>> =
-                    MaybeUninit::uninit();
-                static mut VFS_STORAGE: MaybeUninit<&'static mut $Vfs> = MaybeUninit::uninit();
-                static mut VFS: Option<Filesystem<'static, $Vfs>> = None;
-
-                // let (ifs_alloc, ifs_storage, efs_alloc, efs_storage, vfs_alloc, vfs_storage) = statics;
-
-                unsafe {
-                    // always need to format RAM
-                    Filesystem::format(vfs_storage).expect("can format");
-                    // this is currently a RAM fs too...
-                    Filesystem::format(efs_storage).expect("can format");
-
-                    if format {
-                        Filesystem::format(ifs_storage).expect("can format");
-                    }
-
-                    (*addr_of_mut!(IFS_ALLOC)).as_mut_ptr().write(ifs_alloc);
-                    (*addr_of_mut!(IFS_STORAGE)).as_mut_ptr().write(ifs_storage);
-                    IFS = Some(Filesystem::mount(
-                        &mut *(*addr_of_mut!(IFS_ALLOC)).as_mut_ptr(),
-                        &mut *(*addr_of_mut!(IFS_STORAGE)).as_mut_ptr(),
-                    )?);
-                    let ifs = $crate::store::Fs::new((*addr_of!(IFS)).as_ref().unwrap());
-                    Self::ifs_ptr().write(ifs);
-
-                    (*addr_of_mut!(EFS_ALLOC)).as_mut_ptr().write(efs_alloc);
-                    (*addr_of_mut!(EFS_STORAGE)).as_mut_ptr().write(efs_storage);
-                    EFS = Some(Filesystem::mount(
-                        &mut *(*addr_of_mut!(EFS_ALLOC)).as_mut_ptr(),
-                        &mut *(*addr_of_mut!(EFS_STORAGE)).as_mut_ptr(),
-                    )?);
-                    let efs = $crate::store::Fs::new((*addr_of_mut!(EFS)).as_ref().unwrap());
-                    Self::efs_ptr().write(efs);
-
-                    (*addr_of_mut!(VFS_ALLOC)).as_mut_ptr().write(vfs_alloc);
-                    (*addr_of_mut!(VFS_STORAGE)).as_mut_ptr().write(vfs_storage);
-                    VFS = Some(Filesystem::mount(
-                        &mut *(*addr_of_mut!(VFS_ALLOC)).as_mut_ptr(),
-                        &mut *(*addr_of_mut!(VFS_STORAGE)).as_mut_ptr(),
-                    )?);
-                    let vfs = $crate::store::Fs::new((*addr_of!(VFS)).as_ref().unwrap());
-                    Self::vfs_ptr().write(vfs);
-
-                    Ok(())
-                }
-            }
-
-            #[allow(dead_code)]
-            pub fn attach_else_format(
-                internal_fs: $Ifs,
-                external_fs: $Efs,
-                volatile_fs: $Vfs,
-            ) -> Self {
-                // This unfortunately repeates the code of `allocate`.
-                // It seems Rust's borrowing rules go against this.
-                use core::ptr::addr_of_mut;
-                use littlefs2::fs::{Allocation, Filesystem};
-
-                static mut INTERNAL_STORAGE: Option<$Ifs> = None;
-                unsafe {
-                    INTERNAL_STORAGE = Some(internal_fs);
-                }
-                static mut INTERNAL_FS_ALLOC: Option<Allocation<$Ifs>> = None;
-                unsafe {
-                    INTERNAL_FS_ALLOC = Some(Filesystem::allocate());
-                }
-
-                // static mut EXTERNAL_STORAGE: $Efs = <$Efs>::new();
-                static mut EXTERNAL_STORAGE: Option<$Efs> = None;
-                unsafe {
-                    EXTERNAL_STORAGE = Some(external_fs);
-                }
-                static mut EXTERNAL_FS_ALLOC: Option<Allocation<$Efs>> = None;
-                unsafe {
-                    EXTERNAL_FS_ALLOC = Some(Filesystem::allocate());
-                }
-
-                // static mut VOLATILE_STORAGE: $Vfs = <$Vfs>::new();
-                static mut VOLATILE_STORAGE: Option<$Vfs> = None;
-                unsafe {
-                    VOLATILE_STORAGE = Some(volatile_fs);
-                }
-                static mut VOLATILE_FS_ALLOC: Option<Allocation<$Vfs>> = None;
-                unsafe {
-                    VOLATILE_FS_ALLOC = Some(Filesystem::allocate());
-                }
-
-                let store = Self::claim().unwrap();
-                if store
-                    .mount(
-                        unsafe { (*addr_of_mut!(INTERNAL_FS_ALLOC)).as_mut().unwrap() },
-                        unsafe { (*addr_of_mut!(INTERNAL_STORAGE)).as_mut().unwrap() },
-                        unsafe { (*addr_of_mut!(EXTERNAL_FS_ALLOC)).as_mut().unwrap() },
-                        unsafe { (*addr_of_mut!(EXTERNAL_STORAGE)).as_mut().unwrap() },
-                        unsafe { (*addr_of_mut!(VOLATILE_FS_ALLOC)).as_mut().unwrap() },
-                        unsafe { (*addr_of_mut!(VOLATILE_STORAGE)).as_mut().unwrap() },
-                        false,
-                    )
-                    .is_err()
-                {
-                    store
-                        .mount(
-                            unsafe { (*addr_of_mut!(INTERNAL_FS_ALLOC)).as_mut().unwrap() },
-                            unsafe { (*addr_of_mut!(INTERNAL_STORAGE)).as_mut().unwrap() },
-                            unsafe { (*addr_of_mut!(EXTERNAL_FS_ALLOC)).as_mut().unwrap() },
-                            unsafe { (*addr_of_mut!(EXTERNAL_STORAGE)).as_mut().unwrap() },
-                            unsafe { (*addr_of_mut!(VOLATILE_FS_ALLOC)).as_mut().unwrap() },
-                            unsafe { (*addr_of_mut!(VOLATILE_STORAGE)).as_mut().unwrap() },
-                            true,
-                        )
-                        .unwrap();
-                }
-
-                store
-            }
-        }
-    };
 }
 
 pub fn create_directories(fs: &dyn DynFilesystem, path: &Path) -> Result<(), Error> {
@@ -509,7 +145,7 @@ pub fn create_directories(fs: &dyn DynFilesystem, path: &Path) -> Result<(), Err
 /// Reads contents from path in location of store.
 #[inline(never)]
 pub fn read<const N: usize>(
-    store: impl Store,
+    store: &impl Store,
     location: Location,
     path: &Path,
 ) -> Result<Bytes<N>, Error> {
@@ -523,7 +159,7 @@ pub fn read<const N: usize>(
 /// Writes contents to path in location of store.
 #[inline(never)]
 pub fn write(
-    store: impl Store,
+    store: &impl Store,
     location: Location,
     path: &Path,
     contents: &[u8],
@@ -538,7 +174,7 @@ pub fn write(
 /// Creates parent directory if necessary, then writes.
 #[inline(never)]
 pub fn store(
-    store: impl Store,
+    store: &impl Store,
     location: Location,
     path: &Path,
     contents: &[u8],
@@ -552,7 +188,7 @@ pub fn store(
 }
 
 #[inline(never)]
-pub fn delete(store: impl Store, location: Location, path: &Path) -> bool {
+pub fn delete(store: &impl Store, location: Location, path: &Path) -> bool {
     debug_now!("deleting {}", &path);
     let fs = store.fs(location);
     if fs.remove(path).is_err() {
@@ -583,27 +219,27 @@ pub fn delete(store: impl Store, location: Location, path: &Path) -> bool {
 }
 
 #[inline(never)]
-pub fn exists(store: impl Store, location: Location, path: &Path) -> bool {
+pub fn exists(store: &impl Store, location: Location, path: &Path) -> bool {
     debug_now!("checking existence of {}", &path);
     store.fs(location).exists(path)
 }
 
 #[inline(never)]
 pub fn metadata(
-    store: impl Store,
+    store: &impl Store,
     location: Location,
     path: &Path,
 ) -> Result<Option<Metadata>, Error> {
     debug_now!("checking existence of {}", &path);
     match store.fs(location).metadata(path) {
         Ok(metadata) => Ok(Some(metadata)),
-        Err(littlefs2::io::Error::NO_SUCH_ENTRY) => Ok(None),
+        Err(littlefs2_core::Error::NO_SUCH_ENTRY) => Ok(None),
         Err(_) => Err(Error::FilesystemReadFailure),
     }
 }
 
 #[inline(never)]
-pub fn rename(store: impl Store, location: Location, from: &Path, to: &Path) -> Result<(), Error> {
+pub fn rename(store: &impl Store, location: Location, from: &Path, to: &Path) -> Result<(), Error> {
     debug_now!("renaming {} to {}", &from, &to);
     store
         .fs(location)
@@ -612,14 +248,14 @@ pub fn rename(store: impl Store, location: Location, from: &Path, to: &Path) -> 
 }
 
 #[inline(never)]
-pub fn remove_dir(store: impl Store, location: Location, path: &Path) -> bool {
+pub fn remove_dir(store: &impl Store, location: Location, path: &Path) -> bool {
     debug_now!("remove_dir'ing {}", &path);
     store.fs(location).remove_dir(path).is_ok()
 }
 
 #[inline(never)]
 pub fn remove_dir_all_where(
-    store: impl Store,
+    store: &impl Store,
     location: Location,
     path: &Path,
     predicate: &dyn Fn(&DirEntry) -> bool,

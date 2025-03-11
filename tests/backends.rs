@@ -7,7 +7,7 @@ use trussed::{
     platform,
     service::ServiceResources,
     types::{CoreContext, Location, Message, PathBuf},
-    virt::{self, Ram},
+    virt::{self, StoreConfig},
 };
 
 type Client<'a> = virt::Client<'a, Dispatch>;
@@ -49,7 +49,7 @@ impl backend::Backend for TestBackend {
 }
 
 fn run<F: FnOnce(&mut Client<'_>)>(backends: &'static [BackendId<Backend>], f: F) {
-    virt::with_platform(Ram::default(), |platform| {
+    virt::with_platform(StoreConfig::ram(), |platform| {
         platform.run_client_with_backends("test", Dispatch::default(), backends, |mut client| {
             f(&mut client)
         })
