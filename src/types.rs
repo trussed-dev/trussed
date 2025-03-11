@@ -1,7 +1,5 @@
 pub use generic_array::GenericArray;
 
-pub use heapless::{String, Vec};
-
 pub use crate::Bytes;
 
 pub use littlefs2_core::{DirEntry, Metadata, Path, PathBuf, Result as LfsResult};

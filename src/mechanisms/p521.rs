@@ -14,7 +14,7 @@ use crate::{
     key,
     service::MechanismImpl,
     store::keystore::Keystore,
-    types::{KeyId, KeySerialization, SerializedKey, Signature, SignatureSerialization},
+    types::{Bytes, KeyId, KeySerialization, SerializedKey, Signature, SignatureSerialization},
     Error,
 };
 
@@ -44,9 +44,9 @@ fn load_public_key(keystore: &mut impl Keystore, key_id: &KeyId) -> Result<p521:
     p521::PublicKey::from_sec1_bytes(&compressed_public_key).map_err(|_| Error::InternalError)
 }
 
-fn to_sec1_bytes(public_key: &p521::PublicKey) -> heapless::Vec<u8, { SCALAR_SIZE * 2 + 1 }> {
+fn to_sec1_bytes(public_key: &p521::PublicKey) -> Bytes<{ SCALAR_SIZE * 2 + 1 }> {
     let encoded_point: p521::EncodedPoint = public_key.into();
-    encoded_point.as_bytes().try_into().unwrap()
+    Bytes::from_slice(encoded_point.as_bytes()).unwrap()
 }
 
 impl MechanismImpl for P521 {
