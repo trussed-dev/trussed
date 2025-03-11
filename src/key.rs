@@ -1,7 +1,6 @@
 use core::ptr::write_volatile;
 use core::sync::atomic;
 
-use heapless::Vec;
 use serde::{de::Visitor, ser::SerializeMap, Deserialize, Serialize};
 use zeroize::Zeroize;
 
@@ -11,8 +10,8 @@ use crate::{
     Error,
 };
 
-pub type Material = Vec<u8, { MAX_KEY_MATERIAL_LENGTH }>;
-pub type SerializedKeyBytes = Vec<u8, { MAX_SERIALIZED_KEY_LENGTH }>;
+pub type Material = Bytes<MAX_KEY_MATERIAL_LENGTH>;
+pub type SerializedKeyBytes = Bytes<MAX_SERIALIZED_KEY_LENGTH>;
 
 // We don't implement serde to make sure nobody inadvertently still uses it
 // Should we use references here only?
