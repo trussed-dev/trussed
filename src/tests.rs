@@ -89,19 +89,19 @@ macro_rules! create_memory {
         }
         static mut INTERNAL_FS_ALLOC: Option<Allocation<InternalStorage>> = None;
         unsafe {
-            INTERNAL_FS_ALLOC = Some(Filesystem::allocate());
+            INTERNAL_FS_ALLOC = Some(Filesystem::allocate(INTERNAL_STORAGE.as_ref().unwrap()));
         }
 
         static mut EXTERNAL_STORAGE: ExternalStorage = ExternalStorage::new();
         static mut EXTERNAL_FS_ALLOC: Option<Allocation<ExternalStorage>> = None;
         unsafe {
-            EXTERNAL_FS_ALLOC = Some(Filesystem::allocate());
+            EXTERNAL_FS_ALLOC = Some(Filesystem::allocate(&EXTERNAL_STORAGE));
         }
 
         static mut VOLATILE_STORAGE: VolatileStorage = VolatileStorage::new();
         static mut VOLATILE_FS_ALLOC: Option<Allocation<VolatileStorage>> = None;
         unsafe {
-            VOLATILE_FS_ALLOC = Some(Filesystem::allocate());
+            VOLATILE_FS_ALLOC = Some(Filesystem::allocate(&VOLATILE_STORAGE));
         }
 
         (
