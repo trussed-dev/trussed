@@ -4,9 +4,8 @@ use std::{
     path::PathBuf,
 };
 
-use generic_array::typenum::{U512, U8};
-use littlefs2::{const_ram_storage, driver::Storage, object_safe::DynStorageAlloc};
-use littlefs2_core::{DynFilesystem, Result};
+use littlefs2::{const_ram_storage, driver::Storage, io::Result, object_safe::DynStorageAlloc};
+use littlefs2_core::DynFilesystem;
 
 use crate::store;
 
@@ -15,6 +14,8 @@ pub struct StoreConfig<'a> {
     pub external: StorageConfig<'a>,
     pub volatile: StorageConfig<'a>,
 }
+
+const BLOCK_SIZE: usize = 512;
 
 impl StoreConfig<'_> {
     pub fn ram() -> Self {
@@ -97,15 +98,32 @@ const_ram_storage!(RamStorage, STORAGE_SIZE);
 struct FilesystemStorage(PathBuf);
 
 impl Storage for FilesystemStorage {
-    const READ_SIZE: usize = 16;
-    const WRITE_SIZE: usize = 16;
-    const BLOCK_SIZE: usize = 512;
+    fn read_size(&self) -> usize {
+        16
+    }
+    fn write_size(&self) -> usize {
+        16
+    }
+    fn block_size(&self) -> usize {
+        BLOCK_SIZE
+    }
+    fn block_count(&self) -> usize {
+        128
+    }
+    fn block_cycles(&self) -> isize {
+        -1
+    }
 
-    const BLOCK_COUNT: usize = 128;
-    const BLOCK_CYCLES: isize = -1;
+    fn cache_size(&self) -> usize {
+        512
+    }
 
-    type CACHE_SIZE = U512;
-    type LOOKAHEAD_SIZE = U8;
+    fn lookahead_size(&self) -> usize {
+        8
+    }
+
+    type CACHE_BUFFER = [u8; 512];
+    type LOOKAHEAD_BUFFER = [u8; 64];
 
     fn read(&mut self, offset: usize, buffer: &mut [u8]) -> Result<usize> {
         debug!("read: offset: {}, len: {}", offset, buffer.len());
@@ -136,10 +154,10 @@ impl Storage for FilesystemStorage {
         }
         let mut file = OpenOptions::new().write(true).open(&self.0).unwrap();
         file.seek(SeekFrom::Start(offset as _)).unwrap();
-        let zero_block = [0xFFu8; Self::BLOCK_SIZE];
-        for _ in 0..(len / Self::BLOCK_SIZE) {
+        let zero_block = [0xFFu8; BLOCK_SIZE];
+        for _ in 0..(len / BLOCK_SIZE) {
             let bytes_written = file.write(&zero_block).unwrap();
-            assert_eq!(bytes_written, Self::BLOCK_SIZE);
+            assert_eq!(bytes_written, BLOCK_SIZE);
         }
         file.flush().unwrap();
         Ok(len)
