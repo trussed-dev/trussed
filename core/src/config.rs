@@ -19,37 +19,73 @@ pub const MAX_SERIALIZED_KEY_LENGTH: usize = MAX_KEY_MATERIAL_LENGTH + 4;
 // the private key. Then in the derive call, it just pulls the public key from the private key store
 // and re-saves it as a public-only key. Therefore, the max material length is both keys together, plus
 // the PKCS8 DER encoding overhead (31 bytes).
-cfg_if::cfg_if! {
-    if #[cfg(feature = "mldsa87")] {
-        pub const MAX_SIGNATURE_LENGTH: usize = pqcrypto_mldsa::ffi::PQCLEAN_MLDSA87_CLEAN_CRYPTO_BYTES;
-        pub const MAX_KEY_MATERIAL_LENGTH: usize = pqcrypto_mldsa::ffi::PQCLEAN_MLDSA87_CLEAN_CRYPTO_PUBLICKEYBYTES
+
+pub const MAX_SIGNATURE_LENGTH: usize = if cfg!(feature = "mldsa87") {
+    pqcrypto_mldsa::ffi::PQCLEAN_MLDSA87_CLEAN_CRYPTO_BYTES
+} else if cfg!(feature = "mldsa65") {
+    pqcrypto_mldsa::ffi::PQCLEAN_MLDSA65_CLEAN_CRYPTO_BYTES
+} else if cfg!(feature = "mldsa44") {
+    pqcrypto_mldsa::ffi::PQCLEAN_MLDSA44_CLEAN_CRYPTO_BYTES
+} else {
+    // Default from before addition of PQC
+    512 * 2
+};
+
+pub const MAX_KEY_MATERIAL_LENGTH: usize = if cfg!(feature = "mldsa87") {
+    pqcrypto_mldsa::ffi::PQCLEAN_MLDSA87_CLEAN_CRYPTO_PUBLICKEYBYTES
         + pqcrypto_mldsa::ffi::PQCLEAN_MLDSA87_CLEAN_CRYPTO_SECRETKEYBYTES
-        + 31;
-        //pub const MAX_MESSAGE_LENGTH: usize = MAX_KEY_MATERIAL_LENGTH;
-        pub const MAX_FIDO_WRAPPED_KEY_LENGTH: usize =  MAX_SERIALIZED_KEY_LENGTH + 57;
-    } else if #[cfg(feature = "mldsa65")] {
-        pub const MAX_SIGNATURE_LENGTH: usize = pqcrypto_mldsa::ffi::PQCLEAN_MLDSA65_CLEAN_CRYPTO_BYTES;
-        pub const MAX_KEY_MATERIAL_LENGTH: usize = pqcrypto_mldsa::ffi::PQCLEAN_MLDSA65_CLEAN_CRYPTO_PUBLICKEYBYTES
+        + 31
+} else if cfg!(feature = "mldsa65") {
+    pqcrypto_mldsa::ffi::PQCLEAN_MLDSA65_CLEAN_CRYPTO_PUBLICKEYBYTES
         + pqcrypto_mldsa::ffi::PQCLEAN_MLDSA65_CLEAN_CRYPTO_SECRETKEYBYTES
-        + 31;
-        //pub const MAX_MESSAGE_LENGTH: usize = MAX_KEY_MATERIAL_LENGTH;
-        pub const MAX_FIDO_WRAPPED_KEY_LENGTH: usize =  MAX_SERIALIZED_KEY_LENGTH + 57;
-    } else if #[cfg(feature = "mldsa44")] {
-        pub const MAX_SIGNATURE_LENGTH: usize = pqcrypto_mldsa::ffi::PQCLEAN_MLDSA44_CLEAN_CRYPTO_BYTES;
-        pub const MAX_KEY_MATERIAL_LENGTH: usize = pqcrypto_mldsa::ffi::PQCLEAN_MLDSA44_CLEAN_CRYPTO_PUBLICKEYBYTES
+        + 31
+} else if cfg!(feature = "mldsa44") {
+    pqcrypto_mldsa::ffi::PQCLEAN_MLDSA44_CLEAN_CRYPTO_PUBLICKEYBYTES
         + pqcrypto_mldsa::ffi::PQCLEAN_MLDSA44_CLEAN_CRYPTO_SECRETKEYBYTES
-        + 31;
-        //pub const MAX_MESSAGE_LENGTH: usize = MAX_KEY_MATERIAL_LENGTH;
-        pub const MAX_FIDO_WRAPPED_KEY_LENGTH: usize =  MAX_SERIALIZED_KEY_LENGTH + 57;
+        + 31
+} else {
+    // FIXME: Value from https://stackoverflow.com/questions/5403808/private-key-length-bytes for Rsa2048 Private key
+    1160 * 2 + 72;
+};
+
+pub const MAX_FIDO_WRAPPED_KEY_LENGTH: usize =
+    if cfg!(feature = "mldsa87") || cfg!(feature = "mldsa65") || cfg!(feature = "mldsa44") {
+        MAX_SERIALIZED_KEY_LENGTH + 57
     } else {
-        // Default from before addition of PQC
-        pub const MAX_SIGNATURE_LENGTH: usize = 512 * 2;
-        // FIXME: Value from https://stackoverflow.com/questions/5403808/private-key-length-bytes for Rsa2048 Private key
-        pub const MAX_KEY_MATERIAL_LENGTH: usize = 1160 * 2 + 72;
-        //pub const MAX_MESSAGE_LENGTH: usize = 1024;
-        pub const MAX_FIDO_WRAPPED_KEY_LENGTH: usize = 128;
-    }
-}
+        128
+    };
+
+// cfg_if::cfg_if! {
+//     if #[cfg(feature = "mldsa87")] {
+//         pub const MAX_SIGNATURE_LENGTH: usize = pqcrypto_mldsa::ffi::PQCLEAN_MLDSA87_CLEAN_CRYPTO_BYTES;
+//         pub const MAX_KEY_MATERIAL_LENGTH: usize = pqcrypto_mldsa::ffi::PQCLEAN_MLDSA87_CLEAN_CRYPTO_PUBLICKEYBYTES
+//         + pqcrypto_mldsa::ffi::PQCLEAN_MLDSA87_CLEAN_CRYPTO_SECRETKEYBYTES
+//         + 31;
+//         //pub const MAX_MESSAGE_LENGTH: usize = MAX_KEY_MATERIAL_LENGTH;
+//         pub const MAX_FIDO_WRAPPED_KEY_LENGTH: usize =  MAX_SERIALIZED_KEY_LENGTH + 57;
+//     } else if #[cfg(feature = "mldsa65")] {
+//         pub const MAX_SIGNATURE_LENGTH: usize = pqcrypto_mldsa::ffi::PQCLEAN_MLDSA65_CLEAN_CRYPTO_BYTES;
+//         pub const MAX_KEY_MATERIAL_LENGTH: usize = pqcrypto_mldsa::ffi::PQCLEAN_MLDSA65_CLEAN_CRYPTO_PUBLICKEYBYTES
+//         + pqcrypto_mldsa::ffi::PQCLEAN_MLDSA65_CLEAN_CRYPTO_SECRETKEYBYTES
+//         + 31;
+//         //pub const MAX_MESSAGE_LENGTH: usize = MAX_KEY_MATERIAL_LENGTH;
+//         pub const MAX_FIDO_WRAPPED_KEY_LENGTH: usize =  MAX_SERIALIZED_KEY_LENGTH + 57;
+//     } else if #[cfg(feature = "mldsa44")] {
+//         pub const MAX_SIGNATURE_LENGTH: usize = pqcrypto_mldsa::ffi::PQCLEAN_MLDSA44_CLEAN_CRYPTO_BYTES;
+//         pub const MAX_KEY_MATERIAL_LENGTH: usize = pqcrypto_mldsa::ffi::PQCLEAN_MLDSA44_CLEAN_CRYPTO_PUBLICKEYBYTES
+//         + pqcrypto_mldsa::ffi::PQCLEAN_MLDSA44_CLEAN_CRYPTO_SECRETKEYBYTES
+//         + 31;
+//         //pub const MAX_MESSAGE_LENGTH: usize = MAX_KEY_MATERIAL_LENGTH;
+//         pub const MAX_FIDO_WRAPPED_KEY_LENGTH: usize =  MAX_SERIALIZED_KEY_LENGTH + 57;
+//     } else {
+//         // Default from before addition of PQC
+//         pub const MAX_SIGNATURE_LENGTH: usize = 512 * 2;
+//         // FIXME: Value from https://stackoverflow.com/questions/5403808/private-key-length-bytes for Rsa2048 Private key
+//         pub const MAX_KEY_MATERIAL_LENGTH: usize = 1160 * 2 + 72;
+//         //pub const MAX_MESSAGE_LENGTH: usize = 1024;
+//         pub const MAX_FIDO_WRAPPED_KEY_LENGTH: usize = 128;
+//     }
+// }
 
 // 30 bytes are added by CBOR serialization of a FullCredential
 pub const MAX_MESSAGE_LENGTH: usize = MAX_FIDO_WRAPPED_KEY_LENGTH + 30 + 2031 + 32 + 37; // TODO: update this to use different consts for each area where this is needed
