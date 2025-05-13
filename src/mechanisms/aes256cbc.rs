@@ -15,10 +15,9 @@ impl MechanismImpl for super::Aes256Cbc {
         request: &request::Encrypt,
     ) -> Result<reply::Encrypt, Error> {
         use aes::Aes256;
-        use cbc::cipher::{block_padding::ZeroPadding, BlockEncryptMut, KeyIvInit};
+        use cbc::cipher::{block_padding::NoPadding, BlockEncryptMut, KeyIvInit};
 
         type Aes256CbcEnc = cbc::Encryptor<Aes256>;
-        // TODO: perhaps use NoPadding and have client pad, to emphasize spec-conformance?
 
         let key_id = request.key;
         let key = keystore.load_key(key::Secrecy::Secret, None, &key_id)?;
@@ -51,11 +50,9 @@ impl MechanismImpl for super::Aes256Cbc {
         // hprintln!(" aes256cbc encrypting l = {}B: {:?}", l, &buffer).ok();
 
         // Encrypt message in-place.
-        // &buffer[..pos] is used as a message and &buffer[pos..] as a reserved space for padding.
-        // The padding space should be big enough for padding, otherwise method will return Err(BlockModeError).
         let ciphertext = cipher
-            .encrypt_padded_mut::<ZeroPadding>(&mut buffer, l)
-            .unwrap();
+            .encrypt_padded_mut::<NoPadding>(&mut buffer, l)
+            .map_err(|_| Error::MechanismParamInvalid)?;
 
         let ciphertext = Message::from_slice(ciphertext).unwrap();
         Ok(reply::Encrypt {
@@ -104,9 +101,8 @@ impl MechanismImpl for super::Aes256Cbc {
         request: &request::Decrypt,
     ) -> Result<reply::Decrypt, Error> {
         use aes::Aes256;
-        use cbc::cipher::{block_padding::ZeroPadding, BlockDecryptMut, KeyIvInit};
+        use cbc::cipher::{block_padding::NoPadding, BlockDecryptMut, KeyIvInit};
 
-        // TODO: perhaps use NoPadding and have client pad, to emphasize spec-conformance?
         type Aes256CbcDec = cbc::Decryptor<Aes256>;
 
         let key_id = request.key;
@@ -140,13 +136,12 @@ impl MechanismImpl for super::Aes256Cbc {
         // let l = buffer.len();
 
         // Decrypt message in-place.
-        // Returns an error if buffer length is not multiple of block size and
-        // if after decoding message has malformed padding.
+        // Returns an error if buffer length is not multiple of block size
         // hprintln!("encrypted: {:?}", &buffer).ok();
         // hprintln!("symmetric key: {:?}", &symmetric_key).ok();
         let plaintext = cipher
-            .decrypt_padded_mut::<ZeroPadding>(&mut buffer)
-            .unwrap();
+            .decrypt_padded_mut::<NoPadding>(&mut buffer)
+            .map_err(|_| Error::MechanismParamInvalid)?;
         // hprintln!("decrypted: {:?}", &plaintext).ok();
         let plaintext = Message::from_slice(plaintext).unwrap();
 
