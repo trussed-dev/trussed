@@ -73,7 +73,7 @@ impl MechanismImpl for super::Totp {
 
         // return signature (encode as LE)
         Ok(reply::Sign {
-            signature: crate::Bytes::from_slice(totp_material.to_le_bytes().as_ref()).unwrap(),
+            signature: crate::Bytes::try_from(totp_material.to_le_bytes().as_ref()).unwrap(),
         })
     }
 

@@ -206,9 +206,9 @@ impl MechanismImpl for P384 {
         let serialized_signature = match request.format {
             SignatureSerialization::Asn1Der => {
                 let der = signature.to_der();
-                Signature::from_slice(der.as_bytes()).unwrap()
+                Signature::try_from(der.as_bytes()).unwrap()
             }
-            SignatureSerialization::Raw => Signature::from_slice(&signature.to_bytes()).unwrap(),
+            SignatureSerialization::Raw => Signature::try_from(&*signature.to_bytes()).unwrap(),
             _ => {
                 return Err(Error::InvalidSerializationFormat);
             }
@@ -229,7 +229,7 @@ impl MechanismImpl for P384 {
             return Err(Error::InvalidSerializationFormat);
         }
 
-        let sk = p384::SecretKey::from_bytes((&**request.raw_key).into())
+        let sk = p384::SecretKey::from_bytes((&*request.raw_key).into())
             .map_err(|_| Error::InvalidSerializedKey)?;
 
         let info = key::Info {
@@ -264,7 +264,7 @@ impl MechanismImpl for P384 {
             return Err(Error::InvalidSerializationFormat);
         }
 
-        let signature_bytes = (&**request.signature).into();
+        let signature_bytes = (&*request.signature).into();
 
         let signature = p384::ecdsa::Signature::from_bytes(signature_bytes)
             .map_err(|_| Error::InvalidSerializedRequest)?;
@@ -311,9 +311,9 @@ impl MechanismImpl for P384Prehashed {
         let serialized_signature = match request.format {
             SignatureSerialization::Asn1Der => {
                 let der = signature.to_der();
-                Signature::from_slice(der.as_bytes()).unwrap()
+                Signature::try_from(der.as_bytes()).unwrap()
             }
-            SignatureSerialization::Raw => Signature::from_slice(&signature.to_bytes()).unwrap(),
+            SignatureSerialization::Raw => Signature::try_from(&*signature.to_bytes()).unwrap(),
             _ => {
                 return Err(Error::InvalidSerializationFormat);
             }

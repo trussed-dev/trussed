@@ -54,7 +54,7 @@ impl MechanismImpl for super::Aes256Cbc {
             .encrypt_padded_mut::<NoPadding>(&mut buffer, l)
             .map_err(|_| Error::MechanismParamInvalid)?;
 
-        let ciphertext = Message::from_slice(ciphertext).unwrap();
+        let ciphertext = Message::try_from(ciphertext).unwrap();
         Ok(reply::Encrypt {
             ciphertext,
             nonce: ShortData::new(),
@@ -73,7 +73,7 @@ impl MechanismImpl for super::Aes256Cbc {
 
         // let message: Message = serialized_key.material.try_to_byte_buf().map_err(|_| Error::InternalError)?;
 
-        let message = Message::from_slice(
+        let message = Message::try_from(
             keystore
                 .load_key(key::Secrecy::Secret, None, &request.key)?
                 .material
@@ -143,7 +143,7 @@ impl MechanismImpl for super::Aes256Cbc {
             .decrypt_padded_mut::<NoPadding>(&mut buffer)
             .map_err(|_| Error::MechanismParamInvalid)?;
         // hprintln!("decrypted: {:?}", &plaintext).ok();
-        let plaintext = Message::from_slice(plaintext).unwrap();
+        let plaintext = Message::try_from(plaintext).unwrap();
 
         Ok(reply::Decrypt {
             plaintext: Some(plaintext),

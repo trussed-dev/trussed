@@ -20,6 +20,16 @@ use crate::{
     types::Bytes,
 };
 
+pub(crate) fn postcard_serialize_bytes<T: serde::Serialize, const N: usize>(
+    object: &T,
+) -> postcard::Result<Bytes<N>> {
+    let mut vec = Bytes::new();
+    vec.resize_to_capacity();
+    let serialized = postcard::to_slice(object, &mut vec)?.len();
+    vec.resize(serialized, 0).unwrap();
+    Ok(vec)
+}
+
 /// A Trussed API extension.
 pub trait Extension {
     /// The requests supported by this extension.
@@ -37,8 +47,7 @@ pub trait Extension {
         id: u8,
         request: &Self::Request,
     ) -> Result<request::SerdeExtension, ClientError> {
-        postcard::to_vec(request)
-            .map(Bytes::from)
+        postcard_serialize_bytes(request)
             .map(|request| request::SerdeExtension { id, request })
             .map_err(|_| ClientError::SerializationFailed)
     }
@@ -60,8 +69,7 @@ pub trait Extension {
     /// crate releases.
     #[inline(never)]
     fn serialize_reply(reply: &Self::Reply) -> Result<reply::SerdeExtension, Error> {
-        postcard::to_vec(reply)
-            .map(Bytes::from)
+        postcard_serialize_bytes(reply)
             .map(|reply| reply::SerdeExtension { reply })
             .map_err(|_| Error::ReplySerializationFailure)
     }

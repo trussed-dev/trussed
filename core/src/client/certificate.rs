@@ -26,7 +26,7 @@ pub trait CertificateClient: PollClient {
         location: Location,
         der: &[u8],
     ) -> ClientResult<'_, reply::WriteCertificate, Self> {
-        let der = Message::from_slice(der).map_err(|_| ClientError::DataTooLarge)?;
+        let der = Message::try_from(der).map_err(|_| ClientError::DataTooLarge)?;
         self.request(request::WriteCertificate { location, der })
     }
 }

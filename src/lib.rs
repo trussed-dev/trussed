@@ -72,8 +72,11 @@ pub(crate) use postcard::from_bytes as postcard_deserialize;
 pub(crate) fn postcard_serialize_bytes<T: serde::Serialize, const N: usize>(
     object: &T,
 ) -> postcard::Result<Bytes<N>> {
-    let vec = postcard::to_vec(object)?;
-    Ok(Bytes::from(vec))
+    let mut vec = Bytes::new();
+    vec.resize_to_capacity();
+    let serialized = postcard::to_slice(object, &mut vec)?.len();
+    vec.resize(serialized, 0).unwrap();
+    Ok(vec)
 }
 
 #[cfg(all(test, feature = "crypto-client", feature = "filesystem-client"))]

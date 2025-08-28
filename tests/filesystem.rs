@@ -60,13 +60,13 @@ fn iterating(location: Location) {
         syscall!(client.write_file(
             location,
             PathBuf::from(path!("foo")),
-            Bytes::from_slice(b"foo").unwrap(),
+            Bytes::try_from(b"foo").unwrap(),
             None
         ));
         syscall!(client.write_file(
             location,
             PathBuf::from(path!("bar")),
-            Bytes::from_slice(b"bar").unwrap(),
+            Bytes::try_from(b"bar").unwrap(),
             None
         ));
         let first_entry = syscall!(client.read_dir_first(location, PathBuf::new(), None))
@@ -134,7 +134,7 @@ fn iterating_first(location: Location) {
             syscall!(client.write_file(
                 location,
                 PathBuf::from(f),
-                Bytes::from_slice(f.as_ref().as_bytes()).unwrap(),
+                Bytes::try_from(f.as_ref().as_bytes()).unwrap(),
                 None
             ));
         }
@@ -182,7 +182,7 @@ fn iterating_files_and_dirs(location: Location) {
             syscall!(client.write_file(
                 location,
                 PathBuf::from(f),
-                Bytes::from_slice(f.as_ref().as_bytes()).unwrap(),
+                Bytes::try_from(f.as_ref().as_bytes()).unwrap(),
                 None
             ));
         }
@@ -203,7 +203,7 @@ fn iterating_files_and_dirs(location: Location) {
             syscall!(client.write_file(
                 location,
                 file_path.clone(),
-                Bytes::from_slice(file_path.as_ref().as_bytes()).unwrap(),
+                Bytes::try_from(file_path.as_ref().as_bytes()).unwrap(),
                 None
             ));
         }

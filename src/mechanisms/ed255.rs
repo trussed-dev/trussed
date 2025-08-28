@@ -132,7 +132,7 @@ impl MechanismImpl for super::Ed255 {
                 let cose_pk = cosey::Ed25519PublicKey {
                     // x: Bytes::from_slice(public_key.x_coordinate()).unwrap(),
                     // x: Bytes::from_slice(&buf).unwrap(),
-                    x: Bytes::from_slice(public_key.as_bytes()).unwrap(),
+                    x: Bytes::try_from(public_key.as_bytes()).unwrap(),
                 };
                 crate::cbor_serialize_bytes(&cose_pk).map_err(|_| Error::CborError)?
             }
@@ -187,7 +187,7 @@ impl MechanismImpl for super::Ed255 {
         let keypair = load_keypair(keystore, &key_id)?;
 
         let native_signature = keypair.sign(&request.message);
-        let our_signature = Signature::from_slice(&native_signature.to_bytes()).unwrap();
+        let our_signature = Signature::try_from(&native_signature.to_bytes()).unwrap();
 
         // hprintln!("Ed255 signature:").ok();
         // hprintln!("msg: {:?}", &request.message).ok();

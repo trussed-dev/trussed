@@ -951,7 +951,7 @@ fn filesystem() {
     .metadata
     .is_none(),);
 
-    let data = Bytes::from_slice(&[0; 20]).unwrap();
+    let data = Bytes::try_from(&[0; 20]).unwrap();
     block!(client
         .write_file(Location::Internal, path.clone(), data.clone(), None,)
         .expect("no client error"))

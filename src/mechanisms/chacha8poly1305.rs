@@ -152,8 +152,8 @@ impl MechanismImpl for super::Chacha8Poly1305 {
             .try_into()
             .unwrap();
 
-        let nonce = ShortData::from_slice(&nonce).unwrap();
-        let tag = ShortData::from_slice(&tag).unwrap();
+        let nonce = ShortData::try_from(&nonce).unwrap();
+        let tag = ShortData::try_from(&tag).unwrap();
 
         // let ciphertext = Message::from_slice(&ciphertext).unwrap();
         Ok(reply::Encrypt {
@@ -174,7 +174,7 @@ impl MechanismImpl for super::Chacha8Poly1305 {
         // TODO: need to check both secret and private keys
         let serialized_key = keystore.load_key(key::Secrecy::Secret, None, &request.key)?;
 
-        let message = Message::from_slice(&serialized_key.serialize()).unwrap();
+        let message = Message::try_from(&*serialized_key.serialize()).unwrap();
 
         let encryption_request = request::Encrypt {
             mechanism: Mechanism::Chacha8Poly1305,
