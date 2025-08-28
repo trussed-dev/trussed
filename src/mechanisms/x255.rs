@@ -195,7 +195,7 @@ impl MechanismImpl for super::X255 {
         if request.format != KeySerialization::Raw {
             return Err(Error::InvalidSerializationFormat);
         }
-        let seed = (**request.raw_key)
+        let seed = (*request.raw_key)
             .try_into()
             .map_err(|_| Error::InvalidSerializedKey)?;
         let sk = agreement::SecretKey::from_seed(&seed);

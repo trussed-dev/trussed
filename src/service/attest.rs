@@ -175,7 +175,7 @@ pub fn try_attest(
             SerializedSignature::Ed255(signature.as_ref().try_into().unwrap())
         }
         SignatureAlgorithm::P256 => SerializedSignature::P256(
-            heapless_bytes::Bytes::from_slice(
+            heapless_bytes::Bytes::try_from(
                 mechanisms::P256
                     .sign(
                         attn_keystore,

@@ -29,7 +29,7 @@ pub trait Aes256Cbc: CryptoClient {
             wrapping_key,
             key,
             &[],
-            iv.and_then(|iv| ShortData::from_slice(iv).ok()),
+            iv.map(ShortData::from),
         )
     }
 }
@@ -66,7 +66,7 @@ pub trait Chacha8Poly1305: CryptoClient {
             key,
             message,
             associated_data,
-            nonce.and_then(|nonce| ShortData::from_slice(nonce).ok()),
+            nonce.map(ShortData::from),
         )
     }
 
@@ -90,7 +90,7 @@ pub trait Chacha8Poly1305: CryptoClient {
         self.unwrap_key(
             Mechanism::Chacha8Poly1305,
             wrapping_key,
-            Message::from_slice(wrapped_key).map_err(|_| ClientError::DataTooLarge)?,
+            Message::try_from(wrapped_key).map_err(|_| ClientError::DataTooLarge)?,
             associated_data,
             &[],
             StorageAttributes::new().set_persistence(location),
@@ -109,7 +109,7 @@ pub trait Chacha8Poly1305: CryptoClient {
             wrapping_key,
             key,
             associated_data,
-            nonce.and_then(|nonce| ShortData::from_slice(nonce).ok()),
+            nonce.map(ShortData::from),
         )
     }
 }
@@ -125,7 +125,7 @@ pub trait HmacBlake2s: CryptoClient {
         self.derive_key(
             Mechanism::HmacBlake2s,
             base_key,
-            Some(MediumData::from_slice(message).map_err(|_| ClientError::DataTooLarge)?),
+            Some(MediumData::try_from(message).map_err(|_| ClientError::DataTooLarge)?),
             StorageAttributes::new().set_persistence(persistence),
         )
     }
@@ -155,7 +155,7 @@ pub trait HmacSha1: CryptoClient {
         self.derive_key(
             Mechanism::HmacSha1,
             base_key,
-            Some(MediumData::from_slice(message).map_err(|_| ClientError::DataTooLarge)?),
+            Some(MediumData::try_from(message).map_err(|_| ClientError::DataTooLarge)?),
             StorageAttributes::new().set_persistence(persistence),
         )
     }
@@ -185,7 +185,7 @@ pub trait HmacSha256: CryptoClient {
         self.derive_key(
             Mechanism::HmacSha256,
             base_key,
-            Some(MediumData::from_slice(message).map_err(|_| ClientError::DataTooLarge)?),
+            Some(MediumData::try_from(message).map_err(|_| ClientError::DataTooLarge)?),
             StorageAttributes::new().set_persistence(persistence),
         )
     }
@@ -215,7 +215,7 @@ pub trait HmacSha512: CryptoClient {
         self.derive_key(
             Mechanism::HmacSha512,
             base_key,
-            Some(MediumData::from_slice(message).map_err(|_| ClientError::DataTooLarge)?),
+            Some(MediumData::try_from(message).map_err(|_| ClientError::DataTooLarge)?),
             StorageAttributes::new().set_persistence(persistence),
         )
     }
@@ -579,7 +579,7 @@ pub trait Sha256: CryptoClient {
     fn hash_sha256<'c>(&'c mut self, message: &[u8]) -> ClientResult<'c, reply::Hash, Self> {
         self.hash(
             Mechanism::Sha256,
-            Message::from_slice(message).map_err(|_| ClientError::DataTooLarge)?,
+            Message::try_from(message).map_err(|_| ClientError::DataTooLarge)?,
         )
     }
 }

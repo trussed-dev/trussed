@@ -37,11 +37,11 @@ pub trait CryptoClient: PollClient {
         nonce: &[u8],
         tag: &[u8],
     ) -> ClientResult<'c, reply::Decrypt, Self> {
-        let message = Message::from_slice(message).map_err(|_| ClientError::DataTooLarge)?;
+        let message = Message::try_from(message).map_err(|_| ClientError::DataTooLarge)?;
         let associated_data =
-            Message::from_slice(associated_data).map_err(|_| ClientError::DataTooLarge)?;
-        let nonce = ShortData::from_slice(nonce).map_err(|_| ClientError::DataTooLarge)?;
-        let tag = ShortData::from_slice(tag).map_err(|_| ClientError::DataTooLarge)?;
+            Message::try_from(associated_data).map_err(|_| ClientError::DataTooLarge)?;
+        let nonce = ShortData::try_from(nonce).map_err(|_| ClientError::DataTooLarge)?;
+        let tag = ShortData::try_from(tag).map_err(|_| ClientError::DataTooLarge)?;
         self.request(request::Decrypt {
             mechanism,
             key,
@@ -99,7 +99,7 @@ pub trait CryptoClient: PollClient {
         attributes: StorageAttributes,
     ) -> ClientResult<'c, reply::DeserializeKey, Self> {
         let serialized_key =
-            SerializedKey::from_slice(serialized_key).map_err(|_| ClientError::DataTooLarge)?;
+            SerializedKey::try_from(serialized_key).map_err(|_| ClientError::DataTooLarge)?;
         self.request(request::DeserializeKey {
             mechanism,
             serialized_key,
@@ -116,9 +116,9 @@ pub trait CryptoClient: PollClient {
         associated_data: &[u8],
         nonce: Option<ShortData>,
     ) -> ClientResult<'c, reply::Encrypt, Self> {
-        let message = Message::from_slice(message).map_err(|_| ClientError::DataTooLarge)?;
+        let message = Message::try_from(message).map_err(|_| ClientError::DataTooLarge)?;
         let associated_data =
-            ShortData::from_slice(associated_data).map_err(|_| ClientError::DataTooLarge)?;
+            ShortData::try_from(associated_data).map_err(|_| ClientError::DataTooLarge)?;
         self.request(request::Encrypt {
             mechanism,
             key,
@@ -193,7 +193,7 @@ pub trait CryptoClient: PollClient {
         self.request(request::Sign {
             key,
             mechanism,
-            message: Bytes::from_slice(data).map_err(|_| ClientError::DataTooLarge)?,
+            message: Bytes::try_from(data).map_err(|_| ClientError::DataTooLarge)?,
             format,
         })
     }
@@ -209,8 +209,8 @@ pub trait CryptoClient: PollClient {
         self.request(request::Verify {
             mechanism,
             key,
-            message: Message::from_slice(message).expect("all good"),
-            signature: Signature::from_slice(signature).expect("all good"),
+            message: Message::try_from(message).expect("all good"),
+            signature: Signature::try_from(signature).expect("all good"),
             format,
         })
     }
@@ -224,7 +224,7 @@ pub trait CryptoClient: PollClient {
     ) -> ClientResult<'_, reply::UnsafeInjectKey, Self> {
         self.request(request::UnsafeInjectKey {
             mechanism,
-            raw_key: SerializedKey::from_slice(raw_key).unwrap(),
+            raw_key: SerializedKey::try_from(raw_key).unwrap(),
             attributes: StorageAttributes::new().set_persistence(persistence),
             format,
         })
@@ -236,7 +236,7 @@ pub trait CryptoClient: PollClient {
         location: Location,
     ) -> ClientResult<'_, reply::UnsafeInjectSharedKey, Self> {
         self.request(request::UnsafeInjectSharedKey {
-            raw_key: ShortData::from_slice(raw_key).unwrap(),
+            raw_key: ShortData::try_from(raw_key).unwrap(),
             location,
         })
     }
@@ -251,8 +251,8 @@ pub trait CryptoClient: PollClient {
         attributes: StorageAttributes,
     ) -> ClientResult<'c, reply::UnwrapKey, Self> {
         let associated_data =
-            Message::from_slice(associated_data).map_err(|_| ClientError::DataTooLarge)?;
-        let nonce = ShortData::from_slice(nonce).map_err(|_| ClientError::DataTooLarge)?;
+            Message::try_from(associated_data).map_err(|_| ClientError::DataTooLarge)?;
+        let nonce = ShortData::try_from(nonce).map_err(|_| ClientError::DataTooLarge)?;
         self.request(request::UnwrapKey {
             mechanism,
             wrapping_key,
@@ -272,7 +272,7 @@ pub trait CryptoClient: PollClient {
         nonce: Option<ShortData>,
     ) -> ClientResult<'_, reply::WrapKey, Self> {
         let associated_data =
-            Bytes::from_slice(associated_data).map_err(|_| ClientError::DataTooLarge)?;
+            Bytes::try_from(associated_data).map_err(|_| ClientError::DataTooLarge)?;
         self.request(request::WrapKey {
             mechanism,
             wrapping_key,

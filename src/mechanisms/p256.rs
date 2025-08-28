@@ -205,15 +205,15 @@ impl MechanismImpl for super::P256 {
         let serialized_key = match request.format {
             KeySerialization::EcdhEsHkdf256 => {
                 let cose_pk = cosey::EcdhEsHkdf256PublicKey {
-                    x: Bytes::from_slice(&public_key.x()).unwrap(),
-                    y: Bytes::from_slice(&public_key.y()).unwrap(),
+                    x: Bytes::from(&public_key.x()),
+                    y: Bytes::from(&public_key.y()),
                 };
                 crate::cbor_serialize_bytes(&cose_pk).map_err(|_| Error::CborError)?
             }
             KeySerialization::Cose => {
                 let cose_pk = cosey::P256PublicKey {
-                    x: Bytes::from_slice(&public_key.x()).unwrap(),
-                    y: Bytes::from_slice(&public_key.y()).unwrap(),
+                    x: Bytes::from(&public_key.x()),
+                    y: Bytes::from(&public_key.y()),
                 };
                 crate::cbor_serialize_bytes(&cose_pk).map_err(|_| Error::CborError)?
             }
@@ -267,11 +267,9 @@ impl MechanismImpl for super::P256 {
             SignatureSerialization::Asn1Der => {
                 let mut buffer = [0u8; 72];
                 let l = signature.to_sec1_bytes(&mut buffer);
-                Signature::from_slice(&buffer[..l]).unwrap()
+                Signature::try_from(&buffer[..l]).unwrap()
             }
-            SignatureSerialization::Raw => {
-                Signature::from_slice(&signature.to_untagged_bytes()).unwrap()
-            }
+            SignatureSerialization::Raw => Signature::from(&signature.to_untagged_bytes()),
             _ => {
                 return Err(Error::InvalidSerializationFormat);
             }
@@ -352,11 +350,9 @@ impl MechanismImpl for super::P256Prehashed {
             SignatureSerialization::Asn1Der => {
                 let mut buffer = [0u8; 72];
                 let l = signature.to_sec1_bytes(&mut buffer);
-                Signature::from_slice(&buffer[..l]).unwrap()
+                Signature::try_from(&buffer[..l]).unwrap()
             }
-            SignatureSerialization::Raw => {
-                Signature::from_slice(&signature.to_untagged_bytes()).unwrap()
-            }
+            SignatureSerialization::Raw => Signature::from(&signature.to_untagged_bytes()),
             _ => {
                 return Err(Error::InvalidSerializationFormat);
             }

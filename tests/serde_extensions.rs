@@ -384,8 +384,8 @@ pub fn run<F: FnOnce(&mut Client<'_>)>(backends: &'static [BackendId<runner::id:
 fn test_extension() {
     use extensions::TestClient as _;
 
-    let msg = ShortData::from_slice(&[0x01, 0x02, 0x03]).unwrap();
-    let rev = ShortData::from_slice(&[0x03, 0x02, 0x01]).unwrap();
+    let msg = ShortData::from(&[0x01, 0x02, 0x03]);
+    let rev = ShortData::from(&[0x03, 0x02, 0x01]);
     run(&[], |client| {
         assert!(trussed::try_syscall!(client.reverse(msg.clone())).is_err());
     });
@@ -409,9 +409,9 @@ fn sample_extension() {
     use extensions::SampleClient as _;
     use extensions::TestClient as _;
 
-    let msg = ShortData::from_slice(&[1, 2, 3, 4]).unwrap();
-    let rev = ShortData::from_slice(&[4, 3, 2, 1]).unwrap();
-    let trunc = ShortData::from_slice(&[1, 2, 3]).unwrap();
+    let msg = ShortData::from(&[1, 2, 3, 4]);
+    let rev = ShortData::from(&[4, 3, 2, 1]);
+    let trunc = ShortData::from(&[1, 2, 3]);
     run(&[], |client| {
         assert!(trussed::try_syscall!(client.truncate(msg.clone())).is_err());
     });
@@ -440,9 +440,9 @@ fn mixed_extension() {
     use extensions::SampleClient as _;
     use extensions::TestClient as _;
 
-    let msg = ShortData::from_slice(&[1, 2, 3, 4]).unwrap();
-    let rev = ShortData::from_slice(&[4, 3, 2, 1]).unwrap();
-    let trunc = ShortData::from_slice(&[1, 2, 3]).unwrap();
+    let msg = ShortData::from(&[1, 2, 3, 4]);
+    let rev = ShortData::from(&[4, 3, 2, 1]);
+    let trunc = ShortData::from(&[1, 2, 3]);
     run(runner::BACKENDS_MIXED, |client| {
         assert_eq!(trussed::syscall!(client.sample_calls()).calls, 0);
         assert_eq!(trussed::syscall!(client.test_calls()).calls, 0);

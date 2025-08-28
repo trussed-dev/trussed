@@ -364,7 +364,7 @@ impl<P: Platform> ServiceResources<P> {
                 let size = request.size;
                 let mut keystore = keystore(self, ctx)?;
                 secret_key
-                    .resize_default(request.size)
+                    .resize_zero(request.size)
                     .map_err(|_| Error::ImplementationError)?;
                 keystore.rng().fill_bytes(&mut secret_key[..size]);
                 let key_id = keystore.store_key(
@@ -548,7 +548,7 @@ impl<P: Platform> ServiceResources<P> {
             Request::RandomBytes(request) => {
                 if request.count <= MAX_MESSAGE_LENGTH {
                     let mut bytes = Message::new();
-                    bytes.resize_default(request.count).unwrap();
+                    bytes.resize_zero(request.count).unwrap();
                     self.rng()?.fill_bytes(&mut bytes);
                     Ok(Reply::RandomBytes(reply::RandomBytes { bytes }))
                 } else {
