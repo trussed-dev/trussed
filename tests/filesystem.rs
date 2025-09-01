@@ -60,13 +60,13 @@ fn iterating(location: Location) {
         syscall!(client.write_file(
             location,
             PathBuf::from(path!("foo")),
-            Bytes::try_from(b"foo").unwrap(),
+            Bytes::from(b"foo"),
             None
         ));
         syscall!(client.write_file(
             location,
             PathBuf::from(path!("bar")),
-            Bytes::try_from(b"bar").unwrap(),
+            Bytes::from(b"bar"),
             None
         ));
         let first_entry = syscall!(client.read_dir_first(location, PathBuf::new(), None))

@@ -29,7 +29,7 @@ pub trait Aes256Cbc: CryptoClient {
             wrapping_key,
             key,
             &[],
-            iv.and_then(|iv| ShortData::try_from(iv).ok()),
+            iv.map(ShortData::from),
         )
     }
 }
@@ -66,7 +66,7 @@ pub trait Chacha8Poly1305: CryptoClient {
             key,
             message,
             associated_data,
-            nonce.and_then(|nonce| ShortData::try_from(nonce).ok()),
+            nonce.map(ShortData::from),
         )
     }
 
@@ -109,7 +109,7 @@ pub trait Chacha8Poly1305: CryptoClient {
             wrapping_key,
             key,
             associated_data,
-            nonce.and_then(|nonce| ShortData::try_from(nonce).ok()),
+            nonce.map(ShortData::from),
         )
     }
 }

@@ -205,15 +205,15 @@ impl MechanismImpl for super::P256 {
         let serialized_key = match request.format {
             KeySerialization::EcdhEsHkdf256 => {
                 let cose_pk = cosey::EcdhEsHkdf256PublicKey {
-                    x: Bytes::try_from(&public_key.x()).unwrap(),
-                    y: Bytes::try_from(&public_key.y()).unwrap(),
+                    x: Bytes::from(&public_key.x()),
+                    y: Bytes::from(&public_key.y()),
                 };
                 crate::cbor_serialize_bytes(&cose_pk).map_err(|_| Error::CborError)?
             }
             KeySerialization::Cose => {
                 let cose_pk = cosey::P256PublicKey {
-                    x: Bytes::try_from(&public_key.x()).unwrap(),
-                    y: Bytes::try_from(&public_key.y()).unwrap(),
+                    x: Bytes::from(&public_key.x()),
+                    y: Bytes::from(&public_key.y()),
                 };
                 crate::cbor_serialize_bytes(&cose_pk).map_err(|_| Error::CborError)?
             }
@@ -269,9 +269,7 @@ impl MechanismImpl for super::P256 {
                 let l = signature.to_sec1_bytes(&mut buffer);
                 Signature::try_from(&buffer[..l]).unwrap()
             }
-            SignatureSerialization::Raw => {
-                Signature::try_from(&signature.to_untagged_bytes()).unwrap()
-            }
+            SignatureSerialization::Raw => Signature::from(&signature.to_untagged_bytes()),
             _ => {
                 return Err(Error::InvalidSerializationFormat);
             }
@@ -354,9 +352,7 @@ impl MechanismImpl for super::P256Prehashed {
                 let l = signature.to_sec1_bytes(&mut buffer);
                 Signature::try_from(&buffer[..l]).unwrap()
             }
-            SignatureSerialization::Raw => {
-                Signature::try_from(&signature.to_untagged_bytes()).unwrap()
-            }
+            SignatureSerialization::Raw => Signature::from(&signature.to_untagged_bytes()),
             _ => {
                 return Err(Error::InvalidSerializationFormat);
             }

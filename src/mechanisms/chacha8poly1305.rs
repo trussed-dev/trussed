@@ -152,8 +152,8 @@ impl MechanismImpl for super::Chacha8Poly1305 {
             .try_into()
             .unwrap();
 
-        let nonce = ShortData::try_from(&nonce).unwrap();
-        let tag = ShortData::try_from(&tag).unwrap();
+        let nonce = ShortData::from(&nonce);
+        let tag = ShortData::from(&tag);
 
         // let ciphertext = Message::from_slice(&ciphertext).unwrap();
         Ok(reply::Encrypt {
