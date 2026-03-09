@@ -1,0 +1,16 @@
+name: Continuous delivery - test
+
+on:
+  pull_request:
+    # opened, reopenened, synchronize are the default types for pull_request
+    # labeled, unlabeled ensure this check is also run if a label is added or removed
+    types: [opened, reopened, synchronize, labeled, unlabeled]
+
+jobs:
+  test-publish:
+    runs-on: ubuntu-latest
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-publish-check') }}
+    steps:
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+    - run: cargo publish --dry-run --package trussed-core
+    - run: cargo publish --dry-run --package trussed
