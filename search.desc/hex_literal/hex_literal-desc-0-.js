@@ -1,1 +1,0 @@
-searchState.loadedDescShard("hex_literal", 0, "RustCrypto: hex-literal\nMacro for converting sequence of string literals …")

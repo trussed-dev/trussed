@@ -1,1 +1,0 @@
-searchState.loadedDescShard("cpufeatures", 0, "This crate provides macros for runtime CPU feature …\nCreate module with CPU feature detection code.")

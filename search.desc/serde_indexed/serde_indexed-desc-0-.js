@@ -1,1 +1,0 @@
-searchState.loadedDescShard("serde_indexed", 0, "Derivation of <code>Serialize</code> and <code>Deserialize</code> that replaces …")

@@ -1,9 +1,9 @@
 (function() {
-    var implementors = Object.fromEntries([["spin",[["impl&lt;R: <a class=\"trait\" href=\"spin/relax/trait.RelaxStrategy.html\" title=\"trait spin::relax::RelaxStrategy\">RelaxStrategy</a>&gt; <a class=\"trait\" href=\"lock_api/rwlock/trait.RawRwLockUpgrade.html\" title=\"trait lock_api::rwlock::RawRwLockUpgrade\">RawRwLockUpgrade</a> for <a class=\"struct\" href=\"spin/rwlock/struct.RwLock.html\" title=\"struct spin::rwlock::RwLock\">RwLock</a>&lt;<a class=\"primitive\" href=\"https://doc.rust-lang.org/1.86.0/core/primitive.unit.html\">()</a>, R&gt;"]]]]);
+    const implementors = Object.fromEntries([["spin",[["impl&lt;R: <a class=\"trait\" href=\"spin/relax/trait.RelaxStrategy.html\" title=\"trait spin::relax::RelaxStrategy\">RelaxStrategy</a>&gt; <a class=\"trait\" href=\"lock_api/rwlock/trait.RawRwLockUpgrade.html\" title=\"trait lock_api::rwlock::RawRwLockUpgrade\">RawRwLockUpgrade</a> for <a class=\"struct\" href=\"spin/rwlock/struct.RwLock.html\" title=\"struct spin::rwlock::RwLock\">RwLock</a>&lt;<a class=\"primitive\" href=\"https://doc.rust-lang.org/1.94.0/core/primitive.unit.html\">()</a>, R&gt;",0]]]]);
     if (window.register_implementors) {
         window.register_implementors(implementors);
     } else {
         window.pending_implementors = implementors;
     }
 })()
-//{"start":57,"fragment_lengths":[518]}
+//{"start":59,"fragment_lengths":[520]}

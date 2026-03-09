@@ -1,1 +1,0 @@
-searchState.loadedDescShard("serde_repr", 0, "github crates-io docs-rs")

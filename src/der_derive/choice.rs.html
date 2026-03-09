@@ -1,8 +1,8 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/der_derive-0.4.1/src/choice.rs`."><title>choice.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-6c3ea77c.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="der_derive" data-themes="" data-resource-suffix="" data-rustdoc-version="1.86.0 (05f9846f8 2025-03-31)" data-channel="1.86.0" data-search-js="search-581efc7a.js" data-settings-js="settings-6dad6058.js" ><script src="../../static.files/storage-3a5871a4.js"></script><script defer src="../../static.files/src-script-b8d3f215.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-4d63596a.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-893ab5e7.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><h1><div class="sub-heading">der_derive/</div>choice.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap digits-3"><pre class="rust"><code><a href=#1 id=1 data-nosnippet>1</a><span class="doccomment">//! Support for deriving the `Decodable` and `Encodable` traits on enums for
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/der_derive-0.4.1/src/choice.rs`."><title>choice.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-77263533.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="der_derive" data-themes="" data-resource-suffix="" data-rustdoc-version="1.94.0 (4a4ef493e 2026-03-02)" data-channel="1.94.0" data-search-js="search-9e2438ea.js" data-stringdex-js="stringdex-b897f86f.js" data-settings-js="settings-c38705f0.js" ><script src="../../static.files/storage-e2aeef58.js"></script><script defer src="../../static.files/src-script-813739b1.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-7bab91a1.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-ffcac47a.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-eab170b8.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><section id="main-content" class="content"><div class="main-heading"><h1><div class="sub-heading">der_derive/</div>choice.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap digits-3"><pre class="rust"><code><a href=#1 id=1 data-nosnippet>1</a><span class="doccomment">//! Support for deriving the `Decodable` and `Encodable` traits on enums for
 <a href=#2 id=2 data-nosnippet>2</a>//! the purposes of decoding/encoding ASN.1 `CHOICE` types as mapped to
 <a href=#3 id=3 data-nosnippet>3</a>//! enum variants.
 <a href=#4 id=4 data-nosnippet>4</a>
-<a href=#5 id=5 data-nosnippet>5</a></span><span class="kw">use crate</span>::{Asn1Attrs, Asn1Type};
+<a href=#5 id=5 data-nosnippet>5</a></span><span class="kw">use </span>crate::{Asn1Attrs, Asn1Type};
 <a href=#6 id=6 data-nosnippet>6</a><span class="kw">use </span>proc_macro2::TokenStream;
 <a href=#7 id=7 data-nosnippet>7</a><span class="kw">use </span>quote::{quote, ToTokens};
 <a href=#8 id=8 data-nosnippet>8</a><span class="kw">use </span>syn::{DataEnum, Fields, FieldsUnnamed, Ident, Lifetime, Type, Variant};
@@ -165,22 +165,22 @@
 <a href=#165 id=165 data-nosnippet>165</a>            <span class="kw">let </span>variant_type = <span class="kw-2">&amp;</span>variant.field_type;
 <a href=#166 id=166 data-nosnippet>166</a>
 <a href=#167 id=167 data-nosnippet>167</a>            variant_conversions.extend(s.gen_impl(<span class="macro">quote!</span> {
-<a href=#168 id=168 data-nosnippet>168</a>                gen <span class="kw">impl </span>From&lt;#variant_type&gt; <span class="kw">for </span>@<span class="self">Self </span>{
+<a href=#168 id=168 data-nosnippet>168</a>                <span class="kw">gen impl </span>From&lt;#variant_type&gt; <span class="kw">for </span>@<span class="self">Self </span>{
 <a href=#169 id=169 data-nosnippet>169</a>                    <span class="kw">fn </span>from(field: #variant_type) -&gt; <span class="self">Self </span>{
-<a href=#170 id=170 data-nosnippet>170</a>                        <span class="self">Self</span>::#variant_ident(field)
+<a href=#170 id=170 data-nosnippet>170</a>                        Self::#variant_ident(field)
 <a href=#171 id=171 data-nosnippet>171</a>                    }
 <a href=#172 id=172 data-nosnippet>172</a>                }
 <a href=#173 id=173 data-nosnippet>173</a>            }));
 <a href=#174 id=174 data-nosnippet>174</a>        }
 <a href=#175 id=175 data-nosnippet>175</a>
 <a href=#176 id=176 data-nosnippet>176</a>        s.gen_impl(<span class="macro">quote!</span> {
-<a href=#177 id=177 data-nosnippet>177</a>            gen <span class="kw">impl </span>::der::Choice&lt;#lifetime&gt; <span class="kw">for </span>@<span class="self">Self </span>{
+<a href=#177 id=177 data-nosnippet>177</a>            <span class="kw">gen impl </span>::der::Choice&lt;#lifetime&gt; <span class="kw">for </span>@<span class="self">Self </span>{
 <a href=#178 id=178 data-nosnippet>178</a>                <span class="kw">fn </span>can_decode(tag: ::der::Tag) -&gt; bool {
 <a href=#179 id=179 data-nosnippet>179</a>                    <span class="macro">matches!</span>(tag, #choice_body)
 <a href=#180 id=180 data-nosnippet>180</a>                }
 <a href=#181 id=181 data-nosnippet>181</a>            }
 <a href=#182 id=182 data-nosnippet>182</a>
-<a href=#183 id=183 data-nosnippet>183</a>            gen <span class="kw">impl </span>core::convert::TryFrom&lt;::der::asn1::Any&lt;#lifetime&gt;&gt; <span class="kw">for </span>@<span class="self">Self </span>{
+<a href=#183 id=183 data-nosnippet>183</a>            <span class="kw">gen impl </span>core::convert::TryFrom&lt;::der::asn1::Any&lt;#lifetime&gt;&gt; <span class="kw">for </span>@<span class="self">Self </span>{
 <a href=#184 id=184 data-nosnippet>184</a>                <span class="kw">type </span>Error = der::Error;
 <a href=#185 id=185 data-nosnippet>185</a>
 <a href=#186 id=186 data-nosnippet>186</a>                <span class="kw">fn </span>try_from(any: ::der::asn1::Any&lt;#lifetime&gt;) -&gt; der::Result&lt;<span class="self">Self</span>&gt; {
@@ -198,7 +198,7 @@
 <a href=#198 id=198 data-nosnippet>198</a>                }
 <a href=#199 id=199 data-nosnippet>199</a>            }
 <a href=#200 id=200 data-nosnippet>200</a>
-<a href=#201 id=201 data-nosnippet>201</a>            gen <span class="kw">impl </span>::der::Encodable <span class="kw">for </span>@<span class="self">Self </span>{
+<a href=#201 id=201 data-nosnippet>201</a>            <span class="kw">gen impl </span>::der::Encodable <span class="kw">for </span>@<span class="self">Self </span>{
 <a href=#202 id=202 data-nosnippet>202</a>                <span class="kw">fn </span>encode(<span class="kw-2">&amp;</span><span class="self">self</span>, encoder: <span class="kw-2">&amp;mut </span>::der::Encoder&lt;<span class="lifetime">'_</span>&gt;) -&gt; ::der::Result&lt;()&gt; {
 <a href=#203 id=203 data-nosnippet>203</a>                    <span class="attr">#[allow(unused_imports)]
 <a href=#204 id=204 data-nosnippet>204</a>                    </span><span class="kw">use </span>core::convert::TryFrom;
@@ -253,4 +253,5 @@
 <a href=#253 id=253 data-nosnippet>253</a>            );
 <a href=#254 id=254 data-nosnippet>254</a>        }
 <a href=#255 id=255 data-nosnippet>255</a>    }
-<a href=#256 id=256 data-nosnippet>256</a>}</code></pre></div></section></main></body></html>
+<a href=#256 id=256 data-nosnippet>256</a>}
+</code></pre></div></section></main></body></html>
