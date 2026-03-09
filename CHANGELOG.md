@@ -30,7 +30,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `PollClient::syscall`.
 - Upgrade the `interchange` dependency to version 0.3.0 ([#99][])
   - As a consequence the type `pipe::TrussedInterchange` becomes a const`pipe::TRUSSED_INTERCHANGE`
-- Updated `littlefs2` to 0.6.0.
 - Made `Request`, `Reply`, `Error`, `Context`, `CoreContext`, `Mechanism`,
   `KeySerialization`, `SignatureSerialization`, `consent::Error`, `ui::Status` non-exhaustive.
 - Made `postcard_deserialize`, `postcard_serialize` and
@@ -40,7 +39,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   of being generic over the storage implementation.
 - Add `nonce` argument to `wrap_key` and `unwrap_key` syscalls.
 - Use nonce as IV for Aes256Cbc mechanism.
-- Updated `cbor-smol` to 0.5.0.
 - Removed `serde::{Deserialize, Serialize}` implementations for the API request
   and reply structs, `types::{consent::{Error, Level}, reboot::To, StorageAttributes,
   KeySerialization, SignatureSerialization}`.
@@ -67,6 +65,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Replaced the mechanism RPC traits in `service` with a single `MechanismImpl` trait.
 - Made the `mechanisms` module private.  Mechanism implementation can still be accessed via the `Mechanism` enum.
 - Changed the `Aes256Cbc` mechanism to use no padding instead of zero padding.
+- Updated dependencies to:
+  - `cbor-smol` 0.5
+  - `cosey` 0.4
+  - `flexiber` 0.2
+  - `heapless` 0.9
+  - `heapless-bytes` 0.5
+  - `littlefs2` 0.7
 
 ### Fixed
 
