@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+-
+
+## [v0.2.0](https://github.com/trussed-dev/trussed/releases/tag/core-v0.2.0) (2025-03-20)
+
 ### Changed
 
 - Deprecate `FilesystemClient::debug_dump_store`.  Instead, a debugger should be used to extract the filesystem from a development device.
