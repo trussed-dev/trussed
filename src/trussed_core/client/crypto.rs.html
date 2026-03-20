@@ -37,11 +37,11 @@
 <a href=#37 id=37 data-nosnippet>37</a>        nonce: <span class="kw-2">&amp;</span>[u8],
 <a href=#38 id=38 data-nosnippet>38</a>        tag: <span class="kw-2">&amp;</span>[u8],
 <a href=#39 id=39 data-nosnippet>39</a>    ) -&gt; ClientResult&lt;<span class="lifetime">'c</span>, reply::Decrypt, <span class="self">Self</span>&gt; {
-<a href=#40 id=40 data-nosnippet>40</a>        <span class="kw">let </span>message = Message::from_slice(message).map_err(|<span class="kw">_</span>| ClientError::DataTooLarge)<span class="question-mark">?</span>;
+<a href=#40 id=40 data-nosnippet>40</a>        <span class="kw">let </span>message = Message::try_from(message).map_err(|<span class="kw">_</span>| ClientError::DataTooLarge)<span class="question-mark">?</span>;
 <a href=#41 id=41 data-nosnippet>41</a>        <span class="kw">let </span>associated_data =
-<a href=#42 id=42 data-nosnippet>42</a>            Message::from_slice(associated_data).map_err(|<span class="kw">_</span>| ClientError::DataTooLarge)<span class="question-mark">?</span>;
-<a href=#43 id=43 data-nosnippet>43</a>        <span class="kw">let </span>nonce = ShortData::from_slice(nonce).map_err(|<span class="kw">_</span>| ClientError::DataTooLarge)<span class="question-mark">?</span>;
-<a href=#44 id=44 data-nosnippet>44</a>        <span class="kw">let </span>tag = ShortData::from_slice(tag).map_err(|<span class="kw">_</span>| ClientError::DataTooLarge)<span class="question-mark">?</span>;
+<a href=#42 id=42 data-nosnippet>42</a>            Message::try_from(associated_data).map_err(|<span class="kw">_</span>| ClientError::DataTooLarge)<span class="question-mark">?</span>;
+<a href=#43 id=43 data-nosnippet>43</a>        <span class="kw">let </span>nonce = ShortData::try_from(nonce).map_err(|<span class="kw">_</span>| ClientError::DataTooLarge)<span class="question-mark">?</span>;
+<a href=#44 id=44 data-nosnippet>44</a>        <span class="kw">let </span>tag = ShortData::try_from(tag).map_err(|<span class="kw">_</span>| ClientError::DataTooLarge)<span class="question-mark">?</span>;
 <a href=#45 id=45 data-nosnippet>45</a>        <span class="self">self</span>.request(request::Decrypt {
 <a href=#46 id=46 data-nosnippet>46</a>            mechanism,
 <a href=#47 id=47 data-nosnippet>47</a>            key,
@@ -99,7 +99,7 @@
 <a href=#99 id=99 data-nosnippet>99</a>        attributes: StorageAttributes,
 <a href=#100 id=100 data-nosnippet>100</a>    ) -&gt; ClientResult&lt;<span class="lifetime">'c</span>, reply::DeserializeKey, <span class="self">Self</span>&gt; {
 <a href=#101 id=101 data-nosnippet>101</a>        <span class="kw">let </span>serialized_key =
-<a href=#102 id=102 data-nosnippet>102</a>            SerializedKey::from_slice(serialized_key).map_err(|<span class="kw">_</span>| ClientError::DataTooLarge)<span class="question-mark">?</span>;
+<a href=#102 id=102 data-nosnippet>102</a>            SerializedKey::try_from(serialized_key).map_err(|<span class="kw">_</span>| ClientError::DataTooLarge)<span class="question-mark">?</span>;
 <a href=#103 id=103 data-nosnippet>103</a>        <span class="self">self</span>.request(request::DeserializeKey {
 <a href=#104 id=104 data-nosnippet>104</a>            mechanism,
 <a href=#105 id=105 data-nosnippet>105</a>            serialized_key,
@@ -116,9 +116,9 @@
 <a href=#116 id=116 data-nosnippet>116</a>        associated_data: <span class="kw-2">&amp;</span>[u8],
 <a href=#117 id=117 data-nosnippet>117</a>        nonce: <span class="prelude-ty">Option</span>&lt;ShortData&gt;,
 <a href=#118 id=118 data-nosnippet>118</a>    ) -&gt; ClientResult&lt;<span class="lifetime">'c</span>, reply::Encrypt, <span class="self">Self</span>&gt; {
-<a href=#119 id=119 data-nosnippet>119</a>        <span class="kw">let </span>message = Message::from_slice(message).map_err(|<span class="kw">_</span>| ClientError::DataTooLarge)<span class="question-mark">?</span>;
+<a href=#119 id=119 data-nosnippet>119</a>        <span class="kw">let </span>message = Message::try_from(message).map_err(|<span class="kw">_</span>| ClientError::DataTooLarge)<span class="question-mark">?</span>;
 <a href=#120 id=120 data-nosnippet>120</a>        <span class="kw">let </span>associated_data =
-<a href=#121 id=121 data-nosnippet>121</a>            ShortData::from_slice(associated_data).map_err(|<span class="kw">_</span>| ClientError::DataTooLarge)<span class="question-mark">?</span>;
+<a href=#121 id=121 data-nosnippet>121</a>            ShortData::try_from(associated_data).map_err(|<span class="kw">_</span>| ClientError::DataTooLarge)<span class="question-mark">?</span>;
 <a href=#122 id=122 data-nosnippet>122</a>        <span class="self">self</span>.request(request::Encrypt {
 <a href=#123 id=123 data-nosnippet>123</a>            mechanism,
 <a href=#124 id=124 data-nosnippet>124</a>            key,
@@ -193,7 +193,7 @@
 <a href=#193 id=193 data-nosnippet>193</a>        <span class="self">self</span>.request(request::Sign {
 <a href=#194 id=194 data-nosnippet>194</a>            key,
 <a href=#195 id=195 data-nosnippet>195</a>            mechanism,
-<a href=#196 id=196 data-nosnippet>196</a>            message: Bytes::from_slice(data).map_err(|<span class="kw">_</span>| ClientError::DataTooLarge)<span class="question-mark">?</span>,
+<a href=#196 id=196 data-nosnippet>196</a>            message: Bytes::try_from(data).map_err(|<span class="kw">_</span>| ClientError::DataTooLarge)<span class="question-mark">?</span>,
 <a href=#197 id=197 data-nosnippet>197</a>            format,
 <a href=#198 id=198 data-nosnippet>198</a>        })
 <a href=#199 id=199 data-nosnippet>199</a>    }
@@ -209,8 +209,8 @@
 <a href=#209 id=209 data-nosnippet>209</a>        <span class="self">self</span>.request(request::Verify {
 <a href=#210 id=210 data-nosnippet>210</a>            mechanism,
 <a href=#211 id=211 data-nosnippet>211</a>            key,
-<a href=#212 id=212 data-nosnippet>212</a>            message: Message::from_slice(message).expect(<span class="string">"all good"</span>),
-<a href=#213 id=213 data-nosnippet>213</a>            signature: Signature::from_slice(signature).expect(<span class="string">"all good"</span>),
+<a href=#212 id=212 data-nosnippet>212</a>            message: Message::try_from(message).expect(<span class="string">"all good"</span>),
+<a href=#213 id=213 data-nosnippet>213</a>            signature: Signature::try_from(signature).expect(<span class="string">"all good"</span>),
 <a href=#214 id=214 data-nosnippet>214</a>            format,
 <a href=#215 id=215 data-nosnippet>215</a>        })
 <a href=#216 id=216 data-nosnippet>216</a>    }
@@ -224,7 +224,7 @@
 <a href=#224 id=224 data-nosnippet>224</a>    ) -&gt; ClientResult&lt;<span class="lifetime">'_</span>, reply::UnsafeInjectKey, <span class="self">Self</span>&gt; {
 <a href=#225 id=225 data-nosnippet>225</a>        <span class="self">self</span>.request(request::UnsafeInjectKey {
 <a href=#226 id=226 data-nosnippet>226</a>            mechanism,
-<a href=#227 id=227 data-nosnippet>227</a>            raw_key: SerializedKey::from_slice(raw_key).unwrap(),
+<a href=#227 id=227 data-nosnippet>227</a>            raw_key: SerializedKey::try_from(raw_key).unwrap(),
 <a href=#228 id=228 data-nosnippet>228</a>            attributes: StorageAttributes::new().set_persistence(persistence),
 <a href=#229 id=229 data-nosnippet>229</a>            format,
 <a href=#230 id=230 data-nosnippet>230</a>        })
@@ -236,7 +236,7 @@
 <a href=#236 id=236 data-nosnippet>236</a>        location: Location,
 <a href=#237 id=237 data-nosnippet>237</a>    ) -&gt; ClientResult&lt;<span class="lifetime">'_</span>, reply::UnsafeInjectSharedKey, <span class="self">Self</span>&gt; {
 <a href=#238 id=238 data-nosnippet>238</a>        <span class="self">self</span>.request(request::UnsafeInjectSharedKey {
-<a href=#239 id=239 data-nosnippet>239</a>            raw_key: ShortData::from_slice(raw_key).unwrap(),
+<a href=#239 id=239 data-nosnippet>239</a>            raw_key: ShortData::try_from(raw_key).unwrap(),
 <a href=#240 id=240 data-nosnippet>240</a>            location,
 <a href=#241 id=241 data-nosnippet>241</a>        })
 <a href=#242 id=242 data-nosnippet>242</a>    }
@@ -251,8 +251,8 @@
 <a href=#251 id=251 data-nosnippet>251</a>        attributes: StorageAttributes,
 <a href=#252 id=252 data-nosnippet>252</a>    ) -&gt; ClientResult&lt;<span class="lifetime">'c</span>, reply::UnwrapKey, <span class="self">Self</span>&gt; {
 <a href=#253 id=253 data-nosnippet>253</a>        <span class="kw">let </span>associated_data =
-<a href=#254 id=254 data-nosnippet>254</a>            Message::from_slice(associated_data).map_err(|<span class="kw">_</span>| ClientError::DataTooLarge)<span class="question-mark">?</span>;
-<a href=#255 id=255 data-nosnippet>255</a>        <span class="kw">let </span>nonce = ShortData::from_slice(nonce).map_err(|<span class="kw">_</span>| ClientError::DataTooLarge)<span class="question-mark">?</span>;
+<a href=#254 id=254 data-nosnippet>254</a>            Message::try_from(associated_data).map_err(|<span class="kw">_</span>| ClientError::DataTooLarge)<span class="question-mark">?</span>;
+<a href=#255 id=255 data-nosnippet>255</a>        <span class="kw">let </span>nonce = ShortData::try_from(nonce).map_err(|<span class="kw">_</span>| ClientError::DataTooLarge)<span class="question-mark">?</span>;
 <a href=#256 id=256 data-nosnippet>256</a>        <span class="self">self</span>.request(request::UnwrapKey {
 <a href=#257 id=257 data-nosnippet>257</a>            mechanism,
 <a href=#258 id=258 data-nosnippet>258</a>            wrapping_key,
@@ -272,7 +272,7 @@
 <a href=#272 id=272 data-nosnippet>272</a>        nonce: <span class="prelude-ty">Option</span>&lt;ShortData&gt;,
 <a href=#273 id=273 data-nosnippet>273</a>    ) -&gt; ClientResult&lt;<span class="lifetime">'_</span>, reply::WrapKey, <span class="self">Self</span>&gt; {
 <a href=#274 id=274 data-nosnippet>274</a>        <span class="kw">let </span>associated_data =
-<a href=#275 id=275 data-nosnippet>275</a>            Bytes::from_slice(associated_data).map_err(|<span class="kw">_</span>| ClientError::DataTooLarge)<span class="question-mark">?</span>;
+<a href=#275 id=275 data-nosnippet>275</a>            Bytes::try_from(associated_data).map_err(|<span class="kw">_</span>| ClientError::DataTooLarge)<span class="question-mark">?</span>;
 <a href=#276 id=276 data-nosnippet>276</a>        <span class="self">self</span>.request(request::WrapKey {
 <a href=#277 id=277 data-nosnippet>277</a>            mechanism,
 <a href=#278 id=278 data-nosnippet>278</a>            wrapping_key,

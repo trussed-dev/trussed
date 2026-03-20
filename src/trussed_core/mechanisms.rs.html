@@ -29,7 +29,7 @@
 <a href=#29 id=29 data-nosnippet>29</a>            wrapping_key,
 <a href=#30 id=30 data-nosnippet>30</a>            key,
 <a href=#31 id=31 data-nosnippet>31</a>            <span class="kw-2">&amp;</span>[],
-<a href=#32 id=32 data-nosnippet>32</a>            iv.and_then(|iv| ShortData::from_slice(iv).ok()),
+<a href=#32 id=32 data-nosnippet>32</a>            iv.map(ShortData::from),
 <a href=#33 id=33 data-nosnippet>33</a>        )
 <a href=#34 id=34 data-nosnippet>34</a>    }
 <a href=#35 id=35 data-nosnippet>35</a>}
@@ -66,7 +66,7 @@
 <a href=#66 id=66 data-nosnippet>66</a>            key,
 <a href=#67 id=67 data-nosnippet>67</a>            message,
 <a href=#68 id=68 data-nosnippet>68</a>            associated_data,
-<a href=#69 id=69 data-nosnippet>69</a>            nonce.and_then(|nonce| ShortData::from_slice(nonce).ok()),
+<a href=#69 id=69 data-nosnippet>69</a>            nonce.map(ShortData::from),
 <a href=#70 id=70 data-nosnippet>70</a>        )
 <a href=#71 id=71 data-nosnippet>71</a>    }
 <a href=#72 id=72 data-nosnippet>72</a>
@@ -90,7 +90,7 @@
 <a href=#90 id=90 data-nosnippet>90</a>        <span class="self">self</span>.unwrap_key(
 <a href=#91 id=91 data-nosnippet>91</a>            Mechanism::Chacha8Poly1305,
 <a href=#92 id=92 data-nosnippet>92</a>            wrapping_key,
-<a href=#93 id=93 data-nosnippet>93</a>            Message::from_slice(wrapped_key).map_err(|<span class="kw">_</span>| ClientError::DataTooLarge)<span class="question-mark">?</span>,
+<a href=#93 id=93 data-nosnippet>93</a>            Message::try_from(wrapped_key).map_err(|<span class="kw">_</span>| ClientError::DataTooLarge)<span class="question-mark">?</span>,
 <a href=#94 id=94 data-nosnippet>94</a>            associated_data,
 <a href=#95 id=95 data-nosnippet>95</a>            <span class="kw-2">&amp;</span>[],
 <a href=#96 id=96 data-nosnippet>96</a>            StorageAttributes::new().set_persistence(location),
@@ -109,7 +109,7 @@
 <a href=#109 id=109 data-nosnippet>109</a>            wrapping_key,
 <a href=#110 id=110 data-nosnippet>110</a>            key,
 <a href=#111 id=111 data-nosnippet>111</a>            associated_data,
-<a href=#112 id=112 data-nosnippet>112</a>            nonce.and_then(|nonce| ShortData::from_slice(nonce).ok()),
+<a href=#112 id=112 data-nosnippet>112</a>            nonce.map(ShortData::from),
 <a href=#113 id=113 data-nosnippet>113</a>        )
 <a href=#114 id=114 data-nosnippet>114</a>    }
 <a href=#115 id=115 data-nosnippet>115</a>}
@@ -125,7 +125,7 @@
 <a href=#125 id=125 data-nosnippet>125</a>        <span class="self">self</span>.derive_key(
 <a href=#126 id=126 data-nosnippet>126</a>            Mechanism::HmacBlake2s,
 <a href=#127 id=127 data-nosnippet>127</a>            base_key,
-<a href=#128 id=128 data-nosnippet>128</a>            <span class="prelude-val">Some</span>(MediumData::from_slice(message).map_err(|<span class="kw">_</span>| ClientError::DataTooLarge)<span class="question-mark">?</span>),
+<a href=#128 id=128 data-nosnippet>128</a>            <span class="prelude-val">Some</span>(MediumData::try_from(message).map_err(|<span class="kw">_</span>| ClientError::DataTooLarge)<span class="question-mark">?</span>),
 <a href=#129 id=129 data-nosnippet>129</a>            StorageAttributes::new().set_persistence(persistence),
 <a href=#130 id=130 data-nosnippet>130</a>        )
 <a href=#131 id=131 data-nosnippet>131</a>    }
@@ -155,7 +155,7 @@
 <a href=#155 id=155 data-nosnippet>155</a>        <span class="self">self</span>.derive_key(
 <a href=#156 id=156 data-nosnippet>156</a>            Mechanism::HmacSha1,
 <a href=#157 id=157 data-nosnippet>157</a>            base_key,
-<a href=#158 id=158 data-nosnippet>158</a>            <span class="prelude-val">Some</span>(MediumData::from_slice(message).map_err(|<span class="kw">_</span>| ClientError::DataTooLarge)<span class="question-mark">?</span>),
+<a href=#158 id=158 data-nosnippet>158</a>            <span class="prelude-val">Some</span>(MediumData::try_from(message).map_err(|<span class="kw">_</span>| ClientError::DataTooLarge)<span class="question-mark">?</span>),
 <a href=#159 id=159 data-nosnippet>159</a>            StorageAttributes::new().set_persistence(persistence),
 <a href=#160 id=160 data-nosnippet>160</a>        )
 <a href=#161 id=161 data-nosnippet>161</a>    }
@@ -185,7 +185,7 @@
 <a href=#185 id=185 data-nosnippet>185</a>        <span class="self">self</span>.derive_key(
 <a href=#186 id=186 data-nosnippet>186</a>            Mechanism::HmacSha256,
 <a href=#187 id=187 data-nosnippet>187</a>            base_key,
-<a href=#188 id=188 data-nosnippet>188</a>            <span class="prelude-val">Some</span>(MediumData::from_slice(message).map_err(|<span class="kw">_</span>| ClientError::DataTooLarge)<span class="question-mark">?</span>),
+<a href=#188 id=188 data-nosnippet>188</a>            <span class="prelude-val">Some</span>(MediumData::try_from(message).map_err(|<span class="kw">_</span>| ClientError::DataTooLarge)<span class="question-mark">?</span>),
 <a href=#189 id=189 data-nosnippet>189</a>            StorageAttributes::new().set_persistence(persistence),
 <a href=#190 id=190 data-nosnippet>190</a>        )
 <a href=#191 id=191 data-nosnippet>191</a>    }
@@ -215,7 +215,7 @@
 <a href=#215 id=215 data-nosnippet>215</a>        <span class="self">self</span>.derive_key(
 <a href=#216 id=216 data-nosnippet>216</a>            Mechanism::HmacSha512,
 <a href=#217 id=217 data-nosnippet>217</a>            base_key,
-<a href=#218 id=218 data-nosnippet>218</a>            <span class="prelude-val">Some</span>(MediumData::from_slice(message).map_err(|<span class="kw">_</span>| ClientError::DataTooLarge)<span class="question-mark">?</span>),
+<a href=#218 id=218 data-nosnippet>218</a>            <span class="prelude-val">Some</span>(MediumData::try_from(message).map_err(|<span class="kw">_</span>| ClientError::DataTooLarge)<span class="question-mark">?</span>),
 <a href=#219 id=219 data-nosnippet>219</a>            StorageAttributes::new().set_persistence(persistence),
 <a href=#220 id=220 data-nosnippet>220</a>        )
 <a href=#221 id=221 data-nosnippet>221</a>    }
@@ -579,7 +579,7 @@
 <a href=#579 id=579 data-nosnippet>579</a>    <span class="kw">fn </span>hash_sha256&lt;<span class="lifetime">'c</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'c </span><span class="kw-2">mut </span><span class="self">self</span>, message: <span class="kw-2">&amp;</span>[u8]) -&gt; ClientResult&lt;<span class="lifetime">'c</span>, reply::Hash, <span class="self">Self</span>&gt; {
 <a href=#580 id=580 data-nosnippet>580</a>        <span class="self">self</span>.hash(
 <a href=#581 id=581 data-nosnippet>581</a>            Mechanism::Sha256,
-<a href=#582 id=582 data-nosnippet>582</a>            Message::from_slice(message).map_err(|<span class="kw">_</span>| ClientError::DataTooLarge)<span class="question-mark">?</span>,
+<a href=#582 id=582 data-nosnippet>582</a>            Message::try_from(message).map_err(|<span class="kw">_</span>| ClientError::DataTooLarge)<span class="question-mark">?</span>,
 <a href=#583 id=583 data-nosnippet>583</a>        )
 <a href=#584 id=584 data-nosnippet>584</a>    }
 <a href=#585 id=585 data-nosnippet>585</a>}

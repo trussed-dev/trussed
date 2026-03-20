@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["Consumer","Iter","IterMut","Producer","Queue"]};
+window.SIDEBAR_ITEMS = {"struct":["Consumer","Iter","IterMut","Producer","QueueInner"],"type":["Queue","QueueView"]};

@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"enum":["Init","Uninit"],"mod":["singleton"],"struct":["Box","Node","Pool"]};

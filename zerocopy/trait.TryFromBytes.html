@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Types for which some bit patterns are valid."><title>TryFromBytes in zerocopy - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../static.files/rustdoc-77263533.css"><meta name="rustdoc-vars" data-root-path="../" data-static-root-path="../static.files/" data-current-crate="zerocopy" data-themes="" data-resource-suffix="" data-rustdoc-version="1.94.0 (4a4ef493e 2026-03-02)" data-channel="1.94.0" data-search-js="search-9e2438ea.js" data-stringdex-js="stringdex-b897f86f.js" data-settings-js="settings-c38705f0.js" ><script src="../static.files/storage-e2aeef58.js"></script><script defer src="sidebar-items.js"></script><script defer src="../static.files/main-7bab91a1.js"></script><noscript><link rel="stylesheet" href="../static.files/noscript-ffcac47a.css"></noscript><link rel="alternate icon" type="image/png" href="../static.files/favicon-32x32-eab170b8.png"><link rel="icon" type="image/svg+xml" href="../static.files/favicon-044be391.svg"></head><body class="rustdoc trait"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><rustdoc-topbar><h2><a href="#">TryFromBytes</a></h2></rustdoc-topbar><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../zerocopy/index.html">zerocopy</a><span class="version">0.8.41</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">TryFrom<wbr>Bytes</a></h2><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#implementation" title="Implementation">Implementation</a></li><li><a href="#what-is-a-valid-instance" title="What is a “valid instance”?">What is a “valid instance”?</a></li><li><a href="#tryfrombytes-is-not-symmetrical-with-intobytes" title="`TryFromBytes` is not symmetrical with `IntoBytes`"><code>TryFromBytes</code> is not symmetrical with <code>IntoBytes</code></a></li><li><a href="#safety" title="Safety">Safety</a></li></ul><h3><a href="#provided-methods">Provided Methods</a></h3><ul class="block"><li><a href="#method.try_mut_from_bytes" title="try_mut_from_bytes">try_mut_from_bytes</a></li><li><a href="#method.try_mut_from_bytes_with_elems" title="try_mut_from_bytes_with_elems">try_mut_from_bytes_with_elems</a></li><li><a href="#method.try_mut_from_prefix" title="try_mut_from_prefix">try_mut_from_prefix</a></li><li><a href="#method.try_mut_from_prefix_with_elems" title="try_mut_from_prefix_with_elems">try_mut_from_prefix_with_elems</a></li><li><a href="#method.try_mut_from_suffix" title="try_mut_from_suffix">try_mut_from_suffix</a></li><li><a href="#method.try_mut_from_suffix_with_elems" title="try_mut_from_suffix_with_elems">try_mut_from_suffix_with_elems</a></li><li><a href="#method.try_read_from_bytes" title="try_read_from_bytes">try_read_from_bytes</a></li><li><a href="#method.try_read_from_prefix" title="try_read_from_prefix">try_read_from_prefix</a></li><li><a href="#method.try_read_from_suffix" title="try_read_from_suffix">try_read_from_suffix</a></li><li><a href="#method.try_ref_from_bytes" title="try_ref_from_bytes">try_ref_from_bytes</a></li><li><a href="#method.try_ref_from_bytes_with_elems" title="try_ref_from_bytes_with_elems">try_ref_from_bytes_with_elems</a></li><li><a href="#method.try_ref_from_prefix" title="try_ref_from_prefix">try_ref_from_prefix</a></li><li><a href="#method.try_ref_from_prefix_with_elems" title="try_ref_from_prefix_with_elems">try_ref_from_prefix_with_elems</a></li><li><a href="#method.try_ref_from_suffix" title="try_ref_from_suffix">try_ref_from_suffix</a></li><li><a href="#method.try_ref_from_suffix_with_elems" title="try_ref_from_suffix_with_elems">try_ref_from_suffix_with_elems</a></li></ul><h3><a href="#foreign-impls">Implementations on Foreign Types</a></h3><ul class="block"><li><a href="#impl-TryFromBytes-for-()" title="()">()</a></li><li><a href="#impl-TryFromBytes-for-(A,+B)" title="(A, B)">(A, B)</a></li><li><a href="#impl-TryFromBytes-for-(A,+B,+C)" title="(A, B, C)">(A, B, C)</a></li><li><a href="#impl-TryFromBytes-for-(A,+B,+C,+D)" title="(A, B, C, D)">(A, B, C, D)</a></li><li><a href="#impl-TryFromBytes-for-(A,+B,+C,+D,+E)" title="(A, B, C, D, E)">(A, B, C, D, E)</a></li><li><a href="#impl-TryFromBytes-for-(A,+B,+C,+D,+E,+F)" title="(A, B, C, D, E, F)">(A, B, C, D, E, F)</a></li><li><a href="#impl-TryFromBytes-for-(A,+B,+C,+D,+E,+F,+G)" title="(A, B, C, D, E, F, G)">(A, B, C, D, E, F, G)</a></li><li><a href="#impl-TryFromBytes-for-(A,+B,+C,+D,+E,+F,+G,+H)" title="(A, B, C, D, E, F, G, H)">(A, B, C, D, E, F, G, H)</a></li><li><a href="#impl-TryFromBytes-for-(A,+B,+C,+D,+E,+F,+G,+H,+I)" title="(A, B, C, D, E, F, G, H, I)">(A, B, C, D, E, F, G, H, I)</a></li><li><a href="#impl-TryFromBytes-for-(A,+B,+C,+D,+E,+F,+G,+H,+I,+J)" title="(A, B, C, D, E, F, G, H, I, J)">(A, B, C, D, E, F, G, H, I, J)</a></li><li><a href="#impl-TryFromBytes-for-(A,+B,+C,+D,+E,+F,+G,+H,+I,+J,+K)" title="(A, B, C, D, E, F, G, H, I, J, K)">(A, B, C, D, E, F, G, H, I, J, K)</a></li><li><a href="#impl-TryFromBytes-for-(A,+B,+C,+D,+E,+F,+G,+H,+I,+J,+K,+L)" title="(A, B, C, D, E, F, G, H, I, J, K, L)">(A, B, C, D, E, F, G, H, I, J, K, L)</a></li><li><a href="#impl-TryFromBytes-for-(A,+B,+C,+D,+E,+F,+G,+H,+I,+J,+K,+L,+M)" title="(A, B, C, D, E, F, G, H, I, J, K, L, M)">(A, B, C, D, E, F, G, H, I, J, K, L, M)</a></li><li><a href="#impl-TryFromBytes-for-(A,+B,+C,+D,+E,+F,+G,+H,+I,+J,+K,+L,+M,+N)" title="(A, B, C, D, E, F, G, H, I, J, K, L, M, N)">(A, B, C, D, E, F, G, H, I, J, K, L, M, N)</a></li><li><a href="#impl-TryFromBytes-for-(A,+B,+C,+D,+E,+F,+G,+H,+I,+J,+K,+L,+M,+N,+O)" title="(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O)">(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O)</a></li><li><a href="#impl-TryFromBytes-for-(A,+B,+C,+D,+E,+F,+G,+H,+I,+J,+K,+L,+M,+N,+O,+P)" title="(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P)">(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P)</a></li><li><a href="#impl-TryFromBytes-for-(A,+B,+C,+D,+E,+F,+G,+H,+I,+J,+K,+L,+M,+N,+O,+P,+Q)" title="(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q)">(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q)</a></li><li><a href="#impl-TryFromBytes-for-(A,+B,+C,+D,+E,+F,+G,+H,+I,+J,+K,+L,+M,+N,+O,+P,+Q,+R)" title="(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R)">(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R)</a></li><li><a href="#impl-TryFromBytes-for-(A,+B,+C,+D,+E,+F,+G,+H,+I,+J,+K,+L,+M,+N,+O,+P,+Q,+R,+S)" title="(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S)">(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S)</a></li><li><a href="#impl-TryFromBytes-for-(A,+B,+C,+D,+E,+F,+G,+H,+I,+J,+K,+L,+M,+N,+O,+P,+Q,+R,+S,+T)" title="(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T)">(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T)</a></li><li><a href="#impl-TryFromBytes-for-(A,+B,+C,+D,+E,+F,+G,+H,+I,+J,+K,+L,+M,+N,+O,+P,+Q,+R,+S,+T,+U)" title="(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U)">(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U)</a></li><li><a href="#impl-TryFromBytes-for-(A,+B,+C,+D,+E,+F,+G,+H,+I,+J,+K,+L,+M,+N,+O,+P,+Q,+R,+S,+T,+U,+V)" title="(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V)">(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V)</a></li><li><a href="#impl-TryFromBytes-for-(A,+B,+C,+D,+E,+F,+G,+H,+I,+J,+K,+L,+M,+N,+O,+P,+Q,+R,+S,+T,+U,+V,+W)" title="(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W)">(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W)</a></li><li><a href="#impl-TryFromBytes-for-(A,+B,+C,+D,+E,+F,+G,+H,+I,+J,+K,+L,+M,+N,+O,+P,+Q,+R,+S,+T,+U,+V,+W,+X)" title="(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X)">(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X)</a></li><li><a href="#impl-TryFromBytes-for-(A,+B,+C,+D,+E,+F,+G,+H,+I,+J,+K,+L,+M,+N,+O,+P,+Q,+R,+S,+T,+U,+V,+W,+X,+Y)" title="(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y)">(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y)</a></li><li><a href="#impl-TryFromBytes-for-(A,+B,+C,+D,+E,+F,+G,+H,+I,+J,+K,+L,+M,+N,+O,+P,+Q,+R,+S,+T,+U,+V,+W,+X,+Y,+Z)" title="(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z)">(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z)</a></li><li><a href="#impl-TryFromBytes-for-(A,)" title="(A,)">(A,)</a></li><li><a href="#impl-TryFromBytes-for-*const+T" title="*const T">*const T</a></li><li><a href="#impl-TryFromBytes-for-*mut+T" title="*mut T">*mut T</a></li><li><a href="#impl-TryFromBytes-for-AtomicBool" title="AtomicBool">AtomicBool</a></li><li><a href="#impl-TryFromBytes-for-AtomicI8" title="AtomicI8">AtomicI8</a></li><li><a href="#impl-TryFromBytes-for-AtomicI16" title="AtomicI16">AtomicI16</a></li><li><a href="#impl-TryFromBytes-for-AtomicI32" title="AtomicI32">AtomicI32</a></li><li><a href="#impl-TryFromBytes-for-AtomicI64" title="AtomicI64">AtomicI64</a></li><li><a href="#impl-TryFromBytes-for-AtomicIsize" title="AtomicIsize">AtomicIsize</a></li><li><a href="#impl-TryFromBytes-for-AtomicPtr%3CT%3E" title="AtomicPtr&#60;T&#62;">AtomicPtr&#60;T&#62;</a></li><li><a href="#impl-TryFromBytes-for-AtomicU8" title="AtomicU8">AtomicU8</a></li><li><a href="#impl-TryFromBytes-for-AtomicU16" title="AtomicU16">AtomicU16</a></li><li><a href="#impl-TryFromBytes-for-AtomicU32" title="AtomicU32">AtomicU32</a></li><li><a href="#impl-TryFromBytes-for-AtomicU64" title="AtomicU64">AtomicU64</a></li><li><a href="#impl-TryFromBytes-for-AtomicUsize" title="AtomicUsize">AtomicUsize</a></li><li><a href="#impl-TryFromBytes-for-Cell%3CT%3E" title="Cell&#60;T&#62;">Cell&#60;T&#62;</a></li><li><a href="#impl-TryFromBytes-for-MaybeUninit%3CT%3E" title="CoreMaybeUninit&#60;T&#62;">CoreMaybeUninit&#60;T&#62;</a></li><li><a href="#impl-TryFromBytes-for-ManuallyDrop%3CT%3E" title="ManuallyDrop&#60;T&#62;">ManuallyDrop&#60;T&#62;</a></li><li><a href="#impl-TryFromBytes-for-NonZero%3Ci8%3E" title="NonZeroI8">NonZeroI8</a></li><li><a href="#impl-TryFromBytes-for-NonZero%3Ci16%3E" title="NonZeroI16">NonZeroI16</a></li><li><a href="#impl-TryFromBytes-for-NonZero%3Ci32%3E" title="NonZeroI32">NonZeroI32</a></li><li><a href="#impl-TryFromBytes-for-NonZero%3Ci64%3E" title="NonZeroI64">NonZeroI64</a></li><li><a href="#impl-TryFromBytes-for-NonZero%3Ci128%3E" title="NonZeroI128">NonZeroI128</a></li><li><a href="#impl-TryFromBytes-for-NonZero%3Cisize%3E" title="NonZeroIsize">NonZeroIsize</a></li><li><a href="#impl-TryFromBytes-for-NonZero%3Cu8%3E" title="NonZeroU8">NonZeroU8</a></li><li><a href="#impl-TryFromBytes-for-NonZero%3Cu16%3E" title="NonZeroU16">NonZeroU16</a></li><li><a href="#impl-TryFromBytes-for-NonZero%3Cu32%3E" title="NonZeroU32">NonZeroU32</a></li><li><a href="#impl-TryFromBytes-for-NonZero%3Cu64%3E" title="NonZeroU64">NonZeroU64</a></li><li><a href="#impl-TryFromBytes-for-NonZero%3Cu128%3E" title="NonZeroU128">NonZeroU128</a></li><li><a href="#impl-TryFromBytes-for-NonZero%3Cusize%3E" title="NonZeroUsize">NonZeroUsize</a></li><li><a href="#impl-TryFromBytes-for-Option%3C%26T%3E" title="Option&#60;&#38;T&#62;">Option&#60;&#38;T&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3C%26mut+T%3E" title="Option&#60;&#38;mut T&#62;">Option&#60;&#38;mut T&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3CNonNull%3CT%3E%3E" title="Option&#60;NonNull&#60;T&#62;&#62;">Option&#60;NonNull&#60;T&#62;&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3CNonZero%3Ci8%3E%3E" title="Option&#60;NonZeroI8&#62;">Option&#60;NonZeroI8&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3CNonZero%3Ci16%3E%3E" title="Option&#60;NonZeroI16&#62;">Option&#60;NonZeroI16&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3CNonZero%3Ci32%3E%3E" title="Option&#60;NonZeroI32&#62;">Option&#60;NonZeroI32&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3CNonZero%3Ci64%3E%3E" title="Option&#60;NonZeroI64&#62;">Option&#60;NonZeroI64&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3CNonZero%3Ci128%3E%3E" title="Option&#60;NonZeroI128&#62;">Option&#60;NonZeroI128&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3CNonZero%3Cisize%3E%3E" title="Option&#60;NonZeroIsize&#62;">Option&#60;NonZeroIsize&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3CNonZero%3Cu8%3E%3E" title="Option&#60;NonZeroU8&#62;">Option&#60;NonZeroU8&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3CNonZero%3Cu16%3E%3E" title="Option&#60;NonZeroU16&#62;">Option&#60;NonZeroU16&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3CNonZero%3Cu32%3E%3E" title="Option&#60;NonZeroU32&#62;">Option&#60;NonZeroU32&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3CNonZero%3Cu64%3E%3E" title="Option&#60;NonZeroU64&#62;">Option&#60;NonZeroU64&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3CNonZero%3Cu128%3E%3E" title="Option&#60;NonZeroU128&#62;">Option&#60;NonZeroU128&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3CNonZero%3Cusize%3E%3E" title="Option&#60;NonZeroUsize&#62;">Option&#60;NonZeroUsize&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cextern+%22C%22+fn()+-%3E+M%3E" title="Option&#60;extern &#34;C&#34; fn() -&#62; M&#62;">Option&#60;extern &#34;C&#34; fn() -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cextern+%22C%22+fn(A,+B,+C,+D,+E,+F,+G,+H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;extern &#34;C&#34; fn(A, B, C, D, E, F, G, H, I, J, K, L) -&#62; M&#62;">Option&#60;extern &#34;C&#34; fn(A, B, C, D, E, F, G, H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cextern+%22C%22+fn(B,+C,+D,+E,+F,+G,+H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;extern &#34;C&#34; fn(B, C, D, E, F, G, H, I, J, K, L) -&#62; M&#62;">Option&#60;extern &#34;C&#34; fn(B, C, D, E, F, G, H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cextern+%22C%22+fn(C,+D,+E,+F,+G,+H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;extern &#34;C&#34; fn(C, D, E, F, G, H, I, J, K, L) -&#62; M&#62;">Option&#60;extern &#34;C&#34; fn(C, D, E, F, G, H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cextern+%22C%22+fn(D,+E,+F,+G,+H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;extern &#34;C&#34; fn(D, E, F, G, H, I, J, K, L) -&#62; M&#62;">Option&#60;extern &#34;C&#34; fn(D, E, F, G, H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cextern+%22C%22+fn(E,+F,+G,+H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;extern &#34;C&#34; fn(E, F, G, H, I, J, K, L) -&#62; M&#62;">Option&#60;extern &#34;C&#34; fn(E, F, G, H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cextern+%22C%22+fn(F,+G,+H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;extern &#34;C&#34; fn(F, G, H, I, J, K, L) -&#62; M&#62;">Option&#60;extern &#34;C&#34; fn(F, G, H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cextern+%22C%22+fn(G,+H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;extern &#34;C&#34; fn(G, H, I, J, K, L) -&#62; M&#62;">Option&#60;extern &#34;C&#34; fn(G, H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cextern+%22C%22+fn(H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;extern &#34;C&#34; fn(H, I, J, K, L) -&#62; M&#62;">Option&#60;extern &#34;C&#34; fn(H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cextern+%22C%22+fn(I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;extern &#34;C&#34; fn(I, J, K, L) -&#62; M&#62;">Option&#60;extern &#34;C&#34; fn(I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cextern+%22C%22+fn(J,+K,+L)+-%3E+M%3E" title="Option&#60;extern &#34;C&#34; fn(J, K, L) -&#62; M&#62;">Option&#60;extern &#34;C&#34; fn(J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cextern+%22C%22+fn(K,+L)+-%3E+M%3E" title="Option&#60;extern &#34;C&#34; fn(K, L) -&#62; M&#62;">Option&#60;extern &#34;C&#34; fn(K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cextern+%22C%22+fn(L)+-%3E+M%3E" title="Option&#60;extern &#34;C&#34; fn(L) -&#62; M&#62;">Option&#60;extern &#34;C&#34; fn(L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cfn()+-%3E+M%3E" title="Option&#60;fn() -&#62; M&#62;">Option&#60;fn() -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cfn(A,+B,+C,+D,+E,+F,+G,+H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;fn(A, B, C, D, E, F, G, H, I, J, K, L) -&#62; M&#62;">Option&#60;fn(A, B, C, D, E, F, G, H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cfn(B,+C,+D,+E,+F,+G,+H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;fn(B, C, D, E, F, G, H, I, J, K, L) -&#62; M&#62;">Option&#60;fn(B, C, D, E, F, G, H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cfn(C,+D,+E,+F,+G,+H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;fn(C, D, E, F, G, H, I, J, K, L) -&#62; M&#62;">Option&#60;fn(C, D, E, F, G, H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cfn(D,+E,+F,+G,+H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;fn(D, E, F, G, H, I, J, K, L) -&#62; M&#62;">Option&#60;fn(D, E, F, G, H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cfn(E,+F,+G,+H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;fn(E, F, G, H, I, J, K, L) -&#62; M&#62;">Option&#60;fn(E, F, G, H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cfn(F,+G,+H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;fn(F, G, H, I, J, K, L) -&#62; M&#62;">Option&#60;fn(F, G, H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cfn(G,+H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;fn(G, H, I, J, K, L) -&#62; M&#62;">Option&#60;fn(G, H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cfn(H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;fn(H, I, J, K, L) -&#62; M&#62;">Option&#60;fn(H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cfn(I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;fn(I, J, K, L) -&#62; M&#62;">Option&#60;fn(I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cfn(J,+K,+L)+-%3E+M%3E" title="Option&#60;fn(J, K, L) -&#62; M&#62;">Option&#60;fn(J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cfn(K,+L)+-%3E+M%3E" title="Option&#60;fn(K, L) -&#62; M&#62;">Option&#60;fn(K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cfn(L)+-%3E+M%3E" title="Option&#60;fn(L) -&#62; M&#62;">Option&#60;fn(L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cunsafe+extern+%22C%22+fn()+-%3E+M%3E" title="Option&#60;unsafe extern &#34;C&#34; fn() -&#62; M&#62;">Option&#60;unsafe extern &#34;C&#34; fn() -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cunsafe+extern+%22C%22+fn(A,+B,+C,+D,+E,+F,+G,+H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;unsafe extern &#34;C&#34; fn(A, B, C, D, E, F, G, H, I, J, K, L) -&#62; M&#62;">Option&#60;unsafe extern &#34;C&#34; fn(A, B, C, D, E, F, G, H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cunsafe+extern+%22C%22+fn(B,+C,+D,+E,+F,+G,+H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;unsafe extern &#34;C&#34; fn(B, C, D, E, F, G, H, I, J, K, L) -&#62; M&#62;">Option&#60;unsafe extern &#34;C&#34; fn(B, C, D, E, F, G, H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cunsafe+extern+%22C%22+fn(C,+D,+E,+F,+G,+H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;unsafe extern &#34;C&#34; fn(C, D, E, F, G, H, I, J, K, L) -&#62; M&#62;">Option&#60;unsafe extern &#34;C&#34; fn(C, D, E, F, G, H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cunsafe+extern+%22C%22+fn(D,+E,+F,+G,+H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;unsafe extern &#34;C&#34; fn(D, E, F, G, H, I, J, K, L) -&#62; M&#62;">Option&#60;unsafe extern &#34;C&#34; fn(D, E, F, G, H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cunsafe+extern+%22C%22+fn(E,+F,+G,+H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;unsafe extern &#34;C&#34; fn(E, F, G, H, I, J, K, L) -&#62; M&#62;">Option&#60;unsafe extern &#34;C&#34; fn(E, F, G, H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cunsafe+extern+%22C%22+fn(F,+G,+H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;unsafe extern &#34;C&#34; fn(F, G, H, I, J, K, L) -&#62; M&#62;">Option&#60;unsafe extern &#34;C&#34; fn(F, G, H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cunsafe+extern+%22C%22+fn(G,+H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;unsafe extern &#34;C&#34; fn(G, H, I, J, K, L) -&#62; M&#62;">Option&#60;unsafe extern &#34;C&#34; fn(G, H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cunsafe+extern+%22C%22+fn(H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;unsafe extern &#34;C&#34; fn(H, I, J, K, L) -&#62; M&#62;">Option&#60;unsafe extern &#34;C&#34; fn(H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cunsafe+extern+%22C%22+fn(I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;unsafe extern &#34;C&#34; fn(I, J, K, L) -&#62; M&#62;">Option&#60;unsafe extern &#34;C&#34; fn(I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cunsafe+extern+%22C%22+fn(J,+K,+L)+-%3E+M%3E" title="Option&#60;unsafe extern &#34;C&#34; fn(J, K, L) -&#62; M&#62;">Option&#60;unsafe extern &#34;C&#34; fn(J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cunsafe+extern+%22C%22+fn(K,+L)+-%3E+M%3E" title="Option&#60;unsafe extern &#34;C&#34; fn(K, L) -&#62; M&#62;">Option&#60;unsafe extern &#34;C&#34; fn(K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cunsafe+extern+%22C%22+fn(L)+-%3E+M%3E" title="Option&#60;unsafe extern &#34;C&#34; fn(L) -&#62; M&#62;">Option&#60;unsafe extern &#34;C&#34; fn(L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cunsafe+fn()+-%3E+M%3E" title="Option&#60;unsafe fn() -&#62; M&#62;">Option&#60;unsafe fn() -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cunsafe+fn(A,+B,+C,+D,+E,+F,+G,+H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;unsafe fn(A, B, C, D, E, F, G, H, I, J, K, L) -&#62; M&#62;">Option&#60;unsafe fn(A, B, C, D, E, F, G, H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cunsafe+fn(B,+C,+D,+E,+F,+G,+H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;unsafe fn(B, C, D, E, F, G, H, I, J, K, L) -&#62; M&#62;">Option&#60;unsafe fn(B, C, D, E, F, G, H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cunsafe+fn(C,+D,+E,+F,+G,+H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;unsafe fn(C, D, E, F, G, H, I, J, K, L) -&#62; M&#62;">Option&#60;unsafe fn(C, D, E, F, G, H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cunsafe+fn(D,+E,+F,+G,+H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;unsafe fn(D, E, F, G, H, I, J, K, L) -&#62; M&#62;">Option&#60;unsafe fn(D, E, F, G, H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cunsafe+fn(E,+F,+G,+H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;unsafe fn(E, F, G, H, I, J, K, L) -&#62; M&#62;">Option&#60;unsafe fn(E, F, G, H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cunsafe+fn(F,+G,+H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;unsafe fn(F, G, H, I, J, K, L) -&#62; M&#62;">Option&#60;unsafe fn(F, G, H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cunsafe+fn(G,+H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;unsafe fn(G, H, I, J, K, L) -&#62; M&#62;">Option&#60;unsafe fn(G, H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cunsafe+fn(H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;unsafe fn(H, I, J, K, L) -&#62; M&#62;">Option&#60;unsafe fn(H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cunsafe+fn(I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;unsafe fn(I, J, K, L) -&#62; M&#62;">Option&#60;unsafe fn(I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cunsafe+fn(J,+K,+L)+-%3E+M%3E" title="Option&#60;unsafe fn(J, K, L) -&#62; M&#62;">Option&#60;unsafe fn(J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cunsafe+fn(K,+L)+-%3E+M%3E" title="Option&#60;unsafe fn(K, L) -&#62; M&#62;">Option&#60;unsafe fn(K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cunsafe+fn(L)+-%3E+M%3E" title="Option&#60;unsafe fn(L) -&#62; M&#62;">Option&#60;unsafe fn(L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-PhantomData%3CT%3E" title="PhantomData&#60;T&#62;">PhantomData&#60;T&#62;</a></li><li><a href="#impl-TryFromBytes-for-UnsafeCell%3CT%3E" title="UnsafeCell&#60;T&#62;">UnsafeCell&#60;T&#62;</a></li><li><a href="#impl-TryFromBytes-for-Wrapping%3CT%3E" title="Wrapping&#60;T&#62;">Wrapping&#60;T&#62;</a></li><li><a href="#impl-TryFromBytes-for-%5BT;+N%5D" title="[T; N]">[T; N]</a></li><li><a href="#impl-TryFromBytes-for-%5BT%5D" title="[T]">[T]</a></li><li><a href="#impl-TryFromBytes-for-__m128" title="__m128">__m128</a></li><li><a href="#impl-TryFromBytes-for-__m256" title="__m256">__m256</a></li><li><a href="#impl-TryFromBytes-for-__m512" title="__m512">__m512</a></li><li><a href="#impl-TryFromBytes-for-__m128d" title="__m128d">__m128d</a></li><li><a href="#impl-TryFromBytes-for-__m128i" title="__m128i">__m128i</a></li><li><a href="#impl-TryFromBytes-for-__m256d" title="__m256d">__m256d</a></li><li><a href="#impl-TryFromBytes-for-__m256i" title="__m256i">__m256i</a></li><li><a href="#impl-TryFromBytes-for-__m512bh" title="__m512bh">__m512bh</a></li><li><a href="#impl-TryFromBytes-for-__m512d" title="__m512d">__m512d</a></li><li><a href="#impl-TryFromBytes-for-__m512i" title="__m512i">__m512i</a></li><li><a href="#impl-TryFromBytes-for-bool" title="bool">bool</a></li><li><a href="#impl-TryFromBytes-for-char" title="char">char</a></li><li><a href="#impl-TryFromBytes-for-f32" title="f32">f32</a></li><li><a href="#impl-TryFromBytes-for-f64" title="f64">f64</a></li><li><a href="#impl-TryFromBytes-for-i8" title="i8">i8</a></li><li><a href="#impl-TryFromBytes-for-i16" title="i16">i16</a></li><li><a href="#impl-TryFromBytes-for-i32" title="i32">i32</a></li><li><a href="#impl-TryFromBytes-for-i64" title="i64">i64</a></li><li><a href="#impl-TryFromBytes-for-i128" title="i128">i128</a></li><li><a href="#impl-TryFromBytes-for-isize" title="isize">isize</a></li><li><a href="#impl-TryFromBytes-for-str" title="str">str</a></li><li><a href="#impl-TryFromBytes-for-u8" title="u8">u8</a></li><li><a href="#impl-TryFromBytes-for-u16" title="u16">u16</a></li><li><a href="#impl-TryFromBytes-for-u32" title="u32">u32</a></li><li><a href="#impl-TryFromBytes-for-u64" title="u64">u64</a></li><li><a href="#impl-TryFromBytes-for-u128" title="u128">u128</a></li><li><a href="#impl-TryFromBytes-for-usize" title="usize">usize</a></li></ul><h3><a href="#dyn-compatibility">Dyn Compatibility</a></h3><h3><a href="#implementors">Implementors</a></h3></section><div id="rustdoc-modnav"><h2 class="in-crate"><a href="index.html">In crate zerocopy</a></h2></div></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><div class="width-limiter"><section id="main-content" class="content"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="index.html">zerocopy</a></div><h1>Trait <span class="trait">TryFrom<wbr>Bytes</span>&nbsp;<button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../src/zerocopy/lib.rs.html#1686-3223">Source</a> </span></div><pre class="rust item-decl"><code>pub unsafe trait TryFromBytes {
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Types for which some bit patterns are valid."><title>TryFromBytes in zerocopy - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../static.files/rustdoc-77263533.css"><meta name="rustdoc-vars" data-root-path="../" data-static-root-path="../static.files/" data-current-crate="zerocopy" data-themes="" data-resource-suffix="" data-rustdoc-version="1.94.0 (4a4ef493e 2026-03-02)" data-channel="1.94.0" data-search-js="search-9e2438ea.js" data-stringdex-js="stringdex-b897f86f.js" data-settings-js="settings-c38705f0.js" ><script src="../static.files/storage-e2aeef58.js"></script><script defer src="sidebar-items.js"></script><script defer src="../static.files/main-7bab91a1.js"></script><noscript><link rel="stylesheet" href="../static.files/noscript-ffcac47a.css"></noscript><link rel="alternate icon" type="image/png" href="../static.files/favicon-32x32-eab170b8.png"><link rel="icon" type="image/svg+xml" href="../static.files/favicon-044be391.svg"></head><body class="rustdoc trait"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><rustdoc-topbar><h2><a href="#">TryFromBytes</a></h2></rustdoc-topbar><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../zerocopy/index.html">zerocopy</a><span class="version">0.8.47</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">TryFrom<wbr>Bytes</a></h2><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#implementation" title="Implementation">Implementation</a></li><li><a href="#what-is-a-valid-instance" title="What is a “valid instance”?">What is a “valid instance”?</a></li><li><a href="#tryfrombytes-is-not-symmetrical-with-intobytes" title="`TryFromBytes` is not symmetrical with `IntoBytes`"><code>TryFromBytes</code> is not symmetrical with <code>IntoBytes</code></a></li><li><a href="#safety" title="Safety">Safety</a></li></ul><h3><a href="#provided-methods">Provided Methods</a></h3><ul class="block"><li><a href="#method.try_mut_from_bytes" title="try_mut_from_bytes">try_mut_from_bytes</a></li><li><a href="#method.try_mut_from_bytes_with_elems" title="try_mut_from_bytes_with_elems">try_mut_from_bytes_with_elems</a></li><li><a href="#method.try_mut_from_prefix" title="try_mut_from_prefix">try_mut_from_prefix</a></li><li><a href="#method.try_mut_from_prefix_with_elems" title="try_mut_from_prefix_with_elems">try_mut_from_prefix_with_elems</a></li><li><a href="#method.try_mut_from_suffix" title="try_mut_from_suffix">try_mut_from_suffix</a></li><li><a href="#method.try_mut_from_suffix_with_elems" title="try_mut_from_suffix_with_elems">try_mut_from_suffix_with_elems</a></li><li><a href="#method.try_read_from_bytes" title="try_read_from_bytes">try_read_from_bytes</a></li><li><a href="#method.try_read_from_prefix" title="try_read_from_prefix">try_read_from_prefix</a></li><li><a href="#method.try_read_from_suffix" title="try_read_from_suffix">try_read_from_suffix</a></li><li><a href="#method.try_ref_from_bytes" title="try_ref_from_bytes">try_ref_from_bytes</a></li><li><a href="#method.try_ref_from_bytes_with_elems" title="try_ref_from_bytes_with_elems">try_ref_from_bytes_with_elems</a></li><li><a href="#method.try_ref_from_prefix" title="try_ref_from_prefix">try_ref_from_prefix</a></li><li><a href="#method.try_ref_from_prefix_with_elems" title="try_ref_from_prefix_with_elems">try_ref_from_prefix_with_elems</a></li><li><a href="#method.try_ref_from_suffix" title="try_ref_from_suffix">try_ref_from_suffix</a></li><li><a href="#method.try_ref_from_suffix_with_elems" title="try_ref_from_suffix_with_elems">try_ref_from_suffix_with_elems</a></li></ul><h3><a href="#foreign-impls">Implementations on Foreign Types</a></h3><ul class="block"><li><a href="#impl-TryFromBytes-for-()" title="()">()</a></li><li><a href="#impl-TryFromBytes-for-(A,+B)" title="(A, B)">(A, B)</a></li><li><a href="#impl-TryFromBytes-for-(A,+B,+C)" title="(A, B, C)">(A, B, C)</a></li><li><a href="#impl-TryFromBytes-for-(A,+B,+C,+D)" title="(A, B, C, D)">(A, B, C, D)</a></li><li><a href="#impl-TryFromBytes-for-(A,+B,+C,+D,+E)" title="(A, B, C, D, E)">(A, B, C, D, E)</a></li><li><a href="#impl-TryFromBytes-for-(A,+B,+C,+D,+E,+F)" title="(A, B, C, D, E, F)">(A, B, C, D, E, F)</a></li><li><a href="#impl-TryFromBytes-for-(A,+B,+C,+D,+E,+F,+G)" title="(A, B, C, D, E, F, G)">(A, B, C, D, E, F, G)</a></li><li><a href="#impl-TryFromBytes-for-(A,+B,+C,+D,+E,+F,+G,+H)" title="(A, B, C, D, E, F, G, H)">(A, B, C, D, E, F, G, H)</a></li><li><a href="#impl-TryFromBytes-for-(A,+B,+C,+D,+E,+F,+G,+H,+I)" title="(A, B, C, D, E, F, G, H, I)">(A, B, C, D, E, F, G, H, I)</a></li><li><a href="#impl-TryFromBytes-for-(A,+B,+C,+D,+E,+F,+G,+H,+I,+J)" title="(A, B, C, D, E, F, G, H, I, J)">(A, B, C, D, E, F, G, H, I, J)</a></li><li><a href="#impl-TryFromBytes-for-(A,+B,+C,+D,+E,+F,+G,+H,+I,+J,+K)" title="(A, B, C, D, E, F, G, H, I, J, K)">(A, B, C, D, E, F, G, H, I, J, K)</a></li><li><a href="#impl-TryFromBytes-for-(A,+B,+C,+D,+E,+F,+G,+H,+I,+J,+K,+L)" title="(A, B, C, D, E, F, G, H, I, J, K, L)">(A, B, C, D, E, F, G, H, I, J, K, L)</a></li><li><a href="#impl-TryFromBytes-for-(A,+B,+C,+D,+E,+F,+G,+H,+I,+J,+K,+L,+M)" title="(A, B, C, D, E, F, G, H, I, J, K, L, M)">(A, B, C, D, E, F, G, H, I, J, K, L, M)</a></li><li><a href="#impl-TryFromBytes-for-(A,+B,+C,+D,+E,+F,+G,+H,+I,+J,+K,+L,+M,+N)" title="(A, B, C, D, E, F, G, H, I, J, K, L, M, N)">(A, B, C, D, E, F, G, H, I, J, K, L, M, N)</a></li><li><a href="#impl-TryFromBytes-for-(A,+B,+C,+D,+E,+F,+G,+H,+I,+J,+K,+L,+M,+N,+O)" title="(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O)">(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O)</a></li><li><a href="#impl-TryFromBytes-for-(A,+B,+C,+D,+E,+F,+G,+H,+I,+J,+K,+L,+M,+N,+O,+P)" title="(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P)">(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P)</a></li><li><a href="#impl-TryFromBytes-for-(A,+B,+C,+D,+E,+F,+G,+H,+I,+J,+K,+L,+M,+N,+O,+P,+Q)" title="(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q)">(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q)</a></li><li><a href="#impl-TryFromBytes-for-(A,+B,+C,+D,+E,+F,+G,+H,+I,+J,+K,+L,+M,+N,+O,+P,+Q,+R)" title="(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R)">(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R)</a></li><li><a href="#impl-TryFromBytes-for-(A,+B,+C,+D,+E,+F,+G,+H,+I,+J,+K,+L,+M,+N,+O,+P,+Q,+R,+S)" title="(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S)">(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S)</a></li><li><a href="#impl-TryFromBytes-for-(A,+B,+C,+D,+E,+F,+G,+H,+I,+J,+K,+L,+M,+N,+O,+P,+Q,+R,+S,+T)" title="(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T)">(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T)</a></li><li><a href="#impl-TryFromBytes-for-(A,+B,+C,+D,+E,+F,+G,+H,+I,+J,+K,+L,+M,+N,+O,+P,+Q,+R,+S,+T,+U)" title="(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U)">(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U)</a></li><li><a href="#impl-TryFromBytes-for-(A,+B,+C,+D,+E,+F,+G,+H,+I,+J,+K,+L,+M,+N,+O,+P,+Q,+R,+S,+T,+U,+V)" title="(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V)">(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V)</a></li><li><a href="#impl-TryFromBytes-for-(A,+B,+C,+D,+E,+F,+G,+H,+I,+J,+K,+L,+M,+N,+O,+P,+Q,+R,+S,+T,+U,+V,+W)" title="(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W)">(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W)</a></li><li><a href="#impl-TryFromBytes-for-(A,+B,+C,+D,+E,+F,+G,+H,+I,+J,+K,+L,+M,+N,+O,+P,+Q,+R,+S,+T,+U,+V,+W,+X)" title="(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X)">(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X)</a></li><li><a href="#impl-TryFromBytes-for-(A,+B,+C,+D,+E,+F,+G,+H,+I,+J,+K,+L,+M,+N,+O,+P,+Q,+R,+S,+T,+U,+V,+W,+X,+Y)" title="(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y)">(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y)</a></li><li><a href="#impl-TryFromBytes-for-(A,+B,+C,+D,+E,+F,+G,+H,+I,+J,+K,+L,+M,+N,+O,+P,+Q,+R,+S,+T,+U,+V,+W,+X,+Y,+Z)" title="(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z)">(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z)</a></li><li><a href="#impl-TryFromBytes-for-(A,)" title="(A,)">(A,)</a></li><li><a href="#impl-TryFromBytes-for-*const+T" title="*const T">*const T</a></li><li><a href="#impl-TryFromBytes-for-*mut+T" title="*mut T">*mut T</a></li><li><a href="#impl-TryFromBytes-for-AtomicBool" title="AtomicBool">AtomicBool</a></li><li><a href="#impl-TryFromBytes-for-AtomicI8" title="AtomicI8">AtomicI8</a></li><li><a href="#impl-TryFromBytes-for-AtomicI16" title="AtomicI16">AtomicI16</a></li><li><a href="#impl-TryFromBytes-for-AtomicI32" title="AtomicI32">AtomicI32</a></li><li><a href="#impl-TryFromBytes-for-AtomicI64" title="AtomicI64">AtomicI64</a></li><li><a href="#impl-TryFromBytes-for-AtomicIsize" title="AtomicIsize">AtomicIsize</a></li><li><a href="#impl-TryFromBytes-for-AtomicPtr%3CT%3E" title="AtomicPtr&#60;T&#62;">AtomicPtr&#60;T&#62;</a></li><li><a href="#impl-TryFromBytes-for-AtomicU8" title="AtomicU8">AtomicU8</a></li><li><a href="#impl-TryFromBytes-for-AtomicU16" title="AtomicU16">AtomicU16</a></li><li><a href="#impl-TryFromBytes-for-AtomicU32" title="AtomicU32">AtomicU32</a></li><li><a href="#impl-TryFromBytes-for-AtomicU64" title="AtomicU64">AtomicU64</a></li><li><a href="#impl-TryFromBytes-for-AtomicUsize" title="AtomicUsize">AtomicUsize</a></li><li><a href="#impl-TryFromBytes-for-Cell%3CT%3E" title="Cell&#60;T&#62;">Cell&#60;T&#62;</a></li><li><a href="#impl-TryFromBytes-for-MaybeUninit%3CT%3E" title="CoreMaybeUninit&#60;T&#62;">CoreMaybeUninit&#60;T&#62;</a></li><li><a href="#impl-TryFromBytes-for-ManuallyDrop%3CT%3E" title="ManuallyDrop&#60;T&#62;">ManuallyDrop&#60;T&#62;</a></li><li><a href="#impl-TryFromBytes-for-NonZero%3Ci8%3E" title="NonZeroI8">NonZeroI8</a></li><li><a href="#impl-TryFromBytes-for-NonZero%3Ci16%3E" title="NonZeroI16">NonZeroI16</a></li><li><a href="#impl-TryFromBytes-for-NonZero%3Ci32%3E" title="NonZeroI32">NonZeroI32</a></li><li><a href="#impl-TryFromBytes-for-NonZero%3Ci64%3E" title="NonZeroI64">NonZeroI64</a></li><li><a href="#impl-TryFromBytes-for-NonZero%3Ci128%3E" title="NonZeroI128">NonZeroI128</a></li><li><a href="#impl-TryFromBytes-for-NonZero%3Cisize%3E" title="NonZeroIsize">NonZeroIsize</a></li><li><a href="#impl-TryFromBytes-for-NonZero%3Cu8%3E" title="NonZeroU8">NonZeroU8</a></li><li><a href="#impl-TryFromBytes-for-NonZero%3Cu16%3E" title="NonZeroU16">NonZeroU16</a></li><li><a href="#impl-TryFromBytes-for-NonZero%3Cu32%3E" title="NonZeroU32">NonZeroU32</a></li><li><a href="#impl-TryFromBytes-for-NonZero%3Cu64%3E" title="NonZeroU64">NonZeroU64</a></li><li><a href="#impl-TryFromBytes-for-NonZero%3Cu128%3E" title="NonZeroU128">NonZeroU128</a></li><li><a href="#impl-TryFromBytes-for-NonZero%3Cusize%3E" title="NonZeroUsize">NonZeroUsize</a></li><li><a href="#impl-TryFromBytes-for-Option%3C%26T%3E" title="Option&#60;&#38;T&#62;">Option&#60;&#38;T&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3C%26mut+T%3E" title="Option&#60;&#38;mut T&#62;">Option&#60;&#38;mut T&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3CNonNull%3CT%3E%3E" title="Option&#60;NonNull&#60;T&#62;&#62;">Option&#60;NonNull&#60;T&#62;&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3CNonZero%3Ci8%3E%3E" title="Option&#60;NonZeroI8&#62;">Option&#60;NonZeroI8&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3CNonZero%3Ci16%3E%3E" title="Option&#60;NonZeroI16&#62;">Option&#60;NonZeroI16&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3CNonZero%3Ci32%3E%3E" title="Option&#60;NonZeroI32&#62;">Option&#60;NonZeroI32&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3CNonZero%3Ci64%3E%3E" title="Option&#60;NonZeroI64&#62;">Option&#60;NonZeroI64&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3CNonZero%3Ci128%3E%3E" title="Option&#60;NonZeroI128&#62;">Option&#60;NonZeroI128&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3CNonZero%3Cisize%3E%3E" title="Option&#60;NonZeroIsize&#62;">Option&#60;NonZeroIsize&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3CNonZero%3Cu8%3E%3E" title="Option&#60;NonZeroU8&#62;">Option&#60;NonZeroU8&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3CNonZero%3Cu16%3E%3E" title="Option&#60;NonZeroU16&#62;">Option&#60;NonZeroU16&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3CNonZero%3Cu32%3E%3E" title="Option&#60;NonZeroU32&#62;">Option&#60;NonZeroU32&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3CNonZero%3Cu64%3E%3E" title="Option&#60;NonZeroU64&#62;">Option&#60;NonZeroU64&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3CNonZero%3Cu128%3E%3E" title="Option&#60;NonZeroU128&#62;">Option&#60;NonZeroU128&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3CNonZero%3Cusize%3E%3E" title="Option&#60;NonZeroUsize&#62;">Option&#60;NonZeroUsize&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cextern+%22C%22+fn()+-%3E+M%3E" title="Option&#60;extern &#34;C&#34; fn() -&#62; M&#62;">Option&#60;extern &#34;C&#34; fn() -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cextern+%22C%22+fn(A,+B,+C,+D,+E,+F,+G,+H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;extern &#34;C&#34; fn(A, B, C, D, E, F, G, H, I, J, K, L) -&#62; M&#62;">Option&#60;extern &#34;C&#34; fn(A, B, C, D, E, F, G, H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cextern+%22C%22+fn(B,+C,+D,+E,+F,+G,+H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;extern &#34;C&#34; fn(B, C, D, E, F, G, H, I, J, K, L) -&#62; M&#62;">Option&#60;extern &#34;C&#34; fn(B, C, D, E, F, G, H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cextern+%22C%22+fn(C,+D,+E,+F,+G,+H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;extern &#34;C&#34; fn(C, D, E, F, G, H, I, J, K, L) -&#62; M&#62;">Option&#60;extern &#34;C&#34; fn(C, D, E, F, G, H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cextern+%22C%22+fn(D,+E,+F,+G,+H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;extern &#34;C&#34; fn(D, E, F, G, H, I, J, K, L) -&#62; M&#62;">Option&#60;extern &#34;C&#34; fn(D, E, F, G, H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cextern+%22C%22+fn(E,+F,+G,+H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;extern &#34;C&#34; fn(E, F, G, H, I, J, K, L) -&#62; M&#62;">Option&#60;extern &#34;C&#34; fn(E, F, G, H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cextern+%22C%22+fn(F,+G,+H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;extern &#34;C&#34; fn(F, G, H, I, J, K, L) -&#62; M&#62;">Option&#60;extern &#34;C&#34; fn(F, G, H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cextern+%22C%22+fn(G,+H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;extern &#34;C&#34; fn(G, H, I, J, K, L) -&#62; M&#62;">Option&#60;extern &#34;C&#34; fn(G, H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cextern+%22C%22+fn(H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;extern &#34;C&#34; fn(H, I, J, K, L) -&#62; M&#62;">Option&#60;extern &#34;C&#34; fn(H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cextern+%22C%22+fn(I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;extern &#34;C&#34; fn(I, J, K, L) -&#62; M&#62;">Option&#60;extern &#34;C&#34; fn(I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cextern+%22C%22+fn(J,+K,+L)+-%3E+M%3E" title="Option&#60;extern &#34;C&#34; fn(J, K, L) -&#62; M&#62;">Option&#60;extern &#34;C&#34; fn(J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cextern+%22C%22+fn(K,+L)+-%3E+M%3E" title="Option&#60;extern &#34;C&#34; fn(K, L) -&#62; M&#62;">Option&#60;extern &#34;C&#34; fn(K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cextern+%22C%22+fn(L)+-%3E+M%3E" title="Option&#60;extern &#34;C&#34; fn(L) -&#62; M&#62;">Option&#60;extern &#34;C&#34; fn(L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cfn()+-%3E+M%3E" title="Option&#60;fn() -&#62; M&#62;">Option&#60;fn() -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cfn(A,+B,+C,+D,+E,+F,+G,+H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;fn(A, B, C, D, E, F, G, H, I, J, K, L) -&#62; M&#62;">Option&#60;fn(A, B, C, D, E, F, G, H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cfn(B,+C,+D,+E,+F,+G,+H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;fn(B, C, D, E, F, G, H, I, J, K, L) -&#62; M&#62;">Option&#60;fn(B, C, D, E, F, G, H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cfn(C,+D,+E,+F,+G,+H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;fn(C, D, E, F, G, H, I, J, K, L) -&#62; M&#62;">Option&#60;fn(C, D, E, F, G, H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cfn(D,+E,+F,+G,+H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;fn(D, E, F, G, H, I, J, K, L) -&#62; M&#62;">Option&#60;fn(D, E, F, G, H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cfn(E,+F,+G,+H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;fn(E, F, G, H, I, J, K, L) -&#62; M&#62;">Option&#60;fn(E, F, G, H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cfn(F,+G,+H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;fn(F, G, H, I, J, K, L) -&#62; M&#62;">Option&#60;fn(F, G, H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cfn(G,+H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;fn(G, H, I, J, K, L) -&#62; M&#62;">Option&#60;fn(G, H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cfn(H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;fn(H, I, J, K, L) -&#62; M&#62;">Option&#60;fn(H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cfn(I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;fn(I, J, K, L) -&#62; M&#62;">Option&#60;fn(I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cfn(J,+K,+L)+-%3E+M%3E" title="Option&#60;fn(J, K, L) -&#62; M&#62;">Option&#60;fn(J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cfn(K,+L)+-%3E+M%3E" title="Option&#60;fn(K, L) -&#62; M&#62;">Option&#60;fn(K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cfn(L)+-%3E+M%3E" title="Option&#60;fn(L) -&#62; M&#62;">Option&#60;fn(L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cunsafe+extern+%22C%22+fn()+-%3E+M%3E" title="Option&#60;unsafe extern &#34;C&#34; fn() -&#62; M&#62;">Option&#60;unsafe extern &#34;C&#34; fn() -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cunsafe+extern+%22C%22+fn(A,+B,+C,+D,+E,+F,+G,+H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;unsafe extern &#34;C&#34; fn(A, B, C, D, E, F, G, H, I, J, K, L) -&#62; M&#62;">Option&#60;unsafe extern &#34;C&#34; fn(A, B, C, D, E, F, G, H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cunsafe+extern+%22C%22+fn(B,+C,+D,+E,+F,+G,+H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;unsafe extern &#34;C&#34; fn(B, C, D, E, F, G, H, I, J, K, L) -&#62; M&#62;">Option&#60;unsafe extern &#34;C&#34; fn(B, C, D, E, F, G, H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cunsafe+extern+%22C%22+fn(C,+D,+E,+F,+G,+H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;unsafe extern &#34;C&#34; fn(C, D, E, F, G, H, I, J, K, L) -&#62; M&#62;">Option&#60;unsafe extern &#34;C&#34; fn(C, D, E, F, G, H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cunsafe+extern+%22C%22+fn(D,+E,+F,+G,+H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;unsafe extern &#34;C&#34; fn(D, E, F, G, H, I, J, K, L) -&#62; M&#62;">Option&#60;unsafe extern &#34;C&#34; fn(D, E, F, G, H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cunsafe+extern+%22C%22+fn(E,+F,+G,+H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;unsafe extern &#34;C&#34; fn(E, F, G, H, I, J, K, L) -&#62; M&#62;">Option&#60;unsafe extern &#34;C&#34; fn(E, F, G, H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cunsafe+extern+%22C%22+fn(F,+G,+H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;unsafe extern &#34;C&#34; fn(F, G, H, I, J, K, L) -&#62; M&#62;">Option&#60;unsafe extern &#34;C&#34; fn(F, G, H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cunsafe+extern+%22C%22+fn(G,+H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;unsafe extern &#34;C&#34; fn(G, H, I, J, K, L) -&#62; M&#62;">Option&#60;unsafe extern &#34;C&#34; fn(G, H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cunsafe+extern+%22C%22+fn(H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;unsafe extern &#34;C&#34; fn(H, I, J, K, L) -&#62; M&#62;">Option&#60;unsafe extern &#34;C&#34; fn(H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cunsafe+extern+%22C%22+fn(I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;unsafe extern &#34;C&#34; fn(I, J, K, L) -&#62; M&#62;">Option&#60;unsafe extern &#34;C&#34; fn(I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cunsafe+extern+%22C%22+fn(J,+K,+L)+-%3E+M%3E" title="Option&#60;unsafe extern &#34;C&#34; fn(J, K, L) -&#62; M&#62;">Option&#60;unsafe extern &#34;C&#34; fn(J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cunsafe+extern+%22C%22+fn(K,+L)+-%3E+M%3E" title="Option&#60;unsafe extern &#34;C&#34; fn(K, L) -&#62; M&#62;">Option&#60;unsafe extern &#34;C&#34; fn(K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cunsafe+extern+%22C%22+fn(L)+-%3E+M%3E" title="Option&#60;unsafe extern &#34;C&#34; fn(L) -&#62; M&#62;">Option&#60;unsafe extern &#34;C&#34; fn(L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cunsafe+fn()+-%3E+M%3E" title="Option&#60;unsafe fn() -&#62; M&#62;">Option&#60;unsafe fn() -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cunsafe+fn(A,+B,+C,+D,+E,+F,+G,+H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;unsafe fn(A, B, C, D, E, F, G, H, I, J, K, L) -&#62; M&#62;">Option&#60;unsafe fn(A, B, C, D, E, F, G, H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cunsafe+fn(B,+C,+D,+E,+F,+G,+H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;unsafe fn(B, C, D, E, F, G, H, I, J, K, L) -&#62; M&#62;">Option&#60;unsafe fn(B, C, D, E, F, G, H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cunsafe+fn(C,+D,+E,+F,+G,+H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;unsafe fn(C, D, E, F, G, H, I, J, K, L) -&#62; M&#62;">Option&#60;unsafe fn(C, D, E, F, G, H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cunsafe+fn(D,+E,+F,+G,+H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;unsafe fn(D, E, F, G, H, I, J, K, L) -&#62; M&#62;">Option&#60;unsafe fn(D, E, F, G, H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cunsafe+fn(E,+F,+G,+H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;unsafe fn(E, F, G, H, I, J, K, L) -&#62; M&#62;">Option&#60;unsafe fn(E, F, G, H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cunsafe+fn(F,+G,+H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;unsafe fn(F, G, H, I, J, K, L) -&#62; M&#62;">Option&#60;unsafe fn(F, G, H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cunsafe+fn(G,+H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;unsafe fn(G, H, I, J, K, L) -&#62; M&#62;">Option&#60;unsafe fn(G, H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cunsafe+fn(H,+I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;unsafe fn(H, I, J, K, L) -&#62; M&#62;">Option&#60;unsafe fn(H, I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cunsafe+fn(I,+J,+K,+L)+-%3E+M%3E" title="Option&#60;unsafe fn(I, J, K, L) -&#62; M&#62;">Option&#60;unsafe fn(I, J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cunsafe+fn(J,+K,+L)+-%3E+M%3E" title="Option&#60;unsafe fn(J, K, L) -&#62; M&#62;">Option&#60;unsafe fn(J, K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cunsafe+fn(K,+L)+-%3E+M%3E" title="Option&#60;unsafe fn(K, L) -&#62; M&#62;">Option&#60;unsafe fn(K, L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-Option%3Cunsafe+fn(L)+-%3E+M%3E" title="Option&#60;unsafe fn(L) -&#62; M&#62;">Option&#60;unsafe fn(L) -&#62; M&#62;</a></li><li><a href="#impl-TryFromBytes-for-PhantomData%3CT%3E" title="PhantomData&#60;T&#62;">PhantomData&#60;T&#62;</a></li><li><a href="#impl-TryFromBytes-for-UnsafeCell%3CT%3E" title="UnsafeCell&#60;T&#62;">UnsafeCell&#60;T&#62;</a></li><li><a href="#impl-TryFromBytes-for-Wrapping%3CT%3E" title="Wrapping&#60;T&#62;">Wrapping&#60;T&#62;</a></li><li><a href="#impl-TryFromBytes-for-%5BT;+N%5D" title="[T; N]">[T; N]</a></li><li><a href="#impl-TryFromBytes-for-%5BT%5D" title="[T]">[T]</a></li><li><a href="#impl-TryFromBytes-for-__m128" title="__m128">__m128</a></li><li><a href="#impl-TryFromBytes-for-__m256" title="__m256">__m256</a></li><li><a href="#impl-TryFromBytes-for-__m512" title="__m512">__m512</a></li><li><a href="#impl-TryFromBytes-for-__m128d" title="__m128d">__m128d</a></li><li><a href="#impl-TryFromBytes-for-__m128i" title="__m128i">__m128i</a></li><li><a href="#impl-TryFromBytes-for-__m256d" title="__m256d">__m256d</a></li><li><a href="#impl-TryFromBytes-for-__m256i" title="__m256i">__m256i</a></li><li><a href="#impl-TryFromBytes-for-__m512bh" title="__m512bh">__m512bh</a></li><li><a href="#impl-TryFromBytes-for-__m512d" title="__m512d">__m512d</a></li><li><a href="#impl-TryFromBytes-for-__m512i" title="__m512i">__m512i</a></li><li><a href="#impl-TryFromBytes-for-bool" title="bool">bool</a></li><li><a href="#impl-TryFromBytes-for-char" title="char">char</a></li><li><a href="#impl-TryFromBytes-for-f32" title="f32">f32</a></li><li><a href="#impl-TryFromBytes-for-f64" title="f64">f64</a></li><li><a href="#impl-TryFromBytes-for-i8" title="i8">i8</a></li><li><a href="#impl-TryFromBytes-for-i16" title="i16">i16</a></li><li><a href="#impl-TryFromBytes-for-i32" title="i32">i32</a></li><li><a href="#impl-TryFromBytes-for-i64" title="i64">i64</a></li><li><a href="#impl-TryFromBytes-for-i128" title="i128">i128</a></li><li><a href="#impl-TryFromBytes-for-isize" title="isize">isize</a></li><li><a href="#impl-TryFromBytes-for-str" title="str">str</a></li><li><a href="#impl-TryFromBytes-for-u8" title="u8">u8</a></li><li><a href="#impl-TryFromBytes-for-u16" title="u16">u16</a></li><li><a href="#impl-TryFromBytes-for-u32" title="u32">u32</a></li><li><a href="#impl-TryFromBytes-for-u64" title="u64">u64</a></li><li><a href="#impl-TryFromBytes-for-u128" title="u128">u128</a></li><li><a href="#impl-TryFromBytes-for-usize" title="usize">usize</a></li></ul><h3><a href="#dyn-compatibility">Dyn Compatibility</a></h3><h3><a href="#implementors">Implementors</a></h3></section><div id="rustdoc-modnav"><h2 class="in-crate"><a href="index.html">In crate zerocopy</a></h2></div></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><div class="width-limiter"><section id="main-content" class="content"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="index.html">zerocopy</a></div><h1>Trait <span class="trait">TryFrom<wbr>Bytes</span>&nbsp;<button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../src/zerocopy/lib.rs.html#1686-3221">Source</a> </span></div><pre class="rust item-decl"><code>pub unsafe trait TryFromBytes {
 <details class="toggle type-contents-toggle"><summary class="hideme"><span>Show 15 methods</span></summary>    // Provided methods
     fn <a href="#method.try_ref_from_bytes" class="fn">try_ref_from_bytes</a>(
         source: &amp;[<a class="primitive" href="https://doc.rust-lang.org/1.94.0/core/primitive.u8.html">u8</a>],
@@ -75,7 +75,7 @@ bytes corresponds to a <a href="#what-is-a-valid-instance"><em>valid instance</e
 <code>1</code>.</p>
 <h2 id="implementation"><a class="doc-anchor" href="#implementation">§</a>Implementation</h2>
 <p><strong>Do not implement this trait yourself!</strong> Instead, use
-<a href="https://docs.rs/zerocopy/0.8.41/zerocopy/derive.TryFromBytes.html"><code>#[derive(TryFromBytes)]</code></a>; e.g.:</p>
+<a href="https://docs.rs/zerocopy/0.8.47/zerocopy/derive.TryFromBytes.html"><code>#[derive(TryFromBytes)]</code></a>; e.g.:</p>
 
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="attr">#[derive(TryFromBytes)]
 </span><span class="kw">struct </span>MyStruct {
@@ -128,7 +128,7 @@ validity check at runtime via methods like <a href="trait.TryFromBytes.html#meth
 Future releases of zerocopy may make backwards-breaking changes to these
 items, including changes that only affect soundness, which may cause code
 which uses those items to silently become unsound.</p>
-</div></details><h2 id="provided-methods" class="section-header">Provided Methods<a href="#provided-methods" class="anchor">§</a></h2><div class="methods"><details class="toggle method-toggle" open><summary><section id="method.try_ref_from_bytes" class="method"><a class="src rightside" href="../src/zerocopy/lib.rs.html#1820-1839">Source</a><h4 class="code-header">fn <a href="#method.try_ref_from_bytes" class="fn">try_ref_from_bytes</a>(source: &amp;[<a class="primitive" href="https://doc.rust-lang.org/1.94.0/core/primitive.u8.html">u8</a>]) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.94.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;&amp;Self, <a class="type" href="error/type.TryCastError.html" title="type zerocopy::error::TryCastError">TryCastError</a>&lt;&amp;[<a class="primitive" href="https://doc.rust-lang.org/1.94.0/core/primitive.u8.html">u8</a>], Self&gt;&gt;<div class="where">where
+</div></details><h2 id="provided-methods" class="section-header">Provided Methods<a href="#provided-methods" class="anchor">§</a></h2><div class="methods"><details class="toggle method-toggle" open><summary><section id="method.try_ref_from_bytes" class="method"><a class="src rightside" href="../src/zerocopy/lib.rs.html#1818-1837">Source</a><h4 class="code-header">fn <a href="#method.try_ref_from_bytes" class="fn">try_ref_from_bytes</a>(source: &amp;[<a class="primitive" href="https://doc.rust-lang.org/1.94.0/core/primitive.u8.html">u8</a>]) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.94.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;&amp;Self, <a class="type" href="error/type.TryCastError.html" title="type zerocopy::error::TryCastError">TryCastError</a>&lt;&amp;[<a class="primitive" href="https://doc.rust-lang.org/1.94.0/core/primitive.u8.html">u8</a>], Self&gt;&gt;<div class="where">where
     Self: <a class="trait" href="trait.KnownLayout.html" title="trait zerocopy::KnownLayout">KnownLayout</a> + <a class="trait" href="trait.Immutable.html" title="trait zerocopy::Immutable">Immutable</a>,</div></h4></section></summary><div class="docblock"><p>Attempts to interpret the given <code>source</code> as a <code>&amp;Self</code>.</p>
 <p>If the bytes of <code>source</code> are a valid instance of <code>Self</code>, this method
 returns a reference to those bytes interpreted as a <code>Self</code>. If the
@@ -183,7 +183,7 @@ results in a compile-time assertion error; e.g.:</p>
 
 <span class="comment">// These bytes are not valid instance of `Packet`.
 </span><span class="kw">let </span>bytes = <span class="kw-2">&amp;</span>[<span class="number">0x10</span>, <span class="number">0xC0</span>, <span class="number">240</span>, <span class="number">77</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>][..];
-<span class="macro">assert!</span>(Packet::try_ref_from_bytes(bytes).is_err());</code></pre></div><h5 id="foo"><a class="doc-anchor" href="#foo">§</a><a id="asdf">Foo</a></h5><h5 id='method.try_ref_from_bytes.codegen'>
+<span class="macro">assert!</span>(Packet::try_ref_from_bytes(bytes).is_err());</code></pre></div><h5 id='method.try_ref_from_bytes.codegen'>
     <a class='doc-anchor' href='#method.try_ref_from_bytes.codegen'>§</a>
     Code Generation
 </h5>
@@ -205,26 +205,30 @@ increasingly complex types:</p>
 <div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="kw">use </span>zerocopy_derive::<span class="kw-2">*</span>;
 
 <span class="comment">// The only valid value of this type are the bytes `0xC0C0`.
-</span><span class="attr">#[derive(TryFromBytes, KnownLayout, Immutable)]
+</span><span class="attr">#[derive(TryFromBytes, KnownLayout, Immutable, IntoBytes)]
 #[repr(u16)]
 </span><span class="kw">pub enum </span>C0C0 {
    _XC0C0 = <span class="number">0xC0C0</span>,
 }
 
-<span class="attr">#[derive(FromBytes, KnownLayout, Immutable)]
-#[repr(C, align(<span class="number">2</span>))]
-</span><span class="kw">pub struct </span>Packet&lt;Magic&gt; {
-   magic_number: Magic,
-   mug_size: u8,
-   temperature: u8,
-   marshmallows: [u8; <span class="number">2</span>],
+<span class="macro">macro_rules!</span> define_packet {
+   (<span class="macro-nonterminal">$name</span>: ident, <span class="macro-nonterminal">$trait</span>: ident, <span class="macro-nonterminal">$leading_field</span>: ty) =&gt; {
+       <span class="attr">#[derive(<span class="macro-nonterminal">$trait</span>, KnownLayout, Immutable, IntoBytes)]
+       #[repr(C, align(<span class="number">2</span>))]
+       </span><span class="kw">pub struct </span><span class="macro-nonterminal">$name </span>{
+           magic_number: <span class="macro-nonterminal">$leading_field</span>,
+           mug_size: u8,
+           temperature: u8,
+           marshmallows: [u8; <span class="number">2</span>],
+       }
+   };
 }
 
-<span class="doccomment">/// A packet begining with the magic number `0xC0C0`.
-</span><span class="kw">pub type </span>CocoPacket = Packet&lt;C0C0&gt;;
+<span class="doccomment">/// Packet begins with bytes 0xC0C0.
+</span><span class="macro">define_packet!</span>(CocoPacket, TryFromBytes, C0C0);
 
-<span class="doccomment">/// A packet beginning with any two initialized bytes.
-</span><span class="kw">pub type </span>LocoPacket = Packet&lt;[u8; <span class="number">2</span>]&gt;;
+<span class="doccomment">/// Packet begins with any two bytes.
+</span><span class="macro">define_packet!</span>(LocoPacket, FromBytes, [u8; <span class="number">2</span>]);
 </code></pre></div></div>
     </details>
     <details name='tab-try_ref_from_bytes_static_size' style='--n: 2'>
@@ -335,26 +339,30 @@ Resource pressure by instruction:
 <div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="kw">use </span>zerocopy_derive::<span class="kw-2">*</span>;
 
 <span class="comment">// The only valid value of this type are the bytes `0xC0C0`.
-</span><span class="attr">#[derive(TryFromBytes, KnownLayout, Immutable)]
+</span><span class="attr">#[derive(TryFromBytes, KnownLayout, Immutable, IntoBytes)]
 #[repr(u16)]
 </span><span class="kw">pub enum </span>C0C0 {
    _XC0C0 = <span class="number">0xC0C0</span>,
 }
 
-<span class="attr">#[derive(FromBytes, KnownLayout, Immutable)]
-#[repr(C, align(<span class="number">2</span>))]
-</span><span class="kw">pub struct </span>Packet&lt;Magic&gt; {
-   magic_number: Magic,
-   mug_size: u8,
-   temperature: u8,
-   marshmallows: [[u8; <span class="number">2</span>]],
+<span class="macro">macro_rules!</span> define_packet {
+   (<span class="macro-nonterminal">$name</span>: ident, <span class="macro-nonterminal">$trait</span>: ident, <span class="macro-nonterminal">$leading_field</span>: ty) =&gt; {
+       <span class="attr">#[derive(<span class="macro-nonterminal">$trait</span>, KnownLayout, Immutable, IntoBytes, SplitAt)]
+       #[repr(C, align(<span class="number">2</span>))]
+       </span><span class="kw">pub struct </span><span class="macro-nonterminal">$name </span>{
+           magic_number: <span class="macro-nonterminal">$leading_field</span>,
+           mug_size: u8,
+           temperature: u8,
+           marshmallows: [[u8; <span class="number">2</span>]],
+       }
+   };
 }
 
-<span class="doccomment">/// A packet begining with the magic number `0xC0C0`.
-</span><span class="kw">pub type </span>CocoPacket = Packet&lt;C0C0&gt;;
+<span class="doccomment">/// Packet begins with bytes 0xC0C0.
+</span><span class="macro">define_packet!</span>(CocoPacket, TryFromBytes, C0C0);
 
-<span class="doccomment">/// A packet beginning with any two initialized bytes.
-</span><span class="kw">pub type </span>LocoPacket = Packet&lt;[u8; <span class="number">2</span>]&gt;;
+<span class="doccomment">/// Packet begins with any two bytes.
+</span><span class="macro">define_packet!</span>(LocoPacket, FromBytes, [u8; <span class="number">2</span>]);
 </code></pre></div></div>
     </details>
     <details name='tab-try_ref_from_bytes_dynamic_size' style='--n: 2'>
@@ -500,7 +508,7 @@ Resource pressure by instruction:
    _XC0C0 = <span class="number">0xC0C0</span>,
 }
 
-<span class="attr">#[derive(FromBytes, KnownLayout, Immutable)]
+<span class="attr">#[derive(FromBytes, KnownLayout, Immutable, SplitAt)]
 #[repr(C, align(<span class="number">4</span>))]
 </span><span class="kw">pub struct </span>Packet&lt;Magic&gt; {
    magic_number: Magic,
@@ -646,7 +654,7 @@ Resource pressure by instruction:
 </code></pre></div></div>
     </details></div>
 </div>
-    </details></div></div></details><details class="toggle method-toggle" open><summary><section id="method.try_ref_from_prefix" class="method"><a class="src rightside" href="../src/zerocopy/lib.rs.html#1942-1948">Source</a><h4 class="code-header">fn <a href="#method.try_ref_from_prefix" class="fn">try_ref_from_prefix</a>(
+    </details></div></div></details><details class="toggle method-toggle" open><summary><section id="method.try_ref_from_prefix" class="method"><a class="src rightside" href="../src/zerocopy/lib.rs.html#1940-1946">Source</a><h4 class="code-header">fn <a href="#method.try_ref_from_prefix" class="fn">try_ref_from_prefix</a>(
     source: &amp;[<a class="primitive" href="https://doc.rust-lang.org/1.94.0/core/primitive.u8.html">u8</a>],
 ) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.94.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;(&amp;Self, &amp;[<a class="primitive" href="https://doc.rust-lang.org/1.94.0/core/primitive.u8.html">u8</a>]), <a class="type" href="error/type.TryCastError.html" title="type zerocopy::error::TryCastError">TryCastError</a>&lt;&amp;[<a class="primitive" href="https://doc.rust-lang.org/1.94.0/core/primitive.u8.html">u8</a>], Self&gt;&gt;<div class="where">where
     Self: <a class="trait" href="trait.KnownLayout.html" title="trait zerocopy::KnownLayout">KnownLayout</a> + <a class="trait" href="trait.Immutable.html" title="trait zerocopy::Immutable">Immutable</a>,</div></h4></section></summary><div class="docblock"><p>Attempts to interpret the prefix of the given <code>source</code> as a <code>&amp;Self</code>.</p>
@@ -729,26 +737,30 @@ increasingly complex types:</p>
 <div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="kw">use </span>zerocopy_derive::<span class="kw-2">*</span>;
 
 <span class="comment">// The only valid value of this type are the bytes `0xC0C0`.
-</span><span class="attr">#[derive(TryFromBytes, KnownLayout, Immutable)]
+</span><span class="attr">#[derive(TryFromBytes, KnownLayout, Immutable, IntoBytes)]
 #[repr(u16)]
 </span><span class="kw">pub enum </span>C0C0 {
    _XC0C0 = <span class="number">0xC0C0</span>,
 }
 
-<span class="attr">#[derive(FromBytes, KnownLayout, Immutable)]
-#[repr(C, align(<span class="number">2</span>))]
-</span><span class="kw">pub struct </span>Packet&lt;Magic&gt; {
-   magic_number: Magic,
-   mug_size: u8,
-   temperature: u8,
-   marshmallows: [u8; <span class="number">2</span>],
+<span class="macro">macro_rules!</span> define_packet {
+   (<span class="macro-nonterminal">$name</span>: ident, <span class="macro-nonterminal">$trait</span>: ident, <span class="macro-nonterminal">$leading_field</span>: ty) =&gt; {
+       <span class="attr">#[derive(<span class="macro-nonterminal">$trait</span>, KnownLayout, Immutable, IntoBytes)]
+       #[repr(C, align(<span class="number">2</span>))]
+       </span><span class="kw">pub struct </span><span class="macro-nonterminal">$name </span>{
+           magic_number: <span class="macro-nonterminal">$leading_field</span>,
+           mug_size: u8,
+           temperature: u8,
+           marshmallows: [u8; <span class="number">2</span>],
+       }
+   };
 }
 
-<span class="doccomment">/// A packet begining with the magic number `0xC0C0`.
-</span><span class="kw">pub type </span>CocoPacket = Packet&lt;C0C0&gt;;
+<span class="doccomment">/// Packet begins with bytes 0xC0C0.
+</span><span class="macro">define_packet!</span>(CocoPacket, TryFromBytes, C0C0);
 
-<span class="doccomment">/// A packet beginning with any two initialized bytes.
-</span><span class="kw">pub type </span>LocoPacket = Packet&lt;[u8; <span class="number">2</span>]&gt;;
+<span class="doccomment">/// Packet begins with any two bytes.
+</span><span class="macro">define_packet!</span>(LocoPacket, FromBytes, [u8; <span class="number">2</span>]);
 </code></pre></div></div>
     </details>
     <details name='tab-try_ref_from_prefix_static_size' style='--n: 2'>
@@ -868,26 +880,30 @@ Resource pressure by instruction:
 <div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="kw">use </span>zerocopy_derive::<span class="kw-2">*</span>;
 
 <span class="comment">// The only valid value of this type are the bytes `0xC0C0`.
-</span><span class="attr">#[derive(TryFromBytes, KnownLayout, Immutable)]
+</span><span class="attr">#[derive(TryFromBytes, KnownLayout, Immutable, IntoBytes)]
 #[repr(u16)]
 </span><span class="kw">pub enum </span>C0C0 {
    _XC0C0 = <span class="number">0xC0C0</span>,
 }
 
-<span class="attr">#[derive(FromBytes, KnownLayout, Immutable)]
-#[repr(C, align(<span class="number">2</span>))]
-</span><span class="kw">pub struct </span>Packet&lt;Magic&gt; {
-   magic_number: Magic,
-   mug_size: u8,
-   temperature: u8,
-   marshmallows: [[u8; <span class="number">2</span>]],
+<span class="macro">macro_rules!</span> define_packet {
+   (<span class="macro-nonterminal">$name</span>: ident, <span class="macro-nonterminal">$trait</span>: ident, <span class="macro-nonterminal">$leading_field</span>: ty) =&gt; {
+       <span class="attr">#[derive(<span class="macro-nonterminal">$trait</span>, KnownLayout, Immutable, IntoBytes, SplitAt)]
+       #[repr(C, align(<span class="number">2</span>))]
+       </span><span class="kw">pub struct </span><span class="macro-nonterminal">$name </span>{
+           magic_number: <span class="macro-nonterminal">$leading_field</span>,
+           mug_size: u8,
+           temperature: u8,
+           marshmallows: [[u8; <span class="number">2</span>]],
+       }
+   };
 }
 
-<span class="doccomment">/// A packet begining with the magic number `0xC0C0`.
-</span><span class="kw">pub type </span>CocoPacket = Packet&lt;C0C0&gt;;
+<span class="doccomment">/// Packet begins with bytes 0xC0C0.
+</span><span class="macro">define_packet!</span>(CocoPacket, TryFromBytes, C0C0);
 
-<span class="doccomment">/// A packet beginning with any two initialized bytes.
-</span><span class="kw">pub type </span>LocoPacket = Packet&lt;[u8; <span class="number">2</span>]&gt;;
+<span class="doccomment">/// Packet begins with any two bytes.
+</span><span class="macro">define_packet!</span>(LocoPacket, FromBytes, [u8; <span class="number">2</span>]);
 </code></pre></div></div>
     </details>
     <details name='tab-try_ref_from_prefix_dynamic_size' style='--n: 2'>
@@ -1034,7 +1050,7 @@ Resource pressure by instruction:
    _XC0C0 = <span class="number">0xC0C0</span>,
 }
 
-<span class="attr">#[derive(FromBytes, KnownLayout, Immutable)]
+<span class="attr">#[derive(FromBytes, KnownLayout, Immutable, SplitAt)]
 #[repr(C, align(<span class="number">4</span>))]
 </span><span class="kw">pub struct </span>Packet&lt;Magic&gt; {
    magic_number: Magic,
@@ -1198,7 +1214,7 @@ Resource pressure by instruction:
 </code></pre></div></div>
     </details></div>
 </div>
-    </details></div></div></details><details class="toggle method-toggle" open><summary><section id="method.try_ref_from_suffix" class="method"><a class="src rightside" href="../src/zerocopy/lib.rs.html#2051-2057">Source</a><h4 class="code-header">fn <a href="#method.try_ref_from_suffix" class="fn">try_ref_from_suffix</a>(
+    </details></div></div></details><details class="toggle method-toggle" open><summary><section id="method.try_ref_from_suffix" class="method"><a class="src rightside" href="../src/zerocopy/lib.rs.html#2049-2055">Source</a><h4 class="code-header">fn <a href="#method.try_ref_from_suffix" class="fn">try_ref_from_suffix</a>(
     source: &amp;[<a class="primitive" href="https://doc.rust-lang.org/1.94.0/core/primitive.u8.html">u8</a>],
 ) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.94.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;(&amp;[<a class="primitive" href="https://doc.rust-lang.org/1.94.0/core/primitive.u8.html">u8</a>], &amp;Self), <a class="type" href="error/type.TryCastError.html" title="type zerocopy::error::TryCastError">TryCastError</a>&lt;&amp;[<a class="primitive" href="https://doc.rust-lang.org/1.94.0/core/primitive.u8.html">u8</a>], Self&gt;&gt;<div class="where">where
     Self: <a class="trait" href="trait.KnownLayout.html" title="trait zerocopy::KnownLayout">KnownLayout</a> + <a class="trait" href="trait.Immutable.html" title="trait zerocopy::Immutable">Immutable</a>,</div></h4></section></summary><div class="docblock"><p>Attempts to interpret the suffix of the given <code>source</code> as a <code>&amp;Self</code>.</p>
@@ -1281,26 +1297,30 @@ increasingly complex types:</p>
 <div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="kw">use </span>zerocopy_derive::<span class="kw-2">*</span>;
 
 <span class="comment">// The only valid value of this type are the bytes `0xC0C0`.
-</span><span class="attr">#[derive(TryFromBytes, KnownLayout, Immutable)]
+</span><span class="attr">#[derive(TryFromBytes, KnownLayout, Immutable, IntoBytes)]
 #[repr(u16)]
 </span><span class="kw">pub enum </span>C0C0 {
    _XC0C0 = <span class="number">0xC0C0</span>,
 }
 
-<span class="attr">#[derive(FromBytes, KnownLayout, Immutable)]
-#[repr(C, align(<span class="number">2</span>))]
-</span><span class="kw">pub struct </span>Packet&lt;Magic&gt; {
-   magic_number: Magic,
-   mug_size: u8,
-   temperature: u8,
-   marshmallows: [u8; <span class="number">2</span>],
+<span class="macro">macro_rules!</span> define_packet {
+   (<span class="macro-nonterminal">$name</span>: ident, <span class="macro-nonterminal">$trait</span>: ident, <span class="macro-nonterminal">$leading_field</span>: ty) =&gt; {
+       <span class="attr">#[derive(<span class="macro-nonterminal">$trait</span>, KnownLayout, Immutable, IntoBytes)]
+       #[repr(C, align(<span class="number">2</span>))]
+       </span><span class="kw">pub struct </span><span class="macro-nonterminal">$name </span>{
+           magic_number: <span class="macro-nonterminal">$leading_field</span>,
+           mug_size: u8,
+           temperature: u8,
+           marshmallows: [u8; <span class="number">2</span>],
+       }
+   };
 }
 
-<span class="doccomment">/// A packet begining with the magic number `0xC0C0`.
-</span><span class="kw">pub type </span>CocoPacket = Packet&lt;C0C0&gt;;
+<span class="doccomment">/// Packet begins with bytes 0xC0C0.
+</span><span class="macro">define_packet!</span>(CocoPacket, TryFromBytes, C0C0);
 
-<span class="doccomment">/// A packet beginning with any two initialized bytes.
-</span><span class="kw">pub type </span>LocoPacket = Packet&lt;[u8; <span class="number">2</span>]&gt;;
+<span class="doccomment">/// Packet begins with any two bytes.
+</span><span class="macro">define_packet!</span>(LocoPacket, FromBytes, [u8; <span class="number">2</span>]);
 </code></pre></div></div>
     </details>
     <details name='tab-try_ref_from_suffix_static_size' style='--n: 2'>
@@ -1425,26 +1445,30 @@ Resource pressure by instruction:
 <div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="kw">use </span>zerocopy_derive::<span class="kw-2">*</span>;
 
 <span class="comment">// The only valid value of this type are the bytes `0xC0C0`.
-</span><span class="attr">#[derive(TryFromBytes, KnownLayout, Immutable)]
+</span><span class="attr">#[derive(TryFromBytes, KnownLayout, Immutable, IntoBytes)]
 #[repr(u16)]
 </span><span class="kw">pub enum </span>C0C0 {
    _XC0C0 = <span class="number">0xC0C0</span>,
 }
 
-<span class="attr">#[derive(FromBytes, KnownLayout, Immutable)]
-#[repr(C, align(<span class="number">2</span>))]
-</span><span class="kw">pub struct </span>Packet&lt;Magic&gt; {
-   magic_number: Magic,
-   mug_size: u8,
-   temperature: u8,
-   marshmallows: [[u8; <span class="number">2</span>]],
+<span class="macro">macro_rules!</span> define_packet {
+   (<span class="macro-nonterminal">$name</span>: ident, <span class="macro-nonterminal">$trait</span>: ident, <span class="macro-nonterminal">$leading_field</span>: ty) =&gt; {
+       <span class="attr">#[derive(<span class="macro-nonterminal">$trait</span>, KnownLayout, Immutable, IntoBytes, SplitAt)]
+       #[repr(C, align(<span class="number">2</span>))]
+       </span><span class="kw">pub struct </span><span class="macro-nonterminal">$name </span>{
+           magic_number: <span class="macro-nonterminal">$leading_field</span>,
+           mug_size: u8,
+           temperature: u8,
+           marshmallows: [[u8; <span class="number">2</span>]],
+       }
+   };
 }
 
-<span class="doccomment">/// A packet begining with the magic number `0xC0C0`.
-</span><span class="kw">pub type </span>CocoPacket = Packet&lt;C0C0&gt;;
+<span class="doccomment">/// Packet begins with bytes 0xC0C0.
+</span><span class="macro">define_packet!</span>(CocoPacket, TryFromBytes, C0C0);
 
-<span class="doccomment">/// A packet beginning with any two initialized bytes.
-</span><span class="kw">pub type </span>LocoPacket = Packet&lt;[u8; <span class="number">2</span>]&gt;;
+<span class="doccomment">/// Packet begins with any two bytes.
+</span><span class="macro">define_packet!</span>(LocoPacket, FromBytes, [u8; <span class="number">2</span>]);
 </code></pre></div></div>
     </details>
     <details name='tab-try_ref_from_suffix_dynamic_size' style='--n: 2'>
@@ -1581,7 +1605,7 @@ Resource pressure by instruction:
    _XC0C0 = <span class="number">0xC0C0</span>,
 }
 
-<span class="attr">#[derive(FromBytes, KnownLayout, Immutable)]
+<span class="attr">#[derive(FromBytes, KnownLayout, Immutable, SplitAt)]
 #[repr(C, align(<span class="number">4</span>))]
 </span><span class="kw">pub struct </span>Packet&lt;Magic&gt; {
    magic_number: Magic,
@@ -1736,7 +1760,7 @@ Resource pressure by instruction:
 </code></pre></div></div>
     </details></div>
 </div>
-    </details></div></div></details><details class="toggle method-toggle" open><summary><section id="method.try_mut_from_bytes" class="method"><a class="src rightside" href="../src/zerocopy/lib.rs.html#2144-2161">Source</a><h4 class="code-header">fn <a href="#method.try_mut_from_bytes" class="fn">try_mut_from_bytes</a>(
+    </details></div></div></details><details class="toggle method-toggle" open><summary><section id="method.try_mut_from_bytes" class="method"><a class="src rightside" href="../src/zerocopy/lib.rs.html#2142-2159">Source</a><h4 class="code-header">fn <a href="#method.try_mut_from_bytes" class="fn">try_mut_from_bytes</a>(
     bytes: &amp;mut [<a class="primitive" href="https://doc.rust-lang.org/1.94.0/core/primitive.u8.html">u8</a>],
 ) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.94.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;&amp;mut Self, <a class="type" href="error/type.TryCastError.html" title="type zerocopy::error::TryCastError">TryCastError</a>&lt;&amp;mut [<a class="primitive" href="https://doc.rust-lang.org/1.94.0/core/primitive.u8.html">u8</a>], Self&gt;&gt;<div class="where">where
     Self: <a class="trait" href="trait.KnownLayout.html" title="trait zerocopy::KnownLayout">KnownLayout</a> + <a class="trait" href="trait.IntoBytes.html" title="trait zerocopy::IntoBytes">IntoBytes</a>,</div></h4></section></summary><div class="docblock"><p>Attempts to interpret the given <code>source</code> as a <code>&amp;mut Self</code> without
@@ -1804,7 +1828,7 @@ packet.temperature = <span class="number">111</span>;
     Code Generation
 </h5>
 <p>See <a href="#method.try_ref_from_bytes.codegen"><code>TryFromBytes::try_ref_from_bytes</code></a>.</p>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.try_mut_from_prefix" class="method"><a class="src rightside" href="../src/zerocopy/lib.rs.html#2252-2260">Source</a><h4 class="code-header">fn <a href="#method.try_mut_from_prefix" class="fn">try_mut_from_prefix</a>(
+</div></details><details class="toggle method-toggle" open><summary><section id="method.try_mut_from_prefix" class="method"><a class="src rightside" href="../src/zerocopy/lib.rs.html#2250-2258">Source</a><h4 class="code-header">fn <a href="#method.try_mut_from_prefix" class="fn">try_mut_from_prefix</a>(
     source: &amp;mut [<a class="primitive" href="https://doc.rust-lang.org/1.94.0/core/primitive.u8.html">u8</a>],
 ) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.94.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;(&amp;mut Self, &amp;mut [<a class="primitive" href="https://doc.rust-lang.org/1.94.0/core/primitive.u8.html">u8</a>]), <a class="type" href="error/type.TryCastError.html" title="type zerocopy::error::TryCastError">TryCastError</a>&lt;&amp;mut [<a class="primitive" href="https://doc.rust-lang.org/1.94.0/core/primitive.u8.html">u8</a>], Self&gt;&gt;<div class="where">where
     Self: <a class="trait" href="trait.KnownLayout.html" title="trait zerocopy::KnownLayout">KnownLayout</a> + <a class="trait" href="trait.IntoBytes.html" title="trait zerocopy::IntoBytes">IntoBytes</a>,</div></h4></section></summary><div class="docblock"><p>Attempts to interpret the prefix of the given <code>source</code> as a <code>&amp;mut Self</code>.</p>
@@ -1876,7 +1900,7 @@ suffix[<span class="number">0</span>] = <span class="number">222</span>;
     Code Generation
 </h5>
 <p>See <a href="#method.try_ref_from_prefix.codegen"><code>TryFromBytes::try_ref_from_prefix</code></a>.</p>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.try_mut_from_suffix" class="method"><a class="src rightside" href="../src/zerocopy/lib.rs.html#2351-2359">Source</a><h4 class="code-header">fn <a href="#method.try_mut_from_suffix" class="fn">try_mut_from_suffix</a>(
+</div></details><details class="toggle method-toggle" open><summary><section id="method.try_mut_from_suffix" class="method"><a class="src rightside" href="../src/zerocopy/lib.rs.html#2349-2357">Source</a><h4 class="code-header">fn <a href="#method.try_mut_from_suffix" class="fn">try_mut_from_suffix</a>(
     source: &amp;mut [<a class="primitive" href="https://doc.rust-lang.org/1.94.0/core/primitive.u8.html">u8</a>],
 ) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.94.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;(&amp;mut [<a class="primitive" href="https://doc.rust-lang.org/1.94.0/core/primitive.u8.html">u8</a>], &amp;mut Self), <a class="type" href="error/type.TryCastError.html" title="type zerocopy::error::TryCastError">TryCastError</a>&lt;&amp;mut [<a class="primitive" href="https://doc.rust-lang.org/1.94.0/core/primitive.u8.html">u8</a>], Self&gt;&gt;<div class="where">where
     Self: <a class="trait" href="trait.KnownLayout.html" title="trait zerocopy::KnownLayout">KnownLayout</a> + <a class="trait" href="trait.IntoBytes.html" title="trait zerocopy::IntoBytes">IntoBytes</a>,</div></h4></section></summary><div class="docblock"><p>Attempts to interpret the suffix of the given <code>source</code> as a <code>&amp;mut Self</code>.</p>
@@ -1948,7 +1972,7 @@ packet.temperature = <span class="number">222</span>;
     Code Generation
 </h5>
 <p>See <a href="#method.try_ref_from_suffix.codegen"><code>TryFromBytes::try_ref_from_suffix</code></a>.</p>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.try_ref_from_bytes_with_elems" class="method"><a class="src rightside" href="../src/zerocopy/lib.rs.html#2455-2477">Source</a><h4 class="code-header">fn <a href="#method.try_ref_from_bytes_with_elems" class="fn">try_ref_from_bytes_with_elems</a>(
+</div></details><details class="toggle method-toggle" open><summary><section id="method.try_ref_from_bytes_with_elems" class="method"><a class="src rightside" href="../src/zerocopy/lib.rs.html#2453-2475">Source</a><h4 class="code-header">fn <a href="#method.try_ref_from_bytes_with_elems" class="fn">try_ref_from_bytes_with_elems</a>(
     source: &amp;[<a class="primitive" href="https://doc.rust-lang.org/1.94.0/core/primitive.u8.html">u8</a>],
     count: <a class="primitive" href="https://doc.rust-lang.org/1.94.0/core/primitive.usize.html">usize</a>,
 ) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.94.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;&amp;Self, <a class="type" href="error/type.TryCastError.html" title="type zerocopy::error::TryCastError">TryCastError</a>&lt;&amp;[<a class="primitive" href="https://doc.rust-lang.org/1.94.0/core/primitive.u8.html">u8</a>], Self&gt;&gt;<div class="where">where
@@ -2031,26 +2055,30 @@ increasingly complex types:</p>
 <div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="kw">use </span>zerocopy_derive::<span class="kw-2">*</span>;
 
 <span class="comment">// The only valid value of this type are the bytes `0xC0C0`.
-</span><span class="attr">#[derive(TryFromBytes, KnownLayout, Immutable)]
+</span><span class="attr">#[derive(TryFromBytes, KnownLayout, Immutable, IntoBytes)]
 #[repr(u16)]
 </span><span class="kw">pub enum </span>C0C0 {
    _XC0C0 = <span class="number">0xC0C0</span>,
 }
 
-<span class="attr">#[derive(FromBytes, KnownLayout, Immutable)]
-#[repr(C, align(<span class="number">2</span>))]
-</span><span class="kw">pub struct </span>Packet&lt;Magic&gt; {
-   magic_number: Magic,
-   mug_size: u8,
-   temperature: u8,
-   marshmallows: [[u8; <span class="number">2</span>]],
+<span class="macro">macro_rules!</span> define_packet {
+   (<span class="macro-nonterminal">$name</span>: ident, <span class="macro-nonterminal">$trait</span>: ident, <span class="macro-nonterminal">$leading_field</span>: ty) =&gt; {
+       <span class="attr">#[derive(<span class="macro-nonterminal">$trait</span>, KnownLayout, Immutable, IntoBytes, SplitAt)]
+       #[repr(C, align(<span class="number">2</span>))]
+       </span><span class="kw">pub struct </span><span class="macro-nonterminal">$name </span>{
+           magic_number: <span class="macro-nonterminal">$leading_field</span>,
+           mug_size: u8,
+           temperature: u8,
+           marshmallows: [[u8; <span class="number">2</span>]],
+       }
+   };
 }
 
-<span class="doccomment">/// A packet begining with the magic number `0xC0C0`.
-</span><span class="kw">pub type </span>CocoPacket = Packet&lt;C0C0&gt;;
+<span class="doccomment">/// Packet begins with bytes 0xC0C0.
+</span><span class="macro">define_packet!</span>(CocoPacket, TryFromBytes, C0C0);
 
-<span class="doccomment">/// A packet beginning with any two initialized bytes.
-</span><span class="kw">pub type </span>LocoPacket = Packet&lt;[u8; <span class="number">2</span>]&gt;;
+<span class="doccomment">/// Packet begins with any two bytes.
+</span><span class="macro">define_packet!</span>(LocoPacket, FromBytes, [u8; <span class="number">2</span>]);
 </code></pre></div></div>
     </details>
     <details name='tab-try_ref_from_bytes_with_elems_dynamic_size' style='--n: 2'>
@@ -2185,7 +2213,7 @@ Resource pressure by instruction:
    _XC0C0 = <span class="number">0xC0C0</span>,
 }
 
-<span class="attr">#[derive(FromBytes, KnownLayout, Immutable)]
+<span class="attr">#[derive(FromBytes, KnownLayout, Immutable, SplitAt)]
 #[repr(C, align(<span class="number">4</span>))]
 </span><span class="kw">pub struct </span>Packet&lt;Magic&gt; {
    magic_number: Magic,
@@ -2370,7 +2398,7 @@ Resource pressure by instruction:
 </code></pre></div></div>
     </details></div>
 </div>
-    </details></div></div></details><details class="toggle method-toggle" open><summary><section id="method.try_ref_from_prefix_with_elems" class="method"><a class="src rightside" href="../src/zerocopy/lib.rs.html#2575-2583">Source</a><h4 class="code-header">fn <a href="#method.try_ref_from_prefix_with_elems" class="fn">try_ref_from_prefix_with_elems</a>(
+    </details></div></div></details><details class="toggle method-toggle" open><summary><section id="method.try_ref_from_prefix_with_elems" class="method"><a class="src rightside" href="../src/zerocopy/lib.rs.html#2573-2581">Source</a><h4 class="code-header">fn <a href="#method.try_ref_from_prefix_with_elems" class="fn">try_ref_from_prefix_with_elems</a>(
     source: &amp;[<a class="primitive" href="https://doc.rust-lang.org/1.94.0/core/primitive.u8.html">u8</a>],
     count: <a class="primitive" href="https://doc.rust-lang.org/1.94.0/core/primitive.usize.html">usize</a>,
 ) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.94.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;(&amp;Self, &amp;[<a class="primitive" href="https://doc.rust-lang.org/1.94.0/core/primitive.u8.html">u8</a>]), <a class="type" href="error/type.TryCastError.html" title="type zerocopy::error::TryCastError">TryCastError</a>&lt;&amp;[<a class="primitive" href="https://doc.rust-lang.org/1.94.0/core/primitive.u8.html">u8</a>], Self&gt;&gt;<div class="where">where
@@ -2455,26 +2483,30 @@ increasingly complex types:</p>
 <div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="kw">use </span>zerocopy_derive::<span class="kw-2">*</span>;
 
 <span class="comment">// The only valid value of this type are the bytes `0xC0C0`.
-</span><span class="attr">#[derive(TryFromBytes, KnownLayout, Immutable)]
+</span><span class="attr">#[derive(TryFromBytes, KnownLayout, Immutable, IntoBytes)]
 #[repr(u16)]
 </span><span class="kw">pub enum </span>C0C0 {
    _XC0C0 = <span class="number">0xC0C0</span>,
 }
 
-<span class="attr">#[derive(FromBytes, KnownLayout, Immutable)]
-#[repr(C, align(<span class="number">2</span>))]
-</span><span class="kw">pub struct </span>Packet&lt;Magic&gt; {
-   magic_number: Magic,
-   mug_size: u8,
-   temperature: u8,
-   marshmallows: [[u8; <span class="number">2</span>]],
+<span class="macro">macro_rules!</span> define_packet {
+   (<span class="macro-nonterminal">$name</span>: ident, <span class="macro-nonterminal">$trait</span>: ident, <span class="macro-nonterminal">$leading_field</span>: ty) =&gt; {
+       <span class="attr">#[derive(<span class="macro-nonterminal">$trait</span>, KnownLayout, Immutable, IntoBytes, SplitAt)]
+       #[repr(C, align(<span class="number">2</span>))]
+       </span><span class="kw">pub struct </span><span class="macro-nonterminal">$name </span>{
+           magic_number: <span class="macro-nonterminal">$leading_field</span>,
+           mug_size: u8,
+           temperature: u8,
+           marshmallows: [[u8; <span class="number">2</span>]],
+       }
+   };
 }
 
-<span class="doccomment">/// A packet begining with the magic number `0xC0C0`.
-</span><span class="kw">pub type </span>CocoPacket = Packet&lt;C0C0&gt;;
+<span class="doccomment">/// Packet begins with bytes 0xC0C0.
+</span><span class="macro">define_packet!</span>(CocoPacket, TryFromBytes, C0C0);
 
-<span class="doccomment">/// A packet beginning with any two initialized bytes.
-</span><span class="kw">pub type </span>LocoPacket = Packet&lt;[u8; <span class="number">2</span>]&gt;;
+<span class="doccomment">/// Packet begins with any two bytes.
+</span><span class="macro">define_packet!</span>(LocoPacket, FromBytes, [u8; <span class="number">2</span>]);
 </code></pre></div></div>
     </details>
     <details name='tab-try_ref_from_prefix_with_elems_dynamic_size' style='--n: 2'>
@@ -2634,7 +2666,7 @@ Resource pressure by instruction:
    _XC0C0 = <span class="number">0xC0C0</span>,
 }
 
-<span class="attr">#[derive(FromBytes, KnownLayout, Immutable)]
+<span class="attr">#[derive(FromBytes, KnownLayout, Immutable, SplitAt)]
 #[repr(C, align(<span class="number">4</span>))]
 </span><span class="kw">pub struct </span>Packet&lt;Magic&gt; {
    magic_number: Magic,
@@ -2817,7 +2849,7 @@ Resource pressure by instruction:
 </code></pre></div></div>
     </details></div>
 </div>
-    </details></div></div></details><details class="toggle method-toggle" open><summary><section id="method.try_ref_from_suffix_with_elems" class="method"><a class="src rightside" href="../src/zerocopy/lib.rs.html#2682-2690">Source</a><h4 class="code-header">fn <a href="#method.try_ref_from_suffix_with_elems" class="fn">try_ref_from_suffix_with_elems</a>(
+    </details></div></div></details><details class="toggle method-toggle" open><summary><section id="method.try_ref_from_suffix_with_elems" class="method"><a class="src rightside" href="../src/zerocopy/lib.rs.html#2680-2688">Source</a><h4 class="code-header">fn <a href="#method.try_ref_from_suffix_with_elems" class="fn">try_ref_from_suffix_with_elems</a>(
     source: &amp;[<a class="primitive" href="https://doc.rust-lang.org/1.94.0/core/primitive.u8.html">u8</a>],
     count: <a class="primitive" href="https://doc.rust-lang.org/1.94.0/core/primitive.usize.html">usize</a>,
 ) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.94.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;(&amp;[<a class="primitive" href="https://doc.rust-lang.org/1.94.0/core/primitive.u8.html">u8</a>], &amp;Self), <a class="type" href="error/type.TryCastError.html" title="type zerocopy::error::TryCastError">TryCastError</a>&lt;&amp;[<a class="primitive" href="https://doc.rust-lang.org/1.94.0/core/primitive.u8.html">u8</a>], Self&gt;&gt;<div class="where">where
@@ -2902,26 +2934,30 @@ increasingly complex types:</p>
 <div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="kw">use </span>zerocopy_derive::<span class="kw-2">*</span>;
 
 <span class="comment">// The only valid value of this type are the bytes `0xC0C0`.
-</span><span class="attr">#[derive(TryFromBytes, KnownLayout, Immutable)]
+</span><span class="attr">#[derive(TryFromBytes, KnownLayout, Immutable, IntoBytes)]
 #[repr(u16)]
 </span><span class="kw">pub enum </span>C0C0 {
    _XC0C0 = <span class="number">0xC0C0</span>,
 }
 
-<span class="attr">#[derive(FromBytes, KnownLayout, Immutable)]
-#[repr(C, align(<span class="number">2</span>))]
-</span><span class="kw">pub struct </span>Packet&lt;Magic&gt; {
-   magic_number: Magic,
-   mug_size: u8,
-   temperature: u8,
-   marshmallows: [[u8; <span class="number">2</span>]],
+<span class="macro">macro_rules!</span> define_packet {
+   (<span class="macro-nonterminal">$name</span>: ident, <span class="macro-nonterminal">$trait</span>: ident, <span class="macro-nonterminal">$leading_field</span>: ty) =&gt; {
+       <span class="attr">#[derive(<span class="macro-nonterminal">$trait</span>, KnownLayout, Immutable, IntoBytes, SplitAt)]
+       #[repr(C, align(<span class="number">2</span>))]
+       </span><span class="kw">pub struct </span><span class="macro-nonterminal">$name </span>{
+           magic_number: <span class="macro-nonterminal">$leading_field</span>,
+           mug_size: u8,
+           temperature: u8,
+           marshmallows: [[u8; <span class="number">2</span>]],
+       }
+   };
 }
 
-<span class="doccomment">/// A packet begining with the magic number `0xC0C0`.
-</span><span class="kw">pub type </span>CocoPacket = Packet&lt;C0C0&gt;;
+<span class="doccomment">/// Packet begins with bytes 0xC0C0.
+</span><span class="macro">define_packet!</span>(CocoPacket, TryFromBytes, C0C0);
 
-<span class="doccomment">/// A packet beginning with any two initialized bytes.
-</span><span class="kw">pub type </span>LocoPacket = Packet&lt;[u8; <span class="number">2</span>]&gt;;
+<span class="doccomment">/// Packet begins with any two bytes.
+</span><span class="macro">define_packet!</span>(LocoPacket, FromBytes, [u8; <span class="number">2</span>]);
 </code></pre></div></div>
     </details>
     <details name='tab-try_ref_from_suffix_with_elems_dynamic_size' style='--n: 2'>
@@ -3087,7 +3123,7 @@ Resource pressure by instruction:
    _XC0C0 = <span class="number">0xC0C0</span>,
 }
 
-<span class="attr">#[derive(FromBytes, KnownLayout, Immutable)]
+<span class="attr">#[derive(FromBytes, KnownLayout, Immutable, SplitAt)]
 #[repr(C, align(<span class="number">4</span>))]
 </span><span class="kw">pub struct </span>Packet&lt;Magic&gt; {
    magic_number: Magic,
@@ -3282,7 +3318,7 @@ Resource pressure by instruction:
 </code></pre></div></div>
     </details></div>
 </div>
-    </details></div></div></details><details class="toggle method-toggle" open><summary><section id="method.try_mut_from_bytes_with_elems" class="method"><a class="src rightside" href="../src/zerocopy/lib.rs.html#2777-2797">Source</a><h4 class="code-header">fn <a href="#method.try_mut_from_bytes_with_elems" class="fn">try_mut_from_bytes_with_elems</a>(
+    </details></div></div></details><details class="toggle method-toggle" open><summary><section id="method.try_mut_from_bytes_with_elems" class="method"><a class="src rightside" href="../src/zerocopy/lib.rs.html#2775-2795">Source</a><h4 class="code-header">fn <a href="#method.try_mut_from_bytes_with_elems" class="fn">try_mut_from_bytes_with_elems</a>(
     source: &amp;mut [<a class="primitive" href="https://doc.rust-lang.org/1.94.0/core/primitive.u8.html">u8</a>],
     count: <a class="primitive" href="https://doc.rust-lang.org/1.94.0/core/primitive.usize.html">usize</a>,
 ) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.94.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;&amp;mut Self, <a class="type" href="error/type.TryCastError.html" title="type zerocopy::error::TryCastError">TryCastError</a>&lt;&amp;mut [<a class="primitive" href="https://doc.rust-lang.org/1.94.0/core/primitive.u8.html">u8</a>], Self&gt;&gt;<div class="where">where
@@ -3353,7 +3389,7 @@ which do not take an explicit count do not support such types.</p>
     Code Generation
 </h5>
 <p>See <a href="#method.try_ref_from_bytes_with_elems.codegen"><code>TryFromBytes::try_ref_from_bytes_with_elems</code></a>.</p>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.try_mut_from_prefix_with_elems" class="method"><a class="src rightside" href="../src/zerocopy/lib.rs.html#2887-2895">Source</a><h4 class="code-header">fn <a href="#method.try_mut_from_prefix_with_elems" class="fn">try_mut_from_prefix_with_elems</a>(
+</div></details><details class="toggle method-toggle" open><summary><section id="method.try_mut_from_prefix_with_elems" class="method"><a class="src rightside" href="../src/zerocopy/lib.rs.html#2885-2893">Source</a><h4 class="code-header">fn <a href="#method.try_mut_from_prefix_with_elems" class="fn">try_mut_from_prefix_with_elems</a>(
     source: &amp;mut [<a class="primitive" href="https://doc.rust-lang.org/1.94.0/core/primitive.u8.html">u8</a>],
     count: <a class="primitive" href="https://doc.rust-lang.org/1.94.0/core/primitive.usize.html">usize</a>,
 ) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.94.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;(&amp;mut Self, &amp;mut [<a class="primitive" href="https://doc.rust-lang.org/1.94.0/core/primitive.u8.html">u8</a>]), <a class="type" href="error/type.TryCastError.html" title="type zerocopy::error::TryCastError">TryCastError</a>&lt;&amp;mut [<a class="primitive" href="https://doc.rust-lang.org/1.94.0/core/primitive.u8.html">u8</a>], Self&gt;&gt;<div class="where">where
@@ -3427,7 +3463,7 @@ which do not take an explicit count do not support such types.</p>
     Code Generation
 </h5>
 <p>See <a href="#method.try_ref_from_prefix_with_elems.codegen"><code>TryFromBytes::try_ref_from_prefix_with_elems</code></a>.</p>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.try_mut_from_suffix_with_elems" class="method"><a class="src rightside" href="../src/zerocopy/lib.rs.html#2986-2994">Source</a><h4 class="code-header">fn <a href="#method.try_mut_from_suffix_with_elems" class="fn">try_mut_from_suffix_with_elems</a>(
+</div></details><details class="toggle method-toggle" open><summary><section id="method.try_mut_from_suffix_with_elems" class="method"><a class="src rightside" href="../src/zerocopy/lib.rs.html#2984-2992">Source</a><h4 class="code-header">fn <a href="#method.try_mut_from_suffix_with_elems" class="fn">try_mut_from_suffix_with_elems</a>(
     source: &amp;mut [<a class="primitive" href="https://doc.rust-lang.org/1.94.0/core/primitive.u8.html">u8</a>],
     count: <a class="primitive" href="https://doc.rust-lang.org/1.94.0/core/primitive.usize.html">usize</a>,
 ) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.94.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;(&amp;mut [<a class="primitive" href="https://doc.rust-lang.org/1.94.0/core/primitive.u8.html">u8</a>], &amp;mut Self), <a class="type" href="error/type.TryCastError.html" title="type zerocopy::error::TryCastError">TryCastError</a>&lt;&amp;mut [<a class="primitive" href="https://doc.rust-lang.org/1.94.0/core/primitive.u8.html">u8</a>], Self&gt;&gt;<div class="where">where
@@ -3501,7 +3537,7 @@ which do not take an explicit count do not support such types.</p>
     Code Generation
 </h5>
 <p>See <a href="#method.try_ref_from_suffix_with_elems.codegen"><code>TryFromBytes::try_ref_from_suffix_with_elems</code></a>.</p>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.try_read_from_bytes" class="method"><a class="src rightside" href="../src/zerocopy/lib.rs.html#3052-3067">Source</a><h4 class="code-header">fn <a href="#method.try_read_from_bytes" class="fn">try_read_from_bytes</a>(source: &amp;[<a class="primitive" href="https://doc.rust-lang.org/1.94.0/core/primitive.u8.html">u8</a>]) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.94.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;Self, <a class="type" href="error/type.TryReadError.html" title="type zerocopy::error::TryReadError">TryReadError</a>&lt;&amp;[<a class="primitive" href="https://doc.rust-lang.org/1.94.0/core/primitive.u8.html">u8</a>], Self&gt;&gt;<div class="where">where
+</div></details><details class="toggle method-toggle" open><summary><section id="method.try_read_from_bytes" class="method"><a class="src rightside" href="../src/zerocopy/lib.rs.html#3050-3065">Source</a><h4 class="code-header">fn <a href="#method.try_read_from_bytes" class="fn">try_read_from_bytes</a>(source: &amp;[<a class="primitive" href="https://doc.rust-lang.org/1.94.0/core/primitive.u8.html">u8</a>]) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.94.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;Self, <a class="type" href="error/type.TryReadError.html" title="type zerocopy::error::TryReadError">TryReadError</a>&lt;&amp;[<a class="primitive" href="https://doc.rust-lang.org/1.94.0/core/primitive.u8.html">u8</a>], Self&gt;&gt;<div class="where">where
     Self: <a class="trait" href="https://doc.rust-lang.org/1.94.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</div></h4></section></summary><div class="docblock"><p>Attempts to read the given <code>source</code> as a <code>Self</code>.</p>
 <p>If <code>source.len() != size_of::&lt;Self&gt;()</code> or the bytes are not a valid
 instance of <code>Self</code>, this returns <code>Err</code>.</p>
@@ -3557,26 +3593,30 @@ type, and what the compiler can prove about the source.</p>
 <div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="kw">use </span>zerocopy_derive::<span class="kw-2">*</span>;
 
 <span class="comment">// The only valid value of this type are the bytes `0xC0C0`.
-</span><span class="attr">#[derive(TryFromBytes, KnownLayout, Immutable)]
+</span><span class="attr">#[derive(TryFromBytes, KnownLayout, Immutable, IntoBytes)]
 #[repr(u16)]
 </span><span class="kw">pub enum </span>C0C0 {
    _XC0C0 = <span class="number">0xC0C0</span>,
 }
 
-<span class="attr">#[derive(FromBytes, KnownLayout, Immutable)]
-#[repr(C, align(<span class="number">2</span>))]
-</span><span class="kw">pub struct </span>Packet&lt;Magic&gt; {
-   magic_number: Magic,
-   mug_size: u8,
-   temperature: u8,
-   marshmallows: [u8; <span class="number">2</span>],
+<span class="macro">macro_rules!</span> define_packet {
+   (<span class="macro-nonterminal">$name</span>: ident, <span class="macro-nonterminal">$trait</span>: ident, <span class="macro-nonterminal">$leading_field</span>: ty) =&gt; {
+       <span class="attr">#[derive(<span class="macro-nonterminal">$trait</span>, KnownLayout, Immutable, IntoBytes)]
+       #[repr(C, align(<span class="number">2</span>))]
+       </span><span class="kw">pub struct </span><span class="macro-nonterminal">$name </span>{
+           magic_number: <span class="macro-nonterminal">$leading_field</span>,
+           mug_size: u8,
+           temperature: u8,
+           marshmallows: [u8; <span class="number">2</span>],
+       }
+   };
 }
 
-<span class="doccomment">/// A packet begining with the magic number `0xC0C0`.
-</span><span class="kw">pub type </span>CocoPacket = Packet&lt;C0C0&gt;;
+<span class="doccomment">/// Packet begins with bytes 0xC0C0.
+</span><span class="macro">define_packet!</span>(CocoPacket, TryFromBytes, C0C0);
 
-<span class="doccomment">/// A packet beginning with any two initialized bytes.
-</span><span class="kw">pub type </span>LocoPacket = Packet&lt;[u8; <span class="number">2</span>]&gt;;
+<span class="doccomment">/// Packet begins with any two bytes.
+</span><span class="macro">define_packet!</span>(LocoPacket, FromBytes, [u8; <span class="number">2</span>]);
 </code></pre></div></div>
     </details>
     <details name='tab-try_read_from_bytes' style='--n: 2'>
@@ -3703,7 +3743,7 @@ Resource pressure by instruction:
 -      -      -     0.99    -     0.01    -      -     or	rax, rcx
 -      -      -      -      -     1.00    -      -     ret
 </code></pre></div></div>
-    </details></div></div></details><details class="toggle method-toggle" open><summary><section id="method.try_read_from_prefix" class="method"><a class="src rightside" href="../src/zerocopy/lib.rs.html#3129-3144">Source</a><h4 class="code-header">fn <a href="#method.try_read_from_prefix" class="fn">try_read_from_prefix</a>(
+    </details></div></div></details><details class="toggle method-toggle" open><summary><section id="method.try_read_from_prefix" class="method"><a class="src rightside" href="../src/zerocopy/lib.rs.html#3127-3142">Source</a><h4 class="code-header">fn <a href="#method.try_read_from_prefix" class="fn">try_read_from_prefix</a>(
     source: &amp;[<a class="primitive" href="https://doc.rust-lang.org/1.94.0/core/primitive.u8.html">u8</a>],
 ) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.94.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;(Self, &amp;[<a class="primitive" href="https://doc.rust-lang.org/1.94.0/core/primitive.u8.html">u8</a>]), <a class="type" href="error/type.TryReadError.html" title="type zerocopy::error::TryReadError">TryReadError</a>&lt;&amp;[<a class="primitive" href="https://doc.rust-lang.org/1.94.0/core/primitive.u8.html">u8</a>], Self&gt;&gt;<div class="where">where
     Self: <a class="trait" href="https://doc.rust-lang.org/1.94.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</div></h4></section></summary><div class="docblock"><p>Attempts to read a <code>Self</code> from the prefix of the given <code>source</code>.</p>
@@ -3765,26 +3805,30 @@ type, and what the compiler can prove about the source.</p>
 <div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="kw">use </span>zerocopy_derive::<span class="kw-2">*</span>;
 
 <span class="comment">// The only valid value of this type are the bytes `0xC0C0`.
-</span><span class="attr">#[derive(TryFromBytes, KnownLayout, Immutable)]
+</span><span class="attr">#[derive(TryFromBytes, KnownLayout, Immutable, IntoBytes)]
 #[repr(u16)]
 </span><span class="kw">pub enum </span>C0C0 {
    _XC0C0 = <span class="number">0xC0C0</span>,
 }
 
-<span class="attr">#[derive(FromBytes, KnownLayout, Immutable)]
-#[repr(C, align(<span class="number">2</span>))]
-</span><span class="kw">pub struct </span>Packet&lt;Magic&gt; {
-   magic_number: Magic,
-   mug_size: u8,
-   temperature: u8,
-   marshmallows: [u8; <span class="number">2</span>],
+<span class="macro">macro_rules!</span> define_packet {
+   (<span class="macro-nonterminal">$name</span>: ident, <span class="macro-nonterminal">$trait</span>: ident, <span class="macro-nonterminal">$leading_field</span>: ty) =&gt; {
+       <span class="attr">#[derive(<span class="macro-nonterminal">$trait</span>, KnownLayout, Immutable, IntoBytes)]
+       #[repr(C, align(<span class="number">2</span>))]
+       </span><span class="kw">pub struct </span><span class="macro-nonterminal">$name </span>{
+           magic_number: <span class="macro-nonterminal">$leading_field</span>,
+           mug_size: u8,
+           temperature: u8,
+           marshmallows: [u8; <span class="number">2</span>],
+       }
+   };
 }
 
-<span class="doccomment">/// A packet begining with the magic number `0xC0C0`.
-</span><span class="kw">pub type </span>CocoPacket = Packet&lt;C0C0&gt;;
+<span class="doccomment">/// Packet begins with bytes 0xC0C0.
+</span><span class="macro">define_packet!</span>(CocoPacket, TryFromBytes, C0C0);
 
-<span class="doccomment">/// A packet beginning with any two initialized bytes.
-</span><span class="kw">pub type </span>LocoPacket = Packet&lt;[u8; <span class="number">2</span>]&gt;;
+<span class="doccomment">/// Packet begins with any two bytes.
+</span><span class="macro">define_packet!</span>(LocoPacket, FromBytes, [u8; <span class="number">2</span>]);
 </code></pre></div></div>
     </details>
     <details name='tab-try_read_from_prefix' style='--n: 2'>
@@ -3895,7 +3939,7 @@ Resource pressure by instruction:
 -      -     1.00   0.99    -     0.01    -      -     cmove	rax, rcx
 -      -      -      -      -     1.00    -      -     ret
 </code></pre></div></div>
-    </details></div></div></details><details class="toggle method-toggle" open><summary><section id="method.try_read_from_suffix" class="method"><a class="src rightside" href="../src/zerocopy/lib.rs.html#3207-3222">Source</a><h4 class="code-header">fn <a href="#method.try_read_from_suffix" class="fn">try_read_from_suffix</a>(
+    </details></div></div></details><details class="toggle method-toggle" open><summary><section id="method.try_read_from_suffix" class="method"><a class="src rightside" href="../src/zerocopy/lib.rs.html#3205-3220">Source</a><h4 class="code-header">fn <a href="#method.try_read_from_suffix" class="fn">try_read_from_suffix</a>(
     source: &amp;[<a class="primitive" href="https://doc.rust-lang.org/1.94.0/core/primitive.u8.html">u8</a>],
 ) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.94.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;(&amp;[<a class="primitive" href="https://doc.rust-lang.org/1.94.0/core/primitive.u8.html">u8</a>], Self), <a class="type" href="error/type.TryReadError.html" title="type zerocopy::error::TryReadError">TryReadError</a>&lt;&amp;[<a class="primitive" href="https://doc.rust-lang.org/1.94.0/core/primitive.u8.html">u8</a>], Self&gt;&gt;<div class="where">where
     Self: <a class="trait" href="https://doc.rust-lang.org/1.94.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</div></h4></section></summary><div class="docblock"><p>Attempts to read a <code>Self</code> from the suffix of the given <code>source</code>.</p>
@@ -3957,26 +4001,30 @@ type, and what the compiler can prove about the source.</p>
 <div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="kw">use </span>zerocopy_derive::<span class="kw-2">*</span>;
 
 <span class="comment">// The only valid value of this type are the bytes `0xC0C0`.
-</span><span class="attr">#[derive(TryFromBytes, KnownLayout, Immutable)]
+</span><span class="attr">#[derive(TryFromBytes, KnownLayout, Immutable, IntoBytes)]
 #[repr(u16)]
 </span><span class="kw">pub enum </span>C0C0 {
    _XC0C0 = <span class="number">0xC0C0</span>,
 }
 
-<span class="attr">#[derive(FromBytes, KnownLayout, Immutable)]
-#[repr(C, align(<span class="number">2</span>))]
-</span><span class="kw">pub struct </span>Packet&lt;Magic&gt; {
-   magic_number: Magic,
-   mug_size: u8,
-   temperature: u8,
-   marshmallows: [u8; <span class="number">2</span>],
+<span class="macro">macro_rules!</span> define_packet {
+   (<span class="macro-nonterminal">$name</span>: ident, <span class="macro-nonterminal">$trait</span>: ident, <span class="macro-nonterminal">$leading_field</span>: ty) =&gt; {
+       <span class="attr">#[derive(<span class="macro-nonterminal">$trait</span>, KnownLayout, Immutable, IntoBytes)]
+       #[repr(C, align(<span class="number">2</span>))]
+       </span><span class="kw">pub struct </span><span class="macro-nonterminal">$name </span>{
+           magic_number: <span class="macro-nonterminal">$leading_field</span>,
+           mug_size: u8,
+           temperature: u8,
+           marshmallows: [u8; <span class="number">2</span>],
+       }
+   };
 }
 
-<span class="doccomment">/// A packet begining with the magic number `0xC0C0`.
-</span><span class="kw">pub type </span>CocoPacket = Packet&lt;C0C0&gt;;
+<span class="doccomment">/// Packet begins with bytes 0xC0C0.
+</span><span class="macro">define_packet!</span>(CocoPacket, TryFromBytes, C0C0);
 
-<span class="doccomment">/// A packet beginning with any two initialized bytes.
-</span><span class="kw">pub type </span>LocoPacket = Packet&lt;[u8; <span class="number">2</span>]&gt;;
+<span class="doccomment">/// Packet begins with any two bytes.
+</span><span class="macro">define_packet!</span>(LocoPacket, FromBytes, [u8; <span class="number">2</span>]);
 </code></pre></div></div>
     </details>
     <details name='tab-try_read_from_suffix' style='--n: 2'>

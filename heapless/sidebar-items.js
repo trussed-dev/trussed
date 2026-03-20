@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["Entry"],"mod":["binary_heap","mpmc","pool","sorted_linked_list","spsc"],"struct":["Deque","HistoryBuffer","IndexMap","IndexSet","LinearMap","OccupiedEntry","OldestOrdered","String","VacantEntry","Vec"],"type":["FnvIndexMap","FnvIndexSet"]};
+window.SIDEBAR_ITEMS = {"macro":["format"],"mod":["binary_heap","c_string","deque","history_buf","index_map","index_set","linear_map","mpmc","sorted_linked_list","spsc","storage","string","vec"],"struct":["CapacityError"],"trait":["LenType"]};

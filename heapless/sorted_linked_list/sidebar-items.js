@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["FindMut","Iter","LinkedIndexU16","LinkedIndexU8","LinkedIndexUsize","Max","Min","Node","SortedLinkedList"],"trait":["Kind","SortedLinkedListIndex"]};
+window.SIDEBAR_ITEMS = {"struct":["FindMutView","IterView","Max","Min","Node","SortedLinkedListInner"],"trait":["Kind","SortedLinkedListStorage"],"type":["OwnedSortedLinkedListStorage","SortedLinkedList","SortedLinkedListView","ViewSortedLinkedListStorage"]};

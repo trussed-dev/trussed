@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["Kind","Secrecy"],"struct":["Bytes","Flags","Info","Key"],"type":["Material","SerializedKeyBytes"]};
+window.SIDEBAR_ITEMS = {"enum":["Kind","Secrecy"],"struct":["Flags","Info","Key"],"type":["Bytes","Material","SerializedKeyBytes"]};
