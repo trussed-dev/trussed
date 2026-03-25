@@ -82,14 +82,14 @@ impl platform::Syscall for Syscall {
     }
 }
 
-struct Runner<'a, I: 'static, C> {
+pub struct Runner<'a, I: 'static, C> {
     syscall_tx: Sender<()>,
     syscall_rx: Receiver<()>,
     eps: Vec<ServiceEndpoint<'a, I, C>>,
 }
 
-impl<'a, I: 'static, C: Default> Runner<'a, I, C> {
-    fn new() -> Self {
+impl<'a, I: 'static, C> Runner<'a, I, C> {
+    pub fn new() -> Self {
         let (syscall_tx, syscall_rx) = mpsc::channel();
         Self {
             syscall_tx,
@@ -98,22 +98,11 @@ impl<'a, I: 'static, C: Default> Runner<'a, I, C> {
         }
     }
 
-    fn syscall(&self) -> Syscall {
+    pub fn syscall(&self) -> Syscall {
         Syscall(self.syscall_tx.clone())
     }
 
-    fn add_endpoint(
-        &mut self,
-        responder: TrussedResponder<'a>,
-        client_id: &str,
-        backends: &'static [BackendId<I>],
-    ) {
-        let context = CoreContext::new(client_id.try_into().unwrap());
-        self.eps
-            .push(ServiceEndpoint::new(responder, context, backends));
-    }
-
-    fn run<P, D, F, R>(self, platform: P, dispatch: D, f: F) -> R
+    pub fn run<P, D, F, R>(self, platform: P, dispatch: D, f: F) -> R
     where
         P: platform::Platform,
         D: Dispatch<Context = C, BackendId = I>,
@@ -136,6 +125,25 @@ impl<'a, I: 'static, C: Default> Runner<'a, I, C> {
             stop_tx.send(()).unwrap();
             result
         })
+    }
+}
+
+impl<'a, I: 'static, C: Default> Runner<'a, I, C> {
+    pub fn add_endpoint(
+        &mut self,
+        responder: TrussedResponder<'a>,
+        client_id: &str,
+        backends: &'static [BackendId<I>],
+    ) {
+        let context = CoreContext::new(client_id.try_into().unwrap());
+        self.eps
+            .push(ServiceEndpoint::new(responder, context, backends));
+    }
+}
+
+impl<I: 'static, C> Default for Runner<'_, I, C> {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
