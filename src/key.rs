@@ -4,10 +4,9 @@ use core::sync::atomic;
 use serde::{de::Visitor, ser::SerializeMap, Deserialize, Serialize};
 use zeroize::Zeroize;
 
-pub use crate::Bytes;
 use crate::{
     config::{MAX_KEY_MATERIAL_LENGTH, MAX_SERIALIZED_KEY_LENGTH},
-    Error,
+    Bytes, Error,
 };
 
 pub type Material = Bytes<MAX_KEY_MATERIAL_LENGTH>;

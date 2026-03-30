@@ -1,5 +1,9 @@
-use crate::platform::{self, consent::Level, reboot::To, ui::Status};
 use std::time::{Duration, Instant};
+
+use crate::{
+    platform,
+    types::{consent::Level, reboot::To, ui::Status},
+};
 
 pub struct UserInterface {
     start_time: Instant,

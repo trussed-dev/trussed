@@ -6,20 +6,19 @@ use crate::api::{reply, request, Reply, Request};
 use crate::backend::{BackendId, CoreOnly, Dispatch};
 use crate::config::MAX_MESSAGE_LENGTH;
 use crate::error::{Error, Result};
-pub use crate::key;
+use crate::key;
 #[cfg(feature = "crypto-client")]
 use crate::mechanisms;
-pub use crate::pipe::ServiceEndpoint;
-use crate::platform::{consent, ui, Platform, UserInterface};
-pub use crate::store::{
-    self,
+use crate::pipe::ServiceEndpoint;
+use crate::platform::{Platform, UserInterface};
+use crate::store::{
     certstore::{Certstore as _, ClientCertstore},
     counterstore::{ClientCounterstore, Counterstore as _},
-    filestore::{ClientFilestore, Filestore, ReadDirFilesState, ReadDirState},
+    filestore::{ClientFilestore, Filestore},
     keystore::{ClientKeystore, Keystore},
 };
-use crate::types::ui::Status;
-use crate::types::{Context, CoreContext, Location, Mechanism, MediumData, Message};
+use crate::types::ui::{self, Status};
+use crate::types::{consent, Context, CoreContext, Location, Mechanism, MediumData, Message};
 use crate::Bytes;
 
 #[cfg(feature = "attestation-client")]

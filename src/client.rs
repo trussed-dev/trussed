@@ -82,8 +82,7 @@ use crate::backend::CoreOnly;
 use crate::error::{Error, Result};
 use crate::interrupt::InterruptFlag;
 use crate::pipe::TrussedRequester;
-
-pub use crate::platform::Syscall;
+use crate::platform::Syscall;
 
 #[cfg(feature = "crypto-client")]
 pub mod mechanisms;
