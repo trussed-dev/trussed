@@ -58,9 +58,9 @@ where
 /// Const generics are used to allow easy deconstruction in the callback arguments
 ///
 /// ```rust
-///# use trussed::client::{Ed255, CryptoClient};
-///# use trussed::types::{Location, Mechanism};
-///# use trussed::syscall;
+///# use trussed_core::{mechanisms::Ed255, CryptoClient};
+///# use trussed_core::types::{Location, Mechanism};
+///# use trussed_core::syscall;
 ///# use trussed::virt::{with_clients, StoreConfig};
 /// with_clients(StoreConfig::ram(), ["client1", "client2"], |[mut client1, mut client2]| {
 ///     let key = syscall!(client1.generate_ed255_private_key(Location::Internal)).key;

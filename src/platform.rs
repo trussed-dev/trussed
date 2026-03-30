@@ -7,10 +7,10 @@
 //! TODO: Currently, `Platform::R` lacks the `CryptoRng` bound.
 
 use rand_core::{CryptoRng, RngCore};
+use trussed_core::types::{consent, reboot};
 
 use crate::store::Store;
-use crate::types::consent;
-use crate::types::{reboot, ui};
+use crate::types::ui;
 
 pub trait UserInterface {
     /// Check if the user has indicated their presence so as to give

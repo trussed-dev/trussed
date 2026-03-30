@@ -72,9 +72,11 @@
 //! - Alternative: subdirectory <==> RP hash, everything else in flat files
 //! - In any case need to "list dirs excluding . and .." or similar
 
-use crate::error::Error;
-use crate::types::{Bytes, Location};
 use littlefs2_core::{path, DirEntry, Metadata, Path};
+use trussed_core::{
+    types::{Bytes, Location},
+    Error,
+};
 
 pub use littlefs2_core::{DynFile, DynFilesystem};
 

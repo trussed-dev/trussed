@@ -1,7 +1,9 @@
 use rand_core::RngCore;
+use trussed_core::{
+    api::{reply, request},
+    Error,
+};
 
-use crate::api::{reply, request};
-use crate::error::Error;
 use crate::key;
 use crate::service::MechanismImpl;
 use crate::store::keystore::Keystore;

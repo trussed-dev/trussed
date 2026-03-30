@@ -3,10 +3,12 @@
 #![allow(clippy::derive_partial_eq_without_eq)]
 
 use interchange::{Channel, Requester, Responder};
+use trussed_core::{
+    api::{Reply, Request},
+    Error,
+};
 
-use crate::api::{Reply, Request};
 use crate::backend::BackendId;
-use crate::error::Error;
 use crate::types::{Context, CoreContext};
 
 pub type TrussedChannel = Channel<Request, Result<Reply, Error>>;
@@ -50,8 +52,8 @@ impl<'a, I: 'static, C: Default> ServiceEndpoint<'a, I, C> {
 #[cfg(test)]
 mod tests {
     use super::TrussedChannel;
-    use crate::api::{Reply, Request};
     use core::mem;
+    use trussed_core::api::{Reply, Request};
 
     // The following checks are used to ensure that we don’t accidentally increase the interchange
     // size.  Bumping the size is not a breaking change but should only be done if really

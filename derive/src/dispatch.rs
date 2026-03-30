@@ -50,9 +50,9 @@ impl Dispatch {
                     &mut self,
                     backend: &Self::BackendId,
                     ctx: &mut ::trussed::types::Context<Self::Context>,
-                    request: &::trussed::api::Request,
+                    request: &::trussed_core::api::Request,
                     resources: &mut ::trussed::service::ServiceResources<P>,
-                ) -> ::core::result::Result<::trussed::api::Reply, ::trussed::error::Error> {
+                ) -> ::core::result::Result<::trussed_core::api::Reply, ::trussed_core::Error> {
                     match backend {
                         #(#requests)*
                     }

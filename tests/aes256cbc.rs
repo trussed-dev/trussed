@@ -1,14 +1,13 @@
-use trussed::client::CryptoClient;
-use trussed::syscall;
-
 mod client;
-
-use trussed::types::Location::*;
-use trussed::types::{Mechanism, StorageAttributes};
 
 use aes::Aes256;
 use cbc::cipher::{block_padding::ZeroPadding, BlockEncryptMut, KeyIvInit};
 use sha2::digest::Digest;
+use trussed_core::{
+    syscall,
+    types::{Location::*, Mechanism, StorageAttributes},
+    CryptoClient,
+};
 
 #[test]
 fn aes256cbc() {

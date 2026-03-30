@@ -1,11 +1,10 @@
 use std::assert_eq;
 
 use littlefs2_core::path;
-use trussed::{
-    client::{CryptoClient, FilesystemClient},
-    error::Error,
+use trussed_core::{
     syscall, try_syscall,
     types::{Bytes, Location, Mechanism, PathBuf, StorageAttributes},
+    CryptoClient, Error, FilesystemClient,
 };
 
 mod client;

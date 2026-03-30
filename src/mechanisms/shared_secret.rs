@@ -1,9 +1,12 @@
-use crate::api::{reply, request};
-use crate::error::Error;
+use trussed_core::{
+    api::{reply, request},
+    types::{KeySerialization, SerializedKey},
+    Error,
+};
+
 use crate::key;
 use crate::service::MechanismImpl;
 use crate::store::keystore::Keystore;
-use crate::types::{KeySerialization, SerializedKey};
 
 impl MechanismImpl for super::SharedSecret {
     #[inline(never)]

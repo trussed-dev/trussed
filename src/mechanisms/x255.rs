@@ -1,12 +1,14 @@
 use rand_core::RngCore;
 use salty::agreement;
+use trussed_core::{
+    api::{reply, request},
+    types::{KeyId, KeySerialization, SerializedKey},
+    Error,
+};
 
-use crate::api::{reply, request};
-use crate::error::Error;
 use crate::key;
 use crate::service::MechanismImpl;
 use crate::store::keystore::Keystore;
-use crate::types::{KeyId, KeySerialization, SerializedKey};
 
 fn load_public_key(
     keystore: &mut impl Keystore,

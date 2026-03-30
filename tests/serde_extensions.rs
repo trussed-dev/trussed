@@ -26,9 +26,9 @@
 
 use trussed::{
     backend::BackendId,
-    types::ShortData,
     virt::{self, StoreConfig},
 };
+use trussed_core::{syscall, try_syscall, types::ShortData};
 
 use runner::Backends;
 
@@ -36,10 +36,10 @@ type Client<'a> = virt::Client<'a, Backends>;
 
 mod extensions {
     use serde::{Deserialize, Serialize};
-    use trussed::{
-        error::Error,
+    use trussed_core::{
         serde_extensions::{Extension, ExtensionClient, ExtensionResult},
         types::ShortData,
+        Error,
     };
 
     pub struct TestExtension;
@@ -214,13 +214,10 @@ mod backends {
     };
 
     use trussed::{
-        backend::Backend,
-        error::Error,
-        platform::Platform,
-        serde_extensions::ExtensionImpl,
-        service::ServiceResources,
-        types::{CoreContext, ShortData},
+        backend::Backend, platform::Platform, serde_extensions::ExtensionImpl,
+        service::ServiceResources, types::CoreContext,
     };
+    use trussed_core::{types::ShortData, Error};
 
     #[derive(Default)]
     pub struct TestContext {
@@ -387,20 +384,20 @@ fn test_extension() {
     let msg = ShortData::from(&[0x01, 0x02, 0x03]);
     let rev = ShortData::from(&[0x03, 0x02, 0x01]);
     run(&[], |client| {
-        assert!(trussed::try_syscall!(client.reverse(msg.clone())).is_err());
+        assert!(try_syscall!(client.reverse(msg.clone())).is_err());
     });
     run(runner::BACKENDS_TEST1, |client| {
-        assert_eq!(trussed::syscall!(client.test_calls()).calls, 0);
-        assert_eq!(trussed::syscall!(client.reverse(msg.clone())).s, rev);
-        assert_eq!(trussed::syscall!(client.test_calls()).calls, 1);
-        assert_eq!(trussed::syscall!(client.test_calls()).calls, 1);
-        assert_eq!(trussed::syscall!(client.reverse(msg.clone())).s, rev);
-        assert_eq!(trussed::syscall!(client.test_calls()).calls, 2);
+        assert_eq!(syscall!(client.test_calls()).calls, 0);
+        assert_eq!(syscall!(client.reverse(msg.clone())).s, rev);
+        assert_eq!(syscall!(client.test_calls()).calls, 1);
+        assert_eq!(syscall!(client.test_calls()).calls, 1);
+        assert_eq!(syscall!(client.reverse(msg.clone())).s, rev);
+        assert_eq!(syscall!(client.test_calls()).calls, 2);
     });
     run(runner::BACKENDS_TEST2, |client| {
-        assert_eq!(trussed::syscall!(client.test_calls()).calls, 0);
-        assert_eq!(trussed::syscall!(client.reverse(msg.clone())).s, rev);
-        assert_eq!(trussed::syscall!(client.test_calls()).calls, 1);
+        assert_eq!(syscall!(client.test_calls()).calls, 0);
+        assert_eq!(syscall!(client.reverse(msg.clone())).s, rev);
+        assert_eq!(syscall!(client.test_calls()).calls, 1);
     });
 }
 
@@ -413,25 +410,25 @@ fn sample_extension() {
     let rev = ShortData::from(&[4, 3, 2, 1]);
     let trunc = ShortData::from(&[1, 2, 3]);
     run(&[], |client| {
-        assert!(trussed::try_syscall!(client.truncate(msg.clone())).is_err());
+        assert!(try_syscall!(client.truncate(msg.clone())).is_err());
     });
     run(runner::BACKENDS_SAMPLE1, |client| {
-        assert_eq!(trussed::syscall!(client.sample_calls()).calls, 0);
-        assert_eq!(trussed::syscall!(client.test_calls()).calls, 0);
-        assert_eq!(trussed::syscall!(client.reverse(msg.clone())).s, rev);
-        assert_eq!(trussed::syscall!(client.truncate(msg.clone())).s, trunc);
+        assert_eq!(syscall!(client.sample_calls()).calls, 0);
+        assert_eq!(syscall!(client.test_calls()).calls, 0);
+        assert_eq!(syscall!(client.reverse(msg.clone())).s, rev);
+        assert_eq!(syscall!(client.truncate(msg.clone())).s, trunc);
         // the sample backend has but one context that is shared for its
         // implementation of the extensions, so the calls increment together.
-        assert_eq!(trussed::syscall!(client.sample_calls()).calls, 2);
-        assert_eq!(trussed::syscall!(client.test_calls()).calls, 2);
-        assert_eq!(trussed::syscall!(client.sample_calls()).calls, 2);
-        assert_eq!(trussed::syscall!(client.truncate(msg.clone())).s, trunc);
-        assert_eq!(trussed::syscall!(client.sample_calls()).calls, 3);
+        assert_eq!(syscall!(client.sample_calls()).calls, 2);
+        assert_eq!(syscall!(client.test_calls()).calls, 2);
+        assert_eq!(syscall!(client.sample_calls()).calls, 2);
+        assert_eq!(syscall!(client.truncate(msg.clone())).s, trunc);
+        assert_eq!(syscall!(client.sample_calls()).calls, 3);
     });
     run(runner::BACKENDS_SAMPLE2, |client| {
-        assert_eq!(trussed::syscall!(client.sample_calls()).calls, 0);
-        assert_eq!(trussed::syscall!(client.truncate(msg.clone())).s, trunc);
-        assert_eq!(trussed::syscall!(client.sample_calls()).calls, 1);
+        assert_eq!(syscall!(client.sample_calls()).calls, 0);
+        assert_eq!(syscall!(client.truncate(msg.clone())).s, trunc);
+        assert_eq!(syscall!(client.sample_calls()).calls, 1);
     });
 }
 
@@ -444,16 +441,16 @@ fn mixed_extension() {
     let rev = ShortData::from(&[4, 3, 2, 1]);
     let trunc = ShortData::from(&[1, 2, 3]);
     run(runner::BACKENDS_MIXED, |client| {
-        assert_eq!(trussed::syscall!(client.sample_calls()).calls, 0);
-        assert_eq!(trussed::syscall!(client.test_calls()).calls, 0);
-        assert_eq!(trussed::syscall!(client.reverse(msg.clone())).s, rev);
-        assert_eq!(trussed::syscall!(client.truncate(msg.clone())).s, trunc);
+        assert_eq!(syscall!(client.sample_calls()).calls, 0);
+        assert_eq!(syscall!(client.test_calls()).calls, 0);
+        assert_eq!(syscall!(client.reverse(msg.clone())).s, rev);
+        assert_eq!(syscall!(client.truncate(msg.clone())).s, trunc);
         // the test backend is placed before the sample backend here,
         // and so it "catches" the reverse call, leading to single incrementations
         // of each call counter.
-        assert_eq!(trussed::syscall!(client.sample_calls()).calls, 1);
-        assert_eq!(trussed::syscall!(client.test_calls()).calls, 1);
-        assert_eq!(trussed::syscall!(client.truncate(msg.clone())).s, trunc);
-        assert_eq!(trussed::syscall!(client.sample_calls()).calls, 2);
+        assert_eq!(syscall!(client.sample_calls()).calls, 1);
+        assert_eq!(syscall!(client.test_calls()).calls, 1);
+        assert_eq!(syscall!(client.truncate(msg.clone())).s, trunc);
+        assert_eq!(syscall!(client.sample_calls()).calls, 2);
     });
 }

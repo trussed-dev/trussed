@@ -1,13 +1,16 @@
 use littlefs2_core::path;
 use trussed::{
-    api::{reply::ReadFile, Reply, Request},
     backend::{self, BackendId},
-    client::FilesystemClient as _,
-    error::Error,
     platform,
     service::ServiceResources,
-    types::{CoreContext, Location, Message, PathBuf},
+    types::CoreContext,
     virt::{self, StoreConfig},
+};
+use trussed_core::{
+    api::{reply::ReadFile, Reply, Request},
+    syscall, try_syscall,
+    types::{Location, Message, PathBuf},
+    Error, FilesystemClient as _,
 };
 
 type Client<'a> = virt::Client<'a, Dispatch>;
@@ -60,11 +63,11 @@ fn run<F: FnOnce(&mut Client<'_>)>(backends: &'static [BackendId<Backend>], f: F
 fn override_syscall() {
     let path = PathBuf::from(path!("test"));
     run(&[], |client| {
-        assert!(trussed::try_syscall!(client.read_file(Location::Internal, path.clone())).is_err());
+        assert!(try_syscall!(client.read_file(Location::Internal, path.clone())).is_err());
     });
     run(BACKENDS_TEST, |client| {
         assert_eq!(
-            trussed::syscall!(client.read_file(Location::Internal, path.clone())).data,
+            syscall!(client.read_file(Location::Internal, path.clone())).data,
             &[0xff]
         );
     })

@@ -13,18 +13,18 @@
 //!
 //! See `tests/serde_extensions.rs` for an example.
 
-use crate::{
+use trussed_core::{
     api::{reply, request, Reply, Request},
+    serde_extensions::{Extension, ExtensionClient},
+    Error,
+};
+
+use crate::{
     backend::{Backend, CoreOnly, Dispatch, NoId, OptionalBackend},
     client::ClientImplementation,
-    error::Error,
     platform::{Platform, Syscall},
     service::ServiceResources,
     types::{self, Context, CoreContext},
-};
-
-pub use trussed_core::serde_extensions::{
-    Extension, ExtensionClient, ExtensionFutureResult, ExtensionResult,
 };
 
 /// Dispatches extension requests to custom backends.

@@ -22,11 +22,9 @@ struct Dispatch {
 fn main() {
     use trussed::{
         backend::BackendId,
-        client::CryptoClient,
-        try_syscall,
         virt::{self, StoreConfig},
-        Error,
     };
+    use trussed_core::{try_syscall, CryptoClient, Error};
 
     fn run(backends: &'static [BackendId<Backend>], expected: Option<Error>) {
         virt::with_platform(StoreConfig::ram(), |platform| {

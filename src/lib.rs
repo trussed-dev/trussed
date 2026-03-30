@@ -24,12 +24,9 @@ generate_macros!();
 
 pub use interchange::Interchange;
 
-pub mod api;
 pub mod backend;
 pub mod client;
 pub mod config;
-pub mod error;
-pub mod interrupt;
 pub mod key;
 #[cfg(feature = "crypto-client")]
 mod mechanisms;
@@ -44,24 +41,19 @@ pub mod types;
 #[cfg(feature = "virt")]
 pub mod virt;
 
-pub use api::Reply;
 #[cfg(feature = "all-clients")]
 pub use client::Client;
 pub use client::ClientImplementation;
-pub use error::Error;
 /// The trait that platforms need to implement to use Trussed.
 pub use platform::Platform;
 pub use service::Service;
 
-pub use trussed_core::{block, syscall, try_syscall};
-
 pub use cbor_smol::cbor_deserialize;
-pub use heapless_bytes::Bytes;
 
 pub fn cbor_serialize_bytes<T: serde::Serialize, const N: usize>(
     object: &T,
-) -> cbor_smol::Result<Bytes<N>> {
-    let mut data = Bytes::new();
+) -> cbor_smol::Result<heapless_bytes::Bytes<N>> {
+    let mut data = heapless_bytes::Bytes::new();
     cbor_smol::cbor_serialize_to(object, &mut data)?;
     Ok(data)
 }
@@ -70,8 +62,8 @@ pub(crate) use postcard::from_bytes as postcard_deserialize;
 
 pub(crate) fn postcard_serialize_bytes<T: serde::Serialize, const N: usize>(
     object: &T,
-) -> postcard::Result<Bytes<N>> {
-    let mut vec = Bytes::new();
+) -> postcard::Result<heapless_bytes::Bytes<N>> {
+    let mut vec = heapless_bytes::Bytes::new();
     vec.resize_to_capacity();
     let serialized = postcard::to_slice(object, &mut vec)?.len();
     vec.resize(serialized, 0).unwrap();

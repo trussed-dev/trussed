@@ -1,17 +1,9 @@
 pub use generic_array::GenericArray;
 
-pub use crate::Bytes;
-
 pub use littlefs2_core::{DirEntry, Metadata, Path, PathBuf, Result as LfsResult};
 
-pub use trussed_core::types::{
-    reboot, CertId, CounterId, Id, KeyId, KeySerialization, Location, Mechanism, MediumData,
-    Message, ObjectId, SerializedKey, ShortData, Signature, SignatureSerialization, SpecialId,
-    StorageAttributes, UserAttribute,
-};
-
-use crate::interrupt::InterruptFlag;
 use crate::store::filestore::{ReadDirFilesState, ReadDirState};
+use trussed_core::InterruptFlag;
 
 /// An empty struct not storing any data.
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -31,10 +23,6 @@ pub mod ui {
         Error,
         Custom(u8),
     }
-}
-
-pub mod consent {
-    pub use trussed_core::types::consent::{Error, Level, Result};
 }
 
 /// The context for a syscall (per client).

@@ -1,14 +1,13 @@
 use core::cmp::Ordering;
 
-use crate::{
-    api::NotBefore,
-    error::{Error, Result},
-    // service::ReadDirState,
-    store::{self, DynFilesystem, Store},
-    types::{Location, Message, UserAttribute},
-    Bytes,
-};
 use littlefs2_core::{path, DirEntry, Metadata, Path, PathBuf};
+use trussed_core::{
+    types::NotBefore,
+    types::{Bytes, Location, Message, UserAttribute},
+    Error, Result,
+};
+
+use crate::store::{self, DynFilesystem, Store};
 
 #[derive(Clone)]
 pub struct ReadDirState {

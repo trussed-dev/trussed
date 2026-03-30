@@ -1,7 +1,7 @@
 use super::ClientImplementation;
 use crate::platform::Syscall;
 
-pub use trussed_core::mechanisms::*;
+use trussed_core::mechanisms::*;
 
 #[cfg(feature = "aes256-cbc")]
 impl<S: Syscall, E> Aes256Cbc for ClientImplementation<'_, S, E> {}

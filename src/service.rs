@@ -1,11 +1,14 @@
 use littlefs2_core::{path, PathBuf};
 use rand_chacha::ChaCha8Rng;
 pub use rand_core::{RngCore, SeedableRng};
+use trussed_core::{
+    api::{reply, request, Reply, Request},
+    config::MAX_MESSAGE_LENGTH,
+    types::{consent, Bytes, Location, Mechanism, MediumData, Message},
+    Error, Result,
+};
 
-use crate::api::{reply, request, Reply, Request};
 use crate::backend::{BackendId, CoreOnly, Dispatch};
-use crate::config::MAX_MESSAGE_LENGTH;
-use crate::error::{Error, Result};
 use crate::key;
 #[cfg(feature = "crypto-client")]
 use crate::mechanisms;
@@ -18,8 +21,7 @@ use crate::store::{
     keystore::{ClientKeystore, Keystore},
 };
 use crate::types::ui::{self, Status};
-use crate::types::{consent, Context, CoreContext, Location, Mechanism, MediumData, Message};
-use crate::Bytes;
+use crate::types::{Context, CoreContext};
 
 #[cfg(feature = "attestation-client")]
 pub mod attest;

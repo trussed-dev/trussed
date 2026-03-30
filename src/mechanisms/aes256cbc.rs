@@ -1,9 +1,12 @@
-use crate::api::{reply, request};
-use crate::error::Error;
+use trussed_core::{
+    api::{reply, request},
+    types::{Mechanism, Message, ShortData},
+    Error,
+};
+
 use crate::key;
 use crate::service::MechanismImpl;
 use crate::store::keystore::Keystore;
-use crate::types::{Mechanism, Message, ShortData};
 
 const AES256_KEY_SIZE: usize = 32;
 

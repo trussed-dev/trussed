@@ -1,11 +1,11 @@
 use littlefs2_core::{path, PathBuf};
 use rand_chacha::ChaCha8Rng;
-
-use crate::{
-    error::{Error, Result},
-    store::{self, Store},
-    types::{CounterId, Location},
+use trussed_core::{
+    types::{Bytes, CounterId, Location},
+    Error, Result,
 };
+
+use crate::store::{self, Store};
 
 pub struct ClientCounterstore<S>
 where
@@ -37,7 +37,7 @@ impl<S: Store> ClientCounterstore<S> {
 
     fn read_counter(&mut self, location: Location, id: CounterId) -> Result<Counter> {
         let path = self.counter_path(id);
-        let mut bytes: crate::Bytes<16> = store::read(&self.store, location, &path)?;
+        let mut bytes: Bytes<16> = store::read(&self.store, location, &path)?;
         bytes.resize_zero(16).ok();
         Ok(u128::from_le_bytes(bytes.as_slice().try_into().unwrap()))
     }

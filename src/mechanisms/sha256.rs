@@ -1,9 +1,12 @@
-use crate::api::{reply, request};
-use crate::error::Error;
+use trussed_core::{
+    api::{reply, request},
+    types::ShortData,
+    Error,
+};
+
 use crate::key;
 use crate::service::MechanismImpl;
 use crate::store::keystore::Keystore;
-use crate::types::ShortData;
 
 impl MechanismImpl for super::Sha256 {
     #[inline(never)]

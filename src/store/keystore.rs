@@ -1,13 +1,14 @@
 use littlefs2_core::{path, PathBuf};
 use rand_chacha::ChaCha8Rng;
+use trussed_core::{
+    types::{Bytes, KeyId, Location},
+    Error, Result,
+};
 
 use crate::{
     config::MAX_KEY_MATERIAL_LENGTH,
-    error::{Error, Result},
     key,
     store::{self, Store},
-    types::{KeyId, Location},
-    Bytes,
 };
 
 pub type ClientId = PathBuf;

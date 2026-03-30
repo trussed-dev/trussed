@@ -1,6 +1,6 @@
 mod client;
 
-use trussed::{client::CertificateClient as _, syscall, try_syscall, types::Location::*};
+use trussed_core::{syscall, try_syscall, types::Location::*, CertificateClient as _};
 
 #[test]
 fn certificate_client() {

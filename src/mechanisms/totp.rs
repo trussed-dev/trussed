@@ -1,5 +1,9 @@
-use crate::api::{reply, request};
-use crate::error::Error;
+use trussed_core::{
+    api::{reply, request},
+    types::Bytes,
+    Error,
+};
+
 use crate::key;
 use crate::service::MechanismImpl;
 use crate::store::keystore::Keystore;
@@ -73,7 +77,7 @@ impl MechanismImpl for super::Totp {
 
         // return signature (encode as LE)
         Ok(reply::Sign {
-            signature: crate::Bytes::try_from(totp_material.to_le_bytes().as_ref()).unwrap(),
+            signature: Bytes::try_from(totp_material.to_le_bytes().as_ref()).unwrap(),
         })
     }
 

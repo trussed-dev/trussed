@@ -1,6 +1,6 @@
 use std::mem::size_of;
 
-use trussed::api::{Reply, Request};
+use trussed_core::api::{Reply, Request};
 
 // Used to keep track
 #[test]

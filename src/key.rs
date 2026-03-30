@@ -2,12 +2,10 @@ use core::ptr::write_volatile;
 use core::sync::atomic;
 
 use serde::{de::Visitor, ser::SerializeMap, Deserialize, Serialize};
+use trussed_core::{types::Bytes, Error};
 use zeroize::Zeroize;
 
-use crate::{
-    config::{MAX_KEY_MATERIAL_LENGTH, MAX_SERIALIZED_KEY_LENGTH},
-    Bytes, Error,
-};
+use crate::config::{MAX_KEY_MATERIAL_LENGTH, MAX_SERIALIZED_KEY_LENGTH};
 
 pub type Material = Bytes<MAX_KEY_MATERIAL_LENGTH>;
 pub type SerializedKeyBytes = Bytes<MAX_SERIALIZED_KEY_LENGTH>;

@@ -1,11 +1,11 @@
-use trussed::client::mechanisms::{HmacSha256, P256};
-use trussed::client::CryptoClient;
-use trussed::types::{KeySerialization, Mechanism, StorageAttributes};
-use trussed::{syscall, try_syscall};
-
 mod client;
 
-use trussed::types::Location::*;
+use trussed_core::{
+    mechanisms::{HmacSha256, P256},
+    syscall, try_syscall,
+    types::{KeySerialization, Location::*, Mechanism, StorageAttributes},
+    CryptoClient,
+};
 
 #[test]
 fn p256_agree() {

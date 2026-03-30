@@ -1,4 +1,4 @@
-use trussed::Error;
+use trussed_core::Error;
 
 mod backends {
     use super::extensions::{
@@ -6,8 +6,9 @@ mod backends {
     };
     use trussed::{
         backend::Backend, platform::Platform, serde_extensions::ExtensionImpl,
-        service::ServiceResources, types::CoreContext, Error,
+        service::ServiceResources, types::CoreContext,
     };
+    use trussed_core::Error;
 
     #[derive(Default)]
     pub struct ABackend;
@@ -50,7 +51,7 @@ mod backends {
 
 mod extensions {
     use serde::{Deserialize, Serialize};
-    use trussed::{
+    use trussed_core::{
         serde_extensions::{Extension, ExtensionClient, ExtensionResult},
         Error,
     };
@@ -138,9 +139,9 @@ fn main() {
     use extensions::TestClient;
     use trussed::{
         backend::BackendId,
-        try_syscall,
         virt::{self, StoreConfig},
     };
+    use trussed_core::try_syscall;
 
     fn run(backends: &'static [BackendId<Backend>], expected: Option<Error>) {
         virt::with_platform(StoreConfig::ram(), |platform| {

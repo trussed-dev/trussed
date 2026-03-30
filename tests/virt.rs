@@ -1,10 +1,10 @@
 use littlefs2_core::path;
 use std::time::Duration;
-use trussed::{
-    client::{FilesystemClient as _, ManagementClient as _},
+use trussed::virt;
+use trussed_core::{
     syscall,
     types::{Bytes, Location, PathBuf},
-    virt,
+    FilesystemClient as _, ManagementClient as _,
 };
 
 fn run_test(data: u8) {

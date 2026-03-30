@@ -95,9 +95,9 @@ impl ExtensionDispatch {
                     &mut self,
                     backend: &Self::BackendId,
                     ctx: &mut ::trussed::types::Context<Self::Context>,
-                    request: &::trussed::api::Request,
+                    request: &::trussed_core::api::Request,
                     resources: &mut ::trussed::service::ServiceResources<P>,
-                ) -> ::core::result::Result<::trussed::api::Reply, ::trussed::error::Error> {
+                ) -> ::core::result::Result<::trussed_core::api::Reply, ::trussed_core::Error> {
                     match backend {
                         #(#requests)*
                         #(#delegated_requests)*
@@ -109,9 +109,9 @@ impl ExtensionDispatch {
                     backend: &Self::BackendId,
                     extension: &Self::ExtensionId,
                     ctx: &mut ::trussed::types::Context<Self::Context>,
-                    request: &::trussed::api::request::SerdeExtension,
+                    request: &::trussed_core::api::request::SerdeExtension,
                     resources: &mut ::trussed::service::ServiceResources<P>,
-                ) -> ::core::result::Result<::trussed::api::reply::SerdeExtension, ::trussed::error::Error> {
+                ) -> ::core::result::Result<::trussed_core::api::reply::SerdeExtension, ::trussed_core::Error> {
                     match backend {
                         #(#extension_requests)*
                         #(#delegated_extension_requests)*
@@ -289,7 +289,7 @@ impl Backend {
         let id = &self.id;
         let request = if self.no_core {
             quote! {
-                Err(::trussed::Error::RequestNotAvailable)
+                Err(::trussed_core::Error::RequestNotAvailable)
             }
         } else {
             let Self { index, field, .. } = self;
@@ -312,7 +312,7 @@ impl Backend {
         quote! {
             Self::BackendId::#id => match extension {
                 #(#extension_requests)*
-                _ => Err(::trussed::error::Error::RequestNotAvailable),
+                _ => Err(::trussed_core::Error::RequestNotAvailable),
             }
         }
     }
@@ -366,7 +366,7 @@ impl DelegatedBackend {
         let id = &self.id;
         let request = if self.no_core {
             quote! {
-                Err(::trussed::Error::RequestNotAvailable)
+                Err(::trussed_core::Error::RequestNotAvailable)
             }
         } else {
             let Self { backend, field, .. } = self;
@@ -403,7 +403,7 @@ impl DelegatedBackend {
                 let _ = self.#field;
                 match extension {
                     #(#extension_requests)*
-                    _ => Err(::trussed::error::Error::RequestNotAvailable),
+                    _ => Err(::trussed_core::Error::RequestNotAvailable),
                 }
             }
         }

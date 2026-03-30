@@ -1,11 +1,11 @@
 use littlefs2_core::{path, PathBuf};
 use rand_chacha::ChaCha8Rng;
-
-use crate::{
-    error::{Error, Result},
-    store::{self, Store},
+use trussed_core::{
     types::{CertId, Location, Message},
+    Error, Result,
 };
+
+use crate::store::{self, Store};
 
 pub struct ClientCertstore<S>
 where

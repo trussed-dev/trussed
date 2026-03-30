@@ -77,39 +77,27 @@
 //!
 use core::{marker::PhantomData, task::Poll};
 
-use crate::api::{Reply, RequestVariant};
+use trussed_core::{
+    api::{Reply, RequestVariant},
+    ClientError, ClientResult, Error, FutureResult, InterruptFlag, PollClient, Result,
+};
+
 use crate::backend::CoreOnly;
-use crate::error::{Error, Result};
-use crate::interrupt::InterruptFlag;
 use crate::pipe::TrussedRequester;
 use crate::platform::Syscall;
 
 #[cfg(feature = "crypto-client")]
 pub mod mechanisms;
-#[cfg(feature = "crypto-client")]
-pub use mechanisms::*;
-
-pub use trussed_core::{ClientError, ClientResult, FutureResult, PollClient};
-
-#[cfg(feature = "attestation-client")]
-pub use trussed_core::AttestationClient;
-#[cfg(feature = "certificate-client")]
-pub use trussed_core::CertificateClient;
-#[cfg(feature = "counter-client")]
-pub use trussed_core::CounterClient;
-#[cfg(feature = "crypto-client")]
-pub use trussed_core::CryptoClient;
-#[cfg(feature = "filesystem-client")]
-pub use trussed_core::FilesystemClient;
-#[cfg(feature = "management-client")]
-pub use trussed_core::ManagementClient;
-#[cfg(feature = "ui-client")]
-pub use trussed_core::UiClient;
 
 /// All-in-one trait bounding on the sub-traits.
 #[cfg(feature = "all-clients")]
 pub trait Client:
-    CertificateClient + CryptoClient + CounterClient + FilesystemClient + ManagementClient + UiClient
+    trussed_core::CertificateClient
+    + trussed_core::CryptoClient
+    + trussed_core::CounterClient
+    + trussed_core::FilesystemClient
+    + trussed_core::ManagementClient
+    + trussed_core::UiClient
 {
 }
 
@@ -222,14 +210,14 @@ where
 }
 
 #[cfg(feature = "certificate-client")]
-impl<S: Syscall, E> CertificateClient for ClientImplementation<'_, S, E> {}
+impl<S: Syscall, E> trussed_core::CertificateClient for ClientImplementation<'_, S, E> {}
 #[cfg(feature = "crypto-client")]
-impl<S: Syscall, E> CryptoClient for ClientImplementation<'_, S, E> {}
+impl<S: Syscall, E> trussed_core::CryptoClient for ClientImplementation<'_, S, E> {}
 #[cfg(feature = "counter-client")]
-impl<S: Syscall, E> CounterClient for ClientImplementation<'_, S, E> {}
+impl<S: Syscall, E> trussed_core::CounterClient for ClientImplementation<'_, S, E> {}
 #[cfg(feature = "filesystem-client")]
-impl<S: Syscall, E> FilesystemClient for ClientImplementation<'_, S, E> {}
+impl<S: Syscall, E> trussed_core::FilesystemClient for ClientImplementation<'_, S, E> {}
 #[cfg(feature = "management-client")]
-impl<S: Syscall, E> ManagementClient for ClientImplementation<'_, S, E> {}
+impl<S: Syscall, E> trussed_core::ManagementClient for ClientImplementation<'_, S, E> {}
 #[cfg(feature = "ui-client")]
-impl<S: Syscall, E> UiClient for ClientImplementation<'_, S, E> {}
+impl<S: Syscall, E> trussed_core::UiClient for ClientImplementation<'_, S, E> {}

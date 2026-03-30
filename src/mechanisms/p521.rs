@@ -7,16 +7,14 @@ use p521::{
     elliptic_curve::sec1::ToEncodedPoint,
     SecretKey,
 };
-
-use super::{P521Prehashed, P521};
-use crate::{
+use trussed_core::{
     api::{reply, request},
-    key,
-    service::MechanismImpl,
-    store::keystore::Keystore,
     types::{Bytes, KeyId, KeySerialization, SerializedKey, Signature, SignatureSerialization},
     Error,
 };
+
+use super::{P521Prehashed, P521};
+use crate::{key, service::MechanismImpl, store::keystore::Keystore};
 
 const SCALAR_SIZE: usize = 66;
 

@@ -1,6 +1,6 @@
 mod client;
 
-use trussed::{client::CounterClient as _, syscall, types::Location::*};
+use trussed_core::{syscall, types::Location::*, CounterClient as _};
 
 // #[test]
 // fn counter_implementation() {

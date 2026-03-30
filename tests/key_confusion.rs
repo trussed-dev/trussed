@@ -1,13 +1,12 @@
-use serial_test::serial;
-use trussed::client::mechanisms::{P256, X255};
-use trussed::client::CryptoClient;
-use trussed::error::Error;
-use trussed::types::{KeyId, Mechanism, SignatureSerialization};
-use trussed::{syscall, try_syscall};
-
 mod client;
 
-use trussed::types::Location::*;
+use serial_test::serial;
+use trussed_core::{
+    mechanisms::{P256, X255},
+    syscall, try_syscall,
+    types::{KeyId, Location::*, Mechanism, SignatureSerialization},
+    CryptoClient, Error,
+};
 
 fn assert_sign_mechanims_reject(key: KeyId, client: &mut impl CryptoClient) {
     for m in [

@@ -1,9 +1,8 @@
 use std::time::{Duration, Instant};
 
-use crate::{
-    platform,
-    types::{consent::Level, reboot::To, ui::Status},
-};
+use trussed_core::types::{consent::Level, reboot::To};
+
+use crate::{platform, types::ui::Status};
 
 pub struct UserInterface {
     start_time: Instant,

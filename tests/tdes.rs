@@ -1,13 +1,11 @@
-use trussed::client::CryptoClient;
-use trussed::syscall;
-
 mod client;
 
-use trussed::types::KeySerialization;
-use trussed::types::Location::*;
-use trussed::types::Mechanism;
-
 use hex_literal::hex;
+use trussed_core::{
+    syscall,
+    types::{KeySerialization, Location::*, Mechanism},
+    CryptoClient,
+};
 
 #[test]
 fn tdes() {

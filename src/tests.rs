@@ -7,13 +7,15 @@ use littlefs2::const_ram_storage;
 use littlefs2::fs::{Allocation, Filesystem};
 use littlefs2_core::path;
 use rand_core::{CryptoRng, RngCore};
-
 #[cfg(any(feature = "p256", feature = "p384", feature = "p521",))]
-use crate::types::{Mechanism, SignatureSerialization, StorageAttributes};
+use trussed_core::types::{Mechanism, SignatureSerialization, StorageAttributes};
+use trussed_core::{
+    api, block,
+    types::{consent, reboot, Bytes, Location, PathBuf},
+    CryptoClient as _, Error, FilesystemClient as _,
+};
 
-use crate::client::{CryptoClient as _, FilesystemClient as _};
-use crate::types::{consent, reboot, ui, Bytes, Location, PathBuf};
-use crate::{api, block, platform, store, Error};
+use crate::{platform, store, types::ui};
 
 pub struct MockRng(ChaCha20);
 
@@ -268,7 +270,7 @@ fn sign_ed255() {
     // let mut client = setup!();
     setup!(client);
 
-    use crate::client::mechanisms::{Ed255, P256};
+    use trussed_core::mechanisms::{Ed255, P256};
     let future = client
         .generate_ed255_private_key(Location::Internal)
         .expect("no client error");
@@ -319,7 +321,7 @@ fn sign_ed255() {
 #[test]
 #[serial]
 fn sign_p256() {
-    use crate::client::mechanisms::P256 as _;
+    use trussed_core::mechanisms::P256 as _;
     // let mut client = setup!();
     setup!(client);
     let private_key = block!(client
@@ -360,7 +362,7 @@ fn sign_p256() {
 #[serial]
 fn agree_p256() {
     // let mut client = setup!();
-    use crate::client::mechanisms::P256;
+    use trussed_core::mechanisms::P256;
     setup!(client);
     let plat_private_key = block!(client
         .generate_p256_private_key(Location::Volatile)
@@ -442,7 +444,7 @@ fn agree_p256() {
 #[test]
 #[serial]
 fn sign_p384() {
-    use crate::client::mechanisms::P384 as _;
+    use trussed_core::mechanisms::P384 as _;
     // let mut client = setup!();
     setup!(client);
     let private_key = block!(client
@@ -483,7 +485,7 @@ fn sign_p384() {
 #[serial]
 fn agree_p384() {
     // let mut client = setup!();
-    use crate::client::mechanisms::P384;
+    use trussed_core::mechanisms::P384;
     setup!(client);
     let plat_private_key = block!(client
         .generate_p384_private_key(Location::Volatile)
@@ -565,7 +567,7 @@ fn agree_p384() {
 #[test]
 #[serial]
 fn sign_p521() {
-    use crate::client::mechanisms::P521 as _;
+    use trussed_core::mechanisms::P521 as _;
     // let mut client = setup!();
     setup!(client);
     let private_key = block!(client
@@ -606,7 +608,7 @@ fn sign_p521() {
 #[serial]
 fn agree_p521() {
     // let mut client = setup!();
-    use crate::client::mechanisms::P521;
+    use trussed_core::mechanisms::P521;
     setup!(client);
     let plat_private_key = block!(client
         .generate_p521_private_key(Location::Volatile)

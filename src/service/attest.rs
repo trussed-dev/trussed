@@ -4,18 +4,17 @@ use flexiber::{
 };
 use hex_literal::hex;
 use rand_core::RngCore;
-
-use crate::{
+use trussed_core::{
     api::{reply::Attest as AttestReply, request, request::Attest as AttestRequest},
-    error::Error,
-    key, mechanisms,
-    service::MechanismImpl,
-    store::certstore::Certstore,
-    store::keystore::Keystore,
     types::{
         KeyId, KeySerialization, Location, Mechanism, Message, SignatureSerialization,
         StorageAttributes,
     },
+    Error,
+};
+
+use crate::{
+    key, mechanisms, service::MechanismImpl, store::certstore::Certstore, store::keystore::Keystore,
 };
 
 #[cfg(not(feature = "test-attestation-cert-ids"))]

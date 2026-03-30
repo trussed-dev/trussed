@@ -1,13 +1,13 @@
 use rand_core::RngCore;
+use trussed_core::{
+    api::{reply, request},
+    types::{Bytes, KeyId, KeySerialization, SerializedKey, Signature, SignatureSerialization},
+    Error,
+};
 
-use crate::api::{reply, request};
-use crate::error::Error;
 use crate::key;
 use crate::service::MechanismImpl;
 use crate::store::keystore::Keystore;
-use crate::types::{
-    Bytes, KeyId, KeySerialization, SerializedKey, Signature, SignatureSerialization,
-};
 
 #[inline(never)]
 fn load_public_key(

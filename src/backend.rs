@@ -8,9 +8,12 @@
 //! Backends can also implement API extensions to provide additional syscalls (see the
 //! [`serde_extensions`][`crate::serde_extensions`] module).
 
-use crate::{
+use trussed_core::{
     api::{Reply, Request},
-    error::Error,
+    Error,
+};
+
+use crate::{
     platform::Platform,
     service::ServiceResources,
     types::{Context, CoreContext},
