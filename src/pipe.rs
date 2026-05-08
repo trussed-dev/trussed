@@ -58,7 +58,7 @@ mod tests {
     // necessary.
 
     const MAX_SIZE: usize = 2416
-        + if cfg!(feature = "test-increased-interchange-size") {
+        + if cfg!(feature = "mldsa44") {
             // our largest request has a Message and a Signature field and the mldsa44 feature bumps
             // those by 1024 and 1408 bytes
             1024 + 1408
