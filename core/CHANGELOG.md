@@ -2,7 +2,9 @@
 
 ## Unreleased
 
--
+### Added
+
+- Add `UiClient::confirm_user_present_with_level`.
 
 ## [v0.2.0](https://github.com/trussed-dev/trussed/releases/tag/core-v0.2.0) (2025-03-20)
 
