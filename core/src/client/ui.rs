@@ -12,8 +12,19 @@ pub trait UiClient: PollClient {
         &mut self,
         timeout_milliseconds: u32,
     ) -> ClientResult<'_, reply::RequestUserConsent, Self> {
+        self.confirm_user_present_with_level(Level::Normal, timeout_milliseconds)
+    }
+
+    /// Same as [`Self::confirm_user_present`] but the caller chooses the
+    /// [`Level`] of the user-presence check. Used for stronger ceremonies
+    /// (e.g. CTAP 2.3 long-touch reset) that require [`Level::Strong`].
+    fn confirm_user_present_with_level(
+        &mut self,
+        level: Level,
+        timeout_milliseconds: u32,
+    ) -> ClientResult<'_, reply::RequestUserConsent, Self> {
         self.request(request::RequestUserConsent {
-            level: Level::Normal,
+            level,
             timeout_milliseconds,
         })
     }

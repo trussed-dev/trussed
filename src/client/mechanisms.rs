@@ -21,6 +21,9 @@ impl<S: Syscall, E> HmacSha256 for ClientImplementation<'_, S, E> {}
 #[cfg(feature = "hmac-sha512")]
 impl<S: Syscall, E> HmacSha512 for ClientImplementation<'_, S, E> {}
 
+#[cfg(feature = "mldsa44")]
+impl<S: Syscall, E> Mldsa44 for ClientImplementation<'_, S, E> {}
+
 #[cfg(feature = "ed255")]
 impl<S: Syscall, E> Ed255 for ClientImplementation<'_, S, E> {}
 

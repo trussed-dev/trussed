@@ -56,7 +56,14 @@ mod tests {
     // The following checks are used to ensure that we don’t accidentally increase the interchange
     // size.  Bumping the size is not a breaking change but should only be done if really
     // necessary.
+    //
+    // The cap tracks `MAX_SIGNATURE_LENGTH`, which grows when `mldsa44` is enabled (ML-DSA-44
+    // signatures are 2420 bytes). Both `Request::Verify` and `Reply::Sign` carry a
+    // `Bytes<MAX_SIGNATURE_LENGTH>`; under `mldsa44` the largest variant lands near 3504 bytes.
 
+    #[cfg(feature = "mldsa44")]
+    const MAX_SIZE: usize = 3520;
+    #[cfg(not(feature = "mldsa44"))]
     const MAX_SIZE: usize = 2416;
 
     #[test]

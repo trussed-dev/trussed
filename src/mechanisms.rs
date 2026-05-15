@@ -51,6 +51,11 @@ pub struct HmacSha512;
 #[cfg(feature = "hmac-sha512")]
 mod hmacsha512;
 
+#[cfg(feature = "mldsa44")]
+pub struct Mldsa44;
+#[cfg(feature = "mldsa44")]
+mod mldsa44;
+
 #[cfg(feature = "p256")]
 pub struct P256;
 #[cfg(feature = "p256")]
