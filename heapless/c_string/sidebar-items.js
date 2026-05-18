@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["ExtendError"],"struct":["CString"]};
+window.SIDEBAR_ITEMS = {"enum":["ExtendError"],"struct":["CString","IntoStringError"]};

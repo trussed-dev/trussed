@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/heapless-0.9.2/src/vec/mod.rs`."><title>mod.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../../static.files/rustdoc-77263533.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="heapless" data-themes="" data-resource-suffix="" data-rustdoc-version="1.94.0 (4a4ef493e 2026-03-02)" data-channel="1.94.0" data-search-js="search-9e2438ea.js" data-stringdex-js="stringdex-b897f86f.js" data-settings-js="settings-c38705f0.js" ><script src="../../../static.files/storage-e2aeef58.js"></script><script defer src="../../../static.files/src-script-813739b1.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-7bab91a1.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-ffcac47a.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-eab170b8.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><section id="main-content" class="content"><div class="main-heading"><h1><div class="sub-heading">heapless/vec/</div>mod.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap digits-4"><pre class="rust"><code><a href=#1 id=1 data-nosnippet>1</a><span class="doccomment">//! A fixed capacity [`Vec`](https://doc.rust-lang.org/std/vec/struct.Vec.html).
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/heapless-0.9.3/src/vec/mod.rs`."><title>mod.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../../static.files/rustdoc-b7b9f40b.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="heapless" data-themes="" data-resource-suffix="" data-rustdoc-version="1.95.0 (59807616e 2026-04-14)" data-channel="1.95.0" data-search-js="search-63369b7b.js" data-stringdex-js="stringdex-b897f86f.js" data-settings-js="settings-170eb4bf.js" ><script src="../../../static.files/storage-41dd4d93.js"></script><script defer src="../../../static.files/src-script-813739b1.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-5013f961.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-f7c3ffd8.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-eab170b8.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><a class="skip-main-content" href="#main-content">Skip to main content</a><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><section id="main-content" class="content" tabindex="-1"><div class="main-heading"><h1><div class="sub-heading">heapless/vec/</div>mod.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap digits-4"><pre class="rust"><code><a href=#1 id=1 data-nosnippet>1</a><span class="doccomment">//! A fixed capacity [`Vec`](https://doc.rust-lang.org/std/vec/struct.Vec.html).
 <a href=#2 id=2 data-nosnippet>2</a>
 <a href=#3 id=3 data-nosnippet>3</a></span><span class="kw">use </span>core::{
 <a href=#4 id=4 data-nosnippet>4</a>    borrow,
@@ -6,7 +6,7 @@
 <a href=#6 id=6 data-nosnippet>6</a>    fmt, hash,
 <a href=#7 id=7 data-nosnippet>7</a>    iter::FusedIterator,
 <a href=#8 id=8 data-nosnippet>8</a>    marker::PhantomData,
-<a href=#9 id=9 data-nosnippet>9</a>    mem::{<span class="self">self</span>, ManuallyDrop, MaybeUninit},
+<a href=#9 id=9 data-nosnippet>9</a>    mem::{ManuallyDrop, MaybeUninit},
 <a href=#10 id=10 data-nosnippet>10</a>    ops::{<span class="self">self</span>, Range, RangeBounds},
 <a href=#11 id=11 data-nosnippet>11</a>    ptr::{<span class="self">self</span>, NonNull},
 <a href=#12 id=12 data-nosnippet>12</a>    slice,
@@ -16,7 +16,7 @@
 <a href=#16 id=16 data-nosnippet>16</a></span><span class="kw">use </span>zeroize::Zeroize;
 <a href=#17 id=17 data-nosnippet>17</a>
 <a href=#18 id=18 data-nosnippet>18</a><span class="kw">use </span>crate::{
-<a href=#19 id=19 data-nosnippet>19</a>    len_type::{check_capacity_fits, LenType},
+<a href=#19 id=19 data-nosnippet>19</a>    len_type::{check_capacity_fits, to_len_type, LenType},
 <a href=#20 id=20 data-nosnippet>20</a>    CapacityError,
 <a href=#21 id=21 data-nosnippet>21</a>};
 <a href=#22 id=22 data-nosnippet>22</a>
@@ -355,7 +355,7 @@
 <a href=#355 id=355 data-nosnippet>355</a>    ///
 <a href=#356 id=356 data-nosnippet>356</a>    /// If the length of the provided array is greater than the capacity of the
 <a href=#357 id=357 data-nosnippet>357</a>    /// vector a compile-time error will be produced.
-<a href=#358 id=358 data-nosnippet>358</a>    </span><span class="kw">pub fn </span>from_array&lt;<span class="kw">const </span>M: usize&gt;(src: [T; M]) -&gt; <span class="self">Self </span>{
+<a href=#358 id=358 data-nosnippet>358</a>    </span><span class="kw">pub const fn </span>from_array&lt;<span class="kw">const </span>M: usize&gt;(src: [T; M]) -&gt; <span class="self">Self </span>{
 <a href=#359 id=359 data-nosnippet>359</a>        <span class="kw">const </span>{
 <a href=#360 id=360 data-nosnippet>360</a>            <span class="macro">assert!</span>(N &gt;= M);
 <a href=#361 id=361 data-nosnippet>361</a>        }
@@ -364,107 +364,107 @@
 <a href=#364 id=364 data-nosnippet>364</a>        // any Drop code for T.
 <a href=#365 id=365 data-nosnippet>365</a>        </span><span class="kw">let </span>src = ManuallyDrop::new(src);
 <a href=#366 id=366 data-nosnippet>366</a>
-<a href=#367 id=367 data-nosnippet>367</a>        <span class="kw">if </span>N == M {
-<a href=#368 id=368 data-nosnippet>368</a>            <span class="self">Self </span>{
-<a href=#369 id=369 data-nosnippet>369</a>                phantom: PhantomData,
-<a href=#370 id=370 data-nosnippet>370</a>                len: LenT::from_usize(N),
-<a href=#371 id=371 data-nosnippet>371</a>                <span class="comment">// NOTE(unsafe) ManuallyDrop&lt;[T; M]&gt; and [MaybeUninit&lt;T&gt;; N]
-<a href=#372 id=372 data-nosnippet>372</a>                // have the same layout when N == M.
-<a href=#373 id=373 data-nosnippet>373</a>                </span>buffer: <span class="kw">unsafe </span>{ mem::transmute_copy(<span class="kw-2">&amp;</span>src) },
-<a href=#374 id=374 data-nosnippet>374</a>            }
-<a href=#375 id=375 data-nosnippet>375</a>        } <span class="kw">else </span>{
-<a href=#376 id=376 data-nosnippet>376</a>            <span class="kw">let </span><span class="kw-2">mut </span>v = <span class="self">Self</span>::new();
-<a href=#377 id=377 data-nosnippet>377</a>
-<a href=#378 id=378 data-nosnippet>378</a>            <span class="kw">for </span>(src_elem, dst_elem) <span class="kw">in </span>src.iter().zip(v.buffer.buffer.iter_mut()) {
-<a href=#379 id=379 data-nosnippet>379</a>                <span class="comment">// NOTE(unsafe) src element is not going to drop as src itself
-<a href=#380 id=380 data-nosnippet>380</a>                // is wrapped in a ManuallyDrop.
-<a href=#381 id=381 data-nosnippet>381</a>                </span>dst_elem.write(<span class="kw">unsafe </span>{ ptr::read(src_elem) });
-<a href=#382 id=382 data-nosnippet>382</a>            }
+<a href=#367 id=367 data-nosnippet>367</a>        <span class="kw">let </span>len: LenT = to_len_type(M);
+<a href=#368 id=368 data-nosnippet>368</a>
+<a href=#369 id=369 data-nosnippet>369</a>        <span class="kw">let </span><span class="kw-2">mut </span>v = <span class="self">Self</span>::new();
+<a href=#370 id=370 data-nosnippet>370</a>
+<a href=#371 id=371 data-nosnippet>371</a>        <span class="comment">// MaybeUninit::deref is non-const, so we just cast to it's internal value.
+<a href=#372 id=372 data-nosnippet>372</a>        </span><span class="kw">let </span>src_ptr: <span class="kw-2">*const </span>T = ptr::from_ref(<span class="kw-2">&amp;</span>src).cast();
+<a href=#373 id=373 data-nosnippet>373</a>
+<a href=#374 id=374 data-nosnippet>374</a>        <span class="comment">// Cast from buffer's [MaybeUninit&lt;T&gt;] to [T].
+<a href=#375 id=375 data-nosnippet>375</a>        </span><span class="kw">let </span>dst_ptr: <span class="kw-2">*mut </span>T = v.buffer.buffer.as_mut_ptr().cast();
+<a href=#376 id=376 data-nosnippet>376</a>
+<a href=#377 id=377 data-nosnippet>377</a>        <span class="comment">// SAFETY: Move/copy data from src to v's internal buffer.
+<a href=#378 id=378 data-nosnippet>378</a>        // * Using src_ptr as `*const T` is safe since src's ManuallyDrop&lt;[T; M]&gt; is transparent.
+<a href=#379 id=379 data-nosnippet>379</a>        // * Using dst_ptr as `*mut T` is safe since v's [MaybeUninit&lt;T&gt;; N] is an array of
+<a href=#380 id=380 data-nosnippet>380</a>        //   transparent types.
+<a href=#381 id=381 data-nosnippet>381</a>        </span><span class="kw">unsafe </span>{ ptr::copy_nonoverlapping(src_ptr, dst_ptr, M) };
+<a href=#382 id=382 data-nosnippet>382</a>        v.len = len;
 <a href=#383 id=383 data-nosnippet>383</a>
-<a href=#384 id=384 data-nosnippet>384</a>            <span class="kw">unsafe </span>{ v.set_len(M) };
-<a href=#385 id=385 data-nosnippet>385</a>            v
-<a href=#386 id=386 data-nosnippet>386</a>        }
-<a href=#387 id=387 data-nosnippet>387</a>    }
-<a href=#388 id=388 data-nosnippet>388</a>
-<a href=#389 id=389 data-nosnippet>389</a>    <span class="doccomment">/// Returns the contents of the vector as an array of length `M` if the length
-<a href=#390 id=390 data-nosnippet>390</a>    /// of the vector is exactly `M`, otherwise returns `Err(self)`.
+<a href=#384 id=384 data-nosnippet>384</a>        v
+<a href=#385 id=385 data-nosnippet>385</a>    }
+<a href=#386 id=386 data-nosnippet>386</a>
+<a href=#387 id=387 data-nosnippet>387</a>    <span class="doccomment">/// Returns the contents of the vector as an array of length `M` if the length
+<a href=#388 id=388 data-nosnippet>388</a>    /// of the vector is exactly `M`, otherwise returns `Err(self)`.
+<a href=#389 id=389 data-nosnippet>389</a>    ///
+<a href=#390 id=390 data-nosnippet>390</a>    /// # Examples
 <a href=#391 id=391 data-nosnippet>391</a>    ///
-<a href=#392 id=392 data-nosnippet>392</a>    /// # Examples
-<a href=#393 id=393 data-nosnippet>393</a>    ///
-<a href=#394 id=394 data-nosnippet>394</a>    /// ```
-<a href=#395 id=395 data-nosnippet>395</a>    /// use heapless::Vec;
-<a href=#396 id=396 data-nosnippet>396</a>    /// let buffer: Vec&lt;u8, 42&gt; = Vec::from_slice(&amp;[1, 2, 3, 5, 8]).unwrap();
-<a href=#397 id=397 data-nosnippet>397</a>    /// let array: [u8; 5] = buffer.into_array().unwrap();
-<a href=#398 id=398 data-nosnippet>398</a>    /// assert_eq!(array, [1, 2, 3, 5, 8]);
-<a href=#399 id=399 data-nosnippet>399</a>    /// ```
-<a href=#400 id=400 data-nosnippet>400</a>    </span><span class="kw">pub fn </span>into_array&lt;<span class="kw">const </span>M: usize&gt;(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;[T; M], <span class="self">Self</span>&gt; {
-<a href=#401 id=401 data-nosnippet>401</a>        <span class="kw">if </span><span class="self">self</span>.len() == M {
-<a href=#402 id=402 data-nosnippet>402</a>            <span class="comment">// This is how the unstable `MaybeUninit::array_assume_init` method does it
-<a href=#403 id=403 data-nosnippet>403</a>            </span><span class="kw">let </span>array = <span class="kw">unsafe </span>{ (core::ptr::from_ref(<span class="kw-2">&amp;</span><span class="self">self</span>.buffer).cast::&lt;[T; M]&gt;()).read() };
-<a href=#404 id=404 data-nosnippet>404</a>
-<a href=#405 id=405 data-nosnippet>405</a>            <span class="comment">// We don't want `self`'s destructor to be called because that would drop all the
-<a href=#406 id=406 data-nosnippet>406</a>            // items in the array
-<a href=#407 id=407 data-nosnippet>407</a>            </span>core::mem::forget(<span class="self">self</span>);
-<a href=#408 id=408 data-nosnippet>408</a>
-<a href=#409 id=409 data-nosnippet>409</a>            <span class="prelude-val">Ok</span>(array)
-<a href=#410 id=410 data-nosnippet>410</a>        } <span class="kw">else </span>{
-<a href=#411 id=411 data-nosnippet>411</a>            <span class="prelude-val">Err</span>(<span class="self">self</span>)
-<a href=#412 id=412 data-nosnippet>412</a>        }
-<a href=#413 id=413 data-nosnippet>413</a>    }
-<a href=#414 id=414 data-nosnippet>414</a>
-<a href=#415 id=415 data-nosnippet>415</a>    <span class="doccomment">/// Clones a vec into a new vec
-<a href=#416 id=416 data-nosnippet>416</a>    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>clone(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self
-<a href=#417 id=417 data-nosnippet>417</a>    </span><span class="kw">where
-<a href=#418 id=418 data-nosnippet>418</a>        </span>T: Clone,
-<a href=#419 id=419 data-nosnippet>419</a>    {
-<a href=#420 id=420 data-nosnippet>420</a>        <span class="kw">let </span><span class="kw-2">mut </span>new = <span class="self">Self</span>::new();
-<a href=#421 id=421 data-nosnippet>421</a>        <span class="comment">// avoid `extend_from_slice` as that introduces a runtime check/panicking branch
-<a href=#422 id=422 data-nosnippet>422</a>        </span><span class="kw">for </span>elem <span class="kw">in </span><span class="self">self </span>{
-<a href=#423 id=423 data-nosnippet>423</a>            <span class="kw">unsafe </span>{
-<a href=#424 id=424 data-nosnippet>424</a>                new.push_unchecked(elem.clone());
-<a href=#425 id=425 data-nosnippet>425</a>            }
-<a href=#426 id=426 data-nosnippet>426</a>        }
-<a href=#427 id=427 data-nosnippet>427</a>        new
-<a href=#428 id=428 data-nosnippet>428</a>    }
-<a href=#429 id=429 data-nosnippet>429</a>
-<a href=#430 id=430 data-nosnippet>430</a>    <span class="doccomment">/// Casts the `LenT` type to a new type, preserving everything else about the vector.
-<a href=#431 id=431 data-nosnippet>431</a>    ///
-<a href=#432 id=432 data-nosnippet>432</a>    /// This can be useful if you need to pass a `Vec&lt;T, N, u8&gt;` into a `Vec&lt;T, N, usize&gt;` for
-<a href=#433 id=433 data-nosnippet>433</a>    /// example.
-<a href=#434 id=434 data-nosnippet>434</a>    ///
-<a href=#435 id=435 data-nosnippet>435</a>    /// This will check at compile time if the `N` value will fit into `NewLenT`, and error if not.
-<a href=#436 id=436 data-nosnippet>436</a>    </span><span class="kw">pub fn </span>cast_len_type&lt;NewLenT: LenType&gt;(<span class="self">self</span>) -&gt; Vec&lt;T, N, NewLenT&gt; {
-<a href=#437 id=437 data-nosnippet>437</a>        <span class="kw">const </span>{ check_capacity_fits::&lt;NewLenT, N&gt;() }
-<a href=#438 id=438 data-nosnippet>438</a>        <span class="kw">let </span>this = ManuallyDrop::new(<span class="self">self</span>);
-<a href=#439 id=439 data-nosnippet>439</a>
-<a href=#440 id=440 data-nosnippet>440</a>        <span class="comment">// SAFETY: Pointer argument is derived from a reference, meeting the safety documented
-<a href=#441 id=441 data-nosnippet>441</a>        // invariants. This also prevents double drops by wrapping `self` in `ManuallyDrop`.
-<a href=#442 id=442 data-nosnippet>442</a>        </span>Vec {
-<a href=#443 id=443 data-nosnippet>443</a>            len: NewLenT::from_usize(this.len()),
-<a href=#444 id=444 data-nosnippet>444</a>            buffer: <span class="kw">unsafe </span>{ ptr::read(<span class="kw-2">&amp;</span>this.buffer) },
-<a href=#445 id=445 data-nosnippet>445</a>            phantom: PhantomData,
-<a href=#446 id=446 data-nosnippet>446</a>        }
-<a href=#447 id=447 data-nosnippet>447</a>    }
-<a href=#448 id=448 data-nosnippet>448</a>}
-<a href=#449 id=449 data-nosnippet>449</a>
-<a href=#450 id=450 data-nosnippet>450</a><span class="kw">impl</span>&lt;T, LenT: LenType, S: VecStorage&lt;T&gt; + <span class="question-mark">?</span>Sized&gt; VecInner&lt;T, LenT, S&gt; {
-<a href=#451 id=451 data-nosnippet>451</a>    <span class="doccomment">/// Removes the specified range from the vector in bulk, returning all
-<a href=#452 id=452 data-nosnippet>452</a>    /// removed elements as an iterator. If the iterator is dropped before
-<a href=#453 id=453 data-nosnippet>453</a>    /// being fully consumed, it drops the remaining removed elements.
-<a href=#454 id=454 data-nosnippet>454</a>    ///
-<a href=#455 id=455 data-nosnippet>455</a>    /// The returned iterator keeps a mutable borrow on the vector to optimize
-<a href=#456 id=456 data-nosnippet>456</a>    /// its implementation.
+<a href=#392 id=392 data-nosnippet>392</a>    /// ```
+<a href=#393 id=393 data-nosnippet>393</a>    /// use heapless::Vec;
+<a href=#394 id=394 data-nosnippet>394</a>    /// let buffer: Vec&lt;u8, 42&gt; = Vec::from_slice(&amp;[1, 2, 3, 5, 8]).unwrap();
+<a href=#395 id=395 data-nosnippet>395</a>    /// let array: [u8; 5] = buffer.into_array().unwrap();
+<a href=#396 id=396 data-nosnippet>396</a>    /// assert_eq!(array, [1, 2, 3, 5, 8]);
+<a href=#397 id=397 data-nosnippet>397</a>    /// ```
+<a href=#398 id=398 data-nosnippet>398</a>    </span><span class="kw">pub fn </span>into_array&lt;<span class="kw">const </span>M: usize&gt;(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;[T; M], <span class="self">Self</span>&gt; {
+<a href=#399 id=399 data-nosnippet>399</a>        <span class="kw">if </span><span class="self">self</span>.len() == M {
+<a href=#400 id=400 data-nosnippet>400</a>            <span class="comment">// This is how the unstable `MaybeUninit::array_assume_init` method does it
+<a href=#401 id=401 data-nosnippet>401</a>            </span><span class="kw">let </span>array = <span class="kw">unsafe </span>{ (core::ptr::from_ref(<span class="kw-2">&amp;</span><span class="self">self</span>.buffer).cast::&lt;[T; M]&gt;()).read() };
+<a href=#402 id=402 data-nosnippet>402</a>
+<a href=#403 id=403 data-nosnippet>403</a>            <span class="comment">// We don't want `self`'s destructor to be called because that would drop all the
+<a href=#404 id=404 data-nosnippet>404</a>            // items in the array
+<a href=#405 id=405 data-nosnippet>405</a>            </span>core::mem::forget(<span class="self">self</span>);
+<a href=#406 id=406 data-nosnippet>406</a>
+<a href=#407 id=407 data-nosnippet>407</a>            <span class="prelude-val">Ok</span>(array)
+<a href=#408 id=408 data-nosnippet>408</a>        } <span class="kw">else </span>{
+<a href=#409 id=409 data-nosnippet>409</a>            <span class="prelude-val">Err</span>(<span class="self">self</span>)
+<a href=#410 id=410 data-nosnippet>410</a>        }
+<a href=#411 id=411 data-nosnippet>411</a>    }
+<a href=#412 id=412 data-nosnippet>412</a>
+<a href=#413 id=413 data-nosnippet>413</a>    <span class="doccomment">/// Clones a vec into a new vec
+<a href=#414 id=414 data-nosnippet>414</a>    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>clone(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self
+<a href=#415 id=415 data-nosnippet>415</a>    </span><span class="kw">where
+<a href=#416 id=416 data-nosnippet>416</a>        </span>T: Clone,
+<a href=#417 id=417 data-nosnippet>417</a>    {
+<a href=#418 id=418 data-nosnippet>418</a>        <span class="kw">let </span><span class="kw-2">mut </span>new = <span class="self">Self</span>::new();
+<a href=#419 id=419 data-nosnippet>419</a>        <span class="comment">// avoid `extend_from_slice` as that introduces a runtime check/panicking branch
+<a href=#420 id=420 data-nosnippet>420</a>        </span><span class="kw">for </span>elem <span class="kw">in </span><span class="self">self </span>{
+<a href=#421 id=421 data-nosnippet>421</a>            <span class="kw">unsafe </span>{
+<a href=#422 id=422 data-nosnippet>422</a>                new.push_unchecked(elem.clone());
+<a href=#423 id=423 data-nosnippet>423</a>            }
+<a href=#424 id=424 data-nosnippet>424</a>        }
+<a href=#425 id=425 data-nosnippet>425</a>        new
+<a href=#426 id=426 data-nosnippet>426</a>    }
+<a href=#427 id=427 data-nosnippet>427</a>
+<a href=#428 id=428 data-nosnippet>428</a>    <span class="doccomment">/// Casts the `LenT` type to a new type, preserving everything else about the vector.
+<a href=#429 id=429 data-nosnippet>429</a>    ///
+<a href=#430 id=430 data-nosnippet>430</a>    /// This can be useful if you need to pass a `Vec&lt;T, N, u8&gt;` into a `Vec&lt;T, N, usize&gt;` for
+<a href=#431 id=431 data-nosnippet>431</a>    /// example.
+<a href=#432 id=432 data-nosnippet>432</a>    ///
+<a href=#433 id=433 data-nosnippet>433</a>    /// This will check at compile time if the `N` value will fit into `NewLenT`, and error if not.
+<a href=#434 id=434 data-nosnippet>434</a>    </span><span class="kw">pub fn </span>cast_len_type&lt;NewLenT: LenType&gt;(<span class="self">self</span>) -&gt; Vec&lt;T, N, NewLenT&gt; {
+<a href=#435 id=435 data-nosnippet>435</a>        <span class="kw">const </span>{ check_capacity_fits::&lt;NewLenT, N&gt;() }
+<a href=#436 id=436 data-nosnippet>436</a>        <span class="kw">let </span>this = ManuallyDrop::new(<span class="self">self</span>);
+<a href=#437 id=437 data-nosnippet>437</a>
+<a href=#438 id=438 data-nosnippet>438</a>        <span class="comment">// SAFETY: Pointer argument is derived from a reference, meeting the safety documented
+<a href=#439 id=439 data-nosnippet>439</a>        // invariants. This also prevents double drops by wrapping `self` in `ManuallyDrop`.
+<a href=#440 id=440 data-nosnippet>440</a>        </span>Vec {
+<a href=#441 id=441 data-nosnippet>441</a>            len: NewLenT::from_usize(this.len()),
+<a href=#442 id=442 data-nosnippet>442</a>            buffer: <span class="kw">unsafe </span>{ ptr::read(<span class="kw-2">&amp;</span>this.buffer) },
+<a href=#443 id=443 data-nosnippet>443</a>            phantom: PhantomData,
+<a href=#444 id=444 data-nosnippet>444</a>        }
+<a href=#445 id=445 data-nosnippet>445</a>    }
+<a href=#446 id=446 data-nosnippet>446</a>}
+<a href=#447 id=447 data-nosnippet>447</a>
+<a href=#448 id=448 data-nosnippet>448</a><span class="kw">impl</span>&lt;T, LenT: LenType, S: VecStorage&lt;T&gt; + <span class="question-mark">?</span>Sized&gt; VecInner&lt;T, LenT, S&gt; {
+<a href=#449 id=449 data-nosnippet>449</a>    <span class="doccomment">/// Removes the specified range from the vector in bulk, returning all
+<a href=#450 id=450 data-nosnippet>450</a>    /// removed elements as an iterator. If the iterator is dropped before
+<a href=#451 id=451 data-nosnippet>451</a>    /// being fully consumed, it drops the remaining removed elements.
+<a href=#452 id=452 data-nosnippet>452</a>    ///
+<a href=#453 id=453 data-nosnippet>453</a>    /// The returned iterator keeps a mutable borrow on the vector to optimize
+<a href=#454 id=454 data-nosnippet>454</a>    /// its implementation.
+<a href=#455 id=455 data-nosnippet>455</a>    ///
+<a href=#456 id=456 data-nosnippet>456</a>    /// # Panics
 <a href=#457 id=457 data-nosnippet>457</a>    ///
-<a href=#458 id=458 data-nosnippet>458</a>    /// # Panics
-<a href=#459 id=459 data-nosnippet>459</a>    ///
-<a href=#460 id=460 data-nosnippet>460</a>    /// Panics if the starting point is greater than the end point or if
-<a href=#461 id=461 data-nosnippet>461</a>    /// the end point is greater than the length of the vector.
+<a href=#458 id=458 data-nosnippet>458</a>    /// Panics if the starting point is greater than the end point or if
+<a href=#459 id=459 data-nosnippet>459</a>    /// the end point is greater than the length of the vector.
+<a href=#460 id=460 data-nosnippet>460</a>    ///
+<a href=#461 id=461 data-nosnippet>461</a>    /// # Leaking
 <a href=#462 id=462 data-nosnippet>462</a>    ///
-<a href=#463 id=463 data-nosnippet>463</a>    /// # Leaking
-<a href=#464 id=464 data-nosnippet>464</a>    ///
-<a href=#465 id=465 data-nosnippet>465</a>    /// If the returned iterator goes out of scope without being dropped (due to
-<a href=#466 id=466 data-nosnippet>466</a>    /// [`mem::forget`], for example), the vector may have lost and leaked
-<a href=#467 id=467 data-nosnippet>467</a>    /// elements arbitrarily, including elements outside the range.
+<a href=#463 id=463 data-nosnippet>463</a>    /// If the returned iterator goes out of scope without being dropped (due to
+<a href=#464 id=464 data-nosnippet>464</a>    /// [`mem::forget`], for example), the vector may have lost and leaked
+<a href=#465 id=465 data-nosnippet>465</a>    /// elements arbitrarily, including elements outside the range.
+<a href=#466 id=466 data-nosnippet>466</a>    ///
+<a href=#467 id=467 data-nosnippet>467</a>    /// [`mem::forget`]: core::mem::forget
 <a href=#468 id=468 data-nosnippet>468</a>    ///
 <a href=#469 id=469 data-nosnippet>469</a>    /// # Examples
 <a href=#470 id=470 data-nosnippet>470</a>    ///
@@ -1231,7 +1231,7 @@
 <a href=#1231 id=1231 data-nosnippet>1231</a>        ) <span class="kw">where
 <a href=#1232 id=1232 data-nosnippet>1232</a>            </span>F: FnMut(<span class="kw-2">&amp;mut </span>T) -&gt; bool,
 <a href=#1233 id=1233 data-nosnippet>1233</a>        {
-<a href=#1234 id=1234 data-nosnippet>1234</a>            <span class="kw">while </span>g.<span class="macro">processed_len !</span>= original_len {
+<a href=#1234 id=1234 data-nosnippet>1234</a>            <span class="kw">while </span>g.processed_len != original_len {
 <a href=#1235 id=1235 data-nosnippet>1235</a>                <span class="kw">let </span>p = g.v.as_mut_ptr();
 <a href=#1236 id=1236 data-nosnippet>1236</a>                <span class="comment">// SAFETY: Unchecked element must be valid.
 <a href=#1237 id=1237 data-nosnippet>1237</a>                </span><span class="kw">let </span>cur = <span class="kw">unsafe </span>{ <span class="kw-2">&amp;mut *</span>p.add(g.processed_len.into_usize()) };
@@ -1609,7 +1609,7 @@
 <a href=#1609 id=1609 data-nosnippet>1609</a><span class="kw">where
 <a href=#1610 id=1610 data-nosnippet>1610</a>    </span>A: PartialEq&lt;B&gt;,
 <a href=#1611 id=1611 data-nosnippet>1611</a>    LenTB: LenType,
-<a href=#1612 id=1612 data-nosnippet>1612</a>    SB: VecStorage&lt;B&gt;,
+<a href=#1612 id=1612 data-nosnippet>1612</a>    SB: VecStorage&lt;B&gt; + <span class="question-mark">?</span>Sized,
 <a href=#1613 id=1613 data-nosnippet>1613</a>{
 <a href=#1614 id=1614 data-nosnippet>1614</a>    <span class="kw">fn </span>eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span>VecInner&lt;B, LenTB, SB&gt;) -&gt; bool {
 <a href=#1615 id=1615 data-nosnippet>1615</a>        <span class="self">self</span>.eq(other.as_slice())
@@ -1620,7 +1620,7 @@
 <a href=#1620 id=1620 data-nosnippet>1620</a><span class="kw">where
 <a href=#1621 id=1621 data-nosnippet>1621</a>    </span>A: PartialEq&lt;B&gt;,
 <a href=#1622 id=1622 data-nosnippet>1622</a>    LenTB: LenType,
-<a href=#1623 id=1623 data-nosnippet>1623</a>    SB: VecStorage&lt;B&gt;,
+<a href=#1623 id=1623 data-nosnippet>1623</a>    SB: VecStorage&lt;B&gt; + <span class="question-mark">?</span>Sized,
 <a href=#1624 id=1624 data-nosnippet>1624</a>{
 <a href=#1625 id=1625 data-nosnippet>1625</a>    <span class="kw">fn </span>eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span>VecInner&lt;B, LenTB, SB&gt;) -&gt; bool {
 <a href=#1626 id=1626 data-nosnippet>1626</a>        (<span class="kw-2">*</span><span class="self">self</span>).eq(other)
@@ -1631,7 +1631,7 @@
 <a href=#1631 id=1631 data-nosnippet>1631</a><span class="kw">where
 <a href=#1632 id=1632 data-nosnippet>1632</a>    </span>A: PartialEq&lt;B&gt;,
 <a href=#1633 id=1633 data-nosnippet>1633</a>    LenTB: LenType,
-<a href=#1634 id=1634 data-nosnippet>1634</a>    SB: VecStorage&lt;B&gt;,
+<a href=#1634 id=1634 data-nosnippet>1634</a>    SB: VecStorage&lt;B&gt; + <span class="question-mark">?</span>Sized,
 <a href=#1635 id=1635 data-nosnippet>1635</a>{
 <a href=#1636 id=1636 data-nosnippet>1636</a>    <span class="kw">fn </span>eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span>VecInner&lt;B, LenTB, SB&gt;) -&gt; bool {
 <a href=#1637 id=1637 data-nosnippet>1637</a>        <span class="self">self</span>.eq(other.as_slice())
@@ -1642,7 +1642,7 @@
 <a href=#1642 id=1642 data-nosnippet>1642</a><span class="kw">where
 <a href=#1643 id=1643 data-nosnippet>1643</a>    </span>A: PartialEq&lt;B&gt;,
 <a href=#1644 id=1644 data-nosnippet>1644</a>    LenTB: LenType,
-<a href=#1645 id=1645 data-nosnippet>1645</a>    SB: VecStorage&lt;B&gt;,
+<a href=#1645 id=1645 data-nosnippet>1645</a>    SB: VecStorage&lt;B&gt; + <span class="question-mark">?</span>Sized,
 <a href=#1646 id=1646 data-nosnippet>1646</a>{
 <a href=#1647 id=1647 data-nosnippet>1647</a>    <span class="kw">fn </span>eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span>VecInner&lt;B, LenTB, SB&gt;) -&gt; bool {
 <a href=#1648 id=1648 data-nosnippet>1648</a>        (<span class="kw-2">*</span><span class="self">self</span>).eq(other)
