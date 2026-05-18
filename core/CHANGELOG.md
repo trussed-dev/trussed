@@ -5,6 +5,7 @@
 ### Added
 
 - Add `UiClient::confirm_user_present_with_level`.
+- Add `Mechanism::Mldsa44` and the `Mldsa44` trait behind the `mldsa44` feature flag and bump `MAX_MESSAGE_LENGTH` and `MAX_SIGNATURE_LENGTH` if `mldsa44` is enabled.
 
 ## [v0.2.0](https://github.com/trussed-dev/trussed/releases/tag/core-v0.2.0) (2025-03-20)
 

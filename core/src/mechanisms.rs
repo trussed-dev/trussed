@@ -300,6 +300,77 @@ pub trait Ed255: CryptoClient {
     }
 }
 
+#[cfg(feature = "mldsa44")]
+pub trait Mldsa44: CryptoClient {
+    fn generate_mldsa44_private_key(
+        &mut self,
+        persistence: Location,
+    ) -> ClientResult<'_, reply::GenerateKey, Self> {
+        self.generate_key(
+            Mechanism::Mldsa44,
+            StorageAttributes::new().set_persistence(persistence),
+        )
+    }
+
+    fn derive_mldsa44_public_key(
+        &mut self,
+        private_key: KeyId,
+        persistence: Location,
+    ) -> ClientResult<'_, reply::DeriveKey, Self> {
+        self.derive_key(
+            Mechanism::Mldsa44,
+            private_key,
+            None,
+            StorageAttributes::new().set_persistence(persistence),
+        )
+    }
+
+    fn deserialize_mldsa44_key<'c>(
+        &'c mut self,
+        serialized_key: &[u8],
+        format: KeySerialization,
+        attributes: StorageAttributes,
+    ) -> ClientResult<'c, reply::DeserializeKey, Self> {
+        self.deserialize_key(Mechanism::Mldsa44, serialized_key, format, attributes)
+    }
+
+    fn serialize_mldsa44_key(
+        &mut self,
+        key: KeyId,
+        format: KeySerialization,
+    ) -> ClientResult<'_, reply::SerializeKey, Self> {
+        self.serialize_key(Mechanism::Mldsa44, key, format)
+    }
+
+    fn sign_mldsa44<'c>(
+        &'c mut self,
+        key: KeyId,
+        message: &[u8],
+    ) -> ClientResult<'c, reply::Sign, Self> {
+        self.sign(
+            Mechanism::Mldsa44,
+            key,
+            message,
+            SignatureSerialization::Raw,
+        )
+    }
+
+    fn verify_mldsa44<'c>(
+        &'c mut self,
+        key: KeyId,
+        message: &[u8],
+        signature: &[u8],
+    ) -> ClientResult<'c, reply::Verify, Self> {
+        self.verify(
+            Mechanism::Mldsa44,
+            key,
+            message,
+            signature,
+            SignatureSerialization::Raw,
+        )
+    }
+}
+
 #[cfg(feature = "p256")]
 pub trait P256: CryptoClient {
     fn generate_p256_private_key(

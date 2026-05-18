@@ -57,7 +57,14 @@ mod tests {
     // size.  Bumping the size is not a breaking change but should only be done if really
     // necessary.
 
-    const MAX_SIZE: usize = 2416;
+    const MAX_SIZE: usize = 2416
+        + if cfg!(feature = "test-increased-interchange-size") {
+            // our largest request has a Message and a Signature field and the mldsa44 feature bumps
+            // those by 1024 and 1408 bytes
+            1024 + 1408
+        } else {
+            0
+        };
 
     #[test]
     fn test_sizes() {
