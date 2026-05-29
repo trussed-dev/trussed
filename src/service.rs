@@ -821,6 +821,60 @@ impl<P: Platform, D: Dispatch> Service<P, D> {
         self.resources.platform.user_interface().refresh();
     }
 
+    /// Multiplexed variant of `process`. Takes a single endpoint that holds
+    /// one shared `TrussedResponder` and a table of per-client contexts.
+    /// On each call, pops at most one pending request from the shared
+    /// interchange, looks up the `CURRENT_TAG` (set by the originating
+    /// `MultiplexedClient`), and dispatches with the matching client's
+    /// `Context<C>` + backends list.
+    pub fn process_multiplexed(
+        &mut self,
+        ep: &mut crate::pipe::MultiplexedEndpoint<D::BackendId, D::Context>,
+        current_tag: &crate::client::CurrentTagCell,
+    ) {
+        if let Ok(request) = ep.interchange.request() {
+            self.resources
+                .platform
+                .user_interface()
+                .set_status(ui::Status::Processing);
+
+            let tag = current_tag.get();
+            let entry = ep.clients[..ep.len]
+                .iter_mut()
+                .filter_map(|e| e.as_mut())
+                .find(|(t, _, _)| *t == tag);
+            let reply_result = if let Some((_, ctx, backends)) = entry {
+                if backends.is_empty() {
+                    self.resources.reply_to(&mut ctx.core, request)
+                } else {
+                    let mut reply_result = Err(Error::RequestNotAvailable);
+                    for backend in backends.iter() {
+                        reply_result =
+                            self.resources
+                                .dispatch(&mut self.dispatch, backend, ctx, request);
+                        if reply_result != Err(Error::RequestNotAvailable) {
+                            break;
+                        }
+                    }
+                    reply_result
+                }
+            } else {
+                error!("multiplexed request with unknown tag {}", tag);
+                Err(Error::InternalError)
+            };
+
+            self.resources
+                .platform
+                .user_interface()
+                .set_status(ui::Status::Idle);
+            if ep.interchange.respond(reply_result).is_err() && ep.interchange.is_canceled() {
+                info!("Cancelled request");
+                ep.interchange.acknowledge_cancel().ok();
+            }
+            crate::client::RESPONSE_READY.store(true, core::sync::atomic::Ordering::Release);
+        }
+    }
+
     // process one request per client which has any
     pub fn process(&mut self, eps: &mut [ServiceEndpoint<D::BackendId, D::Context>]) {
         for ep in eps {
