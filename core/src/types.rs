@@ -516,6 +516,8 @@ generate_mechanism! {
     pub enum Mechanism {
         #[cfg(feature = "aes256-cbc")]
         Aes256Cbc,
+        #[cfg(feature = "aes256-gcm")]
+        Aes256Gcm,
         #[cfg(feature = "chacha8-poly1305")]
         Chacha8Poly1305,
         #[cfg(feature = "ed255")]

@@ -6,6 +6,9 @@ pub use trussed_core::mechanisms::*;
 #[cfg(feature = "aes256-cbc")]
 impl<S: Syscall, E> Aes256Cbc for ClientImplementation<'_, S, E> {}
 
+#[cfg(feature = "aes256-gcm")]
+impl<S: Syscall, E> Aes256Gcm for ClientImplementation<'_, S, E> {}
+
 #[cfg(feature = "chacha8-poly1305")]
 impl<S: Syscall, E> Chacha8Poly1305 for ClientImplementation<'_, S, E> {}
 

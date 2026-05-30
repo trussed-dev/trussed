@@ -10,7 +10,7 @@
 // The question of breaking down `reply_to` into smaller, more globally understandable pieces,
 // should be revisited.
 
-#[cfg(feature = "chacha8-poly1305")]
+#[cfg(any(feature = "aes256-gcm", feature = "chacha8-poly1305"))]
 mod aead;
 
 // TODO: rename to aes256-cbc-zero-iv
@@ -18,6 +18,11 @@ mod aead;
 pub struct Aes256Cbc;
 #[cfg(feature = "aes256-cbc")]
 mod aes256cbc;
+
+#[cfg(feature = "aes256-gcm")]
+pub struct Aes256Gcm;
+#[cfg(feature = "aes256-gcm")]
+mod aes256gcm;
 
 #[cfg(feature = "chacha8-poly1305")]
 pub struct Chacha8Poly1305;

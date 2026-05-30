@@ -34,6 +34,86 @@ pub trait Aes256Cbc: CryptoClient {
     }
 }
 
+#[cfg(feature = "aes256-gcm")]
+pub trait Aes256Gcm: CryptoClient {
+    fn decrypt_aes256gcm<'c>(
+        &'c mut self,
+        key: KeyId,
+        message: &[u8],
+        associated_data: &[u8],
+        nonce: &[u8],
+        tag: &[u8],
+    ) -> ClientResult<'c, reply::Decrypt, Self> {
+        self.decrypt(
+            Mechanism::Aes256Gcm,
+            key,
+            message,
+            associated_data,
+            nonce,
+            tag,
+        )
+    }
+
+    fn encrypt_aes256gcm<'c>(
+        &'c mut self,
+        key: KeyId,
+        message: &[u8],
+        associated_data: &[u8],
+        nonce: Option<&[u8; 12]>,
+    ) -> ClientResult<'c, reply::Encrypt, Self> {
+        self.encrypt(
+            Mechanism::Aes256Gcm,
+            key,
+            message,
+            associated_data,
+            nonce.map(ShortData::from),
+        )
+    }
+
+    fn generate_aes256gcm_key(
+        &mut self,
+        persistence: Location,
+    ) -> ClientResult<'_, reply::GenerateKey, Self> {
+        self.generate_key(
+            Mechanism::Aes256Gcm,
+            StorageAttributes::new().set_persistence(persistence),
+        )
+    }
+
+    fn unwrap_key_aes256gcm<'c>(
+        &'c mut self,
+        wrapping_key: KeyId,
+        wrapped_key: &[u8],
+        associated_data: &[u8],
+        location: Location,
+    ) -> ClientResult<'c, reply::UnwrapKey, Self> {
+        self.unwrap_key(
+            Mechanism::Aes256Gcm,
+            wrapping_key,
+            Message::try_from(wrapped_key).map_err(|_| ClientError::DataTooLarge)?,
+            associated_data,
+            &[],
+            StorageAttributes::new().set_persistence(location),
+        )
+    }
+
+    fn wrap_key_aes256gcm<'c>(
+        &'c mut self,
+        wrapping_key: KeyId,
+        key: KeyId,
+        associated_data: &[u8],
+        nonce: Option<&[u8; 12]>,
+    ) -> ClientResult<'c, reply::WrapKey, Self> {
+        self.wrap_key(
+            Mechanism::Aes256Gcm,
+            wrapping_key,
+            key,
+            associated_data,
+            nonce.map(ShortData::from),
+        )
+    }
+}
+
 #[cfg(feature = "chacha8-poly1305")]
 pub trait Chacha8Poly1305: CryptoClient {
     fn decrypt_chacha8poly1305<'c>(

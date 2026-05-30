@@ -684,154 +684,212 @@ fn agree_p521() {
     .signature;
 }
 
-#[cfg(feature = "chacha8-poly1305")]
+#[cfg(any(feature = "aes256-gcm", feature = "chacha8-poly1305"))]
+const AEAD_MECHANISMS: &[trussed_core::types::Mechanism] = &[
+    #[cfg(feature = "aes256-gcm")]
+    trussed_core::types::Mechanism::Aes256Gcm,
+    #[cfg(feature = "chacha8-poly1305")]
+    trussed_core::types::Mechanism::Chacha8Poly1305,
+];
+
+#[cfg(any(feature = "aes256-gcm", feature = "chacha8-poly1305"))]
 #[test]
 #[serial]
 fn aead_rng_nonce() {
-    use crate::client::mechanisms::Chacha8Poly1305;
     setup!(client);
-    let secret_key = block!(client
-        .generate_secret_key(32, Location::Volatile)
-        .expect("no client error"))
-    .expect("no errors")
-    .key;
+    for mechanism in AEAD_MECHANISMS {
+        let secret_key = block!(client
+            .generate_secret_key(32, Location::Volatile)
+            .expect("no client error"))
+        .expect("no errors")
+        .key;
 
-    println!("got a key {:?}", &secret_key);
+        println!("got a key {:?}", &secret_key);
 
-    let message = b"test message";
-    let associated_data = b"solokeys.com";
-    let api::reply::Encrypt {
-        ciphertext,
-        nonce,
-        tag,
-    } = block!(client
-        .encrypt_chacha8poly1305(secret_key, message, associated_data, None)
-        .expect("no client error"))
-    .expect("no errors");
+        let message = b"test message";
+        let associated_data = b"solokeys.com";
+        let api::reply::Encrypt {
+            ciphertext,
+            nonce,
+            tag,
+        } = block!(client
+            .encrypt(*mechanism, secret_key, message, associated_data, None)
+            .expect("no client error"))
+        .expect("no errors");
 
-    let plaintext = block!(client
-        .decrypt_chacha8poly1305(secret_key, &ciphertext, associated_data, &nonce, &tag,)
+        let plaintext = block!(client
+            .decrypt(
+                *mechanism,
+                secret_key,
+                &ciphertext,
+                associated_data,
+                &nonce,
+                &tag
+            )
+            .map_err(drop)
+            .expect("no client error"))
         .map_err(drop)
-        .expect("no client error"))
-    .map_err(drop)
-    .expect("no errors")
-    .plaintext;
+        .expect("no errors")
+        .plaintext;
 
-    assert_ne!(&nonce, &[0; 12]);
-    assert_eq!(&message[..], plaintext.unwrap().as_ref());
+        assert_ne!(&nonce, &[0; 12]);
+        assert_eq!(&message[..], plaintext.unwrap().as_ref());
+    }
 }
 
-#[cfg(feature = "chacha8-poly1305")]
+#[cfg(any(feature = "aes256-gcm", feature = "chacha8-poly1305"))]
 #[test]
 #[serial]
 fn aead_given_nonce() {
-    use crate::client::mechanisms::Chacha8Poly1305;
     setup!(client);
-    let secret_key = block!(client
-        .generate_secret_key(32, Location::Volatile)
-        .expect("no client error"))
-    .expect("no errors")
-    .key;
+    for mechanism in AEAD_MECHANISMS {
+        let secret_key = block!(client
+            .generate_secret_key(32, Location::Volatile)
+            .expect("no client error"))
+        .expect("no errors")
+        .key;
 
-    println!("got a key {:?}", &secret_key);
+        println!("got a key {:?}", &secret_key);
 
-    let message = b"test message";
-    let associated_data = b"solokeys.com";
-    let static_nonce = b"123456789012";
-    let api::reply::Encrypt {
-        ciphertext,
-        nonce,
-        tag,
-    } = block!(client
-        .encrypt_chacha8poly1305(secret_key, message, associated_data, Some(static_nonce))
-        .expect("no client error"))
-    .expect("no errors");
-    assert_eq!(&*nonce, static_nonce);
+        let message = b"test message";
+        let associated_data = b"solokeys.com";
+        let static_nonce = b"123456789012";
+        let api::reply::Encrypt {
+            ciphertext,
+            nonce,
+            tag,
+        } = block!(client
+            .encrypt(
+                *mechanism,
+                secret_key,
+                message,
+                associated_data,
+                Some(static_nonce.into())
+            )
+            .expect("no client error"))
+        .expect("no errors");
+        assert_eq!(&*nonce, static_nonce);
 
-    let plaintext = block!(client
-        .decrypt_chacha8poly1305(secret_key, &ciphertext, associated_data, &nonce, &tag,)
+        let plaintext = block!(client
+            .decrypt(
+                *mechanism,
+                secret_key,
+                &ciphertext,
+                associated_data,
+                &nonce,
+                &tag
+            )
+            .map_err(drop)
+            .expect("no client error"))
         .map_err(drop)
-        .expect("no client error"))
-    .map_err(drop)
-    .expect("no errors")
-    .plaintext;
+        .expect("no errors")
+        .plaintext;
 
-    assert_eq!(&message[..], plaintext.unwrap().as_ref());
+        assert_eq!(&message[..], plaintext.unwrap().as_ref());
+    }
 }
 
 // Same as before but key generated with a nonce
-#[cfg(feature = "chacha8-poly1305")]
+#[cfg(any(feature = "aes256-gcm", feature = "chacha8-poly1305"))]
 #[test]
 #[serial]
 fn aead_given_nonce_2() {
-    use crate::client::mechanisms::Chacha8Poly1305;
     setup!(client);
-    let secret_key = block!(client
-        .generate_chacha8poly1305_key(Location::Volatile)
-        .expect("no client error"))
-    .expect("no errors")
-    .key;
+    for mechanism in AEAD_MECHANISMS {
+        let secret_key = block!(client
+            .generate_key(
+                *mechanism,
+                StorageAttributes::new().set_persistence(Location::Volatile)
+            )
+            .expect("no client error"))
+        .expect("no errors")
+        .key;
 
-    println!("got a key {:?}", &secret_key);
+        println!("got a key {:?}", &secret_key);
 
-    let message = b"test message";
-    let associated_data = b"solokeys.com";
-    let static_nonce = b"123456789012";
-    let api::reply::Encrypt {
-        ciphertext,
-        nonce,
-        tag,
-    } = block!(client
-        .encrypt_chacha8poly1305(secret_key, message, associated_data, Some(static_nonce))
-        .expect("no client error"))
-    .expect("no errors");
-    assert_eq!(&*nonce, static_nonce);
+        let message = b"test message";
+        let associated_data = b"solokeys.com";
+        let static_nonce = b"123456789012";
+        let api::reply::Encrypt {
+            ciphertext,
+            nonce,
+            tag,
+        } = block!(client
+            .encrypt(
+                *mechanism,
+                secret_key,
+                message,
+                associated_data,
+                Some(static_nonce.into())
+            )
+            .expect("no client error"))
+        .expect("no errors");
+        assert_eq!(&*nonce, static_nonce);
 
-    let plaintext = block!(client
-        .decrypt_chacha8poly1305(secret_key, &ciphertext, associated_data, &nonce, &tag,)
+        let plaintext = block!(client
+            .decrypt(
+                *mechanism,
+                secret_key,
+                &ciphertext,
+                associated_data,
+                &nonce,
+                &tag
+            )
+            .map_err(drop)
+            .expect("no client error"))
         .map_err(drop)
-        .expect("no client error"))
-    .map_err(drop)
-    .expect("no errors")
-    .plaintext;
+        .expect("no errors")
+        .plaintext;
 
-    assert_eq!(&message[..], plaintext.unwrap().as_ref());
+        assert_eq!(&message[..], plaintext.unwrap().as_ref());
+    }
 }
 
-#[cfg(feature = "chacha8-poly1305")]
+#[cfg(any(feature = "aes256-gcm", feature = "chacha8-poly1305"))]
 #[test]
 #[serial]
 fn aead() {
-    use crate::client::mechanisms::Chacha8Poly1305;
     setup!(client);
-    let secret_key = block!(client
-        .generate_chacha8poly1305_key(Location::Volatile)
-        .expect("no client error"))
-    .expect("no errors")
-    .key;
+    for mechanism in AEAD_MECHANISMS {
+        let secret_key = block!(client
+            .generate_key(
+                *mechanism,
+                StorageAttributes::new().set_persistence(Location::Volatile)
+            )
+            .expect("no client error"))
+        .expect("no errors")
+        .key;
 
-    println!("got a key {:?}", &secret_key);
+        println!("got a key {:?}", &secret_key);
 
-    let message = b"test message";
-    let associated_data = b"solokeys.com";
-    let api::reply::Encrypt {
-        ciphertext,
-        nonce,
-        tag,
-    } = block!(client
-        .encrypt_chacha8poly1305(secret_key, message, associated_data, None)
-        .expect("no client error"))
-    .expect("no errors");
+        let message = b"test message";
+        let associated_data = b"solokeys.com";
+        let api::reply::Encrypt {
+            ciphertext,
+            nonce,
+            tag,
+        } = block!(client
+            .encrypt(*mechanism, secret_key, message, associated_data, None)
+            .expect("no client error"))
+        .expect("no errors");
 
-    let plaintext = block!(client
-        .decrypt_chacha8poly1305(secret_key, &ciphertext, associated_data, &nonce, &tag,)
+        let plaintext = block!(client
+            .decrypt(
+                *mechanism,
+                secret_key,
+                &ciphertext,
+                associated_data,
+                &nonce,
+                &tag
+            )
+            .map_err(drop)
+            .expect("no client error"))
         .map_err(drop)
-        .expect("no client error"))
-    .map_err(drop)
-    .expect("no errors")
-    .plaintext;
+        .expect("no errors")
+        .plaintext;
 
-    assert_eq!(&message[..], plaintext.unwrap().as_ref());
+        assert_eq!(&message[..], plaintext.unwrap().as_ref());
+    }
 }
 
 #[test]
