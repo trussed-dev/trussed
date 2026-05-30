@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+-
+
+## [v0.2.2](https://github.com/trussed-dev/trussed/releases/tag/core-v0.2.2) (2026-05-30)
+
+### Added
+
 - Add `Mechanism::Aes256Gcm` and the `Aes256Gcm` trait behind the `aes256-gcm` feature flag.
 
 ## [v0.2.1](https://github.com/trussed-dev/trussed/releases/tag/core-v0.2.1) (2026-05-18)
