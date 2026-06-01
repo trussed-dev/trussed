@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/zerocopy-0.8.49/src/pointer/ptr.rs`."><title>ptr.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../../static.files/rustdoc-17e0aaed.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="zerocopy" data-themes="" data-resource-suffix="" data-rustdoc-version="1.96.0 (ac68faa20 2026-05-25)" data-channel="1.96.0" data-search-js="search-b5634cc7.js" data-stringdex-js="stringdex-2da4960a.js" data-settings-js="settings-170eb4bf.js" ><script src="../../../static.files/storage-41dd4d93.js"></script><script defer src="../../../static.files/src-script-813739b1.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-5013f961.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-f7c3ffd8.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-eab170b8.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><a class="skip-main-content" href="#main-content">Skip to main content</a><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><section id="main-content" class="content" tabindex="-1"><div class="main-heading"><h1><div class="sub-heading">zerocopy/pointer/</div>ptr.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap digits-4"><pre class="rust"><code><a href=#1 id=1 data-nosnippet>1</a><span class="comment">// Copyright 2023 The Fuchsia Authors
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/zerocopy-0.8.50/src/pointer/ptr.rs`."><title>ptr.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../../static.files/rustdoc-17e0aaed.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="zerocopy" data-themes="" data-resource-suffix="" data-rustdoc-version="1.96.0 (ac68faa20 2026-05-25)" data-channel="1.96.0" data-search-js="search-b5634cc7.js" data-stringdex-js="stringdex-2da4960a.js" data-settings-js="settings-170eb4bf.js" ><script src="../../../static.files/storage-41dd4d93.js"></script><script defer src="../../../static.files/src-script-813739b1.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-5013f961.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-f7c3ffd8.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-eab170b8.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><a class="skip-main-content" href="#main-content">Skip to main content</a><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><section id="main-content" class="content" tabindex="-1"><div class="main-heading"><h1><div class="sub-heading">zerocopy/pointer/</div>ptr.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap digits-4"><pre class="rust"><code><a href=#1 id=1 data-nosnippet>1</a><span class="comment">// Copyright 2023 The Fuchsia Authors
 <a href=#2 id=2 data-nosnippet>2</a>//
 <a href=#3 id=3 data-nosnippet>3</a>// Licensed under a BSD-style license &lt;LICENSE-BSD&gt;, Apache License, Version 2.0
 <a href=#4 id=4 data-nosnippet>4</a>// &lt;LICENSE-APACHE or https://www.apache.org/licenses/LICENSE-2.0&gt;, or the MIT
@@ -1268,294 +1268,318 @@
 <a href=#1268 id=1268 data-nosnippet>1268</a>    {
 <a href=#1269 id=1269 data-nosnippet>1269</a>        <span class="doccomment">/// Iteratively projects the elements `Ptr&lt;T&gt;` from `Ptr&lt;[T]&gt;`.
 <a href=#1270 id=1270 data-nosnippet>1270</a>        </span><span class="attr">#[inline]
-<a href=#1271 id=1271 data-nosnippet>1271</a>        </span><span class="kw">pub fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Iterator&lt;Item = Ptr&lt;<span class="lifetime">'a</span>, T, I&gt;&gt; {
+<a href=#1271 id=1271 data-nosnippet>1271</a>        </span><span class="kw">pub fn </span>iter(<span class="self">self</span>) -&gt; <span class="kw">impl </span>Iterator&lt;Item = Ptr&lt;<span class="lifetime">'a</span>, T, I&gt;&gt; {
 <a href=#1272 id=1272 data-nosnippet>1272</a>            <span class="comment">// SAFETY:
-<a href=#1273 id=1273 data-nosnippet>1273</a>            // 0. `elem` conforms to the aliasing invariant of `I::Aliasing`
-<a href=#1274 id=1274 data-nosnippet>1274</a>            //    because projection does not impact the aliasing invariant.
-<a href=#1275 id=1275 data-nosnippet>1275</a>            // 1. `elem`, conditionally, conforms to the validity invariant of
-<a href=#1276 id=1276 data-nosnippet>1276</a>            //    `I::Alignment`. If `elem` is projected from data well-aligned
-<a href=#1277 id=1277 data-nosnippet>1277</a>            //    for `[T]`, `elem` will be valid for `T`.
-<a href=#1278 id=1278 data-nosnippet>1278</a>            // 2. `elem` conforms to the validity invariant of `I::Validity`.
-<a href=#1279 id=1279 data-nosnippet>1279</a>            //    Per https://doc.rust-lang.org/1.81.0/reference/type-layout.html#array-layout:
-<a href=#1280 id=1280 data-nosnippet>1280</a>            //
-<a href=#1281 id=1281 data-nosnippet>1281</a>            //      Slices have the same layout as the section of the array they
-<a href=#1282 id=1282 data-nosnippet>1282</a>            //      slice.
-<a href=#1283 id=1283 data-nosnippet>1283</a>            //
-<a href=#1284 id=1284 data-nosnippet>1284</a>            //    Arrays are laid out so that the zero-based `nth` element of
-<a href=#1285 id=1285 data-nosnippet>1285</a>            //    the array is offset from the start of the array by `n *
-<a href=#1286 id=1286 data-nosnippet>1286</a>            //    size_of::&lt;T&gt;()` bytes. Thus, `elem` addresses a valid `T`
-<a href=#1287 id=1287 data-nosnippet>1287</a>            //    within the slice. Since `self` satisfies `I::Validity`, `elem`
-<a href=#1288 id=1288 data-nosnippet>1288</a>            //    also satisfies `I::Validity`.
-<a href=#1289 id=1289 data-nosnippet>1289</a>            </span><span class="self">self</span>.as_inner().iter().map(
-<a href=#1290 id=1290 data-nosnippet>1290</a>                <span class="attr">#[inline(always)]
-<a href=#1291 id=1291 data-nosnippet>1291</a>                </span>|elem| <span class="kw">unsafe </span>{ Ptr::from_inner(elem) },
-<a href=#1292 id=1292 data-nosnippet>1292</a>            )
-<a href=#1293 id=1293 data-nosnippet>1293</a>        }
-<a href=#1294 id=1294 data-nosnippet>1294</a>    }
-<a href=#1295 id=1295 data-nosnippet>1295</a>
-<a href=#1296 id=1296 data-nosnippet>1296</a>    <span class="attr">#[allow(clippy::needless_lifetimes)]
-<a href=#1297 id=1297 data-nosnippet>1297</a>    </span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T, I&gt; Ptr&lt;<span class="lifetime">'a</span>, T, I&gt;
-<a href=#1298 id=1298 data-nosnippet>1298</a>    <span class="kw">where
-<a href=#1299 id=1299 data-nosnippet>1299</a>        </span>T: <span class="lifetime">'a </span>+ <span class="question-mark">?</span>Sized + KnownLayout&lt;PointerMetadata = usize&gt;,
-<a href=#1300 id=1300 data-nosnippet>1300</a>        I: Invariants,
-<a href=#1301 id=1301 data-nosnippet>1301</a>    {
-<a href=#1302 id=1302 data-nosnippet>1302</a>        <span class="doccomment">/// The number of slice elements in the object referenced by `self`.
-<a href=#1303 id=1303 data-nosnippet>1303</a>        </span><span class="attr">#[inline]
-<a href=#1304 id=1304 data-nosnippet>1304</a>        #[must_use]
-<a href=#1305 id=1305 data-nosnippet>1305</a>        </span><span class="kw">pub fn </span>len(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
-<a href=#1306 id=1306 data-nosnippet>1306</a>            <span class="self">self</span>.as_inner().meta().get()
-<a href=#1307 id=1307 data-nosnippet>1307</a>        }
-<a href=#1308 id=1308 data-nosnippet>1308</a>
-<a href=#1309 id=1309 data-nosnippet>1309</a>        <span class="doccomment">/// Returns `true` if the slice pointer has a length of 0.
+<a href=#1273 id=1273 data-nosnippet>1273</a>            // 0. `elem` conforms to the aliasing invariant of `I::Aliasing`:
+<a href=#1274 id=1274 data-nosnippet>1274</a>            //    - `Exclusive`: `self` is consumed by value, and therefore
+<a href=#1275 id=1275 data-nosnippet>1275</a>            //      cannot be used to access the slice while any yielded
+<a href=#1276 id=1276 data-nosnippet>1276</a>            //      element `Ptr` is live. Each non-zero-sized element is a
+<a href=#1277 id=1277 data-nosnippet>1277</a>            //      disjoint byte range within the slice, and zero-sized
+<a href=#1278 id=1278 data-nosnippet>1278</a>            //      elements address no bytes, so distinct yielded element
+<a href=#1279 id=1279 data-nosnippet>1279</a>            //      `Ptr`s do not alias each other.
+<a href=#1280 id=1280 data-nosnippet>1280</a>            //    - `Shared`: It is sound for multiple shared `Ptr`s to exist
+<a href=#1281 id=1281 data-nosnippet>1281</a>            //      simultaneously which reference the same memory.
+<a href=#1282 id=1282 data-nosnippet>1282</a>            // 1. `elem`, conditionally, conforms to the validity invariant of
+<a href=#1283 id=1283 data-nosnippet>1283</a>            //    `I::Alignment`. If `elem` is projected from data well-aligned
+<a href=#1284 id=1284 data-nosnippet>1284</a>            //    for `[T]`, `elem` will be valid for `T`.
+<a href=#1285 id=1285 data-nosnippet>1285</a>            // 2. `elem` conforms to the validity invariant of `I::Validity`.
+<a href=#1286 id=1286 data-nosnippet>1286</a>            //    Per https://doc.rust-lang.org/1.81.0/reference/type-layout.html#array-layout:
+<a href=#1287 id=1287 data-nosnippet>1287</a>            //
+<a href=#1288 id=1288 data-nosnippet>1288</a>            //      Slices have the same layout as the section of the array they
+<a href=#1289 id=1289 data-nosnippet>1289</a>            //      slice.
+<a href=#1290 id=1290 data-nosnippet>1290</a>            //
+<a href=#1291 id=1291 data-nosnippet>1291</a>            //    Arrays are laid out so that the zero-based `nth` element of
+<a href=#1292 id=1292 data-nosnippet>1292</a>            //    the array is offset from the start of the array by `n *
+<a href=#1293 id=1293 data-nosnippet>1293</a>            //    size_of::&lt;T&gt;()` bytes. Thus, `elem` addresses a valid `T`
+<a href=#1294 id=1294 data-nosnippet>1294</a>            //    within the slice. Since `self` satisfies `I::Validity`, `elem`
+<a href=#1295 id=1295 data-nosnippet>1295</a>            //    also satisfies `I::Validity`.
+<a href=#1296 id=1296 data-nosnippet>1296</a>            </span><span class="self">self</span>.as_inner().iter().map(
+<a href=#1297 id=1297 data-nosnippet>1297</a>                <span class="attr">#[inline(always)]
+<a href=#1298 id=1298 data-nosnippet>1298</a>                </span>|elem| <span class="kw">unsafe </span>{ Ptr::from_inner(elem) },
+<a href=#1299 id=1299 data-nosnippet>1299</a>            )
+<a href=#1300 id=1300 data-nosnippet>1300</a>        }
+<a href=#1301 id=1301 data-nosnippet>1301</a>    }
+<a href=#1302 id=1302 data-nosnippet>1302</a>
+<a href=#1303 id=1303 data-nosnippet>1303</a>    <span class="attr">#[allow(clippy::needless_lifetimes)]
+<a href=#1304 id=1304 data-nosnippet>1304</a>    </span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T, I&gt; Ptr&lt;<span class="lifetime">'a</span>, T, I&gt;
+<a href=#1305 id=1305 data-nosnippet>1305</a>    <span class="kw">where
+<a href=#1306 id=1306 data-nosnippet>1306</a>        </span>T: <span class="lifetime">'a </span>+ <span class="question-mark">?</span>Sized + KnownLayout&lt;PointerMetadata = usize&gt;,
+<a href=#1307 id=1307 data-nosnippet>1307</a>        I: Invariants,
+<a href=#1308 id=1308 data-nosnippet>1308</a>    {
+<a href=#1309 id=1309 data-nosnippet>1309</a>        <span class="doccomment">/// The number of slice elements in the object referenced by `self`.
 <a href=#1310 id=1310 data-nosnippet>1310</a>        </span><span class="attr">#[inline]
 <a href=#1311 id=1311 data-nosnippet>1311</a>        #[must_use]
-<a href=#1312 id=1312 data-nosnippet>1312</a>        </span><span class="kw">pub fn </span>is_empty(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-<a href=#1313 id=1313 data-nosnippet>1313</a>            <span class="self">self</span>.len() == <span class="number">0
-<a href=#1314 id=1314 data-nosnippet>1314</a>        </span>}
-<a href=#1315 id=1315 data-nosnippet>1315</a>    }
-<a href=#1316 id=1316 data-nosnippet>1316</a>}
-<a href=#1317 id=1317 data-nosnippet>1317</a>
-<a href=#1318 id=1318 data-nosnippet>1318</a><span class="attr">#[cfg(test)]
-<a href=#1319 id=1319 data-nosnippet>1319</a></span><span class="kw">mod </span>tests {
-<a href=#1320 id=1320 data-nosnippet>1320</a>    <span class="kw">use </span>core::mem::{<span class="self">self</span>, MaybeUninit};
-<a href=#1321 id=1321 data-nosnippet>1321</a>
-<a href=#1322 id=1322 data-nosnippet>1322</a>    <span class="kw">use </span>super::<span class="kw-2">*</span>;
-<a href=#1323 id=1323 data-nosnippet>1323</a>    <span class="attr">#[allow(unused)] </span><span class="comment">// Needed on our MSRV, but considered unused on later toolchains.
-<a href=#1324 id=1324 data-nosnippet>1324</a>    </span><span class="kw">use </span><span class="kw">crate</span>::util::AsAddress;
-<a href=#1325 id=1325 data-nosnippet>1325</a>    <span class="kw">use </span>crate::{pointer::BecauseImmutable, util::testutil::AU64, FromBytes, Immutable};
-<a href=#1326 id=1326 data-nosnippet>1326</a>
-<a href=#1327 id=1327 data-nosnippet>1327</a>    <span class="kw">mod </span>test_ptr_try_cast_into_soundness {
-<a href=#1328 id=1328 data-nosnippet>1328</a>        <span class="kw">use </span>super::<span class="kw-2">*</span>;
-<a href=#1329 id=1329 data-nosnippet>1329</a>
-<a href=#1330 id=1330 data-nosnippet>1330</a>        <span class="comment">// This test is designed so that if `Ptr::try_cast_into_xxx` are
-<a href=#1331 id=1331 data-nosnippet>1331</a>        // buggy, it will manifest as unsoundness that Miri can detect.
-<a href=#1332 id=1332 data-nosnippet>1332</a>
-<a href=#1333 id=1333 data-nosnippet>1333</a>        // - If `size_of::&lt;T&gt;() == 0`, `N == 4`
-<a href=#1334 id=1334 data-nosnippet>1334</a>        // - Else, `N == 4 * size_of::&lt;T&gt;()`
-<a href=#1335 id=1335 data-nosnippet>1335</a>        //
-<a href=#1336 id=1336 data-nosnippet>1336</a>        // Each test will be run for each metadata in `metas`.
-<a href=#1337 id=1337 data-nosnippet>1337</a>        </span><span class="kw">fn </span>test&lt;T, I, <span class="kw">const </span>N: usize&gt;(metas: I)
-<a href=#1338 id=1338 data-nosnippet>1338</a>        <span class="kw">where
-<a href=#1339 id=1339 data-nosnippet>1339</a>            </span>T: <span class="question-mark">?</span>Sized + KnownLayout + Immutable + FromBytes,
-<a href=#1340 id=1340 data-nosnippet>1340</a>            I: IntoIterator&lt;Item = <span class="prelude-ty">Option</span>&lt;T::PointerMetadata&gt;&gt; + Clone,
-<a href=#1341 id=1341 data-nosnippet>1341</a>        {
-<a href=#1342 id=1342 data-nosnippet>1342</a>            <span class="kw">let </span><span class="kw-2">mut </span>bytes = [MaybeUninit::&lt;u8&gt;::uninit(); N];
-<a href=#1343 id=1343 data-nosnippet>1343</a>            <span class="kw">let </span>initialized = [MaybeUninit::new(<span class="number">0u8</span>); N];
-<a href=#1344 id=1344 data-nosnippet>1344</a>            <span class="kw">for </span>start <span class="kw">in </span><span class="number">0</span>..=bytes.len() {
-<a href=#1345 id=1345 data-nosnippet>1345</a>                <span class="kw">for </span>end <span class="kw">in </span>start..=bytes.len() {
-<a href=#1346 id=1346 data-nosnippet>1346</a>                    <span class="comment">// Set all bytes to uninitialized other than those in
-<a href=#1347 id=1347 data-nosnippet>1347</a>                    // the range we're going to pass to `try_cast_from`.
-<a href=#1348 id=1348 data-nosnippet>1348</a>                    // This allows Miri to detect out-of-bounds reads
-<a href=#1349 id=1349 data-nosnippet>1349</a>                    // because they read uninitialized memory. Without this,
-<a href=#1350 id=1350 data-nosnippet>1350</a>                    // some out-of-bounds reads would still be in-bounds of
-<a href=#1351 id=1351 data-nosnippet>1351</a>                    // `bytes`, and so might spuriously be accepted.
-<a href=#1352 id=1352 data-nosnippet>1352</a>                    </span>bytes = [MaybeUninit::&lt;u8&gt;::uninit(); N];
-<a href=#1353 id=1353 data-nosnippet>1353</a>                    <span class="kw">let </span>bytes = <span class="kw-2">&amp;mut </span>bytes[start..end];
-<a href=#1354 id=1354 data-nosnippet>1354</a>                    <span class="comment">// Initialize only the byte range we're going to pass to
-<a href=#1355 id=1355 data-nosnippet>1355</a>                    // `try_cast_from`.
-<a href=#1356 id=1356 data-nosnippet>1356</a>                    </span>bytes.copy_from_slice(<span class="kw-2">&amp;</span>initialized[start..end]);
-<a href=#1357 id=1357 data-nosnippet>1357</a>
-<a href=#1358 id=1358 data-nosnippet>1358</a>                    <span class="kw">let </span>bytes = {
-<a href=#1359 id=1359 data-nosnippet>1359</a>                        <span class="kw">let </span>bytes: <span class="kw-2">*const </span>[MaybeUninit&lt;u8&gt;] = bytes;
-<a href=#1360 id=1360 data-nosnippet>1360</a>                        <span class="attr">#[allow(clippy::as_conversions)]
-<a href=#1361 id=1361 data-nosnippet>1361</a>                        </span><span class="kw">let </span>bytes = bytes <span class="kw">as </span><span class="kw-2">*const </span>[u8];
-<a href=#1362 id=1362 data-nosnippet>1362</a>                        <span class="comment">// SAFETY: We just initialized these bytes to valid
-<a href=#1363 id=1363 data-nosnippet>1363</a>                        // `u8`s.
-<a href=#1364 id=1364 data-nosnippet>1364</a>                        </span><span class="kw">unsafe </span>{ <span class="kw-2">&amp;*</span>bytes }
-<a href=#1365 id=1365 data-nosnippet>1365</a>                    };
-<a href=#1366 id=1366 data-nosnippet>1366</a>
-<a href=#1367 id=1367 data-nosnippet>1367</a>                    <span class="comment">// SAFETY: The bytes in `slf` must be initialized.
-<a href=#1368 id=1368 data-nosnippet>1368</a>                    </span><span class="kw">unsafe fn </span>validate_and_get_len&lt;
-<a href=#1369 id=1369 data-nosnippet>1369</a>                        T: <span class="question-mark">?</span>Sized + KnownLayout + FromBytes + Immutable,
-<a href=#1370 id=1370 data-nosnippet>1370</a>                    &gt;(
-<a href=#1371 id=1371 data-nosnippet>1371</a>                        slf: Ptr&lt;<span class="lifetime">'_</span>, T, (Shared, Aligned, Initialized)&gt;,
-<a href=#1372 id=1372 data-nosnippet>1372</a>                    ) -&gt; usize {
-<a href=#1373 id=1373 data-nosnippet>1373</a>                        <span class="kw">let </span>t = slf.recall_validity().as_ref();
-<a href=#1374 id=1374 data-nosnippet>1374</a>
-<a href=#1375 id=1375 data-nosnippet>1375</a>                        <span class="kw">let </span>bytes = {
-<a href=#1376 id=1376 data-nosnippet>1376</a>                            <span class="kw">let </span>len = mem::size_of_val(t);
-<a href=#1377 id=1377 data-nosnippet>1377</a>                            <span class="kw">let </span>t: <span class="kw-2">*const </span>T = t;
-<a href=#1378 id=1378 data-nosnippet>1378</a>                            <span class="comment">// SAFETY:
-<a href=#1379 id=1379 data-nosnippet>1379</a>                            // - We know `t`'s bytes are all initialized
-<a href=#1380 id=1380 data-nosnippet>1380</a>                            //   because we just read it from `slf`, which
-<a href=#1381 id=1381 data-nosnippet>1381</a>                            //   points to an initialized range of bytes. If
-<a href=#1382 id=1382 data-nosnippet>1382</a>                            //   there's a bug and this doesn't hold, then
-<a href=#1383 id=1383 data-nosnippet>1383</a>                            //   that's exactly what we're hoping Miri will
-<a href=#1384 id=1384 data-nosnippet>1384</a>                            //   catch!
-<a href=#1385 id=1385 data-nosnippet>1385</a>                            // - Since `T: FromBytes`, `T` doesn't contain
-<a href=#1386 id=1386 data-nosnippet>1386</a>                            //   any `UnsafeCell`s, so it's okay for `t: T`
-<a href=#1387 id=1387 data-nosnippet>1387</a>                            //   and a `&amp;[u8]` to the same memory to be
-<a href=#1388 id=1388 data-nosnippet>1388</a>                            //   alive concurrently.
-<a href=#1389 id=1389 data-nosnippet>1389</a>                            </span><span class="kw">unsafe </span>{ core::slice::from_raw_parts(t.cast::&lt;u8&gt;(), len) }
-<a href=#1390 id=1390 data-nosnippet>1390</a>                        };
-<a href=#1391 id=1391 data-nosnippet>1391</a>
-<a href=#1392 id=1392 data-nosnippet>1392</a>                        <span class="comment">// This assertion ensures that `t`'s bytes are read
-<a href=#1393 id=1393 data-nosnippet>1393</a>                        // and compared to another value, which in turn
-<a href=#1394 id=1394 data-nosnippet>1394</a>                        // ensures that Miri gets a chance to notice if any
-<a href=#1395 id=1395 data-nosnippet>1395</a>                        // of `t`'s bytes are uninitialized, which they
-<a href=#1396 id=1396 data-nosnippet>1396</a>                        // shouldn't be (see the comment above).
-<a href=#1397 id=1397 data-nosnippet>1397</a>                        </span><span class="macro">assert_eq!</span>(bytes, <span class="macro">vec!</span>[<span class="number">0u8</span>; bytes.len()]);
+<a href=#1312 id=1312 data-nosnippet>1312</a>        </span><span class="kw">pub fn </span>len(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
+<a href=#1313 id=1313 data-nosnippet>1313</a>            <span class="self">self</span>.as_inner().meta().get()
+<a href=#1314 id=1314 data-nosnippet>1314</a>        }
+<a href=#1315 id=1315 data-nosnippet>1315</a>
+<a href=#1316 id=1316 data-nosnippet>1316</a>        <span class="doccomment">/// Returns `true` if the slice pointer has a length of 0.
+<a href=#1317 id=1317 data-nosnippet>1317</a>        </span><span class="attr">#[inline]
+<a href=#1318 id=1318 data-nosnippet>1318</a>        #[must_use]
+<a href=#1319 id=1319 data-nosnippet>1319</a>        </span><span class="kw">pub fn </span>is_empty(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+<a href=#1320 id=1320 data-nosnippet>1320</a>            <span class="self">self</span>.len() == <span class="number">0
+<a href=#1321 id=1321 data-nosnippet>1321</a>        </span>}
+<a href=#1322 id=1322 data-nosnippet>1322</a>    }
+<a href=#1323 id=1323 data-nosnippet>1323</a>}
+<a href=#1324 id=1324 data-nosnippet>1324</a>
+<a href=#1325 id=1325 data-nosnippet>1325</a><span class="attr">#[cfg(test)]
+<a href=#1326 id=1326 data-nosnippet>1326</a></span><span class="kw">mod </span>tests {
+<a href=#1327 id=1327 data-nosnippet>1327</a>    <span class="kw">use </span>core::mem::{<span class="self">self</span>, MaybeUninit};
+<a href=#1328 id=1328 data-nosnippet>1328</a>
+<a href=#1329 id=1329 data-nosnippet>1329</a>    <span class="kw">use </span>super::<span class="kw-2">*</span>;
+<a href=#1330 id=1330 data-nosnippet>1330</a>    <span class="attr">#[allow(unused)] </span><span class="comment">// Needed on our MSRV, but considered unused on later toolchains.
+<a href=#1331 id=1331 data-nosnippet>1331</a>    </span><span class="kw">use </span><span class="kw">crate</span>::util::AsAddress;
+<a href=#1332 id=1332 data-nosnippet>1332</a>    <span class="kw">use </span>crate::{pointer::BecauseImmutable, util::testutil::AU64, FromBytes, Immutable};
+<a href=#1333 id=1333 data-nosnippet>1333</a>
+<a href=#1334 id=1334 data-nosnippet>1334</a>    <span class="kw">mod </span>test_ptr_try_cast_into_soundness {
+<a href=#1335 id=1335 data-nosnippet>1335</a>        <span class="kw">use </span>super::<span class="kw-2">*</span>;
+<a href=#1336 id=1336 data-nosnippet>1336</a>
+<a href=#1337 id=1337 data-nosnippet>1337</a>        <span class="comment">// This test is designed so that if `Ptr::try_cast_into_xxx` are
+<a href=#1338 id=1338 data-nosnippet>1338</a>        // buggy, it will manifest as unsoundness that Miri can detect.
+<a href=#1339 id=1339 data-nosnippet>1339</a>
+<a href=#1340 id=1340 data-nosnippet>1340</a>        // - If `size_of::&lt;T&gt;() == 0`, `N == 4`
+<a href=#1341 id=1341 data-nosnippet>1341</a>        // - Else, `N == 4 * size_of::&lt;T&gt;()`
+<a href=#1342 id=1342 data-nosnippet>1342</a>        //
+<a href=#1343 id=1343 data-nosnippet>1343</a>        // Each test will be run for each metadata in `metas`.
+<a href=#1344 id=1344 data-nosnippet>1344</a>        </span><span class="kw">fn </span>test&lt;T, I, <span class="kw">const </span>N: usize&gt;(metas: I)
+<a href=#1345 id=1345 data-nosnippet>1345</a>        <span class="kw">where
+<a href=#1346 id=1346 data-nosnippet>1346</a>            </span>T: <span class="question-mark">?</span>Sized + KnownLayout + Immutable + FromBytes,
+<a href=#1347 id=1347 data-nosnippet>1347</a>            I: IntoIterator&lt;Item = <span class="prelude-ty">Option</span>&lt;T::PointerMetadata&gt;&gt; + Clone,
+<a href=#1348 id=1348 data-nosnippet>1348</a>        {
+<a href=#1349 id=1349 data-nosnippet>1349</a>            <span class="kw">let </span><span class="kw-2">mut </span>bytes = [MaybeUninit::&lt;u8&gt;::uninit(); N];
+<a href=#1350 id=1350 data-nosnippet>1350</a>            <span class="kw">let </span>initialized = [MaybeUninit::new(<span class="number">0u8</span>); N];
+<a href=#1351 id=1351 data-nosnippet>1351</a>            <span class="kw">for </span>start <span class="kw">in </span><span class="number">0</span>..=bytes.len() {
+<a href=#1352 id=1352 data-nosnippet>1352</a>                <span class="kw">for </span>end <span class="kw">in </span>start..=bytes.len() {
+<a href=#1353 id=1353 data-nosnippet>1353</a>                    <span class="comment">// Set all bytes to uninitialized other than those in
+<a href=#1354 id=1354 data-nosnippet>1354</a>                    // the range we're going to pass to `try_cast_from`.
+<a href=#1355 id=1355 data-nosnippet>1355</a>                    // This allows Miri to detect out-of-bounds reads
+<a href=#1356 id=1356 data-nosnippet>1356</a>                    // because they read uninitialized memory. Without this,
+<a href=#1357 id=1357 data-nosnippet>1357</a>                    // some out-of-bounds reads would still be in-bounds of
+<a href=#1358 id=1358 data-nosnippet>1358</a>                    // `bytes`, and so might spuriously be accepted.
+<a href=#1359 id=1359 data-nosnippet>1359</a>                    </span>bytes = [MaybeUninit::&lt;u8&gt;::uninit(); N];
+<a href=#1360 id=1360 data-nosnippet>1360</a>                    <span class="kw">let </span>bytes = <span class="kw-2">&amp;mut </span>bytes[start..end];
+<a href=#1361 id=1361 data-nosnippet>1361</a>                    <span class="comment">// Initialize only the byte range we're going to pass to
+<a href=#1362 id=1362 data-nosnippet>1362</a>                    // `try_cast_from`.
+<a href=#1363 id=1363 data-nosnippet>1363</a>                    </span>bytes.copy_from_slice(<span class="kw-2">&amp;</span>initialized[start..end]);
+<a href=#1364 id=1364 data-nosnippet>1364</a>
+<a href=#1365 id=1365 data-nosnippet>1365</a>                    <span class="kw">let </span>bytes = {
+<a href=#1366 id=1366 data-nosnippet>1366</a>                        <span class="kw">let </span>bytes: <span class="kw-2">*const </span>[MaybeUninit&lt;u8&gt;] = bytes;
+<a href=#1367 id=1367 data-nosnippet>1367</a>                        <span class="attr">#[allow(clippy::as_conversions)]
+<a href=#1368 id=1368 data-nosnippet>1368</a>                        </span><span class="kw">let </span>bytes = bytes <span class="kw">as </span><span class="kw-2">*const </span>[u8];
+<a href=#1369 id=1369 data-nosnippet>1369</a>                        <span class="comment">// SAFETY: We just initialized these bytes to valid
+<a href=#1370 id=1370 data-nosnippet>1370</a>                        // `u8`s.
+<a href=#1371 id=1371 data-nosnippet>1371</a>                        </span><span class="kw">unsafe </span>{ <span class="kw-2">&amp;*</span>bytes }
+<a href=#1372 id=1372 data-nosnippet>1372</a>                    };
+<a href=#1373 id=1373 data-nosnippet>1373</a>
+<a href=#1374 id=1374 data-nosnippet>1374</a>                    <span class="comment">// SAFETY: The bytes in `slf` must be initialized.
+<a href=#1375 id=1375 data-nosnippet>1375</a>                    </span><span class="kw">unsafe fn </span>validate_and_get_len&lt;
+<a href=#1376 id=1376 data-nosnippet>1376</a>                        T: <span class="question-mark">?</span>Sized + KnownLayout + FromBytes + Immutable,
+<a href=#1377 id=1377 data-nosnippet>1377</a>                    &gt;(
+<a href=#1378 id=1378 data-nosnippet>1378</a>                        slf: Ptr&lt;<span class="lifetime">'_</span>, T, (Shared, Aligned, Initialized)&gt;,
+<a href=#1379 id=1379 data-nosnippet>1379</a>                    ) -&gt; usize {
+<a href=#1380 id=1380 data-nosnippet>1380</a>                        <span class="kw">let </span>t = slf.recall_validity().as_ref();
+<a href=#1381 id=1381 data-nosnippet>1381</a>
+<a href=#1382 id=1382 data-nosnippet>1382</a>                        <span class="kw">let </span>bytes = {
+<a href=#1383 id=1383 data-nosnippet>1383</a>                            <span class="kw">let </span>len = mem::size_of_val(t);
+<a href=#1384 id=1384 data-nosnippet>1384</a>                            <span class="kw">let </span>t: <span class="kw-2">*const </span>T = t;
+<a href=#1385 id=1385 data-nosnippet>1385</a>                            <span class="comment">// SAFETY:
+<a href=#1386 id=1386 data-nosnippet>1386</a>                            // - We know `t`'s bytes are all initialized
+<a href=#1387 id=1387 data-nosnippet>1387</a>                            //   because we just read it from `slf`, which
+<a href=#1388 id=1388 data-nosnippet>1388</a>                            //   points to an initialized range of bytes. If
+<a href=#1389 id=1389 data-nosnippet>1389</a>                            //   there's a bug and this doesn't hold, then
+<a href=#1390 id=1390 data-nosnippet>1390</a>                            //   that's exactly what we're hoping Miri will
+<a href=#1391 id=1391 data-nosnippet>1391</a>                            //   catch!
+<a href=#1392 id=1392 data-nosnippet>1392</a>                            // - Since `T: FromBytes`, `T` doesn't contain
+<a href=#1393 id=1393 data-nosnippet>1393</a>                            //   any `UnsafeCell`s, so it's okay for `t: T`
+<a href=#1394 id=1394 data-nosnippet>1394</a>                            //   and a `&amp;[u8]` to the same memory to be
+<a href=#1395 id=1395 data-nosnippet>1395</a>                            //   alive concurrently.
+<a href=#1396 id=1396 data-nosnippet>1396</a>                            </span><span class="kw">unsafe </span>{ core::slice::from_raw_parts(t.cast::&lt;u8&gt;(), len) }
+<a href=#1397 id=1397 data-nosnippet>1397</a>                        };
 <a href=#1398 id=1398 data-nosnippet>1398</a>
-<a href=#1399 id=1399 data-nosnippet>1399</a>                        mem::size_of_val(t)
-<a href=#1400 id=1400 data-nosnippet>1400</a>                    }
-<a href=#1401 id=1401 data-nosnippet>1401</a>
-<a href=#1402 id=1402 data-nosnippet>1402</a>                    <span class="kw">for </span>meta <span class="kw">in </span>metas.clone().into_iter() {
-<a href=#1403 id=1403 data-nosnippet>1403</a>                        <span class="kw">for </span>cast_type <span class="kw">in </span>[CastType::Prefix, CastType::Suffix] {
-<a href=#1404 id=1404 data-nosnippet>1404</a>                            <span class="kw">if let </span><span class="prelude-val">Ok</span>((slf, remaining)) = Ptr::from_ref(bytes)
-<a href=#1405 id=1405 data-nosnippet>1405</a>                                .try_cast_into::&lt;T, BecauseImmutable&gt;(cast_type, meta)
-<a href=#1406 id=1406 data-nosnippet>1406</a>                            {
-<a href=#1407 id=1407 data-nosnippet>1407</a>                                <span class="comment">// SAFETY: All bytes in `bytes` have been
-<a href=#1408 id=1408 data-nosnippet>1408</a>                                // initialized.
-<a href=#1409 id=1409 data-nosnippet>1409</a>                                </span><span class="kw">let </span>len = <span class="kw">unsafe </span>{ validate_and_get_len(slf) };
-<a href=#1410 id=1410 data-nosnippet>1410</a>                                <span class="macro">assert_eq!</span>(remaining.len(), bytes.len() - len);
-<a href=#1411 id=1411 data-nosnippet>1411</a>                                <span class="attr">#[allow(unstable_name_collisions)]
-<a href=#1412 id=1412 data-nosnippet>1412</a>                                </span><span class="kw">let </span>bytes_addr = bytes.as_ptr().addr();
-<a href=#1413 id=1413 data-nosnippet>1413</a>                                <span class="attr">#[allow(unstable_name_collisions)]
-<a href=#1414 id=1414 data-nosnippet>1414</a>                                </span><span class="kw">let </span>remaining_addr = remaining.as_inner().as_ptr().addr();
-<a href=#1415 id=1415 data-nosnippet>1415</a>                                <span class="kw">match </span>cast_type {
-<a href=#1416 id=1416 data-nosnippet>1416</a>                                    CastType::Prefix =&gt; {
-<a href=#1417 id=1417 data-nosnippet>1417</a>                                        <span class="macro">assert_eq!</span>(remaining_addr, bytes_addr + len)
-<a href=#1418 id=1418 data-nosnippet>1418</a>                                    }
-<a href=#1419 id=1419 data-nosnippet>1419</a>                                    CastType::Suffix =&gt; <span class="macro">assert_eq!</span>(remaining_addr, bytes_addr),
-<a href=#1420 id=1420 data-nosnippet>1420</a>                                }
-<a href=#1421 id=1421 data-nosnippet>1421</a>
-<a href=#1422 id=1422 data-nosnippet>1422</a>                                <span class="kw">if let </span><span class="prelude-val">Some</span>(want) = meta {
-<a href=#1423 id=1423 data-nosnippet>1423</a>                                    <span class="kw">let </span>got =
-<a href=#1424 id=1424 data-nosnippet>1424</a>                                        KnownLayout::pointer_to_metadata(slf.as_inner().as_ptr());
-<a href=#1425 id=1425 data-nosnippet>1425</a>                                    <span class="macro">assert_eq!</span>(got, want);
-<a href=#1426 id=1426 data-nosnippet>1426</a>                                }
-<a href=#1427 id=1427 data-nosnippet>1427</a>                            }
-<a href=#1428 id=1428 data-nosnippet>1428</a>                        }
-<a href=#1429 id=1429 data-nosnippet>1429</a>
-<a href=#1430 id=1430 data-nosnippet>1430</a>                        <span class="kw">if let </span><span class="prelude-val">Ok</span>(slf) = Ptr::from_ref(bytes)
-<a href=#1431 id=1431 data-nosnippet>1431</a>                            .try_cast_into_no_leftover::&lt;T, BecauseImmutable&gt;(meta)
-<a href=#1432 id=1432 data-nosnippet>1432</a>                        {
-<a href=#1433 id=1433 data-nosnippet>1433</a>                            <span class="comment">// SAFETY: All bytes in `bytes` have been
-<a href=#1434 id=1434 data-nosnippet>1434</a>                            // initialized.
-<a href=#1435 id=1435 data-nosnippet>1435</a>                            </span><span class="kw">let </span>len = <span class="kw">unsafe </span>{ validate_and_get_len(slf) };
-<a href=#1436 id=1436 data-nosnippet>1436</a>                            <span class="macro">assert_eq!</span>(len, bytes.len());
-<a href=#1437 id=1437 data-nosnippet>1437</a>
-<a href=#1438 id=1438 data-nosnippet>1438</a>                            <span class="kw">if let </span><span class="prelude-val">Some</span>(want) = meta {
-<a href=#1439 id=1439 data-nosnippet>1439</a>                                <span class="kw">let </span>got = KnownLayout::pointer_to_metadata(slf.as_inner().as_ptr());
-<a href=#1440 id=1440 data-nosnippet>1440</a>                                <span class="macro">assert_eq!</span>(got, want);
-<a href=#1441 id=1441 data-nosnippet>1441</a>                            }
-<a href=#1442 id=1442 data-nosnippet>1442</a>                        }
-<a href=#1443 id=1443 data-nosnippet>1443</a>                    }
-<a href=#1444 id=1444 data-nosnippet>1444</a>                }
-<a href=#1445 id=1445 data-nosnippet>1445</a>            }
-<a href=#1446 id=1446 data-nosnippet>1446</a>        }
-<a href=#1447 id=1447 data-nosnippet>1447</a>
-<a href=#1448 id=1448 data-nosnippet>1448</a>        <span class="attr">#[derive(FromBytes, KnownLayout, Immutable)]
-<a href=#1449 id=1449 data-nosnippet>1449</a>        #[repr(C)]
-<a href=#1450 id=1450 data-nosnippet>1450</a>        </span><span class="kw">struct </span>SliceDst&lt;T&gt; {
-<a href=#1451 id=1451 data-nosnippet>1451</a>            a: u8,
-<a href=#1452 id=1452 data-nosnippet>1452</a>            trailing: [T],
+<a href=#1399 id=1399 data-nosnippet>1399</a>                        <span class="comment">// This assertion ensures that `t`'s bytes are read
+<a href=#1400 id=1400 data-nosnippet>1400</a>                        // and compared to another value, which in turn
+<a href=#1401 id=1401 data-nosnippet>1401</a>                        // ensures that Miri gets a chance to notice if any
+<a href=#1402 id=1402 data-nosnippet>1402</a>                        // of `t`'s bytes are uninitialized, which they
+<a href=#1403 id=1403 data-nosnippet>1403</a>                        // shouldn't be (see the comment above).
+<a href=#1404 id=1404 data-nosnippet>1404</a>                        </span><span class="macro">assert_eq!</span>(bytes, <span class="macro">vec!</span>[<span class="number">0u8</span>; bytes.len()]);
+<a href=#1405 id=1405 data-nosnippet>1405</a>
+<a href=#1406 id=1406 data-nosnippet>1406</a>                        mem::size_of_val(t)
+<a href=#1407 id=1407 data-nosnippet>1407</a>                    }
+<a href=#1408 id=1408 data-nosnippet>1408</a>
+<a href=#1409 id=1409 data-nosnippet>1409</a>                    <span class="kw">for </span>meta <span class="kw">in </span>metas.clone().into_iter() {
+<a href=#1410 id=1410 data-nosnippet>1410</a>                        <span class="kw">for </span>cast_type <span class="kw">in </span>[CastType::Prefix, CastType::Suffix] {
+<a href=#1411 id=1411 data-nosnippet>1411</a>                            <span class="kw">if let </span><span class="prelude-val">Ok</span>((slf, remaining)) = Ptr::from_ref(bytes)
+<a href=#1412 id=1412 data-nosnippet>1412</a>                                .try_cast_into::&lt;T, BecauseImmutable&gt;(cast_type, meta)
+<a href=#1413 id=1413 data-nosnippet>1413</a>                            {
+<a href=#1414 id=1414 data-nosnippet>1414</a>                                <span class="comment">// SAFETY: All bytes in `bytes` have been
+<a href=#1415 id=1415 data-nosnippet>1415</a>                                // initialized.
+<a href=#1416 id=1416 data-nosnippet>1416</a>                                </span><span class="kw">let </span>len = <span class="kw">unsafe </span>{ validate_and_get_len(slf) };
+<a href=#1417 id=1417 data-nosnippet>1417</a>                                <span class="macro">assert_eq!</span>(remaining.len(), bytes.len() - len);
+<a href=#1418 id=1418 data-nosnippet>1418</a>                                <span class="attr">#[allow(unstable_name_collisions)]
+<a href=#1419 id=1419 data-nosnippet>1419</a>                                </span><span class="kw">let </span>bytes_addr = bytes.as_ptr().addr();
+<a href=#1420 id=1420 data-nosnippet>1420</a>                                <span class="attr">#[allow(unstable_name_collisions)]
+<a href=#1421 id=1421 data-nosnippet>1421</a>                                </span><span class="kw">let </span>remaining_addr = remaining.as_inner().as_ptr().addr();
+<a href=#1422 id=1422 data-nosnippet>1422</a>                                <span class="kw">match </span>cast_type {
+<a href=#1423 id=1423 data-nosnippet>1423</a>                                    CastType::Prefix =&gt; {
+<a href=#1424 id=1424 data-nosnippet>1424</a>                                        <span class="macro">assert_eq!</span>(remaining_addr, bytes_addr + len)
+<a href=#1425 id=1425 data-nosnippet>1425</a>                                    }
+<a href=#1426 id=1426 data-nosnippet>1426</a>                                    CastType::Suffix =&gt; <span class="macro">assert_eq!</span>(remaining_addr, bytes_addr),
+<a href=#1427 id=1427 data-nosnippet>1427</a>                                }
+<a href=#1428 id=1428 data-nosnippet>1428</a>
+<a href=#1429 id=1429 data-nosnippet>1429</a>                                <span class="kw">if let </span><span class="prelude-val">Some</span>(want) = meta {
+<a href=#1430 id=1430 data-nosnippet>1430</a>                                    <span class="kw">let </span>got =
+<a href=#1431 id=1431 data-nosnippet>1431</a>                                        KnownLayout::pointer_to_metadata(slf.as_inner().as_ptr());
+<a href=#1432 id=1432 data-nosnippet>1432</a>                                    <span class="macro">assert_eq!</span>(got, want);
+<a href=#1433 id=1433 data-nosnippet>1433</a>                                }
+<a href=#1434 id=1434 data-nosnippet>1434</a>                            }
+<a href=#1435 id=1435 data-nosnippet>1435</a>                        }
+<a href=#1436 id=1436 data-nosnippet>1436</a>
+<a href=#1437 id=1437 data-nosnippet>1437</a>                        <span class="kw">if let </span><span class="prelude-val">Ok</span>(slf) = Ptr::from_ref(bytes)
+<a href=#1438 id=1438 data-nosnippet>1438</a>                            .try_cast_into_no_leftover::&lt;T, BecauseImmutable&gt;(meta)
+<a href=#1439 id=1439 data-nosnippet>1439</a>                        {
+<a href=#1440 id=1440 data-nosnippet>1440</a>                            <span class="comment">// SAFETY: All bytes in `bytes` have been
+<a href=#1441 id=1441 data-nosnippet>1441</a>                            // initialized.
+<a href=#1442 id=1442 data-nosnippet>1442</a>                            </span><span class="kw">let </span>len = <span class="kw">unsafe </span>{ validate_and_get_len(slf) };
+<a href=#1443 id=1443 data-nosnippet>1443</a>                            <span class="macro">assert_eq!</span>(len, bytes.len());
+<a href=#1444 id=1444 data-nosnippet>1444</a>
+<a href=#1445 id=1445 data-nosnippet>1445</a>                            <span class="kw">if let </span><span class="prelude-val">Some</span>(want) = meta {
+<a href=#1446 id=1446 data-nosnippet>1446</a>                                <span class="kw">let </span>got = KnownLayout::pointer_to_metadata(slf.as_inner().as_ptr());
+<a href=#1447 id=1447 data-nosnippet>1447</a>                                <span class="macro">assert_eq!</span>(got, want);
+<a href=#1448 id=1448 data-nosnippet>1448</a>                            }
+<a href=#1449 id=1449 data-nosnippet>1449</a>                        }
+<a href=#1450 id=1450 data-nosnippet>1450</a>                    }
+<a href=#1451 id=1451 data-nosnippet>1451</a>                }
+<a href=#1452 id=1452 data-nosnippet>1452</a>            }
 <a href=#1453 id=1453 data-nosnippet>1453</a>        }
 <a href=#1454 id=1454 data-nosnippet>1454</a>
-<a href=#1455 id=1455 data-nosnippet>1455</a>        <span class="comment">// Each test case becomes its own `#[test]` function. We do this because
-<a href=#1456 id=1456 data-nosnippet>1456</a>        // this test in particular takes far, far longer to execute under Miri
-<a href=#1457 id=1457 data-nosnippet>1457</a>        // than all of our other tests combined. Previously, we had these
-<a href=#1458 id=1458 data-nosnippet>1458</a>        // execute sequentially in a single test function. We run Miri tests in
-<a href=#1459 id=1459 data-nosnippet>1459</a>        // parallel in CI, but this test being sequential meant that most of
-<a href=#1460 id=1460 data-nosnippet>1460</a>        // that parallelism was wasted, as all other tests would finish in a
-<a href=#1461 id=1461 data-nosnippet>1461</a>        // fraction of the total execution time, leaving this test to execute on
-<a href=#1462 id=1462 data-nosnippet>1462</a>        // a single thread for the remainder of the test. By putting each test
-<a href=#1463 id=1463 data-nosnippet>1463</a>        // case in its own function, we permit better use of available
-<a href=#1464 id=1464 data-nosnippet>1464</a>        // parallelism.
-<a href=#1465 id=1465 data-nosnippet>1465</a>        </span><span class="macro">macro_rules!</span> test {
-<a href=#1466 id=1466 data-nosnippet>1466</a>            (<span class="macro-nonterminal">$test_name</span>:ident: <span class="macro-nonterminal">$ty</span>:ty) =&gt; {
-<a href=#1467 id=1467 data-nosnippet>1467</a>                <span class="attr">#[test]
-<a href=#1468 id=1468 data-nosnippet>1468</a>                #[allow(non_snake_case)]
-<a href=#1469 id=1469 data-nosnippet>1469</a>                </span><span class="kw">fn </span><span class="macro-nonterminal">$test_name</span>() {
-<a href=#1470 id=1470 data-nosnippet>1470</a>                    <span class="kw">const </span>S: usize = core::mem::size_of::&lt;<span class="macro-nonterminal">$ty</span>&gt;();
-<a href=#1471 id=1471 data-nosnippet>1471</a>                    <span class="kw">const </span>N: usize = <span class="kw">if </span>S == <span class="number">0 </span>{ <span class="number">4 </span>} <span class="kw">else </span>{ S * <span class="number">4 </span>};
-<a href=#1472 id=1472 data-nosnippet>1472</a>                    test::&lt;<span class="macro-nonterminal">$ty</span>, <span class="kw">_</span>, N&gt;([<span class="prelude-val">None</span>]);
-<a href=#1473 id=1473 data-nosnippet>1473</a>
-<a href=#1474 id=1474 data-nosnippet>1474</a>                    <span class="comment">// If `$ty` is a ZST, then we can't pass `None` as the
-<a href=#1475 id=1475 data-nosnippet>1475</a>                    // pointer metadata, or else computing the correct trailing
-<a href=#1476 id=1476 data-nosnippet>1476</a>                    // slice length will panic.
-<a href=#1477 id=1477 data-nosnippet>1477</a>                    </span><span class="kw">if </span>S == <span class="number">0 </span>{
-<a href=#1478 id=1478 data-nosnippet>1478</a>                        test::&lt;[<span class="macro-nonterminal">$ty</span>], <span class="kw">_</span>, N&gt;([<span class="prelude-val">Some</span>(<span class="number">0</span>), <span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="prelude-val">Some</span>(<span class="number">2</span>), <span class="prelude-val">Some</span>(<span class="number">3</span>)]);
-<a href=#1479 id=1479 data-nosnippet>1479</a>                        test::&lt;SliceDst&lt;<span class="macro-nonterminal">$ty</span>&gt;, <span class="kw">_</span>, N&gt;([<span class="prelude-val">Some</span>(<span class="number">0</span>), <span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="prelude-val">Some</span>(<span class="number">2</span>), <span class="prelude-val">Some</span>(<span class="number">3</span>)]);
-<a href=#1480 id=1480 data-nosnippet>1480</a>                    } <span class="kw">else </span>{
-<a href=#1481 id=1481 data-nosnippet>1481</a>                        test::&lt;[<span class="macro-nonterminal">$ty</span>], <span class="kw">_</span>, N&gt;([<span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="number">0</span>), <span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="prelude-val">Some</span>(<span class="number">2</span>), <span class="prelude-val">Some</span>(<span class="number">3</span>)]);
-<a href=#1482 id=1482 data-nosnippet>1482</a>                        test::&lt;SliceDst&lt;<span class="macro-nonterminal">$ty</span>&gt;, <span class="kw">_</span>, N&gt;([<span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="number">0</span>), <span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="prelude-val">Some</span>(<span class="number">2</span>), <span class="prelude-val">Some</span>(<span class="number">3</span>)]);
-<a href=#1483 id=1483 data-nosnippet>1483</a>                    }
-<a href=#1484 id=1484 data-nosnippet>1484</a>                }
-<a href=#1485 id=1485 data-nosnippet>1485</a>            };
-<a href=#1486 id=1486 data-nosnippet>1486</a>            (<span class="macro-nonterminal">$ty</span>:ident) =&gt; {
-<a href=#1487 id=1487 data-nosnippet>1487</a>                <span class="macro">test!</span>(<span class="macro-nonterminal">$ty</span>: <span class="macro-nonterminal">$ty</span>);
-<a href=#1488 id=1488 data-nosnippet>1488</a>            };
-<a href=#1489 id=1489 data-nosnippet>1489</a>            ($(<span class="macro-nonterminal">$ty</span>:ident),<span class="kw-2">*</span>) =&gt; { $(<span class="macro">test!</span>(<span class="macro-nonterminal">$ty</span>);)* }
-<a href=#1490 id=1490 data-nosnippet>1490</a>        }
-<a href=#1491 id=1491 data-nosnippet>1491</a>
-<a href=#1492 id=1492 data-nosnippet>1492</a>        <span class="macro">test!</span>(empty_tuple: ());
-<a href=#1493 id=1493 data-nosnippet>1493</a>        <span class="macro">test!</span>(u8, u16, u32, u64, usize, AU64);
-<a href=#1494 id=1494 data-nosnippet>1494</a>        <span class="macro">test!</span>(i8, i16, i32, i64, isize);
-<a href=#1495 id=1495 data-nosnippet>1495</a>        <span class="macro">test!</span>(f32, f64);
-<a href=#1496 id=1496 data-nosnippet>1496</a>    }
-<a href=#1497 id=1497 data-nosnippet>1497</a>
-<a href=#1498 id=1498 data-nosnippet>1498</a>    <span class="attr">#[test]
-<a href=#1499 id=1499 data-nosnippet>1499</a>    </span><span class="kw">fn </span>test_try_cast_into_explicit_count() {
-<a href=#1500 id=1500 data-nosnippet>1500</a>        <span class="macro">macro_rules!</span> test {
-<a href=#1501 id=1501 data-nosnippet>1501</a>            (<span class="macro-nonterminal">$ty</span>:ty, <span class="macro-nonterminal">$bytes</span>:expr, <span class="macro-nonterminal">$elems</span>:expr, <span class="macro-nonterminal">$expect</span>:expr) =&gt; {{
-<a href=#1502 id=1502 data-nosnippet>1502</a>                <span class="kw">let </span>bytes = [<span class="number">0u8</span>; <span class="macro-nonterminal">$bytes</span>];
-<a href=#1503 id=1503 data-nosnippet>1503</a>                <span class="kw">let </span>ptr = Ptr::from_ref(<span class="kw-2">&amp;</span>bytes[..]);
-<a href=#1504 id=1504 data-nosnippet>1504</a>                <span class="kw">let </span>res =
-<a href=#1505 id=1505 data-nosnippet>1505</a>                    ptr.try_cast_into::&lt;<span class="macro-nonterminal">$ty</span>, BecauseImmutable&gt;(CastType::Prefix, <span class="prelude-val">Some</span>(<span class="macro-nonterminal">$elems</span>));
-<a href=#1506 id=1506 data-nosnippet>1506</a>                <span class="kw">if let </span><span class="prelude-val">Some</span>(expect) = <span class="macro-nonterminal">$expect </span>{
-<a href=#1507 id=1507 data-nosnippet>1507</a>                    <span class="kw">let </span>(ptr, <span class="kw">_</span>) = res.unwrap();
-<a href=#1508 id=1508 data-nosnippet>1508</a>                    <span class="macro">assert_eq!</span>(KnownLayout::pointer_to_metadata(ptr.as_inner().as_ptr()), expect);
-<a href=#1509 id=1509 data-nosnippet>1509</a>                } <span class="kw">else </span>{
-<a href=#1510 id=1510 data-nosnippet>1510</a>                    <span class="kw">let _ </span>= res.unwrap_err();
-<a href=#1511 id=1511 data-nosnippet>1511</a>                }
-<a href=#1512 id=1512 data-nosnippet>1512</a>            }};
-<a href=#1513 id=1513 data-nosnippet>1513</a>        }
-<a href=#1514 id=1514 data-nosnippet>1514</a>
-<a href=#1515 id=1515 data-nosnippet>1515</a>        <span class="attr">#[derive(KnownLayout, Immutable)]
-<a href=#1516 id=1516 data-nosnippet>1516</a>        #[repr(C)]
-<a href=#1517 id=1517 data-nosnippet>1517</a>        </span><span class="kw">struct </span>ZstDst {
-<a href=#1518 id=1518 data-nosnippet>1518</a>            u: [u8; <span class="number">8</span>],
-<a href=#1519 id=1519 data-nosnippet>1519</a>            slc: [()],
+<a href=#1455 id=1455 data-nosnippet>1455</a>        <span class="attr">#[derive(FromBytes, KnownLayout, Immutable)]
+<a href=#1456 id=1456 data-nosnippet>1456</a>        #[repr(C)]
+<a href=#1457 id=1457 data-nosnippet>1457</a>        </span><span class="kw">struct </span>SliceDst&lt;T&gt; {
+<a href=#1458 id=1458 data-nosnippet>1458</a>            a: u8,
+<a href=#1459 id=1459 data-nosnippet>1459</a>            trailing: [T],
+<a href=#1460 id=1460 data-nosnippet>1460</a>        }
+<a href=#1461 id=1461 data-nosnippet>1461</a>
+<a href=#1462 id=1462 data-nosnippet>1462</a>        <span class="comment">// Each test case becomes its own `#[test]` function. We do this because
+<a href=#1463 id=1463 data-nosnippet>1463</a>        // this test in particular takes far, far longer to execute under Miri
+<a href=#1464 id=1464 data-nosnippet>1464</a>        // than all of our other tests combined. Previously, we had these
+<a href=#1465 id=1465 data-nosnippet>1465</a>        // execute sequentially in a single test function. We run Miri tests in
+<a href=#1466 id=1466 data-nosnippet>1466</a>        // parallel in CI, but this test being sequential meant that most of
+<a href=#1467 id=1467 data-nosnippet>1467</a>        // that parallelism was wasted, as all other tests would finish in a
+<a href=#1468 id=1468 data-nosnippet>1468</a>        // fraction of the total execution time, leaving this test to execute on
+<a href=#1469 id=1469 data-nosnippet>1469</a>        // a single thread for the remainder of the test. By putting each test
+<a href=#1470 id=1470 data-nosnippet>1470</a>        // case in its own function, we permit better use of available
+<a href=#1471 id=1471 data-nosnippet>1471</a>        // parallelism.
+<a href=#1472 id=1472 data-nosnippet>1472</a>        </span><span class="macro">macro_rules!</span> test {
+<a href=#1473 id=1473 data-nosnippet>1473</a>            (<span class="macro-nonterminal">$test_name</span>:ident: <span class="macro-nonterminal">$ty</span>:ty) =&gt; {
+<a href=#1474 id=1474 data-nosnippet>1474</a>                <span class="attr">#[test]
+<a href=#1475 id=1475 data-nosnippet>1475</a>                #[allow(non_snake_case)]
+<a href=#1476 id=1476 data-nosnippet>1476</a>                </span><span class="kw">fn </span><span class="macro-nonterminal">$test_name</span>() {
+<a href=#1477 id=1477 data-nosnippet>1477</a>                    <span class="kw">const </span>S: usize = core::mem::size_of::&lt;<span class="macro-nonterminal">$ty</span>&gt;();
+<a href=#1478 id=1478 data-nosnippet>1478</a>                    <span class="kw">const </span>N: usize = <span class="kw">if </span>S == <span class="number">0 </span>{ <span class="number">4 </span>} <span class="kw">else </span>{ S * <span class="number">4 </span>};
+<a href=#1479 id=1479 data-nosnippet>1479</a>                    test::&lt;<span class="macro-nonterminal">$ty</span>, <span class="kw">_</span>, N&gt;([<span class="prelude-val">None</span>]);
+<a href=#1480 id=1480 data-nosnippet>1480</a>
+<a href=#1481 id=1481 data-nosnippet>1481</a>                    <span class="comment">// If `$ty` is a ZST, then we can't pass `None` as the
+<a href=#1482 id=1482 data-nosnippet>1482</a>                    // pointer metadata, or else computing the correct trailing
+<a href=#1483 id=1483 data-nosnippet>1483</a>                    // slice length will panic.
+<a href=#1484 id=1484 data-nosnippet>1484</a>                    </span><span class="kw">if </span>S == <span class="number">0 </span>{
+<a href=#1485 id=1485 data-nosnippet>1485</a>                        test::&lt;[<span class="macro-nonterminal">$ty</span>], <span class="kw">_</span>, N&gt;([<span class="prelude-val">Some</span>(<span class="number">0</span>), <span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="prelude-val">Some</span>(<span class="number">2</span>), <span class="prelude-val">Some</span>(<span class="number">3</span>)]);
+<a href=#1486 id=1486 data-nosnippet>1486</a>                        test::&lt;SliceDst&lt;<span class="macro-nonterminal">$ty</span>&gt;, <span class="kw">_</span>, N&gt;([<span class="prelude-val">Some</span>(<span class="number">0</span>), <span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="prelude-val">Some</span>(<span class="number">2</span>), <span class="prelude-val">Some</span>(<span class="number">3</span>)]);
+<a href=#1487 id=1487 data-nosnippet>1487</a>                    } <span class="kw">else </span>{
+<a href=#1488 id=1488 data-nosnippet>1488</a>                        test::&lt;[<span class="macro-nonterminal">$ty</span>], <span class="kw">_</span>, N&gt;([<span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="number">0</span>), <span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="prelude-val">Some</span>(<span class="number">2</span>), <span class="prelude-val">Some</span>(<span class="number">3</span>)]);
+<a href=#1489 id=1489 data-nosnippet>1489</a>                        test::&lt;SliceDst&lt;<span class="macro-nonterminal">$ty</span>&gt;, <span class="kw">_</span>, N&gt;([<span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="number">0</span>), <span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="prelude-val">Some</span>(<span class="number">2</span>), <span class="prelude-val">Some</span>(<span class="number">3</span>)]);
+<a href=#1490 id=1490 data-nosnippet>1490</a>                    }
+<a href=#1491 id=1491 data-nosnippet>1491</a>                }
+<a href=#1492 id=1492 data-nosnippet>1492</a>            };
+<a href=#1493 id=1493 data-nosnippet>1493</a>            (<span class="macro-nonterminal">$ty</span>:ident) =&gt; {
+<a href=#1494 id=1494 data-nosnippet>1494</a>                <span class="macro">test!</span>(<span class="macro-nonterminal">$ty</span>: <span class="macro-nonterminal">$ty</span>);
+<a href=#1495 id=1495 data-nosnippet>1495</a>            };
+<a href=#1496 id=1496 data-nosnippet>1496</a>            ($(<span class="macro-nonterminal">$ty</span>:ident),<span class="kw-2">*</span>) =&gt; { $(<span class="macro">test!</span>(<span class="macro-nonterminal">$ty</span>);)* }
+<a href=#1497 id=1497 data-nosnippet>1497</a>        }
+<a href=#1498 id=1498 data-nosnippet>1498</a>
+<a href=#1499 id=1499 data-nosnippet>1499</a>        <span class="macro">test!</span>(empty_tuple: ());
+<a href=#1500 id=1500 data-nosnippet>1500</a>        <span class="macro">test!</span>(u8, u16, u32, u64, usize, AU64);
+<a href=#1501 id=1501 data-nosnippet>1501</a>        <span class="macro">test!</span>(i8, i16, i32, i64, isize);
+<a href=#1502 id=1502 data-nosnippet>1502</a>        <span class="macro">test!</span>(f32, f64);
+<a href=#1503 id=1503 data-nosnippet>1503</a>    }
+<a href=#1504 id=1504 data-nosnippet>1504</a>
+<a href=#1505 id=1505 data-nosnippet>1505</a>    <span class="attr">#[test]
+<a href=#1506 id=1506 data-nosnippet>1506</a>    </span><span class="kw">fn </span>test_try_cast_into_explicit_count() {
+<a href=#1507 id=1507 data-nosnippet>1507</a>        <span class="macro">macro_rules!</span> test {
+<a href=#1508 id=1508 data-nosnippet>1508</a>            (<span class="macro-nonterminal">$ty</span>:ty, <span class="macro-nonterminal">$bytes</span>:expr, <span class="macro-nonterminal">$elems</span>:expr, <span class="macro-nonterminal">$expect</span>:expr) =&gt; {{
+<a href=#1509 id=1509 data-nosnippet>1509</a>                <span class="kw">let </span>bytes = [<span class="number">0u8</span>; <span class="macro-nonterminal">$bytes</span>];
+<a href=#1510 id=1510 data-nosnippet>1510</a>                <span class="kw">let </span>ptr = Ptr::from_ref(<span class="kw-2">&amp;</span>bytes[..]);
+<a href=#1511 id=1511 data-nosnippet>1511</a>                <span class="kw">let </span>res =
+<a href=#1512 id=1512 data-nosnippet>1512</a>                    ptr.try_cast_into::&lt;<span class="macro-nonterminal">$ty</span>, BecauseImmutable&gt;(CastType::Prefix, <span class="prelude-val">Some</span>(<span class="macro-nonterminal">$elems</span>));
+<a href=#1513 id=1513 data-nosnippet>1513</a>                <span class="kw">if let </span><span class="prelude-val">Some</span>(expect) = <span class="macro-nonterminal">$expect </span>{
+<a href=#1514 id=1514 data-nosnippet>1514</a>                    <span class="kw">let </span>(ptr, <span class="kw">_</span>) = res.unwrap();
+<a href=#1515 id=1515 data-nosnippet>1515</a>                    <span class="macro">assert_eq!</span>(KnownLayout::pointer_to_metadata(ptr.as_inner().as_ptr()), expect);
+<a href=#1516 id=1516 data-nosnippet>1516</a>                } <span class="kw">else </span>{
+<a href=#1517 id=1517 data-nosnippet>1517</a>                    <span class="kw">let _ </span>= res.unwrap_err();
+<a href=#1518 id=1518 data-nosnippet>1518</a>                }
+<a href=#1519 id=1519 data-nosnippet>1519</a>            }};
 <a href=#1520 id=1520 data-nosnippet>1520</a>        }
 <a href=#1521 id=1521 data-nosnippet>1521</a>
-<a href=#1522 id=1522 data-nosnippet>1522</a>        <span class="macro">test!</span>(ZstDst, <span class="number">8</span>, <span class="number">0</span>, <span class="prelude-val">Some</span>(<span class="number">0</span>));
-<a href=#1523 id=1523 data-nosnippet>1523</a>        <span class="macro">test!</span>(ZstDst, <span class="number">7</span>, <span class="number">0</span>, <span class="prelude-val">None</span>);
-<a href=#1524 id=1524 data-nosnippet>1524</a>
-<a href=#1525 id=1525 data-nosnippet>1525</a>        <span class="macro">test!</span>(ZstDst, <span class="number">8</span>, usize::MAX, <span class="prelude-val">Some</span>(usize::MAX));
-<a href=#1526 id=1526 data-nosnippet>1526</a>        <span class="macro">test!</span>(ZstDst, <span class="number">7</span>, usize::MAX, <span class="prelude-val">None</span>);
-<a href=#1527 id=1527 data-nosnippet>1527</a>
-<a href=#1528 id=1528 data-nosnippet>1528</a>        <span class="attr">#[derive(KnownLayout, Immutable)]
-<a href=#1529 id=1529 data-nosnippet>1529</a>        #[repr(C)]
-<a href=#1530 id=1530 data-nosnippet>1530</a>        </span><span class="kw">struct </span>Dst {
-<a href=#1531 id=1531 data-nosnippet>1531</a>            u: [u8; <span class="number">8</span>],
-<a href=#1532 id=1532 data-nosnippet>1532</a>            slc: [u8],
-<a href=#1533 id=1533 data-nosnippet>1533</a>        }
+<a href=#1522 id=1522 data-nosnippet>1522</a>        <span class="attr">#[derive(KnownLayout, Immutable)]
+<a href=#1523 id=1523 data-nosnippet>1523</a>        #[repr(C)]
+<a href=#1524 id=1524 data-nosnippet>1524</a>        </span><span class="kw">struct </span>ZstDst {
+<a href=#1525 id=1525 data-nosnippet>1525</a>            u: [u8; <span class="number">8</span>],
+<a href=#1526 id=1526 data-nosnippet>1526</a>            slc: [()],
+<a href=#1527 id=1527 data-nosnippet>1527</a>        }
+<a href=#1528 id=1528 data-nosnippet>1528</a>
+<a href=#1529 id=1529 data-nosnippet>1529</a>        <span class="macro">test!</span>(ZstDst, <span class="number">8</span>, <span class="number">0</span>, <span class="prelude-val">Some</span>(<span class="number">0</span>));
+<a href=#1530 id=1530 data-nosnippet>1530</a>        <span class="macro">test!</span>(ZstDst, <span class="number">7</span>, <span class="number">0</span>, <span class="prelude-val">None</span>);
+<a href=#1531 id=1531 data-nosnippet>1531</a>
+<a href=#1532 id=1532 data-nosnippet>1532</a>        <span class="macro">test!</span>(ZstDst, <span class="number">8</span>, usize::MAX, <span class="prelude-val">Some</span>(usize::MAX));
+<a href=#1533 id=1533 data-nosnippet>1533</a>        <span class="macro">test!</span>(ZstDst, <span class="number">7</span>, usize::MAX, <span class="prelude-val">None</span>);
 <a href=#1534 id=1534 data-nosnippet>1534</a>
-<a href=#1535 id=1535 data-nosnippet>1535</a>        <span class="macro">test!</span>(Dst, <span class="number">8</span>, <span class="number">0</span>, <span class="prelude-val">Some</span>(<span class="number">0</span>));
-<a href=#1536 id=1536 data-nosnippet>1536</a>        <span class="macro">test!</span>(Dst, <span class="number">7</span>, <span class="number">0</span>, <span class="prelude-val">None</span>);
-<a href=#1537 id=1537 data-nosnippet>1537</a>
-<a href=#1538 id=1538 data-nosnippet>1538</a>        <span class="macro">test!</span>(Dst, <span class="number">9</span>, <span class="number">1</span>, <span class="prelude-val">Some</span>(<span class="number">1</span>));
-<a href=#1539 id=1539 data-nosnippet>1539</a>        <span class="macro">test!</span>(Dst, <span class="number">8</span>, <span class="number">1</span>, <span class="prelude-val">None</span>);
-<a href=#1540 id=1540 data-nosnippet>1540</a>
-<a href=#1541 id=1541 data-nosnippet>1541</a>        <span class="comment">// If we didn't properly check for overflow, this would cause the
-<a href=#1542 id=1542 data-nosnippet>1542</a>        // metadata to overflow to 0, and thus the cast would spuriously
-<a href=#1543 id=1543 data-nosnippet>1543</a>        // succeed.
-<a href=#1544 id=1544 data-nosnippet>1544</a>        </span><span class="macro">test!</span>(Dst, <span class="number">8</span>, usize::MAX - <span class="number">8 </span>+ <span class="number">1</span>, <span class="prelude-val">None</span>);
-<a href=#1545 id=1545 data-nosnippet>1545</a>    }
-<a href=#1546 id=1546 data-nosnippet>1546</a>
-<a href=#1547 id=1547 data-nosnippet>1547</a>    <span class="attr">#[test]
-<a href=#1548 id=1548 data-nosnippet>1548</a>    </span><span class="kw">fn </span>test_try_cast_into_no_leftover_restores_original_slice() {
-<a href=#1549 id=1549 data-nosnippet>1549</a>        <span class="kw">let </span>bytes = [<span class="number">0u8</span>; <span class="number">4</span>];
-<a href=#1550 id=1550 data-nosnippet>1550</a>        <span class="kw">let </span>ptr = Ptr::from_ref(<span class="kw-2">&amp;</span>bytes[..]);
-<a href=#1551 id=1551 data-nosnippet>1551</a>        <span class="kw">let </span>res = ptr.try_cast_into_no_leftover::&lt;[u8; <span class="number">2</span>], BecauseImmutable&gt;(<span class="prelude-val">None</span>);
-<a href=#1552 id=1552 data-nosnippet>1552</a>        <span class="kw">match </span>res {
-<a href=#1553 id=1553 data-nosnippet>1553</a>            <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="macro">panic!</span>(<span class="string">"should have failed due to leftover bytes"</span>),
-<a href=#1554 id=1554 data-nosnippet>1554</a>            <span class="prelude-val">Err</span>(CastError::Size(e)) =&gt; {
-<a href=#1555 id=1555 data-nosnippet>1555</a>                <span class="macro">assert_eq!</span>(e.into_src().len(), <span class="number">4</span>, <span class="string">"Should return original slice length"</span>);
-<a href=#1556 id=1556 data-nosnippet>1556</a>            }
-<a href=#1557 id=1557 data-nosnippet>1557</a>            <span class="prelude-val">Err</span>(e) =&gt; <span class="macro">panic!</span>(<span class="string">"wrong error type: {:?}"</span>, e),
-<a href=#1558 id=1558 data-nosnippet>1558</a>        }
-<a href=#1559 id=1559 data-nosnippet>1559</a>    }
-<a href=#1560 id=1560 data-nosnippet>1560</a>}
+<a href=#1535 id=1535 data-nosnippet>1535</a>        <span class="attr">#[derive(KnownLayout, Immutable)]
+<a href=#1536 id=1536 data-nosnippet>1536</a>        #[repr(C)]
+<a href=#1537 id=1537 data-nosnippet>1537</a>        </span><span class="kw">struct </span>Dst {
+<a href=#1538 id=1538 data-nosnippet>1538</a>            u: [u8; <span class="number">8</span>],
+<a href=#1539 id=1539 data-nosnippet>1539</a>            slc: [u8],
+<a href=#1540 id=1540 data-nosnippet>1540</a>        }
+<a href=#1541 id=1541 data-nosnippet>1541</a>
+<a href=#1542 id=1542 data-nosnippet>1542</a>        <span class="macro">test!</span>(Dst, <span class="number">8</span>, <span class="number">0</span>, <span class="prelude-val">Some</span>(<span class="number">0</span>));
+<a href=#1543 id=1543 data-nosnippet>1543</a>        <span class="macro">test!</span>(Dst, <span class="number">7</span>, <span class="number">0</span>, <span class="prelude-val">None</span>);
+<a href=#1544 id=1544 data-nosnippet>1544</a>
+<a href=#1545 id=1545 data-nosnippet>1545</a>        <span class="macro">test!</span>(Dst, <span class="number">9</span>, <span class="number">1</span>, <span class="prelude-val">Some</span>(<span class="number">1</span>));
+<a href=#1546 id=1546 data-nosnippet>1546</a>        <span class="macro">test!</span>(Dst, <span class="number">8</span>, <span class="number">1</span>, <span class="prelude-val">None</span>);
+<a href=#1547 id=1547 data-nosnippet>1547</a>
+<a href=#1548 id=1548 data-nosnippet>1548</a>        <span class="comment">// If we didn't properly check for overflow, this would cause the
+<a href=#1549 id=1549 data-nosnippet>1549</a>        // metadata to overflow to 0, and thus the cast would spuriously
+<a href=#1550 id=1550 data-nosnippet>1550</a>        // succeed.
+<a href=#1551 id=1551 data-nosnippet>1551</a>        </span><span class="macro">test!</span>(Dst, <span class="number">8</span>, usize::MAX - <span class="number">8 </span>+ <span class="number">1</span>, <span class="prelude-val">None</span>);
+<a href=#1552 id=1552 data-nosnippet>1552</a>    }
+<a href=#1553 id=1553 data-nosnippet>1553</a>
+<a href=#1554 id=1554 data-nosnippet>1554</a>    <span class="attr">#[test]
+<a href=#1555 id=1555 data-nosnippet>1555</a>    </span><span class="kw">fn </span>test_try_cast_into_no_leftover_restores_original_slice() {
+<a href=#1556 id=1556 data-nosnippet>1556</a>        <span class="kw">let </span>bytes = [<span class="number">0u8</span>; <span class="number">4</span>];
+<a href=#1557 id=1557 data-nosnippet>1557</a>        <span class="kw">let </span>ptr = Ptr::from_ref(<span class="kw-2">&amp;</span>bytes[..]);
+<a href=#1558 id=1558 data-nosnippet>1558</a>        <span class="kw">let </span>res = ptr.try_cast_into_no_leftover::&lt;[u8; <span class="number">2</span>], BecauseImmutable&gt;(<span class="prelude-val">None</span>);
+<a href=#1559 id=1559 data-nosnippet>1559</a>        <span class="kw">match </span>res {
+<a href=#1560 id=1560 data-nosnippet>1560</a>            <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="macro">panic!</span>(<span class="string">"should have failed due to leftover bytes"</span>),
+<a href=#1561 id=1561 data-nosnippet>1561</a>            <span class="prelude-val">Err</span>(CastError::Size(e)) =&gt; {
+<a href=#1562 id=1562 data-nosnippet>1562</a>                <span class="macro">assert_eq!</span>(e.into_src().len(), <span class="number">4</span>, <span class="string">"Should return original slice length"</span>);
+<a href=#1563 id=1563 data-nosnippet>1563</a>            }
+<a href=#1564 id=1564 data-nosnippet>1564</a>            <span class="prelude-val">Err</span>(e) =&gt; <span class="macro">panic!</span>(<span class="string">"wrong error type: {:?}"</span>, e),
+<a href=#1565 id=1565 data-nosnippet>1565</a>        }
+<a href=#1566 id=1566 data-nosnippet>1566</a>    }
+<a href=#1567 id=1567 data-nosnippet>1567</a>
+<a href=#1568 id=1568 data-nosnippet>1568</a>    <span class="attr">#[test]
+<a href=#1569 id=1569 data-nosnippet>1569</a>    </span><span class="kw">fn </span>test_iter_exclusive_yields_disjoint_ptrs() {
+<a href=#1570 id=1570 data-nosnippet>1570</a>        <span class="kw">let </span><span class="kw-2">mut </span>arr = [<span class="number">0u8</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>];
+<a href=#1571 id=1571 data-nosnippet>1571</a>
+<a href=#1572 id=1572 data-nosnippet>1572</a>        {
+<a href=#1573 id=1573 data-nosnippet>1573</a>            <span class="kw">let </span><span class="kw-2">mut </span>iter = Ptr::from_mut(<span class="kw-2">&amp;mut </span>arr[..]).iter();
+<a href=#1574 id=1574 data-nosnippet>1574</a>            <span class="kw">let </span>first = iter.next().unwrap().as_mut();
+<a href=#1575 id=1575 data-nosnippet>1575</a>            <span class="kw">let </span>second = iter.next().unwrap().as_mut();
+<a href=#1576 id=1576 data-nosnippet>1576</a>
+<a href=#1577 id=1577 data-nosnippet>1577</a>            <span class="kw-2">*</span>first = <span class="number">10</span>;
+<a href=#1578 id=1578 data-nosnippet>1578</a>            <span class="kw-2">*</span>second = <span class="number">20</span>;
+<a href=#1579 id=1579 data-nosnippet>1579</a>            <span class="kw-2">*</span>first = <span class="number">30</span>;
+<a href=#1580 id=1580 data-nosnippet>1580</a>        }
+<a href=#1581 id=1581 data-nosnippet>1581</a>
+<a href=#1582 id=1582 data-nosnippet>1582</a>        <span class="macro">assert_eq!</span>(arr, [<span class="number">30</span>, <span class="number">20</span>, <span class="number">2</span>, <span class="number">3</span>]);
+<a href=#1583 id=1583 data-nosnippet>1583</a>    }
+<a href=#1584 id=1584 data-nosnippet>1584</a>}
 </code></pre></div></section></main></body></html>
