@@ -53,7 +53,7 @@ impl<S: Store> ClientFilestore<S> {
     /// Client files are store below `/<client_id>/dat/`.
     pub fn actual_path(&self, client_path: &Path) -> Result<PathBuf> {
         // Clients must not escape their namespace
-        if client_path.as_ref().contains("..") {
+        if client_path.as_str().contains("..") || client_path.as_str().starts_with("/") {
             return Err(Error::InvalidPath);
         }
 
@@ -512,5 +512,35 @@ impl<S: Store> Filestore for ClientFilestore<S> {
         let path = recursively_locate(fs, &dir, filename).map(|path| self.client_path(&path));
 
         Ok(path)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn actual_path_root() {
+        let client_path = path!("/testclient");
+        struct DummyStore;
+        impl Store for DummyStore {
+            fn ifs(&self) -> &dyn DynFilesystem {
+                panic!()
+            }
+            fn efs(&self) -> &dyn DynFilesystem {
+                panic!()
+            }
+            fn vfs(&self) -> &dyn DynFilesystem {
+                panic!()
+            }
+        }
+
+        let filestore = ClientFilestore {
+            base: PathBuf::from_path(client_path),
+            store: DummyStore,
+        };
+
+        assert!(filestore.actual_path(path!("/")).is_err());
+        assert!(filestore.actual_path(path!("/test")).is_err());
     }
 }

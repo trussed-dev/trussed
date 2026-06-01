@@ -82,6 +82,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed missing path validation in `Filestore` that allowed clients to escape
   their namespace ([#65]).
 - wrap_key: Don't replace associated data with an empty array
+- Fixed `ClientFilestore` to reject paths starting with `/`
 
 ### Removed
 

@@ -55,6 +55,17 @@ fn escape_namespace_root() {
     })
 }
 
+#[test]
+fn escape_namespace_root_only() {
+    client::get(|client| {
+        let key = syscall!(client.generate_key(Mechanism::P256, StorageAttributes::new())).key;
+        let mut path = PathBuf::from(path!("/"));
+        path.push(path!("sec"));
+        path.push(&key.legacy_hex_path());
+        assert!(try_syscall!(client.read_file(Location::Volatile, path)).is_err());
+    })
+}
+
 fn iterating(location: Location) {
     client::get(|client| {
         syscall!(client.write_file(
