@@ -10,6 +10,7 @@ use std::{
     iter,
     sync::mpsc::{self, Receiver, Sender, TryRecvError},
     thread,
+    time::Duration,
 };
 
 use rand_chacha::ChaCha8Rng;
@@ -119,6 +120,7 @@ impl<'a, I: 'static, C> Runner<'a, I, C> {
                     if self.syscall_rx.try_recv().is_ok() {
                         service.process(&mut eps);
                     }
+                    thread::sleep(Duration::from_millis(1));
                 }
             });
             let result = f();
