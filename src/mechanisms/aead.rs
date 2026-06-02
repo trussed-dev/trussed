@@ -24,6 +24,7 @@ impl<
     const KEY_LEN: usize = T::KeySize::USIZE;
     const NONCE_LEN: usize = T::NonceSize::USIZE;
     const TOTAL_LEN: usize = KeyNonceSize::USIZE;
+    const TAG_LEN: usize = T::TagSize::USIZE;
 
     const KIND: key::Kind = key::Kind::Symmetric(Self::KEY_LEN);
     const KIND_NONCE: key::Kind = key::Kind::Symmetric32Nonce(Self::NONCE_LEN);
@@ -76,7 +77,13 @@ impl<
         let mut aead = T::new(&GenericArray::clone_from_slice(symmetric_key));
 
         let mut plaintext = request.message.clone();
+        if request.nonce.len() != Self::NONCE_LEN {
+            return Err(Error::MechanismParamInvalid);
+        }
         let nonce = GenericArray::from_slice(&request.nonce);
+        if request.tag.len() != Self::TAG_LEN {
+            return Err(Error::MechanismParamInvalid);
+        }
         let tag = GenericArray::from_slice(&request.tag);
 
         let outcome =
