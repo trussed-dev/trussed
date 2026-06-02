@@ -40,3 +40,12 @@ fn test1() {
 fn test2() {
     run_test(2);
 }
+
+#[test]
+#[should_panic]
+fn test_panic() {
+    // panicking tests should return and not run forever
+    virt::with_client(virt::StoreConfig::ram(), "test", |_| {
+        panic!();
+    })
+}

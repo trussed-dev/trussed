@@ -8,7 +8,7 @@ mod ui;
 
 use std::{
     iter,
-    sync::mpsc::{self, Receiver, Sender},
+    sync::mpsc::{self, Receiver, Sender, TryRecvError},
     thread,
 };
 
@@ -110,12 +110,12 @@ impl<'a, I: 'static, C> Runner<'a, I, C> {
         I: Send + Sync,
         F: FnOnce() -> R,
     {
-        let (stop_tx, stop_rx) = mpsc::channel();
         let mut service = Service::with_dispatch(platform, dispatch);
         thread::scope(|s| {
+            let (stop_tx, stop_rx) = mpsc::channel();
             s.spawn(move || {
                 let mut eps = self.eps;
-                while stop_rx.try_recv().is_err() {
+                while stop_rx.try_recv() == Err(TryRecvError::Empty) {
                     if self.syscall_rx.try_recv().is_ok() {
                         service.process(&mut eps);
                     }
