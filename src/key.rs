@@ -76,6 +76,9 @@ pub enum Kind {
     BrainpoolP512R1,
     X255,
     Secp256k1,
+    /// 32-byte ML-DSA seed (FIPS 204 KeyGen_internal `xi`); the full
+    /// signing/verifying key pair is re-expanded on demand.
+    Mldsa44Seed,
 }
 
 bitflags::bitflags! {
@@ -222,6 +225,7 @@ impl Kind {
             Kind::BrainpoolP384R1 => 13,
             Kind::BrainpoolP512R1 => 14,
             Kind::Secp256k1 => 15,
+            Kind::Mldsa44Seed => 16,
         }
     }
 
@@ -242,6 +246,7 @@ impl Kind {
             13 => Kind::BrainpoolP384R1,
             14 => Kind::BrainpoolP512R1,
             15 => Kind::Secp256k1,
+            16 => Kind::Mldsa44Seed,
             _ => return Err(Error::InvalidSerializedKey),
         })
     }

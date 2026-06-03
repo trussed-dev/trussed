@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `types::Path` re-export of `littlefs2::path::Path`.
 - Reduced stack usage of `Service::process`.
 - Added the `Aes256Gcm` mechanism.
+- Added mldsa44 mechanism implementation.
 
 ### Changed
 
