@@ -1,5 +1,3 @@
-pub use generic_array::GenericArray;
-
 pub use littlefs2_core::{DirEntry, Metadata, Path, PathBuf, Result as LfsResult};
 
 use crate::store::filestore::{ReadDirFilesState, ReadDirState};
