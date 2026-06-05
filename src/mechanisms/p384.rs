@@ -14,7 +14,7 @@ use trussed_core::{
 };
 
 use super::{P384Prehashed, P384};
-use crate::{key, service::MechanismImpl, store::keystore::Keystore};
+use crate::{key, service::MechanismImpl, store::Keystore};
 
 const SCALAR_SIZE: usize = 48;
 

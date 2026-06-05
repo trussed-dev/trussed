@@ -15,10 +15,8 @@ use crate::mechanisms;
 use crate::pipe::ServiceEndpoint;
 use crate::platform::{Platform, UserInterface};
 use crate::store::{
-    certstore::{Certstore as _, ClientCertstore},
-    counterstore::{ClientCounterstore, Counterstore as _},
-    filestore::{ClientFilestore, Filestore},
-    keystore::{ClientKeystore, Keystore},
+    Certstore as _, ClientCertstore, ClientCounterstore, ClientFilestore, ClientKeystore,
+    Counterstore as _, Filestore, Keystore,
 };
 use crate::types::ui::{self, Status};
 use crate::types::{Context, CoreContext};

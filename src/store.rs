@@ -80,10 +80,15 @@ use trussed_core::{
 
 pub use littlefs2_core::{DynFile, DynFilesystem};
 
-pub mod certstore;
-pub mod counterstore;
-pub mod filestore;
-pub mod keystore;
+mod certstore;
+mod counterstore;
+mod filestore;
+mod keystore;
+
+pub use certstore::{Certstore, ClientCertstore};
+pub use counterstore::{ClientCounterstore, Counter, Counterstore};
+pub use filestore::{ClientFilestore, Filestore, ReadDirFilesState, ReadDirState};
+pub use keystore::{ClientKeystore, Keystore};
 
 // pub type FileContents = Bytes<MAX_FILE_SIZE>;
 

@@ -24,12 +24,13 @@ generate_macros!();
 
 pub use interchange::Interchange;
 
-pub mod backend;
-pub mod client;
-pub mod config;
-pub mod key;
+mod client;
 #[cfg(feature = "crypto-client")]
 mod mechanisms;
+
+pub mod backend;
+pub mod config;
+pub mod key;
 pub mod pipe;
 pub mod platform;
 #[cfg(feature = "serde-extensions")]

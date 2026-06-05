@@ -8,7 +8,7 @@ use trussed_core::{
 
 use crate::key;
 use crate::service::MechanismImpl;
-use crate::store::keystore::Keystore;
+use crate::store::Keystore;
 
 fn load_public_key(
     keystore: &mut impl Keystore,

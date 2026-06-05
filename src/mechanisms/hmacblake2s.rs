@@ -6,7 +6,7 @@ use trussed_core::{
 
 use crate::key;
 use crate::service::MechanismImpl;
-use crate::store::keystore::Keystore;
+use crate::store::Keystore;
 
 impl MechanismImpl for super::HmacBlake2s {
     #[inline(never)]

@@ -9,7 +9,7 @@ use trussed_core::{
     Error,
 };
 
-use crate::{key, store::keystore::Keystore};
+use crate::{key, store::Keystore};
 
 pub struct Aead<T, KeyNonceSize> {
     mechanism: Mechanism,

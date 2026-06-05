@@ -6,7 +6,7 @@ use trussed_core::{
 
 use crate::key;
 use crate::service::MechanismImpl;
-use crate::store::keystore::Keystore;
+use crate::store::Keystore;
 
 const AES256_KEY_SIZE: usize = 32;
 

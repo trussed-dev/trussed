@@ -32,8 +32,6 @@ impl<S: Store> ClientKeystore<S> {
     }
 }
 
-pub const SERIALIZATION_VERSION: u8 = 0;
-
 /// Trait intended for use by mechanism implementations.
 pub trait Keystore {
     // fn store(&self, key: Key, location: Location) -> Result<KeyId>;

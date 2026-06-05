@@ -5,7 +5,7 @@ use trussed_core::{
     Error,
 };
 
-use crate::{service::MechanismImpl, store::keystore::Keystore};
+use crate::{service::MechanismImpl, store::Keystore};
 
 type KeyNonceSize = U44;
 type Aead = super::aead::Aead<chacha20poly1305::ChaCha8Poly1305, KeyNonceSize>;

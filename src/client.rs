@@ -87,7 +87,7 @@ use crate::pipe::TrussedRequester;
 use crate::platform::Syscall;
 
 #[cfg(feature = "crypto-client")]
-pub mod mechanisms;
+mod mechanisms;
 
 /// All-in-one trait bounding on the sub-traits.
 #[cfg(feature = "all-clients")]

@@ -14,7 +14,9 @@ use trussed_core::{
 };
 
 use crate::{
-    key, mechanisms, service::MechanismImpl, store::certstore::Certstore, store::keystore::Keystore,
+    key, mechanisms,
+    service::MechanismImpl,
+    store::{Certstore, Keystore},
 };
 
 #[cfg(not(feature = "test-attestation-cert-ids"))]
