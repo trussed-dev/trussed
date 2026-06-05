@@ -115,7 +115,7 @@ impl MechanismImpl for super::P256 {
             KeySerialization::Cose => {
                 // TODO: this should all be done upstream
                 let cose_public_key: cosey::P256PublicKey =
-                    crate::cbor_deserialize(&request.serialized_key)
+                    cbor_smol::cbor_deserialize(&request.serialized_key)
                         .map_err(|_| Error::CborError)?;
                 let mut serialized_key = [0u8; 64];
                 if cose_public_key.x.len() != 32 || cose_public_key.y.len() != 32 {
@@ -132,7 +132,7 @@ impl MechanismImpl for super::P256 {
             KeySerialization::EcdhEsHkdf256 => {
                 // TODO: this should all be done upstream
                 let cose_public_key: cosey::EcdhEsHkdf256PublicKey =
-                    crate::cbor_deserialize(&request.serialized_key)
+                    cbor_smol::cbor_deserialize(&request.serialized_key)
                         .map_err(|_| Error::CborError)?;
                 let mut serialized_key = [0u8; 64];
                 if cose_public_key.x.len() != 32 || cose_public_key.y.len() != 32 {

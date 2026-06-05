@@ -48,9 +48,7 @@ pub use client::ClientImplementation;
 pub use platform::Platform;
 pub use service::Service;
 
-pub use cbor_smol::cbor_deserialize;
-
-pub fn cbor_serialize_bytes<T: serde::Serialize, const N: usize>(
+fn cbor_serialize_bytes<T: serde::Serialize, const N: usize>(
     object: &T,
 ) -> cbor_smol::Result<heapless_bytes::Bytes<N>> {
     let mut data = heapless_bytes::Bytes::new();
