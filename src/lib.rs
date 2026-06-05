@@ -49,6 +49,7 @@ pub use client::ClientImplementation;
 pub use platform::Platform;
 pub use service::Service;
 
+#[cfg(any(feature = "ed255", feature = "p256"))]
 fn cbor_serialize_bytes<T: serde::Serialize, const N: usize>(
     object: &T,
 ) -> cbor_smol::Result<heapless_bytes::Bytes<N>> {
