@@ -3,6 +3,7 @@ use std::time::{Duration, Instant};
 
 pub struct UserInterface {
     start_time: Instant,
+    user_presence_level: Level,
     inner: Option<Box<dyn platform::UserInterface + Sync + Send>>,
 }
 
@@ -10,8 +11,13 @@ impl UserInterface {
     pub fn new() -> Self {
         Self {
             start_time: Instant::now(),
+            user_presence_level: Level::Normal,
             inner: None,
         }
+    }
+
+    pub fn set_user_presence_level(&mut self, level: Level) {
+        self.user_presence_level = level;
     }
 
     pub fn set_inner(&mut self, inner: Box<dyn platform::UserInterface + Sync + Send>) {
@@ -34,7 +40,7 @@ impl platform::UserInterface for UserInterface {
         self.inner
             .as_mut()
             .map(|inner| inner.check_user_presence())
-            .unwrap_or(Level::Normal)
+            .unwrap_or(self.user_presence_level)
     }
 
     fn set_status(&mut self, status: Status) {
