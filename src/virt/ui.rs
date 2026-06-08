@@ -14,8 +14,8 @@ impl UserInterface {
         }
     }
 
-    pub fn set_inner(&mut self, inner: impl Into<Box<dyn platform::UserInterface + Sync + Send>>) {
-        self.inner = Some(inner.into());
+    pub fn set_inner(&mut self, inner: Box<dyn platform::UserInterface + Sync + Send>) {
+        self.inner = Some(inner);
     }
 
     pub fn take_inner(&mut self) -> Option<Box<dyn platform::UserInterface + Sync + Send>> {
