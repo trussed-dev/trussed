@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"constant":["SERIALIZATION_VERSION"],"struct":["ClientKeystore"],"trait":["Keystore"],"type":["ClientId"]};

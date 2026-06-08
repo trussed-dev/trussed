@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["Error","Reply"],"fn":["cbor_deserialize","cbor_serialize_bytes"],"macro":["block","platform","syscall","try_syscall"],"mod":["api","backend","client","config","error","interrupt","key","pipe","platform","service","store","types"],"struct":["Interchange"],"type":["Bytes"]};
+window.SIDEBAR_ITEMS = {"macro":["platform"],"mod":["backend","config","key","pipe","platform","service","store","types"],"struct":["ClientImplementation","Interchange"],"trait":["Client"]};
