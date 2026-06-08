@@ -53,7 +53,7 @@
 <a href=#53 id=53 data-nosnippet>53</a>    <span class="doccomment">/// Client files are store below `/&lt;client_id&gt;/dat/`.
 <a href=#54 id=54 data-nosnippet>54</a>    </span><span class="kw">pub fn </span>actual_path(<span class="kw-2">&amp;</span><span class="self">self</span>, client_path: <span class="kw-2">&amp;</span>Path) -&gt; <span class="prelude-ty">Result</span>&lt;PathBuf&gt; {
 <a href=#55 id=55 data-nosnippet>55</a>        <span class="comment">// Clients must not escape their namespace
-<a href=#56 id=56 data-nosnippet>56</a>        </span><span class="kw">if </span>client_path.as_ref().contains(<span class="string">".."</span>) {
+<a href=#56 id=56 data-nosnippet>56</a>        </span><span class="kw">if </span>client_path.as_str().contains(<span class="string">".."</span>) || client_path.as_str().starts_with(<span class="string">"/"</span>) {
 <a href=#57 id=57 data-nosnippet>57</a>            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidPath);
 <a href=#58 id=58 data-nosnippet>58</a>        }
 <a href=#59 id=59 data-nosnippet>59</a>
@@ -514,4 +514,34 @@
 <a href=#514 id=514 data-nosnippet>514</a>        <span class="prelude-val">Ok</span>(path)
 <a href=#515 id=515 data-nosnippet>515</a>    }
 <a href=#516 id=516 data-nosnippet>516</a>}
+<a href=#517 id=517 data-nosnippet>517</a>
+<a href=#518 id=518 data-nosnippet>518</a><span class="attr">#[cfg(test)]
+<a href=#519 id=519 data-nosnippet>519</a></span><span class="kw">mod </span>tests {
+<a href=#520 id=520 data-nosnippet>520</a>    <span class="kw">use </span>super::<span class="kw-2">*</span>;
+<a href=#521 id=521 data-nosnippet>521</a>
+<a href=#522 id=522 data-nosnippet>522</a>    <span class="attr">#[test]
+<a href=#523 id=523 data-nosnippet>523</a>    </span><span class="kw">fn </span>actual_path_root() {
+<a href=#524 id=524 data-nosnippet>524</a>        <span class="kw">let </span>client_path = <span class="macro">path!</span>(<span class="string">"/testclient"</span>);
+<a href=#525 id=525 data-nosnippet>525</a>        <span class="kw">struct </span>DummyStore;
+<a href=#526 id=526 data-nosnippet>526</a>        <span class="kw">impl </span>Store <span class="kw">for </span>DummyStore {
+<a href=#527 id=527 data-nosnippet>527</a>            <span class="kw">fn </span>ifs(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="kw">dyn </span>DynFilesystem {
+<a href=#528 id=528 data-nosnippet>528</a>                <span class="macro">panic!</span>()
+<a href=#529 id=529 data-nosnippet>529</a>            }
+<a href=#530 id=530 data-nosnippet>530</a>            <span class="kw">fn </span>efs(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="kw">dyn </span>DynFilesystem {
+<a href=#531 id=531 data-nosnippet>531</a>                <span class="macro">panic!</span>()
+<a href=#532 id=532 data-nosnippet>532</a>            }
+<a href=#533 id=533 data-nosnippet>533</a>            <span class="kw">fn </span>vfs(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="kw">dyn </span>DynFilesystem {
+<a href=#534 id=534 data-nosnippet>534</a>                <span class="macro">panic!</span>()
+<a href=#535 id=535 data-nosnippet>535</a>            }
+<a href=#536 id=536 data-nosnippet>536</a>        }
+<a href=#537 id=537 data-nosnippet>537</a>
+<a href=#538 id=538 data-nosnippet>538</a>        <span class="kw">let </span>filestore = ClientFilestore {
+<a href=#539 id=539 data-nosnippet>539</a>            base: PathBuf::from_path(client_path),
+<a href=#540 id=540 data-nosnippet>540</a>            store: DummyStore,
+<a href=#541 id=541 data-nosnippet>541</a>        };
+<a href=#542 id=542 data-nosnippet>542</a>
+<a href=#543 id=543 data-nosnippet>543</a>        <span class="macro">assert!</span>(filestore.actual_path(<span class="macro">path!</span>(<span class="string">"/"</span>)).is_err());
+<a href=#544 id=544 data-nosnippet>544</a>        <span class="macro">assert!</span>(filestore.actual_path(<span class="macro">path!</span>(<span class="string">"/test"</span>)).is_err());
+<a href=#545 id=545 data-nosnippet>545</a>    }
+<a href=#546 id=546 data-nosnippet>546</a>}
 </code></pre></div></section></main></body></html>
