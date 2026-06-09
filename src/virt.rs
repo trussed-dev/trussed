@@ -105,8 +105,8 @@ impl<'a, I: 'static, C> Runner<'a, I, C> {
 
     pub fn run<P, D, F, R>(self, platform: P, dispatch: D, f: F) -> R
     where
-        P: platform::Platform,
-        D: Dispatch<Context = C, BackendId = I>,
+        P: platform::Platform + Send,
+        D: Dispatch<Context = C, BackendId = I> + Send,
         C: Send + Sync,
         I: Send + Sync,
         F: FnOnce() -> R,
@@ -160,7 +160,7 @@ impl Platform<'_> {
         self.run_client_with_backends(client_id, CoreOnly, &[], test)
     }
 
-    pub fn run_client_with_backends<R, D: Dispatch>(
+    pub fn run_client_with_backends<R, D: Dispatch + Send>(
         self,
         client_id: &str,
         dispatch: D,
@@ -197,7 +197,7 @@ impl Platform<'_> {
     }
 
     /// Using const generics rather than a `Vec` to allow destructuring in the method
-    pub fn run_clients_with_backends<R, D: Dispatch, const N: usize>(
+    pub fn run_clients_with_backends<R, D: Dispatch + Send, const N: usize>(
         self,
         client_ids: [(&str, &'static [BackendId<D::BackendId>]); N],
         dispatch: D,

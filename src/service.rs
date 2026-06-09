@@ -205,9 +205,6 @@ where
     dispatch: D,
 }
 
-// need to be able to send crypto service to an interrupt handler
-unsafe impl<P: Platform, D: Dispatch> Send for Service<P, D> {}
-
 impl<P: Platform> ServiceResources<P> {
     pub fn certstore(&mut self, ctx: &CoreContext) -> Result<ClientCertstore<P::S>> {
         self.rng()

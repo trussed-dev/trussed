@@ -166,3 +166,5 @@ impl store::Store for Store<'_> {
         self.volatile
     }
 }
+
+unsafe impl Send for Store<'_> {}
