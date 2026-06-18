@@ -6,13 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-[Unreleased]: https://github.com/trussed-dev/trussed/compare/v0.2.0-rc.1...HEAD
+[Unreleased]: https://github.com/trussed-dev/trussed/compare/v0.2.0...HEAD
 
-- Update to `littlefs2` v0.8.
+-
 
-## [0.2.0-rc.1] - 2026-06-05
+## [0.2.0] - 2026-06-18
 
-[0.2.0-rc.1]: https://github.com/trussed-dev/trussed/releases/tag/v0.2.0-rc.1
+[0.2.0]: https://github.com/trussed-dev/trussed/releases/tag/v0.2.0
 
 ### Added
 
@@ -80,8 +80,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `flexiber` 0.2
   - `heapless` 0.9
   - `heapless-bytes` 0.5
-  - `littlefs2` 0.7
-
+  - `littlefs2` 0.8
+  
 ### Fixed
 
 - Fixed off-by-one error in `RandomBytes` request.
@@ -101,6 +101,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed `TrussedInterchange` and `TRUSSED_INTERCHANGE` from `pipe`.
 - Removed the `clients-?` features.
 - Removed the `store!` macro.  Embedded runners should provide their own implementation.  Software runners can use `virt::StoreConfig` to create a `virt::Store`.
+- Removed unconditional `Send` implementation for `Service`.
 
 [#64]: https://github.com/trussed-dev/trussed/issues/64
 [#65]: https://github.com/trussed-dev/trussed/issues/65
