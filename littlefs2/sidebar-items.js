@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"constant":["BACKEND_VERSION","DISK_VERSION"],"macro":["const_ram_storage","path","ram_storage"],"mod":["consts","driver","fs","io","macros","object_safe","path"],"struct":["Version"]};
+window.SIDEBAR_ITEMS = {"constant":["BACKEND_VERSION","DISK_VERSION"],"macro":[["const_ram_storage",1],["path",1],["ram_storage",1]],"mod":["consts","driver","fs","io","macros","object_safe","path"],"struct":["Version"]};

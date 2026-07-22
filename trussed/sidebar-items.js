@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"macro":["platform"],"mod":["backend","config","key","pipe","platform","service","store","types"],"struct":["ClientImplementation","Interchange"],"trait":["Client"]};
+window.SIDEBAR_ITEMS = {"macro":[["platform",1]],"mod":["backend","config","key","pipe","platform","service","store","types"],"struct":["ClientImplementation","Interchange"],"trait":["Client"]};

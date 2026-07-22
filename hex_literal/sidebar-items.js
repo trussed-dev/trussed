@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"macro":["hex"]};
+window.SIDEBAR_ITEMS = {"macro":[["hex",1]]};
