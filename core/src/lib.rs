@@ -15,6 +15,7 @@ pub mod api;
 pub mod config;
 #[cfg(feature = "crypto-client")]
 pub mod mechanisms;
+pub mod reset_signal;
 #[cfg(feature = "serde-extensions")]
 pub mod serde_extensions;
 pub mod types;

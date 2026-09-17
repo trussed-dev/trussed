@@ -2,7 +2,9 @@
 
 ## Unreleased
 
--
+### Added 
+
+- Add `ResetSignal`
 
 ## [v0.2.2](https://github.com/trussed-dev/trussed/releases/tag/core-v0.2.2) (2026-05-30)
 
