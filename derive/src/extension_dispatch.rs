@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use proc_macro2::TokenStream;
 use quote::quote;
@@ -47,12 +47,33 @@ impl ExtensionDispatch {
                 )?);
             }
         }
-        let delegated_backends = delegated_backends
+        let delegated_backends: Vec<_> = delegated_backends
             .into_iter()
             .map(|(raw, delegate_to)| {
                 DelegatedBackend::new(raw, delegate_to, &backends, &extension_attrs.extensions)
             })
             .collect::<Result<_>>()?;
+
+        // ensure that all extensions that are declared are implemented at least once
+        let all_extensions: HashSet<_> = extension_attrs.extensions.keys().collect();
+        let backend_extensions = backends.iter().flat_map(|backend| &backend.extensions);
+        let delegated_backend_extensions = delegated_backends
+            .iter()
+            .flat_map(|backend| &backend.extensions);
+        let implemented_extensions: HashSet<_> = backend_extensions
+            .chain(delegated_backend_extensions)
+            .map(|extension| &extension.id)
+            .collect();
+        let mut missing_extensions = all_extensions.difference(&implemented_extensions);
+        // TODO: this should be a loop with warnings instead, but this is currently not possible
+        // with stable Rust
+        if let Some(e) = missing_extensions.next() {
+            return Err(Error::new_spanned(
+                e,
+                format!("Extension {e} declared but not implemented by any backend"),
+            ));
+        }
+
         Ok(Self {
             name: input.ident,
             generics: input.generics,
