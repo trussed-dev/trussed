@@ -1,4 +1,5 @@
-#![deny(clippy::expect_used, clippy::panic, clippy::unwrap_used)]
+#![deny(unsafe_code, clippy::expect_used, clippy::panic, clippy::unwrap_used)]
+#![warn(missing_docs)]
 
 //! Derive macros for [`trussed`](https://docs.rs/trussed).
 
