@@ -487,7 +487,7 @@ pub struct Datetime<'l>(&'l [u8]);
 impl Encodable for Datetime<'_> {
     fn encoded_length(&self) -> BerResult<BerLength> {
         // before 2050: UtcTime -> truncate YYYY to YY
-        Ok(if &self.0[..4] < b"2050" {
+        Ok(if &self.0[..4] < b"2050".as_slice() {
             0xFu8
         // starting 2050: GeneralizedTime -> keep YYYY
         } else {
@@ -496,7 +496,7 @@ impl Encodable for Datetime<'_> {
         .into())
     }
     fn encode(&self, encoder: &mut Encoder<'_>) -> BerResult<()> {
-        let tagged_slice = if &self.0[..4] < b"2050" {
+        let tagged_slice = if &self.0[..4] < b"2050".as_slice() {
             TaggedSlice::from(Tag::UTC_TIME, &self.0[2..])?
         } else {
             TaggedSlice::from(Tag::GENERALIZED_TIME, self.0)?
