@@ -24,7 +24,7 @@ generate_macros!();
 
 pub use interchange::Interchange;
 
-mod client;
+pub mod client;
 #[cfg(feature = "crypto-client")]
 mod mechanisms;
 

@@ -531,7 +531,7 @@ generate_mechanism! {
         #[cfg(feature = "hmac-sha512")]
         HmacSha512,
         #[cfg(feature = "mldsa44")]
-        Mldsa44,
+        MlDsa44,
         // P256XSha256,
         #[cfg(feature = "p256")]
         P256,

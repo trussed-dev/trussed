@@ -221,3 +221,179 @@ impl<S: Syscall, E> trussed_core::FilesystemClient for ClientImplementation<'_, 
 impl<S: Syscall, E> trussed_core::ManagementClient for ClientImplementation<'_, S, E> {}
 #[cfg(feature = "ui-client")]
 impl<S: Syscall, E> trussed_core::UiClient for ClientImplementation<'_, S, E> {}
+
+// `MultiplexedClient` shares one `TrussedRequester` across N apps; each request
+// carries a `ClientTag` so the service dispatches with the matching context.
+
+use core::cell::RefCell;
+use core::sync::atomic::{AtomicBool, AtomicU8, Ordering};
+use critical_section::Mutex;
+
+/// Identifies the multiplexed client owning the in-flight request.
+pub type ClientTag = u8;
+
+/// The active client tag, written on request and read on dispatch.
+pub struct CurrentTagCell(AtomicU8);
+
+impl CurrentTagCell {
+    pub const fn new() -> Self {
+        Self(AtomicU8::new(0))
+    }
+    pub fn set(&self, tag: ClientTag) {
+        self.0.store(tag, Ordering::Relaxed);
+    }
+    pub fn get(&self) -> ClientTag {
+        self.0.load(Ordering::Relaxed)
+    }
+}
+
+impl Default for CurrentTagCell {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+/// Lets `poll()` skip the critical section until a response is waiting.
+pub static RESPONSE_READY: AtomicBool = AtomicBool::new(false);
+
+/// The shared `TrussedRequester`, installed once at boot.
+pub struct SharedRequesterCell(Mutex<RefCell<Option<TrussedRequester<'static>>>>);
+
+impl SharedRequesterCell {
+    pub const fn new() -> Self {
+        Self(Mutex::new(RefCell::new(None)))
+    }
+    /// Install the requester. Call once at boot from the runner.
+    pub fn init(&self, requester: TrussedRequester<'static>) {
+        critical_section::with(|cs| {
+            *self.0.borrow(cs).borrow_mut() = Some(requester);
+        });
+    }
+    /// Panics if not yet initialised.
+    pub fn with_mut<R>(&self, f: impl FnOnce(&mut TrussedRequester<'static>) -> R) -> R {
+        critical_section::with(|cs| {
+            let mut r = self.0.borrow(cs).borrow_mut();
+            f(r.as_mut().expect("SharedRequesterCell not initialised"))
+        })
+    }
+}
+
+impl Default for SharedRequesterCell {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+/// Client that funnels requests through a shared `TrussedRequester` and
+/// tags each request with a `ClientTag` so the Service can route to the
+/// right context. Implements the same client traits as `ClientImplementation`.
+pub struct MultiplexedClient<S, D = CoreOnly> {
+    syscall: S,
+    shared: &'static SharedRequesterCell,
+    current_tag: &'static CurrentTagCell,
+    tag: ClientTag,
+    interrupt: Option<&'static InterruptFlag>,
+    pending: Option<u8>,
+    _marker: PhantomData<D>,
+}
+
+impl<S, D> MultiplexedClient<S, D>
+where
+    S: Syscall,
+{
+    pub fn new(
+        shared: &'static SharedRequesterCell,
+        current_tag: &'static CurrentTagCell,
+        tag: ClientTag,
+        syscall: S,
+        interrupt: Option<&'static InterruptFlag>,
+    ) -> Self {
+        Self {
+            shared,
+            current_tag,
+            tag,
+            syscall,
+            interrupt,
+            pending: None,
+            _marker: PhantomData,
+        }
+    }
+}
+
+impl<S, D> PollClient for MultiplexedClient<S, D>
+where
+    S: Syscall,
+{
+    fn poll(&mut self) -> Poll<Result<Reply, Error>> {
+        // Cheap fast-path: if no response has been published yet, skip the
+        // critical section entirely. The Service sets `RESPONSE_READY` after
+        // `respond()`; we clear it once we've taken the response.
+        if !RESPONSE_READY.load(Ordering::Acquire) {
+            return Poll::Pending;
+        }
+        let taken = self.shared.with_mut(|r| (r.take_response(), r.state()));
+        if taken.0.is_some() {
+            RESPONSE_READY.store(false, Ordering::Release);
+        }
+        match taken.0 {
+            Some(reply) => match reply {
+                Ok(reply) => {
+                    if Some(u8::from(&reply)) == self.pending {
+                        self.pending = None;
+                        Poll::Ready(Ok(reply))
+                    } else {
+                        info!(
+                            "got: {:?}, expected: {:?}",
+                            Some(u8::from(&reply)),
+                            self.pending
+                        );
+                        Poll::Ready(Err(Error::InternalError))
+                    }
+                }
+                Err(error) => {
+                    self.pending = None;
+                    Poll::Ready(Err(error))
+                }
+            },
+            None => {
+                debug_assert_ne!(
+                    taken.1,
+                    interchange::State::Idle,
+                    "requests can't be cancelled"
+                );
+                Poll::Pending
+            }
+        }
+    }
+
+    fn request<Rq: RequestVariant>(&mut self, req: Rq) -> ClientResult<'_, Rq::Reply, Self> {
+        if self.pending.is_some() {
+            return Err(ClientError::Pending);
+        }
+        self.current_tag.set(self.tag);
+        let request = req.into();
+        self.pending = Some(u8::from(&request));
+        self.shared.with_mut(|r| r.request(request).unwrap());
+        self.syscall.syscall();
+        Ok(FutureResult::new(self))
+    }
+
+    fn interrupt(&self) -> Option<&'static InterruptFlag> {
+        self.interrupt
+    }
+}
+
+#[cfg(feature = "certificate-client")]
+impl<S: Syscall, D> trussed_core::CertificateClient for MultiplexedClient<S, D> {}
+#[cfg(feature = "crypto-client")]
+impl<S: Syscall, D> trussed_core::CryptoClient for MultiplexedClient<S, D> {}
+#[cfg(feature = "counter-client")]
+impl<S: Syscall, D> trussed_core::CounterClient for MultiplexedClient<S, D> {}
+#[cfg(feature = "filesystem-client")]
+impl<S: Syscall, D> trussed_core::FilesystemClient for MultiplexedClient<S, D> {}
+#[cfg(feature = "management-client")]
+impl<S: Syscall, D> trussed_core::ManagementClient for MultiplexedClient<S, D> {}
+#[cfg(feature = "ui-client")]
+impl<S: Syscall, D> trussed_core::UiClient for MultiplexedClient<S, D> {}
+#[cfg(feature = "all-clients")]
+impl<S: Syscall, D> Client for MultiplexedClient<S, D> {}

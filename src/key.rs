@@ -73,6 +73,7 @@ pub enum Kind {
     BrainpoolP512R1,
     X255,
     Secp256k1,
+    MlDsa44Seed,
 }
 
 bitflags::bitflags! {
@@ -219,6 +220,7 @@ impl Kind {
             Kind::BrainpoolP384R1 => 13,
             Kind::BrainpoolP512R1 => 14,
             Kind::Secp256k1 => 15,
+            Kind::MlDsa44Seed => 16,
         }
     }
 
@@ -239,6 +241,7 @@ impl Kind {
             13 => Kind::BrainpoolP384R1,
             14 => Kind::BrainpoolP512R1,
             15 => Kind::Secp256k1,
+            16 => Kind::MlDsa44Seed,
             _ => return Err(Error::InvalidSerializedKey),
         })
     }
