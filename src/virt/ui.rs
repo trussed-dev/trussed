@@ -1,4 +1,7 @@
-use std::time::{Duration, Instant};
+use std::{
+    sync::{Arc, RwLock},
+    time::{Duration, Instant},
+};
 
 use trussed_core::types::{consent::Level, reboot::To};
 
@@ -8,6 +11,7 @@ pub struct UserInterface {
     start_time: Instant,
     user_presence_level: Level,
     inner: Option<Box<dyn platform::UserInterface + Sync + Send>>,
+    uptime_offset: UptimeOffset,
 }
 
 impl UserInterface {
@@ -16,7 +20,12 @@ impl UserInterface {
             start_time: Instant::now(),
             user_presence_level: Level::Normal,
             inner: None,
+            uptime_offset: UptimeOffset::new(),
         }
+    }
+
+    pub fn uptime_offset(&self) -> UptimeOffset {
+        self.uptime_offset.clone()
     }
 
     pub fn set_user_presence_level(&mut self, level: Level) {
@@ -59,7 +68,7 @@ impl platform::UserInterface for UserInterface {
     }
 
     fn uptime(&mut self) -> Duration {
-        self.start_time.elapsed()
+        self.start_time.elapsed() + self.uptime_offset.read()
     }
 
     fn reboot(&mut self, to: To) -> ! {
@@ -76,5 +85,23 @@ impl platform::UserInterface for UserInterface {
         if let Some(inner) = &mut self.inner {
             inner.wink(duration);
         }
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct UptimeOffset(Arc<RwLock<Duration>>);
+
+impl UptimeOffset {
+    fn new() -> Self {
+        Self(Arc::default())
+    }
+
+    fn read(&self) -> Duration {
+        *self.0.read().unwrap()
+    }
+
+    pub fn add(&self, duration: Duration) {
+        let mut offset = self.0.write().unwrap();
+        *offset += duration;
     }
 }

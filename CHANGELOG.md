@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [Unreleased]: https://github.com/trussed-dev/trussed/compare/v0.2.0...HEAD
 
--
+- `virt`: Add `UserInterface::uptime_offset` to modify the uptime when using the virtual platform.
 
 ## [0.2.0] - 2026-06-18
 
