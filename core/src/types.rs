@@ -532,6 +532,16 @@ generate_mechanism! {
         HmacSha512,
         #[cfg(feature = "mldsa44")]
         Mldsa44,
+        #[cfg(feature = "mldsa65")]
+        Mldsa65,
+        #[cfg(feature = "mldsa87")]
+        Mldsa87,
+        #[cfg(feature = "mlkem512")]
+        Mlkem512,
+        #[cfg(feature = "mlkem768")]
+        Mlkem768,
+        #[cfg(feature = "mlkem1024")]
+        Mlkem1024,
         // P256XSha256,
         #[cfg(feature = "p256")]
         P256,
