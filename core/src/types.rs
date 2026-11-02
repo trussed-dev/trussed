@@ -531,11 +531,11 @@ generate_mechanism! {
         #[cfg(feature = "hmac-sha512")]
         HmacSha512,
         #[cfg(feature = "mldsa44")]
-        Mldsa44,
+        MlDsa44,
         #[cfg(feature = "mldsa65")]
-        Mldsa65,
+        MlDsa65,
         #[cfg(feature = "mldsa87")]
-        Mldsa87,
+        MlDsa87,
         #[cfg(feature = "mlkem512")]
         Mlkem512,
         #[cfg(feature = "mlkem768")]

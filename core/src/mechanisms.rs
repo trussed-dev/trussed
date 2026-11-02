@@ -381,13 +381,13 @@ pub trait Ed255: CryptoClient {
 }
 
 #[cfg(feature = "mldsa44")]
-pub trait Mldsa44: CryptoClient {
+pub trait MlDsa44: CryptoClient {
     fn generate_mldsa44_private_key(
         &mut self,
         persistence: Location,
     ) -> ClientResult<'_, reply::GenerateKey, Self> {
         self.generate_key(
-            Mechanism::Mldsa44,
+            Mechanism::MlDsa44,
             StorageAttributes::new().set_persistence(persistence),
         )
     }
@@ -398,7 +398,7 @@ pub trait Mldsa44: CryptoClient {
         persistence: Location,
     ) -> ClientResult<'_, reply::DeriveKey, Self> {
         self.derive_key(
-            Mechanism::Mldsa44,
+            Mechanism::MlDsa44,
             private_key,
             None,
             StorageAttributes::new().set_persistence(persistence),
@@ -411,7 +411,7 @@ pub trait Mldsa44: CryptoClient {
         format: KeySerialization,
         attributes: StorageAttributes,
     ) -> ClientResult<'c, reply::DeserializeKey, Self> {
-        self.deserialize_key(Mechanism::Mldsa44, serialized_key, format, attributes)
+        self.deserialize_key(Mechanism::MlDsa44, serialized_key, format, attributes)
     }
 
     fn serialize_mldsa44_key(
@@ -419,7 +419,7 @@ pub trait Mldsa44: CryptoClient {
         key: KeyId,
         format: KeySerialization,
     ) -> ClientResult<'_, reply::SerializeKey, Self> {
-        self.serialize_key(Mechanism::Mldsa44, key, format)
+        self.serialize_key(Mechanism::MlDsa44, key, format)
     }
 
     fn sign_mldsa44<'c>(
@@ -428,7 +428,7 @@ pub trait Mldsa44: CryptoClient {
         message: &[u8],
     ) -> ClientResult<'c, reply::Sign, Self> {
         self.sign(
-            Mechanism::Mldsa44,
+            Mechanism::MlDsa44,
             key,
             message,
             SignatureSerialization::Raw,
@@ -442,7 +442,7 @@ pub trait Mldsa44: CryptoClient {
         signature: &[u8],
     ) -> ClientResult<'c, reply::Verify, Self> {
         self.verify(
-            Mechanism::Mldsa44,
+            Mechanism::MlDsa44,
             key,
             message,
             signature,

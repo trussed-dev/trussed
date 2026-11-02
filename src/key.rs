@@ -73,12 +73,12 @@ pub enum Kind {
     BrainpoolP512R1,
     X255,
     Secp256k1,
-    Mldsa44,
-    Mldsa65,
-    Mldsa87,
-    Mlkem512,
-    Mlkem768,
-    Mlkem1024,
+    MlDsa44,
+    MlDsa65,
+    MlDsa87,
+    MlKem512,
+    MlKem768,
+    MlKem1024,
 }
 
 bitflags::bitflags! {
@@ -225,12 +225,12 @@ impl Kind {
             Kind::BrainpoolP384R1 => 13,
             Kind::BrainpoolP512R1 => 14,
             Kind::Secp256k1 => 15,
-            Kind::Mldsa44 => 16,
-            Kind::Mldsa65 => 17,
-            Kind::Mldsa87 => 18,
-            Kind::Mlkem512 => 19,
-            Kind::Mlkem768 => 20,
-            Kind::Mlkem1024 => 21,
+            Kind::MlDsa44 => 16,
+            Kind::MlDsa65 => 17,
+            Kind::MlDsa87 => 18,
+            Kind::MlKem512 => 19,
+            Kind::MlKem768 => 20,
+            Kind::MlKem1024 => 21,
         }
     }
 
@@ -251,12 +251,12 @@ impl Kind {
             13 => Kind::BrainpoolP384R1,
             14 => Kind::BrainpoolP512R1,
             15 => Kind::Secp256k1,
-            16 => Kind::Mldsa44,
-            17 => Kind::Mldsa65,
-            18 => Kind::Mldsa87,
-            19 => Kind::Mlkem512,
-            20 => Kind::Mlkem768,
-            21 => Kind::Mlkem1024,
+            16 => Kind::MlDsa44,
+            17 => Kind::MlDsa65,
+            18 => Kind::MlDsa87,
+            19 => Kind::MlKem512,
+            20 => Kind::MlKem768,
+            21 => Kind::MlKem1024,
             _ => return Err(Error::InvalidSerializedKey),
         })
     }
