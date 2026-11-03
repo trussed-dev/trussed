@@ -537,11 +537,11 @@ generate_mechanism! {
         #[cfg(feature = "mldsa87")]
         MlDsa87,
         #[cfg(feature = "mlkem512")]
-        Mlkem512,
+        MlKem512,
         #[cfg(feature = "mlkem768")]
-        Mlkem768,
+        MlKem768,
         #[cfg(feature = "mlkem1024")]
-        Mlkem1024,
+        MlKem1024,
         // P256XSha256,
         #[cfg(feature = "p256")]
         P256,
