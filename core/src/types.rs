@@ -330,7 +330,7 @@ pub enum Location {
     External,
 }
 
-#[derive(Clone, Eq, PartialEq, Debug)]
+#[derive(Clone, Eq, PartialEq, Debug, Serialize, Deserialize)]
 #[non_exhaustive]
 pub struct StorageAttributes {
     // each object must have a unique ID
