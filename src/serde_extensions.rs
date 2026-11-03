@@ -151,3 +151,14 @@ where
         I::ID.into()
     }
 }
+
+impl<E, S, I> ExtensionClient<E> for crate::client::MultiplexedClient<S, I>
+where
+    E: Extension,
+    S: Syscall,
+    I: ExtensionId<E>,
+{
+    fn id() -> u8 {
+        I::ID.into()
+    }
+}
