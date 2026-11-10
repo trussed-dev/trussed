@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [Unreleased]: https://github.com/trussed-dev/trussed/compare/v0.2.1...HEAD
 
--
+- `virt`: Add `cleanup` parameter to allow running cleanup logic or checks at the end of a test
 
 ## [0.2.1] - 2026-10-27
 
