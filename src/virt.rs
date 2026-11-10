@@ -41,6 +41,7 @@ where
             rng: ChaCha8Rng::from_seed([42u8; 32]),
             store,
             ui: UserInterface::new(),
+            cleanup: None,
         };
         f(platform)
     })
@@ -149,13 +150,28 @@ impl<I: 'static, C> Default for Runner<'_, I, C> {
     }
 }
 
+pub type CleanupCallback = Box<dyn FnMut(&mut Platform<'_>) + Send>;
+
 pub struct Platform<'a> {
     rng: ChaCha8Rng,
     store: store::Store<'a>,
     ui: UserInterface,
+    cleanup: Option<CleanupCallback>,
 }
 
-impl Platform<'_> {
+impl Drop for Platform<'_> {
+    fn drop(&mut self) {
+        if let Some(mut cleanup) = self.cleanup.take() {
+            cleanup(self);
+        }
+    }
+}
+
+impl<'a> Platform<'a> {
+    pub fn cleanup(mut self, cleanup: Box<dyn FnMut(&mut Platform) + Send>) -> Self {
+        self.cleanup = Some(cleanup);
+        self
+    }
     pub fn run_client<R>(self, client_id: &str, test: impl FnOnce(Client) -> R) -> R {
         self.run_client_with_backends(client_id, CoreOnly, &[], test)
     }
