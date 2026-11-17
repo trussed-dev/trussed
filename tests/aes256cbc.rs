@@ -1,7 +1,7 @@
 mod client;
 
 use aes::Aes256;
-use cbc::cipher::{block_padding::ZeroPadding, BlockEncryptMut, KeyIvInit};
+use cbc::cipher::{block::BlockModeEncrypt, block_padding::ZeroPadding, KeyIvInit};
 use sha2::digest::Digest;
 use trussed_core::{
     syscall,
@@ -24,7 +24,7 @@ fn aes256cbc() {
         let cipher = cbc::Encryptor::<Aes256>::new_from_slices(&key_ref, &[0; 16]).unwrap();
         let mut buffer = [48; 64];
         cipher
-            .encrypt_padded_mut::<ZeroPadding>(&mut buffer, 64)
+            .encrypt_padded::<ZeroPadding>(&mut buffer, 64)
             .unwrap();
         assert_ne!(buffer, [48; 64]);
         assert_eq!(buffer.as_slice(), ciphertext.as_slice());
