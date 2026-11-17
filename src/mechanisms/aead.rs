@@ -1,7 +1,11 @@
 use core::marker::PhantomData;
 
-use aead::{generic_array::GenericArray, AeadCore, AeadMutInPlace};
-use cipher::{typenum::U32, ArrayLength, KeyInit, KeySizeUser, Unsigned as _};
+use aead::{AeadCore, AeadInOut};
+use cipher::{KeyInit, KeySizeUser};
+use hybrid_array::{
+    typenum::{Unsigned, U32},
+    Array, ArraySize,
+};
 use rand_core::RngCore as _;
 use trussed_core::{
     api::{reply, request},
@@ -16,15 +20,12 @@ pub struct Aead<T, KeyNonceSize> {
     _marker: PhantomData<(T, KeyNonceSize)>,
 }
 
-impl<
-        T: AeadCore + AeadMutInPlace + KeyInit + KeySizeUser<KeySize = U32>,
-        KeyNonceSize: ArrayLength<u8>,
-    > Aead<T, KeyNonceSize>
+impl<T: AeadCore + AeadInOut + KeyInit + KeySizeUser<KeySize = U32>, KeyNonceSize: ArraySize>
+    Aead<T, KeyNonceSize>
 {
     const KEY_LEN: usize = T::KeySize::USIZE;
     const NONCE_LEN: usize = T::NonceSize::USIZE;
     const TOTAL_LEN: usize = KeyNonceSize::USIZE;
-    const TAG_LEN: usize = T::TagSize::USIZE;
 
     const KIND: key::Kind = key::Kind::Symmetric(Self::KEY_LEN);
     const KIND_NONCE: key::Kind = key::Kind::Symmetric32Nonce(Self::NONCE_LEN);
@@ -44,7 +45,7 @@ impl<
         keystore: &mut impl Keystore,
         request: &request::GenerateKey,
     ) -> Result<reply::GenerateKey, Error> {
-        let mut serialized: GenericArray<u8, KeyNonceSize> = GenericArray::default();
+        let mut serialized: Array<u8, KeyNonceSize> = Array::default();
         let entropy = &mut serialized[..Self::KEY_LEN];
         keystore.rng().fill_bytes(entropy);
 
@@ -74,20 +75,22 @@ impl<
 
         let symmetric_key = &serialized[..Self::KEY_LEN];
 
-        let mut aead = T::new(&GenericArray::clone_from_slice(symmetric_key));
+        let aead = T::new(symmetric_key.try_into().unwrap());
 
         let mut plaintext = request.message.clone();
-        if request.nonce.len() != Self::NONCE_LEN {
+        let Ok(nonce) = (&*request.nonce).try_into() else {
             return Err(Error::MechanismParamInvalid);
-        }
-        let nonce = GenericArray::from_slice(&request.nonce);
-        if request.tag.len() != Self::TAG_LEN {
+        };
+        let Ok(tag) = (&*request.tag).try_into() else {
             return Err(Error::MechanismParamInvalid);
-        }
-        let tag = GenericArray::from_slice(&request.tag);
+        };
 
-        let outcome =
-            aead.decrypt_in_place_detached(nonce, &request.associated_data, &mut plaintext, tag);
+        let outcome = aead.decrypt_inout_detached(
+            nonce,
+            &request.associated_data,
+            (&mut *plaintext).into(),
+            tag,
+        );
 
         Ok(reply::Decrypt {
             plaintext: {
@@ -114,8 +117,12 @@ impl<
         }
 
         let serialized: &mut [u8] = key.material.as_mut();
-        let symmetric_key = GenericArray::clone_from_slice(&serialized[..Self::KEY_LEN]);
-        let mut nonce: GenericArray<u8, T::NonceSize> = GenericArray::default();
+        let symmetric_key = Array(
+            serialized[..Self::KEY_LEN]
+                .try_into()
+                .or(Err(Error::MechanismInvalid))?,
+        );
+        let mut nonce: Array<u8, T::NonceSize> = Array::default();
         if let Some(n) = &request.nonce {
             if n.len() == Self::NONCE_LEN {
                 nonce.copy_from_slice(n);
@@ -133,11 +140,11 @@ impl<
             return Err(Error::WrongKeyKind);
         }
 
-        let mut aead = T::new(&symmetric_key);
+        let aead = T::new(&symmetric_key);
 
         let mut ciphertext = request.message.clone();
         let tag = aead
-            .encrypt_in_place_detached(&nonce, &request.associated_data, &mut ciphertext)
+            .encrypt_inout_detached(&nonce, &request.associated_data, (&mut *ciphertext).into())
             .unwrap();
 
         let nonce = ShortData::try_from(nonce.as_slice()).unwrap();

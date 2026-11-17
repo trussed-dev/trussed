@@ -18,7 +18,7 @@ impl MechanismImpl for super::Aes256Cbc {
         request: &request::Encrypt,
     ) -> Result<reply::Encrypt, Error> {
         use aes::Aes256;
-        use cbc::cipher::{block_padding::NoPadding, BlockEncryptMut, KeyIvInit};
+        use cbc::cipher::{block::BlockModeEncrypt, block_padding::NoPadding, KeyIvInit};
 
         type Aes256CbcEnc = cbc::Encryptor<Aes256>;
 
@@ -54,7 +54,7 @@ impl MechanismImpl for super::Aes256Cbc {
 
         // Encrypt message in-place.
         let ciphertext = cipher
-            .encrypt_padded_mut::<NoPadding>(&mut buffer, l)
+            .encrypt_padded::<NoPadding>(&mut buffer, l)
             .map_err(|_| Error::MechanismParamInvalid)?;
 
         let ciphertext = Message::try_from(ciphertext).unwrap();
@@ -104,7 +104,7 @@ impl MechanismImpl for super::Aes256Cbc {
         request: &request::Decrypt,
     ) -> Result<reply::Decrypt, Error> {
         use aes::Aes256;
-        use cbc::cipher::{block_padding::NoPadding, BlockDecryptMut, KeyIvInit};
+        use cbc::cipher::{block::BlockModeDecrypt, block_padding::NoPadding, KeyIvInit};
 
         type Aes256CbcDec = cbc::Decryptor<Aes256>;
 
@@ -143,7 +143,7 @@ impl MechanismImpl for super::Aes256Cbc {
         // hprintln!("encrypted: {:?}", &buffer).ok();
         // hprintln!("symmetric key: {:?}", &symmetric_key).ok();
         let plaintext = cipher
-            .decrypt_padded_mut::<NoPadding>(&mut buffer)
+            .decrypt_padded::<NoPadding>(&mut buffer)
             .map_err(|_| Error::MechanismParamInvalid)?;
         // hprintln!("decrypted: {:?}", &plaintext).ok();
         let plaintext = Message::try_from(plaintext).unwrap();
