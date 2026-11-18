@@ -330,7 +330,7 @@ pub enum Location {
     External,
 }
 
-#[derive(Clone, Eq, PartialEq, Debug)]
+#[derive(Clone, Eq, PartialEq, Debug, Serialize, Deserialize)]
 #[non_exhaustive]
 pub struct StorageAttributes {
     // each object must have a unique ID
@@ -531,7 +531,17 @@ generate_mechanism! {
         #[cfg(feature = "hmac-sha512")]
         HmacSha512,
         #[cfg(feature = "mldsa44")]
-        Mldsa44,
+        MlDsa44,
+        #[cfg(feature = "mldsa65")]
+        MlDsa65,
+        #[cfg(feature = "mldsa87")]
+        MlDsa87,
+        #[cfg(feature = "mlkem512")]
+        MlKem512,
+        #[cfg(feature = "mlkem768")]
+        MlKem768,
+        #[cfg(feature = "mlkem1024")]
+        MlKem1024,
         // P256XSha256,
         #[cfg(feature = "p256")]
         P256,
