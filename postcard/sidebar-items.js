@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["Error","FeedResult"],"fn":["from_bytes","from_bytes_cobs","serialize_with_flavor","take_from_bytes","take_from_bytes_cobs","to_slice","to_slice_cobs","to_vec","to_vec_cobs"],"mod":["flavors"],"struct":["CobsAccumulator","Deserializer","Serializer"],"type":["Result"]};
+window.SIDEBAR_ITEMS = {"enum":["Error","FeedResult"],"fn":["from_bytes","from_bytes_cobs","serialize_with_flavor","take_from_bytes","take_from_bytes_cobs","to_slice","to_slice_cobs"],"mod":["flavors"],"struct":["CobsAccumulator","Deserializer","Serializer"],"type":["Result"]};

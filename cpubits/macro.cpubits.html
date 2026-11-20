@@ -1,0 +1,91 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="A macro for defining code based on the optimal word size to use for the target, as chosen heuristically at compile-time using `cfg`-based predicates."><title>cpubits in cpubits - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../static.files/rustdoc-203241e4.css"><meta name="rustdoc-vars" data-root-path="../" data-static-root-path="../static.files/" data-current-crate="cpubits" data-themes="" data-resource-suffix="" data-rustdoc-version="1.100.0 (0ef1bc386 2026-11-09)" data-channel="1.100.0" data-search-js="search-b167f383.js" data-stringdex-js="stringdex-b5109af9.js" data-settings-js="settings-170eb4bf.js" ><script src="../static.files/storage-41dd4d93.js"></script><script defer src="sidebar-items.js"></script><script defer src="../static.files/main-1814ead3.js"></script><noscript><link rel="stylesheet" href="../static.files/noscript-9f56287d.css"></noscript><link rel="icon" href="https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg"></head><body class="rustdoc macro"><a class="skip-main-content" href="#main-content">Skip to main content</a><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><rustdoc-topbar><h2><a href="#">cpubits</a></h2></rustdoc-topbar><nav class="sidebar"><div class="sidebar-crate"><a class="logo-container" href="../cpubits/index.html"><img src="https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg" alt="logo"></a><h2><a href="../cpubits/index.html">cpubits</a><span class="version">0.1.1</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">cpubits</a></h2><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#usage" title="Usage">Usage</a><ul><li><a href="#basic-usage" title="Basic usage">Basic usage</a></li><li><a href="#grouping-multiple-bit-sizes" title="Grouping multiple bit sizes">Grouping multiple bit sizes</a></li><li><a href="#handling-single-size-cases" title="Handling single-size cases">Handling single-size cases</a></li><li><a href="#use-as-an-expression" title="Use as an expression">Use as an expression</a></li></ul></li><li><a href="#selection-rules" title="Selection rules">Selection rules</a></li></ul></section><div id="rustdoc-modnav"><h2 class="in-crate"><a href="index.html">In crate cpubits</a></h2></div></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><div class="width-limiter"><section id="main-content" class="content" tabindex="-1"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="index.html">cpubits</a></div><h1>Macro <span class="macro">cpubits</span>&nbsp;<button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../src/cpubits/lib.rs.html#153-315">Source</a> </span></div><pre class="rust item-decl"><code>macro_rules! cpubits {
+    ( 16 =&gt; { $( $tokens:tt )* } ) =&gt; { ... };
+    ( 32 =&gt; { $( $tokens:tt )* } ) =&gt; { ... };
+    ( 64 =&gt; { $( $tokens:tt )* } ) =&gt; { ... };
+    ( 16 | 32 =&gt; { $( $tokens:tt )* } ) =&gt; { ... };
+    ( 32 | 64 =&gt; { $( $tokens:tt )* } ) =&gt; { ... };
+    (
+        16 =&gt; { $( $tokens16:tt )* }
+        32 =&gt; { $( $tokens32:tt )* }
+    ) =&gt; { ... };
+    (
+        32 =&gt; { $( $tokens32:tt )* }
+        64 =&gt; { $( $tokens64:tt )* }
+    ) =&gt; { ... };
+    (
+        16 =&gt; { $( $tokens16:tt )* }
+        32 | 64 =&gt; { $( $tokens32:tt )* }
+    ) =&gt; { ... };
+    (
+        16 | 32 =&gt; { $( $tokens32:tt )* }
+        64 =&gt; { $( $tokens64:tt )* }
+    ) =&gt; { ... };
+    (
+        16 =&gt; { $( $tokens16:tt )* }
+        32 =&gt; { $( $tokens32:tt )* }
+        64 =&gt; { $( $tokens64:tt )* }
+    ) =&gt; { ... };
+    (
+        #[cfg(enable_64_bit = $($enable_64_bit:tt)+ )]
+        16 =&gt; { $( $tokens16:tt )* }
+        32 =&gt; { $( $tokens32:tt )* }
+        64 =&gt; { $( $tokens64:tt )* }
+    ) =&gt; { ... };
+}</code></pre><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>A macro for defining code based on the optimal word size to use for the target, as chosen
+heuristically at compile-time using <code>cfg</code>-based predicates.</p>
+<h2 id="usage"><a class="doc-anchor" href="#usage">§</a>Usage</h2>
+<p>The macro works like a <code>match</code> expression that takes an implicit argument representing the
+number of CPU bits, which is one of <code>16</code>, <code>32</code>, or <code>64</code>.</p>
+<p>Use this macro to conditionally emit code specific to certain CPU word sizes, e.g. defining
+types at compile-time based on the word size.</p>
+<p>The macro doesn’t create a new block and supports arbitrary statements in toplevel code, just
+like the <code>cfg-if</code> crate (whose guts it recycles).</p>
+<h3 id="basic-usage"><a class="doc-anchor" href="#basic-usage">§</a>Basic usage</h3>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="macro">cpubits::cpubits!</span> {
+    <span class="number">16 </span>=&gt; { <span class="kw">pub type </span>Word = u16; }
+    <span class="number">32 </span>=&gt; { <span class="kw">pub type </span>Word = u32; }
+    <span class="number">64 </span>=&gt; { <span class="kw">pub type </span>Word = u64; }
+}</code></pre></div>
+<p>NOTE: rustc will complain: “warning: unexpected <code>cfg</code> condition name: <code>cpubits</code>”</p>
+<p>See the <a href="./index.html#lint-configuration-for-cfgcpubits">lint configuration for <code>cfg(cpubits)</code></a>
+documentation for how to silence the warning.</p>
+<h3 id="grouping-multiple-bit-sizes"><a class="doc-anchor" href="#grouping-multiple-bit-sizes">§</a>Grouping multiple bit sizes</h3>
+<p>If you would like to group together 16-bit and 32-bit platforms, you can do so as follows:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="macro">cpubits::cpubits!</span> {
+    <span class="number">16 </span>| <span class="number">32 </span>=&gt; { <span class="kw">pub type </span>Word = u32; }
+    <span class="number">64      </span>=&gt; { <span class="kw">pub type </span>Word = u64; }
+}</code></pre></div><h3 id="handling-single-size-cases"><a class="doc-anchor" href="#handling-single-size-cases">§</a>Handling single-size cases</h3>
+<p>If you only want a block to run for a specific size, e.g. to know when it’s possible to write
+<code>impl From&lt;u64&gt; for MyWordNewtype</code>, you can do the following:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">pub struct </span>MyWordNewtype(Word);
+
+<span class="macro">cpubits::cpubits!</span> {
+    <span class="number">64 </span>=&gt; {
+        <span class="kw">impl </span>From&lt;u64&gt; <span class="kw">for </span>MyWordNewtype {
+            <span class="attr">#[inline]
+            </span><span class="kw">fn </span>from(n: u64) -&gt; MyWordNewtype {
+                MyWordNewtype(n)
+            }
+        }
+    }
+}</code></pre></div><h3 id="use-as-an-expression"><a class="doc-anchor" href="#use-as-an-expression">§</a>Use as an expression</h3>
+<p>It’s also possible to use the macro as an expression, although in somewhat limited contexts
+due to its attribute handling:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">fn </span>detected_cpubits() -&gt; u32 {
+    <span class="macro">cpubits::cpubits!</span> {
+        <span class="number">16 </span>=&gt; { <span class="number">16 </span>}
+        <span class="number">32 </span>=&gt; { <span class="number">32 </span>}
+        <span class="number">64 </span>=&gt; { <span class="number">64 </span>}
+    }
+}</code></pre></div><h2 id="selection-rules"><a class="doc-anchor" href="#selection-rules">§</a>Selection rules</h2>
+<p>The macro augments <code>target_pointer_width</code>-based selection with specific overrides which promote
+certain targets from 32-bit to 64-bit ones.</p>
+<p>This 64-bit promotion occurs if <code>any</code> of the following <code>cfg</code>s are true:</p>
+<ul>
+<li><code>armv7</code>: <code>all(target_arch = "arm", target_feature = "v7")</code></li>
+<li><code>wasm32</code>: <code>target_arch = "wasm32"</code></li>
+</ul>
+</div></details></section></div></main></body></html>

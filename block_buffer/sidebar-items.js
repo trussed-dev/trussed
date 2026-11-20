@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["BlockBuffer","Eager","Error","Lazy"],"trait":["BufferKind"],"type":["Block","EagerBuffer","LazyBuffer"]};
+window.SIDEBAR_ITEMS = {"struct":["BlockBuffer","Eager","Error","Lazy","ReadBuffer"],"trait":["BlockSizes","BufferKind"],"type":["EagerBuffer","LazyBuffer","SerializedBuffer","SerializedBufferSize"]};

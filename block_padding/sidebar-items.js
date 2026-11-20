@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["PadType"],"struct":["AnsiX923","Iso10126","Iso7816","NoPadding","Pkcs7","UnpadError","ZeroPadding"],"trait":["Padding","RawPadding"],"type":["Block"]};
+window.SIDEBAR_ITEMS = {"enum":["PaddedData"],"struct":["AnsiX923","Error","Iso10126","Iso7816","NoPadding","Pkcs7","ZeroPadding"],"trait":["Padding"]};

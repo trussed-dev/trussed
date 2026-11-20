@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":["consts"],"struct":["ChaChaPoly1305","Error"],"trait":["AeadCore","AeadInPlace","KeyInit","KeySizeUser"],"type":["ChaCha12Poly1305","ChaCha20Poly1305","ChaCha8Poly1305","Key","Nonce","Tag","XChaCha12Poly1305","XChaCha20Poly1305","XChaCha8Poly1305","XNonce"]};
+window.SIDEBAR_ITEMS = {"mod":["consts"],"struct":["ChaChaPoly1305","Error"],"trait":["AeadCore","AeadInOut","KeyInit","KeySizeUser"],"type":["ChaCha12Poly1305","ChaCha20Poly1305","ChaCha8Poly1305","Key","Nonce","Tag","XChaCha12Poly1305","XChaCha20Poly1305","XChaCha8Poly1305","XNonce"]};
