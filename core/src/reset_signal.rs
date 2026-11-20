@@ -1,4 +1,9 @@
-use core::sync::atomic::{AtomicU8, Ordering};
+use core::sync::atomic::Ordering;
+
+#[cfg(not(feature = "portable-atomic"))]
+use core::sync::atomic::AtomicU8;
+#[cfg(feature = "portable-atomic")]
+use portable_atomic::AtomicU8;
 
 /// Structure meant to be stored in  a `static` to signal applications that they have been factory-resetted by a runner
 ///

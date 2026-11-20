@@ -1,7 +1,9 @@
-use core::{
-    fmt::Debug,
-    sync::atomic::{AtomicU8, Ordering::Relaxed},
-};
+use core::{fmt::Debug, sync::atomic::Ordering::Relaxed};
+
+#[cfg(not(feature = "portable-atomic"))]
+use core::sync::atomic::AtomicU8;
+#[cfg(feature = "portable-atomic")]
+use portable_atomic::AtomicU8;
 
 #[derive(Default, Debug, PartialEq, Eq)]
 pub enum InterruptState {
